@@ -7,6 +7,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(RESOURCE_DIR "Assets/")
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(DEPS_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/src")
+set(DEPS_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/include")
+
 
 include_directories("${INC_DIR}/")
 include_directories("${INC_DIR}/Core/")
@@ -14,6 +17,8 @@ include_directories("${INC_DIR}/Core/Math/")
 include_directories("${INC_DIR}/UI/")
 include_directories("${INC_DIR}/Render/")
 include_directories("${INC_DIR}/ECS/")
+include_directories("${DEPS_INC_DIR}/ImGui/")
+include_directories("${DEPS_INC_DIR}/")
 
 # Record SUB_SYS configuration (WIN32 for release en Windows to remove console)
 IF(CMAKE_BUILD_TYPE MATCHES Release)
@@ -29,6 +34,13 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES Release)
 # List source files
 set (SRC_FILES
     ${SRC_DIR}/main.cpp
+    ${DEPS_SRC_DIR}/ImGui/imgui.cpp
+    ${DEPS_SRC_DIR}/ImGui/imgui_demo.cpp
+    ${DEPS_SRC_DIR}/ImGui/imgui_draw.cpp
+    ${DEPS_SRC_DIR}/ImGui/imgui_impl_dx11.cpp
+    ${DEPS_SRC_DIR}/ImGui/imgui_impl_glfw.cpp
+    ${DEPS_SRC_DIR}/ImGui/imgui_tables.cpp
+    ${DEPS_SRC_DIR}/ImGui/imgui_widgets.cpp
     )
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
