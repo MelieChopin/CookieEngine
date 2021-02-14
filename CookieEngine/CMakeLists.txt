@@ -34,6 +34,7 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES Release)
 # List source files
 set (SRC_FILES
     ${SRC_DIR}/main.cpp
+    ${SRC_DIR}/Engine.cpp
     ${DEPS_SRC_DIR}/ImGui/imgui.cpp
     ${DEPS_SRC_DIR}/ImGui/imgui_demo.cpp
     ${DEPS_SRC_DIR}/ImGui/imgui_draw.cpp
@@ -41,7 +42,7 @@ set (SRC_FILES
     ${DEPS_SRC_DIR}/ImGui/imgui_impl_glfw.cpp
     ${DEPS_SRC_DIR}/ImGui/imgui_tables.cpp
     ${DEPS_SRC_DIR}/ImGui/imgui_widgets.cpp
-    )
+     "src/Core/Window.cpp")
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
