@@ -187,8 +187,7 @@ bool Renderer::InitState()
 
 void Renderer::Clear()
 {
-    FLOAT color[4] = {};
-    remote.context->ClearRenderTargetView(backbuffer, color);
+    remote.context->ClearRenderTargetView(backbuffer, state.clearColor.e);
     remote.context->ClearDepthStencilView(depthBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0.0f);
 }
 
