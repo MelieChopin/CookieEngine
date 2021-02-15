@@ -2,7 +2,8 @@
 
 using namespace Cookie;
 
-Engine::Engine()
+Engine::Engine() :
+    window{}, renderer{window}
 {
 
 }
@@ -18,5 +19,9 @@ void Engine::Run()
     {
         // Present frame
         glfwPollEvents();
+
+        renderer.Clear();
+
+        renderer.Render();
     }
 }

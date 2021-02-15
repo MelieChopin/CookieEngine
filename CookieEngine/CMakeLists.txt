@@ -42,7 +42,10 @@ set (SRC_FILES
     ${DEPS_SRC_DIR}/ImGui/imgui_impl_glfw.cpp
     ${DEPS_SRC_DIR}/ImGui/imgui_tables.cpp
     ${DEPS_SRC_DIR}/ImGui/imgui_widgets.cpp
-     "src/Core/Window.cpp")
+    "src/Core/Window.cpp"
+    ${SRC_DIR}/Render/Renderer.cpp
+    ${SRC_DIR}/Render/RendererRemote.cpp
+    ${SRC_DIR}/Render/RendererState.cpp)
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
