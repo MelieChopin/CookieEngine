@@ -3,6 +3,7 @@
 
 
 #include "Core/Window.hpp"
+#include "Input.hpp"
 
 namespace Cookie
 {
@@ -10,6 +11,7 @@ namespace Cookie
 	{
 		public:
 			Core::Window window;
+			Core::Input input;
 
 		public:
 		/* CONSTRUCTORS/DESTRUCTORS */
