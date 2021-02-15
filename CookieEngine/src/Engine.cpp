@@ -1,4 +1,5 @@
 #include "Engine.hpp"
+#include "Time.hpp"
 
 using namespace Cookie;
 
@@ -44,6 +45,9 @@ void Engine::Run()
     {
         // Present frame
         glfwPollEvents();        
+
+        //Cookie::Core::Time::UpdateTime();
+        //std::cout << Cookie::Core::Time::deltaTime << std::endl;
         
         input.CheckInputs();
 
