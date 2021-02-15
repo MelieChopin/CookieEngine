@@ -1,5 +1,6 @@
 #include "Engine.hpp"
 #include "Time.hpp"
+#include "Debug.hpp"
 
 using namespace Cookie;
 
@@ -40,6 +41,8 @@ void Engine::Run()
     input.Set(UnitInputs);
     //glfwSetKeyCallback(window.window, keyCallback);
     //glfwSetInputMode(window.window, GLFW_STICKY_KEYS, 1);
+
+    //Core::Debug::Log("Cookie Loop");
 
     while (!glfwWindowShouldClose(window.window))
     {
