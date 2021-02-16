@@ -41,6 +41,7 @@ void Engine::Run()
     //glfwSetKeyCallback(window.window, keyCallback);
     //glfwSetInputMode(window.window, GLFW_STICKY_KEYS, 1);
 
+
     while (!glfwWindowShouldClose(window.window))
     {
         // Present frame
@@ -48,24 +49,40 @@ void Engine::Run()
 
         renderer.Clear();     
         
-        input.CheckInputs();
-
-        if (GetAsyncKeyState('Q') & 0xff)
+        //Input Test
         {
-            std::cout << "Unit Selected\n";
-            input.Set(UnitInputs);
+            input.CheckInputs();
+            if (GetAsyncKeyState('Q') & 0xff)
+            {
+                std::cout << "Unit Selected\n";
+                input.Set(UnitInputs);
+            }
+            if (GetAsyncKeyState('S') & 0xff)
+            {
+                std::cout << "Building Selected\n";
+                input.Set(BuildingInputs);
+            }
+            //if (glfwGetKey(window.window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+            if (GetAsyncKeyState(VK_RBUTTON) & 0xff)
+            {
+                std::cout << "escape pressed\n";
+            }
         }
 
-        if (GetAsyncKeyState('S') & 0xff)
+        //ECS Test
         {
-            std::cout << "Building Selected\n";
-            input.Set(BuildingInputs);
-        }
-        
-        //if (glfwGetKey(window.window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        if (GetAsyncKeyState(VK_RBUTTON) & 0xff)
-        {
-            std::cout << "escape pressed\n";
+            if (GetAsyncKeyState('W') & 0xff)
+            {
+                std::cout << "Entity Created\n";
+                coordinator.AddEntity(SIGNATURE_EMPTY);
+            }
+            if (GetAsyncKeyState('X') & 0xff)
+            {
+                std::cout << "Entity Removed\n";
+                coordinator.RemoveEntity(coordinator.entityHandler.entities[0]);
+            }
+            if (GetAsyncKeyState('C') & 0xff)
+                coordinator.ApplySystemDisplayId();
         }
 
         renderer.Render();

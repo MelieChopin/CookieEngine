@@ -21,5 +21,8 @@ int main()
 	//Mat4::DebugAllTest();
 	//Quat::DebugAllTest();
 
+	//ECS::Coordinator coordinator;
+
+
 	return 0;
 }
