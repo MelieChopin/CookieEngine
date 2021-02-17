@@ -11,26 +11,30 @@ namespace Cookie
 	{
 		class Renderer
 		{
-			private:
-				class ID3D11Device*				device		= nullptr;
-				class IDXGISwapChain*			swapchain	= nullptr;
-				class ID3D11RenderTargetView*	backbuffer	= nullptr;
-				class ID3D11DepthStencilView*	depthBuffer = nullptr;
-				RendererRemote					remote;
-				RendererState					state;
+		private:
+			class ID3D11Device*				device		= nullptr;
+			class IDXGISwapChain*			swapchain	= nullptr;
+			class ID3D11RenderTargetView*	backbuffer	= nullptr;
+			class ID3D11DepthStencilView*	depthBuffer = nullptr;
+			
+		public:
+			RendererRemote					remote;
+			RendererState					state;
 
-			private:
-				bool InitDevice(Core::Window& window);
-				bool CreateBuffer();
-				bool InitState();
+		private:
+			bool InitDevice(Core::Window& window);
+			bool CreateBuffer();
+			bool InitState();
 
-			public:
-				/* CONSTRUCTORS/DESTRUCTORS */
-				Renderer(Core::Window& window);
-				~Renderer();
+		public:
+			/* CONSTRUCTORS/DESTRUCTORS */
+			Renderer(Core::Window& window);
+			~Renderer();
 
-				void Render();
-				void Clear();
+			void Render();
+			void Clear();
+
+			inline ID3D11Device* GetDevice() const {return device;};
 		};
 	}
 }

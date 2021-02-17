@@ -4,6 +4,7 @@
 #include "Render/Renderer.hpp"
 #include "Core/Window.hpp"
 #include "Input.hpp"
+#include "UIcore.h"
 #include "Coordinator.hpp"
 
 namespace Cookie
@@ -14,6 +15,7 @@ namespace Cookie
 			Core::Window		window;
 			Core::Input 		input;
 			Render::Renderer	renderer;
+			Core::UIcore		ui;
 			ECS::Coordinator    coordinator;
 			
 

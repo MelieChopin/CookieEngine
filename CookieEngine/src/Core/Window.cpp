@@ -26,7 +26,7 @@ Window::Window()
     glfwSetErrorCallback(debugGLFWCallback);
 
     //create window
-    window = glfwCreateWindow(initWidth, initHeight, "Proto DX11", nullptr, nullptr);
+    window = glfwCreateWindow(initWidth, initHeight, "Cookie Engine", nullptr, nullptr);
     if (window == nullptr)
     {
         fprintf(stderr, "glfwCreateWindow failed");

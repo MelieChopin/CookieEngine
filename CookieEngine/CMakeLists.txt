@@ -19,6 +19,8 @@ include_directories("${INC_DIR}/Render/")
 include_directories("${INC_DIR}/ECS/")
 include_directories("${DEPS_INC_DIR}/ImGui/")
 include_directories("${DEPS_INC_DIR}/")
+include_directories("${DEPS_INC_DIR}/assimp/")
+include_directories("${DEPS_INC_DIR}/assimp/Compiler/")
 
 # Record SUB_SYS configuration (WIN32 for release en Windows to remove console)
 IF(CMAKE_BUILD_TYPE MATCHES Release)
@@ -45,7 +47,10 @@ set (SRC_FILES
     "src/Core/Window.cpp"
     ${SRC_DIR}/Render/Renderer.cpp
     ${SRC_DIR}/Render/RendererRemote.cpp
-    ${SRC_DIR}/Render/RendererState.cpp)
+    ${SRC_DIR}/Render/RendererState.cpp
+    ${SRC_DIR}/UI/UIcore.cpp
+    ${SRC_DIR}/UI/UIwidgetBases.cpp
+    ${SRC_DIR}/UI/UIwidgets.cpp)
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
@@ -55,6 +60,8 @@ add_executable (CookieEngine  ${SUB_SYS} ${SRC_FILES})
 target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/d3d11.lib")
 target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/d3dcompiler.lib")
 target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/glfw3.lib")
+target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/assimp-vc142-mt.lib")
+target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/zlibstatic.lib")
 
 # TODO: Ajoutez des tests et installez des cibles si nécessaire.
 
