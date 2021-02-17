@@ -1,7 +1,11 @@
-#include "UI/UIwidgetBases.h"
+#include "UIwidgetBases.h"
+
+#include <imgui.h>
+
 
 using namespace ImGui;
 using namespace Cookie::UIwidget;
+
 
 WindowBase::WindowBase(const char* _windowName, bool _opened)
 			: windowName	(_windowName),

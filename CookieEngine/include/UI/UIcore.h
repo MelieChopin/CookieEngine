@@ -1,6 +1,13 @@
-#pragma once
+#ifndef __UI_CORE_HPP_
+#define __UI_CORE_HPP_
 
-#include "UIwidgets.h"
+
+#include "UIwidgetBases.h"
+
+#include <vector>
+
+
+struct GLFWwindow;
 
 struct ID3D11DeviceContext;
 struct ID3D11Device;
@@ -9,14 +16,14 @@ struct ID3D11DepthStencilView;
 
 namespace Cookie::Render {class Renderer;}
 
+
 namespace Cookie::Core
 {
 	class UIcore
 	{
 		GLFWwindow*	window;
-		ImGuiIO*	io;
 
-		bool		mouseCaptured = false;
+		bool mouseCaptured = false;
 
 
 		const std::vector<const char*> menus = {"File", "Edit", "Windows", "Help"};
@@ -53,8 +60,7 @@ namespace Cookie::Core
 			{
 				UIndows[i].push_back(UIWI); 
 				UItems [i].push_back(UIWI);
-
-			} else assert(i <= 3);
+			}
 		}
 
 
@@ -66,3 +72,5 @@ namespace Cookie::Core
 		void UpdateUI();
 	};
 }
+
+#endif

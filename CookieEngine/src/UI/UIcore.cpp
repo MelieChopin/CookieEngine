@@ -1,7 +1,8 @@
 #include <d3d11.h>
 
-#include "UI/UIcore.h"
+#include "UIcore.h"
 
+#include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_dx11.h>
 
@@ -17,16 +18,16 @@ UIcore::UIcore(GLFWwindow* _window, const Cookie::Render::Renderer& _renderer)
 {
 	IMGUI_CHECKVERSION();
 	CreateContext();
-	io = &ImGui::GetIO();
+	ImGuiIO& io = ImGui::GetIO();
 
-	io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-	io->BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
-	io->BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
+	io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
+	io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
 	
-	io->ConfigViewportsNoDefaultParent = true;
+	io.ConfigViewportsNoDefaultParent = true;
 
 
 	StyleColorsDark();
@@ -58,14 +59,8 @@ void UIcore::EndFrame()
 	ImGui::Render();	
 	ImGui_ImplDX11_RenderDrawData(GetDrawData());
 
-
-	if (io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	{
-		UpdatePlatformWindows();
-		RenderPlatformWindowsDefault();
-	}
-
-
+	UpdatePlatformWindows();
+	RenderPlatformWindowsDefault();
 }
 
 void UIcore::UpdateUI()

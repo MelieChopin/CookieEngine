@@ -15,6 +15,7 @@ include_directories("${INC_DIR}/")
 include_directories("${INC_DIR}/Core/")
 include_directories("${INC_DIR}/Core/Math/")
 include_directories("${INC_DIR}/UI/")
+include_directories("${INC_DIR}/UI/Widgets/")
 include_directories("${INC_DIR}/Render/")
 include_directories("${INC_DIR}/ECS/")
 include_directories("${DEPS_INC_DIR}/ImGui/")
@@ -49,8 +50,12 @@ set (SRC_FILES
     ${SRC_DIR}/Render/RendererRemote.cpp
     ${SRC_DIR}/Render/RendererState.cpp
     ${SRC_DIR}/UI/UIcore.cpp
-    ${SRC_DIR}/UI/UIwidgetBases.cpp
-    ${SRC_DIR}/UI/UIwidgets.cpp)
+    ${SRC_DIR}/UI/Widgets/UIwidgetBases.cpp
+    ${SRC_DIR}/UI/Widgets/UIwidgets.cpp
+    ${SRC_DIR}/UI/Widgets/FileExplorerWidget.cpp
+    ${SRC_DIR}/UI/Widgets/HierarchyWidget.cpp
+    ${SRC_DIR}/UI/Widgets/InspectorWidget.cpp
+    )
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
