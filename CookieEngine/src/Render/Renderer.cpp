@@ -73,7 +73,7 @@ bool Renderer::InitDevice(Core::Window& window)
     return true;
 }
 
-bool Renderer::CreateBuffer()
+bool Renderer::CreateDrawBuffer()
 {
     // get the address of the back buffer
     ID3D11Texture2D* pBackBuffer = nullptr;
@@ -179,6 +179,19 @@ bool Renderer::InitState()
     state.viewport.MaxDepth = 1.0f;
 
     remote.context->RSSetViewports(1, &state.viewport);
+
+    return true;
+}
+
+/* Create Methods */
+
+bool Renderer::CreateBuffer(D3D11_BUFFER_DESC bufferDesc, D3D11_SUBRESOURCE_DATA data, ID3D11Buffer** buffer)
+{
+    if (FAILED(device->CreateBuffer(&bufferDesc, &data, buffer)))
+    {
+        printf("Failed Creating Buffer: %p of size %u \n", (*buffer), sizeof(data.pSysMem));
+        return false;
+    }
 
     return true;
 }

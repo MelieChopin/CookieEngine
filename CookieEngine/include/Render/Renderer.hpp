@@ -21,13 +21,15 @@ namespace Cookie
 
 			private:
 				bool InitDevice(Core::Window& window);
-				bool CreateBuffer();
+				bool CreateDrawBuffer();
 				bool InitState();
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
 				Renderer(Core::Window& window);
 				~Renderer();
+
+				bool CreateBuffer(D3D11_BUFFER_DESC bufferDesc, D3D11_SUBRESOURCE_DATA data, ID3D11Buffer** buffer);
 
 				void Render();
 				void Clear();

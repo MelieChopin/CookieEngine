@@ -4,6 +4,7 @@
 #include "EntityHandler.hpp"
 #include "ComponentHandler.hpp"
 #include "SystemHandler.hpp"
+#include "Resources/ResourcesManager.hpp"
 #include <assert.h>
 
 namespace Cookie
@@ -14,8 +15,10 @@ namespace Cookie
 		class Coordinator
 		{
 		public:
-			EntityHandler entityHandler;
-			ComponentHandler componentHandler;
+			EntityHandler				entityHandler;
+			ComponentHandler			componentHandler;
+			Resources::ResourcesManager	resources;
+
 
 			Coordinator() {}
 			~Coordinator() {}
