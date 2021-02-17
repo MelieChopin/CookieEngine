@@ -1,4 +1,6 @@
 #include "Engine.hpp"
+#include "Time.hpp"
+#include "Debug.hpp"
 
 using namespace Cookie;
 
