@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <string>
 
 namespace Cookie
 {
@@ -15,11 +16,12 @@ namespace Cookie
 		public:
 			unsigned int				id{ 0 };
 			int                         signature{ 0 };
+			std::string					name{ "No Name" };
 			bool						needToBeRemoved{ false };
 			std::vector<unsigned int>   children;
 
 			Entity(unsigned int _id) : id{ _id } {}
-			Entity(const Entity& entity) : id{entity.id}, signature{entity.signature}, needToBeRemoved{entity.needToBeRemoved}, children{entity.children} {}
+			Entity(const Entity& entity) : id{ entity.id }, signature{ entity.signature }, name{ entity.name }, needToBeRemoved{ entity.needToBeRemoved }, children{ entity.children } {}
 			~Entity() {}
 
 			void operator= (const Entity& entity)

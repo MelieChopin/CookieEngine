@@ -49,7 +49,10 @@ set (SRC_FILES
     "${SRC_DIR}/Render/RendererState.cpp" 
     "${SRC_DIR}/Resources/Loader.cpp" 
     "${SRC_DIR}/Resources/ResourcesManager.cpp"
-    "${SRC_DIR}/Resources/Mesh.cpp")
+    "${SRC_DIR}/Resources/Mesh.cpp"
+    "${SRC_DIR}/UI/UIcore.cpp"
+    "${SRC_DIR}/UI/UIwidgetBases.cpp"
+    "${SRC_DIR}/UI/UIwidgets.cpp")
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
