@@ -85,11 +85,6 @@ namespace Cookie
 
             inline Mat4 Mat4::Identity()
             {
-                float test[16] = { 1.f, 0.f, 0.f, 0.f,
-                                   0.f, 1.f, 0.f, 0.f,
-                                   0.f, 0.f, 1.f, 0.f,
-                                   0.f, 0.f, 0.f, 1.f };
-
                 return
                 {
                     1.f, 0.f, 0.f, 0.f,
