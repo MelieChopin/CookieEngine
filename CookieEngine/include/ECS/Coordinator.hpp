@@ -20,10 +20,11 @@ namespace Cookie
 			Coordinator() {}
 			~Coordinator() {}
 
-			void AddEntity(const int signature)
+			void AddEntity(const int signature, std::string& name = std::string("No Name") )
 			{
 				assert(entityHandler.livingEntities < MAX_ENTITIES && "Too many entities in existence.");
 
+				entityHandler.entities[entityHandler.livingEntities].name = name;
 				unsigned int id = entityHandler.entities[entityHandler.livingEntities].id;
 				entityHandler.livingEntities++;
 
@@ -40,6 +41,7 @@ namespace Cookie
 
 				//Reset all
 				entity.signature = 0;
+				entity.name = "No Name";
 				entity.needToBeRemoved = false;
 
 				for (unsigned int i = 0; i < entity.children.size(); ++i)
