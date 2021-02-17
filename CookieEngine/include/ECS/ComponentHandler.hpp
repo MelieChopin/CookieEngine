@@ -67,6 +67,40 @@ namespace Cookie
 				entity.signature += SIGNATURE_MODEL;
 			}
 
+			void RemoveComponentTransform(Entity& entity)
+			{
+				if (entity.signature & SIGNATURE_TRANSFORM)
+				{
+					GetComponentTransform(entity.id).ToDefault();
+					entity.signature -= SIGNATURE_TRANSFORM;
+					return;
+				}
+				
+				std::cout << "No Component Transform present\n";
+			}
+			void RemoveComponentRigidBody(Entity& entity)
+			{
+				if (entity.signature & SIGNATURE_RIGIDBODY)
+				{
+					GetComponentRigidBody(entity.id).ToDefault();
+					entity.signature -= SIGNATURE_RIGIDBODY;
+					return;
+				}
+
+				std::cout << "No Component RigidBody present\n";
+			}
+			void RemoveComponentModel(Entity& entity)
+			{
+				if (entity.signature & SIGNATURE_MODEL)
+				{
+					GetComponentModel(entity.id).ToDefault();
+					entity.signature -= SIGNATURE_MODEL;
+					return;
+				}
+
+				std::cout << "No Component Model present\n";
+			}
+
 			ComponentTransform& GetComponentTransform(const unsigned int id) { return componentTransforms[id]; }
 			ComponentRigidBody& GetComponentRigidBody(const unsigned int id) { return componentRigidBodies[id]; }
 			ComponentModel&		GetComponentModel    (const unsigned int id) { return componentModels[id]; }
