@@ -7,7 +7,7 @@ using namespace Cookie;
 Engine::Engine() :
     window{}, renderer{window}, ui{window.window, renderer}
 {
-
+    coordinator.resources.Load(renderer);
 }
 
 Engine::~Engine()

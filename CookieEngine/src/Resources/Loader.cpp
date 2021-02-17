@@ -21,7 +21,7 @@ void Loader::Load(const char* fileName, ResourcesManager& resources, Render::Ren
 
 	if (scene)
 	{
-		InitScene(scene,resources);
+		InitScene(scene,resources,_renderer);
 	}
 	else
 	{
@@ -32,7 +32,7 @@ void Loader::Load(const char* fileName, ResourcesManager& resources, Render::Ren
 void Loader::InitScene(const aiScene* _scene, ResourcesManager& _resources, Render::Renderer& _renderer)
 {
 	if (_scene->HasMeshes())
-		InitMeshes(_scene->mMeshes,_scene->mNumMeshes,_resources);
+		InitMeshes(_scene->mMeshes,_scene->mNumMeshes,_resources, _renderer);
 }
 
 void Loader::InitMeshes(aiMesh** meshes, unsigned int nMeshes, ResourcesManager& _resources, Render::Renderer& _renderer)
@@ -40,5 +40,7 @@ void Loader::InitMeshes(aiMesh** meshes, unsigned int nMeshes, ResourcesManager&
 	for (unsigned int i = 0; i < nMeshes; i++)
 	{
 		aiMesh* iMesh = meshes[i];
+		if (!_resources.HasMesh(iMesh->mName.C_Str()))
+			_resources.AddMesh(std::move(std::make_shared<Mesh>(iMesh, _renderer)));
 	}
 }

@@ -7,6 +7,8 @@ namespace Cookie
 {
 	namespace Resources
 	{
+		class ResourcesManager;
+
 		class Loader
 		{
 			private:

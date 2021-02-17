@@ -7,14 +7,18 @@ using namespace Cookie::Resources;
 
 Mesh::Mesh(aiMesh* mesh, Render::Renderer& renderer)
 {
-    name = mesh->mName.C_Str();
+    name    = mesh->mName.C_Str();
+    INb     = mesh->mNumFaces * 3;//a face is a triangle as triangulate flag is enabled
     InitVBuffer(mesh, renderer);
     InitIBuffer(mesh,renderer);
 }
 
 Mesh::~Mesh()
 {
-	VBuffer->Release();
+    if (VBuffer)
+	    VBuffer->Release();
+    if (IBuffer)
+        IBuffer->Release();
 }
 
 void Mesh::InitVBuffer(aiMesh* mesh, Render::Renderer& renderer)
@@ -22,15 +26,14 @@ void Mesh::InitVBuffer(aiMesh* mesh, Render::Renderer& renderer)
     D3D11_BUFFER_DESC bDesc = {};
 
     std::vector<float> vertices;
-    vertices.reserve(mesh->mNumVertices * 3 * 3 * 2);
 
     for (int i = 0; i <= mesh->mNumVertices; i++)
     {
         vertices.push_back(mesh->mVertices[i].x);
         vertices.push_back(mesh->mVertices[i].y);
         vertices.push_back(mesh->mVertices[i].z);
-        vertices.push_back(mesh->mTextureCoords[i]->x);
-        vertices.push_back(mesh->mTextureCoords[i]->y);
+        vertices.push_back(mesh->mTextureCoords[0][i].x);
+        vertices.push_back(mesh->mTextureCoords[0][i].y);
         vertices.push_back(mesh->mNormals[i].x);
         vertices.push_back(mesh->mNormals[i].y);
         vertices.push_back(mesh->mNormals[i].z);
@@ -56,7 +59,6 @@ void Mesh::InitIBuffer(aiMesh* mesh, Render::Renderer& renderer)
     D3D11_BUFFER_DESC bDesc = {};
 
     std::vector<unsigned int> indices;
-    indices.reserve(mesh->mNumFaces * 3);
 
     for (unsigned int i = 0; i < mesh->mNumFaces; i++)
     {

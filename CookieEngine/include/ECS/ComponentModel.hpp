@@ -1,6 +1,9 @@
 #ifndef __COMPONENT_MODEL_HPP__
 #define __COMPONENT_MODEL_HPP__
 
+#include "Resources/Mesh.hpp"
+#include "Resources/Shader.hpp"
+
 namespace Cookie
 {
     namespace ECS
@@ -9,8 +12,8 @@ namespace Cookie
         class ComponentModel
         {
         private:
-            //Mesh* mesh {nullptr};
-            //Shader* shader {nullptr};
+            Resources::Mesh* mesh {nullptr};
+            Resources::Shader* shader {nullptr};
             //Texture* texture {nullptr};
 
 

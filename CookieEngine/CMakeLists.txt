@@ -52,7 +52,7 @@ set (SRC_FILES
     "${SRC_DIR}/Resources/Mesh.cpp"
     "${SRC_DIR}/UI/UIcore.cpp"
     "${SRC_DIR}/UI/UIwidgetBases.cpp"
-    "${SRC_DIR}/UI/UIwidgets.cpp")
+    "${SRC_DIR}/UI/UIwidgets.cpp" "src/Resources/Shader.cpp")
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 

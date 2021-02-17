@@ -8,16 +8,22 @@ struct ID3D11Buffer;
 
 namespace Cookie
 {
+	namespace Render
+	{
+		class Renderer;
+	}
+
 	namespace Resources
 	{
 		class Mesh
 		{
 			private:
-				ID3D11Buffer* VBuffer = nullptr;
-				ID3D11Buffer* IBuffer = nullptr;
+				ID3D11Buffer* VBuffer	= nullptr;
+				ID3D11Buffer* IBuffer	= nullptr;
+				unsigned int  INb		= 0;
 
 			public:
-				std::string name = nullptr;
+				std::string name;
 
 			private:
 				void InitVBuffer(aiMesh* mesh, Render::Renderer& renderer);
@@ -27,6 +33,8 @@ namespace Cookie
 				/* CONSTRUCTORS/DESTRUCTORS */
 				Mesh(aiMesh* mesh, Render::Renderer& renderer);
 				~Mesh();
+
+				inline unsigned int GetIndicesNb() { return INb; }
 		};
 	}
 }

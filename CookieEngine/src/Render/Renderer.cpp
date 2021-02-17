@@ -19,7 +19,7 @@ Renderer::Renderer(Core::Window& window)
     bool result = true;
     result = InitDevice(window);
     if (result)
-        result = CreateBuffer();
+        result = CreateDrawBuffer();
     if (result)
         result = InitState();
 
@@ -183,13 +183,35 @@ bool Renderer::InitState()
     return true;
 }
 
-/* Create Methods */
+/*========================= CREATE METHODS =========================*/
 
 bool Renderer::CreateBuffer(D3D11_BUFFER_DESC bufferDesc, D3D11_SUBRESOURCE_DATA data, ID3D11Buffer** buffer)
 {
     if (FAILED(device->CreateBuffer(&bufferDesc, &data, buffer)))
     {
         printf("Failed Creating Buffer: %p of size %u \n", (*buffer), sizeof(data.pSysMem));
+        return false;
+    }
+
+    return true;
+}
+
+bool Renderer::CreateVertexBuffer(ID3D11VertexShader** vertexShader, ID3DBlob** VS)
+{
+    if (FAILED(device->CreateVertexShader((*VS)->GetBufferPointer(), (*VS)->GetBufferSize(), NULL, vertexShader)))
+    {
+        printf("Failed Creating Vertex Shader \n");
+        return false;
+    }
+
+    return true;
+}
+
+bool Renderer::CreatePixelBuffer(ID3D11PixelShader** pixelShader, ID3DBlob** PS)
+{
+    if (FAILED(device->CreatePixelShader((*PS)->GetBufferPointer(), (*PS)->GetBufferSize(), NULL, pixelShader)))
+    {
+        printf("Failed Creating Pixel Shader \n");
         return false;
     }
 
