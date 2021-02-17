@@ -3,7 +3,7 @@
 using namespace Cookie;
 
 Engine::Engine() :
-    window{}, renderer{window}
+    window{}, renderer{window}, ui{window.window, renderer}
 {
 
 }
@@ -41,6 +41,11 @@ void Engine::Run()
     //glfwSetKeyCallback(window.window, keyCallback);
     //glfwSetInputMode(window.window, GLFW_STICKY_KEYS, 1);
 
+
+    ui.AddWItem(new UIwidget::ExitPannel(window.window), 0);
+    ui.AddWindow(new UIwidget::FileExplorer);
+
+
     while (!glfwWindowShouldClose(window.window))
     {
         // Present frame
@@ -67,6 +72,8 @@ void Engine::Run()
         {
             std::cout << "escape pressed\n";
         }
+
+        ui.UpdateUI();
 
         renderer.Render();
     }

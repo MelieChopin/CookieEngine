@@ -47,7 +47,10 @@ set (SRC_FILES
     "src/Core/Window.cpp"
     ${SRC_DIR}/Render/Renderer.cpp
     ${SRC_DIR}/Render/RendererRemote.cpp
-    ${SRC_DIR}/Render/RendererState.cpp)
+    ${SRC_DIR}/Render/RendererState.cpp
+    ${SRC_DIR}/UI/UIcore.cpp
+    ${SRC_DIR}/UI/UIwidgetBases.cpp
+    ${SRC_DIR}/UI/UIwidgets.cpp)
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
