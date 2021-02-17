@@ -20,7 +20,7 @@ namespace Cookie
 			Coordinator() {}
 			~Coordinator() {}
 
-			void AddEntity(const int signature, std::string& name = std::string("No Name") )
+			void AddEntity(const int signature, std::string name = std::string("No Name") )
 			{
 				assert(entityHandler.livingEntities < MAX_ENTITIES && "Too many entities in existence.");
 
