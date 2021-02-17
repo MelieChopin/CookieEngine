@@ -39,20 +39,21 @@ namespace Cookie
 			{
 				assert(entityHandler.livingEntities > 0 && "No Entity to remove");
 
-				//Reset all
-				entity.signature = 0;
-				entity.name = "No Name";
-				entity.needToBeRemoved = false;
-
-				for (unsigned int i = 0; i < entity.children.size(); ++i)
-					componentHandler.GetComponentTransform(entity.children[i]).globalTRS = Core::Math::Mat4::Identity();
-
+				//Reset Components
 				if (CheckSignature(entity.signature, SIGNATURE_TRANSFORM))
 					componentHandler.GetComponentTransform(entity.id).ToDefault();
 				if (CheckSignature(entity.signature, SIGNATURE_RIGIDBODY))
 					componentHandler.GetComponentRigidBody(entity.id).ToDefault();
 				if (CheckSignature(entity.signature, SIGNATURE_MODEL))
 					componentHandler.GetComponentModel(entity.id).ToDefault();
+
+				//Reset Entity
+				entity.signature = 0;
+				entity.name = "No Name";
+				entity.needToBeRemoved = false;
+
+				for (unsigned int i = 0; i < entity.children.size(); ++i)
+					componentHandler.GetComponentTransform(entity.children[i]).globalTRS = Core::Math::Mat4::Identity();
 
 				//Switch the removed one with the last alive
 				entityHandler.livingEntities--;
