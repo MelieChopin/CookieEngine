@@ -86,7 +86,7 @@ void Engine::Run()
             if (GetAsyncKeyState('W') & 0xff)
             {
                 std::cout << "Entity Created\n";
-                coordinator.AddEntity(SIGNATURE_TRANSFORM);
+                coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_RIGIDBODY);
             }
             if (GetAsyncKeyState('X') & 0xff)
             {

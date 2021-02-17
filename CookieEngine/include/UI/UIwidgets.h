@@ -29,7 +29,6 @@ namespace Cookie::UIwidget
 		void WindowDisplay() override;
 	};
 	
-
 	class GamePort final : public WindowBase
 	{
 	public:
@@ -40,6 +39,7 @@ namespace Cookie::UIwidget
 		void WindowDisplay() override;
 	};
 	
+
 	class Inspector final : public WindowBase
 	{
 		Cookie::ECS::Coordinator& coordinator;
@@ -57,6 +57,7 @@ namespace Cookie::UIwidget
 		inline void SelectEntity(Cookie::ECS::Entity* newSelection)
 		{selectedEntity = newSelection;}
 	};
+
 
 	class Hierarchy final : public WindowBase
 	{
