@@ -76,7 +76,7 @@ void UIcore::UpdateUI()
 		ImGui::GetIO().MousePos = ImVec2(-FLT_MAX, -FLT_MAX); // Disable ImGui mouse handling
 
 
-	DockSpaceOverViewport(GetMainViewport(), ImGuiDockNodeFlags_AutoHideTabBar | ImGuiDockNodeFlags_PassthruCentralNode);
+	DockSpaceOverViewport(GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
 	// Main Window space
 	{

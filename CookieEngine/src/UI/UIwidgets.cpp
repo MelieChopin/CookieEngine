@@ -1,13 +1,46 @@
+#include "Coordinator.hpp"
 #include "UI/UIwidgets.h"
-
-#include "calc.hpp"
 
 #include <filesystem>
 #include <iostream>
 
+
 namespace fs = ::std::filesystem;
 using namespace ImGui;
 using namespace Cookie::UIwidget;
+using namespace Cookie::ECS;
+
+
+void Viewport::WindowDisplay()
+{
+    ImGui::Begin(windowName, nullptr);
+    ImGui::End();
+}
+
+void GamePort::WindowDisplay()
+{
+    ImGui::Begin(windowName, nullptr);
+    ImGui::End();
+}
+
+void Inspector::WindowDisplay()
+{
+    ImGui::Begin(windowName, nullptr);
+
+    if (selectedEntity)
+    {
+        if (selectedEntity->signature & SIGNATURE_TRANSFORM)
+        {
+            Transform& trsf = coordinator.componentHandler.GetComponentTransform(selectedEntity->id).localTRS;
+
+            Text("Pos:"); DragFloat("X##POS", &trsf.translation.x); DragFloat("Y##POS", &trsf.translation.y); DragFloat("Z##POS", &trsf.translation.z);
+            Text("Rot:"); DragFloat("X##ROT", &trsf.rotation.x);    DragFloat("Y##ROT", &trsf.rotation.y);    DragFloat("Z##ROT", &trsf.rotation.z);
+            Text("Scl:"); DragFloat("X##SCL", &trsf.scale.x);       DragFloat("Y##SCL", &trsf.scale.y);       DragFloat("Z##SCL", &trsf.scale.z);
+        }
+    }
+
+    ImGui::End();
+}
 
 void Hierarchy::WindowDisplay()
 {
@@ -35,6 +68,14 @@ void Hierarchy::WindowDisplay()
         }
 
         EndPopup();
+    }
+
+    for (size_t i = 0; i < entityHandler.livingEntities; i++)
+    {
+        if (Button( (entityHandler.entities[i].name + "##" + std::to_string(i)).c_str()) )
+        {
+            inspector->SelectEntity(&entityHandler.entities[i]);
+        }
     }
 
 	ImGui::End();

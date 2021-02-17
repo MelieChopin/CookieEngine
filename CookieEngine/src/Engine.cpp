@@ -46,7 +46,13 @@ void Engine::Run()
 
     ui.AddWItem(new UIwidget::ExitPannel(window.window), 0);
     ui.AddWindow(new UIwidget::FileExplorer);
-
+    
+    UIwidget::Inspector* insp = new UIwidget::Inspector(coordinator);
+    ui.AddWindow(insp);
+    ui.AddWindow(new UIwidget::Hierarchy(coordinator.entityHandler, insp));
+    
+    ui.AddWindow(new UIwidget::Viewport);
+    ui.AddWindow(new UIwidget::GamePort);
 
     while (!glfwWindowShouldClose(window.window))
     {
@@ -80,7 +86,7 @@ void Engine::Run()
             if (GetAsyncKeyState('W') & 0xff)
             {
                 std::cout << "Entity Created\n";
-                coordinator.AddEntity(SIGNATURE_EMPTY);
+                coordinator.AddEntity(SIGNATURE_TRANSFORM);
             }
             if (GetAsyncKeyState('X') & 0xff)
             {
