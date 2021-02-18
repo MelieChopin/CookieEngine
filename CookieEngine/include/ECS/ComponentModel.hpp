@@ -29,6 +29,17 @@ namespace Cookie
                 //shader = nullptr;
                 //texture = nullptr;
             }
+
+            void Draw(Render::RendererRemote& remote, const Core::Math::Mat4& mvp)
+            {
+                if (shader)
+                    shader->Set(remote, mvp);
+                if (mesh)
+                {
+                    mesh->Set(remote);
+                    mesh->Draw(remote);
+                }
+            }
         };
 
     }

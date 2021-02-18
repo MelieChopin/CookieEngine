@@ -1,4 +1,5 @@
 #include <d3d11.h>
+#include "Render/RendererRemote.hpp"
 #include "Render/Renderer.hpp"
 #include <vector>
 #include "Resources/Mesh.hpp"
@@ -80,4 +81,16 @@ void Mesh::InitIBuffer(aiMesh* mesh, Render::Renderer& renderer)
     InitData.SysMemSlicePitch = 0;
 
     renderer.CreateBuffer(bDesc, InitData, &IBuffer);
+}
+
+void Mesh::Set(Render::RendererRemote& remote)
+{
+    UINT stride = ((2 * sizeof(Core::Math::Vec3)) + sizeof(Core::Math::Vec2));
+    remote.context->IASetVertexBuffers(0,1,&VBuffer,&stride,0);
+    remote.context->IASetIndexBuffer(IBuffer, DXGI_FORMAT_R32_UINT,0);
+}
+
+void Mesh::Draw(Render::RendererRemote& remote)
+{
+    remote.context->DrawIndexed(INb * 3, 0, 0);
 }

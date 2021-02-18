@@ -11,6 +11,7 @@ namespace Cookie
 	namespace Render
 	{
 		class Renderer;
+		class RendererRemote;
 	}
 
 	namespace Resources
@@ -35,6 +36,8 @@ namespace Cookie
 				~Mesh();
 
 				inline unsigned int GetIndicesNb() { return INb; }
+				void Set(Render::RendererRemote& remote);
+				void Draw(Render::RendererRemote& remote);
 		};
 	}
 }

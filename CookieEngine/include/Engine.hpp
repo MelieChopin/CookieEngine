@@ -6,6 +6,7 @@
 #include "Input.hpp"
 #include "UIcore.h"
 #include "Coordinator.hpp"
+#include "Render/Camera.hpp"
 
 namespace Cookie
 {
@@ -17,6 +18,7 @@ namespace Cookie
 			Render::Renderer	renderer;
 			Core::UIcore		ui;
 			ECS::Coordinator    coordinator;
+			Render::Camera		camera;
 			
 
 		public:

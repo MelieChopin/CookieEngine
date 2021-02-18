@@ -2,7 +2,9 @@
 #include <d3dcompiler.h>
 
 #include "Vec4.hpp"
+#include "Mat4.hpp"
 #include "Render/Renderer.hpp"
+#include "Render/RendererRemote.hpp"
 #include "Resources/Shader.hpp"
 
 using namespace Cookie::Resources;
@@ -11,8 +13,9 @@ Shader::Shader(Render::Renderer& _renderer)
 {
     ID3DBlob* VS;
 
-    if (CompileDefaultVertex(_renderer,&VS) && CompileDefaultPixel(_renderer))
-        CreateDefaultLayout(_renderer, &VS);
+    if (CompileDefaultVertex(_renderer, &VS) && CompileDefaultPixel(_renderer))
+        if (CreateDefaultLayout(_renderer, &VS))
+            CreateDefaultBuffer(_renderer);
 }
 
 Shader::Shader(Render::Renderer& _renderer, std::string VShaderPath, std::string PShaderPath)
@@ -20,7 +23,8 @@ Shader::Shader(Render::Renderer& _renderer, std::string VShaderPath, std::string
     ID3DBlob* VS;
 
     if (CompileVertex(_renderer,&VS,VShaderPath) && CompilePixel(_renderer,PShaderPath))
-        CreateDefaultLayout(_renderer, &VS);
+        if (CreateDefaultLayout(_renderer, &VS))
+            CreateDefaultBuffer(_renderer);
 }
 
 Shader::~Shader()
@@ -134,6 +138,33 @@ bool Shader::CreateDefaultLayout(Render::Renderer& _renderer, ID3DBlob** VS)
     return true;
 }
 
+bool Shader::CreateDefaultBuffer(Render::Renderer& _renderer)
+{
+    D3D11_BUFFER_DESC bDesc = {};
+
+    bDesc.ByteWidth = sizeof(Core::Math::Mat4);
+    bDesc.Usage = D3D11_USAGE_DYNAMIC;
+    bDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    bDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    bDesc.MiscFlags = 0;
+    bDesc.StructureByteStride = 0;
+
+    Core::Math::Mat4 identity = Core::Math::Mat4::Identity();
+
+    D3D11_SUBRESOURCE_DATA InitData;
+    InitData.pSysMem = identity.e;
+    InitData.SysMemPitch = 0;
+    InitData.SysMemSlicePitch = 0;
+
+    if (FAILED(_renderer.CreateBuffer(bDesc, InitData, &CBuffer)))
+    {
+        printf("Failed Creating Buffer: %p \n", (CBuffer));
+        return false;
+    }
+
+    return true;
+}
+
 bool Shader::CompileVertex(Render::Renderer& _renderer, ID3DBlob** VS, std::string VShaderPath)
 {
     ID3DBlob* VSErr;
@@ -160,4 +191,25 @@ bool Shader::CompilePixel(Render::Renderer& _renderer, std::string PShaderPath)
     }
 
     return _renderer.CreatePixelBuffer(&PShader, &PS);
+}
+
+void Shader::Set(Render::RendererRemote& remote, const Core::Math::Mat4& mvp)
+{
+    remote.context->VSSetShader(VShader, nullptr, 0);
+    remote.context->PSSetShader(PShader, nullptr, 0);
+
+    D3D11_MAPPED_SUBRESOURCE ms;
+
+    if (FAILED(remote.context->Map(CBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms)))
+    {
+        printf("Failed to update Buffer nb %u: %p\n", 0, CBuffer);
+        return;
+    }
+
+    memcpy(ms.pData, mvp.e, sizeof(Core::Math::Mat4));
+
+    remote.context->Unmap(CBuffer, 0);
+
+    remote.context->IASetInputLayout(layout);
+    remote.context->VSSetConstantBuffers(0, 1, &CBuffer);
 }

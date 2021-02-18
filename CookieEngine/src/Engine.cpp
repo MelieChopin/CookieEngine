@@ -1,6 +1,7 @@
 #include "Engine.hpp"
 #include "Time.hpp"
 #include "Debug.hpp"
+#include "Core/Math/Calc.hpp"
 
 using namespace Cookie;
 
@@ -8,6 +9,9 @@ Engine::Engine() :
     window{}, renderer{window}, ui{window.window, renderer}
 {
     coordinator.resources.Load(renderer);
+    camera.SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width / renderer.state.viewport.Height, 0.01f, 100.f);
+    camera.pos = Core::Math::Vec3(0.0f, 0.0f, -2.0f);
+    camera.Update();
 }
 
 Engine::~Engine()
@@ -42,6 +46,8 @@ void Engine::Run()
     input.Set(UnitInputs);
     //glfwSetKeyCallback(window.window, keyCallback);
     //glfwSetInputMode(window.window, GLFW_STICKY_KEYS, 1);
+
+    coordinator.AddEntity(SIGNATURE_MODEL + SIGNATURE_TRANSFORM,"Duck");
 
 
     ui.AddWItem(new UIwidget::ExitPannel(window.window), 0);
@@ -91,6 +97,7 @@ void Engine::Run()
                 coordinator.ApplySystemDisplayId();
         }
 
+        coordinator.ApplyDraw(renderer.remote, camera.GetViewProj());
         ui.UpdateUI();
 
         renderer.Render();
