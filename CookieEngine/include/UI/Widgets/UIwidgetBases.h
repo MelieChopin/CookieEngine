@@ -1,11 +1,6 @@
 #ifndef	__COOKIEUI_WIDGET_BASES_HPP__
 #define __COOKIEUI_WIDGET_BASES_HPP__
 
-
-#include <imgui.h>
-
-#include <GLFW/glfw3.h>
-
 namespace Cookie::UIwidget
 {
 	struct WindowBase
