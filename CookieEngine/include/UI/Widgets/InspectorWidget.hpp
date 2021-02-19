@@ -21,8 +21,8 @@ namespace Cookie::UIwidget
 
 	public:
 		Inspector(Cookie::ECS::Coordinator& _coordinator)
-			: WindowBase("Inspector"),
-			coordinator(_coordinator)
+			: WindowBase	("Inspector"),
+			  coordinator	(_coordinator)
 		{}
 
 		void WindowDisplay() override;

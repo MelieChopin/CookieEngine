@@ -4,7 +4,7 @@
 #include "UIwidgetBases.h"
 
 
-namespace Cookie::ECS {class EntityHandler;}
+namespace Cookie::ECS {class Coordinator;}
 
 namespace Cookie::UIwidget
 {
@@ -13,14 +13,14 @@ namespace Cookie::UIwidget
 
 	class Hierarchy final : public WindowBase
 	{
-		Cookie::ECS::EntityHandler& entityHandler;
+		Cookie::ECS::Coordinator& coordinator;
 		Inspector* inspector;
 
 	public:
-		Hierarchy(Cookie::ECS::EntityHandler& _entityHandler, Inspector* _inspector)
-			: WindowBase("Hierarchy"),
-			entityHandler(_entityHandler),
-			inspector(_inspector)
+		Hierarchy(Cookie::ECS::Coordinator& _coordinator, Inspector* _inspector)
+			: WindowBase	("Hierarchy"),
+			  coordinator	(_coordinator),
+			  inspector		(_inspector)
 		{}
 
 		void WindowDisplay() override;

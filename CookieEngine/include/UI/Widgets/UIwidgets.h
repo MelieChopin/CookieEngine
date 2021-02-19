@@ -39,8 +39,8 @@ namespace Cookie::UIwidget
 
 	public:
 		ExitPannel(GLFWwindow* _window)
-			: window		(_window),
-			  WItemBase	("Exit confirmation", "Exit", "Esc")
+			: WItemBase	("Exit confirmation", "Exit", "Esc"),
+			  window	(_window)
 		{}
 
 		void WindowDisplay() override;

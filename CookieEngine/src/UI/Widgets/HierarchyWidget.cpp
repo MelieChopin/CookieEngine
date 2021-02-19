@@ -1,4 +1,4 @@
-#include "EntityHandler.hpp"
+#include "Coordinator.hpp"
 #include "InspectorWidget.hpp"
 #include "HierarchyWidget.hpp"
 
@@ -16,28 +16,20 @@ void Hierarchy::WindowDisplay()
 
     if (IsWindowHovered() && IsMouseClicked(ImGuiMouseButton_Right)) OpenPopup("Out-object hierarchy menu");
 
+
     if (BeginPopup("Out-object hierarchy menu"))
     {
-        MenuItem("Yay! Success button!");
-        MenuItem("More success button!");
-        Text("Even a success text!");
-
-        if (TreeNode("This is the magic success tree~!"))
-        {
-            if (TreeNode("Wait this goes deeper?"))
-            {
-                Text("Wow, this does go deepah!");
-                TreePop();
-            }
-
-            Button("Boop me!~");
-
-            TreePop();
+        if (Button("Create empty"))
+        { 
+            coordinator.AddEntity(SIGNATURE_EMPTY);
+            CloseCurrentPopup();
         }
-
+        
         EndPopup();
     }
 
+
+    EntityHandler& entityHandler = coordinator.entityHandler;
     for (size_t i = 0; i < entityHandler.livingEntities; i++)
     {
         if (Button((entityHandler.entities[i].name + "##" + std::to_string(i)).c_str()))

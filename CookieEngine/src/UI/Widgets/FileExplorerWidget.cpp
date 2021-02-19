@@ -68,10 +68,12 @@ void FileExplorer::WindowDisplay()
 
     ImGuiStyle& style = GetStyle();
     style.FrameRounding = 25.f;
+    style.IndentSpacing = 30.0f;
 
     ExploreFiles(fs::current_path().parent_path().parent_path().parent_path(), &searchQuery[0]);
 
     style.FrameRounding = 0.f;
+    style.IndentSpacing = 21.0f;
 
     ImGui::End();
 }
