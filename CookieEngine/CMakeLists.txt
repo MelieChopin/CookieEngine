@@ -52,12 +52,12 @@ set (SRC_FILES
     "${SRC_DIR}/Resources/ResourcesManager.cpp"
     "${SRC_DIR}/Resources/Mesh.cpp"
     "${SRC_DIR}/UI/UIcore.cpp"
-    "${SRC_DIR}/UI/UIwidgetBases.cpp"
-    "${SRC_DIR}/UI/UIwidgets.cpp" 
-"src/Resources/Shader.cpp"
-    ${SRC_DIR}/UI/Widgets/FileExplorerWidget.cpp
-    ${SRC_DIR}/UI/Widgets/HierarchyWidget.cpp
-    ${SRC_DIR}/UI/Widgets/InspectorWidget.cpp)
+    "${SRC_DIR}/UI/Widgets/UIwidgetBases.cpp"
+    "${SRC_DIR}/UI/Widgets/UIwidgets.cpp" 
+    "${SRC_DIR}/Resources/Shader.cpp"
+    "${SRC_DIR}/UI/Widgets/FileExplorerWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/HierarchyWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/InspectorWidget.cpp")
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 

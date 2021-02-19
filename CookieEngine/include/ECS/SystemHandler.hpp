@@ -22,7 +22,7 @@ namespace Cookie
 			inline void SystemVelocity(ComponentTransform& trs, const ComponentRigidBody& rb) {trs.localTRS.translation += rb.linearVelocity /* * deltaTime*/; };
 			inline void SystemDraw(const ComponentTransform& trs, ComponentModel& model, Render::RendererRemote& remote, const Core::Math::Mat4& viewproj) 
 			{
-				model.Draw(remote, viewproj * trs.globalTRS * trs.localTRS);
+				model.Draw(remote, viewproj * trs.globalTRS);
 			}
 			//void SystemRemoveBelowLevel(const ComponentTransform&);
 			//void SystemRemoveNeeded();
