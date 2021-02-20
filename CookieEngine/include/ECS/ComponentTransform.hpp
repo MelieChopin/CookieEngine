@@ -29,7 +29,7 @@ namespace Cookie
 			Core::Math::Mat4 globalTRS;
 
 
-			ComponentTransform() {}
+			ComponentTransform() { ToDefault(); }
 			~ComponentTransform() {}
 
 			void ToDefault()

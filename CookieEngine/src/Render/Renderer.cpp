@@ -224,6 +224,10 @@ void Renderer::Clear()
 {
     remote.context->ClearRenderTargetView(backbuffer, state.clearColor.e);
     remote.context->ClearDepthStencilView(depthBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0.0f);
+
+    remote.context->RSSetState(state.rasterizerState);
+    remote.context->OMSetDepthStencilState(state.depthStencilState, 1);
+    remote.context->RSSetViewports(1, &state.viewport);
 }
 
 void Renderer::Render()

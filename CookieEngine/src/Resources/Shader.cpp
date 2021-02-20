@@ -9,6 +9,12 @@
 
 using namespace Cookie::Resources;
 
+struct VS_CONSTANT_BUFFER
+{
+    Cookie::Core::Math::Mat4 viewProj = Cookie::Core::Math::Mat4::Identity();
+    Cookie::Core::Math::Mat4 modelMat = Cookie::Core::Math::Mat4::Identity();
+};
+
 Shader::Shader(Render::Renderer& _renderer)
 {
     ID3DBlob* VS;
@@ -48,8 +54,7 @@ std::string Shader::GetDefaultVertexSource()
     
     cbuffer VS_CONSTANT_BUFFER : register(b0)
     {
-        float4x4  projection;
-        float4x4  view;
+        float4x4  viewProj;
         float4x4  model;
     };
     
@@ -57,9 +62,9 @@ std::string Shader::GetDefaultVertexSource()
     {
         VOut output;
     
-        output.position = mul(mul(mul(float4(position,1.0), model),view),projection);
+        output.position = mul(float4(position,1.0), viewProj);
         output.uv       = uv;
-        output.normal   = mul(float4(normal,0.0), model).xyz;
+        output.normal   = normal;
     
         return output;
 
@@ -69,14 +74,10 @@ std::string Shader::GetDefaultVertexSource()
 std::string Shader::GetDefaultPixelSource()
 {
 	return (const char*)R"(
-    Texture2D	diffuseTex2D : register( t0 );
-    Texture2D	emmisiveTex2D : register( t1 );
-
-    SamplerState linearSampler : register( s0 );
 
     float4 main(float4 position : SV_POSITION, float2 uv : UV, float3 normal : NORMAL) : SV_TARGET
     {
-        return diffuseTex2D.Sample(linearSampler,uv) + emmisiveTex2D.Sample(linearSampler,uv);
+        return float4(1.0,1.0,1.0,1.0);
     })";
 }
 
@@ -142,17 +143,17 @@ bool Shader::CreateDefaultBuffer(Render::Renderer& _renderer)
 {
     D3D11_BUFFER_DESC bDesc = {};
 
-    bDesc.ByteWidth = sizeof(Core::Math::Mat4);
+    bDesc.ByteWidth = sizeof(VS_CONSTANT_BUFFER);
     bDesc.Usage = D3D11_USAGE_DYNAMIC;
     bDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     bDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     bDesc.MiscFlags = 0;
     bDesc.StructureByteStride = 0;
 
-    Core::Math::Mat4 identity = Core::Math::Mat4::Identity();
+    VS_CONSTANT_BUFFER buffer;
 
     D3D11_SUBRESOURCE_DATA InitData;
-    InitData.pSysMem = identity.e;
+    InitData.pSysMem = &buffer;
     InitData.SysMemPitch = 0;
     InitData.SysMemSlicePitch = 0;
 
@@ -193,7 +194,7 @@ bool Shader::CompilePixel(Render::Renderer& _renderer, std::string PShaderPath)
     return _renderer.CreatePixelBuffer(&PShader, &PS);
 }
 
-void Shader::Set(Render::RendererRemote& remote, const Core::Math::Mat4& mvp)
+void Shader::Set(Render::RendererRemote& remote, const Core::Math::Mat4& viewProj, const Core::Math::Mat4& model)
 {
     remote.context->VSSetShader(VShader, nullptr, 0);
     remote.context->PSSetShader(PShader, nullptr, 0);
@@ -206,7 +207,11 @@ void Shader::Set(Render::RendererRemote& remote, const Core::Math::Mat4& mvp)
         return;
     }
 
-    memcpy(ms.pData, mvp.e, sizeof(Core::Math::Mat4));
+
+
+    VS_CONSTANT_BUFFER vcb = { viewProj,model };
+
+    memcpy(ms.pData, &vcb, sizeof(vcb));
 
     remote.context->Unmap(CBuffer, 0);
 

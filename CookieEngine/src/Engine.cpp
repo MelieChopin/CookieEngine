@@ -2,6 +2,7 @@
 #include "Time.hpp"
 #include "Debug.hpp"
 #include "Core/Math/Calc.hpp"
+#include "ImGui/imgui.h"
 
 using namespace Cookie;
 
@@ -9,8 +10,8 @@ Engine::Engine() :
     window{}, renderer{window}, ui{window.window, renderer}
 {
     coordinator.resources.Load(renderer);
-    camera.SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width / renderer.state.viewport.Height, 0.01f, 100.f);
-    camera.pos = Core::Math::Vec3(0.0f, 0.0f, -2.0f);
+    camera.SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width / renderer.state.viewport.Height, 0.01f, 1000.f);
+    camera.pos = Core::Math::Vec3(0.0f, 50.0f, 200.0f);
     camera.Update();
 }
 
@@ -48,6 +49,10 @@ void Engine::Run()
     //glfwSetInputMode(window.window, GLFW_STICKY_KEYS, 1);
 
     coordinator.AddEntity(SIGNATURE_MODEL + SIGNATURE_TRANSFORM,"Duck");
+    ECS::ComponentModel model;
+    model.mesh = coordinator.resources.GetMesh("LOD3spShape");
+    model.shader = coordinator.resources.GetDefaultShader();
+    coordinator.componentHandler.componentModels[0] = model;
 
 
     ui.AddWItem(new UIwidget::ExitPannel(window.window), 0);

@@ -11,9 +11,9 @@ namespace Cookie
 
         class ComponentModel
         {
-        private:
-            Resources::Mesh* mesh {nullptr};
-            Resources::Shader* shader {nullptr};
+        public:
+            std::shared_ptr<Resources::Mesh> mesh {nullptr};
+            std::shared_ptr<Resources::Shader> shader {nullptr};
             //Texture* texture {nullptr};
 
 
@@ -30,10 +30,10 @@ namespace Cookie
                 //texture = nullptr;
             }
 
-            void Draw(Render::RendererRemote& remote, const Core::Math::Mat4& mvp)
+            void Draw(Render::RendererRemote& remote, const Core::Math::Mat4& viewProj, const Core::Math::Mat4& modelMat)
             {
                 if (shader)
-                    shader->Set(remote, mvp);
+                    shader->Set(remote, viewProj, modelMat);
                 if (mesh)
                 {
                     mesh->Set(remote);

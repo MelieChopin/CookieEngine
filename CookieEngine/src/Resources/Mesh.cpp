@@ -86,11 +86,13 @@ void Mesh::InitIBuffer(aiMesh* mesh, Render::Renderer& renderer)
 void Mesh::Set(Render::RendererRemote& remote)
 {
     UINT stride = ((2 * sizeof(Core::Math::Vec3)) + sizeof(Core::Math::Vec2));
-    remote.context->IASetVertexBuffers(0,1,&VBuffer,&stride,0);
+    UINT offset = 0;
+    remote.context->IASetVertexBuffers(0,1,&VBuffer,&stride,&offset);
     remote.context->IASetIndexBuffer(IBuffer, DXGI_FORMAT_R32_UINT,0);
+    remote.context->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void Mesh::Draw(Render::RendererRemote& remote)
 {
-    remote.context->DrawIndexed(INb * 3, 0, 0);
+    remote.context->DrawIndexed(INb, 0, 0);
 }

@@ -46,7 +46,7 @@ namespace Cookie
 				Shader(Render::Renderer& _renderer, std::string VShaderPath, std::string PShaderPath);
 				~Shader();
 
-				void Set(Render::RendererRemote& remote, const Core::Math::Mat4& mvp);
+				void Set(Render::RendererRemote& remote, const Core::Math::Mat4& projMat, const Core::Math::Mat4& viewMat);
 		};
 	}
 }
