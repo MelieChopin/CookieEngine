@@ -10,7 +10,7 @@ Engine::Engine() :
     window{}, renderer{window}, ui{window.window, renderer}
 {
     coordinator.resources.Load(renderer);
-    camera.SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width / renderer.state.viewport.Height, 0.01f, 1000.f);
+    camera.SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width / renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     camera.pos = Core::Math::Vec3(0.0f, 50.0f, 200.0f);
     camera.Update();
 }
@@ -33,7 +33,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 void Engine::Run()
 {
-    input.Set(VK_SPACE, [] { std::cout << "This shortcut won't change depending on the selected \n"; });
     //Map in future Classes
     std::map<int, std::function<void()> > UnitInputs;
     UnitInputs['A'] = [] { std::cout << "Unit Shortcut 1\n"; };
@@ -45,8 +44,6 @@ void Engine::Run()
     BuildingInputs['E'] = [] { std::cout << "Building Shortcut 3\n"; };
 
     input.Set(UnitInputs);
-    //glfwSetKeyCallback(window.window, keyCallback);
-    //glfwSetInputMode(window.window, GLFW_STICKY_KEYS, 1);
 
     coordinator.AddEntity(SIGNATURE_MODEL + SIGNATURE_TRANSFORM,"Duck");
     ECS::ComponentModel model;
@@ -68,6 +65,7 @@ void Engine::Run()
 
     while (!glfwWindowShouldClose(window.window))
     {
+        Core::UpdateTime();
         // Present frame
         glfwPollEvents();
 
@@ -86,27 +84,17 @@ void Engine::Run()
                 std::cout << "Building Selected\n";
                 input.Set(BuildingInputs);
             }
-            //if (glfwGetKey(window.window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-            if (GetAsyncKeyState(VK_RBUTTON) & 0xff)
-            {
-                std::cout << "escape pressed\n";
-            }
         }
 
-        //ECS Test
+        if(ui.mouseCaptured)
+            camera.UpdateFreeFly(window.window);
+
+        if (glfwGetKey(window.window, GLFW_KEY_SPACE))
         {
-            if (GetAsyncKeyState('W') & 0xff)
-            {
-                std::cout << "Entity Created\n";
-                coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_RIGIDBODY);
-            }
-            if (GetAsyncKeyState('X') & 0xff)
-            {
-                std::cout << "Entity Removed\n";
-                coordinator.RemoveEntity(coordinator.entityHandler.entities[0]);
-            }
-            if (GetAsyncKeyState('C') & 0xff)
-                coordinator.ApplySystemDisplayId();
+            std::cout << "Pos : ";
+            camera.pos.Debug();
+            std::cout << "Rot : ";
+            camera.rot.Debug();
         }
 
         coordinator.ApplyDraw(renderer.remote, camera.GetViewProj());

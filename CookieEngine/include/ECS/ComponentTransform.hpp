@@ -26,7 +26,7 @@ namespace Cookie
 		{
 		public:
 			Transform localTRS;
-			Core::Math::Mat4 globalTRS;
+			Core::Math::Mat4 parentTRS;
 
 
 			ComponentTransform() { ToDefault(); }
@@ -37,7 +37,7 @@ namespace Cookie
 				localTRS.translation = {0, 0, 0};
 				localTRS.rotation    = {0, 0, 0};
 				localTRS.scale       = {1, 1, 1};
-				globalTRS = Core::Math::Mat4::Identity();
+				parentTRS = Core::Math::Mat4::Identity();
 			}
 		};
 
