@@ -70,11 +70,11 @@ namespace Cookie
 
 			// Pitch
 			rot.x += deltaMouseY * CAM_MOUSE_SENSITIVITY_Y;
-			rot.x = std::clamp(rot.x, -TAU / 4.f, TAU / 4.f); // Limit rotation to -90,90 range
+			rot.x = std::clamp(rot.x, -Core::Math::TAU / 4.f, Core::Math::TAU / 4.f); // Limit rotation to -90,90 range
 
 			// Yaw
 			rot.y += deltaMouseX * CAM_MOUSE_SENSITIVITY_X;
-			rot.y = std::fmod(rot.y + TAU + PI, TAU) - PI; // Loop around -180,180
+			rot.y = std::fmod(rot.y + Core::Math::TAU + Core::Math::PI, Core::Math::TAU) - Core::Math::PI; // Loop around -180,180
 		}
 
 		inline void Camera::Update()

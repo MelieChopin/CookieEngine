@@ -1,7 +1,6 @@
 #ifndef __MAT4_INL__
 #define __MAT4_INL__
 
-#include <cmath>
 
 namespace Cookie
 {
@@ -51,6 +50,10 @@ namespace Cookie
                     temp = Mat4::RotateZ(90);
                     std::cout << "test RotateZ with 90 :\n";
                     temp.Debug();
+                                        
+                    temp = Mat4::TRS(Vec3(10, 20, 30), Vec3(ToRadians(90), ToRadians(180), ToRadians(270)), Vec3(1, 2, 3));
+                    std::cout << "test TRS with T(10, 20, 30), R(rad(90), rad(180), rad(270)), S(1, 2, 3) :\n";
+                    temp.Debug();
 
                     temp = Mat4::Perspective(45, 800 / 600, 0.01f, 50.f);
                     std::cout << "test Perspective with Fov = 45, Ratio = 800/600, Near = 0.01, Far = 50 :\n";
@@ -80,8 +83,6 @@ namespace Cookie
 
                 std::cout << "/////////////////////////////////////////////////\n";
             }
-
-
 
             inline Mat4 Mat4::Identity()
             {
@@ -159,20 +160,10 @@ namespace Cookie
                         0.f, 0.f, 0.f, 1.f,
                 };
             }
-
-
-            inline Mat4 Mat4::Transpose()
+            inline Mat4 Mat4::TRS(const Vec3& t, const Vec3& r, const Vec3& s)
             {
-                return
-                {
-                    c[0].e[0], c[1].e[0], c[2].e[0], c[3].e[0],
-                    c[0].e[1], c[1].e[1], c[2].e[1], c[3].e[1],
-                    c[0].e[2], c[1].e[2], c[2].e[2], c[3].e[2],
-                    c[0].e[3], c[1].e[3], c[2].e[3], c[3].e[3],
-                };
+                return Mat4::Scale(s) *Mat4::RotateZ(r.z)* Mat4::RotateX(r.x)* Mat4::RotateY(r.y)* Mat4::Translate(t);
             }
-
-
             inline Mat4 Mat4::Perspective(float yFov, float aspect, float n, float f)
             {
                 Mat4 m;
@@ -201,6 +192,17 @@ namespace Cookie
                 return m;
             }
 
+            inline Mat4 Mat4::Transpose()
+            {
+                return
+                {
+                    c[0].e[0], c[1].e[0], c[2].e[0], c[3].e[0],
+                    c[0].e[1], c[1].e[1], c[2].e[1], c[3].e[1],
+                    c[0].e[2], c[1].e[2], c[2].e[2], c[3].e[2],
+                    c[0].e[3], c[1].e[3], c[2].e[3], c[3].e[3],
+                };
+            }
+
             inline Mat4 Mat4::operator*(const Mat4& other) const
             {
                 Mat4 res{};
@@ -219,7 +221,6 @@ namespace Cookie
                 r.w = other.x * c[0].e[3] + other.y * c[1].e[3] + other.z * c[2].e[3] + other.w * c[3].e[3];
                 return r;
             }
-
             inline Mat4& Mat4::operator*=(const Mat4& other) { *this = *this * other; return *this; }
 
         }
