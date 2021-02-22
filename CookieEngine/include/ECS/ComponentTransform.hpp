@@ -18,6 +18,7 @@ namespace Cookie
 
 			Transform() {}
 			Transform(const Core::Math::Vec3& _translation, const Core::Math::Vec3& _rotation, const Core::Math::Vec3& _scale) : translation{ _translation }, rotation{ _rotation }, scale{ _scale } {}
+			Core::Math::Mat4 ToTRS() const { return Core::Math::Mat4::TRS(translation, rotation, scale); }
 			~Transform() {}
 
 		};
