@@ -6,6 +6,7 @@
 
 namespace Cookie::ECS {class Coordinator;}
 
+
 namespace Cookie::UIwidget
 {
 	class Inspector;

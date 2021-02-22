@@ -34,11 +34,15 @@ namespace Cookie
 				void Load(Render::Renderer& _renderer);
 
 				std::shared_ptr<Mesh> AddMesh(std::shared_ptr<Mesh>&& mesh);
-				std::shared_ptr<Mesh> GetMesh(std::string _name);
-				bool HasMesh(std::string _name);
+				std::shared_ptr<Mesh> GetMesh(std::string _name) const;
+
+				inline const std::vector<std::shared_ptr<Mesh>>&	GetMeshes()	const	{ return meshes; }
+				inline const std::vector<std::shared_ptr<Shader>>&	GetShaders() const	{ return shaders;}
+
+				bool HasMesh(std::string _name) const;
 
 				std::shared_ptr<Shader> AddShader(std::shared_ptr<Shader>&& shader);
-				std::shared_ptr<Shader> GetDefaultShader();
+				std::shared_ptr<Shader> GetDefaultShader() const;
 		};
 	}
 }

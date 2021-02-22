@@ -14,10 +14,8 @@ void Hierarchy::WindowDisplay()
 {
     ImGui::Begin(windowName, nullptr, ImGuiWindowFlags_HorizontalScrollbar);
 
-    if (IsWindowHovered() && IsMouseClicked(ImGuiMouseButton_Right)) OpenPopup("Out-object hierarchy menu");
 
-
-    if (BeginPopup("Out-object hierarchy menu"))
+    if (BeginPopupContextWindow("Out-object hierarchy menu"))
     {
         if (Button("Create empty"))
         { 
@@ -32,9 +30,22 @@ void Hierarchy::WindowDisplay()
     EntityHandler& entityHandler = coordinator.entityHandler;
     for (size_t i = 0; i < entityHandler.livingEntities; i++)
     {
-        if (Button((entityHandler.entities[i].name + "##" + std::to_string(i)).c_str()))
+        std::string entityNameTag = entityHandler.entities[i].name + "##" + std::to_string(i);
+
+        if (Button(entityNameTag.c_str()))
         {
             inspector->SelectEntity(&entityHandler.entities[i]);
+        }
+
+        if (BeginPopupContextItem(entityNameTag.c_str()))
+        {
+            if (Button("Delete entity"))
+            {
+                coordinator.RemoveEntity(entityHandler.entities[i]);
+                CloseCurrentPopup();
+            }
+            
+            EndPopup();
         }
     }
 
