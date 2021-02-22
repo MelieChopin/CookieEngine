@@ -4,6 +4,8 @@
 #include "EntityHandler.hpp"
 #include "ComponentHandler.hpp"
 #include "SystemHandler.hpp"
+#include "Resources/ResourcesManager.hpp"
+#include "Render/Camera.hpp"
 #include <assert.h>
 
 namespace Cookie
@@ -14,8 +16,10 @@ namespace Cookie
 		class Coordinator
 		{
 		public:
-			EntityHandler entityHandler;
-			ComponentHandler componentHandler;
+			EntityHandler				entityHandler;
+			ComponentHandler			componentHandler;
+			Resources::ResourcesManager	resources;
+
 
 			Coordinator() {}
 			~Coordinator() {}
@@ -81,7 +85,13 @@ namespace Cookie
 											   componentHandler.GetComponentRigidBody(entityHandler.entities[i].id));
 			}
 
-
+			void ApplyDraw(Render::RendererRemote& remote, const Core::Math::Mat4& viewProj)
+			{
+				for (int i = 0; i < entityHandler.livingEntities; ++i)
+					if (CheckSignature(entityHandler.entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_MODEL))
+						System::SystemDraw(componentHandler.GetComponentTransform(entityHandler.entities[i].id),
+							componentHandler.GetComponentModel(entityHandler.entities[i].id),remote, viewProj);
+			}
 		};
 
 	}

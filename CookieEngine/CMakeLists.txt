@@ -10,7 +10,6 @@ set(INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(DEPS_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/src")
 set(DEPS_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/include")
 
-
 include_directories("${INC_DIR}/")
 include_directories("${INC_DIR}/Core/")
 include_directories("${INC_DIR}/Core/Math/")
@@ -36,26 +35,30 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES Release)
 
 # List source files
 set (SRC_FILES
-    ${SRC_DIR}/main.cpp
-    ${SRC_DIR}/Engine.cpp
-    ${DEPS_SRC_DIR}/ImGui/imgui.cpp
-    ${DEPS_SRC_DIR}/ImGui/imgui_demo.cpp
-    ${DEPS_SRC_DIR}/ImGui/imgui_draw.cpp
-    ${DEPS_SRC_DIR}/ImGui/imgui_impl_dx11.cpp
-    ${DEPS_SRC_DIR}/ImGui/imgui_impl_glfw.cpp
-    ${DEPS_SRC_DIR}/ImGui/imgui_tables.cpp
-    ${DEPS_SRC_DIR}/ImGui/imgui_widgets.cpp
-    ${DEPS_SRC_DIR}/ImGui/imgui_stdlib.cpp
-    "src/Core/Window.cpp"
-    ${SRC_DIR}/Render/Renderer.cpp
-    ${SRC_DIR}/Render/RendererRemote.cpp
-    ${SRC_DIR}/Render/RendererState.cpp
-    ${SRC_DIR}/UI/UIcore.cpp
-    ${SRC_DIR}/UI/Widgets/UIwidgetBases.cpp
-    ${SRC_DIR}/UI/Widgets/UIwidgets.cpp
-    ${SRC_DIR}/UI/Widgets/FileExplorerWidget.cpp
-    ${SRC_DIR}/UI/Widgets/HierarchyWidget.cpp
-    ${SRC_DIR}/UI/Widgets/InspectorWidget.cpp
+    "${SRC_DIR}/main.cpp"
+    "${SRC_DIR}/Engine.cpp"
+    "${DEPS_SRC_DIR}/ImGui/imgui.cpp"
+    "${DEPS_SRC_DIR}/ImGui/imgui_demo.cpp"
+    "${DEPS_SRC_DIR}/ImGui/imgui_draw.cpp"
+    "${DEPS_SRC_DIR}/ImGui/imgui_impl_dx11.cpp"
+    "${DEPS_SRC_DIR}/ImGui/imgui_impl_glfw.cpp"
+    "${DEPS_SRC_DIR}/ImGui/imgui_tables.cpp"
+    "${DEPS_SRC_DIR}/ImGui/imgui_widgets.cpp"
+    "${DEPS_SRC_DIR}/ImGui/imgui_stdlib.cpp"
+    "${SRC_DIR}/Core/Window.cpp"
+    "${SRC_DIR}/Render/Renderer.cpp"
+    "${SRC_DIR}/Render/RendererRemote.cpp"
+    "${SRC_DIR}/Render/RendererState.cpp" 
+    "${SRC_DIR}/Resources/Loader.cpp" 
+    "${SRC_DIR}/Resources/ResourcesManager.cpp"
+    "${SRC_DIR}/Resources/Mesh.cpp"
+    "${SRC_DIR}/UI/UIcore.cpp"
+    "${SRC_DIR}/UI/Widgets/UIwidgetBases.cpp"
+    "${SRC_DIR}/UI/Widgets/UIwidgets.cpp" 
+    "${SRC_DIR}/Resources/Shader.cpp"
+    "${SRC_DIR}/UI/Widgets/FileExplorerWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/HierarchyWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/InspectorWidget.cpp"
     )
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")

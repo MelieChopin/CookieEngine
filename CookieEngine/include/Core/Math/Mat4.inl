@@ -117,10 +117,10 @@ namespace Cookie
             {
                 return
                 {
-                    1.f, 0.f, 0.f, 0.f,
-                    0.f, 1.f, 0.f, 0.f,
-                    0.f, 0.f, 1.f, 0.f,
-                    t.x, t.y, t.z, 1.f
+                    1.f, 0.f, 0.f, t.x,
+                    0.f, 1.f, 0.f, t.y,
+                    0.f, 0.f, 1.f, t.z,
+                    0.f, 0.f, 0.f, 1.f
                 };
             }
             inline Mat4 Mat4::RotateX(float radians)
@@ -191,11 +191,11 @@ namespace Cookie
                 m.c[2].e[0] = 0.f;
                 m.c[2].e[1] = 0.f;
                 m.c[2].e[2] = -((f + n) / (f - n));
-                m.c[2].e[3] = -1.f;
+                m.c[2].e[3] = -((2.f * f * n) / (f - n)) ;
 
                 m.c[3].e[0] = 0.f;
                 m.c[3].e[1] = 0.f;
-                m.c[3].e[2] = -((2.f * f * n) / (f - n));
+                m.c[3].e[2] = -1.f;
                 m.c[3].e[3] = 0.f;
 
                 return m;
@@ -207,7 +207,7 @@ namespace Cookie
                 for (int c = 0; c < 4; ++c)
                     for (int r = 0; r < 4; ++r)
                         for (int k = 0; k < 4; ++k)
-                            res.c[c].e[r] += this->c[k].e[r] * other.c[c].e[k];
+                            res.c[c].e[r] += this->c[c].e[k] * other.c[k].e[r];
                 return res;
             }
             inline Vec4 Mat4::operator*(const Vec4& other) const
