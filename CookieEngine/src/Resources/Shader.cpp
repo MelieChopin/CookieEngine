@@ -75,9 +75,18 @@ std::string Shader::GetDefaultPixelSource()
 {
 	return (const char*)R"(
 
+    Texture2D	diffuseTex2D : register( t0 );    
+
+    SamplerState WrapSampler : register (s0)
+    {
+        Filter      = MIN_MAG_MIP_LINEAR;
+        AddressU    = Wrap;
+        AddressV    = Wrap;
+    };
+
     float4 main(float4 position : SV_POSITION, float2 uv : UV, float3 normal : NORMAL) : SV_TARGET
     {
-        return float4(1.0,1.0,1.0,1.0);
+        return diffuseTex2D.Sample(WrapSampler,uv);
     })";
 }
 

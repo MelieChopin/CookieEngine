@@ -103,3 +103,34 @@ std::shared_ptr<Shader> ResourcesManager::GetDefaultShader()
 	else
 		return nullptr;
 }
+
+std::shared_ptr<Texture> ResourcesManager::AddTexture(std::shared_ptr<Texture>&& texture)
+{
+	textures.push_back(texture);
+	return textures.back();
+}
+
+std::shared_ptr<Texture> ResourcesManager::GetTexture(std::string _name)
+{
+	for (unsigned int i = 0; i < textures.size(); i++)
+	{
+		if (textures[i]->name.find(_name) != std::string::npos)
+		{
+			return textures[i];
+		}
+	}
+}
+
+bool ResourcesManager::HasTexture(std::string _name)
+{
+	if (textures.empty())
+		return false;
+
+	for (unsigned int i = 0; i < textures.size(); i++)
+	{
+		if (textures[i]->name == _name)
+			return true;
+	}
+
+	return false;
+}

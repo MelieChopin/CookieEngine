@@ -51,6 +51,7 @@ void Engine::Run()
     coordinator.AddEntity(SIGNATURE_MODEL + SIGNATURE_TRANSFORM,"Duck");
     ECS::ComponentModel model;
     model.mesh = coordinator.resources.GetMesh("LOD3spShape");
+    model.texture = coordinator.resources.GetTexture("Duck");
     model.shader = coordinator.resources.GetDefaultShader();
     coordinator.componentHandler.componentModels[0] = model;
 

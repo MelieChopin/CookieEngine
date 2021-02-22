@@ -3,6 +3,7 @@
 
 #include "Resources/Mesh.hpp"
 #include "Resources/Shader.hpp"
+#include "Resources/Texture.hpp"
 
 namespace Cookie
 {
@@ -12,9 +13,9 @@ namespace Cookie
         class ComponentModel
         {
         public:
-            std::shared_ptr<Resources::Mesh> mesh {nullptr};
-            std::shared_ptr<Resources::Shader> shader {nullptr};
-            //Texture* texture {nullptr};
+            std::shared_ptr<Resources::Mesh>    mesh    {nullptr};
+            std::shared_ptr<Resources::Shader>  shader  {nullptr};
+            std::shared_ptr<Resources::Texture> texture {nullptr};
 
 
             //Material material;
@@ -34,6 +35,8 @@ namespace Cookie
             {
                 if (shader)
                     shader->Set(remote, viewProj, modelMat);
+                if (texture)
+                    texture->Set(remote);
                 if (mesh)
                 {
                     mesh->Set(remote);
