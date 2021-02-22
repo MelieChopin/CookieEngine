@@ -25,7 +25,7 @@ namespace Cookie::UIwidget
 
 
 	public:
-		ItemBase(const char* _itemName,							bool _visible = true);
+		ItemBase(const char* _itemName,							  bool _visible = true);
 		ItemBase(const char* _itemName, const char* _shortcutSeq, bool _visible = true);
 
 

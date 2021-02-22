@@ -11,6 +11,7 @@ namespace Cookie::ECS
 	class Entity;
 }
 
+
 namespace Cookie::UIwidget
 {
 	class Inspector final : public WindowBase
@@ -19,18 +20,21 @@ namespace Cookie::UIwidget
 
 		Cookie::ECS::Entity* selectedEntity = nullptr;
 
+	private:
+		void TransformInterface();
+		void RigidBodyInterface();
+		void ModelCompInterface();
+	
 	public:
 		Inspector(Cookie::ECS::Coordinator& _coordinator)
-			: WindowBase	("Inspector"),
-			  coordinator	(_coordinator)
+			: WindowBase		("Inspector"),
+			  coordinator		(_coordinator)
 		{}
 
 		void WindowDisplay() override;
 
 		inline void SelectEntity(Cookie::ECS::Entity* newSelection)
-		{
-			selectedEntity = newSelection;
-		}
+		{ selectedEntity = newSelection; }
 	};
 }
 

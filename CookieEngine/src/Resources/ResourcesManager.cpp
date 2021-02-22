@@ -66,7 +66,7 @@ std::shared_ptr<Mesh> ResourcesManager::AddMesh(std::shared_ptr<Mesh>&& _mesh)
 	return meshes.back();
 }
 
-bool ResourcesManager::HasMesh(std::string _name)
+bool ResourcesManager::HasMesh(std::string _name) const
 {
 	if (meshes.empty())
 		return false;
@@ -80,7 +80,7 @@ bool ResourcesManager::HasMesh(std::string _name)
 	return false;
 }
 
-std::shared_ptr<Mesh> ResourcesManager::GetMesh(std::string _name)
+std::shared_ptr<Mesh> ResourcesManager::GetMesh(std::string _name) const
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
@@ -96,7 +96,7 @@ std::shared_ptr<Shader> ResourcesManager::AddShader(std::shared_ptr<Shader>&& sh
 	return shaders.back();
 }
 
-std::shared_ptr<Shader> ResourcesManager::GetDefaultShader()
+std::shared_ptr<Shader> ResourcesManager::GetDefaultShader() const
 {
 	if (!shaders.empty())
 		return shaders.front();
