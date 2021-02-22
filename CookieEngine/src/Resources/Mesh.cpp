@@ -14,6 +14,13 @@ Mesh::Mesh(aiMesh* mesh, Render::Renderer& renderer)
     InitIBuffer(mesh,renderer);
 }
 
+Mesh::Mesh(std::vector<float> vertices, std::vector<unsigned int> indices, unsigned int inb, Render::Renderer& renderer)
+{
+    INb = inb;
+    InitVBuffer(vertices, renderer);
+    InitIBuffer(indices, renderer);
+}
+
 Mesh::~Mesh()
 {
     if (VBuffer)
@@ -74,6 +81,44 @@ void Mesh::InitIBuffer(aiMesh* mesh, Render::Renderer& renderer)
     bDesc.CPUAccessFlags        = 0;
     bDesc.MiscFlags             = 0;
     bDesc.StructureByteStride   = 0;
+
+    D3D11_SUBRESOURCE_DATA InitData;
+    InitData.pSysMem = indices.data();
+    InitData.SysMemPitch = 0;
+    InitData.SysMemSlicePitch = 0;
+
+    renderer.CreateBuffer(bDesc, InitData, &IBuffer);
+}
+
+void Mesh::InitVBuffer(std::vector<float> vertices, Render::Renderer& renderer)
+{
+    D3D11_BUFFER_DESC bDesc = {};
+
+    bDesc.ByteWidth = vertices.size() * sizeof(float);
+    bDesc.Usage = D3D11_USAGE_DEFAULT;
+    bDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    bDesc.CPUAccessFlags = 0;
+    bDesc.MiscFlags = 0;
+    bDesc.StructureByteStride = 0;
+
+    D3D11_SUBRESOURCE_DATA InitData;
+    InitData.pSysMem = vertices.data();
+    InitData.SysMemPitch = 0;
+    InitData.SysMemSlicePitch = 0;
+
+    renderer.CreateBuffer(bDesc, InitData, &VBuffer);
+}
+
+void Mesh::InitIBuffer(std::vector<unsigned int> indices, Render::Renderer& renderer)
+{
+    D3D11_BUFFER_DESC bDesc = {};
+
+    bDesc.ByteWidth = indices.size() * sizeof(unsigned int);
+    bDesc.Usage = D3D11_USAGE_DEFAULT;
+    bDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    bDesc.CPUAccessFlags = 0;
+    bDesc.MiscFlags = 0;
+    bDesc.StructureByteStride = 0;
 
     D3D11_SUBRESOURCE_DATA InitData;
     InitData.pSysMem = indices.data();

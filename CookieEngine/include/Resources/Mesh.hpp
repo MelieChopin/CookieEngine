@@ -5,6 +5,7 @@ struct ID3D11Buffer;
 
 #include <string>
 #include <assimp/mesh.h>
+#include <vector>
 
 namespace Cookie
 {
@@ -29,10 +30,13 @@ namespace Cookie
 			private:
 				void InitVBuffer(aiMesh* mesh, Render::Renderer& renderer);
 				void InitIBuffer(aiMesh* mesh, Render::Renderer& renderer);
+				void InitVBuffer(std::vector<float> vertices, Render::Renderer& renderer);
+				void InitIBuffer(std::vector<unsigned int> indices, Render::Renderer& renderer);
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
 				Mesh(aiMesh* mesh, Render::Renderer& renderer);
+				Mesh(std::vector<float> vertices, std::vector<unsigned int> indices, unsigned int INb, Render::Renderer& renderer);
 				~Mesh();
 
 				inline unsigned int GetIndicesNb() { return INb; }

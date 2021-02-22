@@ -3,6 +3,7 @@
 #include "Render/Renderer.hpp"
 #include "Resources/Loader.hpp"
 #include "Resources/ResourcesManager.hpp"
+#include "Core/Primitives.hpp"
 
 
 using namespace Cookie::Resources;
@@ -19,6 +20,9 @@ ResourcesManager::~ResourcesManager()
 
 void ResourcesManager::Load(Render::Renderer& _renderer)
 {
+	meshes.push_back(Cookie::Core::Primitives::CreateQuad(_renderer));
+	meshes.push_back(Cookie::Core::Primitives::CreateTriangle(_renderer));
+
 	std::vector<std::string> gltfFiles;
 	SearchForGltf(std::string("Assets\\"),gltfFiles);
 
