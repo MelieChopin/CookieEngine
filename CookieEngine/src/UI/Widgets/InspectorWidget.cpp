@@ -107,8 +107,10 @@ void Inspector::ModelCompInterface()
     {
         ComponentModel& modelComp = coordinator.componentHandler.GetComponentModel(selectedEntity->id);
 
+//================//
+//===== MESH =====//
 
-//===== MESH PART =====//
+        Text("Mesh:"); SameLine(100);
 
         if (Button(modelComp.mesh != nullptr ? modelComp.mesh->name.c_str() : "No mesh applied##MESHCHECK")) OpenPopup("Mesh selector popup");
 
@@ -133,9 +135,37 @@ void Inspector::ModelCompInterface()
             EndPopup();
         }
 
+        
+//===== SHADER =====//
 
-//===== Shader part to come =====//
-//===============================//
+//===== TEXTURE =====//
+        
+        Text("Texture:"); SameLine(100);
+
+        if (Button(modelComp.texture != nullptr ? modelComp.texture->name.c_str() : "No texture applied##TEXTCHECK")) OpenPopup("Texture selector popup");
+
+        if (BeginPopup("Texture selector popup"))
+        {
+            for (const std::shared_ptr<Cookie::Resources::Texture>& textPtr : coordinator.resources.GetTextures())
+            {
+                if (Button(textPtr->name.c_str()))
+                {
+                    modelComp.texture = textPtr;
+                    CloseCurrentPopup();
+                    break;
+                }
+            }
+
+            if (modelComp.texture != nullptr && Button("Clear current texture"))
+            {
+                modelComp.texture.reset();
+                CloseCurrentPopup();
+            }
+
+            EndPopup();
+        }
+
+//===================//
 
         ImGui::NewLine();
         if (Button("Remove component##MODEL"))

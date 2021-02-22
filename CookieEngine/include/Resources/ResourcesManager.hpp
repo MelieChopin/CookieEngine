@@ -38,8 +38,9 @@ namespace Cookie
 				std::shared_ptr<Mesh> AddMesh(std::shared_ptr<Mesh>&& mesh);
 				std::shared_ptr<Mesh> GetMesh(std::string _name) const;
 
-				inline const std::vector<std::shared_ptr<Mesh>>&	GetMeshes()	const	{ return meshes; }
-				inline const std::vector<std::shared_ptr<Shader>>&	GetShaders() const	{ return shaders;}
+				inline const std::vector<std::shared_ptr<Mesh>>&	GetMeshes()		const	{return meshes;  }
+				inline const std::vector<std::shared_ptr<Shader>>&	GetShaders()	const	{return shaders; }
+				inline const std::vector<std::shared_ptr<Texture>>&	GetTextures()	const	{return textures;}
 
 				bool HasMesh(std::string _name) const;
 
