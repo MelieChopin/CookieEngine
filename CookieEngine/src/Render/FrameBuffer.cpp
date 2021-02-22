@@ -102,7 +102,7 @@ void FrameBuffer::Draw(Render::RendererRemote& _remote)
 
     if (shader)
     {
-        shader->Set(_remote, Core::Math::Mat4::Identity(), Core::Math::Mat4::TRS(Cookie::Core::Math::Vec3(0.5f,0.0f,0.0f),Cookie::Core::Math::Vec3(0.0f,Core::Math::PI,Core::Math::PI),Core::Math::Vec3(1.0f,1.0f,1.0f)));
+        shader->Set(_remote, Core::Math::Mat4::Identity(), Core::Math::Mat4::TRS(Cookie::Core::Math::Vec3(0.0f,0.0f,0.99f),Cookie::Core::Math::Vec3(Core::Math::PI,0.0f,0.0f),Core::Math::Vec3(1.0f,1.0f,1.0f)));
     }
     if (shaderResource)
     {

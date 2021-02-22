@@ -220,11 +220,6 @@ void Shader::Set(Render::RendererRemote& remote, const Core::Math::Mat4& viewPro
 
     VS_CONSTANT_BUFFER vcb = { viewProj,model };
 
-    printf("Hé Ho\n");
-
-    viewProj.Debug();
-    model.Debug();
-
     memcpy(ms.pData, &vcb, sizeof(vcb));
 
     remote.context->Unmap(CBuffer, 0);
