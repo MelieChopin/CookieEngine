@@ -7,7 +7,7 @@
 using namespace Cookie;
 
 Engine::Engine() :
-    window{}, renderer{window}, ui{window.window, renderer}
+    window{}, renderer{window}, ui{window.window, renderer}, frameBuffer {coordinator.resources,renderer}
 {
     coordinator.resources.Load(renderer);
     camera.SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width / renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
@@ -68,7 +68,9 @@ void Engine::Run()
         // Present frame
         glfwPollEvents();
 
-        renderer.Clear();     
+        renderer.Clear();
+        renderer.ClearFrameBuffer(frameBuffer);
+        renderer.SetFrameBuffer(frameBuffer);
         
         //Input Test
         {
@@ -97,6 +99,8 @@ void Engine::Run()
         }
 
         coordinator.ApplyDraw(renderer.remote, camera.GetViewProj());
+        renderer.SetBackBuffer();
+        frameBuffer.Draw(renderer.remote);
         ui.UpdateUI();
 
         renderer.Render();

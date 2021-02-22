@@ -20,8 +20,10 @@ ResourcesManager::~ResourcesManager()
 
 void ResourcesManager::Load(Render::Renderer& _renderer)
 {
-	meshes.push_back(Cookie::Core::Primitives::CreateQuad(_renderer));
-	meshes.push_back(Cookie::Core::Primitives::CreateTriangle(_renderer));
+	if (!HasMesh("Quad"))
+		meshes.push_back(Cookie::Core::Primitives::CreateQuad(_renderer));
+	if (!HasMesh("Triangle"))
+		meshes.push_back(Cookie::Core::Primitives::CreateTriangle(_renderer));
 
 	std::vector<std::string> gltfFiles;
 	SearchForGltf(std::string("Assets\\"),gltfFiles);

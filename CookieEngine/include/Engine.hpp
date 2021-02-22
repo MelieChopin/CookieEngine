@@ -7,6 +7,7 @@
 #include "UIallIn.hpp"
 #include "Coordinator.hpp"
 #include "Render/Camera.hpp"
+#include "Render/FrameBuffer.hpp"
 
 namespace Cookie
 {
@@ -19,6 +20,7 @@ namespace Cookie
 			Core::UIcore		ui;
 			ECS::Coordinator    coordinator;
 			Render::Camera		camera;
+			Render::FrameBuffer frameBuffer;
 			
 
 		public:

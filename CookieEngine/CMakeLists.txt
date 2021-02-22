@@ -10,6 +10,7 @@ set(INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(DEPS_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/src")
 set(DEPS_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/include")
 
+
 include_directories("${INC_DIR}/")
 include_directories("${INC_DIR}/Core/")
 include_directories("${INC_DIR}/Core/Math/")
@@ -63,7 +64,9 @@ set (SRC_FILES
     "${SRC_DIR}/UI/Widgets/HierarchyWidget.cpp"
     "${SRC_DIR}/UI/Widgets/InspectorWidget.cpp"
     "${SRC_DIR}/Resources/Texture.cpp"
-    )
+    "${SRC_DIR}/Render/FrameBuffer.cpp")
+
+set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll")
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
@@ -82,3 +85,7 @@ add_custom_command(TARGET CookieEngine POST_BUILD COMMAND
     ${CMAKE_COMMAND} -E copy_directory 
         ${CMAKE_SOURCE_DIR}/${RESOURCE_DIR} 
         ${CMAKE_CURRENT_BINARY_DIR}/${RESOURCE_DIR})
+
+add_custom_command(TARGET CookieEngine POST_BUILD COMMAND 
+    ${CMAKE_COMMAND} -E copy
+        ${DLL} $<TARGET_FILE_DIR:CookieEngine>)

@@ -162,7 +162,7 @@ namespace Cookie
             }
             inline Mat4 Mat4::TRS(const Vec3& t, const Vec3& r, const Vec3& s)
             {
-                return Mat4::Scale(s) *Mat4::RotateZ(r.z)* Mat4::RotateX(r.x)* Mat4::RotateY(r.y)* Mat4::Translate(t);
+                return Mat4::Translate(t) * Mat4::RotateY(r.y) *  Mat4::RotateX(r.x)*  Mat4::RotateZ(r.z)* Mat4::Scale(s);
             }
             inline Mat4 Mat4::Perspective(float yFov, float aspect, float n, float f)
             {

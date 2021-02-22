@@ -5,6 +5,7 @@
 #include <GLFW/glfw3native.h>
 
 #include "Render/Renderer.hpp"
+#include "Render/FrameBuffer.hpp"
 
 using namespace Cookie::Render;
 
@@ -230,9 +231,24 @@ void Renderer::Clear()
     remote.context->RSSetViewports(1, &state.viewport);
 }
 
+void Renderer::SetBackBuffer()
+{
+    remote.context->OMSetRenderTargets(1, &backbuffer, depthBuffer);
+}
+
 void Renderer::Render()
 {
     // switch the back buffer and the front buffer
-    remote.context->OMSetRenderTargets(1, &backbuffer, depthBuffer);
+    remote.context->OMSetRenderTargets(1, &backbuffer, nullptr);
     swapchain->Present(0, 0);
+}
+
+void Renderer::SetFrameBuffer(const FrameBuffer& frameBuffer)
+{
+    remote.context->OMSetRenderTargets(1, frameBuffer.GetRenderTarget(), depthBuffer);
+}
+
+void Renderer::ClearFrameBuffer(const FrameBuffer& frameBuffer)
+{
+    remote.context->ClearRenderTargetView(*frameBuffer.GetRenderTarget(), state.clearColor.e);
 }
