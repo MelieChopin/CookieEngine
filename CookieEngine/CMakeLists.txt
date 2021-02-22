@@ -21,6 +21,7 @@ include_directories("${DEPS_INC_DIR}/ImGui/")
 include_directories("${DEPS_INC_DIR}/")
 include_directories("${DEPS_INC_DIR}/assimp/")
 include_directories("${DEPS_INC_DIR}/assimp/Compiler/")
+include_directories("${DEPS_INC_DIR}/DirectXTex/")
 
 # Record SUB_SYS configuration (WIN32 for release en Windows to remove console)
 IF(CMAKE_BUILD_TYPE MATCHES Release)
@@ -37,6 +38,8 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES Release)
 set (SRC_FILES
     "${SRC_DIR}/main.cpp"
     "${SRC_DIR}/Engine.cpp"
+    "${DEPS_SRC_DIR}/DirectXTex/DDSTextureLoader11.cpp"
+    "${DEPS_SRC_DIR}/DirectXTex/WICTextureLoader11.cpp"
     "${DEPS_SRC_DIR}/ImGui/imgui.cpp"
     "${DEPS_SRC_DIR}/ImGui/imgui_demo.cpp"
     "${DEPS_SRC_DIR}/ImGui/imgui_draw.cpp"
@@ -59,6 +62,7 @@ set (SRC_FILES
     "${SRC_DIR}/UI/Widgets/FileExplorerWidget.cpp"
     "${SRC_DIR}/UI/Widgets/HierarchyWidget.cpp"
     "${SRC_DIR}/UI/Widgets/InspectorWidget.cpp"
+    "${SRC_DIR}/Resources/Texture.cpp"
     )
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")

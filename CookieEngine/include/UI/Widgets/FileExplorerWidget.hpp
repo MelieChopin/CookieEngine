@@ -8,6 +8,7 @@
 namespace std				{using string = basic_string<char, char_traits<char>, allocator<char>>;}
 namespace std::filesystem	{class path;}
 
+
 namespace Cookie::UIwidget
 {
 	class FileExplorer final : public WindowBase
