@@ -2,6 +2,7 @@
 #define __MAT4_HPP__
 
 #include "Vec4.hpp"
+#include "Calc.hpp"
  
 namespace Cookie
 {
@@ -25,6 +26,7 @@ namespace Cookie
                 inline static Mat4 RotateX(float radians);
                 inline static Mat4 RotateY(float radians);
                 inline static Mat4 RotateZ(float radians);
+                inline static Mat4 TRS(const Vec3& t, const Vec3& r, const Vec3& s);
                 inline static Mat4 Perspective(float yFov, float aspect, float n, float f);
 
                 inline Mat4 Transpose();
