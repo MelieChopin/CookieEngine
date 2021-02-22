@@ -28,6 +28,7 @@ namespace Cookie
 			{
 				id              = entity.id;
 				signature       = entity.signature;
+				name			= entity.name;
 				needToBeRemoved = entity.needToBeRemoved;
 				children        = entity.children;
 			}
