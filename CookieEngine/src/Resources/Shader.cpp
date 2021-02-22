@@ -62,7 +62,7 @@ std::string Shader::GetDefaultVertexSource()
     {
         VOut output;
     
-        output.position = mul(float4(position,1.0), viewProj);
+        output.position = mul(mul(float4(position,1.0), viewProj),model);
         output.uv       = uv;
         output.normal   = normal;
     

@@ -11,7 +11,6 @@ Engine::Engine() :
 {
     coordinator.resources.Load(renderer);
     camera.SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width / renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
-    camera.pos = Core::Math::Vec3(0.0f, 50.0f, 200.0f);
     camera.Update();
 }
 
