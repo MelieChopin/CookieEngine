@@ -23,7 +23,6 @@ namespace Cookie::Core
 	{
 		GLFWwindow*	window;
 
-		bool mouseCaptured = false;
 
 
 		const std::vector<const char*> menus = {"File", "Edit", "Windows", "Help"};
@@ -34,6 +33,8 @@ namespace Cookie::Core
 		// All stored item elements of the engine UI.
 		std::vector<UIwidget::ItemBase*>	UItems[4];
 
+	public:
+		bool mouseCaptured = false;
 
 	private:
 		void BeginFrame();

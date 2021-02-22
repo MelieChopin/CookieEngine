@@ -64,7 +64,7 @@ set (SRC_FILES
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
 # Ajoutez une source à l'exécutable de ce projet.
-add_executable (CookieEngine  ${SUB_SYS} ${SRC_FILES})
+add_executable (CookieEngine  ${SUB_SYS} ${SRC_FILES} )
 
 target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/d3d11.lib")
 target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/d3dcompiler.lib")
