@@ -10,7 +10,6 @@ using namespace Cookie::Resources;
 
 ResourcesManager::ResourcesManager()
 {
-
 }
 
 ResourcesManager::~ResourcesManager()

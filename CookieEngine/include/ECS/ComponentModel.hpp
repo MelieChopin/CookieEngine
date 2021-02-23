@@ -26,9 +26,9 @@ namespace Cookie
 
             void ToDefault()
             {
-                //mesh = nullptr;
-                //shader = nullptr;
-                //texture = nullptr;
+                mesh    = nullptr;
+                //shader  = nullptr;
+                texture = nullptr;
             }
 
             void Draw(Render::RendererRemote& remote, const Core::Math::Mat4& viewProj, const Core::Math::Mat4& modelMat)

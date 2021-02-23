@@ -40,7 +40,7 @@ namespace Cookie
 				void Draw(Render::RendererRemote& _remote);
 
 				inline ID3D11Texture2D*const*			GetTexture()const			{ return &texBuffer; }
-				inline ID3D11ShaderResourceView*const*	GetShaderResources()const	{ return &shaderResource; }
+				inline ID3D11ShaderResourceView*const*	GetShaderResource()const	{ return &shaderResource; }
 				inline ID3D11RenderTargetView*const*	GetRenderTarget()const		{ return &renderTargetView; }
 
 

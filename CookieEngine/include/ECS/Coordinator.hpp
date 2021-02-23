@@ -16,9 +16,9 @@ namespace Cookie
 		class Coordinator
 		{
 		public:
+			Resources::ResourcesManager	resources;
 			EntityHandler				entityHandler;
 			ComponentHandler			componentHandler;
-			Resources::ResourcesManager	resources;
 
 
 			Coordinator() {}
@@ -38,6 +38,9 @@ namespace Cookie
 					componentHandler.AddComponentRigidBody(entityHandler.entities[id]);
 				if (CheckSignature(signature, SIGNATURE_MODEL))
 					componentHandler.AddComponentModel(entityHandler.entities[id]);
+
+				//not clean should be moved somewhere else
+				componentHandler.GetComponentModel(id).shader = resources.GetDefaultShader();
 			}
 			void RemoveEntity(Entity& entity)
 			{
@@ -84,13 +87,13 @@ namespace Cookie
 						System::SystemVelocity(componentHandler.GetComponentTransform(entityHandler.entities[i].id),
 											   componentHandler.GetComponentRigidBody(entityHandler.entities[i].id));
 			}
-
 			void ApplyDraw(Render::RendererRemote& remote, const Core::Math::Mat4& viewProj)
 			{
 				for (int i = 0; i < entityHandler.livingEntities; ++i)
 					if (CheckSignature(entityHandler.entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_MODEL))
 						System::SystemDraw(componentHandler.GetComponentTransform(entityHandler.entities[i].id),
 							componentHandler.GetComponentModel(entityHandler.entities[i].id),remote, viewProj);
+
 			}
 		};
 
