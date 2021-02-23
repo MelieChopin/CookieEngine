@@ -16,7 +16,7 @@ namespace Cookie
 		#define CAM_MOUSE_SENSITIVITY_Y 0.0007f
 
 		#define CAMERA_INITIAL_NEAR 0.01f
-		#define CAMERA_INITIAL_FAR  1000.f
+		#define CAMERA_INITIAL_FAR  10000.f
 
 		class Camera
 		{
