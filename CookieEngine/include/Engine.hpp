@@ -23,6 +23,9 @@ namespace Cookie
 			Render::FrameBuffer frameBuffer;
 			
 
+		private:
+			void TryResizeWindow();
+
 		public:
 		/* CONSTRUCTORS/DESTRUCTORS */
 		Engine();

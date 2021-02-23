@@ -25,8 +25,8 @@ namespace Cookie
 
 			private:
 				bool InitDevice(Core::Window& window);
-				bool CreateDrawBuffer();
-				bool InitState();
+				bool CreateDrawBuffer(int width, int height);
+				bool InitState(int width, int height);
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
@@ -44,6 +44,8 @@ namespace Cookie
 				void SetFrameBuffer(const FrameBuffer& frameBuffer);
 				void ClearFrameBuffer(const FrameBuffer& frameBuffer);
 
+
+				void ResizeBuffer(int width, int height);
 
 				inline ID3D11Device* GetDevice() const {return device;};
 

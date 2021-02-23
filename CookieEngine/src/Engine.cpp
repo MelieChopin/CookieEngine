@@ -57,8 +57,11 @@ void Engine::Run()
     while (!glfwWindowShouldClose(window.window))
     {
         Core::UpdateTime();
+
         // Present frame
         glfwPollEvents();
+
+        TryResizeWindow();
 
         renderer.Clear();
         renderer.ClearFrameBuffer(frameBuffer);
@@ -76,5 +79,22 @@ void Engine::Run()
         ui.UpdateUI();
 
         renderer.Render();
+    }
+}
+
+
+void Engine::TryResizeWindow()
+{
+    int width, height = 0;
+
+    glfwGetWindowSize(window.window, &width, &height);
+
+    if (window.width != width || window.height != height)
+    {
+        window.width = width;
+        window.height = height;
+
+        renderer.ResizeBuffer(width,height);
+        camera.SetProj(Core::Math::ToRadians(60.f),(float)width/(float)height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     }
 }

@@ -12,6 +12,8 @@ namespace Cookie
 
 			public:
 			GLFWwindow* window = nullptr;
+			int width	= 0;
+			int height	= 0;
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
