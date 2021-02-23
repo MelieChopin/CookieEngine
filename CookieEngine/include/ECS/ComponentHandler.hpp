@@ -64,7 +64,7 @@ namespace Cookie
 					return;
 				}
 
-				entity.signature += SIGNATURE_MODEL;
+				entity.signature += SIGNATURE_MODEL; 
 			}
 
 			void RemoveComponentTransform(Entity& entity)

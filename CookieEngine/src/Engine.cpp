@@ -7,7 +7,7 @@
 using namespace Cookie;
 
 Engine::Engine() :
-    window{}, renderer{window}, ui{window.window, renderer}, frameBuffer {coordinator.resources,renderer}
+    window{}, renderer{ window }, ui{ window.window, renderer }, frameBuffer{ coordinator.resources,renderer }
 {
     coordinator.resources.Load(renderer);
     camera.SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width / renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
@@ -90,14 +90,8 @@ void Engine::Run()
         if(ui.mouseCaptured)
             camera.UpdateFreeFly(window.window);
 
-        if (glfwGetKey(window.window, GLFW_KEY_SPACE))
-        {
-            std::cout << "Pos : ";
-            camera.pos.Debug();
-            std::cout << "Rot : ";
-            camera.rot.Debug();
-        }
 
+        coordinator.ApplySystemVelocity();
         coordinator.ApplyDraw(renderer.remote, camera.GetViewProj());
         renderer.SetBackBuffer();
         frameBuffer.Draw(renderer.remote);
