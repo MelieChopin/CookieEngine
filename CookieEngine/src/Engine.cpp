@@ -51,35 +51,30 @@ void Engine::Run()
     ui.AddWindow(insp);
     ui.AddWindow(new UIwidget::Hierarchy(coordinator, insp));
     
-    ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, ui.mouseCaptured));
+    ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, camera));
     //ui.AddWindow(new UIwidget::GamePort);
 
     ui.AddWindow(new UIwidget::Console(Core::Debug::Summon()));
 
-    Core::Debug::Summon().Log("This is a Log.");
-    Core::Debug::Summon().Warning("This is a warning!");
-    Core::Debug::Summon().Error("This is an error!!");
-    Core::Debug::Summon().Exception("This is an exception!!!");
 
     while (!glfwWindowShouldClose(window.window))
     {
         Core::UpdateTime();
+
+        camera.ResetPreviousMousePos(window.window);
+
         // Present frame
         glfwPollEvents();
+
 
         renderer.Clear();
         renderer.ClearFrameBuffer(frameBuffer);
         renderer.SetFrameBuffer(frameBuffer);
 
-        if(ui.mouseCaptured)
-            camera.UpdateFreeFly(window.window);
-
-
         coordinator.ApplySystemVelocity();
         coordinator.ApplyDraw(renderer.remote, camera.GetViewProj());
         renderer.SetBackBuffer();
-        //frameBuffer.Draw(renderer.remote);
-        
+
         ui.UpdateUI();
 
         renderer.Render();

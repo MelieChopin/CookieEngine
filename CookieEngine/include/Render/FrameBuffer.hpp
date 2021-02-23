@@ -2,6 +2,7 @@
 #define __FRAME_BUFFER_HPP__
 
 #include <d3d11.h>
+#include <memory>
 
 namespace Cookie
 {
@@ -14,6 +15,7 @@ namespace Cookie
 
 	namespace Render
 	{
+		class Renderer;
 		class RendererRemote;
 
 		class FrameBuffer

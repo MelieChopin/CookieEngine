@@ -1,6 +1,9 @@
 #ifndef __CAMERA_INL__
 #define __CAMERA_INL__
 
+#include <imgui.h>
+#include <algorithm>
+
 namespace Cookie
 {
 	namespace Render
@@ -29,13 +32,13 @@ namespace Cookie
 			float sinYaw = std::sin(rot.y);
 
 			// Compute speed
-			float speed = (CAM_MOUSE_SPEED * Core::deltaTime);
+			float speed = (CAM_MOUSE_SPEED * ImGui::GetIO().DeltaTime);
 			if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
 				speed *= CAM_MOUSE_SPEED_UP_SCALE;
 
 			// Move forward/backward
 			float forwardVelocity = 0.f;
-			if (glfwGetKey(window, GLFW_KEY_W))  forwardVelocity -= speed;
+			if (glfwGetKey(window, GLFW_KEY_W)) forwardVelocity -= speed;
 			else if (glfwGetKey(window, GLFW_KEY_S)) forwardVelocity += speed;
 
 			// Strafe left/right
@@ -80,6 +83,16 @@ namespace Cookie
 		inline void Camera::Update()
 		{
 			viewMat = Core::Math::Mat4::RotateX(-rot.x) * Core::Math::Mat4::RotateY(-rot.y) * Core::Math::Mat4::Translate(-pos);
+		}
+
+		inline void Camera::ResetPreviousMousePos(GLFWwindow* window)
+		{
+			double tempMouseX;
+			double tempMouseY;
+			glfwGetCursorPos(window, &tempMouseX, &tempMouseY);
+
+			previousMouseX = tempMouseX;
+			previousMouseY = tempMouseY;
 		}
 	}
 }

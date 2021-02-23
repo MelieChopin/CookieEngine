@@ -44,6 +44,7 @@ namespace Cookie
 				inline void UpdateFreeFlyRot(GLFWwindow* window);
 				inline void Update();
 
+				inline void ResetPreviousMousePos(GLFWwindow* window);
 		};
 	}
 }
