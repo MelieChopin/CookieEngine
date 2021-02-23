@@ -187,7 +187,7 @@ bool Renderer::CreateBuffer(D3D11_BUFFER_DESC bufferDesc, D3D11_SUBRESOURCE_DATA
 {
     if (FAILED(device->CreateBuffer(&bufferDesc, &data, buffer)))
     {
-        printf("Failed Creating Buffer: %p of size %u \n", (*buffer), sizeof(data.pSysMem));
+        printf("Failed Creating Buffer: %p of size %llu \n", (*buffer), sizeof(data.pSysMem));
         return false;
     }
 

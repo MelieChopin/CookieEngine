@@ -100,7 +100,7 @@ namespace Cookie
 			inline Quat Quat::Conjugate() const { return { w , -x, -y, -z }; }
 			inline Quat Quat::Inverse() const { float length = Length(); return Conjugate() / (length * length); }
 
-			inline float Quat::Dot(const Quat& other) const { return { w * other.w + x * other.x + y * other.y + z * other.z }; }
+			inline float Quat::Dot(const Quat& other) const { return (w * other.w + x * other.x + y * other.y + z * other.z); }
 			inline Quat Quat::Slerp(const Quat& q1, const Quat& q2, float t)
 			{
 				float theta = acos(q1.Dot(q2));

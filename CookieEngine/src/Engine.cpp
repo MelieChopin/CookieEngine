@@ -33,11 +33,11 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 void Engine::Run()
 {
     //Map in future Classes
-    std::map<int, std::function<void()> > UnitInputs;
+    std::unordered_map<int, std::function<void()> > UnitInputs;
     UnitInputs['A'] = [] { std::cout << "Unit Shortcut 1\n"; };
     UnitInputs['Z'] = [] { std::cout << "Unit Shortcut 2\n"; };
     UnitInputs['E'] = [] { std::cout << "Unit Shortcut 3\n"; };
-    std::map<int, std::function<void()> > BuildingInputs;
+    std::unordered_map<int, std::function<void()> > BuildingInputs;
     BuildingInputs['A'] = [] { std::cout << "Building Shortcut 1\n"; };
     BuildingInputs['Z'] = [] { std::cout << "Building Shortcut 2\n"; };
     BuildingInputs['E'] = [] { std::cout << "Building Shortcut 3\n"; };

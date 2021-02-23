@@ -1,6 +1,8 @@
 #ifndef __CAMERA_INL__
 #define __CAMERA_INL__
 
+
+
 namespace Cookie
 {
 	namespace Render
