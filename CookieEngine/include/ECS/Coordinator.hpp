@@ -16,7 +16,6 @@ namespace Cookie
 		class Coordinator
 		{
 		public:
-			Resources::ResourcesManager	resources;
 			EntityHandler				entityHandler;
 			ComponentHandler			componentHandler;
 
@@ -24,7 +23,7 @@ namespace Cookie
 			Coordinator() {}
 			~Coordinator() {}
 
-			void AddEntity(const int signature, std::string name = std::string("No Name") )
+			void AddEntity(const int signature, Resources::ResourcesManager	resources, std::string name = std::string("No Name") )
 			{
 				assert(entityHandler.livingEntities < MAX_ENTITIES && "Too many entities in existence.");
 

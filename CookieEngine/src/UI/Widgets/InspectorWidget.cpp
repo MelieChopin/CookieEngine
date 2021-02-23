@@ -119,7 +119,7 @@ void Inspector::ModelCompInterface()
 
         if (BeginPopup("Mesh selector popup"))
         {
-            for (const std::shared_ptr<Cookie::Resources::Mesh>& meshPtr : coordinator.resources.GetMeshes())
+            for (const std::shared_ptr<Cookie::Resources::Mesh>& meshPtr : resources.GetMeshes())
             {
                 if (Button(meshPtr->name.c_str()))
                 {
@@ -149,7 +149,7 @@ void Inspector::ModelCompInterface()
 
         if (BeginPopup("Texture selector popup"))
         {
-            for (const std::shared_ptr<Cookie::Resources::Texture>& textPtr : coordinator.resources.GetTextures())
+            for (const std::shared_ptr<Cookie::Resources::Texture>& textPtr : resources.GetTextures())
             {
                 if (Button(textPtr->name.c_str()))
                 {

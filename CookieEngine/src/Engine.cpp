@@ -3,15 +3,18 @@
 #include "Debug.hpp"
 #include "Core/Math/Calc.hpp"
 #include "ImGui/imgui.h"
+#include <vector>
 
 using namespace Cookie;
 
 Engine::Engine() :
-    window{}, renderer{ window }, ui{ window.window, renderer }, frameBuffer{ coordinator.resources,renderer }
+    window{}, renderer{ window }, ui{ window.window, renderer }, frameBuffer{ resources,renderer }
 {
-    coordinator.resources.Load(renderer);
+    resources.Load(renderer);
     camera.SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width / renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     camera.Update();
+    scene.push_back(Cookie::Editor::Scene());
+    scene[indexScene].InitScene(resources);
 }
 
 Engine::~Engine()
@@ -47,9 +50,9 @@ void Engine::Run()
     ui.AddWItem(new UIwidget::ExitPannel(window.window), 0);
     ui.AddWindow(new UIwidget::FileExplorer);
     
-    UIwidget::Inspector* insp = new UIwidget::Inspector(coordinator);
+    UIwidget::Inspector* insp = new UIwidget::Inspector(scene[indexScene].coordinator, resources);
     ui.AddWindow(insp);
-    ui.AddWindow(new UIwidget::Hierarchy(coordinator, insp));
+    ui.AddWindow(new UIwidget::Hierarchy(scene[indexScene].coordinator, insp, resources));
     
     ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, ui.mouseCaptured));
     ui.AddWindow(new UIwidget::GamePort);
@@ -68,8 +71,21 @@ void Engine::Run()
             camera.UpdateFreeFly(window.window);
 
 
-        coordinator.ApplySystemVelocity();
-        coordinator.ApplyDraw(renderer.remote, camera.GetViewProj());
+        //----------------COLLISION-------------------------------
+        Cookie::Core::Math::Vec3 firstPoint = camera.pos;
+        Cookie::Core::Math::Vec4 view = camera.GetViewProj().c[2];
+        Cookie::Core::Math::Vec3 cameraTarget{ view.x, view.y, view.z };
+        Cookie::Core::Math::Vec3 secondPoint = camera.pos + cameraTarget * 50;
+        Cookie::Core::Math::Vec3 result;
+        bool hit = scene[indexScene].LinePlane(result, firstPoint, secondPoint);
+        if (hit == true)
+            std::cout << "hit" << " \n";
+        else
+            std::cout << "non \n";
+        //--------------------------------------------------------
+
+        scene[indexScene].coordinator.ApplySystemVelocity();
+        scene[indexScene].coordinator.ApplyDraw(renderer.remote, camera.GetViewProj());
         renderer.SetBackBuffer();
         //frameBuffer.Draw(renderer.remote);
         

@@ -18,6 +18,7 @@ include_directories("${INC_DIR}/UI/")
 include_directories("${INC_DIR}/UI/Widgets/")
 include_directories("${INC_DIR}/Render/")
 include_directories("${INC_DIR}/ECS/")
+include_directories("${INC_DIR}/Editor/")
 include_directories("${DEPS_INC_DIR}/ImGui/")
 include_directories("${DEPS_INC_DIR}/")
 include_directories("${DEPS_INC_DIR}/assimp/")
@@ -64,7 +65,8 @@ set (SRC_FILES
     "${SRC_DIR}/UI/Widgets/HierarchyWidget.cpp"
     "${SRC_DIR}/UI/Widgets/InspectorWidget.cpp"
     "${SRC_DIR}/Resources/Texture.cpp"
-    "${SRC_DIR}/Render/FrameBuffer.cpp")
+    "${SRC_DIR}/Render/FrameBuffer.cpp"
+    "${SRC_DIR}/Editor/Scene.cpp")
 
 set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll")
 

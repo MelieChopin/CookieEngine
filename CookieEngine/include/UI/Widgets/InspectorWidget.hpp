@@ -3,7 +3,7 @@
 
 
 #include "UIwidgetBases.h"
-
+#include "Resources/ResourcesManager.hpp"
 
 namespace Cookie::ECS
 {
@@ -17,6 +17,7 @@ namespace Cookie::UIwidget
 	class Inspector final : public WindowBase
 	{
 		Cookie::ECS::Coordinator& coordinator;
+		Cookie::Resources::ResourcesManager& resources;
 
 		Cookie::ECS::Entity* selectedEntity = nullptr;
 
@@ -26,9 +27,10 @@ namespace Cookie::UIwidget
 		void ModelCompInterface();
 	
 	public:
-		Inspector(Cookie::ECS::Coordinator& _coordinator)
+		Inspector(Cookie::ECS::Coordinator& _coordinator, Cookie::Resources::ResourcesManager& _resources)
 			: WindowBase		("Inspector"),
-			  coordinator		(_coordinator)
+			  coordinator		(_coordinator),
+			  resources			(_resources)
 		{}
 
 		void WindowDisplay() override;
