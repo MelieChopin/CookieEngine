@@ -105,6 +105,7 @@ void Engine::TryResizeWindow()
         window.height = height;
 
         renderer.ResizeBuffer(width,height);
+        frameBuffer.Resize(renderer);
         camera.SetProj(Core::Math::ToRadians(60.f),(float)width/(float)height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     }
 }

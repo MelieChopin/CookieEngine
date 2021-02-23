@@ -31,12 +31,12 @@ namespace Cookie
 				bool CreateShaderResource(Renderer& _renderer);
 				bool CreateRenderTargetView(Renderer& _renderer);
 
-
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
 				FrameBuffer(Resources::ResourcesManager& _resources, Renderer& _renderer);
 				~FrameBuffer();
 
+				void Resize(Renderer& _renderer);
 				void Draw(Render::RendererRemote& _remote);
 
 				inline ID3D11Texture2D*const*			GetTexture()const			{ return &texBuffer; }
