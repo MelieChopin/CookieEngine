@@ -25,6 +25,9 @@ namespace Cookie
 			std::vector<Editor::Scene>	scene;
 			int							indexScene = 0;
 
+		private:
+			void TryResizeWindow();
+
 		public:
 		/* CONSTRUCTORS/DESTRUCTORS */
 		Engine();

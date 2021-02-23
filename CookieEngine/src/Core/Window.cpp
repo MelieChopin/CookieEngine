@@ -14,7 +14,8 @@ void debugGLFWCallback(int error_code, const char* description)
 
 /*============== CONSTRUCTORS/DESTRUCTORS =================*/
 
-Window::Window()
+Window::Window():
+    width{ initWidth }, height{initHeight}
 {
     // Init glfw
     if (!glfwInit())

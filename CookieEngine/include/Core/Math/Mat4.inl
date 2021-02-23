@@ -87,78 +87,78 @@ namespace Cookie
             inline Mat4 Mat4::Identity()
             {
                 return
-                {
+                { {
                     1.f, 0.f, 0.f, 0.f,
                     0.f, 1.f, 0.f, 0.f,
                     0.f, 0.f, 1.f, 0.f,
                     0.f, 0.f, 0.f, 1.f
-                };
+                } };
             }
             inline Mat4 Mat4::Scale(float s)
             {
                 return
-                {
+                { {
                      s,  0.f, 0.f, 0.f,
                     0.f,   s, 0.f, 0.f,
                     0.f, 0.f,   s, 0.f,
                     0.f, 0.f, 0.f, 1.f
-                };
+                } };
             }
             inline Mat4 Mat4::Scale(const Vec3& s)
             {
                 return
-                {
+                { {
                     s.x, 0.f, 0.f, 0.f,
                     0.f, s.y, 0.f, 0.f,
                     0.f, 0.f, s.z, 0.f,
                     0.f, 0.f, 0.f, 1.f
-                };
+                } };
             }
             inline Mat4 Mat4::Translate(const Vec3& t)
             {
                 return
-                {
+                { {
                     1.f, 0.f, 0.f, t.x,
                     0.f, 1.f, 0.f, t.y,
                     0.f, 0.f, 1.f, t.z,
                     0.f, 0.f, 0.f, 1.f
-                };
+                } };
             }
             inline Mat4 Mat4::RotateX(float radians)
             {
                 float c = std::cos(radians);
                 float s = std::sin(radians);
                 return
-                {
+                { {
                     1.f, 0.f, 0.f, 0.f,
                     0.f,   c,   s, 0.f,
                     0.f,  -s,   c, 0.f,
                     0.f, 0.f, 0.f, 1.f,
-                };
+                } };
             }
             inline Mat4 Mat4::RotateY(float radians)
             {
                 float c = std::cos(radians);
                 float s = std::sin(radians);
                 return
-                {
+                { {
                      c, 0.f,  -s, 0.f,
                     0.f, 1.f, 0.f, 0.f,
                      s, 0.f,   c, 0.f,
                     0.f, 0.f, 0.f, 1.f,
-                };
+                } };
             }
             inline Mat4 Mat4::RotateZ(float radians)
             {
                 float c = std::cos(radians);
                 float s = std::sin(radians);
                 return
-                {
+                { {
                         c,   s,  0.f, 0.f,
                         -s,   c,  0.f, 0.f,
                         0.f, 0.f, 1.f, 0.f,
                         0.f, 0.f, 0.f, 1.f,
-                };
+                } };
             }
             inline Mat4 Mat4::TRS(const Vec3& t, const Vec3& r, const Vec3& s)
             {
@@ -195,12 +195,12 @@ namespace Cookie
             inline Mat4 Mat4::Transpose()
             {
                 return
-                {
+                { {
                     c[0].e[0], c[1].e[0], c[2].e[0], c[3].e[0],
                     c[0].e[1], c[1].e[1], c[2].e[1], c[3].e[1],
                     c[0].e[2], c[1].e[2], c[2].e[2], c[3].e[2],
                     c[0].e[3], c[1].e[3], c[2].e[3], c[3].e[3],
-                };
+                } };
             }
 
             inline Mat4 Mat4::operator*(const Mat4& other) const

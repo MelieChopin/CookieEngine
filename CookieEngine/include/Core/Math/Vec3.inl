@@ -143,7 +143,7 @@ namespace Cookie
 			inline float Vec3::Length() const { return std::sqrt(x * x + y * y + z * z); }
 			inline Vec3 Vec3::Normalize() const { return *this / Length(); }
 
-			inline float Vec3::Dot(const Vec3& other) const { return{ x * other.x + y * other.y + z * other.z }; }
+			inline float Vec3::Dot(const Vec3& other) const { return (x * other.x + y * other.y + z * other.z); }
 			inline Vec3 Vec3::Cross(const Vec3& other) const {
 				return { y * other.z - z * other.y,
 						z * other.x - x * other.z,

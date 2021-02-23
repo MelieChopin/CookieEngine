@@ -17,11 +17,11 @@ void Viewport::WindowDisplay()
 
 	ImGui::Image(static_cast<ImTextureID>(*frameBuffer.GetShaderResource()), GetContentRegionAvail());
 
-	if (IsWindowHovered() && GetIO().MouseClicked[0])
+	/*if (IsWindowHovered() && GetIO().MouseClicked[0])
 	{
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		mouseCapture = true;
-	}
+	}*/
 
     ImGui::End();
 }

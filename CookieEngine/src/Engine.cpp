@@ -36,11 +36,11 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 void Engine::Run()
 {
     //Map in future Classes
-    std::map<int, std::function<void()> > UnitInputs;
+    std::unordered_map<int, std::function<void()> > UnitInputs;
     UnitInputs['A'] = [] { std::cout << "Unit Shortcut 1\n"; };
     UnitInputs['Z'] = [] { std::cout << "Unit Shortcut 2\n"; };
     UnitInputs['E'] = [] { std::cout << "Unit Shortcut 3\n"; };
-    std::map<int, std::function<void()> > BuildingInputs;
+    std::unordered_map<int, std::function<void()> > BuildingInputs;
     BuildingInputs['A'] = [] { std::cout << "Building Shortcut 1\n"; };
     BuildingInputs['Z'] = [] { std::cout << "Building Shortcut 2\n"; };
     BuildingInputs['E'] = [] { std::cout << "Building Shortcut 3\n"; };
@@ -55,13 +55,23 @@ void Engine::Run()
     ui.AddWindow(new UIwidget::Hierarchy(scene[indexScene].coordinator, insp, resources));
     
     ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, ui.mouseCaptured));
-    ui.AddWindow(new UIwidget::GamePort);
+    //ui.AddWindow(new UIwidget::GamePort);
+
+    ui.AddWindow(new UIwidget::Console(Core::Debug::Summon()));
+
+    Core::Debug::Summon().Log("This is a Log.");
+    Core::Debug::Summon().Warning("This is a warning!");
+    Core::Debug::Summon().Error("This is an error!!");
+    Core::Debug::Summon().Exception("This is an exception!!!");
 
     while (!glfwWindowShouldClose(window.window))
     {
         Core::UpdateTime();
+
         // Present frame
         glfwPollEvents();
+
+        TryResizeWindow();
 
         renderer.Clear();
         renderer.ClearFrameBuffer(frameBuffer);
@@ -92,5 +102,22 @@ void Engine::Run()
         ui.UpdateUI();
 
         renderer.Render();
+    }
+}
+
+
+void Engine::TryResizeWindow()
+{
+    int width, height = 0;
+
+    glfwGetWindowSize(window.window, &width, &height);
+
+    if (window.width != width || window.height != height)
+    {
+        window.width = width;
+        window.height = height;
+
+        renderer.ResizeBuffer(width,height);
+        camera.SetProj(Core::Math::ToRadians(60.f),(float)width/(float)height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     }
 }

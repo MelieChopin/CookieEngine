@@ -9,9 +9,6 @@
 
 using namespace Cookie::Render;
 
-constexpr int initWidth = 1280;
-constexpr int initHeight = 720;
-
 
 /*========================= CONSTRUCTORS/DESTRUCTORS ===========================*/
 
@@ -20,9 +17,9 @@ Renderer::Renderer(Core::Window& window)
     bool result = true;
     result = InitDevice(window);
     if (result)
-        result = CreateDrawBuffer();
+        result = CreateDrawBuffer(window.width,window.height);
     if (result)
-        result = InitState();
+        result = InitState(window.width, window.height);
 
 }
 
@@ -74,7 +71,7 @@ bool Renderer::InitDevice(Core::Window& window)
     return true;
 }
 
-bool Renderer::CreateDrawBuffer()
+bool Renderer::CreateDrawBuffer(int width, int height)
 {
     // get the address of the back buffer
     ID3D11Texture2D* pBackBuffer = nullptr;
@@ -90,8 +87,8 @@ bool Renderer::CreateDrawBuffer()
     D3D11_TEXTURE2D_DESC depthBufferDesc = {};
 
     // Set up the description of the depth buffer.
-    depthBufferDesc.Width               = initWidth;
-    depthBufferDesc.Height              = initHeight;
+    depthBufferDesc.Width               = width;
+    depthBufferDesc.Height              = height;
     depthBufferDesc.MipLevels           = 1;
     depthBufferDesc.ArraySize           = 1;
     depthBufferDesc.Format              = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -122,7 +119,7 @@ bool Renderer::CreateDrawBuffer()
     return true;
 }
 
-bool Renderer::InitState()
+bool Renderer::InitState(int width, int height)
 {
     // Initialize the description of the stencil state.
     D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
@@ -174,8 +171,8 @@ bool Renderer::InitState()
 
     state.viewport.TopLeftX = 0;
     state.viewport.TopLeftY = 0;
-    state.viewport.Width = initWidth;
-    state.viewport.Height = initHeight;
+    state.viewport.Width = width;
+    state.viewport.Height = height;
     state.viewport.MinDepth = 0.0f;
     state.viewport.MaxDepth = 1.0f;
 
@@ -190,7 +187,7 @@ bool Renderer::CreateBuffer(D3D11_BUFFER_DESC bufferDesc, D3D11_SUBRESOURCE_DATA
 {
     if (FAILED(device->CreateBuffer(&bufferDesc, &data, buffer)))
     {
-        printf("Failed Creating Buffer: %p of size %u \n", (*buffer), sizeof(data.pSysMem));
+        printf("Failed Creating Buffer: %p of size %llu \n", (*buffer), sizeof(data.pSysMem));
         return false;
     }
 
@@ -217,6 +214,32 @@ bool Renderer::CreatePixelBuffer(ID3D11PixelShader** pixelShader, ID3DBlob** PS)
     }
 
     return true;
+}
+
+/*========================= CALLBACK METHODS =========================*/
+
+void Renderer::ResizeBuffer(int width, int height)
+{
+    remote.context->OMSetRenderTargets(0, 0, 0);
+
+    backbuffer->Release();
+    depthBuffer->Release();
+
+    HRESULT result = swapchain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+
+    if (FAILED(result))
+    {
+        printf("%s", (std::string("Failing Resizing SwapChain Buffer : ") + std::system_category().message(result)).c_str());
+    }
+
+    CreateDrawBuffer(width,height);
+
+    remote.context->OMSetRenderTargets(1, &backbuffer, depthBuffer);
+
+    state.viewport.Width = width;
+    state.viewport.Height = height;
+    remote.context->RSSetViewports(1, &state.viewport);
+
 }
 
 /*========================= RENDER METHODS =========================*/

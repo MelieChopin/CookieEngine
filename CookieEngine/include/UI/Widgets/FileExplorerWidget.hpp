@@ -1,7 +1,6 @@
 #ifndef	__FILE_EXPLORER_W_HPP__
 #define __FILE_EXPLORER_W_HPP__
 
-
 #include "UIwidgetBases.h"
 
 

@@ -1,7 +1,6 @@
 #ifndef	__INSPECTOR_W_HPP__
 #define __INSPECTOR_W_HPP__
 
-
 #include "UIwidgetBases.h"
 #include "Resources/ResourcesManager.hpp"
 
