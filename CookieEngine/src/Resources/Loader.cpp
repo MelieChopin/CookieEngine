@@ -46,6 +46,7 @@ void Loader::InitMeshes(aiMesh** meshes, unsigned int nMeshes, ResourcesManager&
 		if (!_resources.HasMesh(iMesh->mName.C_Str()))
 			_resources.AddMesh(std::move(std::make_shared<Mesh>(iMesh, _renderer)));
 	}
+
 }
 
 void Loader::InitTextures(const char* pathName, aiMaterial** materials, unsigned int nMatNb, ResourcesManager& _resources, Render::Renderer& _renderer)

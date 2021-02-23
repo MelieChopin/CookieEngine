@@ -8,6 +8,7 @@
 #include "Resources/Shader.hpp"
 #include "Resources/Texture.hpp"
 
+
 namespace fs = std::filesystem;
 
 namespace Cookie
