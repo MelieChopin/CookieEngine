@@ -59,7 +59,7 @@ void Engine::Run()
     ui.AddWindow(insp);
     ui.AddWindow(new UIwidget::Hierarchy(coordinator, insp));
     
-    ui.AddWindow(new UIwidget::Viewport);
+    ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, ui.mouseCaptured));
     ui.AddWindow(new UIwidget::GamePort);
 
     while (!glfwWindowShouldClose(window.window))
@@ -100,7 +100,8 @@ void Engine::Run()
 
         coordinator.ApplyDraw(renderer.remote, camera.GetViewProj());
         renderer.SetBackBuffer();
-        frameBuffer.Draw(renderer.remote);
+        //frameBuffer.Draw(renderer.remote);
+        
         ui.UpdateUI();
 
         renderer.Render();

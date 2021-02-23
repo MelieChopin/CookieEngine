@@ -7,14 +7,23 @@
 
 struct GLFWwindow;
 
+namespace Cookie::Render {class FrameBuffer;}
+
 
 namespace Cookie::UIwidget
 {
 	class Viewport final : public WindowBase
 	{
+		GLFWwindow* window;
+		const Cookie::Render::FrameBuffer& frameBuffer;
+		bool& mouseCapture;
+
 	public:
-		Viewport()
-			: WindowBase("Viewport")
+		Viewport(GLFWwindow* _window, const Cookie::Render::FrameBuffer& _frameBuffer, bool& _mouseCapture)
+			: WindowBase	("Viewport"),
+			  window		(_window),
+			  frameBuffer	(_frameBuffer),
+			  mouseCapture	(_mouseCapture)
 		{}
 
 		void WindowDisplay() override;
