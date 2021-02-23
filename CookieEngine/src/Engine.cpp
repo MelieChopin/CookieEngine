@@ -92,12 +92,15 @@ void Engine::Run()
 
 void Engine::TryResizeWindow()
 {
-    int width, height = 0;
+    int width = 0;
+    int height = 0;
 
     glfwGetWindowSize(window.window, &width, &height);
 
     if (window.width != width || window.height != height)
     {
+        Core::Debug::Summon().Log((std::to_string(width) + ' '+ std::to_string(height)).c_str());
+        printf("%d, %d\n", width, height);
         window.width = width;
         window.height = height;
 
