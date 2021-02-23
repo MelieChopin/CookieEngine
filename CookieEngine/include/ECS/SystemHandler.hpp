@@ -20,7 +20,13 @@ namespace Cookie
 		{
 			inline void SystemGravity(ComponentRigidBody& rb) { rb.AddForce({ 0, -9.81f * rb.mass, 0 }); }
 			//void SystemCollision(const ComponentTransform&, const ComponentRigidBody&, const ComponentCollider&);
-			inline void SystemVelocity(ComponentTransform& trs, const ComponentRigidBody& rb) {trs.localTRS.translation += rb.linearVelocity * Core::deltaTime; };
+			inline void SystemVelocity(ComponentTransform& trs, ComponentRigidBody& rb)
+			{
+				if (rb.goTowardTarget)
+					rb.linearVelocity = (rb.targetPosition - trs.localTRS.translation).Normalize() * rb.speed;
+
+				trs.localTRS.translation += rb.linearVelocity * Core::deltaTime; 
+			}
 			inline void SystemDraw(const ComponentTransform& trs, ComponentModel& model, Render::RendererRemote& remote, const Core::Math::Mat4& viewProj) 
 			{
 				model.Draw(remote, viewProj, trs.localTRS.ToTRS());
