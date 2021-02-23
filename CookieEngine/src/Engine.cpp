@@ -52,7 +52,14 @@ void Engine::Run()
     ui.AddWindow(new UIwidget::Hierarchy(coordinator, insp));
     
     ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, ui.mouseCaptured));
-    ui.AddWindow(new UIwidget::GamePort);
+    //ui.AddWindow(new UIwidget::GamePort);
+
+    ui.AddWindow(new UIwidget::Console(Core::Debug::Summon()));
+
+    Core::Debug::Summon().Log("This is a Log.");
+    Core::Debug::Summon().Warning("This is a warning!");
+    Core::Debug::Summon().Error("This is an error!!");
+    Core::Debug::Summon().Exception("This is an exception!!!");
 
     while (!glfwWindowShouldClose(window.window))
     {

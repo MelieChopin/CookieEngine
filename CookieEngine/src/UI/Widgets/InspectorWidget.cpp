@@ -88,6 +88,9 @@ void Inspector::RigidBodyInterface()
         Text("Mass:"); DragFloat("##MASS", &rigibod.mass);
         Text("Drag:"); DragFloat("##DRAG", &rigibod.drag);
 
+        Text("TargetPos:"); DragFloat("X##TargetPos", &rigibod.targetPosition.x); DragFloat("Y##TargetPos", &rigibod.targetPosition.y); DragFloat("Z##TargetPos", &rigibod.targetPosition.z);
+        Text("Speed:"); DragFloat("##Speed", &rigibod.speed);
+        Text("GoTowardPosition:"); Checkbox("##GoTowardPosition", &rigibod.goTowardTarget);
 
         ImGui::NewLine();
         if (Button("Remove component##RIBOD"))

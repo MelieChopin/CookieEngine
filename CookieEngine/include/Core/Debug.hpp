@@ -1,28 +1,72 @@
 #ifndef __DEBUG_HPP__
 #define __DEBUG_HPP__
 
+#include <vector>
+#include <iostream>
+
 namespace Cookie
 {
 	namespace Core
 	{
+		// [Singleton class closely linked with the console widget. Can be used anywhere after being initialized.]
 		class Debug
 		{
 		public:
-			static void Log(const char* text)
+			struct Message
 			{
-				std::cout << "LOG: " << text << std::endl;
+				const char*	text;
+				
+				enum Type
+				{ 
+					// Basic information. Will slowly flash blue at arrival.
+					Log, 
+					
+					// Indicate a warning. Will flash yellow once.
+					Warning,
+
+					// Signal an error. Will quickly flash red thrice.
+					Error,
+
+					// An exception will make the whole console flash red. Use in really bad cases.
+					Exception 
+				
+				} messageType;
+				
+				uint8_t			colorVariant;
+				unsigned short	colorBounces;
+				bool			bouncing = false;
+			};
+
+			std::vector<Message> storedMessages;
+
+
+		private:
+			Debug() = default;
+		
+		public:
+			// Summons the Debug manager.
+			inline static Debug& Summon()
+			{ static Debug debugSingleton; return debugSingleton; }
+
+
+			inline void Log(const char* text)
+			{
+				storedMessages.push_back(Message{text, Message::Log, 255, 0 });
 			}
-			static void Error(const char* text)
+			
+			void Warning(const char* text)
 			{
-				std::cout << "INFO: \terror : " << text << std::endl;
+				storedMessages.push_back(Message{ text, Message::Warning, 0, 0, true });
 			}
-			static void Warning(const char* text)
+			
+			void Error(const char* text)
 			{
-				std::cout << "INFO: \twarning : " << text << std::endl;
+				storedMessages.push_back(Message{ text, Message::Error, 255, 3 });
 			}
-			static void Exception(const char* text)
+			
+			void Exception(const char* text)
 			{
-				std::cout << "INFO: \texception : " << text << std::endl;
+				storedMessages.push_back(Message{ text, Message::Exception, 255, 10 });
 			}
 
 			static void Assertion(int line, const char* file, bool element)
