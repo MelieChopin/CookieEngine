@@ -15,7 +15,7 @@ void Viewport::WindowDisplay()
 {
     ImGui::Begin(windowName, nullptr);
 
-	ImGui::Image(static_cast<ImTextureID>(*frameBuffer.GetShaderResources()), GetContentRegionAvail());
+	ImGui::Image(static_cast<ImTextureID>(*frameBuffer.GetShaderResource()), GetContentRegionAvail());
 
 	if (IsWindowHovered() && GetIO().MouseClicked[0])
 	{
