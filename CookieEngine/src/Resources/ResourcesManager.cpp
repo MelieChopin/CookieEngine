@@ -92,6 +92,8 @@ std::shared_ptr<Mesh> ResourcesManager::GetMesh(std::string _name) const
 		if (meshes[i]->name == _name)
 			return meshes[i];
 	}
+
+	return nullptr;
 }
 
 
@@ -124,6 +126,8 @@ std::shared_ptr<Texture> ResourcesManager::GetTexture(std::string _name)
 			return textures[i];
 		}
 	}
+
+	return nullptr;
 }
 
 bool ResourcesManager::HasTexture(std::string _name)
