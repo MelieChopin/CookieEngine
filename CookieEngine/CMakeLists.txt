@@ -63,6 +63,7 @@ set (SRC_FILES
     "${SRC_DIR}/UI/Widgets/FileExplorerWidget.cpp"
     "${SRC_DIR}/UI/Widgets/HierarchyWidget.cpp"
     "${SRC_DIR}/UI/Widgets/InspectorWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/ConsoleWidget.cpp"
     "${SRC_DIR}/Resources/Texture.cpp"
     "${SRC_DIR}/Render/FrameBuffer.cpp")
 

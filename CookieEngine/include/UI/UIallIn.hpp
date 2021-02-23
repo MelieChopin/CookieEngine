@@ -3,6 +3,7 @@
 
 #include "UIcore.h"
 
+#include "Widgets/ConsoleWidget.hpp"
 #include "Widgets/FileExplorerWidget.hpp"
 #include "Widgets/HierarchyWidget.hpp"
 #include "Widgets/InspectorWidget.hpp"
