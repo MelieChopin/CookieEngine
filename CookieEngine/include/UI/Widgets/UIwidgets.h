@@ -9,6 +9,7 @@ struct GLFWwindow;
 
 namespace Cookie::UIwidget
 {
+
 	class GamePort final : public WindowBase
 	{
 	public:

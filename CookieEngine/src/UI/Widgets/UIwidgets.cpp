@@ -1,3 +1,5 @@
+#include "Coordinator.hpp"
+#include "FrameBuffer.hpp"
 #include <GLFW/glfw3.h>
 #include "UIwidgets.h"
 
@@ -6,6 +8,7 @@
 
 using namespace ImGui;
 using namespace Cookie::UIwidget;
+using namespace Cookie::ECS;
 
 
 void GamePort::WindowDisplay()
