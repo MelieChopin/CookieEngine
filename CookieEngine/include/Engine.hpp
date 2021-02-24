@@ -1,6 +1,7 @@
 #ifndef __ENGINE_HPP__
 #define __ENGINE_HPP__
 
+#include <memory>
 #include "Render/Renderer.hpp"
 #include "Core/Window.hpp"
 #include "Input.hpp"

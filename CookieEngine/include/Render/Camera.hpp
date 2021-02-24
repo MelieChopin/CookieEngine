@@ -25,6 +25,10 @@ namespace Cookie
 				Core::Math::Mat4 projMat;
 				Core::Math::Mat4 viewMat;
 
+				float fov = 0.0f;
+				float width = 0.0f;
+				float height = 0.0f;
+
 			protected:
 				bool activated = true;
 
@@ -32,17 +36,19 @@ namespace Cookie
 				float previousMouseY{ 0.0 };
 
 			public:
+				float camFar = 0.0f;
+
+				Core::Math::Vec2 windowOffset = {0.0f,0.0f};
+
 				Core::Math::Vec3 pos = {0.0f,0.0f,0.0f};
 				Core::Math::Vec3 rot = {0.0f,0.0f,0.0f};
-
-			private:
-
+				
 			public:
 				Camera() {}
 				~Camera() {}
 
 				inline Core::Math::Mat4 GetViewProj() const {return projMat * viewMat;}
-				inline void SetProj(float yFov, float aspect, float n, float f) {projMat = Core::Math::Mat4::Perspective(yFov, aspect, n, f);}
+				inline void SetProj(float yFov, float _width, float _height, float n, float f) { fov = yFov; width = _width; height = _height; camFar = f; projMat = Core::Math::Mat4::Perspective(yFov, width / height, n, f); }
 					    
 				inline virtual void Update() = 0;
 
@@ -50,6 +56,8 @@ namespace Cookie
 				inline void Deactivate() { activated = false; }
 
 				inline virtual void ResetPreviousMousePos();
+
+				inline Core::Math::Vec3 MouseToWorldDir();
 					   
 		};
 

@@ -14,8 +14,8 @@ Engine::Engine() :
 {
     resources.Load(renderer);
     camera = std::make_shared<Render::FreeFlyCam>();
-    camera->SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width / renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
-    camera->pos = { 0.0f,0.0f,5.0f };
+    camera->SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width,renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+    camera->pos = { 0.0f,2.0f,5.0f };
     camera->Update();
     camera->Deactivate();
     scene.reserve(MaxScene);
@@ -114,8 +114,9 @@ void Engine::Run()
            Vec4 view = camera->GetViewProj().c[2];
            Vec3 result;
 
-           if (scene[0].LinePlane(result, camera->pos, camera->pos + Vec3{ view.x, view.y, view.z } *1000))
+           if (scene[0].LinePlane(result, camera->pos, camera->pos + camera->MouseToWorldDir() * camera->camFar))
            {
+               //(camera->MouseToWorldDir() * camera->camFar).Debug();
                //move to
                if (glfwGetKey(window.window, GLFW_KEY_LEFT_CONTROL) && coordinator.selectedEntity)
                {
@@ -131,8 +132,6 @@ void Engine::Run()
 
        if(coordinator.selectedEntity)
            std::cout << coordinator.selectedEntity->name << std::endl;
-       else
-           std::cout << "no selected" << std::endl;
 
         //Scene
         {
@@ -181,6 +180,6 @@ void Engine::TryResizeWindow()
 
         renderer.ResizeBuffer(width,height);
         frameBuffer.Resize(renderer);
-        camera->SetProj(Core::Math::ToRadians(60.f),(float)width/(float)height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+        camera->SetProj(Core::Math::ToRadians(60.f),width,height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     }
 }

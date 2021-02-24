@@ -3,6 +3,8 @@
 
 #include <imgui.h>
 #include <algorithm>
+#include <Debug.hpp>
+#include "Core/Math/Quat.hpp"
 
 namespace Cookie
 {
@@ -20,6 +22,29 @@ namespace Cookie
 			previousMouseX = ImGui::GetIO().MousePos.x;
 			previousMouseY = ImGui::GetIO().MousePos.y;
 		}					 
+
+		inline Core::Math::Vec3 Camera::MouseToWorldDir()
+		{
+			Core::Math::Vec2 mousePos = { ImGui::GetIO().MousePos.x - windowOffset.x,ImGui::GetIO().MousePos.y - windowOffset.y};
+
+			Core::Math::Vec2 ratio = { (mousePos.x / (width * 0.5f)) - 1.0f,  (-mousePos.y / (height * 0.5f)) + 1.0f };
+
+			ratio *= fov;
+			
+			Core::Math::Quat rotx(ratio.x, Core::Math::Vec3(0.0f, 1.0f, 0.0f));
+			Core::Math::Quat roty(-ratio.y, Core::Math::Vec3(1.0f, 0.0f, 0.0f));
+			
+			Core::Math::Vec3 r = (roty + rotx).RotateVector(/*{ viewMat.e[3],viewMat.e[7],viewMat.e[11] }*/{ viewMat.c[2].x, viewMat.c[2].y, viewMat.c[2].z}).Normalize();
+
+			viewMat.Debug();
+
+			//Core::Math::Vec4 r = Core::Math::Mat4::Inverse(projMat * viewMat) * Core::Math::Vec4(ratio.x,ratio.y,1.0f,1.0f);
+			//
+			//Core::Math::Vec3 re = Core::Math::Vec3({ r.x,r.y,r.z }).Normalize();
+			//re.Debug();
+
+			return r;
+		}
 
 		/*======================= FREE FLY CAMERA =======================*/
 

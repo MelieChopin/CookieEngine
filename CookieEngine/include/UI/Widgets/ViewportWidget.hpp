@@ -25,7 +25,8 @@ namespace Cookie::UIwidget
 			  window		(_window),
 			  frameBuffer	(_frameBuffer),
 			  camera		(_camera)
-		{}
+		{
+		}
 
 		void WindowDisplay() override;
 	};

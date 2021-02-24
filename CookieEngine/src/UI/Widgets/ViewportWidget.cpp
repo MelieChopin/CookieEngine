@@ -14,11 +14,12 @@ void Viewport::WindowDisplay()
 	ImGui::Begin(windowName, nullptr);
 
 	ImGui::Image(static_cast<ImTextureID>(*frameBuffer.GetShaderResource()), GetContentRegionAvail());
+	(*camera)->windowOffset = { ImGui::GetWindowPos().x,  ImGui::GetWindowPos().y };
 
 	if ((recordedWinSize.x != GetWindowSize().x) || (recordedWinSize.y != GetWindowSize().y))
 	{
 		recordedWinSize = {GetWindowSize().x, GetWindowSize().y};
-		(*camera)->SetProj(Core::Math::ToRadians(60.f), recordedWinSize.x / recordedWinSize.y, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+		(*camera)->SetProj(Core::Math::ToRadians(60.f), recordedWinSize.x, recordedWinSize.y, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
 	}
 
 	ImGuiIO& io = GetIO();
