@@ -192,7 +192,136 @@ namespace Cookie
                 return m;
             }
 
-            inline Mat4 Mat4::Transpose()
+            inline Mat4 Mat4::Inverse(const Mat4& _mat)
+            {
+                float det = _mat.Det();
+            
+                if (det == 0.0f)
+                    return _mat;
+            
+                Mat4 invMat;
+            
+                invMat.e[0] = _mat.e[5]  * _mat.e[10] * _mat.e[15] -
+                          _mat.e[5]  * _mat.e[11] * _mat.e[14] -
+                          _mat.e[9]  * _mat.e[6]  * _mat.e[15] +
+                          _mat.e[9]  * _mat.e[7]  * _mat.e[14] +
+                          _mat.e[13] * _mat.e[6]  * _mat.e[11] -
+                          _mat.e[13] * _mat.e[7]  * _mat.e[10];
+            
+                invMat.e[4] = -_mat.e[4]  * _mat.e[10] * _mat.e[15] +
+                          _mat.e[4]  * _mat.e[11] * _mat.e[14] +
+                          _mat.e[8]  * _mat.e[6]  * _mat.e[15] -
+                          _mat.e[8]  * _mat.e[7]  * _mat.e[14] -
+                          _mat.e[12] * _mat.e[6]  * _mat.e[11] +
+                          _mat.e[12] * _mat.e[7]  * _mat.e[10];
+            
+                invMat.e[8] = _mat.e[4]  * _mat.e[9] * _mat.e[15] -
+                         _mat.e[4]  * _mat.e[11] * _mat.e[13] -
+                         _mat.e[8]  * _mat.e[5] *  _mat.e[15] +
+                         _mat.e[8]  * _mat.e[7] *  _mat.e[13] +
+                         _mat.e[12] * _mat.e[5] *  _mat.e[11] -
+                         _mat.e[12] * _mat.e[7] *  _mat.e[9];
+            
+                invMat.e[12] = - _mat.e[4]  * _mat.e[9] * _mat.e[14] +
+                           _mat.e[4]  * _mat.e[10] * _mat.e[13] +
+                           _mat.e[8]  * _mat.e[5] * _mat.e[14] -
+                           _mat.e[8]  * _mat.e[6] * _mat.e[13] -
+                           _mat.e[12] * _mat.e[5] * _mat.e[10] +
+                           _mat.e[12] * _mat.e[6] * _mat.e[9];
+            
+                invMat.e[1] = -_mat.e[1]  * _mat.e[10] * _mat.e[15] +
+                          _mat.e[1]  * _mat.e[11] * _mat.e[14] +
+                          _mat.e[9]  * _mat.e[2] * _mat.e[15] -
+                          _mat.e[9]  * _mat.e[3] * _mat.e[14] -
+                          _mat.e[13] * _mat.e[2] * _mat.e[11] +
+                          _mat.e[13] * _mat.e[3] * _mat.e[10];
+            
+                invMat.e[5] = _mat.e[0]  * _mat.e[10] * _mat.e[15] -
+                         _mat.e[0]  * _mat.e[11] * _mat.e[14] -
+                         _mat.e[8]  * _mat.e[2] * _mat.e[15] +
+                         _mat.e[8]  * _mat.e[3] * _mat.e[14] +
+                         _mat.e[12] * _mat.e[2] * _mat.e[11] -
+                         _mat.e[12] * _mat.e[3] * _mat.e[10];
+            
+                invMat.e[9] = -_mat.e[0]  * _mat.e[9] * _mat.e[15] +
+                          _mat.e[0]  * _mat.e[11] * _mat.e[13] +
+                          _mat.e[8]  * _mat.e[1] * _mat.e[15] -
+                          _mat.e[8]  * _mat.e[3] * _mat.e[13] -
+                          _mat.e[12] * _mat.e[1] * _mat.e[11] +
+                          _mat.e[12] * _mat.e[3] * _mat.e[9];
+            
+                invMat.e[13] = _mat.e[0]  * _mat.e[9] * _mat.e[14] -
+                          _mat.e[0]  * _mat.e[10] * _mat.e[13] -
+                          _mat.e[8]  * _mat.e[1] * _mat.e[14] +
+                          _mat.e[8]  * _mat.e[2] * _mat.e[13] +
+                          _mat.e[12] * _mat.e[1] * _mat.e[10] -
+                          _mat.e[12] * _mat.e[2] * _mat.e[9];
+            
+                invMat.e[2] = _mat.e[1]  * _mat.e[6] * _mat.e[15] -
+                         _mat.e[1]  * _mat.e[7] * _mat.e[14] -
+                         _mat.e[5]  * _mat.e[2] * _mat.e[15] +
+                         _mat.e[5]  * _mat.e[3] * _mat.e[14] +
+                         _mat.e[13] * _mat.e[2] * _mat.e[7] -
+                         _mat.e[13] * _mat.e[3] * _mat.e[6];
+            
+                invMat.e[6] = -_mat.e[0]  * _mat.e[6] * _mat.e[15] +
+                          _mat.e[0]  * _mat.e[7] * _mat.e[14] +
+                          _mat.e[4]  * _mat.e[2] * _mat.e[15] -
+                          _mat.e[4]  * _mat.e[3] * _mat.e[14] -
+                          _mat.e[12] * _mat.e[2] * _mat.e[7] +
+                          _mat.e[12] * _mat.e[3] * _mat.e[6];
+            
+                invMat.e[10] = _mat.e[0]  * _mat.e[5] * _mat.e[15] -
+                          _mat.e[0]  * _mat.e[7] * _mat.e[13] -
+                          _mat.e[4]  * _mat.e[1] * _mat.e[15] +
+                          _mat.e[4]  * _mat.e[3] * _mat.e[13] +
+                          _mat.e[12] * _mat.e[1] * _mat.e[7] -
+                          _mat.e[12] * _mat.e[3] * _mat.e[5];
+            
+                invMat.e[14] = -_mat.e[0]  * _mat.e[5] * _mat.e[14] +
+                           _mat.e[0]  * _mat.e[6] * _mat.e[13] +
+                           _mat.e[4]  * _mat.e[1] * _mat.e[14] -
+                           _mat.e[4]  * _mat.e[2] * _mat.e[13] -
+                           _mat.e[12] * _mat.e[1] * _mat.e[6] +
+                           _mat.e[12] * _mat.e[2] * _mat.e[5];
+            
+                invMat.e[3] = -_mat.e[1] * _mat.e[6] * _mat.e[11] +
+                          _mat.e[1] * _mat.e[7] * _mat.e[10] +
+                          _mat.e[5] * _mat.e[2] * _mat.e[11] -
+                          _mat.e[5] * _mat.e[3] * _mat.e[10] -
+                          _mat.e[9] * _mat.e[2] * _mat.e[7] +
+                          _mat.e[9] * _mat.e[3] * _mat.e[6];
+            
+                invMat.e[7] = _mat.e[0] * _mat.e[6] * _mat.e[11] -
+                         _mat.e[0] * _mat.e[7] * _mat.e[10] -
+                         _mat.e[4] * _mat.e[2] * _mat.e[11] +
+                         _mat.e[4] * _mat.e[3] * _mat.e[10] +
+                         _mat.e[8] * _mat.e[2] * _mat.e[7] -
+                         _mat.e[8] * _mat.e[3] * _mat.e[6];
+            
+                invMat.e[11] = -_mat.e[0] * _mat.e[5] * _mat.e[11] +
+                           _mat.e[0] * _mat.e[7] * _mat.e[9] +
+                           _mat.e[4] * _mat.e[1] * _mat.e[11] -
+                           _mat.e[4] * _mat.e[3] * _mat.e[9] -
+                           _mat.e[8] * _mat.e[1] * _mat.e[7] +
+                           _mat.e[8] * _mat.e[3] * _mat.e[5];
+            
+                invMat.e[15] = _mat.e[0] * _mat.e[5] * _mat.e[10] -
+                          _mat.e[0] * _mat.e[6] * _mat.e[9] -
+                          _mat.e[4] * _mat.e[1] * _mat.e[10] +
+                          _mat.e[4] * _mat.e[2] * _mat.e[9] +
+                          _mat.e[8] * _mat.e[1] * _mat.e[6] -
+                          _mat.e[8] * _mat.e[2] * _mat.e[5];
+            
+                det = 1.0f/det;
+            
+                for (int i = 0; i < 16; i++)
+                    invMat.e[i] = invMat.e[i] * det;
+            
+                return invMat;
+            }
+
+            inline Mat4 Mat4::Transpose()const
             {
                 return
                 { {
@@ -201,6 +330,22 @@ namespace Cookie
                     c[0].e[2], c[1].e[2], c[2].e[2], c[3].e[2],
                     c[0].e[3], c[1].e[3], c[2].e[3], c[3].e[3],
                 } };
+            }
+
+            inline float Mat4::Det()const
+            {
+                return    e[0] * (e[5] * ((e[10] * e[15]) - (e[14] * e[11]))
+                        - e[6] * ((e[9] * e[15]) - (e[13] * e[11]))
+                        + e[7] * ((e[9] * e[14]) - (e[13] * e[10])))
+                        - e[1] * (e[4] * ((e[10] * e[15]) - (e[14] * e[11]))
+                        - e[6] * ((e[8] * e[15]) - (e[12] * e[11]))
+                        + e[7] * ((e[8] * e[14]) - (e[12] * e[10])))
+                        + e[2] * (e[4] * ((e[9] * e[15]) - (e[13] * e[11]))
+                        - e[5] * ((e[8] * e[15]) - (e[12] * e[11]))
+                        + e[7] * ((e[8] * e[13]) - (e[12] * e[9])))
+                        - e[3] * (e[4] * ((e[9] * e[14]) - (e[13] * e[10]))
+                        - e[5] * ((e[8] * e[14]) - (e[14] * e[10]))
+                        + e[6] * ((e[8] * e[13]) - (e[12] * e[9])));
             }
 
             inline Mat4 Mat4::operator*(const Mat4& other) const
