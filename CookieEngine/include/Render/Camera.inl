@@ -14,7 +14,7 @@ namespace Cookie
 
 		inline void Camera::Update()
 		{
-			viewMat = Core::Math::Mat4::RotateX(-rot.x) * Core::Math::Mat4::RotateY(-rot.y) * Core::Math::Mat4::Translate(-pos);
+			viewMat = Core::Math::Mat4::Inverse(Core::Math::Mat4::Translate(pos) * Core::Math::Mat4::RotateY(rot.y)  * Core::Math::Mat4::RotateX(rot.x));
 		}
 
 		inline void Camera::ResetPreviousMousePos()
@@ -31,19 +31,20 @@ namespace Cookie
 
 			ratio *= fov;
 			
-			Core::Math::Quat rotx(ratio.x, Core::Math::Vec3(0.0f, 1.0f, 0.0f));
+			Core::Math::Quat rotx(-ratio.x, Core::Math::Vec3(0.0f, 1.0f, 0.0f));
 			Core::Math::Quat roty(-ratio.y, Core::Math::Vec3(1.0f, 0.0f, 0.0f));
-			
-			Core::Math::Vec3 r = (roty + rotx).RotateVector(/*{ viewMat.e[3],viewMat.e[7],viewMat.e[11] }*/{ viewMat.c[2].x, viewMat.c[2].y, viewMat.c[2].z}).Normalize();
 
-			viewMat.Debug();
+			Core::Math::Mat4 viewProj = GetViewProj();
+			
+			Core::Math::Vec3 rx = rotx.RotateVector({ viewProj.c[2].x, viewProj.c[2].y, viewProj.c[2].z});
+			Core::Math::Vec3 ry = roty.RotateVector({ viewProj.c[2].x, viewProj.c[2].y, viewProj.c[2].z});
 
 			//Core::Math::Vec4 r = Core::Math::Mat4::Inverse(projMat * viewMat) * Core::Math::Vec4(ratio.x,ratio.y,1.0f,1.0f);
 			//
 			//Core::Math::Vec3 re = Core::Math::Vec3({ r.x,r.y,r.z }).Normalize();
 			//re.Debug();
 
-			return r;
+			return (rx + ry).Normalize();
 		}
 
 		/*======================= FREE FLY CAMERA =======================*/
