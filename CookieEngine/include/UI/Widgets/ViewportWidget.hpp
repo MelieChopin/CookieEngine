@@ -17,10 +17,10 @@ namespace Cookie::UIwidget
 		GLFWwindow* window;
 
 		const Cookie::Render::FrameBuffer&	frameBuffer;
-			  Cookie::Render::Camera&		camera;
+		std::shared_ptr<Cookie::Render::Camera>* camera;
 
 	public:
-		Viewport(GLFWwindow* _window, const Cookie::Render::FrameBuffer& _frameBuffer, Cookie::Render::Camera& _camera)
+		Viewport(GLFWwindow* _window, const Cookie::Render::FrameBuffer& _frameBuffer, std::shared_ptr<Cookie::Render::Camera>* _camera)
 			: WindowBase	("Viewport"),
 			  window		(_window),
 			  frameBuffer	(_frameBuffer),

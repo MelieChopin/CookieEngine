@@ -4,6 +4,7 @@
 #include "Core/Math/Mat4.hpp"
 #include "Core/Math/Calc.hpp"
 
+
 #include "Core/Time.hpp"
 
 namespace Cookie
@@ -23,8 +24,12 @@ namespace Cookie
 			private:
 				Core::Math::Mat4 projMat;
 				Core::Math::Mat4 viewMat;
-				double previousMouseX {0.0};
-				double previousMouseY {0.0};
+
+			protected:
+				bool activated = true;
+
+				float previousMouseX{ 0.0 };
+				float previousMouseY{ 0.0 };
 
 			public:
 				Core::Math::Vec3 pos = {0.0f,0.0f,0.0f};
@@ -36,15 +41,31 @@ namespace Cookie
 				Camera() {}
 				~Camera() {}
 
-				inline Core::Math::Mat4 GetViewProj() const;
-				inline void SetProj(float yFov, float aspect, float n, float f);
-				
-				inline void UpdateFreeFly(GLFWwindow* window);
-				inline void UpdateFreeFlyPos(GLFWwindow* window);
-				inline void UpdateFreeFlyRot(GLFWwindow* window);
-				inline void Update();
+				inline Core::Math::Mat4 GetViewProj() const {return projMat * viewMat;}
+				inline void SetProj(float yFov, float aspect, float n, float f) {projMat = Core::Math::Mat4::Perspective(yFov, aspect, n, f);}
+					    
+				inline virtual void Update() = 0;
 
-				inline void ResetPreviousMousePos(GLFWwindow* window);
+				inline void Activate() { activated = true; }
+				inline void Deactivate() { activated = false; }
+
+				inline virtual void ResetPreviousMousePos();
+					   
+		};
+
+		class FreeFlyCam : public Camera
+		{
+			private:
+
+
+			public:
+				FreeFlyCam() {}
+				~FreeFlyCam() {}
+
+			inline void UpdateFreeFlyPos();
+			inline void UpdateFreeFlyRot();
+			inline void Update()override;
+
 		};
 	}
 }

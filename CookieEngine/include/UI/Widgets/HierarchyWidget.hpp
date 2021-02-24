@@ -20,10 +20,10 @@ namespace Cookie::UIwidget
 
 	public:
 		Hierarchy(Cookie::ECS::Coordinator& _coordinator, Inspector* _inspector, Cookie::Resources::ResourcesManager& _resources)
-			: WindowBase	("Hierarchy"),
-			  coordinator	(_coordinator),
-			  inspector		(_inspector),
-			  resources     (_resources)
+			:	WindowBase	("Hierarchy"),
+				coordinator	(_coordinator),
+				resources     (_resources),
+				inspector(_inspector)
 		{}
 
 		void WindowDisplay() override;

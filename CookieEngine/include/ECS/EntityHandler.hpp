@@ -23,7 +23,7 @@ namespace Cookie
 
 			Entity() {}
 			Entity(unsigned int _id) : id{ _id } {}
-			Entity(const Entity& entity) : id{ entity.id }, signature{ entity.signature }, name{ entity.name }, needToBeRemoved{ entity.needToBeRemoved }, children{ entity.children }, tag{ entity.tag } {}
+			Entity(const Entity& entity) : id{ entity.id }, signature{ entity.signature }, name{ entity.name }, tag{ entity.tag }, needToBeRemoved{ entity.needToBeRemoved }, children{ entity.children } {}
 			~Entity() {}
 
 			void operator= (const Entity& entity)

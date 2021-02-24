@@ -14,10 +14,10 @@ namespace Cookie
 		class Renderer
 		{
 			private:
-				class ID3D11Device*				device		= nullptr;
-				class IDXGISwapChain*			swapchain	= nullptr;
-				class ID3D11RenderTargetView*	backbuffer	= nullptr;
-				class ID3D11DepthStencilView*	depthBuffer = nullptr;
+				struct ID3D11Device*			device		= nullptr;
+				struct IDXGISwapChain*			swapchain	= nullptr;
+				struct ID3D11RenderTargetView*	backbuffer	= nullptr;
+				struct ID3D11DepthStencilView*	depthBuffer = nullptr;
 				
 			public:
 				RendererRemote					remote;

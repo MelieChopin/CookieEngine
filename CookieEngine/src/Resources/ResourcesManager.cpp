@@ -29,7 +29,11 @@ void ResourcesManager::Load(Render::Renderer& _renderer)
 
 	Loader loader;
 
-	AddShader(std::move(std::make_shared<Shader>(_renderer)));
+	if (GetDefaultShader() == nullptr)
+	{
+		std::shared_ptr<Shader> dfltShader = std::make_shared<Shader>(_renderer);
+		AddShader(std::move(dfltShader));
+	}
 
 	for (unsigned int i = 0; i < gltfFiles.size(); i++)
 	{

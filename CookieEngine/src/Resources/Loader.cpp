@@ -44,7 +44,10 @@ void Loader::InitMeshes(aiMesh** meshes, unsigned int nMeshes, ResourcesManager&
 	{
 		aiMesh* iMesh = meshes[i];
 		if (!_resources.HasMesh(iMesh->mName.C_Str()))
-			_resources.AddMesh(std::move(std::make_shared<Mesh>(iMesh, _renderer)));
+		{
+			std::shared_ptr<Mesh> newMesh = std::make_shared<Mesh>(iMesh, _renderer);
+			_resources.AddMesh(std::move(newMesh));
+		}
 	}
 
 }
@@ -60,9 +63,10 @@ void Loader::InitTextures(const char* pathName, aiMaterial** materials, unsigned
 			std::string fullpath = (std::string(pathName) + '/' + std::string(path.C_Str())).c_str();
 
 			if (!_resources.HasTexture(fullpath.c_str()))
-				_resources.AddTexture(std::move(std::make_shared<Texture>(_renderer, fullpath.c_str())));
-
-			printf("%s\n", (std::string(pathName) + std::string(path.C_Str())).c_str());
+			{
+				std::shared_ptr<Texture> newTex = std::make_shared<Texture>(_renderer, fullpath.c_str());
+				_resources.AddTexture(std::move(newTex));
+			}
 		}
 	}
 }

@@ -11,18 +11,28 @@ Engine::Engine() :
     window{}, renderer{ window }, ui{ window.window, renderer }, frameBuffer{ resources,renderer }
 {
     resources.Load(renderer);
-    camera.SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width / renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
-    camera.Update();
+    camera = std::make_shared<Render::FreeFlyCam>();
+    camera->SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width / renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+    camera->pos = { 0.0f,0.0f,5.0f };
+    camera->Update();
+    camera->Deactivate();
     scene.reserve(MaxScene);
     scene.push_back(Editor::Scene(resources));
     scene.push_back(Editor::Scene(resources));
     scene[0].LoadScene(coordinator);
+    ImGui::GetIO().AddInputCharacter(GLFW_KEY_W);
+    ImGui::GetIO().AddInputCharacter(GLFW_KEY_S);
+    ImGui::GetIO().AddInputCharacter(GLFW_KEY_A);
+    ImGui::GetIO().AddInputCharacter(GLFW_KEY_D);
+    ImGui::GetIO().AddInputCharacter(GLFW_KEY_SPACE);
+    ImGui::GetIO().AddInputCharacter(GLFW_KEY_LEFT_CONTROL);
 }
 
 Engine::~Engine()
 {
 
 }
+
 /*
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -56,7 +66,7 @@ void Engine::Run()
     ui.AddWindow(insp);
     ui.AddWindow(new UIwidget::Hierarchy(coordinator, insp, resources));
     
-    ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, camera));
+    ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, &camera));
     //ui.AddWindow(new UIwidget::GamePort);
 
     ui.AddWindow(new UIwidget::Console(Core::Debug::Summon()));
@@ -67,8 +77,6 @@ void Engine::Run()
     {
         Core::UpdateTime();
 
-        camera.ResetPreviousMousePos(window.window);
-
         // Present frame
         glfwPollEvents();
 
@@ -78,15 +86,14 @@ void Engine::Run()
         renderer.ClearFrameBuffer(frameBuffer);
         renderer.SetFrameBuffer(frameBuffer);
 
-        if(ui.mouseCaptured)
-            camera.UpdateFreeFly(window.window);
+        camera->Update();
 
         //----------------COLLISION-------------------------------
-        Cookie::Core::Math::Vec3 firstPoint = camera.pos;
-        Cookie::Core::Math::Vec4 view = camera.GetViewProj().c[2];
-        Cookie::Core::Math::Vec3 cameraTarget{ view.x, view.y, view.z };
-        Cookie::Core::Math::Vec3 secondPoint = camera.pos + cameraTarget * 50;
-        Cookie::Core::Math::Vec3 result;
+        //Cookie::Core::Math::Vec3 firstPoint = camera.pos;
+        //Cookie::Core::Math::Vec4 view = camera.GetViewProj().c[2];
+        //Cookie::Core::Math::Vec3 cameraTarget{ view.x, view.y, view.z };
+        //Cookie::Core::Math::Vec3 secondPoint = camera.pos + cameraTarget * 50;
+        //Cookie::Core::Math::Vec3 result;
         //bool hit = scene[0].LinePlane(result, firstPoint, secondPoint);
        /* if (hit == true)
             std::cout << "hit" << " \n";
@@ -117,7 +124,7 @@ void Engine::Run()
         //std::cout << scene.size() << "\n";
 
         coordinator.ApplySystemVelocity();
-        coordinator.ApplyDraw(renderer.remote, camera.GetViewProj());
+        coordinator.ApplyDraw(renderer.remote, camera->GetViewProj());
         renderer.SetBackBuffer();
         //frameBuffer.Draw(renderer.remote);
         
@@ -144,6 +151,6 @@ void Engine::TryResizeWindow()
 
         renderer.ResizeBuffer(width,height);
         frameBuffer.Resize(renderer);
-        camera.SetProj(Core::Math::ToRadians(60.f),(float)width/(float)height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+        camera->SetProj(Core::Math::ToRadians(60.f),(float)width/(float)height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     }
 }
