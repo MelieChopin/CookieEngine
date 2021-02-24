@@ -106,6 +106,31 @@ bool FrameBuffer::CreateRenderTargetView(Renderer& _renderer)
     return true;
 }
 
+void FrameBuffer::Resize(Renderer& _renderer)
+{
+    if (texBuffer)
+    {
+        texBuffer->Release();
+        texBuffer = nullptr;
+    }
+    if (shaderResource)
+    {
+        shaderResource->Release();
+        shaderResource = nullptr;
+    }
+    if (renderTargetView)
+    {
+        renderTargetView->Release();
+        renderTargetView = nullptr;
+    }
+
+    if (CreateTexture(_renderer))
+    {
+        CreateShaderResource(_renderer);
+        CreateRenderTargetView(_renderer);
+    }
+}
+
 void FrameBuffer::Draw(Render::RendererRemote& _remote)
 {
     if (shader)

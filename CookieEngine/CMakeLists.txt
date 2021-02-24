@@ -4,6 +4,8 @@
 cmake_minimum_required (VERSION 3.8)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(RESOURCE_DIR "Assets/")
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
@@ -61,10 +63,11 @@ set (SRC_FILES
     "${SRC_DIR}/UI/Widgets/UIwidgetBases.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgets.cpp" 
     "${SRC_DIR}/Resources/Shader.cpp"
+    "${SRC_DIR}/UI/Widgets/ConsoleWidget.cpp"
     "${SRC_DIR}/UI/Widgets/FileExplorerWidget.cpp"
     "${SRC_DIR}/UI/Widgets/HierarchyWidget.cpp"
     "${SRC_DIR}/UI/Widgets/InspectorWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/ConsoleWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/ViewportWidget.cpp"
     "${SRC_DIR}/Resources/Texture.cpp"
     "${SRC_DIR}/Render/FrameBuffer.cpp"
     "${SRC_DIR}/Editor/Scene.cpp")
@@ -76,13 +79,15 @@ set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 # Ajoutez une source à l'exécutable de ce projet.
 add_executable (CookieEngine  ${SUB_SYS} ${SRC_FILES} )
 
-set_property(TARGET CookieEngine PROPERTY CXX_STANDARD 17)
 set_target_properties(CookieEngine PROPERTIES CXX_STANDARD 17)
-set_property(TARGET CookieEngine PROPERTY CXX_STANDARD_REQUIRED ON)
-target_compile_features(CookieEngine PUBLIC cxx_std_17)
-target_include_directories(CookieEngine INTERFACE CXX_STANDARD 17)
-target_compile_features(CookieEngine PRIVATE cxx_std_17)
 
+target_include_directories(CookieEngine INTERFACE CXX_STANDARD 17)
+
+set_property(TARGET CookieEngine PROPERTY CXX_STANDARD 17)
+set_property(TARGET CookieEngine PROPERTY CXX_STANDARD_REQUIRED ON)
+
+target_compile_features(CookieEngine PUBLIC cxx_std_17)
+target_compile_features(CookieEngine PRIVATE cxx_std_17)
 
 target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/d3d11.lib")
 target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/d3dcompiler.lib")

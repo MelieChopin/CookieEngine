@@ -2,6 +2,7 @@
 #define __FRAME_BUFFER_HPP__
 
 #include <d3d11.h>
+#include <memory>
 
 namespace Cookie
 {
@@ -14,6 +15,7 @@ namespace Cookie
 
 	namespace Render
 	{
+		class Renderer;
 		class RendererRemote;
 
 		class FrameBuffer
@@ -31,12 +33,12 @@ namespace Cookie
 				bool CreateShaderResource(Renderer& _renderer);
 				bool CreateRenderTargetView(Renderer& _renderer);
 
-
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
 				FrameBuffer(Resources::ResourcesManager& _resources, Renderer& _renderer);
 				~FrameBuffer();
 
+				void Resize(Renderer& _renderer);
 				void Draw(Render::RendererRemote& _remote);
 
 				inline ID3D11Texture2D*const*			GetTexture()const			{ return &texBuffer; }

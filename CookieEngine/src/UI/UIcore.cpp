@@ -20,6 +20,7 @@ UIcore::UIcore(GLFWwindow* _window, const Cookie::Render::Renderer& _renderer)
 	CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableSetMousePos;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
@@ -67,10 +68,6 @@ void UIcore::UpdateUI()
 {
 	BeginFrame();
 
-	if (mouseCaptured)
-		ImGui::GetIO().MousePos = ImVec2(-FLT_MAX, -FLT_MAX); // Disable ImGui mouse handling
-
-
 	DockSpaceOverViewport(GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
 	// Main Window space
@@ -101,21 +98,6 @@ void UIcore::UpdateUI()
 		for (UIwidget::WindowBase* cOW : UIndows[menus.size()])
 		{
 			cOW->WindowDisplay();
-		}
-	}
-
-	// Mouse capture (Mouse right click to enable, escape key to disable)
-	{
-		if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE) && mouseCaptured)
-		{
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			mouseCaptured = false;
-		}
-
-		if (!ImGui::GetIO().WantCaptureMouse && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-		{
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			mouseCaptured = true;
 		}
 	}
 

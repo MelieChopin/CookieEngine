@@ -15,6 +15,9 @@ namespace Cookie
 			int width	= 0;
 			int height	= 0;
 
+			private:
+				void SetIcon();
+
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
 				Window();

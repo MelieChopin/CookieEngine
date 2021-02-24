@@ -51,28 +51,21 @@ void Engine::Run()
     ui.AddWItem(new UIwidget::ExitPannel(window.window), 0);
     ui.AddWindow(new UIwidget::FileExplorer);
     
-    UIwidget::Inspector* insp = new UIwidget::Inspector(coordinator, resources);
+    UIwidget::Inspector* insp = new UIwidget::Inspector(coordinator);
     ui.AddWindow(insp);
-    ui.AddWindow(new UIwidget::Hierarchy(coordinator, insp, resources));
+    ui.AddWindow(new UIwidget::Hierarchy(coordinator, insp));
     
-    ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, ui.mouseCaptured));
+    ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, camera));
     //ui.AddWindow(new UIwidget::GamePort);
 
     ui.AddWindow(new UIwidget::Console(Core::Debug::Summon()));
 
-    Core::Debug::Summon().Log("This is a Log.");
-    Core::Debug::Summon().Warning("This is a warning!");
-    Core::Debug::Summon().Error("This is an error!!");
-    Core::Debug::Summon().Exception("This is an exception!!!");
-
-    scene.push_back(Editor::Scene(resources));
-    //scene[1].InitScene(resources);
-
-    static bool start = false;
 
     while (!glfwWindowShouldClose(window.window))
     {
         Core::UpdateTime();
+
+        camera.ResetPreviousMousePos(window.window);
 
         // Present frame
         glfwPollEvents();
@@ -134,16 +127,20 @@ void Engine::Run()
 
 void Engine::TryResizeWindow()
 {
-    int width, height = 0;
+    int width = 0;
+    int height = 0;
 
     glfwGetWindowSize(window.window, &width, &height);
 
     if (window.width != width || window.height != height)
     {
+        Core::Debug::Summon().Log((std::to_string(width) + ' '+ std::to_string(height)).c_str());
+        printf("%d, %d\n", width, height);
         window.width = width;
         window.height = height;
 
         renderer.ResizeBuffer(width,height);
+        frameBuffer.Resize(renderer);
         camera.SetProj(Core::Math::ToRadians(60.f),(float)width/(float)height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     }
 }

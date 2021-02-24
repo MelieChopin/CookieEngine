@@ -263,7 +263,7 @@ void Renderer::Render()
 {
     // switch the back buffer and the front buffer
     remote.context->OMSetRenderTargets(1, &backbuffer, nullptr);
-    swapchain->Present(0, 0);
+    swapchain->Present(1, 0);
 }
 
 void Renderer::SetFrameBuffer(const FrameBuffer& frameBuffer)
