@@ -6,12 +6,15 @@
 #include <vector>
 
 using namespace Cookie;
+using namespace Cookie::Core::Math;
+using namespace Cookie::ECS;
 
 Engine::Engine() :
     window{}, renderer{ window }, ui{ window.window, renderer }, frameBuffer{ resources,renderer }
 {
     resources.Load(renderer);
-    camera.SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width / renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+    camera.SetProj(ToRadians(60.f), renderer.state.viewport.Width / renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+    camera.pos = {0, 12, 25};
     camera.Update();
     scene.reserve(MaxScene);
     scene.push_back(Editor::Scene(resources));
@@ -63,15 +66,30 @@ void Engine::Run()
 
     static bool start = false;
 
+    //Create default Ducks
+    {
+        coordinator.AddEntity(SIGNATURE_ALL_COMPONENT, resources, "Duck 1");
+        ComponentTransform& trs1 = coordinator.componentHandler->GetComponentTransform(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
+        trs1.localTRS.translation = { 10, 0, 0 };
+        trs1.localTRS.scale = { 0.02, 0.02, 0.02 };
+        coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).speed = 10;
+        coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).mesh = resources.GetMesh("LOD3spShape");
+        
+        coordinator.AddEntity(SIGNATURE_ALL_COMPONENT, resources, "Duck 2");
+        ComponentTransform& trs2 = coordinator.componentHandler->GetComponentTransform(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
+        trs2.localTRS.translation = { -10, 0, 0 };
+        trs2.localTRS.scale = { 0.02, 0.02, 0.02 };
+        coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).speed = 10;
+        coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).mesh = resources.GetMesh("LOD3spShape");
+    }
+
     while (!glfwWindowShouldClose(window.window))
     {
+        // Present frame
         Core::UpdateTime();
-
         camera.ResetPreviousMousePos(window.window);
 
-        // Present frame
         glfwPollEvents();
-
         TryResizeWindow();
 
         renderer.Clear();
@@ -81,40 +99,51 @@ void Engine::Run()
         if(ui.mouseCaptured)
             camera.UpdateFreeFly(window.window);
 
-        //----------------COLLISION-------------------------------
-        Cookie::Core::Math::Vec3 firstPoint = camera.pos;
-        Cookie::Core::Math::Vec4 view = camera.GetViewProj().c[2];
-        Cookie::Core::Math::Vec3 cameraTarget{ view.x, view.y, view.z };
-        Cookie::Core::Math::Vec3 secondPoint = camera.pos + cameraTarget * 50;
-        Cookie::Core::Math::Vec3 result;
-        //bool hit = scene[0].LinePlane(result, firstPoint, secondPoint);
-       /* if (hit == true)
-            std::cout << "hit" << " \n";
-        else
-            std::cout << "non \n";*/
-        //--------------------------------------------------------
+       //select unit or move selected
+       if (glfwGetMouseButton(window.window, GLFW_MOUSE_BUTTON_LEFT))
+       {        
+           //second condition not inside first "if" to not calculate ViewProj each frame
+           Vec4 view = camera.GetViewProj().c[2];
+           Vec3 result;
 
-        if (glfwGetKey(window.window, GLFW_KEY_P) == GLFW_PRESS)
-            scene[1].LoadScene(coordinator);
+           if (scene[0].LinePlane(result, camera.pos, camera.pos + Vec3{ view.x, view.y, view.z } *1000))
+           {
+               //move to
+               if (glfwGetKey(window.window, GLFW_KEY_LEFT_CONTROL) && coordinator.selectedEntity)
+               {
+                   ComponentRigidBody& rb = coordinator.componentHandler->GetComponentRigidBody(coordinator.selectedEntity->id);
+                   rb.targetPosition = {result.x, coordinator.componentHandler->GetComponentTransform(coordinator.selectedEntity->id).localTRS.translation.y, result.z};
+                   rb.goTowardTarget = true;
+               }
+               //select entity
+               else
+                   coordinator.SelectClosestMovableEntity(result);
+           }
+       }
 
-        if (glfwGetKey(window.window, GLFW_KEY_K) == GLFW_PRESS)
-            scene[0].LoadScene(coordinator);
+       if(coordinator.selectedEntity)
+           std::cout << coordinator.selectedEntity->name << std::endl;
+       else
+           std::cout << "no selected" << std::endl;
 
-        if (glfwGetKey(window.window, GLFW_KEY_U) == GLFW_PRESS)
-            start = false;
-
-        if (glfwGetKey(window.window, GLFW_KEY_O) == GLFW_PRESS && start == false)
+        //Scene
         {
-            if (scene.size() < MaxScene)
-                scene.push_back(Editor::Scene(resources));
-            else
-                std::cout << "OUT OF RANGE\n";
-            std::cout << scene.size() << "\n";
-            start = true;
+            if (glfwGetKey(window.window, GLFW_KEY_P) == GLFW_PRESS)
+                scene[1].LoadScene(coordinator);
+            if (glfwGetKey(window.window, GLFW_KEY_K) == GLFW_PRESS)
+                scene[0].LoadScene(coordinator);
+            if (glfwGetKey(window.window, GLFW_KEY_U) == GLFW_PRESS)
+                start = false;
+            if (glfwGetKey(window.window, GLFW_KEY_O) == GLFW_PRESS && start == false)
+            {
+                if (scene.size() < MaxScene)
+                    scene.push_back(Editor::Scene(resources));
+                else
+                    std::cout << "OUT OF RANGE\n";
+                std::cout << scene.size() << "\n";
+                start = true;
+            }
         }
-            
-
-        //std::cout << scene.size() << "\n";
 
         coordinator.ApplySystemVelocity();
         coordinator.ApplyDraw(renderer.remote, camera.GetViewProj());
