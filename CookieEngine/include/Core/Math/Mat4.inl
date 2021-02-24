@@ -360,10 +360,10 @@ namespace Cookie
             inline Vec4 Mat4::operator*(const Vec4& other) const
             {
                 Vec4 r;
-                r.x = other.x * c[0].e[0] + other.y * c[1].e[0] + other.z * c[2].e[0] + other.w * c[3].e[0];
-                r.y = other.x * c[0].e[1] + other.y * c[1].e[1] + other.z * c[2].e[1] + other.w * c[3].e[1];
-                r.z = other.x * c[0].e[2] + other.y * c[1].e[2] + other.z * c[2].e[2] + other.w * c[3].e[2];
-                r.w = other.x * c[0].e[3] + other.y * c[1].e[3] + other.z * c[2].e[3] + other.w * c[3].e[3];
+                r.x = other.x * c[0].e[0] + other.y * c[0].e[1] + other.z * c[0].e[2] + other.w * c[0].e[3];
+                r.y = other.x * c[1].e[0] + other.y * c[1].e[1] + other.z * c[1].e[2] + other.w * c[1].e[3];
+                r.z = other.x * c[2].e[0] + other.y * c[2].e[1] + other.z * c[2].e[2] + other.w * c[2].e[3];
+                r.w = other.x * c[3].e[0] + other.y * c[3].e[1] + other.z * c[3].e[2] + other.w * c[3].e[3];
                 return r;
             }
             inline Mat4& Mat4::operator*=(const Mat4& other) { *this = *this * other; return *this; }
