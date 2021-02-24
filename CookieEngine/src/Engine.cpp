@@ -15,6 +15,7 @@ Engine::Engine() :
     camera.Update();
     scene.reserve(MaxScene);
     scene.push_back(Editor::Scene(resources));
+    scene.push_back(Editor::Scene(resources));
     scene[0].LoadScene(coordinator);
 }
 
@@ -51,15 +52,16 @@ void Engine::Run()
     ui.AddWItem(new UIwidget::ExitPannel(window.window), 0);
     ui.AddWindow(new UIwidget::FileExplorer);
     
-    UIwidget::Inspector* insp = new UIwidget::Inspector(coordinator);
+    UIwidget::Inspector* insp = new UIwidget::Inspector(coordinator, resources);
     ui.AddWindow(insp);
-    ui.AddWindow(new UIwidget::Hierarchy(coordinator, insp));
+    ui.AddWindow(new UIwidget::Hierarchy(coordinator, insp, resources));
     
     ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, camera));
     //ui.AddWindow(new UIwidget::GamePort);
 
     ui.AddWindow(new UIwidget::Console(Core::Debug::Summon()));
 
+    static bool start = false;
 
     while (!glfwWindowShouldClose(window.window))
     {
@@ -107,6 +109,7 @@ void Engine::Run()
                 scene.push_back(Editor::Scene(resources));
             else
                 std::cout << "OUT OF RANGE\n";
+            std::cout << scene.size() << "\n";
             start = true;
         }
             

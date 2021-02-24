@@ -11,22 +11,6 @@ using namespace Cookie::UIwidget;
 using namespace Cookie::ECS;
 
 
-void Viewport::WindowDisplay()
-{
-    ImGui::Begin(windowName, nullptr);
-
-	ImGui::Image(static_cast<ImTextureID>(*frameBuffer.GetShaderResource()), GetContentRegionAvail());
-
-	if (IsWindowHovered() && GetIO().MouseClicked[0])
-	{
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		mouseCapture = true;
-	}
-
-    ImGui::End();
-}
-
-
 void GamePort::WindowDisplay()
 {
     ImGui::Begin(windowName, nullptr);
