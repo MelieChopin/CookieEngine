@@ -13,39 +13,96 @@ void Console::WindowDisplay()
 	ImGui::Begin(windowName);
 
 	if (Button("Clear list"))
-	{ std::vector<Debug::Message>().swap(debugManager.storedMessages); }
+	{ std::vector<DebugMessage>().swap(debugManager.storedMessages); }
 
-	for (std::vector<Debug::Message>::reverse_iterator i = debugManager.storedMessages.rbegin(); i != debugManager.storedMessages.rend(); ++i)
+	if (Button(messagesGrouped ? "Ungroup messages" : "Group messages"))
+	{ messagesGrouped = !messagesGrouped; }
+
+	if		(messagesGrouped == true)	GroupedDisplay();
+	else								UngroupedDisplay();
+
+	ImGui::End();
+}
+
+
+void Console::UngroupedDisplay()
+{
+	for (std::vector<DebugMessage>::reverse_iterator i = debugManager.storedMessages.rbegin(); i != debugManager.storedMessages.rend(); ++i)
 	{
-		switch (i->messageType)
+		DisplayMessage(*i);
+
+		Separator();
+	}
+}
+
+void Console::GroupedDisplay()
+{
+	std::vector<DebugMessage*> firstOccurences;
+	std::vector<int> repetitions;
+
+	for (std::vector<DebugMessage>::reverse_iterator i = debugManager.storedMessages.rbegin(); i != debugManager.storedMessages.rend(); ++i)
+	{
+		bool isNew; isNew = true;
+
+		for (size_t fo = 0; fo < firstOccurences.size(); fo++)
 		{
-		case (Debug::Message::Log):
-			TextColored({ 0, 1, 1, 1 }, "Log:"); SameLine(85.f);
-			TextColored({ (255.f - i->colorVariant/2.f)/255.f, 1, 1, 1 }, "%s", i->text);
-			MessageColorBounce(1, i->colorVariant, i->bouncing, i->colorBounces);
-			break;
+			if ((strcmp(i->text, firstOccurences[fo]->text) == 0) && (i->messageType == firstOccurences[fo]->messageType))
+			{
+				isNew = false;
+				repetitions[fo]++;
+			}
+		}
 
-		case (Debug::Message::Warning):
-			TextColored({ 1, 1, 0, 1 }, "Warning:"); SameLine(85.f);
-			TextColored({ 1, 1, (255.f - i->colorVariant)/255.f, 1}, "%s", i->text);
-			MessageColorBounce(3, i->colorVariant, i->bouncing, i->colorBounces);
-			break;
-
-		case (Debug::Message::Error):
-			TextColored({ 1, 0, 0, 1 }, "Error:"); SameLine(85.f);
-			TextColored({ 1, (255.f - i->colorVariant)/255.f, (255.f - i->colorVariant)/255.f, 1 }, "%s", i->text);
-			MessageColorBounce(5, i->colorVariant, i->bouncing, i->colorBounces);
-			break;
-
-		case (Debug::Message::Exception):
-			TextColored({ 1, 0, 0, 1 }, "Exception:"); SameLine(85.f);
-			TextColored({ 1, (255.f - i->colorVariant)/255.f, (255.f - i->colorVariant)/255.f, 1 }, "%s", i->text);
-			MessageColorBounce(5, i->colorVariant, i->bouncing, i->colorBounces);
-			break;
+		if (isNew)
+		{
+			firstOccurences.push_back(&*i);
+			repetitions.push_back(0);
 		}
 	}
 
-	ImGui::End();
+
+	for (size_t i = 0; i < firstOccurences.size(); i++)
+	{
+		DisplayMessage(*firstOccurences[i]);
+
+		if (repetitions[i] > 0)
+		{
+			TextColored({0.5, 0.5, 0.5, 1}, "Has been repeated %d times", repetitions[i]);
+		}
+
+		Separator();
+	}
+}
+
+
+void Console::DisplayMessage(DebugMessage& message)
+{
+	switch (message.messageType)
+	{
+	case (DebugMessage::Log):
+		TextColored({ 0, 1, 1, 1 }, "Log:"); SameLine(85.f);
+		TextColored({ (255.f - message.colorVariant / 2.f) / 255.f, 1, 1, 1 }, "%s", message.text);
+		MessageColorBounce(1, message.colorVariant, message.bouncing, message.colorBounces);
+		break;
+
+	case (DebugMessage::Warning):
+		TextColored({ 1, 1, 0, 1 }, "Warning:"); SameLine(85.f);
+		TextColored({ 1, 1, (255.f - message.colorVariant) / 255.f, 1 }, "%s", message.text);
+		MessageColorBounce(3, message.colorVariant, message.bouncing, message.colorBounces);
+		break;
+
+	case (DebugMessage::Error):
+		TextColored({ 1, 0, 0, 1 }, "Error:"); SameLine(85.f);
+		TextColored({ 1, (255.f - message.colorVariant) / 255.f, (255.f - message.colorVariant) / 255.f, 1 }, "%s", message.text);
+		MessageColorBounce(5, message.colorVariant, message.bouncing, message.colorBounces);
+		break;
+
+	case (DebugMessage::Exception):
+		TextColored({ 1, 0, 0, 1 }, "Exception:"); SameLine(85.f);
+		TextColored({ 1, (255.f - message.colorVariant) / 255.f, (255.f - message.colorVariant) / 255.f, 1 }, "%s", message.text);
+		MessageColorBounce(5, message.colorVariant, message.bouncing, message.colorBounces);
+		break;
+	}
 }
 
 void Console::MessageColorBounce(unsigned short intensity, uint8_t& colorVariant, bool& bouncing, unsigned short& colorBounces)
