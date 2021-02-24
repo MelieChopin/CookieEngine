@@ -12,10 +12,11 @@ namespace Cookie
 {
 	namespace ECS
 	{
-		#define SIGNATURE_EMPTY     0b000
-		#define SIGNATURE_TRANSFORM 0b100
-		#define SIGNATURE_RIGIDBODY 0b010
-		#define SIGNATURE_MODEL     0b001
+		#define SIGNATURE_EMPTY         0b000
+		#define SIGNATURE_TRANSFORM     0b100
+		#define SIGNATURE_RIGIDBODY     0b010
+		#define SIGNATURE_MODEL         0b001
+		#define SIGNATURE_ALL_COMPONENT 0b111
 
 
 		class ComponentHandler

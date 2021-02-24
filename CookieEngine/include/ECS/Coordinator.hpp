@@ -16,9 +16,9 @@ namespace Cookie
 		class Coordinator
 		{
 		public:
-			EntityHandler*				entityHandler;
-			ComponentHandler*			componentHandler;
-
+			EntityHandler*     entityHandler    {nullptr};
+			ComponentHandler*  componentHandler {nullptr};
+			Entity*            selectedEntity   {nullptr};
 
 			Coordinator() {}
 			~Coordinator() {}
@@ -110,6 +110,22 @@ namespace Cookie
 						System::SystemDraw(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
 							componentHandler->GetComponentModel(entityHandler->entities[i].id),remote, viewProj);
 
+			}
+
+			void SelectClosestMovableEntity(const Core::Math::Vec3& position)
+			{
+				float distance = FLT_MAX;
+
+				for (int i = 0; i < entityHandler->livingEntities; ++i)
+					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_RIGIDBODY))
+					{
+						float newDistance = (position - componentHandler->GetComponentTransform(entityHandler->entities[i].id).localTRS.translation).Length();
+						if (newDistance < distance)
+						{
+							distance = newDistance;
+							selectedEntity = &entityHandler->entities[i];
+						}
+					}
 			}
 		};
 
