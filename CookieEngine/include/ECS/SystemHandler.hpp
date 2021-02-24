@@ -23,7 +23,18 @@ namespace Cookie
 			inline void SystemVelocity(ComponentTransform& trs, ComponentRigidBody& rb)
 			{
 				if (rb.goTowardTarget)
-					rb.linearVelocity = (rb.targetPosition - trs.localTRS.translation).Normalize() * rb.speed;
+				{
+					//if not reach the target Pos
+					if((rb.targetPosition - trs.localTRS.translation).Length() > 0.1)
+						rb.linearVelocity = (rb.targetPosition - trs.localTRS.translation).Normalize() * rb.speed;
+					//if reached
+					else
+					{
+						rb.goTowardTarget = false;
+						rb.targetPosition = {0, 0, 0};
+						rb.linearVelocity = {0, 0, 0};
+					}
+				}
 
 				trs.localTRS.translation += rb.linearVelocity * Core::deltaTime; 
 			}
