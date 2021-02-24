@@ -29,6 +29,7 @@ namespace Cookie
 		public:
 			Cookie::ECS::EntityHandler		entityHandler;
 			Cookie::ECS::ComponentHandler	componentHandler;
+			std::string						name = "NO NAME";
 			Plane							plane;
 			float							widthPlane;
 			float							lengthPlane;
@@ -40,6 +41,7 @@ namespace Cookie
 			~Scene();
 
 			void LoadScene(Cookie::ECS::Coordinator& coordinator);
+			void ChangeName(const char* newName) { name = newName; }
 			bool LinePlane(Cookie::Core::Math::Vec3& pointCollision, const Cookie::Core::Math::Vec3& firstPoint, const Cookie::Core::Math::Vec3& secondPoint);
 		};
 	}
