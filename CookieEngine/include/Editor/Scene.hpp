@@ -3,6 +3,7 @@
 
 #include "ECS/Coordinator.hpp"
 #include "Vec3.hpp"
+#include "ECS/Coordinator.hpp"
 
 namespace Cookie
 {
@@ -21,13 +22,16 @@ namespace Cookie
 			float dist;
 		};
 
+		#define MaxScene 20 
+
 		class Scene
 		{
 		public:
-			Cookie::ECS::Coordinator    coordinator;
-			Plane						plane;
-			float						widthPlane;
-			float						lengthPlane;
+			Cookie::ECS::EntityHandler		entityHandler;
+			Cookie::ECS::ComponentHandler	componentHandler;
+			Plane							plane;
+			float							widthPlane;
+			float							lengthPlane;
 
 		public:
 			Scene();
@@ -35,7 +39,7 @@ namespace Cookie
 			Scene(const Scene& _scene);
 			~Scene();
 
-			void InitScene(const Resources::ResourcesManager& resources);
+			void LoadScene(Cookie::ECS::Coordinator& coordinator);
 			bool LinePlane(Cookie::Core::Math::Vec3& pointCollision, const Cookie::Core::Math::Vec3& firstPoint, const Cookie::Core::Math::Vec3& secondPoint);
 		};
 	}

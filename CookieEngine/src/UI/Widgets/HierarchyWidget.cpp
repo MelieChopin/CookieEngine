@@ -27,7 +27,7 @@ void Hierarchy::WindowDisplay()
     }
 
 
-    EntityHandler& entityHandler = coordinator.entityHandler;
+    EntityHandler& entityHandler = *coordinator.entityHandler;
     for (size_t i = 0; i < entityHandler.livingEntities; i++)
     {
         std::string entityNameTag = entityHandler.entities[i].name + "##" + std::to_string(i);

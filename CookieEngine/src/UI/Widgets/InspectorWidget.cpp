@@ -31,19 +31,19 @@ void Inspector::WindowDisplay()
         {
             if (Button("Add component Transform"))  
             { 
-                coordinator.componentHandler.AddComponentTransform  (*selectedEntity);
+                coordinator.componentHandler->AddComponentTransform  (*selectedEntity);
                 CloseCurrentPopup();
             }
             
             if (Button("Add component RigidBody"))
             {
-                coordinator.componentHandler.AddComponentRigidBody  (*selectedEntity);
+                coordinator.componentHandler->AddComponentRigidBody  (*selectedEntity);
                 CloseCurrentPopup();
             }
             
             if (Button("Add component Model"))
             {
-                coordinator.componentHandler.AddComponentModel      (*selectedEntity);
+                coordinator.componentHandler->AddComponentModel      (*selectedEntity);
                 CloseCurrentPopup();
             }
 
@@ -58,7 +58,7 @@ void Inspector::TransformInterface()
 {
     if (TreeNode("Transform"))
     {
-        Transform& trsf = coordinator.componentHandler.GetComponentTransform(selectedEntity->id).localTRS;
+        Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity->id).localTRS;
 
         Text("Pos:"); DragFloat("X##POS", &trsf.translation.x); DragFloat("Y##POS", &trsf.translation.y); DragFloat("Z##POS", &trsf.translation.z);
         Text("Rot:"); DragFloat("X##ROT", &trsf.rotation.x);    DragFloat("Y##ROT", &trsf.rotation.y);    DragFloat("Z##ROT", &trsf.rotation.z);
@@ -68,7 +68,7 @@ void Inspector::TransformInterface()
         ImGui::NewLine();
         if (Button("Remove component##TRSF"))
         {
-            coordinator.componentHandler.RemoveComponentTransform(*selectedEntity);
+            coordinator.componentHandler->RemoveComponentTransform(*selectedEntity);
         }
 
         TreePop();
@@ -81,7 +81,7 @@ void Inspector::RigidBodyInterface()
 {
     if (TreeNode("RigidBody"))
     {
-        ComponentRigidBody& rigibod = coordinator.componentHandler.GetComponentRigidBody(selectedEntity->id);
+        ComponentRigidBody& rigibod = coordinator.componentHandler->GetComponentRigidBody(selectedEntity->id);
 
         Text("Velocity:"); DragFloat("X##VEL", &rigibod.linearVelocity.x); DragFloat("Y##VEL", &rigibod.linearVelocity.y); DragFloat("Z##VEL", &rigibod.linearVelocity.z);
 
@@ -95,7 +95,7 @@ void Inspector::RigidBodyInterface()
         ImGui::NewLine();
         if (Button("Remove component##RIBOD"))
         {
-            coordinator.componentHandler.RemoveComponentRigidBody(*selectedEntity);
+            coordinator.componentHandler->RemoveComponentRigidBody(*selectedEntity);
         }
 
         TreePop();
@@ -108,7 +108,7 @@ void Inspector::ModelCompInterface()
 {
     if (TreeNode("Model"))
     {
-        ComponentModel& modelComp = coordinator.componentHandler.GetComponentModel(selectedEntity->id);
+        ComponentModel& modelComp = coordinator.componentHandler->GetComponentModel(selectedEntity->id);
 
 //================//
 //===== MESH =====//
@@ -173,7 +173,7 @@ void Inspector::ModelCompInterface()
         ImGui::NewLine();
         if (Button("Remove component##MODEL"))
         {
-            coordinator.componentHandler.RemoveComponentModel(*selectedEntity);
+            coordinator.componentHandler->RemoveComponentModel(*selectedEntity);
         }
 
         TreePop();

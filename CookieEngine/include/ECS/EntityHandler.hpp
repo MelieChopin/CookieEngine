@@ -21,6 +21,7 @@ namespace Cookie
 			bool						needToBeRemoved{ false };
 			std::vector<unsigned int>   children;
 
+			Entity() {}
 			Entity(unsigned int _id) : id{ _id } {}
 			Entity(const Entity& entity) : id{ entity.id }, signature{ entity.signature }, name{ entity.name }, needToBeRemoved{ entity.needToBeRemoved }, children{ entity.children }, tag{ entity.tag } {}
 			~Entity() {}

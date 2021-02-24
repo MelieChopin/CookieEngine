@@ -22,6 +22,7 @@ namespace Cookie
 			Resources::ResourcesManager	resources;
 			Render::Camera				camera;
 			Render::FrameBuffer			frameBuffer;
+			ECS::Coordinator			coordinator;
 			std::vector<Editor::Scene>	scene;
 			int							indexScene = 0;
 

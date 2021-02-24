@@ -8,18 +8,21 @@ using namespace Cookie::Core::Math;
 
 Scene::Scene()
 {
+	entityHandler = Cookie::ECS::EntityHandler();
+	componentHandler = Cookie::ECS::ComponentHandler();
 }
 
 Scene::Scene(const Resources::ResourcesManager& resources)
 {
-	coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL, resources, "Map");
-	coordinator.componentHandler.componentModels[0].mesh = resources.GetMesh("Quad");
-	coordinator.componentHandler.componentModels[0].texture = resources.GetTextures()[0];
-	coordinator.componentHandler.componentTransforms[0].localTRS.rotation = Vec3(90, 0, 0);
-	coordinator.componentHandler.componentTransforms[0].localTRS.scale = Vec3(15, 15, 0);
+	Cookie::ECS::Coordinator::AddEntity(entityHandler, componentHandler, SIGNATURE_TRANSFORM + SIGNATURE_MODEL, resources, "Map");
+	componentHandler.componentModels[0].mesh = resources.GetMesh("Quad");
+	componentHandler.componentModels[0].texture = resources.GetTextures()[0];
+	componentHandler.componentTransforms[0].localTRS.rotation = Vec3(90, 0, 0);
+	componentHandler.componentTransforms[0].localTRS.scale = Vec3(15, 15, 0);
+	entityHandler.entities[0].tag = "MAP";
 	plane = { Vec3(0, 1, 0), 0 };
-	widthPlane = coordinator.componentHandler.componentTransforms[0].localTRS.scale.x;
-	lengthPlane = coordinator.componentHandler.componentTransforms[0].localTRS.scale.y;
+	widthPlane = componentHandler.componentTransforms[0].localTRS.scale.x;
+	lengthPlane = componentHandler.componentTransforms[0].localTRS.scale.y;
 }
 
 Scene::Scene(const Scene& _scene)
@@ -32,18 +35,12 @@ Scene::~Scene()
 
 }
 
-void Scene::InitScene(const Resources::ResourcesManager& resources)
+void Scene::LoadScene(Cookie::ECS::Coordinator& coordinator)
 {
-	coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL, resources, "Map");
-	coordinator.componentHandler.componentModels[0].mesh = resources.GetMesh("Quad");
-	coordinator.componentHandler.componentModels[0].texture = resources.GetTextures()[0];
-	coordinator.componentHandler.componentTransforms[0].localTRS.rotation = Vec3(90, 0, 0);
-	coordinator.componentHandler.componentTransforms[0].localTRS.scale = Vec3(15, 15, 0);
-	coordinator.entityHandler.entities[0].tag = "MAP";
-	plane = { Vec3(0, 1, 0), 0 };
-	widthPlane = coordinator.componentHandler.componentTransforms[0].localTRS.scale.x;
-	lengthPlane = coordinator.componentHandler.componentTransforms[0].localTRS.scale.y;
+	coordinator.entityHandler = &entityHandler;
+	coordinator.componentHandler = &componentHandler;
 }
+
 
 bool Scene::LinePlane(Cookie::Core::Math::Vec3& pointCollision, const Cookie::Core::Math::Vec3& firstPoint, const Cookie::Core::Math::Vec3& secondPoint)
 {
@@ -61,10 +58,10 @@ bool Scene::LinePlane(Cookie::Core::Math::Vec3& pointCollision, const Cookie::Co
 
 	pointCollision = firstPoint + line * t;
 
-	if (coordinator.componentHandler.componentTransforms.size() > 0)
+	if (componentHandler.componentTransforms.size() > 0)
 	{
-		widthPlane = coordinator.componentHandler.componentTransforms[0].localTRS.scale.x;
-		lengthPlane = coordinator.componentHandler.componentTransforms[0].localTRS.scale.y;
+		widthPlane = componentHandler.componentTransforms[0].localTRS.scale.x;
+		lengthPlane = componentHandler.componentTransforms[0].localTRS.scale.y;
 	}
 	
 	Vec3 temp = pointCollision;
