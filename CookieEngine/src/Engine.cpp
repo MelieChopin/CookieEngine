@@ -111,10 +111,10 @@ void Engine::Run()
        if (glfwGetMouseButton(window.window, GLFW_MOUSE_BUTTON_LEFT))
        {        
            //second condition not inside first "if" to not calculate ViewProj each frame
-           Vec4 view = camera.GetViewProj().c[2];
+           Vec4 view = camera->GetViewProj().c[2];
            Vec3 result;
 
-           if (scene[0].LinePlane(result, camera.pos, camera.pos + Vec3{ view.x, view.y, view.z } *1000))
+           if (scene[0].LinePlane(result, camera->pos, camera->pos + Vec3{ view.x, view.y, view.z } *1000))
            {
                //move to
                if (glfwGetKey(window.window, GLFW_KEY_LEFT_CONTROL) && coordinator.selectedEntity)
