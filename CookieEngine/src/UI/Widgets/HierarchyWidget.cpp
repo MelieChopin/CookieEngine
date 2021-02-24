@@ -1,14 +1,19 @@
+#include <vector>
+#include "Scene.hpp"
 #include "Coordinator.hpp"
 #include "InspectorWidget.hpp"
 #include "HierarchyWidget.hpp"
 
 #include <imgui.h>
-
+#include <imgui_stdlib.h>
 
 using namespace ImGui;
 using namespace Cookie::UIwidget;
+using namespace Cookie::Editor;
 using namespace Cookie::ECS;
 
+
+#include "Debug.hpp"
 
 void Hierarchy::WindowDisplay()
 {
@@ -26,6 +31,36 @@ void Hierarchy::WindowDisplay()
         EndPopup();
     }
 
+
+    for (size_t i = 0; i < scenes->size(); i++)
+    {
+        Scene& _scene = scenes->at(i);
+
+        std::string SceneNameTag;
+
+
+        if (&_scene.entityHandler == coordinator.entityHandler)
+        { SceneNameTag += "> "; }
+
+        SceneNameTag += _scene.name + "##" + std::to_string(i);
+        
+
+        if (Button(SceneNameTag.c_str()))
+        { inspector->SelectScene(&scenes->at(i)); }
+
+        if (BeginPopupContextItem(SceneNameTag.c_str()))
+        {
+            if (Button("Load scene"))
+            {
+                _scene.LoadScene(coordinator);
+                CloseCurrentPopup();
+            }
+
+            EndPopup();
+        }
+    }
+
+    Separator();
 
     EntityHandler& entityHandler = *coordinator.entityHandler;
     for (size_t i = 0; i < entityHandler.livingEntities; i++)

@@ -1,5 +1,6 @@
-#include "Coordinator.hpp"
 #include "Resources/ResourcesManager.hpp"
+#include "Coordinator.hpp"
+#include "Scene.hpp"
 #include "InspectorWidget.hpp"
 
 #include <imgui.h>
@@ -12,46 +13,50 @@ using namespace Cookie::ECS;
 
 void Inspector::WindowDisplay()
 {
-    ImGui::Begin(windowName, nullptr);
+    ImGui::Begin(windowName);
 
-    if (selectedEntity)
-    {
-        InputText("Name", &selectedEntity->name);
-
-        ImGui::NewLine();
-
-        if (selectedEntity->signature & SIGNATURE_TRANSFORM)    TransformInterface();
-        if (selectedEntity->signature & SIGNATURE_RIGIDBODY)    RigidBodyInterface();
-        if (selectedEntity->signature & SIGNATURE_MODEL)        ModelCompInterface();
-
-
-        if (Button("Add component...")) OpenPopup("Add component popup");
-
-        if (BeginPopup("Add component popup"))
-        {
-            if (Button("Add component Transform"))  
-            { 
-                coordinator.componentHandler->AddComponentTransform  (*selectedEntity);
-                CloseCurrentPopup();
-            }
-            
-            if (Button("Add component RigidBody"))
-            {
-                coordinator.componentHandler->AddComponentRigidBody  (*selectedEntity);
-                CloseCurrentPopup();
-            }
-            
-            if (Button("Add component Model"))
-            {
-                coordinator.componentHandler->AddComponentModel      (*selectedEntity);
-                CloseCurrentPopup();
-            }
-
-            EndPopup();
-        }
-    }
+    if      (selectedEntity)    EntityInspection();
+    else if (selectedScene)     SceneInspection();
 
     ImGui::End();
+}
+
+
+void Inspector::EntityInspection()
+{
+    InputText("Entity name", &selectedEntity->name);
+
+    ImGui::Separator();
+
+    if (selectedEntity->signature & SIGNATURE_TRANSFORM)    TransformInterface();
+    if (selectedEntity->signature & SIGNATURE_RIGIDBODY)    RigidBodyInterface();
+    if (selectedEntity->signature & SIGNATURE_MODEL)        ModelCompInterface();
+
+
+    if (Button("Add component...")) OpenPopup("Add component popup");
+
+    if (BeginPopup("Add component popup"))
+    {
+        if (Button("Add component Transform"))  
+        { 
+            coordinator.componentHandler->AddComponentTransform  (*selectedEntity);
+            CloseCurrentPopup();
+        }
+            
+        if (Button("Add component RigidBody"))
+        {
+            coordinator.componentHandler->AddComponentRigidBody  (*selectedEntity);
+            CloseCurrentPopup();
+        }
+            
+        if (Button("Add component Model"))
+        {
+            coordinator.componentHandler->AddComponentModel      (*selectedEntity);
+            CloseCurrentPopup();
+        }
+
+        EndPopup();
+    }
 }
 
 void Inspector::TransformInterface()
@@ -74,7 +79,7 @@ void Inspector::TransformInterface()
         TreePop();
     }
 
-    ImGui::NewLine();
+    ImGui::Separator();
 }
 
 void Inspector::RigidBodyInterface()
@@ -83,14 +88,17 @@ void Inspector::RigidBodyInterface()
     {
         ComponentRigidBody& rigibod = coordinator.componentHandler->GetComponentRigidBody(selectedEntity->id);
 
-        Text("Velocity:"); DragFloat("X##VEL", &rigibod.linearVelocity.x); DragFloat("Y##VEL", &rigibod.linearVelocity.y); DragFloat("Z##VEL", &rigibod.linearVelocity.z);
+        Text("Velocity:");          DragFloat("X##VEL", &rigibod.linearVelocity.x); DragFloat("Y##VEL", &rigibod.linearVelocity.y); DragFloat("Z##VEL", &rigibod.linearVelocity.z);
 
-        Text("Mass:"); DragFloat("##MASS", &rigibod.mass);
-        Text("Drag:"); DragFloat("##DRAG", &rigibod.drag);
+        Text("Mass:");              DragFloat("##MASS", &rigibod.mass);
+        Text("Drag:");              DragFloat("##DRAG", &rigibod.drag);
 
-        Text("TargetPos:"); DragFloat("X##TargetPos", &rigibod.targetPosition.x); DragFloat("Y##TargetPos", &rigibod.targetPosition.y); DragFloat("Z##TargetPos", &rigibod.targetPosition.z);
-        Text("Speed:"); DragFloat("##Speed", &rigibod.speed);
-        Text("GoTowardPosition:"); Checkbox("##GoTowardPosition", &rigibod.goTowardTarget);
+        Text("TargetPos:");         DragFloat("X##TargetPos", &rigibod.targetPosition.x); DragFloat("Y##TargetPos", &rigibod.targetPosition.y); DragFloat("Z##TargetPos", &rigibod.targetPosition.z);
+        
+        Text("Speed:");             DragFloat("##Speed", &rigibod.speed);
+        
+        Text("GoTowardPosition:");  Checkbox("##GoTowardPosition", &rigibod.goTowardTarget);
+
 
         ImGui::NewLine();
         if (Button("Remove component##RIBOD"))
@@ -101,7 +109,7 @@ void Inspector::RigidBodyInterface()
         TreePop();
     }
 
-    ImGui::NewLine();
+    ImGui::Separator();
 }
 
 void Inspector::ModelCompInterface()
@@ -179,5 +187,13 @@ void Inspector::ModelCompInterface()
         TreePop();
     }
 
-    ImGui::NewLine();
+    ImGui::Separator();
+}
+
+
+void Inspector::SceneInspection()
+{
+    InputText("Scene name", &selectedScene->name);
+
+    ImGui::Separator();
 }

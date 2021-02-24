@@ -3,7 +3,6 @@
 
 #include "UIwidgetBases.h"
 
-
 namespace Cookie::Core {class Debug;}
 
 

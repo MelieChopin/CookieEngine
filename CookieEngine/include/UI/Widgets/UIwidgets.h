@@ -3,7 +3,6 @@
 
 #include "UIwidgetBases.h"
 
-
 struct GLFWwindow;
 
 
