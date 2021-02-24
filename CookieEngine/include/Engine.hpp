@@ -8,20 +8,23 @@
 #include "Coordinator.hpp"
 #include "Render/Camera.hpp"
 #include "Render/FrameBuffer.hpp"
+#include "Scene.hpp"
 
 namespace Cookie
 {
 	class Engine
 	{
 		public:
-			Core::Window		window;
-			Core::Input 		input;
-			Render::Renderer	renderer;
-			Core::UIcore		ui;
-			ECS::Coordinator    coordinator;
-			Render::Camera		camera;
-			Render::FrameBuffer frameBuffer;
-			
+			Core::Window				window;
+			Core::Input 				input;
+			Render::Renderer			renderer;
+			Core::UIcore				ui;
+			Resources::ResourcesManager	resources;
+			Render::Camera				camera;
+			Render::FrameBuffer			frameBuffer;
+			ECS::Coordinator			coordinator;
+			std::vector<Editor::Scene>	scene;
+			int							indexScene = 0;
 
 		private:
 			void TryResizeWindow();

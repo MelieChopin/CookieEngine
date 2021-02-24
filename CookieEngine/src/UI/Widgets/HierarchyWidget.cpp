@@ -19,7 +19,7 @@ void Hierarchy::WindowDisplay()
     {
         if (Button("Create empty"))
         { 
-            coordinator.AddEntity(SIGNATURE_EMPTY);
+            coordinator.AddEntity(SIGNATURE_EMPTY, resources);
             CloseCurrentPopup();
         }
         
@@ -27,7 +27,7 @@ void Hierarchy::WindowDisplay()
     }
 
 
-    EntityHandler& entityHandler = coordinator.entityHandler;
+    EntityHandler& entityHandler = *coordinator.entityHandler;
     for (size_t i = 0; i < entityHandler.livingEntities; i++)
     {
         std::string entityNameTag = entityHandler.entities[i].name + "##" + std::to_string(i);
