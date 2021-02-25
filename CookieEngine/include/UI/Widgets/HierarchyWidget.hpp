@@ -2,9 +2,10 @@
 #define __HIERARCHY_W_HPP__
 
 #include "UIwidgetBases.h"
-#include "Resources/ResourcesManager.hpp"
 
-namespace Cookie::ECS {class Coordinator;}
+namespace Cookie::Resources { class ResourcesManager; }
+namespace Cookie::Editor	{ class Scene; }
+namespace Cookie::ECS		{ class Coordinator; }
 
 
 namespace Cookie::UIwidget
@@ -14,16 +15,19 @@ namespace Cookie::UIwidget
 
 	class Hierarchy final : public WindowBase
 	{
-		Cookie::ECS::Coordinator& coordinator;
-		Cookie::Resources::ResourcesManager& resources;
+		Cookie::Resources::ResourcesManager&	resources;
+		std::vector<Cookie::Editor::Scene>*		scenes;
+		Cookie::ECS::Coordinator&				coordinator;
+
 		Inspector* inspector;
 
 	public:
-		Hierarchy(Cookie::ECS::Coordinator& _coordinator, Inspector* _inspector, Cookie::Resources::ResourcesManager& _resources)
-			:	WindowBase	("Hierarchy"),
-				coordinator	(_coordinator),
-				resources     (_resources),
-				inspector(_inspector)
+		Hierarchy(Cookie::Resources::ResourcesManager& _resources, std::vector<Cookie::Editor::Scene>* _scenes, Cookie::ECS::Coordinator& _coordinator, Inspector* _inspector)
+			: WindowBase	("Hierarchy"),
+			  resources     (_resources),
+			  scenes		(_scenes),
+			  coordinator	(_coordinator),
+			  inspector		(_inspector)
 		{}
 
 		void WindowDisplay() override;

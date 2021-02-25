@@ -3,8 +3,11 @@
 
 #include "UIwidgetBases.h"
 
-
-namespace Cookie::Core {class Debug;}
+namespace Cookie::Core 
+{
+	class  Debug;
+	struct DebugMessage;
+}
 
 
 namespace Cookie::UIwidget
@@ -13,7 +16,13 @@ namespace Cookie::UIwidget
 	{
 		Cookie::Core::Debug& debugManager;
 
+		bool messagesGrouped = false;
+
 	private:
+		void UngroupedDisplay();
+		void GroupedDisplay();
+
+		void DisplayMessage(Cookie::Core::DebugMessage& message);
 		void MessageColorBounce(unsigned short intensity, uint8_t& colorVariant, bool& bouncing, unsigned short& colorBounces);
 
 	public:
