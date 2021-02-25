@@ -46,6 +46,7 @@ namespace Cookie
 				bool HasMesh(std::string _name) const;
 
 				std::shared_ptr<Shader> AddShader(std::shared_ptr<Shader>&& shader);
+				std::shared_ptr<Shader> AddShader(const std::shared_ptr<Shader>& shader);
 				std::shared_ptr<Shader> GetDefaultShader()const;
 
 				std::shared_ptr<Texture> AddTexture(std::shared_ptr<Texture>&& texture);

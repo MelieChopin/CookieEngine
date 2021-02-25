@@ -50,7 +50,7 @@ namespace Cookie
                     temp = Mat4::RotateZ(90);
                     std::cout << "test RotateZ with 90 :\n";
                     temp.Debug();
-                                        
+
                     temp = Mat4::TRS(Vec3(10, 20, 30), Vec3(ToRadians(90), ToRadians(180), ToRadians(270)), Vec3(1, 2, 3));
                     std::cout << "test TRS with T(10, 20, 30), R(rad(90), rad(180), rad(270)), S(1, 2, 3) :\n";
                     temp.Debug();
@@ -162,7 +162,7 @@ namespace Cookie
             }
             inline Mat4 Mat4::TRS(const Vec3& t, const Vec3& r, const Vec3& s)
             {
-                return Mat4::Translate(t) * Mat4::RotateY(r.y) *  Mat4::RotateX(r.x)*  Mat4::RotateZ(r.z)* Mat4::Scale(s);
+                return Mat4::Translate(t) * Mat4::RotateY(r.y) * Mat4::RotateX(r.x) * Mat4::RotateZ(r.z) * Mat4::Scale(s);
             }
             inline Mat4 Mat4::Perspective(float yFov, float aspect, float n, float f)
             {
@@ -182,12 +182,42 @@ namespace Cookie
                 m.c[2].e[0] = 0.f;
                 m.c[2].e[1] = 0.f;
                 m.c[2].e[2] = -((f + n) / (f - n));
-                m.c[2].e[3] = -((2.f * f * n) / (f - n)) ;
+                m.c[2].e[3] = -((2.f * f * n) / (f - n));
 
                 m.c[3].e[0] = 0.f;
                 m.c[3].e[1] = 0.f;
                 m.c[3].e[2] = -1.f;
                 m.c[3].e[3] = 0.f;
+
+                return m;
+            }
+            inline Mat4 Mat4::LookAt(const Vec3& eye, const Vec3& center, const Vec3& up)
+            {
+                Mat4 m;
+
+                Core::Math::Vec3 z = (eye - center).Normalize();
+                Core::Math::Vec3 y = up;
+                Core::Math::Vec3 x = y.Cross(z);
+                y = z.Cross(x);
+                x.Normalize();
+                y.Normalize();
+
+                m.c[0].e[0] = x.x;
+                m.c[1].e[0] = x.y;
+                m.c[2].e[0] = x.z;
+                m.c[3].e[0] = -x.Dot(eye);
+                m.c[0].e[1] = y.x;
+                m.c[1].e[1] = y.y;
+                m.c[2].e[1] = y.z;
+                m.c[3].e[1] = -y.Dot(eye);
+                m.c[0].e[2] = z.x;
+                m.c[1].e[2] = z.y;
+                m.c[2].e[2] = z.z;
+                m.c[3].e[2] = -z.Dot(eye);
+                m.c[0].e[3] = 0;
+                m.c[1].e[3] = 0;
+                m.c[2].e[3] = 0;
+                m.c[3].e[3] = 1.0f;
 
                 return m;
             }

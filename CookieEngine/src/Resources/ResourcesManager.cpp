@@ -107,6 +107,12 @@ std::shared_ptr<Shader> ResourcesManager::AddShader(std::shared_ptr<Shader>&& sh
 	return shaders.back();
 }
 
+std::shared_ptr<Shader> ResourcesManager::AddShader(const std::shared_ptr<Shader>& shader)
+{
+	shaders.push_back(shader);
+	return shaders.back();
+}
+
 std::shared_ptr<Shader> ResourcesManager::GetDefaultShader() const
 {
 	if (!shaders.empty())

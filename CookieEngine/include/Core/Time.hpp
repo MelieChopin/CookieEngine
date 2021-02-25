@@ -1,9 +1,7 @@
 #ifndef __TIME_HPP__
 #define __TIME_HPP__
 
-
-#include <GLFW/glfw3.h>
-
+#include <ImGui/imgui.h>
 
 namespace Cookie
 {
@@ -12,15 +10,11 @@ namespace Cookie
 		static float timeScale {1.f};
 		static float deltaTime {0.f};
 		static float unscaledDeltaTime {0.f};
-		static float lastFrame {0.f};
 
-		static void UpdateTime() 
+		static inline void UpdateTime() 
 		{
-			float currentFrame = glfwGetTime();
-
-			unscaledDeltaTime = (currentFrame - lastFrame);
+			unscaledDeltaTime = ImGui::GetIO().DeltaTime;
 			deltaTime = unscaledDeltaTime * timeScale;
-			lastFrame = currentFrame;
 		}
 	}
 }

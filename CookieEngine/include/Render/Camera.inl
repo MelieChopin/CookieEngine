@@ -1,7 +1,7 @@
 #ifndef __CAMERA_INL__
 #define __CAMERA_INL__
 
-#include <imgui.h>
+#include <GLFW/glfw3.h>
 #include <algorithm>
 #include <Debug.hpp>
 #include "Core/Math/Quat.hpp"
@@ -25,9 +25,9 @@ namespace Cookie
 
 		inline Core::Math::Vec3 Camera::MouseToWorldDir()
 		{
-			Core::Math::Vec2 mousePos = { ImGui::GetIO().MousePos.x - windowOffset.x,ImGui::GetIO().MousePos.y - windowOffset.y};
+			Core::Math::Vec2 mousePos = { { ImGui::GetIO().MousePos.x - windowOffset.x,ImGui::GetIO().MousePos.y - windowOffset.y} };
 
-			Core::Math::Vec2 ratio = { (mousePos.x / (width * 0.5f)) - 1.0f,  (-mousePos.y / (height * 0.5f)) + 1.0f };
+			Core::Math::Vec2 ratio = { { (mousePos.x / (width * 0.5f)) - 1.0f,  (-mousePos.y / (height * 0.5f)) + 1.0f } };
 
 			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(projMat * viewMat) * Core::Math::Vec4(ratio.x,ratio.y,1.0f,1.0f);
 
@@ -56,7 +56,7 @@ namespace Cookie
 			float sinYaw = std::sin(rot.y);
 
 			// Compute speed
-			float speed = (CAM_MOUSE_SPEED * ImGui::GetIO().DeltaTime);
+			float speed = (CAM_MOUSE_SPEED * Core::unscaledDeltaTime);
 			if (ImGui::GetIO().KeyShift)
 				speed *= CAM_MOUSE_SPEED_UP_SCALE;
 
@@ -122,7 +122,7 @@ namespace Cookie
 				previousMouseX = tempMouseX;
 				previousMouseY = tempMouseY;
 
-				float speed = (ImGui::GetIO().DeltaTime * CAM_MOUSE_SPEED * CAM_MOUSE_SPEED_UP_SCALE);
+				float speed = (Core::deltaTime * CAM_MOUSE_SPEED * CAM_MOUSE_SPEED_UP_SCALE);
 
 				pos -= Core::Math::Vec3(deltaMouseX, 0.0f, deltaMouseY) * speed;
 			}

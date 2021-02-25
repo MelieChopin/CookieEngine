@@ -3,8 +3,6 @@
 
 #include "Core/Math/Mat4.hpp"
 #include "Core/Math/Calc.hpp"
-
-
 #include "Core/Time.hpp"
 
 namespace Cookie
@@ -38,7 +36,7 @@ namespace Cookie
 			public:
 				float camFar = 0.0f;
 
-				Core::Math::Vec2 windowOffset = {0.0f,0.0f};
+				Core::Math::Vec2 windowOffset = { {0.0f,0.0f} };
 
 				Core::Math::Vec3 pos = {0.0f,0.0f,0.0f};
 				Core::Math::Vec3 rot = {0.0f,0.0f,0.0f};
@@ -68,7 +66,7 @@ namespace Cookie
 
 			public:
 				FreeFlyCam() {}
-				~FreeFlyCam() {}
+				virtual ~FreeFlyCam() {}
 
 			inline void UpdateFreeFlyPos();
 			inline void UpdateFreeFlyRot();
@@ -83,7 +81,7 @@ namespace Cookie
 
 		public:
 			GameCam() {}
-			~GameCam() {}
+			virtual ~GameCam() {}
 
 			inline void UpdateGamePos();
 			inline void Update()override;

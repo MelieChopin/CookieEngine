@@ -21,9 +21,7 @@ namespace Cookie::Core
 {
 	class UIcore
 	{
-		GLFWwindow*	window;
-
-
+		GLFWwindow*	window = nullptr;
 
 		const std::vector<const char*> menus = {"File", "Edit", "Windows", "Help"};
 
