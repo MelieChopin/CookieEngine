@@ -75,6 +75,19 @@ namespace Cookie
 			inline void Update()override;
 
 		};
+
+		class GameCam : public Camera
+		{
+		private:
+
+
+		public:
+			GameCam() {}
+			~GameCam() {}
+
+			inline void UpdateGamePos();
+			inline void Update()override;
+		};
 	}
 }
 
