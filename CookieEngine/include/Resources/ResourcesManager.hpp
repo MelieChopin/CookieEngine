@@ -50,6 +50,7 @@ namespace Cookie
 				std::shared_ptr<Shader> GetDefaultShader()const;
 
 				std::shared_ptr<Texture> AddTexture(std::shared_ptr<Texture>&& texture);
+				std::shared_ptr<Texture> AddTexture(const std::shared_ptr<Texture>& texture);
 				std::shared_ptr<Texture> GetTexture(std::string _name);
 				bool HasTexture(std::string _name);
 		};

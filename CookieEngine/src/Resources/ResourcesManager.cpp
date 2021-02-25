@@ -127,6 +127,12 @@ std::shared_ptr<Texture> ResourcesManager::AddTexture(std::shared_ptr<Texture>&&
 	return textures.back();
 }
 
+std::shared_ptr<Texture> ResourcesManager::AddTexture(const std::shared_ptr<Texture>& texture)
+{
+	textures.push_back(texture);
+	return textures.back();
+}
+
 std::shared_ptr<Texture> ResourcesManager::GetTexture(std::string _name)
 {
 	for (unsigned int i = 0; i < textures.size(); i++)

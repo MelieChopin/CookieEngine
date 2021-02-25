@@ -24,9 +24,13 @@ namespace Cookie
 				std::string name;
 
 			private:
+				bool CreateTextureFromColor(Render::Renderer& renderer,const Core::Math::Vec4& color);
+				bool CreateShaderResource(Render::Renderer& renderer);
+
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
 				Texture(Render::Renderer& renderer, const std::string& texPath);
+				Texture(Render::Renderer& renderer, const std::string& texName, const Core::Math::Vec4& color);
 				~Texture();
 
 

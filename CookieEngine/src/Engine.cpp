@@ -30,6 +30,7 @@ Engine::Engine() :
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_D);
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_SPACE);
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_LEFT_CONTROL);
+    resources.AddTexture(std::make_shared<Resources::Texture>(renderer, "Pink", Core::Math::Vec4(1.0f,0.5f,0.5f,1.0f)));
 }
 
 Engine::~Engine()
