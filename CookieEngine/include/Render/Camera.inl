@@ -29,22 +29,9 @@ namespace Cookie
 
 			Core::Math::Vec2 ratio = { (mousePos.x / (width * 0.5f)) - 1.0f,  (-mousePos.y / (height * 0.5f)) + 1.0f };
 
-			//ratio *= fov;
-			//
-			//Core::Math::Quat rotx(-ratio.x, Core::Math::Vec3(0.0f, 1.0f, 0.0f));
-			//Core::Math::Quat roty(-ratio.y, Core::Math::Vec3(1.0f, 0.0f, 0.0f));
-			//
-			//Core::Math::Mat4 viewProj = GetViewProj();
-			//
-			//Core::Math::Vec3 rx = rotx.RotateVector({ viewProj.c[2].x, viewProj.c[2].y, viewProj.c[2].z});
-			//Core::Math::Vec3 ry = roty.RotateVector({ viewProj.c[2].x, viewProj.c[2].y, viewProj.c[2].z});
-
 			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(projMat * viewMat) * Core::Math::Vec4(ratio.x,ratio.y,1.0f,1.0f);
 
-			Core::Math::Vec3 re = Core::Math::Vec3({ r.x/r.a,r.y/r.a,r.z/r.a }).Normalize();
-			re.Debug();
-
-			return (re).Normalize();
+			return Core::Math::Vec3({ r.x / r.a,r.y / r.a,r.z / r.a }).Normalize();
 		}
 
 		/*======================= FREE FLY CAMERA =======================*/
