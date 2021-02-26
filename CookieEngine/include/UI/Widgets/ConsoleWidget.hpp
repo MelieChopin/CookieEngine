@@ -12,7 +12,7 @@ namespace Cookie::Core
 
 namespace Cookie::UIwidget
 {
-	class Console final : public WindowBase
+	class Console final : public WItemBase
 	{
 		Cookie::Core::Debug& debugManager;
 
@@ -27,7 +27,7 @@ namespace Cookie::UIwidget
 
 	public:
 		Console(Cookie::Core::Debug& _debugManager)
-			: WindowBase	("Console"),
+			: WItemBase		("Console", false),
 			  debugManager	(_debugManager)
 		{}
 

@@ -10,7 +10,7 @@ using namespace Cookie::Core;
 
 void Console::WindowDisplay()
 {
-	ImGui::Begin(windowName);
+	if (!BeginWindow()) return;
 
 	if (Button("Clear list"))
 	{ std::vector<DebugMessage>().swap(debugManager.storedMessages); }
