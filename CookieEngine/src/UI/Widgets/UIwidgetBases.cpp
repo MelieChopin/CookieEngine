@@ -1,3 +1,4 @@
+
 #include "UIwidgetBases.h"
 
 #include <imgui.h>
@@ -31,6 +32,17 @@ void ItemBase::ItemDisplay()
 		MenuItem(itemName, shortcutSeq);
 }
 
+
+bool WItemBase::BeginWindow(int windowFlags)
+{
+	if (!opened) return false;
+
+	ImGui::Begin(windowName, &opened, windowFlags);
+
+	if (!opened) visible = true;
+	
+	return true;
+}
 
 void WItemBase::ItemDisplay()
 {

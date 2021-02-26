@@ -20,10 +20,7 @@ void GamePort::WindowDisplay()
 
 void ExitPannel::WindowDisplay()
 {
-	if (!opened) return;
-
-
-	ImGui::Begin(windowName, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
+	if (!BeginWindow(ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking)) return;
 
 	TextColored({ 1, 0, 0, 1 }, "Are you sure you want to close Cookie engine?");
 

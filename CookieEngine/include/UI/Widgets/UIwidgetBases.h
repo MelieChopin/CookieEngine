@@ -36,6 +36,8 @@ namespace Cookie::UIwidget
 	struct WItemBase : WindowBase, ItemBase
 	{
 	protected:
+		bool BeginWindow(int windowFlags = 0);
+		
 		inline void Flip()
 		{opened = !opened; visible = !visible;}
 
