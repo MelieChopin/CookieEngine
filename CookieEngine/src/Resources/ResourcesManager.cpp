@@ -29,7 +29,11 @@ void ResourcesManager::Load(Render::Renderer& _renderer)
 
 	Loader loader;
 
-	AddShader(std::move(std::make_shared<Shader>(_renderer)));
+	if (GetDefaultShader() == nullptr)
+	{
+		std::shared_ptr<Shader> dfltShader = std::make_shared<Shader>(_renderer);
+		AddShader(std::move(dfltShader));
+	}
 
 	for (unsigned int i = 0; i < gltfFiles.size(); i++)
 	{
@@ -103,6 +107,12 @@ std::shared_ptr<Shader> ResourcesManager::AddShader(std::shared_ptr<Shader>&& sh
 	return shaders.back();
 }
 
+std::shared_ptr<Shader> ResourcesManager::AddShader(const std::shared_ptr<Shader>& shader)
+{
+	shaders.push_back(shader);
+	return shaders.back();
+}
+
 std::shared_ptr<Shader> ResourcesManager::GetDefaultShader() const
 {
 	if (!shaders.empty())
@@ -117,7 +127,13 @@ std::shared_ptr<Texture> ResourcesManager::AddTexture(std::shared_ptr<Texture>&&
 	return textures.back();
 }
 
-std::shared_ptr<Texture> ResourcesManager::GetTexture(std::string _name)
+std::shared_ptr<Texture> ResourcesManager::AddTexture(const std::shared_ptr<Texture>& texture)
+{
+	textures.push_back(texture);
+	return textures.back();
+}
+
+std::shared_ptr<Texture> ResourcesManager::GetTexture(std::string _name)const
 {
 	for (unsigned int i = 0; i < textures.size(); i++)
 	{
@@ -130,7 +146,7 @@ std::shared_ptr<Texture> ResourcesManager::GetTexture(std::string _name)
 	return nullptr;
 }
 
-bool ResourcesManager::HasTexture(std::string _name)
+bool ResourcesManager::HasTexture(std::string _name)const
 {
 	if (textures.empty())
 		return false;

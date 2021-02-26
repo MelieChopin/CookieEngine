@@ -3,7 +3,6 @@
 
 #include "Core/Math/Mat4.hpp"
 #include "Core/Math/Calc.hpp"
-
 #include "Core/Time.hpp"
 
 namespace Cookie
@@ -21,30 +20,74 @@ namespace Cookie
 		class Camera
 		{
 			private:
-				Core::Math::Mat4 projMat;
-				Core::Math::Mat4 viewMat;
-				double previousMouseX {0.0};
-				double previousMouseY {0.0};
+				Core::Math::Mat4 projMat = Core::Math::Mat4::Identity();
+
+				float fov = 0.0f;
+
+			protected:
+				Core::Math::Mat4 viewMat = Core::Math::Mat4::Identity();
+
+				bool activated = true;
+
+				float previousMouseX{ 0.0 };
+				float previousMouseY{ 0.0 };
 
 			public:
+				float camFar = 0.0f;
+
+				float width = 0.0f;
+				float height = 0.0f;
+
+				Core::Math::Vec2 windowOffset = { {0.0f,0.0f} };
+
 				Core::Math::Vec3 pos = {0.0f,0.0f,0.0f};
 				Core::Math::Vec3 rot = {0.0f,0.0f,0.0f};
-
-			private:
-
+				
 			public:
 				Camera() {}
 				~Camera() {}
 
-				inline Core::Math::Mat4 GetViewProj() const;
-				inline void SetProj(float yFov, float aspect, float n, float f);
-				
-				inline void UpdateFreeFly(GLFWwindow* window);
-				inline void UpdateFreeFlyPos(GLFWwindow* window);
-				inline void UpdateFreeFlyRot(GLFWwindow* window);
-				inline void Update();
+				inline Core::Math::Mat4 GetViewProj() const {return projMat * viewMat;}
+				inline void SetProj(float yFov, float _width, float _height, float n, float f) { fov = yFov; width = _width; height = _height; camFar = f; projMat = Core::Math::Mat4::Perspective(yFov, width / height, n, f); }
+					    
+				inline virtual void Update() = 0;
 
-				inline void ResetPreviousMousePos(GLFWwindow* window);
+				inline void Activate() { activated = true; }
+				inline void Deactivate() { activated = false; }
+
+				inline virtual void ResetPreviousMousePos();
+
+				inline Core::Math::Vec3 MouseToWorldDir();
+					   
+		};
+
+		class FreeFlyCam : public Camera
+		{
+			private:
+
+
+			public:
+				FreeFlyCam() {}
+				virtual ~FreeFlyCam() {}
+
+			inline void UpdateFreeFlyPos();
+			inline void UpdateFreeFlyRot();
+			inline void Update()override;
+
+		};
+
+		class GameCam : public Camera
+		{
+		private:
+
+
+		public:
+			GameCam() {}
+			virtual ~GameCam() {}
+
+			inline void UpdateGamePos();
+			inline void UpdateZoom();
+			inline void Update()override;
 		};
 	}
 }

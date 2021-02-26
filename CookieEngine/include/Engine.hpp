@@ -1,6 +1,7 @@
 #ifndef __ENGINE_HPP__
 #define __ENGINE_HPP__
 
+#include <memory>
 #include "Render/Renderer.hpp"
 #include "Core/Window.hpp"
 #include "Input.hpp"
@@ -8,7 +9,7 @@
 #include "Coordinator.hpp"
 #include "Render/Camera.hpp"
 #include "Render/FrameBuffer.hpp"
-#include "Scene.hpp"
+#include "Editor/Scene.hpp"
 
 namespace Cookie
 {
@@ -20,7 +21,8 @@ namespace Cookie
 			Render::Renderer			renderer;
 			Core::UIcore				ui;
 			Resources::ResourcesManager	resources;
-			Render::Camera				camera;
+			std::shared_ptr<Render::Camera>	camera = nullptr;
+			bool						isFlyCam = false;
 			Render::FrameBuffer			frameBuffer;
 			ECS::Coordinator			coordinator;
 			std::vector<Editor::Scene>	scene;

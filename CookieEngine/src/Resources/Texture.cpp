@@ -34,6 +34,15 @@ Texture::Texture(Render::Renderer& renderer, const std::string& texPath) :
 		
 }
 
+Texture::Texture(Render::Renderer& _renderer, const std::string& texName, const Core::Math::Vec4& color):
+	name {texName}
+{
+	if (CreateTextureFromColor(_renderer, color))
+	{
+		CreateShaderResource(_renderer);
+	}
+}
+
 Texture::~Texture()
 {
 	if (texture)
@@ -45,4 +54,54 @@ Texture::~Texture()
 void Texture::Set(Render::RendererRemote& remote)
 {
 	remote.context->PSSetShaderResources(0, 1, &shaderResourceView);
+}
+
+/*==================== CREATE METHODS ========================*/
+
+bool Texture::CreateTextureFromColor(Render::Renderer& _renderer, const Core::Math::Vec4& color)
+{
+	D3D11_TEXTURE2D_DESC desc = {};
+
+	desc.Width = 1;
+	desc.Height = 1;
+	desc.MipLevels = 1;
+	desc.ArraySize = 1;
+	desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	desc.SampleDesc.Count = 1;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	desc.CPUAccessFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA subResource;
+	subResource.pSysMem = color.e;
+	subResource.SysMemPitch = 1;
+	subResource.SysMemSlicePitch = 0;
+
+	HRESULT result = _renderer.GetDevice()->CreateTexture2D(&desc, &subResource, (ID3D11Texture2D**)&texture);
+	if (FAILED(result))
+	{
+		printf("Failing Creating Texture: %s\n", std::system_category().message(result).c_str());
+		return false;
+	}
+	
+	return true;
+}
+
+bool Texture::CreateShaderResource(Render::Renderer& _renderer)
+{
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+
+	srvDesc.Format						= DXGI_FORMAT_R32G32B32A32_FLOAT;
+	srvDesc.ViewDimension				= D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels			= 1;
+	srvDesc.Texture2D.MostDetailedMip	= 0;
+
+	HRESULT result = _renderer.GetDevice()->CreateShaderResourceView(texture, &srvDesc, &shaderResourceView);
+	if (FAILED(result))
+	{
+		printf("Failing Creating FrameBuffer ShaderResource: %s\n", std::system_category().message(result).c_str());
+		return false;
+	}
+
+	return true;
 }

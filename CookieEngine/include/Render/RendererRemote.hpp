@@ -8,7 +8,7 @@ namespace Cookie
 		class RendererRemote
 		{
 			public:
-				class ID3D11DeviceContext* context = nullptr;
+				struct ID3D11DeviceContext* context = nullptr;
 
 
 			/* CONSTRUCTORS/DESTRUCTORS */

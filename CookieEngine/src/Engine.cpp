@@ -13,19 +13,33 @@ Engine::Engine() :
     window{}, renderer{ window }, ui{ window.window, renderer }, frameBuffer{ resources,renderer }
 {
     resources.Load(renderer);
-    camera.SetProj(ToRadians(60.f), renderer.state.viewport.Width / renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
-    camera.pos = {0, 12, 25};
-    camera.Update();
+    camera = std::make_shared<Render::GameCam>();
+    camera->SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width,renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+    camera->pos = { 0.0f,5.0f,5.0f };
+    camera->rot = { Core::Math::ToRadians(30.f) ,0.0f,0.0f};
+    camera->ResetPreviousMousePos();
+    camera->Update();
+    camera->Deactivate();
     scene.reserve(MaxScene);
     scene.push_back(Editor::Scene(resources));
     scene.push_back(Editor::Scene(resources));
     scene[0].LoadScene(coordinator);
+    ImGui::GetIO().AddInputCharacter(GLFW_KEY_W);
+    ImGui::GetIO().AddInputCharacter(GLFW_KEY_S);
+    ImGui::GetIO().AddInputCharacter(GLFW_KEY_A);
+    ImGui::GetIO().AddInputCharacter(GLFW_KEY_D);
+    ImGui::GetIO().AddInputCharacter(GLFW_KEY_SPACE);
+    ImGui::GetIO().AddInputCharacter(GLFW_KEY_LEFT_CONTROL);
+    resources.AddTexture(std::make_shared<Resources::Texture>(renderer, "Pink", Core::Math::Vec4(1.0f,0.5f,0.5f,1.0f)));
+    resources.AddTexture(std::make_shared<Resources::Texture>(renderer, "Assets/Floor_DefaultMaterial_BaseColor.png"));
+    coordinator.componentHandler->componentModels[0].texture = resources.GetTexture("Assets/Floor_DefaultMaterial_BaseColor.png");
 }
 
 Engine::~Engine()
 {
 
 }
+
 /*
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -59,12 +73,10 @@ void Engine::Run()
     ui.AddWindow(insp);
     ui.AddWindow(new UIwidget::Hierarchy(resources, &scene, coordinator, insp));
     
-    ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, camera));
+    ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, &camera));
     //ui.AddWindow(new UIwidget::GamePort);
 
     ui.AddWItem(new UIwidget::Console(Core::Debug::Summon()), 2);
-
-    static bool start = false;
 
     //Create default Ducks
     {
@@ -73,7 +85,10 @@ void Engine::Run()
         trs1.localTRS.translation = { 10, 0, 0 };
         trs1.localTRS.scale = { 0.02, 0.02, 0.02 };
         coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).speed = 10;
-        coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).mesh = resources.GetMesh("LOD3spShape");
+        ComponentModel& model1 = coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
+        model1.mesh = resources.GetMesh("LOD3spShape");
+        model1.texture = resources.GetTexture("Duck");
+
         
         coordinator.AddEntity(SIGNATURE_ALL_COMPONENT, resources, "Duck 2");
         ComponentTransform& trs2 = coordinator.componentHandler->GetComponentTransform(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
@@ -81,14 +96,17 @@ void Engine::Run()
         trs2.localTRS.scale = { 0.02, 0.02, 0.02 };
         coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).speed = 10;
         coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).mesh = resources.GetMesh("LOD3spShape");
+        ComponentModel& model2 = coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
+        model2.mesh = resources.GetMesh("LOD3spShape");
+        model2.texture = resources.GetTexture("Duck");
     }
 
     while (!glfwWindowShouldClose(window.window))
     {
         // Present frame
         Core::UpdateTime();
-        camera.ResetPreviousMousePos(window.window);
 
+        // Present frame
         glfwPollEvents();
         TryResizeWindow();
 
@@ -96,17 +114,39 @@ void Engine::Run()
         renderer.ClearFrameBuffer(frameBuffer);
         renderer.SetFrameBuffer(frameBuffer);
 
-        if(ui.mouseCaptured)
-            camera.UpdateFreeFly(window.window);
+        if (glfwGetMouseButton(window.window, GLFW_MOUSE_BUTTON_MIDDLE))
+        {
+            Core::Math::Vec3 pos = camera->pos;
+            Core::Math::Vec2 window = { camera->width,camera->height };
+            if (isFlyCam)
+            {
+                camera = std::make_shared<Render::GameCam>();
+                camera->rot = { Core::Math::ToRadians(30.f) ,0.0f,0.0f };
+            }
+            else
+            {
+                Core::Math::Vec3 rot = camera->rot;
+                camera = std::make_shared<Render::FreeFlyCam>();
+                camera->rot = rot;
+            }
+
+            camera->pos = pos;
+            isFlyCam = !isFlyCam;
+            camera->ResetPreviousMousePos();
+            camera->SetProj(Core::Math::ToRadians(60.f),window.x,window.y, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+            camera->Update();
+            camera->Deactivate();
+        }
+
+        camera->Update();
 
        //select unit or move selected
        if (glfwGetMouseButton(window.window, GLFW_MOUSE_BUTTON_LEFT))
        {        
            //second condition not inside first "if" to not calculate ViewProj each frame
-           Vec4 view = camera.GetViewProj().c[2];
            Vec3 result;
 
-           if (scene[0].LinePlane(result, camera.pos, camera.pos + Vec3{ view.x, view.y, view.z } *1000))
+           if (scene[0].LinePlane(result, camera->pos, camera->pos + camera->MouseToWorldDir() * camera->camFar))
            {
                //move to
                if (glfwGetKey(window.window, GLFW_KEY_LEFT_CONTROL) && coordinator.selectedEntity)
@@ -117,36 +157,29 @@ void Engine::Run()
                }
                //select entity
                else
+               {
+                   int prevEntity = coordinator.selectedEntity ? coordinator.selectedEntity->id : -1;
                    coordinator.SelectClosestMovableEntity(result);
+                   
+                   if (coordinator.selectedEntity && prevEntity != coordinator.selectedEntity->id)
+                   {
+
+                       insp->SelectEntity(coordinator.selectedEntity);
+                       ComponentModel& model = coordinator.componentHandler->GetComponentModel(coordinator.selectedEntity->id);
+                       model.texture = resources.GetTexture("Pink");
+
+                       if (prevEntity != -1)
+                       {
+                           ComponentModel& prevModel = coordinator.componentHandler->GetComponentModel((unsigned int)prevEntity);
+                           prevModel.texture = resources.GetTexture("Duck");
+                       }
+                   }
+               }
            }
        }
 
-       if(coordinator.selectedEntity)
-           std::cout << coordinator.selectedEntity->name << std::endl;
-       else
-           std::cout << "no selected" << std::endl;
-
-        //Scene
-        {
-            if (glfwGetKey(window.window, GLFW_KEY_P) == GLFW_PRESS)
-                scene[1].LoadScene(coordinator);
-            if (glfwGetKey(window.window, GLFW_KEY_K) == GLFW_PRESS)
-                scene[0].LoadScene(coordinator);
-            if (glfwGetKey(window.window, GLFW_KEY_U) == GLFW_PRESS)
-                start = false;
-            if (glfwGetKey(window.window, GLFW_KEY_O) == GLFW_PRESS && start == false)
-            {
-                if (scene.size() < MaxScene)
-                    scene.push_back(Editor::Scene(resources));
-                else
-                    std::cout << "OUT OF RANGE\n";
-                std::cout << scene.size() << "\n";
-                start = true;
-            }
-        }
-
         coordinator.ApplySystemVelocity();
-        coordinator.ApplyDraw(renderer.remote, camera.GetViewProj());
+        coordinator.ApplyDraw(renderer.remote, camera->GetViewProj());
         renderer.SetBackBuffer();
         //frameBuffer.Draw(renderer.remote);
         
@@ -173,6 +206,6 @@ void Engine::TryResizeWindow()
 
         renderer.ResizeBuffer(width,height);
         frameBuffer.Resize(renderer);
-        camera.SetProj(Core::Math::ToRadians(60.f),(float)width/(float)height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+        camera->SetProj(Core::Math::ToRadians(60.f),width,height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     }
 }

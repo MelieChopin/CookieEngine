@@ -16,7 +16,7 @@
 using namespace Cookie::Render;
 
 FrameBuffer::FrameBuffer(Resources::ResourcesManager& _resources, Renderer& _renderer):
-	quad{ _resources.HasMesh("Quad") ? _resources.GetMesh("Quad") : _resources.AddMesh(Core::Primitives::CreateQuad(_renderer))}, shader{_resources.GetDefaultShader() == nullptr? _resources.AddShader(std::move(std::make_shared<Resources::Shader>(_renderer))): _resources.GetDefaultShader() }
+	quad{ _resources.HasMesh("Quad") ? _resources.GetMesh("Quad") : _resources.AddMesh(Core::Primitives::CreateQuad(_renderer))}, shader{_resources.GetDefaultShader() == nullptr? _resources.AddShader(std::make_shared<Resources::Shader>(_renderer)): _resources.GetDefaultShader() }
 {
     if (CreateTexture(_renderer))
     {

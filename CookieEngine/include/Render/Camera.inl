@@ -1,29 +1,53 @@
 #ifndef __CAMERA_INL__
 #define __CAMERA_INL__
 
-#include <imgui.h>
+#include <GLFW/glfw3.h>
 #include <algorithm>
+#include <Debug.hpp>
+#include "Core/Math/Quat.hpp"
 
 namespace Cookie
 {
 	namespace Render
 	{
-		inline Core::Math::Mat4 Camera::GetViewProj() const
-		{ 
-			return projMat * viewMat;
-		}
-		inline void Camera::SetProj(float yFov, float aspect, float n, float f)
+		/*======================= CAMERA =======================*/
+
+		inline void Camera::Update()
 		{
-			projMat = Core::Math::Mat4::Perspective(yFov, aspect, n, f);
+			viewMat = Core::Math::Mat4::Inverse(Core::Math::Mat4::Translate(pos) * Core::Math::Mat4::RotateY(rot.y)  * Core::Math::Mat4::RotateX(rot.x));
 		}
 
-		inline void Camera::UpdateFreeFly(GLFWwindow* window)
+		inline void Camera::ResetPreviousMousePos()
 		{
-			UpdateFreeFlyPos(window);
-			UpdateFreeFlyRot(window);
-			Update();
+			previousMouseX = ImGui::GetIO().MousePos.x;
+			previousMouseY = ImGui::GetIO().MousePos.y;
+		}					 
+
+		inline Core::Math::Vec3 Camera::MouseToWorldDir()
+		{
+			Core::Math::Vec2 mousePos = { { ImGui::GetIO().MousePos.x - windowOffset.x,ImGui::GetIO().MousePos.y - windowOffset.y} };
+
+			Core::Math::Vec2 ratio = { { (mousePos.x / (width * 0.5f)) - 1.0f,  (-mousePos.y / (height * 0.5f)) + 1.0f } };
+
+			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(projMat * viewMat) * Core::Math::Vec4(ratio.x,ratio.y,1.0f,1.0f);
+
+			return Core::Math::Vec3({ r.x / r.a,r.y / r.a,r.z / r.a }).Normalize();
 		}
-		inline void Camera::UpdateFreeFlyPos(GLFWwindow* window)
+
+		/*======================= FREE FLY CAMERA =======================*/
+
+
+		inline void FreeFlyCam::Update()
+		{
+			if (activated)
+			{
+				UpdateFreeFlyPos();
+				UpdateFreeFlyRot();
+				Camera::Update();
+			}
+		}
+
+		inline void FreeFlyCam::UpdateFreeFlyPos()
 		{
 			// Spheric coordinates
 			float cosPitch = std::cos(rot.x);
@@ -32,19 +56,19 @@ namespace Cookie
 			float sinYaw = std::sin(rot.y);
 
 			// Compute speed
-			float speed = (CAM_MOUSE_SPEED * ImGui::GetIO().DeltaTime);
-			if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
+			float speed = (CAM_MOUSE_SPEED * Core::unscaledDeltaTime);
+			if (ImGui::GetIO().KeyShift)
 				speed *= CAM_MOUSE_SPEED_UP_SCALE;
 
 			// Move forward/backward
 			float forwardVelocity = 0.f;
-			if (glfwGetKey(window, GLFW_KEY_W)) forwardVelocity -= speed;
-			else if (glfwGetKey(window, GLFW_KEY_S)) forwardVelocity += speed;
+			if (ImGui::GetIO().KeysDown[GLFW_KEY_W]) forwardVelocity -= speed;
+			else if (ImGui::GetIO().KeysDown[GLFW_KEY_S]) forwardVelocity += speed;
 
 			// Strafe left/right
 			float strafeVelocity = 0.f;
-			if (glfwGetKey(window, GLFW_KEY_A))  strafeVelocity -= speed;
-			else if (glfwGetKey(window, GLFW_KEY_D)) strafeVelocity += speed;
+			if (ImGui::GetIO().KeysDown[GLFW_KEY_A])  strafeVelocity -= speed;
+			else if (ImGui::GetIO().KeysDown[GLFW_KEY_D]) strafeVelocity += speed;
 
 			// Forward movement
 			pos.z += cosYaw * cosPitch * forwardVelocity;
@@ -56,18 +80,19 @@ namespace Cookie
 			pos.x += cosYaw * strafeVelocity;
 
 			// Up movement
-			if (glfwGetKey(window, GLFW_KEY_SPACE))   pos.y += speed;
-			if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)) pos.y -= speed;
+			if (ImGui::GetIO().KeysDown[GLFW_KEY_SPACE]) pos.y += speed;
+			if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT_CONTROL]) pos.y -= speed;
 		}
-		inline void Camera::UpdateFreeFlyRot(GLFWwindow* window)
+
+		inline void FreeFlyCam::UpdateFreeFlyRot()
 		{
 			//Calculate DeltaMousePos, later on will put in inputs
-			double tempMouseX;
-			double tempMouseY;
-			glfwGetCursorPos(window, &tempMouseX, &tempMouseY);
+			float tempMouseX = ImGui::GetIO().MousePos.x;
+			float tempMouseY = ImGui::GetIO().MousePos.y;
 
-			double deltaMouseX = tempMouseX - previousMouseX;
-			double deltaMouseY = tempMouseY - previousMouseY;
+			float deltaMouseX = tempMouseX - previousMouseX;
+			float deltaMouseY = tempMouseY - previousMouseY;
+
 			previousMouseX = tempMouseX;
 			previousMouseY = tempMouseY;
 
@@ -80,20 +105,44 @@ namespace Cookie
 			rot.y = std::fmod(rot.y + Core::Math::TAU + Core::Math::PI, Core::Math::TAU) - Core::Math::PI; // Loop around -180,180
 		}
 
-		inline void Camera::Update()
-		{
-			viewMat = Core::Math::Mat4::RotateX(-rot.x) * Core::Math::Mat4::RotateY(-rot.y) * Core::Math::Mat4::Translate(-pos);
-		}
 
-		inline void Camera::ResetPreviousMousePos(GLFWwindow* window)
-		{
-			double tempMouseX;
-			double tempMouseY;
-			glfwGetCursorPos(window, &tempMouseX, &tempMouseY);
+		/* Game Camera*/
 
+		inline void GameCam::UpdateGamePos()
+		{
+			//Calculate DeltaMousePos, later on will put in inputs
+			float tempMouseX = ImGui::GetIO().MousePos.x;
+			float tempMouseY = ImGui::GetIO().MousePos.y;
+			
+			float deltaMouseX = (tempMouseX - previousMouseX) * CAM_MOUSE_SENSITIVITY_X;
+			float deltaMouseY = (tempMouseY - previousMouseY) * CAM_MOUSE_SENSITIVITY_Y;
+			
 			previousMouseX = tempMouseX;
 			previousMouseY = tempMouseY;
+			
+			float speed = (Core::deltaTime * CAM_MOUSE_SPEED * CAM_MOUSE_SPEED_UP_SCALE);
+			
+			pos += Core::Math::Vec3(deltaMouseX, 0.0f, deltaMouseY) * speed;
 		}
+
+		inline void GameCam::UpdateZoom()
+		{
+			pos -= Core::Math::Vec3({viewMat.c[2].x, viewMat.c[2].y, viewMat.c[2].z}) * ImGui::GetIO().MouseWheel * (CAM_MOUSE_SPEED * Core::deltaTime);
+		}
+
+
+		inline void GameCam::Update()
+		{
+			if (activated)
+			{
+				UpdateGamePos();
+				UpdateZoom();
+				Camera::Update();
+			}
+
+			ResetPreviousMousePos();
+		}
+
 	}
 }
 
