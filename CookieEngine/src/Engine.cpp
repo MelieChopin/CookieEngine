@@ -15,7 +15,7 @@ Engine::Engine() :
     resources.Load(renderer);
     camera = std::make_shared<Render::GameCam>();
     camera->SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width,renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
-    camera->pos = { 0.0f,5.0f,5.0f };
+    camera->pos = { 0.0f,20.0f,30.0f };
     camera->rot = { Core::Math::ToRadians(30.f) ,0.0f,0.0f};
     camera->ResetPreviousMousePos();
     camera->Update();
