@@ -22,6 +22,7 @@ namespace Cookie
 			Core::UIcore				ui;
 			Resources::ResourcesManager	resources;
 			std::shared_ptr<Render::Camera>	camera = nullptr;
+			bool						isFlyCam = false;
 			Render::FrameBuffer			frameBuffer;
 			ECS::Coordinator			coordinator;
 			std::vector<Editor::Scene>	scene;

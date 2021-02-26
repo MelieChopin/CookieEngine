@@ -43,7 +43,7 @@ namespace Cookie
 				inline const std::vector<std::shared_ptr<Shader>>&	GetShaders()	const	{return shaders; }
 				inline const std::vector<std::shared_ptr<Texture>>&	GetTextures()	const	{return textures;}
 
-				bool HasMesh(std::string _name) const;
+				bool HasMesh(std::string _name)const;
 
 				std::shared_ptr<Shader> AddShader(std::shared_ptr<Shader>&& shader);
 				std::shared_ptr<Shader> AddShader(const std::shared_ptr<Shader>& shader);
@@ -51,8 +51,8 @@ namespace Cookie
 
 				std::shared_ptr<Texture> AddTexture(std::shared_ptr<Texture>&& texture);
 				std::shared_ptr<Texture> AddTexture(const std::shared_ptr<Texture>& texture);
-				std::shared_ptr<Texture> GetTexture(std::string _name);
-				bool HasTexture(std::string _name);
+				std::shared_ptr<Texture> GetTexture(std::string _name)const;
+				bool HasTexture(std::string _name)const;
 		};
 	}
 }

@@ -16,7 +16,6 @@ Scene::Scene(const Resources::ResourcesManager& resources)
 {
 	Cookie::ECS::Coordinator::AddEntity(entityHandler, componentHandler, SIGNATURE_TRANSFORM + SIGNATURE_MODEL, resources, "Map");
 	componentHandler.componentModels[0].mesh = resources.GetMesh("Quad");
-	componentHandler.componentModels[0].texture = resources.GetTextures()[0];
 	componentHandler.componentTransforms[0].localTRS.rotation = Vec3(PI/2, 0, 0);
 	componentHandler.componentTransforms[0].localTRS.scale = Vec3(15, 15, 0);
 	entityHandler.entities[0].tag = "MAP";

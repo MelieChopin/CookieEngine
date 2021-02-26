@@ -110,22 +110,24 @@ namespace Cookie
 
 		inline void GameCam::UpdateGamePos()
 		{
-			if (ImGui::GetIO().MouseDown[ImGuiMouseButton_Left])
-			{
-				//Calculate DeltaMousePos, later on will put in inputs
-				float tempMouseX = ImGui::GetIO().MousePos.x;
-				float tempMouseY = ImGui::GetIO().MousePos.y;
+			//Calculate DeltaMousePos, later on will put in inputs
+			float tempMouseX = ImGui::GetIO().MousePos.x;
+			float tempMouseY = ImGui::GetIO().MousePos.y;
+			
+			float deltaMouseX = (tempMouseX - previousMouseX) * CAM_MOUSE_SENSITIVITY_X;
+			float deltaMouseY = (tempMouseY - previousMouseY) * CAM_MOUSE_SENSITIVITY_Y;
+			
+			previousMouseX = tempMouseX;
+			previousMouseY = tempMouseY;
+			
+			float speed = (Core::deltaTime * CAM_MOUSE_SPEED * CAM_MOUSE_SPEED_UP_SCALE);
+			
+			pos += Core::Math::Vec3(deltaMouseX, 0.0f, deltaMouseY) * speed;
+		}
 
-				float deltaMouseX = (tempMouseX - previousMouseX) * CAM_MOUSE_SENSITIVITY_X;
-				float deltaMouseY = (tempMouseY - previousMouseY) * CAM_MOUSE_SENSITIVITY_Y;
-
-				previousMouseX = tempMouseX;
-				previousMouseY = tempMouseY;
-
-				float speed = (Core::deltaTime * CAM_MOUSE_SPEED * CAM_MOUSE_SPEED_UP_SCALE);
-
-				pos -= Core::Math::Vec3(deltaMouseX, 0.0f, deltaMouseY) * speed;
-			}
+		inline void GameCam::UpdateZoom()
+		{
+			pos -= Core::Math::Vec3({viewMat.c[2].x, viewMat.c[2].y, viewMat.c[2].z}) * ImGui::GetIO().MouseWheel * (CAM_MOUSE_SPEED * Core::deltaTime);
 		}
 
 
@@ -134,6 +136,7 @@ namespace Cookie
 			if (activated)
 			{
 				UpdateGamePos();
+				UpdateZoom();
 				Camera::Update();
 			}
 

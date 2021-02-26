@@ -20,14 +20,13 @@ namespace Cookie
 		class Camera
 		{
 			private:
-				Core::Math::Mat4 projMat;
-				Core::Math::Mat4 viewMat;
+				Core::Math::Mat4 projMat = Core::Math::Mat4::Identity();
 
 				float fov = 0.0f;
-				float width = 0.0f;
-				float height = 0.0f;
 
 			protected:
+				Core::Math::Mat4 viewMat = Core::Math::Mat4::Identity();
+
 				bool activated = true;
 
 				float previousMouseX{ 0.0 };
@@ -35,6 +34,9 @@ namespace Cookie
 
 			public:
 				float camFar = 0.0f;
+
+				float width = 0.0f;
+				float height = 0.0f;
 
 				Core::Math::Vec2 windowOffset = { {0.0f,0.0f} };
 
@@ -84,6 +86,7 @@ namespace Cookie
 			virtual ~GameCam() {}
 
 			inline void UpdateGamePos();
+			inline void UpdateZoom();
 			inline void Update()override;
 		};
 	}

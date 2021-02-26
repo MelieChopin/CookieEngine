@@ -14,7 +14,6 @@ using namespace Cookie::Core;
 
 
 UIcore::UIcore(GLFWwindow* _window, const Cookie::Render::Renderer& _renderer)
-		: window (_window)
 {
 	IMGUI_CHECKVERSION();
 	CreateContext();

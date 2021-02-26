@@ -133,7 +133,7 @@ std::shared_ptr<Texture> ResourcesManager::AddTexture(const std::shared_ptr<Text
 	return textures.back();
 }
 
-std::shared_ptr<Texture> ResourcesManager::GetTexture(std::string _name)
+std::shared_ptr<Texture> ResourcesManager::GetTexture(std::string _name)const
 {
 	for (unsigned int i = 0; i < textures.size(); i++)
 	{
@@ -146,7 +146,7 @@ std::shared_ptr<Texture> ResourcesManager::GetTexture(std::string _name)
 	return nullptr;
 }
 
-bool ResourcesManager::HasTexture(std::string _name)
+bool ResourcesManager::HasTexture(std::string _name)const
 {
 	if (textures.empty())
 		return false;
