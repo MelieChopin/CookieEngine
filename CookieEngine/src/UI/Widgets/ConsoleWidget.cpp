@@ -10,16 +10,22 @@ using namespace Cookie::Core;
 
 void Console::WindowDisplay()
 {
-	if (!BeginWindow()) return;
+	static bool contentVisible = false;
+	if (!BeginWindow(&contentVisible)) return;
 
-	if (Button("Clear list"))
-	{ std::vector<DebugMessage>().swap(debugManager.storedMessages); }
+	if (contentVisible)
+	{
+		if (Button("Clear list"))
+		{ std::vector<DebugMessage>().swap(debugManager.storedMessages); }
 
-	if (Button(messagesGrouped ? "Ungroup messages" : "Group messages"))
-	{ messagesGrouped = !messagesGrouped; }
+		SameLine();
 
-	if		(messagesGrouped == true)	GroupedDisplay();
-	else								UngroupedDisplay();
+		if (Button(messagesGrouped ? "Ungroup messages" : "Group messages"))
+		{ messagesGrouped = !messagesGrouped; }
+
+		if		(messagesGrouped == true)	GroupedDisplay();
+		else								UngroupedDisplay();
+	}
 
 	ImGui::End();
 }
@@ -100,7 +106,7 @@ void Console::DisplayMessage(DebugMessage& message)
 	case (DebugMessage::Exception):
 		TextColored({ 1, 0, 0, 1 }, "Exception:"); SameLine(85.f);
 		TextColored({ 1, (255.f - message.colorVariant) / 255.f, (255.f - message.colorVariant) / 255.f, 1 }, "%s", message.text);
-		MessageColorBounce(5, message.colorVariant, message.bouncing, message.colorBounces);
+		MessageColorBounce(15, message.colorVariant, message.bouncing, message.colorBounces);
 		break;
 	}
 }

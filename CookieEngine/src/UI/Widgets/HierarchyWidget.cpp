@@ -17,70 +17,70 @@ using namespace Cookie::ECS;
 
 void Hierarchy::WindowDisplay()
 {
-    ImGui::Begin(windowName, nullptr, ImGuiWindowFlags_HorizontalScrollbar);
-
-
-    if (BeginPopupContextWindow("Out-object hierarchy menu"))
+    if (ImGui::Begin(windowName, nullptr, ImGuiWindowFlags_HorizontalScrollbar))
     {
-        if (Button("Create empty"))
-        { 
-            coordinator.AddEntity(SIGNATURE_EMPTY, resources);
-            CloseCurrentPopup();
-        }
-        
-        EndPopup();
-    }
-
-
-    for (size_t i = 0; i < scenes->size(); i++)
-    {
-        Scene& _scene = scenes->at(i);
-
-        std::string SceneNameTag;
-
-
-        if (&_scene.entityHandler == coordinator.entityHandler)
-        { SceneNameTag += "> "; }
-
-        SceneNameTag += _scene.name + "##" + std::to_string(i);
-        
-
-        if (Button(SceneNameTag.c_str()))
-        { inspector->SelectScene(&scenes->at(i)); }
-
-        if (BeginPopupContextItem(SceneNameTag.c_str()))
+        if (BeginPopupContextWindow("Out-object hierarchy menu"))
         {
-            if (Button("Load scene"))
-            {
-                _scene.LoadScene(coordinator);
+            if (Button("Create empty"))
+            { 
+                coordinator.AddEntity(SIGNATURE_EMPTY, resources);
                 CloseCurrentPopup();
             }
-
+        
             EndPopup();
         }
-    }
 
-    Separator();
 
-    EntityHandler& entityHandler = *coordinator.entityHandler;
-    for (size_t i = 0; i < entityHandler.livingEntities; i++)
-    {
-        std::string entityNameTag = entityHandler.entities[i].name + "##" + std::to_string(i);
-
-        if (Button(entityNameTag.c_str()))
+        for (size_t i = 0; i < scenes->size(); i++)
         {
-            inspector->SelectEntity(&entityHandler.entities[i]);
+            Scene& _scene = scenes->at(i);
+
+            std::string SceneNameTag;
+
+
+            if (&_scene.entityHandler == coordinator.entityHandler)
+            { SceneNameTag += "> "; }
+
+            SceneNameTag += _scene.name + "##" + std::to_string(i);
+        
+
+            if (Button(SceneNameTag.c_str()))
+            { inspector->SelectScene(&scenes->at(i)); }
+
+            if (BeginPopupContextItem(SceneNameTag.c_str()))
+            {
+                if (Button("Load scene"))
+                {
+                    _scene.LoadScene(coordinator);
+                    CloseCurrentPopup();
+                }
+
+                EndPopup();
+            }
         }
 
-        if (BeginPopupContextItem(entityNameTag.c_str()))
+        Separator();
+
+        EntityHandler& entityHandler = *coordinator.entityHandler;
+        for (size_t i = 0; i < entityHandler.livingEntities; i++)
         {
-            if (Button("Delete entity"))
+            std::string entityNameTag = entityHandler.entities[i].name + "##" + std::to_string(i);
+
+            if (Button(entityNameTag.c_str()))
             {
-                coordinator.RemoveEntity(entityHandler.entities[i]);
-                CloseCurrentPopup();
+                inspector->SelectEntity(&entityHandler.entities[i]);
             }
+
+            if (BeginPopupContextItem(entityNameTag.c_str()))
+            {
+                if (Button("Delete entity"))
+                {
+                    coordinator.RemoveEntity(entityHandler.entities[i]);
+                    CloseCurrentPopup();
+                }
             
-            EndPopup();
+                EndPopup();
+            }
         }
     }
 

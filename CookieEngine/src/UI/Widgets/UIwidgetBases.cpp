@@ -33,6 +33,17 @@ void ItemBase::ItemDisplay()
 }
 
 
+bool WItemBase::BeginWindow(bool* contentVisible, int windowFlags)
+{
+	if (!opened) return false;
+
+	*contentVisible = ImGui::Begin(windowName, &opened, windowFlags);
+
+	if (!opened) visible = true;
+
+	return true;
+}
+
 bool WItemBase::BeginWindow(int windowFlags)
 {
 	if (!opened) return false;

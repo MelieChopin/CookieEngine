@@ -13,11 +13,12 @@ using namespace Cookie::ECS;
 
 void Inspector::WindowDisplay()
 {
-    ImGui::Begin(windowName);
-
-    if      (selectedEntity)    EntityInspection();
-    else if (selectedScene)     SceneInspection();
-
+    if (ImGui::Begin(windowName))
+    {
+        if      (selectedEntity)    EntityInspection();
+        else if (selectedScene)     SceneInspection();
+    }
+    
     ImGui::End();
 }
 

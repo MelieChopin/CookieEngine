@@ -76,7 +76,12 @@ void Engine::Run()
     ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, &camera));
     //ui.AddWindow(new UIwidget::GamePort);
 
-    ui.AddWItem(new UIwidget::Console(Core::Debug::Summon()), 2);
+    ui.AddWItem(new UIwidget::Console(CDebug), 2);
+
+    CDebug.Log("I am mister Log");
+    CDebug.Warning("I am mister Warning");
+    CDebug.Error("I am mister Error");
+    CDebug.Exception("I am mister AAAAAAAAAAAAA");
 
     //Create default Ducks
     {
@@ -199,7 +204,7 @@ void Engine::TryResizeWindow()
 
     if (window.width != width || window.height != height)
     {
-        Core::Debug::Summon().Log((std::to_string(width) + ' '+ std::to_string(height)).c_str());
+        Core::DebugMessageHandler::Summon().Log((std::to_string(width) + ' '+ std::to_string(height)).c_str());
         printf("%d, %d\n", width, height);
         window.width = width;
         window.height = height;

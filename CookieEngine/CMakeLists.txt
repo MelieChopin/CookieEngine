@@ -52,6 +52,7 @@ set (SRC_FILES
     "${DEPS_SRC_DIR}/ImGui/imgui_tables.cpp"
     "${DEPS_SRC_DIR}/ImGui/imgui_widgets.cpp"
     "${DEPS_SRC_DIR}/ImGui/imgui_stdlib.cpp"
+    "${SRC_DIR}/Core/Debug.cpp"
     "${SRC_DIR}/Core/Window.cpp"
     "${SRC_DIR}/Render/Renderer.cpp"
     "${SRC_DIR}/Render/RendererRemote.cpp"

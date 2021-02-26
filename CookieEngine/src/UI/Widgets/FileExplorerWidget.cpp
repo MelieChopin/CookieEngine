@@ -61,19 +61,20 @@ bool FileExplorer::HasReleventFile(const std::filesystem::path& folderPath, cons
 
 void FileExplorer::WindowDisplay()
 {
-    ImGui::Begin(windowName, nullptr, ImGuiWindowFlags_HorizontalScrollbar);
+    if (ImGui::Begin(windowName, nullptr, ImGuiWindowFlags_HorizontalScrollbar))
+    {
+        static char searchQuery[25]{ 0 };
+        InputText("File search", &searchQuery[0], 25);
 
-    static char searchQuery[25]{ 0 };
-    InputText("File search", &searchQuery[0], 25);
+        ImGuiStyle& style = GetStyle();
+        style.FrameRounding = 25.f;
+        style.IndentSpacing = 30.0f;
 
-    ImGuiStyle& style = GetStyle();
-    style.FrameRounding = 25.f;
-    style.IndentSpacing = 30.0f;
+        ExploreFiles(fs::current_path().parent_path().parent_path().parent_path(), &searchQuery[0]);
 
-    ExploreFiles(fs::current_path().parent_path().parent_path().parent_path(), &searchQuery[0]);
-
-    style.FrameRounding = 0.f;
-    style.IndentSpacing = 21.0f;
+        style.FrameRounding = 0.f;
+        style.IndentSpacing = 21.0f;
+    }
 
     ImGui::End();
 }

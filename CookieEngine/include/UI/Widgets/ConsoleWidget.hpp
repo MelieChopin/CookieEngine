@@ -5,7 +5,7 @@
 
 namespace Cookie::Core 
 {
-	class  Debug;
+	class  DebugMessageHandler;
 	struct DebugMessage;
 }
 
@@ -14,7 +14,7 @@ namespace Cookie::UIwidget
 {
 	class Console final : public WItemBase
 	{
-		Cookie::Core::Debug& debugManager;
+		Cookie::Core::DebugMessageHandler& debugManager;
 
 		bool messagesGrouped = false;
 
@@ -26,7 +26,7 @@ namespace Cookie::UIwidget
 		void MessageColorBounce(unsigned short intensity, uint8_t& colorVariant, bool& bouncing, unsigned short& colorBounces);
 
 	public:
-		Console(Cookie::Core::Debug& _debugManager)
+		Console(Cookie::Core::DebugMessageHandler& _debugManager)
 			: WItemBase		("Console", false),
 			  debugManager	(_debugManager)
 		{}

@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <string>
-#include <iostream>
 
 namespace Cookie
 {
@@ -29,65 +28,47 @@ namespace Cookie
 				
 			} messageType;
 				
-			uint8_t			colorVariant;
-			unsigned short	colorBounces;
-			bool			bouncing = false;
+			unsigned short	colorBounces	= 0;
+			uint8_t			colorVariant	= 255;
+			bool			bouncing		= false;
 		};
 
 		// [Singleton class closely linked with the console widget. Can be used anywhere after being initialized.]
-		class Debug
+		class DebugMessageHandler
 		{
 		public:
 			std::vector<DebugMessage> storedMessages;
 
 
 		private:
-			Debug() = default;
+			DebugMessageHandler()						= default;
+			DebugMessageHandler(DebugMessageHandler&&)	= delete;
+			DebugMessageHandler(DebugMessageHandler& )	= delete;
 		
 		public:
 			// Summons the Debug manager.
-			inline static Debug& Summon()
-			{ static Debug debugSingleton; return debugSingleton; }
+			inline static DebugMessageHandler& Summon()
+			{ static DebugMessageHandler debugSingleton; return debugSingleton; }
 
-
-			inline void Log(const char* text)
-			{ storedMessages.push_back(DebugMessage{ text, DebugMessage::Log, 255, 0 }); }
-
-			inline void Log(const std::string& strext)
-			{ storedMessages.push_back(DebugMessage{ strext.c_str(), DebugMessage::Log, 255, 0 }); }
+			void Log(const char* text);
+			void Log(const std::string& strext);
 			
-			
-			inline void Warning(const char* text)
-			{ storedMessages.push_back(DebugMessage{ text, DebugMessage::Warning, 0, 0, true }); }
+			void Warning(const char* text);
+			void Warning(const std::string& strext);
 
-			inline void Warning(const std::string& strext)
-			{ storedMessages.push_back(DebugMessage{ strext.c_str(), DebugMessage::Warning, 0, 0, true }); }
-			
+			void Error(const char* text);
+			void Error(const std::string& strext);
 
-			inline void Error(const char* text)
-			{ storedMessages.push_back(DebugMessage{ text, DebugMessage::Error, 255, 3 }); }
-
-			inline void Error(const std::string& strext)
-			{ storedMessages.push_back(DebugMessage{ strext.c_str(), DebugMessage::Error, 255, 3 }); }
-			
-
-			inline void Exception(const char* text)
-			{ storedMessages.push_back(DebugMessage{ text, DebugMessage::Exception, 255, 10 }); }
-
-			inline void Exception(const std::string& strext)
-			{ storedMessages.push_back(DebugMessage{ strext.c_str(), DebugMessage::Exception, 255, 10 }); }
+			void Exception(const char* text);
+			void Exception(const std::string& strext);
 
 
-			static void Assertion(int line, const char* file, bool element)
-			{
-				if (!element)
-				{
-					std::cout << "\nINFO : \t" << "Problem insertion at " << line << " in " << file << "\n\n";
-					exit(1);
-				}
-			}
+			static void Assertion(int line, const char* file, bool element);
 		};
 	}
 }
+
+
+#define CDebug Cookie::Core::DebugMessageHandler::Summon()
 
 #endif // !__DEBUG__
