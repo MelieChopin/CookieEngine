@@ -101,6 +101,8 @@ void Engine::Run()
         model2.texture = resources.GetTexture("Duck");
     }
 
+    static bool camClicked = false;
+
     while (!glfwWindowShouldClose(window.window))
     {
         // Present frame
@@ -114,10 +116,10 @@ void Engine::Run()
         renderer.ClearFrameBuffer(frameBuffer);
         renderer.SetFrameBuffer(frameBuffer);
 
-        if (glfwGetMouseButton(window.window, GLFW_MOUSE_BUTTON_MIDDLE))
+        if (glfwGetMouseButton(window.window, GLFW_MOUSE_BUTTON_MIDDLE) && !camClicked)
         {
             Core::Math::Vec3 pos = camera->pos;
-            Core::Math::Vec2 window = { camera->width,camera->height };
+            Core::Math::Vec2 window = { { camera->width,camera->height } };
             if (isFlyCam)
             {
                 camera = std::make_shared<Render::GameCam>();
@@ -136,6 +138,11 @@ void Engine::Run()
             camera->SetProj(Core::Math::ToRadians(60.f),window.x,window.y, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
             camera->Update();
             camera->Deactivate();
+            camClicked = true;
+        }
+        else if (!glfwGetMouseButton(window.window, GLFW_MOUSE_BUTTON_MIDDLE) && camClicked)
+        {
+            camClicked = false;
         }
 
         camera->Update();
