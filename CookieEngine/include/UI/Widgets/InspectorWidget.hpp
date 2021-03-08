@@ -10,7 +10,7 @@ namespace Cookie::Editor	{ class Scene; }
 
 namespace Cookie::UIwidget
 {
-	class Inspector final : public WindowBase
+	class Inspector final : public WItemBase
 	{
 		Cookie::Resources::ResourcesManager& resources;
 		Cookie::ECS::Coordinator& coordinator;
@@ -30,7 +30,7 @@ namespace Cookie::UIwidget
 
 	public:
 		Inspector(Cookie::Resources::ResourcesManager& _resources, Cookie::ECS::Coordinator& _coordinator)
-			: WindowBase		("Inspector"),
+			: WItemBase			("Inspector", false),
 			  resources			(_resources),
 			  coordinator		(_coordinator)
 		{}

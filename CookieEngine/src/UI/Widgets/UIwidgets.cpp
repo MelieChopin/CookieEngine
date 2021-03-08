@@ -20,13 +20,14 @@ void GamePort::WindowDisplay()
 
 void ExitPannel::WindowDisplay()
 {
-	if (!BeginWindow(ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking)) return;
+	TryBeginWindow(ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking)
+	{
+		TextColored({ 1, 0, 0, 1 }, "Are you sure you want to close Cookie engine?");
 
-	TextColored({ 1, 0, 0, 1 }, "Are you sure you want to close Cookie engine?");
-
-	if (Button("Yes, close!", { 150, 50 })) glfwSetWindowShouldClose(window, true);
-	SameLine(160.f);
-	if (Button("Nooo, stay!", { 150, 50 })) Flip();
+		if (Button("Yes, close!", { 150, 50 })) glfwSetWindowShouldClose(window, true);
+		SameLine(160.f);
+		if (Button("Nooo, stay!", { 150, 50 })) Flip();
+	}
 
 	ImGui::End();
 }

@@ -9,14 +9,14 @@ namespace std::filesystem	{class path;}
 
 namespace Cookie::UIwidget
 {
-	class FileExplorer final : public WindowBase
+	class FileExplorer final : public WItemBase
 	{
 		void ExploreFiles(const std::filesystem::path& path, const char* researchQuery);
 		bool HasReleventFile(const std::filesystem::path& folderPath, const std::string& researchQuery);
 
 	public:
 		FileExplorer()
-			: WindowBase("File explorer")
+			: WItemBase("File explorer")
 		{}
 
 		void WindowDisplay() override;

@@ -10,10 +10,7 @@ using namespace Cookie::Core;
 
 void Console::WindowDisplay()
 {
-	static bool contentVisible = false;
-	if (!BeginWindow(&contentVisible)) return;
-
-	if (contentVisible)
+	TryBeginWindow()
 	{
 		if (Button("Clear list"))
 		{ std::vector<DebugMessage>().swap(debugManager.storedMessages); }
@@ -73,7 +70,7 @@ void Console::GroupedDisplay()
 
 		if (repetitions[i] > 0)
 		{
-			TextColored({0.5, 0.5, 0.5, 1}, "Has been repeated %d times", repetitions[i]);
+			TextColored({0.5, 0.5, 0.5, 1}, "Repeated +%d times", repetitions[i]);
 		}
 
 		Separator();

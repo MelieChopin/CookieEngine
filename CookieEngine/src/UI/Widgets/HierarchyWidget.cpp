@@ -13,11 +13,9 @@ using namespace Cookie::Editor;
 using namespace Cookie::ECS;
 
 
-#include "Debug.hpp"
-
 void Hierarchy::WindowDisplay()
 {
-    if (ImGui::Begin(windowName, nullptr, ImGuiWindowFlags_HorizontalScrollbar))
+    TryBeginWindow(ImGuiWindowFlags_HorizontalScrollbar)
     {
         if (BeginPopupContextWindow("Out-object hierarchy menu"))
         {

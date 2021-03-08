@@ -8,6 +8,10 @@ namespace Cookie::UIwidget
 	protected:
 		const char* windowName;
 		bool		opened;
+		bool		contentVisible = true;
+
+	protected:
+		virtual bool BeginWindow(int windowFlags = 0);
 
 	public:
 		WindowBase(const char* _windowName, bool _opened = true);
@@ -36,12 +40,10 @@ namespace Cookie::UIwidget
 	struct WItemBase : WindowBase, ItemBase
 	{
 	protected:
-		bool BeginWindow(bool* contentVisible, int windowFlags = 0);
-		bool BeginWindow(int windowFlags = 0);
-		
+		bool BeginWindow(int windowFlags = 0) final override;
+
 		inline void Flip()
 		{opened = !opened; visible = !visible;}
-
 
 	public:
 
@@ -86,6 +88,18 @@ namespace Cookie::UIwidget
 
 		virtual void ItemDisplay() override;
 	};
+
+
+	/* [Engine shortcut]
+		-> Usable inside WItems and Windows.
+
+		It will attempt to open the imgui window using the flags.
+
+		Will stop the function it is in if the window is not opened.
+		Use brackets: everything inside will be executed if the window's content is visible.
+	*/
+	#define TryBeginWindow(flags) if (!BeginWindow(flags)) return; if (contentVisible)
 }
+
 
 #endif
