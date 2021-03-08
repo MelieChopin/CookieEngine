@@ -23,9 +23,9 @@ namespace Cookie
 			private:
 				std::shared_ptr<Cookie::Resources::Mesh>	quad				{ nullptr };
 				std::shared_ptr<Cookie::Resources::Shader>	shader				{ nullptr };
-				ID3D11Texture2D*							texBuffer			= nullptr;
-				ID3D11ShaderResourceView*					shaderResource		= nullptr;
-				ID3D11RenderTargetView*						renderTargetView	= nullptr;
+				ID3D11Texture2D*							texBuffer			{ nullptr };
+				ID3D11ShaderResourceView*					shaderResource		{ nullptr };
+				ID3D11RenderTargetView*						renderTargetView	{ nullptr };
 
 
 			private:
@@ -35,7 +35,7 @@ namespace Cookie
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
-				FrameBuffer(Resources::ResourcesManager& _resources, Renderer& _renderer);
+				FrameBuffer(const Resources::ResourcesManager& _resources, Renderer& _renderer);
 				~FrameBuffer();
 
 				void Resize(Renderer& _renderer);

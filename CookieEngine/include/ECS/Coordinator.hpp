@@ -76,8 +76,8 @@ namespace Cookie
 				entity.name = "No Name";
 				entity.needToBeRemoved = false;
 
-				for (unsigned int i = 0; i < entity.children.size(); ++i)
-					componentHandler->GetComponentTransform(entity.children[i]).parentTRS = Core::Math::Mat4::Identity();
+				//for (unsigned int i = 0; i < entity.children.size(); ++i)
+				//	componentHandler->GetComponentTransform(entity.children[i]).parentTRS = Core::Math::Mat4::Identity();
 
 				//Switch the removed one with the last alive
 				entityHandler->livingEntities--;

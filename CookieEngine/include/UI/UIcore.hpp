@@ -2,7 +2,7 @@
 #define __UI_CORE_HPP_
 
 
-#include "UIwidgetBases.h"
+#include "UIwidgetBases.hpp"
 
 #include <vector>
 
@@ -30,14 +30,10 @@ namespace Cookie::Core
 		// All stored item elements of the engine UI.
 		std::vector<UIwidget::ItemBase*>	UItems[4];
 
-	public:
-		bool mouseCaptured = false;
-
 	private:
 		void BeginFrame();
 		void EndFrame();
 	
-
 	public:
 		UIcore(GLFWwindow* _window, const Cookie::Render::Renderer& _renderer);
 		void Terminate();

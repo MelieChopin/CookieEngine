@@ -1,7 +1,7 @@
 #ifndef __CONSOLE_W_HPP__
 #define __CONSOLE_W_HPP__
 
-#include "UIwidgetBases.h"
+#include "UIwidgetBases.hpp"
 
 namespace Cookie::Core 
 {

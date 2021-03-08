@@ -1,7 +1,7 @@
 #ifndef __VIEWPORT_W_HPP__
 #define __VIEWPORT_W_HPP__
 
-#include "UIwidgetBases.h"
+#include "UIwidgetBases.hpp"
 
 struct GLFWwindow;
 namespace Cookie::Core::Math	{ union Vec2; }

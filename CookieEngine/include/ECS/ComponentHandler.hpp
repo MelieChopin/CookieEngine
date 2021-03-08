@@ -4,6 +4,7 @@
 #include "ComponentTransform.hpp"
 #include "ComponentModel.hpp"
 #include "ComponentRigidBody.hpp"
+#include "Debug.hpp"
 
 #include <array>
 #include <unordered_map>
@@ -23,15 +24,12 @@ namespace Cookie
 		{
 		public:
 
-			//Transform
 			std::array<ComponentTransform, MAX_ENTITIES> componentTransforms;
-			//std::unordered_map<unsigned int, unsigned int> transformEntityIdToIndex;
-			//RigidBody
+
 			std::array<ComponentRigidBody, MAX_ENTITIES> componentRigidBodies;
-			//std::unordered_map<unsigned int, unsigned int> rigidBodyEntityIdToIndex;
-			//Model
+
 			std::array<ComponentModel, MAX_ENTITIES> componentModels;
-			//std::unordered_map<unsigned int, unsigned int> modelEntityIdToIndex;
+
 
 
 			ComponentHandler() {}
@@ -41,7 +39,7 @@ namespace Cookie
 			{
 				if (entity.signature & SIGNATURE_TRANSFORM)
 				{
-					std::cout << "Component Transform already present\n";
+					CDebug.Warning("Component Transform already present");
 					return;
 				}
 
@@ -51,7 +49,7 @@ namespace Cookie
 			{
 				if (entity.signature & SIGNATURE_RIGIDBODY)
 				{
-					std::cout << "Component RigidBody already present\n";
+					CDebug.Warning("Component RigidBody already present");
 					return;
 				}
 
@@ -61,7 +59,7 @@ namespace Cookie
 			{
 				if (entity.signature & SIGNATURE_MODEL)
 				{
-					std::cout << "Component Model already present\n";
+					CDebug.Warning("Component Model already present");
 					return;
 				}
 
@@ -77,7 +75,7 @@ namespace Cookie
 					return;
 				}
 				
-				std::cout << "No Component Transform present\n";
+				CDebug.Warning("No Component Transform present");
 			}
 			void RemoveComponentRigidBody(Entity& entity)
 			{
@@ -88,7 +86,7 @@ namespace Cookie
 					return;
 				}
 
-				std::cout << "No Component RigidBody present\n";
+				CDebug.Warning("No Component RigidBody present");
 			}
 			void RemoveComponentModel(Entity& entity)
 			{
@@ -99,7 +97,7 @@ namespace Cookie
 					return;
 				}
 
-				std::cout << "No Component Model present\n";
+				CDebug.Warning("No Component Model present");
 			}
 
 			ComponentTransform& GetComponentTransform(const unsigned int id) { return componentTransforms[id]; }

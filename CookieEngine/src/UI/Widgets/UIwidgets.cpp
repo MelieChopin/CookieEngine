@@ -1,7 +1,7 @@
 #include "Coordinator.hpp"
 #include "FrameBuffer.hpp"
 #include <GLFW/glfw3.h>
-#include "UIwidgets.h"
+#include "UIwidgets.hpp"
 
 #include <imgui.h>
 

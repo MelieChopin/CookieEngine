@@ -8,19 +8,12 @@ namespace Cookie
 {
 	namespace Render
 	{
-		class RendererState
+		struct RendererState
 		{
-			public:
 				ID3D11DepthStencilState*	depthStencilState	= nullptr;
 				ID3D11RasterizerState*		rasterizerState		= nullptr;
 				D3D11_VIEWPORT				viewport = {};
 				Core::Math::Vec4			clearColor = { 0.0f,0.0f,0.0f,0.0f };
-
-
-			public:
-				/* CONSTRUCTORS/DESTRUCTORS */
-				RendererState();
-				~RendererState();
 		};
 	}
 }

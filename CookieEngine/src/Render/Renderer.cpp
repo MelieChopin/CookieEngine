@@ -54,7 +54,8 @@ bool Renderer::InitDevice(Core::Window& window)
     scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
     // create a device, device context and swap chain using the information in the scd struct
-    if (D3D11CreateDeviceAndSwapChain(NULL,
+    if (D3D11CreateDeviceAndSwapChain(
+        NULL,
         D3D_DRIVER_TYPE_HARDWARE,
         NULL,
 #if 0

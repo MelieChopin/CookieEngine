@@ -12,9 +12,9 @@ namespace Cookie
 			inline std::shared_ptr<Cookie::Resources::Mesh> CreateQuad(Render::Renderer& _renderer)
 			{
 				std::vector<float> vertices = { -1, -1, 0, 0, 0, 0, 0, 1,
-												1, -1, 0, 1, 0, 0, 0, 1,
-												1, 1, 0, 1, 1, 0, 0, 1,
-												-1, 1, 0, 0, 1, 0, 0, 1  };
+												 1, -1, 0, 1, 0, 0, 0, 1,
+												 1,  1, 0, 1, 1, 0, 0, 1,
+												-1,  1, 0, 0, 1, 0, 0, 1  };
 
 				std::vector<unsigned int> indices = { 1, 2, 3, 3, 1, 0 };
 
@@ -26,9 +26,9 @@ namespace Cookie
 
 			inline std::shared_ptr<Cookie::Resources::Mesh> CreateTriangle(Render::Renderer& _renderer)
 			{
-				std::vector<float> vertices = { -1, -1, 0, 0, 0, 0, 0, 1,
-												1, -1, 0, 0, 1, 0, 0, 1,
-												0, 1, 0, 0.5, 1, 0, 0, 1 };
+				std::vector<float> vertices = { -1, -1, 0, 0,   0, 0, 0, 1,
+												 1, -1, 0, 0,   1, 0, 0, 1,
+												 0,  1, 0, 0.5, 1, 0, 0, 1 };
 
 				std::vector<unsigned int> indices = { 0, 1, 2 };
 

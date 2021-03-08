@@ -1,7 +1,7 @@
 #ifndef	__INSPECTOR_W_HPP__
 #define __INSPECTOR_W_HPP__
 
-#include "UIwidgetBases.h"
+#include "UIwidgetBases.hpp"
 
 namespace Cookie::Resources { class ResourcesManager; }
 namespace Cookie::ECS		{ class Coordinator; class Entity; }

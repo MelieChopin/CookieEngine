@@ -78,11 +78,6 @@ void Engine::Run()
 
     ui.AddWItem(new UIwidget::Console(CDebug), 2);
 
-    CDebug.Log("I am mister Log");
-    CDebug.Warning("I am mister Warning");
-    CDebug.Error("I am mister Error");
-    CDebug.Exception("I am mister AAAAAAAAAAAAA");
-
     //Create default Ducks
     {
         coordinator.AddEntity(SIGNATURE_ALL_COMPONENT, resources, "Duck 1");
