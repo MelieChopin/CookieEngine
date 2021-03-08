@@ -1,6 +1,6 @@
 #include <d3d11.h>
 
-#include "UIcore.h"
+#include "UIcore.hpp"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -75,7 +75,7 @@ void UIcore::UpdateUI()
 
 		for (int i = 0; i < menus.size(); i++)
 		{
-			if (BeginMenu(menus[i]))
+			if (ImGui::BeginMenu(menus[i]))
 			{
 				for (UIwidget::ItemBase* cI : UItems[i])
 				{
@@ -92,7 +92,6 @@ void UIcore::UpdateUI()
 		}
 
 		EndMainMenuBar();
-
 
 		for (UIwidget::WindowBase* cOW : UIndows[menus.size()])
 		{

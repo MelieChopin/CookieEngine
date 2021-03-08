@@ -41,29 +41,42 @@ namespace Cookie
 
 
 		private:
-			DebugMessageHandler()						= default;
-			DebugMessageHandler(DebugMessageHandler&&)	= delete;
-			DebugMessageHandler(DebugMessageHandler& )	= delete;
+			DebugMessageHandler()								= default;
+			DebugMessageHandler(DebugMessageHandler&&)			= delete;
+			DebugMessageHandler(const DebugMessageHandler& )	= delete;
 		
 		public:
 			// Summons the Debug manager.
 			inline static DebugMessageHandler& Summon()
 			{ static DebugMessageHandler debugSingleton; return debugSingleton; }
 
-			void Log(const char* text);
-			void Log(const std::string& strext);
+
+			inline void Log(const char* text)
+			{ storedMessages.push_back(DebugMessage{ text, DebugMessage::Log }); }
+
+			inline void Log(const std::string& strext)
+			{ storedMessages.push_back(DebugMessage{ strext.c_str(), DebugMessage::Log });}
 			
-			void Warning(const char* text);
-			void Warning(const std::string& strext);
+			
+			inline void Warning(const char* text)
+			{ storedMessages.push_back(DebugMessage{ text, DebugMessage::Warning, 1 }); }
 
-			void Error(const char* text);
-			void Error(const std::string& strext);
-
-			void Exception(const char* text);
-			void Exception(const std::string& strext);
+			inline void Warning(const std::string& strext)
+			{ storedMessages.push_back(DebugMessage{ strext.c_str(), DebugMessage::Warning, 1 }); }
 
 
-			static void Assertion(int line, const char* file, bool element);
+			inline void Error(const char* text)
+			{ storedMessages.push_back(DebugMessage{ text, DebugMessage::Error, 2 }); }
+
+			inline void Error(const std::string& strext)
+			{ storedMessages.push_back(DebugMessage{ strext.c_str(), DebugMessage::Error, 2 }); }
+
+
+			inline void Exception(const char* text)
+			{ storedMessages.push_back(DebugMessage{ text, DebugMessage::Exception, 7 }); }
+
+			inline void Exception(const std::string& strext)
+			{ storedMessages.push_back(DebugMessage{ strext.c_str(), DebugMessage::Exception, 7 }); }
 		};
 	}
 }

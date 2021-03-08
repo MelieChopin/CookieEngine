@@ -16,13 +16,5 @@ int main()
 
 	engine.Run();
 
-	//Vec2::DebugAllTest();
-	//Vec3::DebugAllTest();
-	//Mat4::DebugAllTest();
-	//Quat::DebugAllTest();
-
-	//ECS::Coordinator coordinator;
-
-
 	return 0;
 }

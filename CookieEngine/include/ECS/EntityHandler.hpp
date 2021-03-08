@@ -19,11 +19,10 @@ namespace Cookie
 			std::string					name{ "No Name" };
 			std::string					tag{ "No Tag" };
 			bool						needToBeRemoved{ false };
-			std::vector<unsigned int>   children;
+			//std::vector<unsigned int>   children;
 
-			Entity() {}
 			Entity(unsigned int _id) : id{ _id } {}
-			Entity(const Entity& entity) : id{ entity.id }, signature{ entity.signature }, name{ entity.name }, tag{ entity.tag }, needToBeRemoved{ entity.needToBeRemoved }, children{ entity.children } {}
+			Entity(const Entity& entity) : id{ entity.id }, signature{ entity.signature }, name{ entity.name }, tag{ entity.tag }, needToBeRemoved{ entity.needToBeRemoved } {}//, children{ entity.children } {}
 			~Entity() {}
 
 			void operator= (const Entity& entity)
@@ -32,7 +31,7 @@ namespace Cookie
 				signature       = entity.signature;
 				name			= entity.name;
 				needToBeRemoved = entity.needToBeRemoved;
-				children        = entity.children;
+				//children        = entity.children;
 				tag				= entity.tag;
 			}
 			void Swap(Entity& entity)
@@ -41,9 +40,6 @@ namespace Cookie
 				entity = *this;
 				*this = temp;
 			}
-
-
-
 		};
 
 		class EntityHandler

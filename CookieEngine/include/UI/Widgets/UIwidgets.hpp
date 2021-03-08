@@ -1,7 +1,7 @@
 #ifndef	__COOKIEUI_WIDGETS_HPP__
 #define __COOKIEUI_WIDGETS_HPP__
 
-#include "UIwidgetBases.h"
+#include "UIwidgetBases.hpp"
 
 struct GLFWwindow;
 

@@ -1,7 +1,7 @@
 #ifndef	__HIERARCHY_W_HPP__
 #define __HIERARCHY_W_HPP__
 
-#include "UIwidgetBases.h"
+#include "UIwidgetBases.hpp"
 
 namespace Cookie::Resources { class ResourcesManager; }
 namespace Cookie::Editor	{ class Scene; }

@@ -9,7 +9,7 @@ using namespace ImGui;
 using namespace Cookie::UIwidget;
 
 
-void FileExplorer::ExploreFiles(const fs::path& path, const char* researchQuery)
+void FileExplorer::ExploreFiles(const fs::path& path, const char* researchQuery)const
 {
     if (fs::exists(path) && fs::is_directory(path))
     {
@@ -39,7 +39,7 @@ void FileExplorer::ExploreFiles(const fs::path& path, const char* researchQuery)
     }
 }
 
-bool FileExplorer::HasReleventFile(const std::filesystem::path& folderPath, const std::string& researchQuery)
+bool FileExplorer::HasReleventFile(const std::filesystem::path& folderPath, const std::string& researchQuery)const
 {
     if (researchQuery.size() == 0) return true;
 
@@ -70,7 +70,7 @@ void FileExplorer::WindowDisplay()
         style.FrameRounding = 25.f;
         style.IndentSpacing = 30.0f;
 
-        ExploreFiles(fs::current_path().parent_path().parent_path().parent_path(), &searchQuery[0]);
+        ExploreFiles("Assets/", &searchQuery[0]);
 
         style.FrameRounding = 0.f;
         style.IndentSpacing = 21.0f;

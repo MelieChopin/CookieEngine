@@ -42,10 +42,11 @@ void Console::GroupedDisplay()
 {
 	std::vector<DebugMessage*> firstOccurences;
 	std::vector<int> repetitions;
+	bool isNew;
 
 	for (std::vector<DebugMessage>::reverse_iterator i = debugManager.storedMessages.rbegin(); i != debugManager.storedMessages.rend(); ++i)
 	{
-		bool isNew; isNew = true;
+		isNew = true;
 
 		for (size_t fo = 0; fo < firstOccurences.size(); fo++)
 		{

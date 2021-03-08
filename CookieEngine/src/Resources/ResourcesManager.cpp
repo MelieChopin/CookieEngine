@@ -75,11 +75,8 @@ std::shared_ptr<Mesh> ResourcesManager::AddMesh(std::shared_ptr<Mesh>&& _mesh)
 	return meshes.back();
 }
 
-bool ResourcesManager::HasMesh(std::string _name) const
+bool ResourcesManager::HasMesh(const std::string& _name) const
 {
-	if (meshes.empty())
-		return false;
-
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
 		if (meshes[i]->name == _name)
@@ -133,7 +130,7 @@ std::shared_ptr<Texture> ResourcesManager::AddTexture(const std::shared_ptr<Text
 	return textures.back();
 }
 
-std::shared_ptr<Texture> ResourcesManager::GetTexture(std::string _name)const
+std::shared_ptr<Texture> ResourcesManager::GetTexture(const std::string& _name)const
 {
 	for (unsigned int i = 0; i < textures.size(); i++)
 	{
@@ -146,11 +143,8 @@ std::shared_ptr<Texture> ResourcesManager::GetTexture(std::string _name)const
 	return nullptr;
 }
 
-bool ResourcesManager::HasTexture(std::string _name)const
+bool ResourcesManager::HasTexture(const std::string& _name)const
 {
-	if (textures.empty())
-		return false;
-
 	for (unsigned int i = 0; i < textures.size(); i++)
 	{
 		if (textures[i]->name == _name)
