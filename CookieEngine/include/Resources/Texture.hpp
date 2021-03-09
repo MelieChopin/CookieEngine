@@ -36,6 +36,7 @@ namespace Cookie
 
 				void Set(Render::RendererRemote& remote);
 
+				inline ID3D11ShaderResourceView* GetResourceView() const { return shaderResourceView; };
 		};
 	}
 }

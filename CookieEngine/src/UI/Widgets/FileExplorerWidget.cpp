@@ -61,7 +61,7 @@ bool FileExplorer::HasReleventFile(const std::filesystem::path& folderPath, cons
 
 void FileExplorer::WindowDisplay()
 {
-    if (ImGui::Begin(windowName, nullptr, ImGuiWindowFlags_HorizontalScrollbar))
+    TryBeginWindow(ImGuiWindowFlags_HorizontalScrollbar)
     {
         static char searchQuery[25]{ 0 };
         InputText("File search", &searchQuery[0], 25);

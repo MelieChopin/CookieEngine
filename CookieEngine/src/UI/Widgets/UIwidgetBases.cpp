@@ -13,6 +13,15 @@ WindowBase::WindowBase(const char* _windowName, bool _opened)
 			  opened		(_opened)
 {}
 
+bool WindowBase::BeginWindow(int windowFlags)
+{
+	if (!opened) return false;
+
+	contentVisible = ImGui::Begin(windowName, nullptr, windowFlags);
+
+	return true;
+}
+
 
 ItemBase::ItemBase(const char* _itemName, bool _visible)
 		  :	itemName	(_itemName),
@@ -33,22 +42,11 @@ void ItemBase::ItemDisplay()
 }
 
 
-bool WItemBase::BeginWindow(bool* contentVisible, int windowFlags)
-{
-	if (!opened) return false;
-
-	*contentVisible = ImGui::Begin(windowName, &opened, windowFlags);
-
-	if (!opened) visible = true;
-
-	return true;
-}
-
 bool WItemBase::BeginWindow(int windowFlags)
 {
 	if (!opened) return false;
 
-	ImGui::Begin(windowName, &opened, windowFlags);
+	contentVisible = ImGui::Begin(windowName, &opened, windowFlags);
 
 	if (!opened) visible = true;
 	
@@ -60,5 +58,9 @@ void WItemBase::ItemDisplay()
 	if (visible)
 	{
 		if (MenuItem(itemName, shortcutSeq)) Flip();
+	}
+	else
+	{
+		TextDisabled("%s", itemName);
 	}
 }

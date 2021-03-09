@@ -13,7 +13,7 @@ using namespace Cookie::ECS;
 
 void Inspector::WindowDisplay()
 {
-    if (ImGui::Begin(windowName))
+    TryBeginWindow()
     {
         if      (selectedEntity)    EntityInspection();
         else if (selectedScene)     SceneInspection();
@@ -66,10 +66,9 @@ void Inspector::TransformInterface()
     {
         Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity->id).localTRS;
 
-        Text("Pos:"); DragFloat("X##POS", &trsf.translation.x); DragFloat("Y##POS", &trsf.translation.y); DragFloat("Z##POS", &trsf.translation.z);
-        Text("Rot:"); DragFloat("X##ROT", &trsf.rotation.x);    DragFloat("Y##ROT", &trsf.rotation.y);    DragFloat("Z##ROT", &trsf.rotation.z);
-        Text("Scl:"); DragFloat("X##SCL", &trsf.scale.x);       DragFloat("Y##SCL", &trsf.scale.y);       DragFloat("Z##SCL", &trsf.scale.z);
-
+        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.translation.e);
+        Text("Rot:"); SameLine(65.f); DragFloat3("##ROT", trsf.rotation.e);
+        Text("Scl:"); SameLine(65.f); DragFloat3("##SCL", trsf.scale.e);
 
         ImGui::NewLine();
         if (Button("Remove component##TRSF"))
@@ -89,16 +88,16 @@ void Inspector::RigidBodyInterface()
     {
         ComponentRigidBody& rigibod = coordinator.componentHandler->GetComponentRigidBody(selectedEntity->id);
 
-        Text("Velocity:");          DragFloat("X##VEL", &rigibod.linearVelocity.x); DragFloat("Y##VEL", &rigibod.linearVelocity.y); DragFloat("Z##VEL", &rigibod.linearVelocity.z);
+        Text("Velocity:");          SameLine(110.f); DragFloat3("##VEL", rigibod.linearVelocity.e);
 
-        Text("Mass:");              DragFloat("##MASS", &rigibod.mass);
-        Text("Drag:");              DragFloat("##DRAG", &rigibod.drag);
+        Text("Mass:");              SameLine(110.f); DragFloat("##MASS", &rigibod.mass);
+        Text("Drag:");              SameLine(110.f); DragFloat("##DRAG", &rigibod.drag);
 
-        Text("TargetPos:");         DragFloat("X##TargetPos", &rigibod.targetPosition.x); DragFloat("Y##TargetPos", &rigibod.targetPosition.y); DragFloat("Z##TargetPos", &rigibod.targetPosition.z);
+        Text("TargetPos:");         SameLine(110.f); DragFloat3("##TargetPos", rigibod.targetPosition.e);
         
-        Text("Speed:");             DragFloat("##Speed", &rigibod.speed);
+        Text("Speed:");             SameLine(110.f); DragFloat("##Speed", &rigibod.speed);
         
-        Text("GoTowardPosition:");  Checkbox("##GoTowardPosition", &rigibod.goTowardTarget);
+        Text("GoTowardPosition:");  SameLine(160.f); Checkbox("##GoTowardPosition", &rigibod.goTowardTarget);
 
 
         ImGui::NewLine();
@@ -165,6 +164,13 @@ void Inspector::ModelCompInterface()
                     modelComp.texture = textPtr;
                     CloseCurrentPopup();
                     break;
+                }
+
+                if (IsItemHovered())
+                {
+                    BeginTooltip();
+                    Image(static_cast<ImTextureID>(textPtr->GetResourceView()), {75, 75});
+                    EndTooltip();
                 }
             }
 

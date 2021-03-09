@@ -70,11 +70,11 @@ void Engine::Run()
     input.Set(UnitInputs);
 
     ui.AddWItem(new UIwidget::ExitPannel(window.window), 0);
-    ui.AddWindow(new UIwidget::FileExplorer);
+    ui.AddWItem(new UIwidget::FileExplorer, 2);
     
     UIwidget::Inspector* insp = new UIwidget::Inspector(resources, coordinator);
-    ui.AddWindow(insp);
-    ui.AddWindow(new UIwidget::Hierarchy(resources, &scene, coordinator, insp));
+    ui.AddWItem(insp, 2);
+    ui.AddWItem(new UIwidget::Hierarchy(resources, &scene, coordinator, insp), 2);
     
     ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, &camera));
     //ui.AddWindow(new UIwidget::GamePort);
