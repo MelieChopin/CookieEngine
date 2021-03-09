@@ -14,14 +14,24 @@ Scene::Scene()
 
 Scene::Scene(const Resources::ResourcesManager& resources)
 {
-	Cookie::ECS::Coordinator::AddEntity(entityHandler, componentHandler, SIGNATURE_TRANSFORM + SIGNATURE_MODEL, resources, "Map");
-	componentHandler.componentModels[0].mesh = resources.GetMesh("Quad");
-	componentHandler.componentTransforms[0].localTRS.rotation = Vec3(PI/2, 0, 0);
-	componentHandler.componentTransforms[0].localTRS.scale = Vec3(15, 15, 0);
+	int length = 30;
+	int width = 10;
+	tiles = Tiles(width, length);
+
+	for (int i = 0; i < width * length; i++)
+	{
+		Cookie::ECS::Coordinator::AddEntity(entityHandler, componentHandler, SIGNATURE_TRANSFORM + SIGNATURE_MODEL, resources, "Map");
+		componentHandler.componentModels[i].mesh = resources.GetMesh("Quad");
+		componentHandler.componentTransforms[i].localTRS.translation = Vec3(i % width, 0, i / length);
+		componentHandler.componentTransforms[i].localTRS.rotation = Vec3(PI / 2, 0, 0);
+		componentHandler.componentTransforms[i].localTRS.scale = Vec3(0.5, 0.5, 0);
+	}
+	
+	
 	entityHandler.entities[0].tag = "MAP";
 	plane = { Vec3(0, 1, 0), 0 };
-	widthPlane = componentHandler.componentTransforms[0].localTRS.scale.x;
-	lengthPlane = componentHandler.componentTransforms[0].localTRS.scale.y;
+	widthPlane = width / 4;
+	lengthPlane = length / 4;
 }
 
 Scene::Scene(const Scene& _scene)
@@ -57,11 +67,11 @@ bool Scene::LinePlane(Cookie::Core::Math::Vec3& pointCollision, const Cookie::Co
 
 	pointCollision = firstPoint + line * t;
 
-	if (componentHandler.componentTransforms.size() > 0)
+	/*if (componentHandler.componentTransforms.size() > 0)
 	{
 		widthPlane = componentHandler.componentTransforms[0].localTRS.scale.x;
 		lengthPlane = componentHandler.componentTransforms[0].localTRS.scale.y;
-	}
+	}*/
 	
 	Vec3 temp = pointCollision;
 	temp.x += widthPlane;
@@ -73,15 +83,6 @@ bool Scene::LinePlane(Cookie::Core::Math::Vec3& pointCollision, const Cookie::Co
 		pointCollision = { FLT_MAX, FLT_MAX, FLT_MAX };
 		return false;
 	}
-		
-
-	/*int indexWid = temp.x / (widthTile);
-	int indexLen = temp.z / (lengthTile);
-
-	std::cout << indexWid << " " << indexLen << std::endl;
-
-	pointCollision.x = indexWid * widthTile - lenghtMap + widthTile / 2;
-	pointCollision.z = indexLen * lengthTile - lenghtMap + lengthTile / 2;*/
 
 	return true;
 }

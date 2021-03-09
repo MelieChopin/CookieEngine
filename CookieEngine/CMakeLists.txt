@@ -70,7 +70,8 @@ set (SRC_FILES
     "${SRC_DIR}/UI/Widgets/ViewportWidget.cpp"
     "${SRC_DIR}/Resources/Texture.cpp"
     "${SRC_DIR}/Render/FrameBuffer.cpp"
-    "${SRC_DIR}/Editor/Scene.cpp")
+    "${SRC_DIR}/Editor/Scene.cpp"
+    "${SRC_DIR}/Editor/Tiles.cpp")
 
 set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll")
 

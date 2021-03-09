@@ -5,6 +5,9 @@
 #include "ImGui/imgui.h"
 #include <vector>
 
+//Temp
+#include "GLFW/glfw3.h"
+
 using namespace Cookie;
 using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
@@ -183,6 +186,18 @@ void Engine::Run()
                    }
                }
            }
+
+
+
+
+
+           ///TEMP
+           if (glfwGetKey(window.window, GLFW_KEY_P) == GLFW_PRESS)
+               scene[0].ParcourTiles();
+
+
+
+           ///
        }
 
         coordinator.ApplySystemVelocity();

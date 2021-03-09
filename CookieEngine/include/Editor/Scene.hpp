@@ -4,17 +4,16 @@
 #include "ECS/Coordinator.hpp"
 #include "Vec3.hpp"
 #include "ECS/Coordinator.hpp"
+#include "Tiles.hpp"
+
+
+//temp
+#include <iostream>
 
 namespace Cookie
 {
 	namespace Editor
 	{
-		struct TileProp
-		{
-			int index = 0; //num of index block
-			bool fill = false;
-		};
-
 		//To cut
 		struct Plane
 		{
@@ -29,7 +28,8 @@ namespace Cookie
 		public:
 			Cookie::ECS::EntityHandler		entityHandler;
 			Cookie::ECS::ComponentHandler	componentHandler;
-			std::string						name = "NO NAME";
+			Tiles							tiles;
+			std::string						name = "Scene";
 			Plane							plane;
 			float							widthPlane;
 			float							lengthPlane;
@@ -39,6 +39,35 @@ namespace Cookie
 			Scene(const Resources::ResourcesManager& resources);
 			Scene(const Scene& _scene);
 			~Scene();
+
+			/// <Temp>
+			void ParcourTiles()
+			{
+				for (int i = 0; i < tiles.tiles.size(); i++)
+				{
+					std::cout << tiles.tiles[i].fill << " " << i << "\n";
+				}
+			}
+
+			void AddToTiles(int id)
+			{
+				int index = -1;
+				for (int i = 0; i < entityHandler.entities.size(); i++)
+				{
+					if (entityHandler.entities[i].id == id)
+					{
+						index = i;
+						break;
+					}
+				}
+
+				if (index = -1)
+					return;
+
+
+
+			}
+			/// </Temp>
 
 			void LoadScene(Cookie::ECS::Coordinator& coordinator);
 			void ChangeName(const char* newName) { name = newName; }

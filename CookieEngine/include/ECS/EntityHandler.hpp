@@ -9,7 +9,7 @@ namespace Cookie
 {
 	namespace ECS
 	{
-		#define MAX_ENTITIES 100
+		#define MAX_ENTITIES 1000
 
 		class Entity
 		{

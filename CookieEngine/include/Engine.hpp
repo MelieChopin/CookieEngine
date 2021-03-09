@@ -16,7 +16,7 @@ namespace Cookie
 	class Engine
 	{
 		public:
-
+			
 			Core::Window				window;
 			Core::Input 				input;
 			Render::Renderer			renderer;
