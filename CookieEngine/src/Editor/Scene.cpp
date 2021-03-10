@@ -21,20 +21,6 @@ Scene::Scene(const Resources::ResourcesManager& resources)
 	int lengthTile = 6;
 	tiles = Tiles(width, length, widthTile, lengthTile);
 
-	/*for (int i = 0; i < length; i++)
-	{
-		for (int j = 0; j < width; j++)
-		{
-			Cookie::ECS::Coordinator::AddEntity(entityHandler, componentHandler, SIGNATURE_TRANSFORM + SIGNATURE_MODEL, resources, "Map");
-			componentHandler.componentModels[j + i * width].mesh = resources.GetMesh("Quad");
-			componentHandler.componentTransforms[j + i * width].localTRS.translation = Vec3(j * tiles.widthTileProp - tiles.widthTile * tiles.widthTileProp / 2 + (float)tiles.widthTileProp / 2,
-																						0, i * tiles.lengthTileProp - tiles.lengthTile * tiles.lengthTileProp / 2 + (float)tiles.lengthTileProp / 2);
-			componentHandler.componentTransforms[j + i * width].localTRS.rotation = Vec3(PI / 2, 0, 0);
-			componentHandler.componentTransforms[j + i * width].localTRS.scale = Vec3((float)tiles.widthTileProp / 2, (float)tiles.lengthTileProp / 2, 0);
-			entityHandler.entities[j + i * width].tag = "MAP";
-		}
-	}*/
-
 	Cookie::ECS::Coordinator::AddEntity(entityHandler, componentHandler, SIGNATURE_TRANSFORM + SIGNATURE_MODEL, resources, "Map");
 	componentHandler.componentModels[0].mesh = resources.GetMesh("Quad");
 	componentHandler.componentTransforms[0].localTRS.translation = Vec3(0, 0, 0);
@@ -74,6 +60,9 @@ void Scene::ResizeSizeTilesWithScaleOfTheMap(float newWidthPlane, float newLengt
 
 void Scene::ChangeNumberOfTiles(int newSizeWidthTile, int newSizeLengthTile)
 {
+	if (newSizeLengthTile == tiles.lengthTile || newSizeWidthTile == tiles.widthTile)
+		return;
+
 	if (newSizeLengthTile > tiles.lengthTile)
 	{
 		for (int i = 0; i < tiles.widthTile * (newSizeLengthTile - tiles.lengthTile); i++)

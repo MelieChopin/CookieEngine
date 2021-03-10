@@ -29,9 +29,9 @@ void Hierarchy::WindowDisplay()
         }
 
 
-        for (size_t i = 0; i < scenes->size(); i++)
-        {
-            Scene& _scene = scenes->at(i);
+        //for (size_t i = 0; i < scenes->size(); i++)
+        //{
+            Scene& _scene = *scenes;
 
             std::string SceneNameTag;
 
@@ -39,11 +39,11 @@ void Hierarchy::WindowDisplay()
             if (&_scene.entityHandler == coordinator.entityHandler)
             { SceneNameTag += "> "; }
 
-            SceneNameTag += _scene.name + "##" + std::to_string(i);
+            SceneNameTag += _scene.name + "##" + std::to_string('0');
         
 
             if (Button(SceneNameTag.c_str()))
-            { inspector->SelectScene(&scenes->at(i)); }
+            { inspector->SelectScene(scenes); }
 
             if (BeginPopupContextItem(SceneNameTag.c_str()))
             {
@@ -55,7 +55,7 @@ void Hierarchy::WindowDisplay()
 
                 EndPopup();
             }
-        }
+        //}
 
         Separator();
 

@@ -64,6 +64,25 @@ namespace Cookie
 				if (index == -1)
 					return;
 
+				int indexWidthOfTiles = (componentHandler.componentTransforms[index].localTRS.translation.x + widthPlane) / (tiles.widthTileProp);
+				int indexLengthOfTiles = (componentHandler.componentTransforms[index].localTRS.translation.z + lengthPlane) / (tiles.lengthTileProp);
+
+				componentHandler.componentTransforms[index].localTRS.translation.x = indexWidthOfTiles * (tiles.widthTileProp) - widthPlane + tiles.widthTileProp / 2;
+				componentHandler.componentTransforms[index].localTRS.translation.z = indexLengthOfTiles * (tiles.lengthTileProp) - lengthPlane + tiles.lengthTileProp / 2;
+
+				for (int i = 0; i < tiles.tiles.size(); i++)
+				{
+					if (tiles.tiles[i].idEntity == id)
+					{
+						tiles.tiles[i].idEntity = -1;
+						tiles.tiles[i].fill = false;
+						break;
+					}
+				}
+
+				tiles.tiles[indexWidthOfTiles + indexLengthOfTiles * tiles.widthTile].fill = true;
+				tiles.tiles[indexWidthOfTiles + indexLengthOfTiles * tiles.widthTile].idEntity = id;
+
 			}
 			/// </Temp>
 
