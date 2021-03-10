@@ -60,7 +60,7 @@ void Scene::ResizeSizeTilesWithScaleOfTheMap(float newWidthPlane, float newLengt
 
 void Scene::ChangeNumberOfTiles(int newSizeWidthTile, int newSizeLengthTile)
 {
-	if (newSizeLengthTile == tiles.lengthTile || newSizeWidthTile == tiles.widthTile)
+	if (newSizeLengthTile == tiles.lengthTile && newSizeWidthTile == tiles.widthTile)
 		return;
 
 	if (newSizeLengthTile > tiles.lengthTile)
