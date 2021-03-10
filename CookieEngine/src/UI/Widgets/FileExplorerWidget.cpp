@@ -9,6 +9,8 @@ using namespace ImGui;
 using namespace Cookie::UIwidget;
 
 
+#include <thread>
+
 void FileExplorer::ExploreFiles(const fs::path& path, const char* researchQuery)const
 {
     if (fs::exists(path) && fs::is_directory(path))
@@ -32,8 +34,10 @@ void FileExplorer::ExploreFiles(const fs::path& path, const char* researchQuery)
             const fs::path& filename = entry.path().c_str();
             if (fs::is_regular_file(entry.status()))
             {
-                if (filename.string().find(researchQuery) != std::string::npos)
-                    Button(filename.filename().string().c_str());
+                if (filename.string().find(researchQuery) != std::string::npos && Button(filename.filename().string().c_str()))
+                {
+                    // something to actually open the file
+                }
             }
         }
     }

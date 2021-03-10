@@ -33,6 +33,17 @@ namespace Cookie::UIwidget
 
 		void WindowDisplay() override;
 	};
+
+
+	class DemoWindow final : public WItemBase
+	{
+	public:
+		DemoWindow()
+			: WItemBase("ImGui demo window")
+		{}
+
+		void WindowDisplay() override;
+	};
 }
 
 #endif

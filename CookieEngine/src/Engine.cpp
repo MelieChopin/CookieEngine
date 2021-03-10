@@ -67,7 +67,12 @@ void Engine::Run()
 
     input.Set(UnitInputs);
 
+
     ui.AddWItem(new UIwidget::ExitPannel(window.window), 0);
+
+    ui.AddWItem(new UIwidget::TextureEditor(renderer, resources), 1);
+    
+    
     ui.AddWItem(new UIwidget::FileExplorer, 2);
     
     UIwidget::Inspector* insp = new UIwidget::Inspector(resources, coordinator);
@@ -77,7 +82,11 @@ void Engine::Run()
     ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, &camera));
     //ui.AddWindow(new UIwidget::GamePort);
 
-    ui.AddWItem(new UIwidget::Console(CDebug), 2);
+    ui.AddWItem(new UIwidget::Console(CDebug, renderer), 2);
+
+
+    ui.AddWItem(new UIwidget::DemoWindow, 3);
+
 
     //Create default Ducks
     {
@@ -108,6 +117,7 @@ void Engine::Run()
     {
         // Present frame
         Core::UpdateTime();
+        CDebug.UpdateTime();
 
         // Present frame
         glfwPollEvents();

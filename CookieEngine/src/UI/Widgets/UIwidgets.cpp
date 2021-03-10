@@ -32,3 +32,11 @@ void ExitPannel::WindowDisplay()
 	ImGui::End();
 }
 
+void DemoWindow::WindowDisplay()
+{
+	if (!opened) return;
+
+	ShowDemoWindow(&opened);
+
+	if (!opened) visible = true;
+}

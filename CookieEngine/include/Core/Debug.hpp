@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <time.h>
 
 namespace Cookie
 {
@@ -11,7 +12,8 @@ namespace Cookie
 		struct DebugMessage
 		{
 			const char*	text;
-				
+			char		timestamp[10] {};
+
 			enum Type
 			{ 
 				// Basic information. Will slowly flash blue at arrival.
@@ -21,21 +23,29 @@ namespace Cookie
 				Warning,
 
 				// Signal an error. Will quickly flash red thrice.
-				Error,
-
-				// An exception will make the whole console flash red. Use in really bad cases.
-				Exception 
+				Error
 				
 			} messageType;
 				
 			unsigned short	colorBounces	= 0;
 			uint8_t			colorVariant	= 255;
 			bool			bouncing		= false;
+
+
+			inline DebugMessage(const char* _text, Type&& _type, unsigned short&& _colorBounces = 0)
+				: text			(_text),
+				  messageType	(_type),
+				  colorBounces	(_colorBounces)
+			{}
 		};
 
 		// [Singleton class closely linked with the console widget. Can be used anywhere after being initialized.]
 		class DebugMessageHandler
 		{
+		private:
+			time_t	currentTime;
+			tm		currentTmcov;
+
 		public:
 			std::vector<DebugMessage> storedMessages;
 
@@ -44,6 +54,13 @@ namespace Cookie
 			DebugMessageHandler()								= default;
 			DebugMessageHandler(DebugMessageHandler&&)			= delete;
 			DebugMessageHandler(const DebugMessageHandler& )	= delete;
+
+
+			inline void AddMessage(DebugMessage&& newMessage)
+			{
+				sprintf(newMessage.timestamp, "[%d:%d:%d]", currentTmcov.tm_hour, currentTmcov.tm_min, currentTmcov.tm_sec);
+				storedMessages.push_back(std::move(newMessage));
+			}
 		
 		public:
 			// Summons the Debug manager.
@@ -51,32 +68,29 @@ namespace Cookie
 			{ static DebugMessageHandler debugSingleton; return debugSingleton; }
 
 
+			inline void UpdateTime()
+			{ time(&currentTime); localtime_s(&currentTmcov, &currentTime); }
+
+
 			inline void Log(const char* text)
-			{ storedMessages.push_back(DebugMessage{ text, DebugMessage::Log }); }
+			{ AddMessage({text, DebugMessage::Log}); }
 
 			inline void Log(const std::string& strext)
-			{ storedMessages.push_back(DebugMessage{ strext.c_str(), DebugMessage::Log });}
+			{ AddMessage({strext.c_str(), DebugMessage::Log}); }
 			
 			
 			inline void Warning(const char* text)
-			{ storedMessages.push_back(DebugMessage{ text, DebugMessage::Warning, 1 }); }
+			{ AddMessage({text, DebugMessage::Warning, 1}); }
 
 			inline void Warning(const std::string& strext)
-			{ storedMessages.push_back(DebugMessage{ strext.c_str(), DebugMessage::Warning, 1 }); }
+			{ AddMessage({strext.c_str(), DebugMessage::Warning, 1}); }
 
 
 			inline void Error(const char* text)
-			{ storedMessages.push_back(DebugMessage{ text, DebugMessage::Error, 2 }); }
+			{ AddMessage({text, DebugMessage::Error, 2}); }
 
 			inline void Error(const std::string& strext)
-			{ storedMessages.push_back(DebugMessage{ strext.c_str(), DebugMessage::Error, 2 }); }
-
-
-			inline void Exception(const char* text)
-			{ storedMessages.push_back(DebugMessage{ text, DebugMessage::Exception, 7 }); }
-
-			inline void Exception(const std::string& strext)
-			{ storedMessages.push_back(DebugMessage{ strext.c_str(), DebugMessage::Exception, 7 }); }
+			{ AddMessage({strext.c_str(), DebugMessage::Error, 2}); }
 		};
 	}
 }

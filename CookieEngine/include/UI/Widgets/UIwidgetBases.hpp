@@ -40,7 +40,7 @@ namespace Cookie::UIwidget
 	struct WItemBase : WindowBase, ItemBase
 	{
 	protected:
-		bool BeginWindow(int windowFlags = 0) final override;
+		virtual bool BeginWindow(int windowFlags = 0) override;
 
 		inline void Flip()
 		{opened = !opened; visible = !visible;}
@@ -53,7 +53,7 @@ namespace Cookie::UIwidget
 			@param _name		Name of the WItem
 			@param _isItemFirst (True if not indicated otherwise) Indicates if the WItem should begin as an item
 		*/
-		WItemBase(const char* _name, bool _isItemFirst = true)
+		inline WItemBase(const char* _name, bool _isItemFirst = true)
 			:	WindowBase	(_name, !_isItemFirst),
 				ItemBase	(_name,  _isItemFirst)
 		{}
@@ -66,7 +66,7 @@ namespace Cookie::UIwidget
 			@param _itemName	Name of the Item form
 			@param _isItemFirst (True if not indicated otherwise) Indicates if the WItem should begin as an item
 		*/
-		WItemBase(const char* _windowName, const char* _itemName, bool _isItemFirst = true)
+		inline WItemBase(const char* _windowName, const char* _itemName, bool _isItemFirst = true)
 			:	WindowBase	(_windowName, !_isItemFirst),
 				ItemBase	(_itemName,    _isItemFirst)
 		{}
@@ -80,7 +80,7 @@ namespace Cookie::UIwidget
 			@param _shortcutSeq	Shortcut sequence to trigger the item remotely
 			@param _isItemFirst (True if not indicated otherwise) Indicates if the WItem should begin as an item
 		*/
-		WItemBase(const char* _windowName, const char* _itemName, const char* _shortcutSeq, bool _isItemFirst = true)
+		inline WItemBase(const char* _windowName, const char* _itemName, const char* _shortcutSeq, bool _isItemFirst = true)
 			:	WindowBase	(_windowName,			   !_isItemFirst),
 				ItemBase	(_itemName,	  _shortcutSeq, _isItemFirst)
 		{}
