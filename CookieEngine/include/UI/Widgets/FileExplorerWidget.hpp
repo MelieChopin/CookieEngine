@@ -15,7 +15,7 @@ namespace Cookie::UIwidget
 		bool HasReleventFile(const std::filesystem::path& folderPath, const std::string& researchQuery)const;
 
 	public:
-		FileExplorer()
+		inline FileExplorer()
 			: WItemBase("File explorer")
 		{}
 

@@ -4,6 +4,9 @@
 #include <d3d11.h>
 #include <string>
 
+#include "Vec4.hpp"
+
+
 namespace Cookie
 {
 	namespace Render

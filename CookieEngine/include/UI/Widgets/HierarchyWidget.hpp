@@ -22,7 +22,7 @@ namespace Cookie::UIwidget
 		Inspector* inspector;
 
 	public:
-		Hierarchy(Cookie::Resources::ResourcesManager& _resources, std::vector<Cookie::Editor::Scene>* _scenes, Cookie::ECS::Coordinator& _coordinator, Inspector* _inspector)
+		inline Hierarchy(Cookie::Resources::ResourcesManager& _resources, std::vector<Cookie::Editor::Scene>* _scenes, Cookie::ECS::Coordinator& _coordinator, Inspector* _inspector)
 			: WItemBase		("Hierarchy", false),
 			  resources     (_resources),
 			  scenes		(_scenes),

@@ -5,7 +5,6 @@
 #include "HierarchyWidget.hpp"
 
 #include <imgui.h>
-#include <imgui_stdlib.h>
 
 using namespace ImGui;
 using namespace Cookie::UIwidget;
