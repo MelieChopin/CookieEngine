@@ -186,19 +186,21 @@ void Engine::Run()
                    }
                }
            }
-
-
-
-
-
-           ///TEMP
-           if (glfwGetKey(window.window, GLFW_KEY_P) == GLFW_PRESS)
-               scene[0].ParcourTiles();
-
-
-
-           ///
+         
        }
+
+       ///TEMP
+       if (glfwGetKey(window.window, GLFW_KEY_P) == GLFW_PRESS)
+           scene[0].ParcourTiles();
+
+       if (glfwGetKey(window.window, GLFW_KEY_L) == GLFW_PRESS)
+           scene[0].ResizeSizeTilesWithScaleOfTheMap(scene[0].componentHandler.componentTransforms[0].localTRS.scale.x, 
+               scene[0].componentHandler.componentTransforms[0].localTRS.scale.y);
+
+       if (glfwGetKey(window.window, GLFW_KEY_I) == GLFW_PRESS)
+           scene[0].ChangeNumberOfTiles(10, 15);
+
+       ///
 
         coordinator.ApplySystemVelocity();
         coordinator.ApplyDraw(renderer.remote, camera->GetViewProj());

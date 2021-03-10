@@ -17,12 +17,12 @@ namespace Cookie
 		{
 		public:
 			std::vector<TileProp> tiles;
-			int widthTileProp;
-			int lengthTileProp;
+			float widthTileProp;
+			float lengthTileProp;
 			int widthTile;
 			int lengthTile;
 
-			Tiles(int _widthTileProp = 15, int _lengthTileProp = 15, int _widthTile = 1, int _lengthTile = 1);
+			Tiles(int _widthTile = 15, int _lengthTile = 15, float _widthTileProp = 1, float _lengthTileProp = 1);
 			~Tiles();
 		};
 	}

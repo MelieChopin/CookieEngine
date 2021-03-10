@@ -2,10 +2,10 @@
 
 using namespace Cookie::Editor;
 
-Tiles::Tiles(int _widthTileProp, int _lengthTileProp, int _widthTile, int _lengthTile)
+Tiles::Tiles(int _widthTile, int _lengthTile, float _widthTileProp, float _lengthTileProp)
 {
-	for (int i = 0; i < _widthTileProp * _lengthTileProp; i++)
-		tiles.push_back(TileProp());
+	for (int i = 0; i < _widthTile * _lengthTile; i++)
+		tiles.push_back(TileProp());	
 
 	widthTileProp = _widthTileProp;
 	lengthTileProp = _lengthTileProp;

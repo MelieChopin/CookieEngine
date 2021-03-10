@@ -61,15 +61,15 @@ namespace Cookie
 					}
 				}
 
-				if (index = -1)
+				if (index == -1)
 					return;
-
-
 
 			}
 			/// </Temp>
 
 			void LoadScene(Cookie::ECS::Coordinator& coordinator);
+			void ResizeSizeTilesWithScaleOfTheMap(float newWidthPlane, float newLengthPlane);
+			void ChangeNumberOfTiles(int newSizeWidthTile, int newSizeLengthTile);
 			void ChangeName(const char* newName) { name = newName; }
 			bool LinePlane(Cookie::Core::Math::Vec3& pointCollision, const Cookie::Core::Math::Vec3& firstPoint, const Cookie::Core::Math::Vec3& secondPoint);
 		};
