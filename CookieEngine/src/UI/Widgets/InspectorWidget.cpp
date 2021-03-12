@@ -3,12 +3,14 @@
 #include "Scene.hpp"
 #include "InspectorWidget.hpp"
 
+#include <string>
 #include <imgui.h>
 #include <imgui_stdlib.h>
 
 using namespace ImGui;
 using namespace Cookie::UIwidget;
 using namespace Cookie::ECS;
+using namespace Cookie::Resources;
 
 
 void Inspector::WindowDisplay()
@@ -32,6 +34,7 @@ void Inspector::EntityInspection()
     if (selectedEntity->signature & SIGNATURE_TRANSFORM)    TransformInterface();
     if (selectedEntity->signature & SIGNATURE_RIGIDBODY)    RigidBodyInterface();
     if (selectedEntity->signature & SIGNATURE_MODEL)        ModelCompInterface();
+    if (selectedEntity->signature & SIGNATURE_SCRIPT)       ScriptInterface();
 
 
     if (Button("Add component...")) OpenPopup("Add component popup");
@@ -53,6 +56,12 @@ void Inspector::EntityInspection()
         if (Button("Add component Model"))
         {
             coordinator.componentHandler->AddComponentModel      (*selectedEntity);
+            CloseCurrentPopup();
+        }
+
+        if (Button("Add component Script"))
+        {
+            coordinator.componentHandler->AddComponentScript     (*selectedEntity);
             CloseCurrentPopup();
         }
 
@@ -118,7 +127,6 @@ void Inspector::ModelCompInterface()
     {
         ComponentModel& modelComp = coordinator.componentHandler->GetComponentModel(selectedEntity->id);
 
-//================//
 //===== MESH =====//
 
         Text("Mesh:"); SameLine(100);
@@ -189,6 +197,38 @@ void Inspector::ModelCompInterface()
         if (Button("Remove component##MODEL"))
         {
             coordinator.componentHandler->RemoveComponentModel(*selectedEntity);
+        }
+
+        TreePop();
+    }
+
+    ImGui::Separator();
+}
+
+void Inspector::ScriptInterface()
+{
+    if (TreeNode("Script"))
+    {
+        ComponentScript& script = coordinator.componentHandler->GetComponentScript(selectedEntity->id);
+
+        for (int i = 0; i < script.scripts.size(); ++i)
+        {
+            Text("%s", script.scripts[i]->GetName());   
+            if ( Button( ("Remove Script##" + i)) )
+            { 
+                script.scripts.erase(script.scripts.begin() + i); 
+                i = (i > 0) ? i - 1 : 0;
+            }
+            ImGui::NewLine();
+        }
+
+        ImGui::NewLine();  if (Button("Add Script Hello World")) { script.scripts.push_back(new ScriptHelloWorld ); }
+        ImGui::NewLine();  if (Button("Add Warning each 2s"))    { script.scripts.push_back(new ScriptWarning ); }
+
+        ImGui::NewLine();
+        if (Button("Remove component##RIBOD"))
+        {
+            coordinator.componentHandler->RemoveComponentScript(*selectedEntity);
         }
 
         TreePop();

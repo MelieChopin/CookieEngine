@@ -8,6 +8,7 @@
 using namespace Cookie;
 using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
+using namespace Cookie::Resources;
 
 Engine::Engine() :
     window{}, renderer{ window }, ui{ window.window, renderer }, frameBuffer{ resources,renderer }
@@ -89,7 +90,6 @@ void Engine::Run()
         model1.mesh = resources.GetMesh("LOD3spShape");
         model1.texture = resources.GetTexture("Duck");
 
-        
         coordinator.AddEntity(SIGNATURE_ALL_COMPONENT, resources, "Duck 2");
         ComponentTransform& trs2 = coordinator.componentHandler->GetComponentTransform(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
         trs2.localTRS.translation = { -10, 0, 0 };
@@ -186,6 +186,7 @@ void Engine::Run()
        }
 
         coordinator.ApplySystemVelocity();
+        coordinator.ApplySystemScriptUpdate();
         coordinator.ApplyDraw(renderer.remote, camera->GetViewProj());
         renderer.SetBackBuffer();
         //frameBuffer.Draw(renderer.remote);

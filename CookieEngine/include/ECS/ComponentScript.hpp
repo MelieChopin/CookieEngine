@@ -1,0 +1,27 @@
+#ifndef __COMPONENT_SCRIPT_HPP__
+#define __COMPONENT_SCRIPT_HPP__
+
+#include "Resources/Script.hpp"
+
+#include <vector>
+#include <memory>
+
+namespace Cookie
+{
+	namespace ECS
+	{
+		class ComponentScript
+		{
+		
+		public:
+			std::vector<Resources::Script*> scripts;
+
+			void ToDefault()
+			{
+				scripts.clear();
+			}
+		};
+	}
+}
+
+#endif // !__COMPONENT_SCRIPT_HPP__

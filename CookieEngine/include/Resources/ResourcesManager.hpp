@@ -7,6 +7,7 @@
 #include "Resources/Mesh.hpp"
 #include "Resources/Shader.hpp"
 #include "Resources/Texture.hpp"
+#include "Resources/Script.hpp"
 
 
 namespace fs = std::filesystem;

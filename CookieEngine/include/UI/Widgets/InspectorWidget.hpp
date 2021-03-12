@@ -24,6 +24,7 @@ namespace Cookie::UIwidget
 		void TransformInterface();
 		void RigidBodyInterface();
 		void ModelCompInterface();
+		void ScriptInterface();
 	
 		
 		void SceneInspection();

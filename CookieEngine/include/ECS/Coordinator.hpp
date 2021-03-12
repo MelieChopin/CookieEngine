@@ -23,7 +23,7 @@ namespace Cookie
 			Coordinator() {}
 			~Coordinator() {}
 
-			void AddEntity(const int signature, Resources::ResourcesManager	resources, std::string name = std::string("No Name"))
+			void AddEntity(const int signature, const Resources::ResourcesManager&	resources, std::string name = std::string("No Name"))
 			{
 				assert(entityHandler->livingEntities < MAX_ENTITIES && "Too many entities in existence.");
 
@@ -37,11 +37,14 @@ namespace Cookie
 					componentHandler->AddComponentRigidBody(entityHandler->entities[id]);
 				if (CheckSignature(signature, SIGNATURE_MODEL))
 					componentHandler->AddComponentModel(entityHandler->entities[id]);
+				if (CheckSignature(signature, SIGNATURE_SCRIPT))
+					componentHandler->AddComponentScript(entityHandler->entities[id]);
 
 				//not clean should be moved somewhere else
 				componentHandler->GetComponentModel(id).shader = resources.GetDefaultShader();
 			}
-			static void AddEntity(EntityHandler& entityHandler, ComponentHandler& componentHandler, const int signature, Resources::ResourcesManager resources, std::string name = std::string("No Name") )
+			//will be removed when scene clean
+			static void AddEntity(EntityHandler& entityHandler, ComponentHandler& componentHandler, const int signature, const Resources::ResourcesManager& resources, std::string name = std::string("No Name") )
 			{
 				assert(entityHandler.livingEntities < MAX_ENTITIES && "Too many entities in existence.");
 
@@ -70,6 +73,8 @@ namespace Cookie
 					componentHandler->GetComponentRigidBody(entity.id).ToDefault();
 				if (CheckSignature(entity.signature, SIGNATURE_MODEL))
 					componentHandler->GetComponentModel(entity.id).ToDefault();
+				if (CheckSignature(entity.signature, SIGNATURE_SCRIPT))
+					componentHandler->GetComponentScript(entity.id).ToDefault();
 
 				//Reset Entity
 				entity.signature = 0;
@@ -109,8 +114,20 @@ namespace Cookie
 					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_MODEL))
 						System::SystemDraw(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
 							componentHandler->GetComponentModel(entityHandler->entities[i].id),remote, viewProj);
-
 			}
+			void ApplySystemScriptStart()
+			{
+				for (int i = 0; i < entityHandler->livingEntities; ++i)
+					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_SCRIPT))
+						System::SystemScriptStart(componentHandler->GetComponentScript(entityHandler->entities[i].id));
+			}
+			void ApplySystemScriptUpdate()
+			{
+				for (int i = 0; i < entityHandler->livingEntities; ++i)
+					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_SCRIPT))
+						System::SystemScriptUpdate(componentHandler->GetComponentScript(entityHandler->entities[i].id));
+			}
+
 
 			void SelectClosestMovableEntity(const Core::Math::Vec3& position)
 			{

@@ -2,8 +2,10 @@
 #define __SYSTEM_HANDLER_HPP__
 
 #include "ComponentTransform.hpp"
-#include "ComponentModel.hpp"
 #include "ComponentRigidBody.hpp"
+#include "ComponentModel.hpp"
+#include "ComponentScript.hpp"
+
 #include "Core/Math/Mat4.hpp"
 #include "Render/Camera.hpp"
 
@@ -36,7 +38,7 @@ namespace Cookie
 					}
 				}
 
-				trs.localTRS.translation += rb.linearVelocity * Core::deltaTime; 
+				trs.localTRS.translation += rb.linearVelocity * Core::deltaTime;
 			}
 			inline void SystemDraw(const ComponentTransform& trs, ComponentModel& model, Render::RendererRemote& remote, const Core::Math::Mat4& viewProj) 
 			{
@@ -44,6 +46,17 @@ namespace Cookie
 			}
 			//void SystemRemoveBelowLevel(const ComponentTransform&);
 			//void SystemRemoveNeeded();
+
+			inline void SystemScriptStart(const ComponentScript& script)
+			{
+				for (int i = 0; i < script.scripts.size(); ++i)
+					script.scripts[i]->Start();
+			}
+			inline void SystemScriptUpdate(ComponentScript& script)
+			{
+				for (int i = 0; i < script.scripts.size(); ++i)
+					script.scripts[i]->Update();
+			}
 
 		}
 	}
