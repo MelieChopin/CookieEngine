@@ -34,6 +34,7 @@ IF(CMAKE_BUILD_TYPE MATCHES Release)
     IF(WIN32)
         set(SUB_SYS WIN32)
     ENDIF(WIN32)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
 ELSE()
     message(STATUS "Generate CMake cache for Debug")
     add_definitions(-DDEBUG)
@@ -79,7 +80,7 @@ set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll")
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
 # Ajoutez une source à l'exécutable de ce projet.
-add_executable (CookieEngine  ${SUB_SYS} ${SRC_FILES} )
+add_executable (CookieEngine ${SUB_SYS} ${SRC_FILES} )
 
 set_target_properties(CookieEngine PROPERTIES CXX_STANDARD 17)
 

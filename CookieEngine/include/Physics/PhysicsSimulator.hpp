@@ -1,8 +1,11 @@
 #ifndef __PHYSICS_SIMULATOR_HPP__
 #define __PHYSICS_SIMULATOR_HPP__
 
-class reactphysics3d::PhysicsCommon;
-class reactphysics3d::PhysicsWorld;
+namespace reactphysics3d
+{
+	class PhysicsCommon;
+	class PhysicsWorld;
+}
 
 namespace Cookie
 {
@@ -10,9 +13,21 @@ namespace Cookie
 	{
 		class PhysicsSimulator
 		{
-			reactphysics3d::PhysicsCommon	physicObjectCreator;
-			reactphysics3d::PhysicsWorld	worldSimulator;
-		}
+			private:
+				reactphysics3d::PhysicsCommon* physCreator;
+				reactphysics3d::PhysicsWorld* worldSim;
+				float accumulator = 0.f;
+
+			public:
+				float timeStep		= .0f;
+				float factor		= 0.f;
+
+
+				PhysicsSimulator(reactphysics3d::PhysicsCommon& _physCreator);
+				~PhysicsSimulator();
+
+				void Update();
+		};
 	}
 }
 

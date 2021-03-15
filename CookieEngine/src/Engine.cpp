@@ -204,6 +204,9 @@ void Engine::TryResizeWindow()
 
     glfwGetWindowSize(window.window, &width, &height);
 
+    if (width <= 0 || height <= 0)
+        return;
+
     if (window.width != width || window.height != height)
     {
         Core::DebugMessageHandler::Summon().Log((std::to_string(width) + ' '+ std::to_string(height)).c_str());
