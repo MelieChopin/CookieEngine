@@ -5,20 +5,18 @@
 
 #include <imgui.h>
 
-#include <ctime>
-
 using namespace ImGui;
 using namespace Cookie::UIwidget;
 using namespace Cookie::Core;
 
 
-Console::Console(Cookie::Core::DebugMessageHandler& _debugManager, Cookie::Render::Renderer& _renderer)
+Console::Console(DebugMessageHandler& _debugManager, Cookie::Render::Renderer& _renderer)
 	: WItemBase		("Console", false),
 	  debugManager	(_debugManager)
 {
-	icons[0] = std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/DebugIcos/Log.ico");
-	icons[1] = std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/DebugIcos/Warning.ico");
-	icons[2] = std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/DebugIcos/Error.ico");
+	icons[0] = std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/Log.ico");
+	icons[1] = std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/Warning.ico");
+	icons[2] = std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/Error.ico");
 }
 
 

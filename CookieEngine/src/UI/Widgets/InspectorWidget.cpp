@@ -31,7 +31,8 @@ void Inspector::EntityInspection()
 
     if (selectedEntity->signature & SIGNATURE_TRANSFORM)    TransformInterface();
     if (selectedEntity->signature & SIGNATURE_RIGIDBODY)    RigidBodyInterface();
-    if (selectedEntity->signature & SIGNATURE_MODEL)        ModelCompInterface();
+    if (selectedEntity->signature & SIGNATURE_MODEL)        ModelInterface();
+    //if (selectedEntity->signature & SIGNATURE_MAP)          MapInterface();
 
 
     if (Button("Add component...")) OpenPopup("Add component popup");
@@ -112,7 +113,7 @@ void Inspector::RigidBodyInterface()
     ImGui::Separator();
 }
 
-void Inspector::ModelCompInterface()
+void Inspector::ModelInterface()
 {
     if (TreeNode("Model"))
     {
@@ -197,10 +198,65 @@ void Inspector::ModelCompInterface()
     ImGui::Separator();
 }
 
+void Inspector::MapInterface()
+{
+    if (TreeNode("Map transform"))
+    {
+        Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity->id).localTRS;
+
+        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.translation.e);
+        
+        Text("Scl:"); SameLine(65.f); 
+        if (DragFloat3("##SCL", trsf.scale.e)) CDebug.Log("Recoded an edit");
+
+        TreePop();
+    }
+
+    ImGui::Separator();
+}
+
+
+void Inspector::SelectScene(Cookie::Editor::Scene* newSelection)
+{
+    selectedScene   = newSelection;
+    selectedEntity  = nullptr;
+
+    sceneTiles.x = (float)selectedScene->tiles.widthTile, 
+    sceneTiles.y = (float)selectedScene->tiles.lengthTile;
+}
 
 void Inspector::SceneInspection()
 {
     InputText("Scene name", &selectedScene->name);
 
     ImGui::Separator();
+
+    if (TreeNode("Tiles"))
+    {
+        Text("Current tiles: %d in x, %d in z", selectedScene->tiles.widthTile, selectedScene->tiles.lengthTile);
+
+        DragFloat2("##TILESNUM_EDIT", sceneTiles.e);
+
+        if (sceneTiles.x != (float)selectedScene->tiles.widthTile ||
+            sceneTiles.y != (float)selectedScene->tiles.lengthTile)
+        {
+            if (sceneTiles.x > 0 && sceneTiles.y > 0)
+            {
+                if (Button("Save new dimensions"))
+                    selectedScene->ChangeNumberOfTiles(sceneTiles.x, sceneTiles.y); 
+            }
+            else
+            { TextColored({0.70f, 0.4f, 0.4f, 1}, "Invalid new values"); }
+
+            SameLine();
+
+            if (Button("Discard"))
+            {
+                sceneTiles.x = (float)selectedScene->tiles.widthTile,
+                sceneTiles.y = (float)selectedScene->tiles.lengthTile;
+            }
+        }
+
+        TreePop();
+    }
 }

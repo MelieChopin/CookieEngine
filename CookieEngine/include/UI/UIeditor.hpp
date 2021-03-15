@@ -19,9 +19,8 @@ namespace Cookie::Render {class Renderer;}
 
 namespace Cookie::Core
 {
-	class UIcore
+	class UIeditor
 	{
-
 		const std::vector<const char*> menus = {"File", "Edit", "Windows", "Help"};
 
 		// All window-able elements of the engine, mostly WItems, which are positioned in the 4 first parts. All only-window elements are in the 5th spot.
@@ -35,7 +34,7 @@ namespace Cookie::Core
 		void EndFrame();
 	
 	public:
-		UIcore(GLFWwindow* _window, const Cookie::Render::Renderer& _renderer);
+		UIeditor(GLFWwindow* _window, const Cookie::Render::Renderer& _renderer);
 		void Terminate();
 
 

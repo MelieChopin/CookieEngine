@@ -1,6 +1,6 @@
 #include <d3d11.h>
 
-#include "UIcore.hpp"
+#include "UIeditor.hpp"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -13,7 +13,7 @@ using namespace ImGui;
 using namespace Cookie::Core;
 
 
-UIcore::UIcore(GLFWwindow* _window, const Cookie::Render::Renderer& _renderer)
+UIeditor::UIeditor(GLFWwindow* _window, const Cookie::Render::Renderer& _renderer)
 {
 	IMGUI_CHECKVERSION();
 	CreateContext();
@@ -39,7 +39,7 @@ UIcore::UIcore(GLFWwindow* _window, const Cookie::Render::Renderer& _renderer)
 	ImGui_ImplDX11_CreateDeviceObjects();
 }
 
-void UIcore::Terminate()
+void UIeditor::Terminate()
 {
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
@@ -47,14 +47,14 @@ void UIcore::Terminate()
 }
 
 
-void UIcore::BeginFrame()
+void UIeditor::BeginFrame()
 {
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	NewFrame();
 }
 
-void UIcore::EndFrame()
+void UIeditor::EndFrame()
 {	
 	ImGui::Render();	
 	ImGui_ImplDX11_RenderDrawData(GetDrawData());
@@ -63,7 +63,7 @@ void UIcore::EndFrame()
 	RenderPlatformWindowsDefault();
 }
 
-void UIcore::UpdateUI()
+void UIeditor::UpdateUI()
 {
 	BeginFrame();
 

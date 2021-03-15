@@ -20,7 +20,7 @@ namespace Cookie
 			Core::Window				window;
 			Core::Input 				input;
 			Render::Renderer			renderer;
-			Core::UIcore				ui;
+			Core::UIeditor				ui;
 			Resources::ResourcesManager	resources;
 			std::shared_ptr<Render::Camera>	camera = nullptr;
 			bool						isFlyCam = false;
