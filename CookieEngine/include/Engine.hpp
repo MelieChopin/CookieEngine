@@ -2,9 +2,11 @@
 #define __ENGINE_HPP__
 
 #include <memory>
+//#include <reactphysics3d/reactphysics3d.h>
 #include "Render/Renderer.hpp"
 #include "Core/Window.hpp"
-#include "Input.hpp"
+#include "Physics/PhysicsSimulator.hpp"
+//#include "Input.hpp"
 #include "UIallIn.hpp"
 #include "Coordinator.hpp"
 #include "Render/Camera.hpp"
@@ -18,7 +20,7 @@ namespace Cookie
 		public:
 
 			Core::Window				window;
-			Core::Input 				input;
+			//Core::Input 				input;
 			Render::Renderer			renderer;
 			Core::UIcore				ui;
 			Resources::ResourcesManager	resources;
@@ -27,6 +29,10 @@ namespace Cookie
 			Render::FrameBuffer			frameBuffer;
 			ECS::Coordinator			coordinator;
 			std::vector<Editor::Scene>	scene;
+
+			std::shared_ptr<reactphysics3d::PhysicsCommon>	physCom;
+			Physics::PhysicsSimulator						physSim;
+
 			int							indexScene = 0;
 
 		private:

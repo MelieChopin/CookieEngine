@@ -18,25 +18,24 @@ namespace Cookie
 	{
 		namespace System
 		{
-			inline void SystemGravity(ComponentRigidBody& rb) { rb.AddForce({ 0, -9.81f * rb.mass, 0 }); }
 			//void SystemCollision(const ComponentTransform&, const ComponentRigidBody&, const ComponentCollider&);
 			inline void SystemVelocity(ComponentTransform& trs, ComponentRigidBody& rb)
 			{
-				if (rb.goTowardTarget)
-				{
-					//if not reach the target Pos
-					if((rb.targetPosition - trs.localTRS.translation).Length() > 0.1)
-						rb.linearVelocity = (rb.targetPosition - trs.localTRS.translation).Normalize() * rb.speed;
-					//if reached
-					else
-					{
-						rb.goTowardTarget = false;
-						rb.targetPosition = {0, 0, 0};
-						rb.linearVelocity = {0, 0, 0};
-					}
-				}
-
-				trs.localTRS.translation += rb.linearVelocity * Core::deltaTime; 
+				//if (rb.goTowardTarget)
+				//{
+				//	//if not reach the target Pos
+				//	if((rb.targetPosition - trs.localTRS.translation).Length() > 0.1)
+				//		rb.linearVelocity = (rb.targetPosition - trs.localTRS.translation).Normalize() * rb.speed;
+				//	//if reached
+				//	else
+				//	{
+				//		rb.goTowardTarget = false;
+				//		rb.targetPosition = {0, 0, 0};
+				//		rb.linearVelocity = {0, 0, 0};
+				//	}
+				//}
+				//
+				//trs.localTRS.translation += rb.linearVelocity * Core::deltaTime; 
 			}
 			inline void SystemDraw(const ComponentTransform& trs, ComponentModel& model, Render::RendererRemote& remote, const Core::Math::Mat4& viewProj) 
 			{

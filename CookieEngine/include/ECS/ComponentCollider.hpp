@@ -1,6 +1,8 @@
 #ifndef __COMPONENT_COLLIDER_HPP__
 #define __COMPONENT_COLLIDER_HPP__
 
+//#include <reactphysics3d/reactphysics3d.h>
+
 namespace Cookie
 {
     namespace ECS
@@ -8,17 +10,16 @@ namespace Cookie
 
 		class ComponentCollider
 		{
+			private:
+			//reactphysics3d::Collider* physCollider;
+
 			public:
 				ComponentCollider() {}
 				~ComponentCollider() {}
-
-		private:
 
 		};
 
     }
 }
-
-#endif
 
 #endif // !__COMPONENT_COLLIDER_HPP__

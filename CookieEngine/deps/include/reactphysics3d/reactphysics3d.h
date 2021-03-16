@@ -34,6 +34,9 @@
 #ifndef REACTPHYSICS3D_H
 #define REACTPHYSICS3D_H
 
+#undef min
+#undef max
+
 // Libraries
 #include <reactphysics3d/configuration.h>
 #include <reactphysics3d/mathematics/mathematics.h>

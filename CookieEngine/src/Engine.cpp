@@ -1,3 +1,4 @@
+#include <reactphysics3d/reactphysics3d.h>
 #include "Engine.hpp"
 #include "Time.hpp"
 #include "Debug.hpp"
@@ -10,7 +11,7 @@ using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
 
 Engine::Engine() :
-    window{}, renderer{ window }, ui{ window.window, renderer }, frameBuffer{ resources,renderer }
+    window{}, renderer{ window }, ui{ window.window, renderer }, frameBuffer{ resources,renderer }, physCom{std::make_shared<reactphysics3d::PhysicsCommon>()},physSim{ physCom }
 {
     resources.Load(renderer);
     camera = std::make_shared<Render::GameCam>();
@@ -54,17 +55,17 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 void Engine::Run()
 {
-    //Map in future Classes
-    std::unordered_map<int, std::function<void()> > UnitInputs;
-    UnitInputs['A'] = [] { std::cout << "Unit Shortcut 1\n"; };
-    UnitInputs['Z'] = [] { std::cout << "Unit Shortcut 2\n"; };
-    UnitInputs['E'] = [] { std::cout << "Unit Shortcut 3\n"; };
-    std::unordered_map<int, std::function<void()> > BuildingInputs;
-    BuildingInputs['A'] = [] { std::cout << "Building Shortcut 1\n"; };
-    BuildingInputs['Z'] = [] { std::cout << "Building Shortcut 2\n"; };
-    BuildingInputs['E'] = [] { std::cout << "Building Shortcut 3\n"; };
+    ////Map in future Classes
+    //std::unordered_map<int, std::function<void()> > UnitInputs;
+    //UnitInputs['A'] = [] { std::cout << "Unit Shortcut 1\n"; };
+    //UnitInputs['Z'] = [] { std::cout << "Unit Shortcut 2\n"; };
+    //UnitInputs['E'] = [] { std::cout << "Unit Shortcut 3\n"; };
+    //std::unordered_map<int, std::function<void()> > BuildingInputs;
+    //BuildingInputs['A'] = [] { std::cout << "Building Shortcut 1\n"; };
+    //BuildingInputs['Z'] = [] { std::cout << "Building Shortcut 2\n"; };
+    //BuildingInputs['E'] = [] { std::cout << "Building Shortcut 3\n"; };
 
-    input.Set(UnitInputs);
+    //input.Set(UnitInputs);
 
     ui.AddWItem(new UIwidget::ExitPannel(window.window), 0);
     ui.AddWItem(new UIwidget::FileExplorer, 2);
@@ -82,9 +83,9 @@ void Engine::Run()
     {
         coordinator.AddEntity(SIGNATURE_ALL_COMPONENT, resources, "Duck 1");
         ComponentTransform& trs1 = coordinator.componentHandler->GetComponentTransform(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
-        trs1.localTRS.translation = { 10, 0, 0 };
+        trs1.localTRS.pos = { 10, 0, 0 };
         trs1.localTRS.scale = { 0.02, 0.02, 0.02 };
-        coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).speed = 10;
+        //coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).speed = 10;
         ComponentModel& model1 = coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
         model1.mesh = resources.GetMesh("LOD3spShape");
         model1.texture = resources.GetTexture("Duck");
@@ -92,9 +93,9 @@ void Engine::Run()
         
         coordinator.AddEntity(SIGNATURE_ALL_COMPONENT, resources, "Duck 2");
         ComponentTransform& trs2 = coordinator.componentHandler->GetComponentTransform(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
-        trs2.localTRS.translation = { -10, 0, 0 };
+        trs2.localTRS.pos = { -10, 0, 0 };
         trs2.localTRS.scale = { 0.02, 0.02, 0.02 };
-        coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).speed = 10;
+        //coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).speed = 10;
         coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).mesh = resources.GetMesh("LOD3spShape");
         ComponentModel& model2 = coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
         model2.mesh = resources.GetMesh("LOD3spShape");
@@ -148,42 +149,42 @@ void Engine::Run()
         camera->Update();
 
        //select unit or move selected
-       if (glfwGetMouseButton(window.window, GLFW_MOUSE_BUTTON_LEFT))
-       {        
-           //second condition not inside first "if" to not calculate ViewProj each frame
-           Vec3 result;
-
-           if (scene[0].LinePlane(result, camera->pos, camera->pos + camera->MouseToWorldDir() * camera->camFar))
-           {
-               //move to
-               if (glfwGetKey(window.window, GLFW_KEY_LEFT_CONTROL) && coordinator.selectedEntity)
-               {
-                   ComponentRigidBody& rb = coordinator.componentHandler->GetComponentRigidBody(coordinator.selectedEntity->id);
-                   rb.targetPosition = {result.x, coordinator.componentHandler->GetComponentTransform(coordinator.selectedEntity->id).localTRS.translation.y, result.z};
-                   rb.goTowardTarget = true;
-               }
-               //select entity
-               else
-               {
-                   int prevEntity = coordinator.selectedEntity ? coordinator.selectedEntity->id : -1;
-                   coordinator.SelectClosestMovableEntity(result);
-                   
-                   if (coordinator.selectedEntity && prevEntity != coordinator.selectedEntity->id)
-                   {
-
-                       insp->SelectEntity(coordinator.selectedEntity);
-                       ComponentModel& model = coordinator.componentHandler->GetComponentModel(coordinator.selectedEntity->id);
-                       model.texture = resources.GetTexture("Pink");
-
-                       if (prevEntity != -1)
-                       {
-                           ComponentModel& prevModel = coordinator.componentHandler->GetComponentModel((unsigned int)prevEntity);
-                           prevModel.texture = resources.GetTexture("Duck");
-                       }
-                   }
-               }
-           }
-       }
+       //if (glfwGetMouseButton(window.window, GLFW_MOUSE_BUTTON_LEFT))
+       //{        
+       //    //second condition not inside first "if" to not calculate ViewProj each frame
+       //    Vec3 result;
+       //
+       //    if (scene[0].LinePlane(result, camera->pos, camera->pos + camera->MouseToWorldDir() * camera->camFar))
+       //    {
+       //        //move to
+       //        if (glfwGetKey(window.window, GLFW_KEY_LEFT_CONTROL) && coordinator.selectedEntity)
+       //        {
+       //            ComponentRigidBody& rb = coordinator.componentHandler->GetComponentRigidBody(coordinator.selectedEntity->id);
+       //            rb.targetPosition = {result.x, coordinator.componentHandler->GetComponentTransform(coordinator.selectedEntity->id).localTRS.translation.y, result.z};
+       //            rb.goTowardTarget = true;
+       //        }
+       //        //select entity
+       //        else
+       //        {
+       //            int prevEntity = coordinator.selectedEntity ? coordinator.selectedEntity->id : -1;
+       //            coordinator.SelectClosestMovableEntity(result);
+       //            
+       //            if (coordinator.selectedEntity && prevEntity != coordinator.selectedEntity->id)
+       //            {
+       //
+       //                insp->SelectEntity(coordinator.selectedEntity);
+       //                ComponentModel& model = coordinator.componentHandler->GetComponentModel(coordinator.selectedEntity->id);
+       //                model.texture = resources.GetTexture("Pink");
+       //
+       //                if (prevEntity != -1)
+       //                {
+       //                    ComponentModel& prevModel = coordinator.componentHandler->GetComponentModel((unsigned int)prevEntity);
+       //                    prevModel.texture = resources.GetTexture("Duck");
+       //                }
+       //            }
+       //        }
+       //    }
+       //}
 
         coordinator.ApplySystemVelocity();
         coordinator.ApplyDraw(renderer.remote, camera->GetViewProj());

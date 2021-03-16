@@ -34,6 +34,8 @@ namespace Cookie
                 inline float Dot(const Quat& other) const;
                 inline static Quat Slerp(const Quat& q1, const Quat& q2, float t);
                 inline static Quat Nlerp(const Quat& q1, const Quat& q2, float t);
+                inline static Vec3 ToEulerAngle(const Quat& q);
+                inline static Quat ToQuat(const Vec3& euler);
                 inline Vec3 RotateVector(const Vec3& vec) const;
 
                 inline Quat operator-() const;

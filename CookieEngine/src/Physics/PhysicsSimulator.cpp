@@ -8,8 +8,8 @@ constexpr float initTimeStep = 1.0f / 60.0f;
 
 /*================ CONSTRUCTORS/DESTRUCTORS ================*/
 
-PhysicsSimulator::PhysicsSimulator(reactphysics3d::PhysicsCommon& _physCreator)
-	:physCreator{ &_physCreator }, worldSim{ _physCreator.createPhysicsWorld() }, timeStep{initTimeStep}
+PhysicsSimulator::PhysicsSimulator(std::shared_ptr<reactphysics3d::PhysicsCommon> _physCreator)
+	:physCreator{ _physCreator }, worldSim{ _physCreator->createPhysicsWorld() }, timeStep{initTimeStep}
 {
 }
 
