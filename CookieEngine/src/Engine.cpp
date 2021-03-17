@@ -91,7 +91,7 @@ void Engine::Run()
 
 
     //Load default Scene
-    Editor::Serialization::Load::LoadScene("Save/DefaultDuck.CAsset", scene, resources);
+    Editor::Serialization::Load::LoadScene("Assets/Save/DefaultDuck.CAsset", scene, resources);
     coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).speed = 10;
     coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 2].id).speed = 10;
 
@@ -186,10 +186,10 @@ void Engine::Run()
            Editor::Serialization::Save::SaveScene(scene);
        
        if (glfwGetKey(window.window, GLFW_KEY_P) == GLFW_PRESS)
-           Editor::Serialization::Load::LoadScene("Save/Map2.CAsset", scene, resources);           
+           Editor::Serialization::Load::LoadScene("Assets/Save/Map2.CAsset", scene, resources);           
 
        if (glfwGetKey(window.window, GLFW_KEY_L) == GLFW_PRESS)
-           Editor::Serialization::Load::LoadScene("Save/Map1.CAsset", scene, resources);
+           Editor::Serialization::Load::LoadScene("Assets/Save/Map1.CAsset", scene, resources);
            
 
        ///
