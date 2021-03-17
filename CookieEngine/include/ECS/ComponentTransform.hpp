@@ -23,7 +23,7 @@ namespace Cookie
 			
 			inline Core::Math::Mat4 ToTRS() const 
 			{ 
-				return Core::Math::Mat4::TRS(pos,rot,scale); 
+				return Core::Math::Mat4::TRS(pos, {Core::Math::ToRadians(rot.x),Core::Math::ToRadians(rot.y) ,Core::Math::ToRadians(rot.z) }, scale);
 			}
 			
 			~Transform() {}

@@ -8,14 +8,8 @@ namespace Cookie
 	namespace Core
 	{
 		static float timeScale {1.f};
-		static float deltaTime {0.f};
-		static float unscaledDeltaTime {0.f};
-
-		static inline void UpdateTime() 
-		{
-			unscaledDeltaTime = ImGui::GetIO().DeltaTime;
-			deltaTime = unscaledDeltaTime * timeScale;
-		}
+		static inline float DeltaTime(){ return ImGui::GetIO().DeltaTime * timeScale; }
+		static inline float UnscaledDeltaTime() { return ImGui::GetIO().DeltaTime; };
 	}
 }
 

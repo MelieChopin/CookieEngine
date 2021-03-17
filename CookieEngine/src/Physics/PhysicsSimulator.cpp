@@ -1,4 +1,5 @@
 #include <reactphysics3d/reactphysics3d.h>
+#include "imgui.h"
 #include "Core/Time.hpp"
 #include "Physics/PhysicsSimulator.hpp"
 
@@ -15,6 +16,11 @@ PhysicsSimulator::PhysicsSimulator(std::shared_ptr<reactphysics3d::PhysicsCommon
 
 PhysicsSimulator::~PhysicsSimulator()
 {
+	int max = worldSim->getNbRigidBodies();
+	for (int i = 0; i < max; i++)
+	{
+		worldSim->destroyRigidBody(worldSim->getRigidBody(0));
+	}
 	physCreator->destroyPhysicsWorld(worldSim);
 }
 
@@ -22,7 +28,7 @@ PhysicsSimulator::~PhysicsSimulator()
 
 void PhysicsSimulator::Update()
 {
-	accumulator += Core::deltaTime;
+	accumulator += Cookie::Core::DeltaTime();
 
 	while (accumulator >= timeStep)
 	{

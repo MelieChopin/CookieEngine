@@ -91,12 +91,12 @@ namespace Cookie
 					std::cout << entityHandler->entities[i].id << std::endl;
 			}
 
-			void ApplySystemVelocity() 
+			void ApplySystemPhysics(float factor) 
 			{
 				for (int i = 0; i < entityHandler->livingEntities; ++i)
 					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_RIGIDBODY))
-						System::SystemVelocity(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
-											   componentHandler->GetComponentRigidBody(entityHandler->entities[i].id));
+						System::SystemPhysics(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
+											   componentHandler->GetComponentRigidBody(entityHandler->entities[i].id),factor);
 			}
 
 			void ApplyDraw(Render::RendererRemote& remote, const Core::Math::Mat4& viewProj)

@@ -19,7 +19,6 @@ namespace Cookie
             ComponentRigidBody(const ComponentRigidBody& other) : physBody{other.physBody} {}
             ~ComponentRigidBody() {}
 
-            //void AddForce(const Core::Math::Vec3& directVec) {}
             void ToDefault()
             {
                 physBody = nullptr;

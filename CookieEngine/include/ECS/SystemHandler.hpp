@@ -19,23 +19,12 @@ namespace Cookie
 		namespace System
 		{
 			//void SystemCollision(const ComponentTransform&, const ComponentRigidBody&, const ComponentCollider&);
-			inline void SystemVelocity(ComponentTransform& trs, ComponentRigidBody& rb)
+			inline void SystemPhysics(ComponentTransform& trs, ComponentRigidBody& rb, float factor)
 			{
-				//if (rb.goTowardTarget)
-				//{
-				//	//if not reach the target Pos
-				//	if((rb.targetPosition - trs.localTRS.translation).Length() > 0.1)
-				//		rb.linearVelocity = (rb.targetPosition - trs.localTRS.translation).Normalize() * rb.speed;
-				//	//if reached
-				//	else
-				//	{
-				//		rb.goTowardTarget = false;
-				//		rb.targetPosition = {0, 0, 0};
-				//		rb.linearVelocity = {0, 0, 0};
-				//	}
-				//}
-				//
-				//trs.localTRS.translation += rb.linearVelocity * Core::deltaTime; 
+				trs.physTransform = rb.physBody->getTransform();
+
+				trs.Update(factor);
+
 			}
 			inline void SystemDraw(const ComponentTransform& trs, ComponentModel& model, Render::RendererRemote& remote, const Core::Math::Mat4& viewProj) 
 			{

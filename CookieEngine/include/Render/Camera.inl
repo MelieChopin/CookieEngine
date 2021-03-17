@@ -14,7 +14,7 @@ namespace Cookie
 
 		inline void Camera::Update()
 		{
-			viewMat = Core::Math::Mat4::Inverse(Core::Math::Mat4::Translate(pos) * Core::Math::Mat4::RotateY(rot.y)  * Core::Math::Mat4::RotateX(rot.x));
+			viewMat = Core::Math::Mat4::Inverse(Core::Math::Mat4::Translate(pos) * Core::Math::Mat4::RotateY(-rot.y)  * Core::Math::Mat4::RotateX(-rot.x));
 		}
 
 		inline void Camera::ResetPreviousMousePos()
@@ -56,7 +56,7 @@ namespace Cookie
 			float sinYaw = std::sin(rot.y);
 
 			// Compute speed
-			float speed = (CAM_MOUSE_SPEED * Core::unscaledDeltaTime);
+			float speed = (CAM_MOUSE_SPEED * Core::UnscaledDeltaTime());
 			if (ImGui::GetIO().KeyShift)
 				speed *= CAM_MOUSE_SPEED_UP_SCALE;
 
@@ -120,14 +120,14 @@ namespace Cookie
 			previousMouseX = tempMouseX;
 			previousMouseY = tempMouseY;
 			
-			float speed = (Core::deltaTime * CAM_MOUSE_SPEED * CAM_MOUSE_SPEED_UP_SCALE);
+			float speed = (Core::DeltaTime() * CAM_MOUSE_SPEED * CAM_MOUSE_SPEED_UP_SCALE);
 			
 			pos += Core::Math::Vec3(deltaMouseX, 0.0f, deltaMouseY) * speed;
 		}
 
 		inline void GameCam::UpdateZoom()
 		{
-			pos -= Core::Math::Vec3({viewMat.c[2].x, viewMat.c[2].y, viewMat.c[2].z}) * ImGui::GetIO().MouseWheel * (CAM_MOUSE_SPEED * Core::deltaTime);
+			pos -= Core::Math::Vec3({viewMat.c[2].x, viewMat.c[2].y, viewMat.c[2].z}) * ImGui::GetIO().MouseWheel * (CAM_MOUSE_SPEED * Core::DeltaTime());
 		}
 
 

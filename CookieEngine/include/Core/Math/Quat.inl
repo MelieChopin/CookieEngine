@@ -118,33 +118,38 @@ namespace Cookie
 			{
 				Vec3 angles{0.0f,0.0f,0.0f};
 
-				// roll (z-axis rotation)
+				// roll (x-axis rotation)
 				float sinr_cosp = 2 * (q.w * q.x + q.y * q.z);
 				float cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
-				angles.z = std::atan2(sinr_cosp, cosr_cosp);
+				angles.x = ToDegrees(std::atan2(sinr_cosp, cosr_cosp));
 
-				// pitch (x-axis rotation)
+				// pitch (y-axis rotation)
 				double sinp = 2 * (q.w * q.y - q.z * q.x);
 				if (std::abs(sinp) >= 1)
-					angles.x = std::copysign(PI / 2, sinp); // use 90 degrees if out of range
+					angles.y = ToDegrees(std::copysign(PI / 2, sinp)); // use 90 degrees if out of range
 				else
-					angles.x = std::asin(sinp);
+					angles.y = ToDegrees(std::asin(sinp));
 
-				// yaw (y-axis rotation)
+				// yaw (z-axis rotation)
 				double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
 				double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
-				angles.y = std::atan2(siny_cosp, cosy_cosp);
+				angles.z = ToDegrees(std::atan2(siny_cosp, cosy_cosp));
 
 				return angles;
 			}
 			inline Quat Quat::ToQuat(const Vec3& euler)
 			{
-				float cy = cos(euler.y * 0.5);
-				float sy = sin(euler.y * 0.5);
-				float cp = cos(euler.x * 0.5);
-				float sp = sin(euler.x * 0.5);
-				float cr = cos(euler.z * 0.5);
-				float sr = sin(euler.z * 0.5);
+				Vec3 angles = euler;
+				angles.x = ToRadians(euler.x);
+				angles.y = ToRadians(euler.y);
+				angles.z = ToRadians(euler.z);
+
+				float cy = cos(angles.z * 0.5);
+				float sy = sin(angles.z * 0.5);
+				float cp = cos(angles.y * 0.5);
+				float sp = sin(angles.y * 0.5);
+				float cr = cos(angles.x * 0.5);
+				float sr = sin(angles.x * 0.5);
 
 				Quat q;
 				q.w = cr * cp * cy + sr * sp * sy;
