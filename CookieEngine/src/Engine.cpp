@@ -1,9 +1,11 @@
 #include "Engine.hpp"
+#include "Serialization.hpp"
 #include "Time.hpp"
 #include "Debug.hpp"
 #include "Core/Math/Calc.hpp"
 #include "ImGui/imgui.h"
 #include <vector>
+
 
 //Temp
 #include "GLFW/glfw3.h"
@@ -198,7 +200,7 @@ void Engine::Run()
        }
 
        ///TEMP
-       if (glfwGetKey(window.window, GLFW_KEY_P) == GLFW_PRESS)
+       /*if (glfwGetKey(window.window, GLFW_KEY_P) == GLFW_PRESS)
            scene.ParcourTiles();
 
        if (glfwGetKey(window.window, GLFW_KEY_L) == GLFW_PRESS)
@@ -206,10 +208,15 @@ void Engine::Run()
                scene.componentHandler.componentTransforms[0].localTRS.scale.y);
 
        if (glfwGetKey(window.window, GLFW_KEY_I) == GLFW_PRESS)
-           scene.ChangeNumberOfTiles(10, 15);
+           scene.ChangeNumberOfTiles(10, 15);*/
 
        if (glfwGetKey(window.window, GLFW_KEY_H) == GLFW_PRESS)
-           scene.AddToTiles(1);
+           Editor::Serialization::Save::SaveScene("Save/Map1.CAsset", scene);
+
+       if (glfwGetKey(window.window, GLFW_KEY_P) == GLFW_PRESS)
+           Editor::Serialization::Load::LoadScene("Save/Map2.CAsset", scene, resources);
+       if (glfwGetKey(window.window, GLFW_KEY_L) == GLFW_PRESS)
+           Editor::Serialization::Load::LoadScene("Save/Map1.CAsset", scene, resources);
            
 
        ///

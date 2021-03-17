@@ -22,6 +22,7 @@ namespace Cookie
 			//std::vector<unsigned int>   children;
 
 			Entity(unsigned int _id) : id{ _id } {}
+			Entity(unsigned int _id, int _signature, std::string _name) : id{ _id }, signature{ _signature }, name{ _name } {}
 			Entity(const Entity& entity) : id{ entity.id }, signature{ entity.signature }, name{ entity.name }, tag{ entity.tag }, needToBeRemoved{ entity.needToBeRemoved } {}//, children{ entity.children } {}
 			~Entity() {}
 

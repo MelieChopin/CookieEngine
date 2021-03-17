@@ -3,7 +3,6 @@
 
 #include "ECS/Coordinator.hpp"
 #include "Vec3.hpp"
-#include "ECS/Coordinator.hpp"
 #include "Tiles.hpp"
 
 
@@ -65,10 +64,10 @@ namespace Cookie
 					return;
 
 				int indexWidthOfTiles = (componentHandler.componentTransforms[index].localTRS.translation.x + widthPlane) / (tiles.widthTileProp);
-				int indexLengthOfTiles = (componentHandler.componentTransforms[index].localTRS.translation.z + lengthPlane) / (tiles.lengthTileProp);
+				int indexLengthOfTiles = (componentHandler.componentTransforms[index].localTRS.translation.z + lengthPlane) / (tiles.depthTileProp);
 
 				componentHandler.componentTransforms[index].localTRS.translation.x = indexWidthOfTiles * (tiles.widthTileProp) - widthPlane + tiles.widthTileProp / 2;
-				componentHandler.componentTransforms[index].localTRS.translation.z = indexLengthOfTiles * (tiles.lengthTileProp) - lengthPlane + tiles.lengthTileProp / 2;
+				componentHandler.componentTransforms[index].localTRS.translation.z = indexLengthOfTiles * (tiles.depthTileProp) - lengthPlane + tiles.depthTileProp / 2;
 
 				for (int i = 0; i < tiles.tiles.size(); i++)
 				{
