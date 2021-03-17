@@ -25,8 +25,8 @@ Engine::Engine() :
     camera->ResetPreviousMousePos();
     camera->Update();
     camera->Deactivate();
-    scene = Editor::Scene(resources);
-    scene.LoadScene(coordinator);
+    scene = Editor::Scene(resources, coordinator);
+    scene.InitCoordinator(coordinator);
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_W);
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_S);
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_A);
@@ -35,7 +35,7 @@ Engine::Engine() :
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_LEFT_CONTROL);
     resources.AddTexture(std::make_shared<Resources::Texture>(renderer, "Pink", Core::Math::Vec4(1.0f,0.5f,0.5f,1.0f)));
     resources.AddTexture(std::make_shared<Resources::Texture>(renderer, "Assets/Floor_DefaultMaterial_BaseColor.png"));
-    coordinator.componentHandler->componentModels[0].texture = resources.GetTexture("Assets/Floor_DefaultMaterial_BaseColor.png");
+    //coordinator.componentHandler->componentModels[0].texture = resources.GetTexture("Assets/Floor_DefaultMaterial_BaseColor.png");
 }
 
 Engine::~Engine()
@@ -90,28 +90,10 @@ void Engine::Run()
     ui.AddWItem(new UIwidget::DemoWindow, 3);
 
 
-    //Create default Ducks
-    {
-        coordinator.AddEntity(SIGNATURE_ALL_COMPONENT, resources, "Duck 1");
-        ComponentTransform& trs1 = coordinator.componentHandler->GetComponentTransform(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
-        trs1.localTRS.translation = { 10, 0, 0 };
-        trs1.localTRS.scale = { 0.02, 0.02, 0.02 };
-        coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).speed = 10;
-        ComponentModel& model1 = coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
-        model1.mesh = resources.GetMesh("LOD3spShape");
-        model1.texture = resources.GetTexture("Duck");
-
-        
-        coordinator.AddEntity(SIGNATURE_ALL_COMPONENT, resources, "Duck 2");
-        ComponentTransform& trs2 = coordinator.componentHandler->GetComponentTransform(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
-        trs2.localTRS.translation = { -10, 0, 0 };
-        trs2.localTRS.scale = { 0.02, 0.02, 0.02 };
-        coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).speed = 10;
-        coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).mesh = resources.GetMesh("LOD3spShape");
-        ComponentModel& model2 = coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
-        model2.mesh = resources.GetMesh("LOD3spShape");
-        model2.texture = resources.GetTexture("Duck");
-    }
+    //Load default Scene
+    Editor::Serialization::Load::LoadScene("Save/DefaultDuck.CAsset", scene, resources);
+    coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).speed = 10;
+    coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 2].id).speed = 10;
 
     static bool camClicked = false;
 
@@ -180,10 +162,9 @@ void Engine::Run()
                {
                    int prevEntity = coordinator.selectedEntity ? coordinator.selectedEntity->id : -1;
                    coordinator.SelectClosestMovableEntity(result);
-                   
+
                    if (coordinator.selectedEntity && prevEntity != coordinator.selectedEntity->id)
                    {
-
                        insp->SelectEntity(coordinator.selectedEntity);
                        ComponentModel& model = coordinator.componentHandler->GetComponentModel(coordinator.selectedEntity->id);
                        model.texture = resources.GetTexture("Pink");
@@ -200,21 +181,13 @@ void Engine::Run()
        }
 
        ///TEMP
-       /*if (glfwGetKey(window.window, GLFW_KEY_P) == GLFW_PRESS)
-           scene.ParcourTiles();
-
-       if (glfwGetKey(window.window, GLFW_KEY_L) == GLFW_PRESS)
-           scene.ResizeSizeTilesWithScaleOfTheMap(scene.componentHandler.componentTransforms[0].localTRS.scale.x, 
-               scene.componentHandler.componentTransforms[0].localTRS.scale.y);
-
-       if (glfwGetKey(window.window, GLFW_KEY_I) == GLFW_PRESS)
-           scene.ChangeNumberOfTiles(10, 15);*/
 
        if (glfwGetKey(window.window, GLFW_KEY_H) == GLFW_PRESS)
-           Editor::Serialization::Save::SaveScene("Save/Map1.CAsset", scene);
-
+           Editor::Serialization::Save::SaveScene(scene);
+       
        if (glfwGetKey(window.window, GLFW_KEY_P) == GLFW_PRESS)
-           Editor::Serialization::Load::LoadScene("Save/Map2.CAsset", scene, resources);
+           Editor::Serialization::Load::LoadScene("Save/Map2.CAsset", scene, resources);           
+
        if (glfwGetKey(window.window, GLFW_KEY_L) == GLFW_PRESS)
            Editor::Serialization::Load::LoadScene("Save/Map1.CAsset", scene, resources);
            

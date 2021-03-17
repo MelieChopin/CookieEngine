@@ -17,16 +17,16 @@ namespace Cookie
 	{
 		public:
 			
-			Core::Window				window;
-			Core::Input 				input;
-			Render::Renderer			renderer;
-			Core::UIcore				ui;
-			Resources::ResourcesManager	resources;
+			Core::Window					window;
+			Core::Input 					input;
+			Render::Renderer				renderer;
+			Core::UIcore					ui;
+			Resources::ResourcesManager		resources;
 			std::shared_ptr<Render::Camera>	camera = nullptr;
-			bool						isFlyCam = false;
-			Render::FrameBuffer			frameBuffer;
-			ECS::Coordinator			coordinator;
-			Editor::Scene				scene;
+			bool							isFlyCam = false;
+			Render::FrameBuffer				frameBuffer;
+			ECS::Coordinator				coordinator;
+			Editor::Scene					scene;
 
 		private:
 			void TryResizeWindow();

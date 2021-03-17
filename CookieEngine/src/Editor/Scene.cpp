@@ -13,7 +13,7 @@ Scene::Scene()
 	componentHandler = Cookie::ECS::ComponentHandler();
 }
 
-Scene::Scene(const Resources::ResourcesManager& resources)
+Scene::Scene(const Resources::ResourcesManager& resources, Cookie::ECS::Coordinator& coordinator)
 {
 	int length = 15;
 	int width = 15;
@@ -43,7 +43,7 @@ Scene::~Scene()
 
 }
 
-void Scene::LoadScene(Cookie::ECS::Coordinator& coordinator)
+void Scene::InitCoordinator(Cookie::ECS::Coordinator& coordinator)
 {
 	coordinator.entityHandler = &entityHandler;
 	coordinator.componentHandler = &componentHandler;

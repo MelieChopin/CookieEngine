@@ -33,9 +33,9 @@ using namespace Cookie::Editor::Serialization;
  }
 
 
- void Cookie::Editor::Serialization::Save::SaveScene(const char* filepath, const Cookie::Editor::Scene& actScene)
+ void Cookie::Editor::Serialization::Save::SaveScene(const Cookie::Editor::Scene& actScene)
 {
-	std::ofstream file(filepath);
+	std::ofstream file(actScene.filepath);
 
 	json js;
 
@@ -88,8 +88,6 @@ using namespace Cookie::Editor::Serialization;
 		 }
 		 if (entity.entities[i].signature & SIGNATURE_MODEL)
 		 {
-			 ///GET RESOURCES MANAGER
-			 
 			 std::string test;
 			 component.componentModels[entity.entities[i].id].mesh = resourcesManager.GetMesh(js["ComponentHandler"]["Model"][i].at("model").get<std::string>());
 			 component.componentModels[entity.entities[i].id].texture = resourcesManager.GetTexture(js["ComponentHandler"]["Model"][i].at("texture").get<std::string>());
@@ -110,7 +108,7 @@ using namespace Cookie::Editor::Serialization;
 
 	 json js;
 	 file >> js;
-
+	 
 	 //name
 	 {
 		  js["Name"].get_to(newScene.name);
@@ -136,4 +134,6 @@ using namespace Cookie::Editor::Serialization;
 	 {
 		 Cookie::Editor::Serialization::Load::FromJson(js, newScene.entityHandler, newScene.componentHandler, resourcesManager);
 	 }
+
+	 newScene.filepath = filepath;
  }

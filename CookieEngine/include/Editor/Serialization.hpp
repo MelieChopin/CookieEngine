@@ -23,7 +23,7 @@ namespace Cookie
 				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity);
 				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler component);
 
-				void SaveScene(const char* filepath, const Cookie::Editor::Scene& actScene);
+				void SaveScene(const Cookie::Editor::Scene& actScene);
 			}
 
 			namespace Load
