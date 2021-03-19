@@ -67,5 +67,5 @@ void Viewport::GizmoManipulator()
 	ImGuizmo::SetRect(GetWindowPos().x, GetWindowPos().y, GetWindowSize().x, GetWindowSize().y);
 	
 	if (ImGuizmo::Manipulate((*camera)->GetView().Transpose().e, (*camera)->GetProj().Transpose().e, ImGuizmo::OPERATION::ROTATE, ImGuizmo::MODE::WORLD, trsfTMat.e))
-		ImGuizmo::DecomposeMatrixToComponents(trsfTMat.e, trsf.translation.e, trsf.rotation.e, trsf.scale.e);
+		ImGuizmo::DecomposeMatrixToComponents(trsfTMat.e, trsf.pos.e, trsf.rot.e, trsf.scale.e);
 }

@@ -206,7 +206,7 @@ void Inspector::MapInterface()
     {
         Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity->id).localTRS;
 
-        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.translation.e);
+        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.pos.e);
         
         Text("Scl:"); SameLine(65.f); 
         if (DragFloat3("##SCL", trsf.scale.e)) CDebug.Log("Recoded an edit");

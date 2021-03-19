@@ -108,16 +108,13 @@ void Engine::Run()
     UIwidget::Inspector* insp = new UIwidget::Inspector(resources, coordinator);
     ui.AddWItem(insp, 2);
     ui.AddWItem(new UIwidget::Hierarchy(resources, &scene, coordinator, insp), 2);
-    
-    ui.AddWindow(new UIwidget::Viewport(window.window, renderer.GetLastFrameBuffer() , &camera));
-    //ui.AddWindow(new UIwidget::GamePort);
 
     ui.AddWItem(new UIwidget::Console(CDebug, renderer), 2);
 
     ui.AddWItem(new UIwidget::DemoWindow, 3);
 
     UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(renderer);
-    ui.AddWindow(new UIwidget::Viewport(toolbar, window.window, frameBuffer, &camera, coordinator, insp->selectedEntity));
+    ui.AddWindow(new UIwidget::Viewport(toolbar, window.window, renderer.GetLastFrameBuffer(), &camera, coordinator, insp->selectedEntity));
 
     //Create default Ducks
     {
