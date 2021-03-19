@@ -1,10 +1,12 @@
 #include <reactphysics3d/reactphysics3d.h>
 #include "Engine.hpp"
+#include "Serialization.hpp"
 #include "Time.hpp"
 #include "Debug.hpp"
 #include "Core/Math/Calc.hpp"
 #include "ImGui/imgui.h"
 #include <vector>
+
 
 //Temp
 #include "GLFW/glfw3.h"
@@ -48,8 +50,8 @@ Engine::Engine() :
     camera->ResetPreviousMousePos();
     camera->Update();
     camera->Deactivate();
-    scene = Editor::Scene(resources);
-    scene.LoadScene(coordinator);
+    scene = Editor::Scene(resources, coordinator);
+    scene.InitCoordinator(coordinator);
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_W);
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_S);
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_A);
@@ -58,13 +60,7 @@ Engine::Engine() :
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_LEFT_CONTROL);
     resources.AddTexture(std::make_shared<Resources::Texture>(renderer, "Pink", Core::Math::Vec4(1.0f,0.5f,0.5f,1.0f)));
     resources.AddTexture(std::make_shared<Resources::Texture>(renderer, "Assets/Floor_DefaultMaterial_BaseColor.png"));
-    coordinator.componentHandler->componentModels[0].texture = resources.GetTexture("Assets/Floor_DefaultMaterial_BaseColor.png");
-    coordinator.componentHandler->componentTransforms[0].SetPhysics();
-
-
-    coordinator.componentHandler->componentRigidBodies[0].physBody = physSim.worldSim->createRigidBody(coordinator.componentHandler->componentTransforms[0].physTransform);
-    coordinator.componentHandler->componentRigidBodies[0].physBody->setType(reactphysics3d::BodyType::STATIC);
-    coordinator.componentHandler->componentColliders[0].AddCubeCollider(physCom, coordinator.componentHandler->componentRigidBodies[0].physBody, { 15.0f,15.f,.05f }, {0.0f,0.0f,0.0f}, {0.0f,0.0f,0.0f});
+    //coordinator.componentHandler->componentModels[0].texture = resources.GetTexture("Assets/Floor_DefaultMaterial_BaseColor.png");
 }
 
 Engine::~Engine()
@@ -116,46 +112,10 @@ void Engine::Run()
     UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(renderer);
     ui.AddWindow(new UIwidget::Viewport(toolbar, window.window, renderer.GetLastFrameBuffer(), &camera, coordinator, insp->selectedEntity));
 
-    //Create default Ducks
-    {
-        coordinator.AddEntity(SIGNATURE_ALL_COMPONENT - SIGNATURE_COLLIDER, resources, "Duck 1");
-        ComponentTransform& trs1 = coordinator.componentHandler->GetComponentTransform(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
-        trs1.localTRS.pos = { 10, 1.0f, 0 };
-        trs1.localTRS.scale = { 0.02, 0.02, 0.02 };
-        trs1.SetPhysics();
-       
-        ComponentModel& model1 = coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
-        model1.mesh = resources.GetMesh("LOD3spShape");
-        model1.texture = resources.GetTexture("Duck");
-
-        ComponentRigidBody& rb1 = coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
-        rb1.physBody = physSim.worldSim->createRigidBody(trs1.physTransform);
-        rb1.physBody->setType(reactphysics3d::BodyType::DYNAMIC);
-
-        ComponentCollider& cd1 = coordinator.componentHandler->GetComponentCollider(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
-        cd1.AddSphereCollider(physCom, rb1.physBody, 1.f, { 0.0f,1.0f,0.0f }, {0.0f,0.0f,0.0f});
-        
-        coordinator.AddEntity(SIGNATURE_ALL_COMPONENT - SIGNATURE_COLLIDER, resources, "Duck 2");
-        ComponentTransform& trs2 = coordinator.componentHandler->GetComponentTransform(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
-        trs2.localTRS.pos = { -10, 2.0f, 0 };
-        trs2.localTRS.scale = { 0.02, 0.02, 0.02 };
-        trs2.SetPhysics();
-
-        coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).mesh = resources.GetMesh("LOD3spShape");
-        ComponentModel& model2 = coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
-        model2.mesh = resources.GetMesh("LOD3spShape");
-        model2.texture = resources.GetTexture("Duck");
-
-        ComponentRigidBody& rb2 = coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
-        rb2.physBody = physSim.worldSim->createRigidBody(trs2.physTransform);
-        rb2.physBody->setType(reactphysics3d::BodyType::DYNAMIC);
-
-        ComponentCollider& cd2 = coordinator.componentHandler->GetComponentCollider(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id);
-        cd2.AddSphereCollider(physCom, rb2.physBody, 1.f, { 0.0f,1.0f,0.0f }, { 0.0f,0.0f,0.0f });
-    }
-    
-    printf("%s\n", physSim.worldSim->getGravity().to_string().c_str());
-    printf("%f\n",coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 2].id).physBody->getMass());
+    //Load default Scene
+    Editor::Serialization::Load::LoadScene("Assets/Save/DefaultDuck.CAsset", scene, resources);
+    coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).speed = 10;
+    coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 2].id).speed = 10;
 
     static bool camClicked = false;
 
@@ -168,8 +128,8 @@ void Engine::Run()
         glfwPollEvents();
         TryResizeWindow();
 
-        physSim.Update();
-        coordinator.ApplySystemPhysics(physSim.factor);
+        //physSim.Update();
+        //coordinator.ApplySystemPhysics(physSim.factor);
 
         renderer.Clear();
 
@@ -236,6 +196,17 @@ void Engine::Run()
        }
 
        renderer.Draw(camera->GetViewProj(), coordinator);
+       ///TEMP
+
+       if (glfwGetKey(window.window, GLFW_KEY_H) == GLFW_PRESS)
+           Editor::Serialization::Save::SaveScene(scene);
+       
+       if (glfwGetKey(window.window, GLFW_KEY_P) == GLFW_PRESS)
+           Editor::Serialization::Load::LoadScene("Assets/Save/Map2.CAsset", scene, resources);           
+
+       if (glfwGetKey(window.window, GLFW_KEY_L) == GLFW_PRESS)
+           Editor::Serialization::Load::LoadScene("Assets/Save/Map1.CAsset", scene, resources);
+           
         
         ui.UpdateUI();
 

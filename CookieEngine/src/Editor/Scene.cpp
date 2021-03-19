@@ -13,13 +13,13 @@ Scene::Scene()
 	componentHandler = Cookie::ECS::ComponentHandler();
 }
 
-Scene::Scene(const Resources::ResourcesManager& resources)
+Scene::Scene(const Resources::ResourcesManager& resources, Cookie::ECS::Coordinator& coordinator)
 {
 	int length = 15;
 	int width = 15;
 	int widthTile = 6;
-	int lengthTile = 6;
-	tiles = Tiles(width, length, widthTile, lengthTile);
+	int depthTile = 6;
+	tiles = Tiles(width, length, widthTile, depthTile);
 
 	Cookie::ECS::Coordinator::AddEntity(entityHandler, componentHandler, SIGNATURE_TRANSFORM + SIGNATURE_MODEL, resources, "Map");
 	componentHandler.componentModels[0].mesh = resources.GetMesh("Quad");
@@ -30,7 +30,7 @@ Scene::Scene(const Resources::ResourcesManager& resources)
 	
 	plane = { Vec3(0, 1, 0), 0 };
 	widthPlane = tiles.widthTile * tiles.widthTileProp / 2;
-	lengthPlane = tiles.lengthTile * tiles.lengthTileProp / 2;
+	lengthPlane = tiles.depthTile * tiles.depthTileProp / 2;
 }
 
 Scene::Scene(const Scene& _scene)
@@ -43,7 +43,7 @@ Scene::~Scene()
 
 }
 
-void Scene::LoadScene(Cookie::ECS::Coordinator& coordinator)
+void Scene::InitCoordinator(Cookie::ECS::Coordinator& coordinator)
 {
 	coordinator.entityHandler = &entityHandler;
 	coordinator.componentHandler = &componentHandler;
@@ -52,40 +52,40 @@ void Scene::LoadScene(Cookie::ECS::Coordinator& coordinator)
 
 void Scene::ResizeSizeTilesWithScaleOfTheMap(float newWidthPlane, float newLengthPlane)
 {
-	std::cout << "BEFORE " << tiles.widthTileProp << " " << tiles.lengthTileProp << "\n";
+	std::cout << "BEFORE " << tiles.widthTileProp << " " << tiles.depthTileProp << "\n";
 	tiles.widthTileProp = 2 * newWidthPlane / tiles.widthTile;
-	tiles.lengthTileProp = 2 * newLengthPlane / tiles.lengthTile;
-	std::cout << "AFTER " << tiles.widthTileProp << " " << tiles.lengthTileProp << "\n";
+	tiles.depthTileProp = 2 * newLengthPlane / tiles.depthTile;
+	std::cout << "AFTER " << tiles.widthTileProp << " " << tiles.depthTileProp << "\n";
 }
 
 void Scene::ChangeNumberOfTiles(int newSizeWidthTile, int newSizeLengthTile)
 {
-	if (newSizeLengthTile == tiles.lengthTile && newSizeWidthTile == tiles.widthTile)
+	if (newSizeLengthTile == tiles.depthTile && newSizeWidthTile == tiles.widthTile)
 		return;
 
-	if (newSizeLengthTile > tiles.lengthTile)
+	if (newSizeLengthTile > tiles.depthTile)
 	{
-		for (int i = 0; i < tiles.widthTile * (newSizeLengthTile - tiles.lengthTile); i++)
+		for (int i = 0; i < tiles.widthTile * (newSizeLengthTile - tiles.depthTile); i++)
 			tiles.tiles.push_back(TileProp());
 
-		tiles.lengthTile = newSizeLengthTile;
+		tiles.depthTile = newSizeLengthTile;
 	}
-	else if (newSizeLengthTile < tiles.lengthTile)
+	else if (newSizeLengthTile < tiles.depthTile)
 	{
-		tiles.tiles.erase(tiles.tiles.begin() + (tiles.widthTile) * (tiles.lengthTile - (tiles.lengthTile - newSizeLengthTile)), tiles.tiles.end());
-		tiles.lengthTile = newSizeLengthTile;
+		tiles.tiles.erase(tiles.tiles.begin() + (tiles.widthTile) * (tiles.depthTile - (tiles.depthTile - newSizeLengthTile)), tiles.tiles.end());
+		tiles.depthTile = newSizeLengthTile;
 	}
 
 	if (newSizeWidthTile > tiles.widthTile)
 	{
-		for (int i = tiles.lengthTile; i > 0; i--)
+		for (int i = tiles.depthTile; i > 0; i--)
 			tiles.tiles.insert(tiles.tiles.begin() + i  * tiles.widthTile - 1, newSizeWidthTile - tiles.widthTile , TileProp());
 
 		tiles.widthTile = newSizeWidthTile;
 	}
 	else if (newSizeWidthTile < tiles.widthTile)
 	{
-		for (int i = tiles.lengthTile; i > 0; i--)
+		for (int i = tiles.depthTile; i > 0; i--)
 			tiles.tiles.erase(tiles.tiles.begin() + i * tiles.widthTile - (tiles.widthTile - newSizeWidthTile), tiles.tiles.begin() + i * tiles.widthTile);
 			
 		tiles.widthTile = newSizeWidthTile;
@@ -129,7 +129,7 @@ bool Scene::LinePlane(Cookie::Core::Math::Vec3& pointCollision, const Cookie::Co
 	///Check the tiles
 
 	int indexWidthOfTiles = temp.x / (tiles.widthTileProp);
-	int indexLengthOfTiles = temp.z / (tiles.lengthTileProp);
+	int indexLengthOfTiles = temp.z / (tiles.depthTileProp);
 
 	std::cout << "INDEX TILES   " << indexWidthOfTiles << " " << indexLengthOfTiles << "\n";
 

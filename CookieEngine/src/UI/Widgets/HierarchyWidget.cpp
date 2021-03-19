@@ -48,7 +48,7 @@ void Hierarchy::WindowDisplay()
             {
                 if (Button("Load scene"))
                 {
-                    _scene.LoadScene(coordinator);
+                    _scene.InitCoordinator(coordinator);
                     CloseCurrentPopup();
                 }
 

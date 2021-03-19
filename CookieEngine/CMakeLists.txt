@@ -85,11 +85,12 @@ set (SRC_FILES
     "${SRC_DIR}/UI/Widgets/TextureEditorWidget.cpp"
     "${SRC_DIR}/UI/Widgets/ToolbarWidget.cpp"
     "${SRC_DIR}/UI/Widgets/ViewportWidget.cpp"
-    "${SRC_DIR}/Editor/Scene.cpp"
-    "${SRC_DIR}/Editor/Tiles.cpp"
     "${SRC_DIR}/Resources/Texture.cpp"
     "${SRC_DIR}/Render/FrameBuffer.cpp"
-    "${SRC_DIR}/Physics/PhysicsSimulator.cpp")
+    "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
+    "${SRC_DIR}/Editor/Scene.cpp"
+    "${SRC_DIR}/Editor/Tiles.cpp"
+    "${SRC_DIR}/Editor/Serialization.cpp")
 
 set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll")
 
