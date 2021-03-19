@@ -1,11 +1,46 @@
 #include "Debug.hpp"
+#include "Resources/Texture.hpp"
+#include "Renderer.hpp"
 #include "ConsoleWidget.hpp"
 
 #include <imgui.h>
 
+#include <ctime>
+
 using namespace ImGui;
 using namespace Cookie::UIwidget;
 using namespace Cookie::Core;
+
+
+Console::Console(Cookie::Core::DebugMessageHandler& _debugManager, Cookie::Render::Renderer& _renderer)
+	: WItemBase		("Console", false),
+	  debugManager	(_debugManager)
+{
+	icons[0] = std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/DebugIcos/Log.ico");
+	icons[1] = std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/DebugIcos/Warning.ico");
+	icons[2] = std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/DebugIcos/Error.ico");
+}
+
+
+bool Console::BeginWindow(int windowFlags)
+{
+	if (!opened) return false;
+
+	if (errorFlash > 0)
+	{
+		ImGui::PushStyleColor(ImGuiCol_Text, { 1, (255.f - errorFlash) / 255.f, (255.f - errorFlash) / 255.f, 1 });
+		contentVisible = ImGui::Begin(windowName, &opened, windowFlags);
+		ImGui::PopStyleColor();
+	}
+	else
+	{
+		contentVisible = ImGui::Begin(windowName, &opened, windowFlags);
+	}
+
+	if (!opened) visible = true;
+
+	return true;
+}
 
 
 void Console::WindowDisplay()
@@ -13,15 +48,23 @@ void Console::WindowDisplay()
 	TryBeginWindow()
 	{
 		if (Button("Clear list"))
-		{ std::vector<DebugMessage>().swap(debugManager.storedMessages); }
+		{
+			std::vector<DebugMessage>().swap(debugManager.storedMessages); 
+			errorFlash = 0;
+		}
 
 		SameLine();
 
 		if (Button(messagesGrouped ? "Ungroup messages" : "Group messages"))
 		{ messagesGrouped = !messagesGrouped; }
 
-		if		(messagesGrouped == true)	GroupedDisplay();
-		else								UngroupedDisplay();
+		if (BeginTable("Console disps", 2, ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_BordersH))
+		{
+			if		(messagesGrouped == true)	GroupedDisplay();
+			else								UngroupedDisplay();
+
+			EndTable();
+		}
 	}
 
 	ImGui::End();
@@ -30,18 +73,24 @@ void Console::WindowDisplay()
 
 void Console::UngroupedDisplay()
 {
+	bool latestErrorEncountered = false;
+
 	for (std::vector<DebugMessage>::reverse_iterator i = debugManager.storedMessages.rbegin(); i != debugManager.storedMessages.rend(); ++i)
 	{
 		DisplayMessage(*i);
 
-		Separator();
+		if (!latestErrorEncountered && i->messageType == DebugMessage::Error)
+		{
+			errorFlash = i->colorVariant;
+			latestErrorEncountered = true;
+		}
 	}
 }
 
 void Console::GroupedDisplay()
 {
 	std::vector<DebugMessage*> firstOccurences;
-	std::vector<int> repetitions;
+	std::vector<unsigned int> repetitions;
 	bool isNew;
 
 	for (std::vector<DebugMessage>::reverse_iterator i = debugManager.storedMessages.rbegin(); i != debugManager.storedMessages.rend(); ++i)
@@ -71,40 +120,36 @@ void Console::GroupedDisplay()
 
 		if (repetitions[i] > 0)
 		{
-			TextColored({0.5, 0.5, 0.5, 1}, "Repeated +%d times", repetitions[i]);
+			TextDisabled("Repeated +%d times", repetitions[i]);
 		}
-
-		Separator();
 	}
 }
 
 
 void Console::DisplayMessage(DebugMessage& message)
 {
+	TableNextRow();
+	TableNextColumn();
+	Image(icons[(int)message.messageType]->GetResourceView(), { 35, 35 });
+	TableNextColumn();
+	TextDisabled("%s", message.timestamp);
+	SameLine();
+
 	switch (message.messageType)
 	{
 	case (DebugMessage::Log):
-		TextColored({ 0, 1, 1, 1 }, "Log:"); SameLine(85.f);
-		TextColored({ (255.f - message.colorVariant / 2.f) / 255.f, 1, 1, 1 }, "%s", message.text);
+		TextColored({ (255.f - message.colorVariant) / 255.f, 1, 1, 1 }, "%s", message.text);
 		MessageColorBounce(1, message.colorVariant, message.bouncing, message.colorBounces);
 		break;
 
 	case (DebugMessage::Warning):
-		TextColored({ 1, 1, 0, 1 }, "Warning:"); SameLine(85.f);
 		TextColored({ 1, 1, (255.f - message.colorVariant) / 255.f, 1 }, "%s", message.text);
 		MessageColorBounce(3, message.colorVariant, message.bouncing, message.colorBounces);
 		break;
 
 	case (DebugMessage::Error):
-		TextColored({ 1, 0, 0, 1 }, "Error:"); SameLine(85.f);
 		TextColored({ 1, (255.f - message.colorVariant) / 255.f, (255.f - message.colorVariant) / 255.f, 1 }, "%s", message.text);
 		MessageColorBounce(5, message.colorVariant, message.bouncing, message.colorBounces);
-		break;
-
-	case (DebugMessage::Exception):
-		TextColored({ 1, 0, 0, 1 }, "Exception:"); SameLine(85.f);
-		TextColored({ 1, (255.f - message.colorVariant) / 255.f, (255.f - message.colorVariant) / 255.f, 1 }, "%s", message.text);
-		MessageColorBounce(15, message.colorVariant, message.bouncing, message.colorBounces);
 		break;
 	}
 }

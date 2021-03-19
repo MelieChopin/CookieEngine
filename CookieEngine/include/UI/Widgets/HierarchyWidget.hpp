@@ -16,13 +16,13 @@ namespace Cookie::UIwidget
 	class Hierarchy final : public WItemBase
 	{
 		Cookie::Resources::ResourcesManager&	resources;
-		std::vector<Cookie::Editor::Scene>*		scenes;
+		Cookie::Editor::Scene*					scenes;
 		Cookie::ECS::Coordinator&				coordinator;
 
 		Inspector* inspector;
 
 	public:
-		Hierarchy(Cookie::Resources::ResourcesManager& _resources, std::vector<Cookie::Editor::Scene>* _scenes, Cookie::ECS::Coordinator& _coordinator, Inspector* _inspector)
+		inline Hierarchy(Cookie::Resources::ResourcesManager& _resources, Cookie::Editor::Scene* _scenes, Cookie::ECS::Coordinator& _coordinator, Inspector* _inspector)
 			: WItemBase		("Hierarchy", false),
 			  resources     (_resources),
 			  scenes		(_scenes),

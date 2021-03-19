@@ -16,7 +16,7 @@ namespace Cookie
 	class Engine
 	{
 		public:
-
+			
 			Core::Window				window;
 			Core::Input 				input;
 			Render::Renderer			renderer;
@@ -26,8 +26,7 @@ namespace Cookie
 			bool						isFlyCam = false;
 			Render::FrameBuffer			frameBuffer;
 			ECS::Coordinator			coordinator;
-			std::vector<Editor::Scene>	scene;
-			int							indexScene = 0;
+			Editor::Scene				scene;
 
 		private:
 			void TryResizeWindow();

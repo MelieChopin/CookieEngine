@@ -30,7 +30,7 @@ namespace Cookie::UIwidget
 		void SceneInspection();
 
 	public:
-		Inspector(Cookie::Resources::ResourcesManager& _resources, Cookie::ECS::Coordinator& _coordinator)
+		inline Inspector(Cookie::Resources::ResourcesManager& _resources, Cookie::ECS::Coordinator& _coordinator)
 			: WItemBase			("Inspector", false),
 			  resources			(_resources),
 			  coordinator		(_coordinator)

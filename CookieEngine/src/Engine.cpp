@@ -5,6 +5,9 @@
 #include "ImGui/imgui.h"
 #include <vector>
 
+//Temp
+#include "GLFW/glfw3.h"
+
 using namespace Cookie;
 using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
@@ -21,10 +24,8 @@ Engine::Engine() :
     camera->ResetPreviousMousePos();
     camera->Update();
     camera->Deactivate();
-    scene.reserve(MaxScene);
-    scene.push_back(Editor::Scene(resources));
-    scene.push_back(Editor::Scene(resources));
-    scene[0].LoadScene(coordinator);
+    scene = Editor::Scene(resources);
+    scene.LoadScene(coordinator);
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_W);
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_S);
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_A);
@@ -67,7 +68,12 @@ void Engine::Run()
 
     input.Set(UnitInputs);
 
+
     ui.AddWItem(new UIwidget::ExitPannel(window.window), 0);
+
+    ui.AddWItem(new UIwidget::TextureEditor(renderer, resources), 1);
+    
+    
     ui.AddWItem(new UIwidget::FileExplorer, 2);
     
     UIwidget::Inspector* insp = new UIwidget::Inspector(resources, coordinator);
@@ -77,7 +83,11 @@ void Engine::Run()
     ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, &camera));
     //ui.AddWindow(new UIwidget::GamePort);
 
-    ui.AddWItem(new UIwidget::Console(CDebug), 2);
+    ui.AddWItem(new UIwidget::Console(CDebug, renderer), 2);
+
+
+    ui.AddWItem(new UIwidget::DemoWindow, 3);
+
 
     //Create default Ducks
     {
@@ -107,6 +117,7 @@ void Engine::Run()
     {
         // Present frame
         Core::UpdateTime();
+        CDebug.UpdateTime();
 
         // Present frame
         glfwPollEvents();
@@ -153,7 +164,7 @@ void Engine::Run()
            //second condition not inside first "if" to not calculate ViewProj each frame
            Vec3 result;
 
-           if (scene[0].LinePlane(result, camera->pos, camera->pos + camera->MouseToWorldDir() * camera->camFar))
+           if (scene.LinePlane(result, camera->pos, camera->pos + camera->MouseToWorldDir() * camera->camFar))
            {
                //move to
                if (glfwGetKey(window.window, GLFW_KEY_LEFT_CONTROL) && coordinator.selectedEntity)
@@ -183,7 +194,25 @@ void Engine::Run()
                    }
                }
            }
+         
        }
+
+       ///TEMP
+       if (glfwGetKey(window.window, GLFW_KEY_P) == GLFW_PRESS)
+           scene.ParcourTiles();
+
+       if (glfwGetKey(window.window, GLFW_KEY_L) == GLFW_PRESS)
+           scene.ResizeSizeTilesWithScaleOfTheMap(scene.componentHandler.componentTransforms[0].localTRS.scale.x, 
+               scene.componentHandler.componentTransforms[0].localTRS.scale.y);
+
+       if (glfwGetKey(window.window, GLFW_KEY_I) == GLFW_PRESS)
+           scene.ChangeNumberOfTiles(10, 15);
+
+       if (glfwGetKey(window.window, GLFW_KEY_H) == GLFW_PRESS)
+           scene.AddToTiles(1);
+           
+
+       ///
 
         coordinator.ApplySystemVelocity();
         coordinator.ApplySystemScriptUpdate();

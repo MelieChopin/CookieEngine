@@ -7,6 +7,7 @@
 #include "Widgets/FileExplorerWidget.hpp"
 #include "Widgets/HierarchyWidget.hpp"
 #include "Widgets/InspectorWidget.hpp"
+#include "Widgets/TextureEditorWidget.hpp"
 #include "Widgets/ViewportWidget.hpp"
 
 #include "Widgets/UIwidgets.hpp"

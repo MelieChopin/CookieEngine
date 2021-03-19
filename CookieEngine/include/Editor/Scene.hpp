@@ -4,17 +4,16 @@
 #include "ECS/Coordinator.hpp"
 #include "Vec3.hpp"
 #include "ECS/Coordinator.hpp"
+#include "Tiles.hpp"
+
+
+//temp
+#include <iostream>
 
 namespace Cookie
 {
 	namespace Editor
 	{
-		struct TileProp
-		{
-			int index = 0; //num of index block
-			bool fill = false;
-		};
-
 		//To cut
 		struct Plane
 		{
@@ -29,7 +28,8 @@ namespace Cookie
 		public:
 			Cookie::ECS::EntityHandler		entityHandler;
 			Cookie::ECS::ComponentHandler	componentHandler;
-			std::string						name = "NO NAME";
+			Tiles							tiles;
+			std::string						name = "Scene";
 			Plane							plane;
 			float							widthPlane;
 			float							lengthPlane;
@@ -40,7 +40,55 @@ namespace Cookie
 			Scene(const Scene& _scene);
 			~Scene();
 
+			/// <Temp>
+			void ParcourTiles()
+			{
+				for (int i = 0; i < tiles.tiles.size(); i++)
+				{
+					std::cout << tiles.tiles[i].fill << " " << i << "\n";
+				}
+			}
+
+			void AddToTiles(int id)
+			{
+				int index = -1;
+				for (int i = 0; i < entityHandler.entities.size(); i++)
+				{
+					if (entityHandler.entities[i].id == id)
+					{
+						index = i;
+						break;
+					}
+				}
+
+				if (index == -1)
+					return;
+
+				int indexWidthOfTiles = (componentHandler.componentTransforms[index].localTRS.translation.x + widthPlane) / (tiles.widthTileProp);
+				int indexLengthOfTiles = (componentHandler.componentTransforms[index].localTRS.translation.z + lengthPlane) / (tiles.lengthTileProp);
+
+				componentHandler.componentTransforms[index].localTRS.translation.x = indexWidthOfTiles * (tiles.widthTileProp) - widthPlane + tiles.widthTileProp / 2;
+				componentHandler.componentTransforms[index].localTRS.translation.z = indexLengthOfTiles * (tiles.lengthTileProp) - lengthPlane + tiles.lengthTileProp / 2;
+
+				for (int i = 0; i < tiles.tiles.size(); i++)
+				{
+					if (tiles.tiles[i].idEntity == id)
+					{
+						tiles.tiles[i].idEntity = -1;
+						tiles.tiles[i].fill = false;
+						break;
+					}
+				}
+
+				tiles.tiles[indexWidthOfTiles + indexLengthOfTiles * tiles.widthTile].fill = true;
+				tiles.tiles[indexWidthOfTiles + indexLengthOfTiles * tiles.widthTile].idEntity = id;
+
+			}
+			/// </Temp>
+
 			void LoadScene(Cookie::ECS::Coordinator& coordinator);
+			void ResizeSizeTilesWithScaleOfTheMap(float newWidthPlane, float newLengthPlane);
+			void ChangeNumberOfTiles(int newSizeWidthTile, int newSizeLengthTile);
 			void ChangeName(const char* newName) { name = newName; }
 			bool LinePlane(Cookie::Core::Math::Vec3& pointCollision, const Cookie::Core::Math::Vec3& firstPoint, const Cookie::Core::Math::Vec3& secondPoint);
 		};
