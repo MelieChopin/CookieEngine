@@ -34,9 +34,10 @@ public:
 
 
 Engine::Engine() :
-    window{}, renderer{ window }, ui{ window.window, renderer }, frameBuffer{ resources,renderer }, physCom{std::make_shared<reactphysics3d::PhysicsCommon>()},physSim{ physCom }
+    window{}, renderer{ window }, ui{ window.window, renderer },physCom{std::make_shared<reactphysics3d::PhysicsCommon>()},physSim{ physCom }
 {
     resources.Load(renderer);
+    renderer.AddFrameBuffer(resources);
     camera = std::make_shared<Render::GameCam>();
     camera->SetProj(Core::Math::ToRadians(60.f), renderer.state.viewport.Width,renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     camera->pos = { 0.0f,20.0f,30.0f };
@@ -102,7 +103,7 @@ void Engine::Run()
     ui.AddWItem(insp, 2);
     ui.AddWItem(new UIwidget::Hierarchy(resources, &scene, coordinator, insp), 2);
     
-    ui.AddWindow(new UIwidget::Viewport(window.window, frameBuffer, &camera));
+    ui.AddWindow(new UIwidget::Viewport(window.window, renderer.GetLastFrameBuffer() , &camera));
     //ui.AddWindow(new UIwidget::GamePort);
 
     ui.AddWItem(new UIwidget::Console(CDebug), 2);
@@ -160,8 +161,6 @@ void Engine::Run()
         coordinator.ApplySystemPhysics(physSim.factor);
 
         renderer.Clear();
-        renderer.ClearFrameBuffer(frameBuffer);
-        renderer.SetFrameBuffer(frameBuffer);
 
         if (glfwGetMouseButton(window.window, GLFW_MOUSE_BUTTON_MIDDLE) && !camClicked)
         {
@@ -224,9 +223,7 @@ void Engine::Run()
            }
        }
 
-        coordinator.ApplyDraw(renderer.remote, camera->GetViewProj());
-        renderer.SetBackBuffer();
-        //frameBuffer.Draw(renderer.remote);
+       renderer.Draw(camera->GetViewProj(), coordinator);
         
         ui.UpdateUI();
 
@@ -264,7 +261,6 @@ void Engine::TryResizeWindow()
         window.height = height;
 
         renderer.ResizeBuffer(width,height);
-        frameBuffer.Resize(renderer);
         camera->SetProj(Core::Math::ToRadians(60.f),width,height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     }
 }
