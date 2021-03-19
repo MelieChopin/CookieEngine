@@ -224,7 +224,7 @@ void Inspector::SelectScene(Cookie::Editor::Scene* newSelection)
     selectedEntity  = nullptr;
 
     sceneTiles.x = (float)selectedScene->tiles.widthTile, 
-    sceneTiles.y = (float)selectedScene->tiles.lengthTile;
+    sceneTiles.y = (float)selectedScene->tiles.depthTile;
 }
 
 void Inspector::SceneInspection()
@@ -235,12 +235,12 @@ void Inspector::SceneInspection()
 
     if (TreeNode("Tiles"))
     {
-        Text("Current tiles: %d in x, %d in z", selectedScene->tiles.widthTile, selectedScene->tiles.lengthTile);
+        Text("Current tiles: %d in x, %d in z", selectedScene->tiles.widthTile, selectedScene->tiles.depthTile);
 
         DragFloat2("##TILESNUM_EDIT", sceneTiles.e);
 
         if (sceneTiles.x != (float)selectedScene->tiles.widthTile ||
-            sceneTiles.y != (float)selectedScene->tiles.lengthTile)
+            sceneTiles.y != (float)selectedScene->tiles.depthTile)
         {
             if (sceneTiles.x > 0 && sceneTiles.y > 0)
             {
@@ -255,7 +255,7 @@ void Inspector::SceneInspection()
             if (Button("Discard"))
             {
                 sceneTiles.x = (float)selectedScene->tiles.widthTile,
-                sceneTiles.y = (float)selectedScene->tiles.lengthTile;
+                sceneTiles.y = (float)selectedScene->tiles.depthTileProp;
             }
         }
 

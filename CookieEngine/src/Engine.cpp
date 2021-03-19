@@ -114,8 +114,6 @@ void Engine::Run()
 
     //Load default Scene
     Editor::Serialization::Load::LoadScene("Assets/Save/DefaultDuck.CAsset", scene, resources);
-    coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 1].id).speed = 10;
-    coordinator.componentHandler->GetComponentRigidBody(coordinator.entityHandler->entities[coordinator.entityHandler->livingEntities - 2].id).speed = 10;
 
     static bool camClicked = false;
 

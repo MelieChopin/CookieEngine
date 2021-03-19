@@ -65,10 +65,10 @@ namespace Cookie
 					return;
 
 				int indexWidthOfTiles = (componentHandler.componentTransforms[index].localTRS.pos.x + widthPlane) / (tiles.widthTileProp);
-				int indexLengthOfTiles = (componentHandler.componentTransforms[index].localTRS.pos.z + lengthPlane) / (tiles.lengthTileProp);
+				int indexLengthOfTiles = (componentHandler.componentTransforms[index].localTRS.pos.z + lengthPlane) / (tiles.depthTileProp);
 
 				componentHandler.componentTransforms[index].localTRS.pos.x = indexWidthOfTiles * (tiles.widthTileProp) - widthPlane + tiles.widthTileProp / 2;
-				componentHandler.componentTransforms[index].localTRS.pos.z = indexLengthOfTiles * (tiles.lengthTileProp) - lengthPlane + tiles.lengthTileProp / 2;
+				componentHandler.componentTransforms[index].localTRS.pos.z = indexLengthOfTiles * (tiles.depthTileProp) - lengthPlane + tiles.depthTileProp / 2;
 
 				for (int i = 0; i < tiles.tiles.size(); i++)
 				{

@@ -22,7 +22,7 @@ using namespace Cookie::Editor::Serialization;
 		 if (entity.entities[i].signature & SIGNATURE_TRANSFORM)
 		 {
 			 Cookie::ECS::ComponentTransform transform = component.GetComponentTransform(entity.entities[i].id);
-			 js["ComponentHandler"]["Transform"] += json{ { "localTRS", { { "translate", transform.localTRS.translation.e }, { "rotation", transform.localTRS.rotation.e }, { "scale", transform.localTRS.scale.e } } } };
+			 js["ComponentHandler"]["Transform"] += json{ { "localTRS", { { "translate", transform.localTRS.pos.e }, { "rotation", transform.localTRS.rot.e }, { "scale", transform.localTRS.scale.e } } } };
 		 }
 		 if (entity.entities[i].signature & SIGNATURE_MODEL)
 		 {
@@ -81,8 +81,8 @@ using namespace Cookie::Editor::Serialization;
 		 if (entity.entities[i].signature & SIGNATURE_TRANSFORM)
 		 {
 			 Cookie::ECS::ComponentTransform transform;
-			 js["ComponentHandler"]["Transform"][i].at("localTRS").at("translate").get_to(transform.localTRS.translation.e);
-			 js["ComponentHandler"]["Transform"][i].at("localTRS").at("rotation").get_to(transform.localTRS.rotation.e);
+			 js["ComponentHandler"]["Transform"][i].at("localTRS").at("translate").get_to(transform.localTRS.pos.e);
+			 js["ComponentHandler"]["Transform"][i].at("localTRS").at("rotation").get_to(transform.localTRS.rot.e);
 			 js["ComponentHandler"]["Transform"][i].at("localTRS").at("scale").get_to(transform.localTRS.scale.e);
 			 component.componentTransforms[entity.entities[i].id].localTRS = transform.localTRS;
 		 }

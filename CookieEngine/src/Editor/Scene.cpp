@@ -25,7 +25,7 @@ Scene::Scene(const Resources::ResourcesManager& resources, Cookie::ECS::Coordina
 	componentHandler.componentModels[0].mesh = resources.GetMesh("Quad");
 	componentHandler.componentTransforms[0].localTRS.pos = Vec3(0, 0, 0);
 	componentHandler.componentTransforms[0].localTRS.rot = Vec3(90.0f, 0, 0);
-	componentHandler.componentTransforms[0].localTRS.scale = Vec3(tiles.widthTile * tiles.widthTileProp / 2, tiles.lengthTile * tiles.lengthTileProp / 2, 0);
+	componentHandler.componentTransforms[0].localTRS.scale = Vec3(tiles.widthTile * tiles.widthTileProp / 2, tiles.depthTile * tiles.depthTileProp / 2, 0);
 	entityHandler.entities[0].tag = "MAP";
 	
 	plane = { Vec3(0, 1, 0), 0 };
