@@ -5,10 +5,11 @@
 #include <GLFW/glfw3native.h>
 
 #include "Render/Renderer.hpp"
-#include "Render/FrameBuffer.hpp"
+#include "Resources/ResourcesManager.hpp"
+#include "ECS/Coordinator.hpp"
 
 using namespace Cookie::Render;
-
+using namespace Cookie::Core::Math;
 
 /*========================= CONSTRUCTORS/DESTRUCTORS ===========================*/
 
@@ -20,7 +21,6 @@ Renderer::Renderer(Core::Window& window)
         result = CreateDrawBuffer(window.width,window.height);
     if (result)
         result = InitState(window.width, window.height);
-
 }
 
 Renderer::~Renderer()
@@ -188,6 +188,11 @@ bool Renderer::InitState(int width, int height)
 
 /*========================= CREATE METHODS =========================*/
 
+void Renderer::AddFrameBuffer(Resources::ResourcesManager& resources)
+{
+    frameBuffers.push_back(std::move(std::make_unique<FrameBuffer>(resources,*this)));
+}
+
 bool Renderer::CreateBuffer(D3D11_BUFFER_DESC bufferDesc, D3D11_SUBRESOURCE_DATA data, ID3D11Buffer** buffer)
 {
     if (FAILED(device->CreateBuffer(&bufferDesc, &data, buffer)))
@@ -245,14 +250,41 @@ void Renderer::ResizeBuffer(int width, int height)
     state.viewport.Height = height;
     remote.context->RSSetViewports(1, &state.viewport);
 
+    if (!frameBuffers.empty()) 
+    {
+        for (int i = 0; i < frameBuffers.size(); i++)
+        {
+            frameBuffers[i]->Resize(*this);
+        }
+    }
 }
 
 /*========================= RENDER METHODS =========================*/
+
+void Renderer::Draw(const Mat4& viewProj, Cookie::ECS::Coordinator& coordinator)
+{
+    if (!frameBuffers.empty())
+    {
+        remote.context->OMSetRenderTargets(1, frameBuffers[0]->GetRenderTarget(), depthBuffer);
+    }
+
+    coordinator.ApplyDraw(remote,viewProj);
+    
+    remote.context->OMSetRenderTargets(1, &backbuffer, depthBuffer);
+}
 
 void Renderer::Clear()
 {
     remote.context->ClearRenderTargetView(backbuffer, state.clearColor.e);
     remote.context->ClearDepthStencilView(depthBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0.0f);
+
+    if (!frameBuffers.empty())
+    {
+        for (int i = 0; i < frameBuffers.size(); i++)
+        {
+            remote.context->ClearRenderTargetView(*frameBuffers[i]->GetRenderTarget(), state.clearColor.e);
+        }
+    }
 
     remote.context->RSSetState(state.rasterizerState);
     remote.context->OMSetDepthStencilState(state.depthStencilState, 1);
@@ -269,14 +301,4 @@ void Renderer::Render()
     // switch the back buffer and the front buffer
     remote.context->OMSetRenderTargets(1, &backbuffer, nullptr);
     swapchain->Present(1, 0);
-}
-
-void Renderer::SetFrameBuffer(const FrameBuffer& frameBuffer)
-{
-    remote.context->OMSetRenderTargets(1, frameBuffer.GetRenderTarget(), depthBuffer);
-}
-
-void Renderer::ClearFrameBuffer(const FrameBuffer& frameBuffer)
-{
-    remote.context->ClearRenderTargetView(*frameBuffer.GetRenderTarget(), state.clearColor.e);
 }

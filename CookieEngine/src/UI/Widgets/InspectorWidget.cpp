@@ -65,11 +65,13 @@ void Inspector::TransformInterface()
 {
     if (TreeNode("Transform"))
     {
-        Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity->id).localTRS;
+        ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity->id);
 
-        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.translation.e);
-        Text("Rot:"); SameLine(65.f); DragFloat3("##ROT", trsf.rotation.e);
-        Text("Scl:"); SameLine(65.f); DragFloat3("##SCL", trsf.scale.e);
+        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.localTRS.pos.e);
+        Text("Rot:"); SameLine(65.f); DragFloat3("##ROT", trsf.localTRS.rot.e);
+        Text("Scl:"); SameLine(65.f); DragFloat3("##SCL", trsf.localTRS.scale.e);
+
+        trsf.SetPhysics();
 
         ImGui::NewLine();
         if (Button("Remove component##TRSF"))
@@ -89,16 +91,16 @@ void Inspector::RigidBodyInterface()
     {
         ComponentRigidBody& rigibod = coordinator.componentHandler->GetComponentRigidBody(selectedEntity->id);
 
-        Text("Velocity:");          SameLine(110.f); DragFloat3("##VEL", rigibod.linearVelocity.e);
-
-        Text("Mass:");              SameLine(110.f); DragFloat("##MASS", &rigibod.mass);
-        Text("Drag:");              SameLine(110.f); DragFloat("##DRAG", &rigibod.drag);
-
-        Text("TargetPos:");         SameLine(110.f); DragFloat3("##TargetPos", rigibod.targetPosition.e);
-        
-        Text("Speed:");             SameLine(110.f); DragFloat("##Speed", &rigibod.speed);
-        
-        Text("GoTowardPosition:");  SameLine(160.f); Checkbox("##GoTowardPosition", &rigibod.goTowardTarget);
+        //Text("Velocity:");          SameLine(110.f); DragFloat3("##VEL", rigibod.linearVelocity.e);
+        //
+        //Text("Mass:");              SameLine(110.f); DragFloat("##MASS", &rigibod.mass);
+        //Text("Drag:");              SameLine(110.f); DragFloat("##DRAG", &rigibod.drag);
+        //
+        //Text("TargetPos:");         SameLine(110.f); DragFloat3("##TargetPos", rigibod.targetPosition.e);
+        //
+        //Text("Speed:");             SameLine(110.f); DragFloat("##Speed", &rigibod.speed);
+        //
+        //Text("GoTowardPosition:");  SameLine(160.f); Checkbox("##GoTowardPosition", &rigibod.goTowardTarget);
 
 
         ImGui::NewLine();
