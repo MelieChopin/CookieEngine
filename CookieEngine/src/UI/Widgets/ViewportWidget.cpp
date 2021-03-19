@@ -13,7 +13,6 @@ using namespace Cookie::UIwidget;
 using namespace Cookie::ECS;
 using namespace Cookie::Core::Math;
 
-#include "Debug.hpp"
 
 void Viewport::WindowDisplay()
 {
@@ -50,10 +49,11 @@ void Viewport::WindowDisplay()
 			io.WantCaptureKeyboard = true;
 			(*camera)->Deactivate();
 		}
+		
+		if (selectedEntity)
+			GizmoManipulator();
 	}
 
-	if (selectedEntity)
-		GizmoManipulator();
 
 	ImGui::End();
 }
@@ -66,6 +66,18 @@ void Viewport::GizmoManipulator()
 	ImGuizmo::SetDrawlist();
 	ImGuizmo::SetRect(GetWindowPos().x, GetWindowPos().y, GetWindowSize().x, GetWindowSize().y);
 	
-	if (ImGuizmo::Manipulate((*camera)->GetView().Transpose().e, (*camera)->GetProj().Transpose().e, ImGuizmo::OPERATION::ROTATE, ImGuizmo::MODE::WORLD, trsfTMat.e))
+
+	static ImGuizmo::OPERATION transformTool;
+
+	switch (toolbar->CurrentTrsfTool())
+	{
+	case TransformTool::Translate:	transformTool = ImGuizmo::OPERATION::TRANSLATE; break;
+	case TransformTool::Rotate:		transformTool = ImGuizmo::OPERATION::ROTATE;	break;
+	case TransformTool::Scale:		transformTool = ImGuizmo::OPERATION::SCALE;		break;
+	case TransformTool::Quad:		transformTool = ImGuizmo::OPERATION::BOUNDS;	break;
+	}
+
+
+	if (ImGuizmo::Manipulate((*camera)->GetView().Transpose().e, (*camera)->GetProj().Transpose().e, transformTool, ImGuizmo::MODE::WORLD, trsfTMat.e))
 		ImGuizmo::DecomposeMatrixToComponents(trsfTMat.e, trsf.pos.e, trsf.rot.e, trsf.scale.e);
 }
