@@ -15,11 +15,19 @@ Toolbar::Toolbar(Cookie::Render::Renderer& _renderer)
 	icons[(int)ToolbarIcons::Rotator]		= std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/rotate.ico");
 	icons[(int)ToolbarIcons::Scaler]		= std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/zoom.ico");
 	icons[(int)ToolbarIcons::Quader]		= std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/quad.ico");
-	icons[(int)ToolbarIcons::Save]			= std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/save.ico");
 	icons[(int)ToolbarIcons::Play]			= std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/play.ico");
 	icons[(int)ToolbarIcons::Stop]			= std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/stop.ico");
 	icons[(int)ToolbarIcons::Pause]			= std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/pause.ico");
 	icons[(int)ToolbarIcons::Frame]			= std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/frame.ico");
+}
+
+bool Toolbar::BeginWindow(int windowFlags)
+{
+	if (!opened) return false;
+
+	contentVisible = ImGui::BeginChild(windowName, {GetWindowContentRegionWidth(), 50}, true, windowFlags);
+
+	return true;
 }
 
 void Toolbar::WindowDisplay()
@@ -50,15 +58,8 @@ void Toolbar::WindowDisplay()
 		if (ImageButton(icons[(int)ToolbarIcons::Quader]->GetResourceView(), { 25, 25 }, { 0, 0 }, { 1, 1 }, 5))
 		{ currentTrsfTool = TransformTool::Quad; } 
 		
-		
-		SameLine(GetWindowWidth()/5);
-
-
-		if (ImageButton(icons[(int)ToolbarIcons::Save]->GetResourceView(), { 25, 25 }, { 0, 0 }, { 1, 1 }, 5))
-		{/*TBD*/} 
 
 		SameLine(GetWindowWidth()/2);
-
 
 		if		(!playing && ImageButton(icons[(int)ToolbarIcons::Play]->GetResourceView(), { 25, 25 }, { 0, 0 }, { 1, 1 }, 5))
 		{
@@ -81,7 +82,7 @@ void Toolbar::WindowDisplay()
 		{/*TBD*/}
 	}
 
-	ImGui::End();
+	ImGui::EndChild();
 
 
 	GetStyle() = prev;

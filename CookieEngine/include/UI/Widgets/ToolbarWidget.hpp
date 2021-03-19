@@ -16,23 +16,26 @@ namespace Cookie::UIwidget
 	class Toolbar final : public WindowBase
 	{
 		enum class ToolbarIcons
-		{ Translator, Rotator, Scaler, Quader, Save, Play, Stop, Pause, Frame, ICOS_NUM };
+		{ Translator, Rotator, Scaler, Quader, Play, Stop, Pause, Frame, ICOS_NUM };
 
 		std::unique_ptr<Cookie::Resources::Texture> icons[(int)ToolbarIcons::ICOS_NUM];
 		
 		TransformTool	currentTrsfTool	= TransformTool::Translate;
 		bool			playing			= false;
 
+	protected:
+		bool BeginWindow(int windowFlags = 0) override;
+
 	public:
 		Toolbar(Cookie::Render::Renderer& _renderer);
 
-		void WindowDisplay() final override;
+		void WindowDisplay() override;
 
 
-		inline const TransformTool& CurrentTrsfTool()
+		inline const TransformTool& CurrentTrsfTool() const
 		{ return currentTrsfTool; }
 
-		inline const bool isPlaying()
+		inline const bool isPlaying() const
 		{ return playing; }
 	};
 }

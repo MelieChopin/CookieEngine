@@ -16,11 +16,13 @@ namespace Cookie::UIwidget
 		Cookie::Resources::ResourcesManager& resources;
 		Cookie::ECS::Coordinator& coordinator;
 
-		Cookie::ECS::Entity*	selectedEntity	= nullptr;
 
 		Cookie::Editor::Scene*	 selectedScene	= nullptr;
 		Cookie::Core::Math::Vec2 sceneTiles;
 
+	public:
+		Cookie::ECS::Entity*	selectedEntity	= nullptr;
+	
 	private:
 		void EntityInspection();
 

@@ -6,6 +6,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_dx11.h>
 
+#include <ImGuizmo.h>
+
 #include "Renderer.hpp"
 
 
@@ -52,6 +54,7 @@ void UIeditor::BeginFrame()
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	NewFrame();
+	ImGuizmo::BeginFrame();
 }
 
 void UIeditor::EndFrame()

@@ -14,7 +14,7 @@ namespace Cookie
 
 		inline void Camera::Update()
 		{
-			viewMat = Core::Math::Mat4::Inverse(Core::Math::Mat4::Translate(pos) * Core::Math::Mat4::RotateY(rot.y)  * Core::Math::Mat4::RotateX(rot.x));
+			viewMat = Core::Math::Mat4::Inverse(Core::Math::Mat4::Translate(pos) * Core::Math::Mat4::RotateY(-rot.y)  * Core::Math::Mat4::RotateX(-rot.x));
 		}
 
 		inline void Camera::ResetPreviousMousePos()

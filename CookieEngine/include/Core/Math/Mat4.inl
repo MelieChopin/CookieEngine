@@ -131,8 +131,8 @@ namespace Cookie
                 return
                 { {
                     1.f, 0.f, 0.f, 0.f,
-                    0.f,   c,   s, 0.f,
-                    0.f,  -s,   c, 0.f,
+                    0.f,   c,  -s, 0.f,
+                    0.f,   s,   c, 0.f,
                     0.f, 0.f, 0.f, 1.f,
                 } };
             }
@@ -142,9 +142,9 @@ namespace Cookie
                 float s = std::sin(radians);
                 return
                 { {
-                     c, 0.f,  -s, 0.f,
+                      c, 0.f,   s, 0.f,
                     0.f, 1.f, 0.f, 0.f,
-                     s, 0.f,   c, 0.f,
+                     -s, 0.f,   c, 0.f,
                     0.f, 0.f, 0.f, 1.f,
                 } };
             }
@@ -154,8 +154,8 @@ namespace Cookie
                 float s = std::sin(radians);
                 return
                 { {
-                        c,   s,  0.f, 0.f,
-                        -s,   c,  0.f, 0.f,
+                        c,   -s,  0.f, 0.f,
+                        s,    c,  0.f, 0.f,
                         0.f, 0.f, 1.f, 0.f,
                         0.f, 0.f, 0.f, 1.f,
                 } };
