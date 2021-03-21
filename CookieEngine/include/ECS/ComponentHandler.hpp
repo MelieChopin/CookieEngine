@@ -2,6 +2,8 @@
 #define __COMPONENT_HANDLER_HPP__
 
 #include "ComponentTransform.hpp"
+#include "ComponentModel.hpp"
+#include "ComponentCollider.hpp"
 #include "ComponentRigidBody.hpp"
 #include "ComponentModel.hpp"
 #include "ComponentScript.hpp"
@@ -14,12 +16,13 @@ namespace Cookie
 {
 	namespace ECS
 	{
-		#define SIGNATURE_EMPTY         0b0000
-		#define SIGNATURE_TRANSFORM     0b1000
-		#define SIGNATURE_RIGIDBODY     0b0100
-		#define SIGNATURE_MODEL         0b0010
-		#define SIGNATURE_SCRIPT        0b0001
-		#define SIGNATURE_ALL_COMPONENT 0b1111
+		#define SIGNATURE_EMPTY         0b00000
+		#define SIGNATURE_TRANSFORM     0b10000
+		#define SIGNATURE_RIGIDBODY     0b01000
+		#define SIGNATURE_MODEL         0b00100
+		#define SIGNATURE_SCRIPT        0b00010
+		#define SIGNATURE_COLLIDER		0b00001
+		#define SIGNATURE_ALL_COMPONENT 0b11111
 
 
 		class ComponentHandler
@@ -29,6 +32,8 @@ namespace Cookie
 			std::array<ComponentTransform, MAX_ENTITIES> componentTransforms;
 
 			std::array<ComponentRigidBody, MAX_ENTITIES> componentRigidBodies;
+
+			std::array<ComponentCollider, MAX_ENTITIES> componentColliders;
 
 			std::array<ComponentModel, MAX_ENTITIES> componentModels;
 
@@ -48,6 +53,16 @@ namespace Cookie
 				}
 
 				entity.signature += SIGNATURE_TRANSFORM;
+			}
+			void AddComponentCollider(Entity& entity)
+			{
+				if (entity.signature & SIGNATURE_COLLIDER)
+				{
+					CDebug.Warning("Component Collider already present");
+					return;
+				}
+
+				entity.signature += SIGNATURE_COLLIDER;
 			}
 			void AddComponentRigidBody(Entity& entity)
 			{
@@ -91,6 +106,17 @@ namespace Cookie
 				
 				CDebug.Warning("No Component Transform present");
 			}
+			void RemoveComponentCollider(Entity& entity)
+			{
+				if (entity.signature & SIGNATURE_COLLIDER)
+				{
+					GetComponentCollider(entity.id).ToDefault();
+					entity.signature -= SIGNATURE_COLLIDER;
+					return;
+				}
+
+				CDebug.Warning("No Component RigidBody present");
+			}
 			void RemoveComponentRigidBody(Entity& entity)
 			{
 				if (entity.signature & SIGNATURE_RIGIDBODY)
@@ -129,6 +155,7 @@ namespace Cookie
 			ComponentRigidBody& GetComponentRigidBody(const unsigned int id) { return componentRigidBodies[id]; }
 			ComponentModel&		GetComponentModel    (const unsigned int id) { return componentModels[id]; }
 			ComponentScript&    GetComponentScript   (const unsigned int id) { return componentScripts[id]; }
+			ComponentCollider&	GetComponentCollider (const unsigned int id) { return componentColliders[id]; }
 
 
 		};

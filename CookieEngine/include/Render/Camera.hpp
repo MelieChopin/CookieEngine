@@ -47,7 +47,10 @@ namespace Cookie
 				Camera() {}
 				~Camera() {}
 
-				inline Core::Math::Mat4 GetViewProj() const {return projMat * viewMat;}
+				inline const Core::Math::Mat4& GetView() const	{ return viewMat;			}
+				inline const Core::Math::Mat4& GetProj() const	{ return projMat;			}
+				inline Core::Math::Mat4 GetViewProj() const		{ return projMat * viewMat;	}
+				
 				inline void SetProj(float yFov, float _width, float _height, float n, float f) { fov = yFov; width = _width; height = _height; camFar = f; projMat = Core::Math::Mat4::Perspective(yFov, width / height, n, f); }
 					    
 				inline virtual void Update() = 0;
@@ -72,7 +75,7 @@ namespace Cookie
 
 			inline void UpdateFreeFlyPos();
 			inline void UpdateFreeFlyRot();
-			inline void Update()override;
+			inline void Update() override;
 
 		};
 
@@ -87,7 +90,7 @@ namespace Cookie
 
 			inline void UpdateGamePos();
 			inline void UpdateZoom();
-			inline void Update()override;
+			inline void Update() override;
 		};
 	}
 }

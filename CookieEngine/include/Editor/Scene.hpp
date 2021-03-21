@@ -3,7 +3,6 @@
 
 #include "ECS/Coordinator.hpp"
 #include "Vec3.hpp"
-#include "ECS/Coordinator.hpp"
 #include "Tiles.hpp"
 
 
@@ -30,13 +29,14 @@ namespace Cookie
 			Cookie::ECS::ComponentHandler	componentHandler;
 			Tiles							tiles;
 			std::string						name = "Scene";
+			std::string						filepath;
 			Plane							plane;
 			float							widthPlane;
 			float							lengthPlane;
 
 		public:
 			Scene();
-			Scene(const Resources::ResourcesManager& resources);
+			Scene(const Resources::ResourcesManager& resources, Cookie::ECS::Coordinator& coordinator);
 			Scene(const Scene& _scene);
 			~Scene();
 
@@ -64,11 +64,11 @@ namespace Cookie
 				if (index == -1)
 					return;
 
-				int indexWidthOfTiles = (componentHandler.componentTransforms[index].localTRS.translation.x + widthPlane) / (tiles.widthTileProp);
-				int indexLengthOfTiles = (componentHandler.componentTransforms[index].localTRS.translation.z + lengthPlane) / (tiles.lengthTileProp);
+				int indexWidthOfTiles = (componentHandler.componentTransforms[index].localTRS.pos.x + widthPlane) / (tiles.widthTileProp);
+				int indexLengthOfTiles = (componentHandler.componentTransforms[index].localTRS.pos.z + lengthPlane) / (tiles.depthTileProp);
 
-				componentHandler.componentTransforms[index].localTRS.translation.x = indexWidthOfTiles * (tiles.widthTileProp) - widthPlane + tiles.widthTileProp / 2;
-				componentHandler.componentTransforms[index].localTRS.translation.z = indexLengthOfTiles * (tiles.lengthTileProp) - lengthPlane + tiles.lengthTileProp / 2;
+				componentHandler.componentTransforms[index].localTRS.pos.x = indexWidthOfTiles * (tiles.widthTileProp) - widthPlane + tiles.widthTileProp / 2;
+				componentHandler.componentTransforms[index].localTRS.pos.z = indexLengthOfTiles * (tiles.depthTileProp) - lengthPlane + tiles.depthTileProp / 2;
 
 				for (int i = 0; i < tiles.tiles.size(); i++)
 				{
@@ -86,7 +86,7 @@ namespace Cookie
 			}
 			/// </Temp>
 
-			void LoadScene(Cookie::ECS::Coordinator& coordinator);
+			void InitCoordinator(Cookie::ECS::Coordinator& coordinator);
 			void ResizeSizeTilesWithScaleOfTheMap(float newWidthPlane, float newLengthPlane);
 			void ChangeNumberOfTiles(int newSizeWidthTile, int newSizeLengthTile);
 			void ChangeName(const char* newName) { name = newName; }

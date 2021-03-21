@@ -22,10 +22,12 @@ include_directories("${INC_DIR}/Render/")
 include_directories("${INC_DIR}/ECS/")
 include_directories("${INC_DIR}/Editor/")
 include_directories("${DEPS_INC_DIR}/ImGui/")
+include_directories("${DEPS_INC_DIR}/ImGuizmo/")
 include_directories("${DEPS_INC_DIR}/")
 include_directories("${DEPS_INC_DIR}/assimp/")
 include_directories("${DEPS_INC_DIR}/assimp/Compiler/")
 include_directories("${DEPS_INC_DIR}/DirectXTex/")
+include_directories("${DEPS_INC_DIR}/reactphysics3d/")
 
 # Record SUB_SYS configuration (WIN32 for release en Windows to remove console)
 IF(CMAKE_BUILD_TYPE MATCHES Release)
@@ -33,6 +35,7 @@ IF(CMAKE_BUILD_TYPE MATCHES Release)
     IF(WIN32)
         set(SUB_SYS WIN32)
     ENDIF(WIN32)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
 ELSE()
     message(STATUS "Generate CMake cache for Debug")
     add_definitions(-DDEBUG)
@@ -42,8 +45,10 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES Release)
 set (SRC_FILES
     "${SRC_DIR}/main.cpp"
     "${SRC_DIR}/Engine.cpp"
+    
     "${DEPS_SRC_DIR}/DirectXTex/DDSTextureLoader11.cpp"
     "${DEPS_SRC_DIR}/DirectXTex/WICTextureLoader11.cpp"
+    
     "${DEPS_SRC_DIR}/ImGui/imgui.cpp"
     "${DEPS_SRC_DIR}/ImGui/imgui_demo.cpp"
     "${DEPS_SRC_DIR}/ImGui/imgui_draw.cpp"
@@ -52,33 +57,47 @@ set (SRC_FILES
     "${DEPS_SRC_DIR}/ImGui/imgui_tables.cpp"
     "${DEPS_SRC_DIR}/ImGui/imgui_widgets.cpp"
     "${DEPS_SRC_DIR}/ImGui/imgui_stdlib.cpp"
+
+    "${DEPS_SRC_DIR}/ImGuizmo/ImCurveEdit.cpp"
+    "${DEPS_SRC_DIR}/ImGuizmo/ImGradient.cpp"
+    "${DEPS_SRC_DIR}/ImGuizmo/ImGuizmo.cpp"
+    "${DEPS_SRC_DIR}/ImGuizmo/ImSequencer.cpp"
+
     "${SRC_DIR}/Core/Window.cpp"
+    
     "${SRC_DIR}/Render/Renderer.cpp"
     "${SRC_DIR}/Render/RendererRemote.cpp"
+    "${SRC_DIR}/Render/FrameBuffer.cpp"
+    
     "${SRC_DIR}/Resources/Loader.cpp" 
     "${SRC_DIR}/Resources/ResourcesManager.cpp"
     "${SRC_DIR}/Resources/Mesh.cpp"
-    "${SRC_DIR}/UI/UIcore.cpp"
+    "${SRC_DIR}/Resources/Shader.cpp"
+    "${SRC_DIR}/Resources/Texture.cpp"
+
+    "${SRC_DIR}/UI/UIeditor.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgetBases.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgets.cpp" 
-    "${SRC_DIR}/Resources/Shader.cpp"
     "${SRC_DIR}/UI/Widgets/ConsoleWidget.cpp"
     "${SRC_DIR}/UI/Widgets/FileExplorerWidget.cpp"
     "${SRC_DIR}/UI/Widgets/HierarchyWidget.cpp"
     "${SRC_DIR}/UI/Widgets/InspectorWidget.cpp"
     "${SRC_DIR}/UI/Widgets/TextureEditorWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/ToolbarWidget.cpp"
     "${SRC_DIR}/UI/Widgets/ViewportWidget.cpp"
     "${SRC_DIR}/Resources/Texture.cpp"
     "${SRC_DIR}/Render/FrameBuffer.cpp"
+    "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
     "${SRC_DIR}/Editor/Scene.cpp"
-    "${SRC_DIR}/Editor/Tiles.cpp")
+    "${SRC_DIR}/Editor/Tiles.cpp"
+    "${SRC_DIR}/Editor/Serialization.cpp")
 
 set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll")
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
 # Ajoutez une source à l'exécutable de ce projet.
-add_executable (CookieEngine  ${SUB_SYS} ${SRC_FILES} )
+add_executable (CookieEngine ${SUB_SYS} ${SRC_FILES} )
 
 set_target_properties(CookieEngine PROPERTIES CXX_STANDARD 17)
 
@@ -95,6 +114,13 @@ target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/d3dcompiler.lib")
 target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/glfw3.lib")
 target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/assimp-vc142-mt.lib")
 target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/zlibstatic.lib")
+
+IF(CMAKE_BUILD_TYPE MATCHES Release)
+    target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/reactphysics3d.lib")
+ELSE()
+    target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/debug_reactphysics3d.lib")
+ENDIF(CMAKE_BUILD_TYPE MATCHES Release)
+
 
 # TODO: Ajoutez des tests et installez des cibles si nécessaire.
 

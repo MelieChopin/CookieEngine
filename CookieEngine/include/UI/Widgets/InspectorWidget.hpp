@@ -3,9 +3,10 @@
 
 #include "UIwidgetBases.hpp"
 
-namespace Cookie::Resources { class ResourcesManager; }
-namespace Cookie::ECS		{ class Coordinator; class Entity; }
-namespace Cookie::Editor	{ class Scene; }
+namespace Cookie::Resources  { class ResourcesManager; }
+namespace Cookie::ECS		 { class Coordinator; class Entity; }
+namespace Cookie::Editor	 { class Scene; }
+namespace Cookie::Core::Math { union Vec2; }
 
 
 namespace Cookie::UIwidget
@@ -15,17 +16,20 @@ namespace Cookie::UIwidget
 		Cookie::Resources::ResourcesManager& resources;
 		Cookie::ECS::Coordinator& coordinator;
 
-		Cookie::ECS::Entity*	selectedEntity	= nullptr;
-		Cookie::Editor::Scene*	selectedScene	= nullptr;
 
+		Cookie::Editor::Scene*	 selectedScene	= nullptr;
+		Cookie::Core::Math::Vec2 sceneTiles;
+
+	public:
+		Cookie::ECS::Entity*	selectedEntity	= nullptr;
+	
 	private:
 		void EntityInspection();
 
 		void TransformInterface();
 		void RigidBodyInterface();
-		void ModelCompInterface();
-		void ScriptInterface();
-	
+		void ModelInterface();
+		void MapInterface();
 		
 		void SceneInspection();
 
@@ -42,8 +46,7 @@ namespace Cookie::UIwidget
 		inline void SelectEntity(Cookie::ECS::Entity* newSelection)
 		{ selectedEntity = newSelection; selectedScene = nullptr; }
 
-		inline void SelectScene(Cookie::Editor::Scene* newSelection)
-		{ selectedScene = newSelection; selectedEntity = nullptr; }
+		void SelectScene(Cookie::Editor::Scene* newSelection);
 	};
 }
 

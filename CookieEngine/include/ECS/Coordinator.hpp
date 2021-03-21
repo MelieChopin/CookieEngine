@@ -95,54 +95,21 @@ namespace Cookie
 				for (int i = 0; i < entityHandler->livingEntities; ++i)
 					std::cout << entityHandler->entities[i].id << std::endl;
 			}
-			void ApplySystemGravity()
-			{
-				for (int i = 0; i < entityHandler->livingEntities; ++i)
-					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_RIGIDBODY))
-						System::SystemGravity(componentHandler->GetComponentRigidBody(entityHandler->entities[i].id));
-			}
-			void ApplySystemVelocity() 
+
+			void ApplySystemPhysics(float factor) 
 			{
 				for (int i = 0; i < entityHandler->livingEntities; ++i)
 					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_RIGIDBODY))
-						System::SystemVelocity(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
-											   componentHandler->GetComponentRigidBody(entityHandler->entities[i].id));
+						System::SystemPhysics(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
+											   componentHandler->GetComponentRigidBody(entityHandler->entities[i].id),factor);
 			}
+
 			void ApplyDraw(Render::RendererRemote& remote, const Core::Math::Mat4& viewProj)
 			{
 				for (int i = 0; i < entityHandler->livingEntities; ++i)
 					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_MODEL))
 						System::SystemDraw(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
 							componentHandler->GetComponentModel(entityHandler->entities[i].id),remote, viewProj);
-			}
-			void ApplySystemScriptStart()
-			{
-				for (int i = 0; i < entityHandler->livingEntities; ++i)
-					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_SCRIPT))
-						System::SystemScriptStart(componentHandler->GetComponentScript(entityHandler->entities[i].id));
-			}
-			void ApplySystemScriptUpdate()
-			{
-				for (int i = 0; i < entityHandler->livingEntities; ++i)
-					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_SCRIPT))
-						System::SystemScriptUpdate(componentHandler->GetComponentScript(entityHandler->entities[i].id));
-			}
-
-
-			void SelectClosestMovableEntity(const Core::Math::Vec3& position)
-			{
-				float distance = FLT_MAX;
-
-				for (int i = 0; i < entityHandler->livingEntities; ++i)
-					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_RIGIDBODY))
-					{
-						float newDistance = (position - componentHandler->GetComponentTransform(entityHandler->entities[i].id).localTRS.translation).Length();
-						if (newDistance < distance)
-						{
-							distance = newDistance;
-							selectedEntity = &entityHandler->entities[i];
-						}
-					}
 			}
 		};
 

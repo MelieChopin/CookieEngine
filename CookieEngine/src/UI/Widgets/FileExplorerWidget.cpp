@@ -9,8 +9,6 @@ using namespace ImGui;
 using namespace Cookie::UIwidget;
 
 
-#include <thread>
-
 void FileExplorer::ExploreFiles(const fs::path& path, const char* researchQuery)const
 {
     if (fs::exists(path) && fs::is_directory(path))

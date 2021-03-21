@@ -33,8 +33,8 @@ void Inspector::EntityInspection()
 
     if (selectedEntity->signature & SIGNATURE_TRANSFORM)    TransformInterface();
     if (selectedEntity->signature & SIGNATURE_RIGIDBODY)    RigidBodyInterface();
-    if (selectedEntity->signature & SIGNATURE_MODEL)        ModelCompInterface();
-    if (selectedEntity->signature & SIGNATURE_SCRIPT)       ScriptInterface();
+    if (selectedEntity->signature & SIGNATURE_MODEL)        ModelInterface();
+    //if (selectedEntity->signature & SIGNATURE_MAP)          MapInterface();
 
 
     if (Button("Add component...")) OpenPopup("Add component popup");
@@ -73,11 +73,13 @@ void Inspector::TransformInterface()
 {
     if (TreeNode("Transform"))
     {
-        Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity->id).localTRS;
+        ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity->id);
 
-        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.translation.e);
-        Text("Rot:"); SameLine(65.f); DragFloat3("##ROT", trsf.rotation.e);
-        Text("Scl:"); SameLine(65.f); DragFloat3("##SCL", trsf.scale.e);
+        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.localTRS.pos.e);
+        Text("Rot:"); SameLine(65.f); DragFloat3("##ROT", trsf.localTRS.rot.e);
+        Text("Scl:"); SameLine(65.f); DragFloat3("##SCL", trsf.localTRS.scale.e);
+
+        trsf.SetPhysics();
 
         ImGui::NewLine();
         if (Button("Remove component##TRSF"))
@@ -97,16 +99,16 @@ void Inspector::RigidBodyInterface()
     {
         ComponentRigidBody& rigibod = coordinator.componentHandler->GetComponentRigidBody(selectedEntity->id);
 
-        Text("Velocity:");          SameLine(110.f); DragFloat3("##VEL", rigibod.linearVelocity.e);
-
-        Text("Mass:");              SameLine(110.f); DragFloat("##MASS", &rigibod.mass);
-        Text("Drag:");              SameLine(110.f); DragFloat("##DRAG", &rigibod.drag);
-
-        Text("TargetPos:");         SameLine(110.f); DragFloat3("##TargetPos", rigibod.targetPosition.e);
-        
-        Text("Speed:");             SameLine(110.f); DragFloat("##Speed", &rigibod.speed);
-        
-        Text("GoTowardPosition:");  SameLine(160.f); Checkbox("##GoTowardPosition", &rigibod.goTowardTarget);
+        //Text("Velocity:");          SameLine(110.f); DragFloat3("##VEL", rigibod.linearVelocity.e);
+        //
+        //Text("Mass:");              SameLine(110.f); DragFloat("##MASS", &rigibod.mass);
+        //Text("Drag:");              SameLine(110.f); DragFloat("##DRAG", &rigibod.drag);
+        //
+        //Text("TargetPos:");         SameLine(110.f); DragFloat3("##TargetPos", rigibod.targetPosition.e);
+        //
+        //Text("Speed:");             SameLine(110.f); DragFloat("##Speed", &rigibod.speed);
+        //
+        //Text("GoTowardPosition:");  SameLine(160.f); Checkbox("##GoTowardPosition", &rigibod.goTowardTarget);
 
 
         ImGui::NewLine();
@@ -121,7 +123,7 @@ void Inspector::RigidBodyInterface()
     ImGui::Separator();
 }
 
-void Inspector::ModelCompInterface()
+void Inspector::ModelInterface()
 {
     if (TreeNode("Model"))
     {
@@ -205,31 +207,16 @@ void Inspector::ModelCompInterface()
     ImGui::Separator();
 }
 
-void Inspector::ScriptInterface()
+void Inspector::MapInterface()
 {
-    if (TreeNode("Script"))
+    if (TreeNode("Map transform"))
     {
-        ComponentScript& script = coordinator.componentHandler->GetComponentScript(selectedEntity->id);
+        Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity->id).localTRS;
 
-        for (int i = 0; i < script.scripts.size(); ++i)
-        {
-            Text("%s", script.scripts[i]->GetName());   
-            if ( Button( ("Remove Script##" + i)) )
-            { 
-                script.scripts.erase(script.scripts.begin() + i); 
-                i = (i > 0) ? i - 1 : 0;
-            }
-            ImGui::NewLine();
-        }
-
-        ImGui::NewLine();  if (Button("Add Script Hello World")) { script.scripts.push_back(new ScriptHelloWorld ); }
-        ImGui::NewLine();  if (Button("Add Warning each 2s"))    { script.scripts.push_back(new ScriptWarning ); }
-
-        ImGui::NewLine();
-        if (Button("Remove component##RIBOD"))
-        {
-            coordinator.componentHandler->RemoveComponentScript(*selectedEntity);
-        }
+        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.pos.e);
+        
+        Text("Scl:"); SameLine(65.f); 
+        if (DragFloat3("##SCL", trsf.scale.e)) CDebug.Log("Recoded an edit");
 
         TreePop();
     }
@@ -238,9 +225,47 @@ void Inspector::ScriptInterface()
 }
 
 
+void Inspector::SelectScene(Cookie::Editor::Scene* newSelection)
+{
+    selectedScene   = newSelection;
+    selectedEntity  = nullptr;
+
+    sceneTiles.x = (float)selectedScene->tiles.widthTile, 
+    sceneTiles.y = (float)selectedScene->tiles.depthTile;
+}
+
 void Inspector::SceneInspection()
 {
     InputText("Scene name", &selectedScene->name);
 
     ImGui::Separator();
+
+    if (TreeNode("Tiles"))
+    {
+        Text("Current tiles: %d in x, %d in z", selectedScene->tiles.widthTile, selectedScene->tiles.depthTile);
+
+        DragFloat2("##TILESNUM_EDIT", sceneTiles.e);
+
+        if (sceneTiles.x != (float)selectedScene->tiles.widthTile ||
+            sceneTiles.y != (float)selectedScene->tiles.depthTile)
+        {
+            if (sceneTiles.x > 0 && sceneTiles.y > 0)
+            {
+                if (Button("Save new dimensions"))
+                    selectedScene->ChangeNumberOfTiles(sceneTiles.x, sceneTiles.y); 
+            }
+            else
+            { TextColored({0.70f, 0.4f, 0.4f, 1}, "Invalid new values"); }
+
+            SameLine();
+
+            if (Button("Discard"))
+            {
+                sceneTiles.x = (float)selectedScene->tiles.widthTile,
+                sceneTiles.y = (float)selectedScene->tiles.depthTileProp;
+            }
+        }
+
+        TreePop();
+    }
 }

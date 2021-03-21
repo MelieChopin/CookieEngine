@@ -8,12 +8,24 @@ Tiles::Tiles(int _widthTile, int _lengthTile, float _widthTileProp, float _lengt
 		tiles.push_back(TileProp());	
 
 	widthTileProp = _widthTileProp;
-	lengthTileProp = _lengthTileProp;
+	depthTileProp = _lengthTileProp;
 	widthTile = _widthTile;
-	lengthTile = _lengthTile;
+	depthTile = _lengthTile;
 }
 
 Tiles::~Tiles()
 {
 
+}
+
+
+void Tiles::ReInitAllTiles()
+{
+	for (int i = 0; i < widthTile * depthTile; i++)
+	{
+		if (!tiles[i].fill)
+			continue;
+		tiles[i].fill = false;
+		tiles[i].idEntity = -1;
+	}
 }

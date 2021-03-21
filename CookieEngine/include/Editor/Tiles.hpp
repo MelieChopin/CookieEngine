@@ -18,12 +18,14 @@ namespace Cookie
 		public:
 			std::vector<TileProp> tiles;
 			float widthTileProp;
-			float lengthTileProp;
+			float depthTileProp;
 			int widthTile;
-			int lengthTile;
+			int depthTile;
 
 			Tiles(int _widthTile = 15, int _lengthTile = 15, float _widthTileProp = 1, float _lengthTileProp = 1);
 			~Tiles();
+
+			void ReInitAllTiles();
 		};
 	}
 }
