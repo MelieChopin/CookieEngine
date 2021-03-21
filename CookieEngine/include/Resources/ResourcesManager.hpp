@@ -28,6 +28,9 @@ namespace Cookie
 				std::vector<std::shared_ptr<Shader>> shaders;
 				std::vector<std::shared_ptr<Texture>> textures;
 
+		public:
+				std::vector<std::shared_ptr<Script>> scripts;
+
 			private:
 				void SearchForGltf(const fs::path& path, std::vector<std::string>& gltfFiles);
 				

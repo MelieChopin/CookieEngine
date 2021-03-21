@@ -14,7 +14,7 @@ namespace Cookie
 		{
 		
 		public:
-			std::vector<Resources::Script*> scripts;
+			std::vector<Resources::ScriptObject> scripts;
 
 			void ToDefault()
 			{

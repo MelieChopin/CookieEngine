@@ -209,8 +209,7 @@ void Engine::Run()
 
        ///
 
-        coordinator.ApplySystemVelocity();
-        coordinator.ApplySystemScriptUpdate();
+        coordinator.ApplyScriptUpdate();
         coordinator.ApplyDraw(renderer.remote, camera->GetViewProj());
         renderer.SetBackBuffer();
         //frameBuffer.Draw(renderer.remote);

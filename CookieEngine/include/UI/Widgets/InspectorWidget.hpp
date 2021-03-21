@@ -30,6 +30,7 @@ namespace Cookie::UIwidget
 		void RigidBodyInterface();
 		void ModelInterface();
 		void MapInterface();
+		void ScriptInterface();
 		
 		void SceneInspection();
 

@@ -38,12 +38,12 @@ namespace Cookie
 			inline void SystemScriptStart(const ComponentScript& script)
 			{
 				for (int i = 0; i < script.scripts.size(); ++i)
-					script.scripts[i]->Start();
+					script.scripts[i].Start();
 			}
 			inline void SystemScriptUpdate(ComponentScript& script)
 			{
 				for (int i = 0; i < script.scripts.size(); ++i)
-					script.scripts[i]->Update();
+					script.scripts[i].Update();
 			}
 
 		}

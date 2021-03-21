@@ -10,6 +10,8 @@ using namespace Cookie::Resources;
 
 ResourcesManager::ResourcesManager()
 {
+	scripts.push_back(std::make_shared<Script>("Assets\\scripts\\test.lua"));
+	scripts.push_back(std::make_shared<Script>("Assets\\scripts\\test2.lua"));
 }
 
 ResourcesManager::~ResourcesManager()

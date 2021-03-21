@@ -58,6 +58,8 @@ namespace Cookie
 					componentHandler.AddComponentRigidBody(entityHandler.entities[id]);
 				if (CheckSignature(signature, SIGNATURE_MODEL))
 					componentHandler.AddComponentModel(entityHandler.entities[id]);
+				if (CheckSignature(signature, SIGNATURE_SCRIPT))
+					componentHandler.AddComponentScript(entityHandler.entities[id]);
 
 				//not clean should be moved somewhere else
 				componentHandler.GetComponentModel(id).shader = resources.GetDefaultShader();
@@ -110,6 +112,13 @@ namespace Cookie
 					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_MODEL))
 						System::SystemDraw(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
 							componentHandler->GetComponentModel(entityHandler->entities[i].id),remote, viewProj);
+			}
+
+			void ApplyScriptUpdate()
+			{
+				for (int i = 0; i < entityHandler->livingEntities; ++i)
+					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_SCRIPT))
+						System::SystemScriptUpdate(componentHandler->GetComponentScript(entityHandler->entities[i].id));
 			}
 		};
 

@@ -1,59 +1,80 @@
 #ifndef __SCRIPT_HPP__
 #define __SCRIPT_HPP__
 
+#define SOL_ALL_SAFETIES_ON 1
+#include "Sol/sol.hpp"
+
+#include <iostream>
+#include <string>
+#include <vector>
+
+/*
+#ifdef _WIN32
+#pragma comment (lib, "liblua54.a")
+#endif*/
+
 #include "Time.hpp"
 #include "Debug.hpp"
 
-#include <iostream>
+
+
 
 namespace Cookie
 {
 
 	namespace Resources
 	{
+		class ScriptObject;
+
+
 		class Script
 		{
 		public:
+			std::string filename;
+			sol::state state;
+			sol::function construct;
+			sol::function start;
+			sol::function update;
 
-			virtual const char* GetName() const = 0; //typeid(*this).name();
-			virtual void Start() = 0;
-			virtual void Update() = 0;
-		};
-
-
-		class ScriptHelloWorld : public Script
-		{
-		public:
-			ScriptHelloWorld() {};
-			~ScriptHelloWorld() {};
-
-			const char* GetName() const override { return "Script Hello World"; }
-			void Start()		  override { CDebug.Log("Hello World start"); }
-			void Update()		  override { CDebug.Log("Hello World update"); }
-		};
-
-		class ScriptWarning : public Script
-		{
-		public:
-			ScriptWarning() {};
-			~ScriptWarning() { };
-
-			float cooldownMax = 2;
-			float cooldownCurrent = 2;
-
-			const char* GetName() const override { return "Script Warning"; }
-			void Start()		  override { CDebug.Log("I will pop Warning"); }
-			void Update()		  override
+			Script(const char* _filename) : filename(_filename)
 			{
-				cooldownCurrent -= ImGui::GetIO().DeltaTime;
-
-				if (cooldownCurrent < 0)
-				{
-					CDebug.Warning("This Warning will come back in 2s");
-					cooldownCurrent = cooldownMax;
-				}
+				state.open_libraries(sol::lib::base);
+				state.script_file(filename);
+				construct = state["Construct"];
+				update = state["Start"];
+				update = state["Update"];
 			}
+
+			~Script() {}
+
+			inline ScriptObject CreateObject(std::string entityId);
 		};
+
+		
+		class ScriptObject
+		{
+		public:
+			ScriptObject(Script& aScript, std::string entityId) : script(&aScript)
+			{
+				table = script->state[entityId].get_or_create<sol::table>();
+				script->construct(table);
+			}
+
+			void Start() const { script->start(table); }
+			void Update() const { script->update(table); }
+
+
+			Script* script;
+			sol::table table;
+		};
+		
+		
+		inline ScriptObject Script::CreateObject(std::string entityId)
+		{
+			return ScriptObject(*this, entityId);
+		}
+
+
 	}
 }
 
