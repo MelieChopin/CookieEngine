@@ -22,8 +22,8 @@ using namespace Cookie::Editor::Serialization;
 		 if (entity.entities[i].signature & SIGNATURE_TRANSFORM)
 		 {
 			 Cookie::ECS::ComponentTransform transform = component.GetComponentTransform(entity.entities[i].id);
-			 js["ComponentHandler"]["Transform"] += json{ { "localTRS", { { "translate", transform.localTRS.translation.e }, 
-														{ "rotation", transform.localTRS.rotation.e }, 
+			 js["ComponentHandler"]["Transform"] += json{ { "localTRS", { { "translate", transform.localTRS.pos.e }, 
+														{ "rotation", transform.localTRS.rot.e }, 
 														{ "scale", transform.localTRS.scale.e } } } };
 		 }
 		 if (entity.entities[i].signature & SIGNATURE_MODEL)
