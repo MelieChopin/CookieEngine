@@ -8,12 +8,25 @@ using json = nlohmann::json;
 
 namespace Cookie
 {
+	class Game;
+
+	namespace ECS
+	{
+		class Coordinator;
+	}
+
+	namespace reactphysics3d
+	{
+		class PhysicsCommon;
+	}
+
 	namespace Resources
 	{
 		class ResourcesManager;
+		class Scene;
 	}
 
-	namespace Editor
+	namespace Resources
 	{
 		class Scene;
 		namespace Serialization
@@ -23,7 +36,7 @@ namespace Cookie
 				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity);
 				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler component);
 
-				void SaveScene(const Cookie::Editor::Scene& actScene);
+				void SaveScene(const Cookie::Resources::Scene& actScene);
 			}
 
 			namespace Load
@@ -31,7 +44,7 @@ namespace Cookie
 				void FromJson(json& js, Cookie::ECS::EntityHandler& entity);
 				void FromJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager resourcesManager);
 
-				void LoadScene(const char* filepath, Cookie::Editor::Scene& newScene, Cookie::Resources::ResourcesManager resourcesManager);
+				std::shared_ptr<Scene> LoadScene(const char* filepath, Game& game);
 			}
 		}
 	}

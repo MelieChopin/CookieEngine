@@ -17,17 +17,17 @@ void TextureEditor::WindowDisplay()
 		Text("Currently loaded and available textures:");
 		Indent();
 
-        for (const std::shared_ptr<Cookie::Resources::Texture>& textPtr : resources.GetTextures())
+        for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator textPtr = resources.textures.begin(); textPtr != resources.textures.end(); textPtr++)
         {
-			Image(static_cast<ImTextureID>(textPtr->GetResourceView()), { 25, 25 });
+			Image(static_cast<ImTextureID>(textPtr->second->GetResourceView()), { 25, 25 });
 			SameLine(); 
 			
-			if (newTexture.name == textPtr->name)
+			if (newTexture.name == textPtr->second->name)
 			{
-				TextColored({0.75, 0.25, 0.25, 1}, "%s (<- Already in use!)", textPtr->name.c_str());
+				TextColored({0.75, 0.25, 0.25, 1}, "%s (<- Already in use!)", textPtr->second->name.c_str());
 				newTexture.invalidName = true;
 			}
-			else Text("%s", textPtr->name.c_str());
+			else Text("%s", textPtr->second->name.c_str());
         }
 
 		Unindent();
@@ -67,7 +67,7 @@ void TextureEditor::WindowDisplay()
 			}
 			else if (Button("Confirm and save"))
 			{				
-				resources.AddTexture(std::make_shared<Texture>(renderer, newTexture.name, newTexture.color));
+				resources.textures[newTexture.name] = (std::make_shared<Texture>(renderer, newTexture.name, newTexture.color));
 				
 				newTexture.creating = false;
 				newTexture.name.clear();

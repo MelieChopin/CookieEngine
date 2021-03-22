@@ -6,9 +6,9 @@
 
 using namespace Cookie::Resources;
 
-Mesh::Mesh(aiMesh* mesh, Render::Renderer& renderer)
+Mesh::Mesh(std::string _name, aiMesh* mesh, Render::Renderer& renderer)
 {
-    name    = mesh->mName.C_Str();
+    name    = _name;
     INb     = mesh->mNumFaces * 3;//a face is a triangle as triangulate flag is enabled
     InitVBuffer(mesh, renderer);
     InitIBuffer(mesh,renderer);

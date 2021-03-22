@@ -24,11 +24,11 @@ void Viewport::WindowDisplay()
 		if ((recordedWinSize.x != GetWindowSize().x) || (recordedWinSize.y != GetContentRegionAvail().y))
 		{
 			recordedWinSize = { {GetWindowSize().x, GetContentRegionAvail().y} };
-			(*camera)->SetProj(Core::Math::ToRadians(60.f), recordedWinSize.x, recordedWinSize.y, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+			camera->SetProj(Core::Math::ToRadians(60.f), recordedWinSize.x, recordedWinSize.y, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
 		}
 
 		ImGui::Image(static_cast<ImTextureID>(*frameBuffer.GetShaderResource()), GetContentRegionAvail());
-		(*camera)->windowOffset = { { ImGui::GetWindowPos().x,  ImGui::GetWindowPos().y } };
+		camera->windowOffset = { { ImGui::GetWindowPos().x,  ImGui::GetWindowPos().y } };
 
 
 		ImGuiIO& io = GetIO();
@@ -39,15 +39,15 @@ void Viewport::WindowDisplay()
 			{
 				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 				io.WantCaptureKeyboard = false;
-				(*camera)->Activate();
-				(*camera)->ResetPreviousMousePos();
+				camera->Activate();
+				camera->ResetPreviousMousePos();
 			}
 		}
 		else if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED && !io.MouseDown[ImGuiMouseButton_Right])
 		{
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			io.WantCaptureKeyboard = true;
-			(*camera)->Deactivate();
+			camera->Deactivate();
 		}
 		
 		if (selectedEntity)
@@ -78,6 +78,6 @@ void Viewport::GizmoManipulator()
 	}
 
 
-	if (ImGuizmo::Manipulate((*camera)->GetView().Transpose().e, (*camera)->GetProj().Transpose().e, transformTool, ImGuizmo::MODE::WORLD, trsfTMat.e))
+	if (ImGuizmo::Manipulate(camera->GetView().Transpose().e, camera->GetProj().Transpose().e, transformTool, ImGuizmo::MODE::WORLD, trsfTMat.e))
 		ImGuizmo::DecomposeMatrixToComponents(trsfTMat.e, trsf.pos.e, trsf.rot.e, trsf.scale.e);
 }

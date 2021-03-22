@@ -35,7 +35,7 @@ namespace Cookie
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
-				Mesh(aiMesh* mesh, Render::Renderer& renderer);
+				Mesh(std::string meshName, aiMesh* mesh, Render::Renderer& renderer);
 				Mesh(std::vector<float> vertices, std::vector<unsigned int> indices, unsigned int INb, Render::Renderer& renderer);
 				~Mesh();
 

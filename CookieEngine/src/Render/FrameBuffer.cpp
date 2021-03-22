@@ -15,8 +15,8 @@
 
 using namespace Cookie::Render;
 
-FrameBuffer::FrameBuffer(const Resources::ResourcesManager& _resources, Renderer& _renderer):
-	quad{ _resources.GetMesh("Quad") }, shader{_resources.GetDefaultShader()}
+FrameBuffer::FrameBuffer(Resources::ResourcesManager& _resources, Renderer& _renderer):
+	quad{ _resources.meshes["Quad"] }, shader{ _resources.shaders.at("dfltShader") }
 {
     if (CreateTexture(_renderer))
     {

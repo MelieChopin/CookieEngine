@@ -1,10 +1,4 @@
-﻿// CookieEngine.cpp : définit le point d'entrée de l'application.
-//
-#include "Engine.hpp"
-
-#include "Mat4.hpp"
-#include "Quat.hpp"
-
+﻿#include "Editor.hpp"
 
 using namespace Cookie;
 using namespace Cookie::Core;
@@ -12,9 +6,9 @@ using namespace Cookie::Core::Math;
 
 int main()
 {
-	Engine engine;
+	Editor engine;
 
-	engine.Run();
+	engine.Loop();
 
 	return 0;
 }

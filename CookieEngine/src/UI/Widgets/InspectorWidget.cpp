@@ -1,6 +1,6 @@
 #include "Resources/ResourcesManager.hpp"
 #include "Coordinator.hpp"
-#include "Scene.hpp"
+#include "Resources/Scene.hpp"
 #include "InspectorWidget.hpp"
 
 #include <string>
@@ -138,11 +138,11 @@ void Inspector::ModelInterface()
 
         if (BeginPopup("Mesh selector popup"))
         {
-            for (const std::shared_ptr<Cookie::Resources::Mesh>& meshPtr : resources.GetMeshes())
+            for (std::unordered_map<std::string, std::shared_ptr<Mesh>>::iterator meshPtr = resources.meshes.begin(); meshPtr != resources.meshes.end(); meshPtr++)
             {
-                if (Button(meshPtr->name.c_str()))
+                if (Button(meshPtr->second->name.c_str()))
                 {
-                    modelComp.mesh = meshPtr;
+                    modelComp.mesh = meshPtr->second;
                     CloseCurrentPopup();
                     break;
                 }
@@ -168,11 +168,11 @@ void Inspector::ModelInterface()
 
         if (BeginPopup("Texture selector popup"))
         {
-            for (const std::shared_ptr<Cookie::Resources::Texture>& textPtr : resources.GetTextures())
+            for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator textPtr = resources.textures.begin(); textPtr != resources.textures.end(); textPtr++)
             {
-                if (Button(textPtr->name.c_str()))
+                if (Button(textPtr->second->name.c_str()))
                 {
-                    modelComp.texture = textPtr;
+                    modelComp.texture = textPtr->second;
                     CloseCurrentPopup();
                     break;
                 }
@@ -180,7 +180,7 @@ void Inspector::ModelInterface()
                 if (IsItemHovered())
                 {
                     BeginTooltip();
-                    Image(static_cast<ImTextureID>(textPtr->GetResourceView()), {75, 75});
+                    Image(static_cast<ImTextureID>(textPtr->second->GetResourceView()), {75, 75});
                     EndTooltip();
                 }
             }
@@ -244,14 +244,14 @@ void Inspector::ScriptInterface()
             ImGui::NewLine();
         }
 
-        for (int i = 0; i < resources.scripts.size(); ++i)
-        {
-            ImGui::NewLine();  
-            std::string buttonText("Add Script##");
-            buttonText += i;
-            if (Button(buttonText.c_str() ))
-                {cScript.scripts.push_back(resources.scripts[i]->CreateObject(std::to_string(selectedEntity->id))); }
-        }
+        //for (int i = 0; i < resources.scripts.size(); ++i)
+        //{
+        //    ImGui::NewLine();  
+        //    std::string buttonText("Add Script##");
+        //    buttonText += i;
+        //    if (Button(buttonText.c_str() ))
+        //        {cScript.scripts.push_back(resources.scripts[i]->CreateObject(std::to_string(selectedEntity->id))); }
+        //}
 
 
         ImGui::NewLine();
@@ -266,7 +266,7 @@ void Inspector::ScriptInterface()
     ImGui::Separator();
 }
 
-void Inspector::SelectScene(Cookie::Editor::Scene* newSelection)
+void Inspector::SelectScene(Cookie::Resources::Scene* newSelection)
 {
     selectedScene   = newSelection;
     selectedEntity  = nullptr;

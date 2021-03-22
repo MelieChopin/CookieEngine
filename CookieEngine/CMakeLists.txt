@@ -20,7 +20,7 @@ include_directories("${INC_DIR}/UI/")
 include_directories("${INC_DIR}/UI/Widgets/")
 include_directories("${INC_DIR}/Render/")
 include_directories("${INC_DIR}/ECS/")
-include_directories("${INC_DIR}/Editor/")
+include_directories("${INC_DIR}/Resources/")
 include_directories("${DEPS_INC_DIR}/ImGui/")
 include_directories("${DEPS_INC_DIR}/ImGuizmo/")
 include_directories("${DEPS_INC_DIR}/")
@@ -46,7 +46,7 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES Release)
 # List source files
 set (SRC_FILES
     "${SRC_DIR}/main.cpp"
-    "${SRC_DIR}/Engine.cpp"
+    "${SRC_DIR}/Editor.cpp"
     
     "${DEPS_SRC_DIR}/DirectXTex/DDSTextureLoader11.cpp"
     "${DEPS_SRC_DIR}/DirectXTex/WICTextureLoader11.cpp"
@@ -90,9 +90,10 @@ set (SRC_FILES
     "${SRC_DIR}/Resources/Texture.cpp"
     "${SRC_DIR}/Render/FrameBuffer.cpp"
     "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
-    "${SRC_DIR}/Editor/Scene.cpp"
-    "${SRC_DIR}/Editor/Tiles.cpp"
-    "${SRC_DIR}/Editor/Serialization.cpp")
+    "${SRC_DIR}/Resources/Scene.cpp"
+    "src/Resources/Tiles.cpp"
+    "src/Resources/Serialization.cpp" 
+    "${SRC_DIR}/Editor.cpp" "src/Game.cpp")
 
 set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
         "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/lua54.dll")

@@ -33,21 +33,17 @@ void Loader::Load(const char* fileName, ResourcesManager& resources, Render::Ren
 void Loader::InitScene(const char* fileName, const aiScene* _scene, ResourcesManager& _resources, Render::Renderer& _renderer)
 {
 	if (_scene->HasMeshes())
-		InitMeshes(_scene->mMeshes,_scene->mNumMeshes,_resources, _renderer);
+		InitMeshes(fileName,_scene->mMeshes,_scene->mNumMeshes,_resources, _renderer);
 	if (_scene->HasMaterials())
 		InitTextures(std::string(fileName).substr(0, std::string(fileName).find_last_of("\\/")).c_str(),_scene->mMaterials, _scene->mNumMaterials, _resources, _renderer);
 }
 
-void Loader::InitMeshes(aiMesh** meshes, unsigned int nMeshes, ResourcesManager& _resources, Render::Renderer& _renderer)
+void Loader::InitMeshes(const char* fileName, aiMesh** meshes, unsigned int nMeshes, ResourcesManager& _resources, Render::Renderer& _renderer)
 {
 	for (unsigned int i = 0; i < nMeshes; i++)
 	{
 		aiMesh* iMesh = meshes[i];
-		if (!_resources.HasMesh(iMesh->mName.C_Str()))
-		{
-			std::shared_ptr<Mesh> newMesh = std::make_shared<Mesh>(iMesh, _renderer);
-			_resources.AddMesh(std::move(newMesh));
-		}
+		_resources.meshes[iMesh->mName.C_Str()] = std::make_shared<Mesh>(iMesh->mName.C_Str(),iMesh, _renderer);
 	}
 
 }
@@ -62,11 +58,7 @@ void Loader::InitTextures(const char* pathName, aiMaterial** materials, unsigned
 		{
 			std::string fullpath = (std::string(pathName) + '/' + std::string(path.C_Str())).c_str();
 
-			if (!_resources.HasTexture(fullpath.c_str()))
-			{
-				std::shared_ptr<Texture> newTex = std::make_shared<Texture>(_renderer, fullpath.c_str());
-				_resources.AddTexture(std::move(newTex));
-			}
+			_resources.textures[fullpath] = std::make_shared<Texture>(_renderer, fullpath.c_str());
 		}
 	}
 }

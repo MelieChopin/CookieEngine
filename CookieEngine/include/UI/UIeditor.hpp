@@ -17,7 +17,7 @@ struct ID3D11DepthStencilView;
 namespace Cookie::Render {class Renderer;}
 
 
-namespace Cookie::Core
+namespace Cookie::UI
 {
 	class UIeditor
 	{
@@ -34,7 +34,7 @@ namespace Cookie::Core
 		void EndFrame();
 	
 	public:
-		UIeditor(GLFWwindow* _window, const Cookie::Render::Renderer& _renderer);
+		UIeditor(const Cookie::Render::Renderer& _renderer);
 		void Terminate();
 
 

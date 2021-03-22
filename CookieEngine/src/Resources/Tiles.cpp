@@ -1,6 +1,6 @@
-#include "Tiles.hpp"
+#include "Resources/Tiles.hpp"
 
-using namespace Cookie::Editor;
+using namespace Cookie::Resources;
 
 Tiles::Tiles(int _widthTile, int _lengthTile, float _widthTileProp, float _lengthTileProp)
 {

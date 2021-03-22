@@ -24,7 +24,7 @@ namespace Cookie::UIwidget
 		GLFWwindow* window;
 
 		const Cookie::Render::FrameBuffer& frameBuffer;
-		std::shared_ptr<Cookie::Render::Camera>* camera;
+		Cookie::Render::Camera* camera;
 
 
 		Cookie::ECS::Coordinator&	coordinator;
@@ -39,7 +39,7 @@ namespace Cookie::UIwidget
 		inline Viewport(Toolbar*									_toolbar, 
 						GLFWwindow*									_window, 
 						const Cookie::Render::FrameBuffer&			_frameBuffer, 
-						std::shared_ptr<Cookie::Render::Camera>*	_camera, 
+						Cookie::Render::Camera*						_camera, 
 						Cookie::ECS::Coordinator&					_coordinator,
 						Cookie::ECS::Entity*&						_selectedEntity)
 
