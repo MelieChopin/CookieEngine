@@ -6,9 +6,9 @@ using namespace Cookie::Core::Math;
 
 int main()
 {
-	Editor engine;
+	Editor editor;
 
-	engine.Loop();
+	editor.Loop();
 
 	return 0;
 }
