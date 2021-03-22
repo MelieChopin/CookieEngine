@@ -22,12 +22,16 @@ using namespace Cookie::Editor::Serialization;
 		 if (entity.entities[i].signature & SIGNATURE_TRANSFORM)
 		 {
 			 Cookie::ECS::ComponentTransform transform = component.GetComponentTransform(entity.entities[i].id);
-			 js["ComponentHandler"]["Transform"] += json{ { "localTRS", { { "translate", transform.localTRS.translation.e }, { "rotation", transform.localTRS.rotation.e }, { "scale", transform.localTRS.scale.e } } } };
+			 js["ComponentHandler"]["Transform"] += json{ { "localTRS", { { "translate", transform.localTRS.translation.e }, 
+														{ "rotation", transform.localTRS.rotation.e }, 
+														{ "scale", transform.localTRS.scale.e } } } };
 		 }
 		 if (entity.entities[i].signature & SIGNATURE_MODEL)
 		 {
 			 Cookie::ECS::ComponentModel model = component.GetComponentModel(entity.entities[i].id);
-			 js["ComponentHandler"]["Model"] += json{ { "model", model.mesh.get()->name }, { "shader", "default" }, { "texture", model.texture.get()->name } };
+			 js["ComponentHandler"]["Model"] += json{ { "model", model.mesh != nullptr ? model.mesh.get()->name: "NO MESH" }, 
+													{ "shader", "default" },
+													{ "texture", model.texture != nullptr ? model.texture.get()->name: "NO TEXTURE" } };
 		 }
 	 }
  }
@@ -51,14 +55,18 @@ using namespace Cookie::Editor::Serialization;
 							{ "widthTileProp", actScene.tiles.widthTileProp }, { "depthTileProp", actScene.tiles.depthTileProp } };
 	}
 
-	//Entities
-	{
-		Cookie::Editor::Serialization::Save::ToJson(js, actScene.entityHandler);
-	}
 
-	//Components
+	if (actScene.entityHandler.livingEntities > 0)
 	{
-		Cookie::Editor::Serialization::Save::ToJson(js, actScene.entityHandler, actScene.componentHandler);
+		//Entities
+		{
+			Cookie::Editor::Serialization::Save::ToJson(js, actScene.entityHandler);
+		}
+
+		//Components
+		{
+			Cookie::Editor::Serialization::Save::ToJson(js, actScene.entityHandler, actScene.componentHandler);
+		}
 	}
 
 	file << std::setw(4) << js << std::endl;
@@ -68,8 +76,6 @@ using namespace Cookie::Editor::Serialization;
 
  void Cookie::Editor::Serialization::Load::FromJson(json& js, Cookie::ECS::EntityHandler& entity)
  {
-	 entity.livingEntities = js["EntityHandler"].size();
-	 
 	 for (int i = 0; i < entity.livingEntities; i++)
 		 entity.entities[i] = (Cookie::ECS::Entity(js["EntityHandler"][i].at("entity").at("id").get<int>(), js["EntityHandler"][i].at("entity").at("signature").get<int>(), js["EntityHandler"][i].at("entity").at("name").get<std::string>()));
  }
@@ -105,35 +111,58 @@ using namespace Cookie::Editor::Serialization;
 		 std::cout << "DON'T FIND THE FILE\n";
 		 return;
 	 }
-
+	 
 	 json js;
 	 file >> js;
 	 
-	 //name
+	 if (js.contains("Name"))
 	 {
-		  js["Name"].get_to(newScene.name);
-	 }
-
-	 //tiles
-	 {
-		 //----------------------CHECK--------------------------------------
-		 js["Tiles"].at("widthTile").get_to(newScene.tiles.widthTile);
-		 js["Tiles"].at("depthTile").get_to(newScene.tiles.depthTile);
-		 js["Tiles"].at("widthTileProp").get_to(newScene.tiles.widthTileProp);
-		 js["Tiles"].at("depthTileProp").get_to(newScene.tiles.depthTileProp);
-		 newScene.ChangeNumberOfTiles(newScene.tiles.widthTile, newScene.tiles.depthTile);
-		 newScene.tiles.ReInitAllTiles();
+		 //name
+		 {
+			  js["Name"].get_to(newScene.name);
+		 }
 	 }
 	 
-	 //entities
+	 
+	 if (js.contains("Tiles"))
 	 {
-		 Cookie::Editor::Serialization::Load::FromJson(js, newScene.entityHandler);
-	 }
-
-	 //component
+		 //tiles
+		 {
+			 //----------------------CHECK--------------------------------------
+			 js["Tiles"].at("widthTile").get_to(newScene.tiles.widthTile);
+			 js["Tiles"].at("depthTile").get_to(newScene.tiles.depthTile);
+			 js["Tiles"].at("widthTileProp").get_to(newScene.tiles.widthTileProp);
+			 js["Tiles"].at("depthTileProp").get_to(newScene.tiles.depthTileProp);
+			 newScene.ChangeNumberOfTiles(newScene.tiles.widthTile, newScene.tiles.depthTile);
+			 newScene.tiles.ReInitAllTiles();
+		 }
+	 } 
+	 
+	 if (js.contains("EntityHandler"))
 	 {
-		 Cookie::Editor::Serialization::Load::FromJson(js, newScene.entityHandler, newScene.componentHandler, resourcesManager);
-	 }
+		 int newSizeEntities = js["EntityHandler"].size();
+		 for (int i = newSizeEntities; i < newSizeEntities + newScene.entityHandler.livingEntities - newSizeEntities; i++)
+		 {
+			 if (newScene.entityHandler.entities[i].signature & SIGNATURE_TRANSFORM)
+				 newScene.componentHandler.componentTransforms[newScene.entityHandler.entities[i].id].ToDefault();
+			 if (newScene.entityHandler.entities[i].signature & SIGNATURE_MODEL)
+				 newScene.componentHandler.componentModels[newScene.entityHandler.entities[i].id].ToDefault();
+			 /*if (newScene.entityHandler.entities[i].signature & SIGNATURE_RIGIDBODY)
+				 newScene.componentHandler.componentRigidBodies[newScene.entityHandler.entities[i].id].ToDefault();*/
+			 newScene.entityHandler.entities[i] = Cookie::ECS::Entity(i);
+		 }
 
+		 //entities
+		 {
+			 newScene.entityHandler.livingEntities = newSizeEntities;
+			 Cookie::Editor::Serialization::Load::FromJson(js, newScene.entityHandler);
+		 }
+
+		 //component
+		 {
+			 Cookie::Editor::Serialization::Load::FromJson(js, newScene.entityHandler, newScene.componentHandler, resourcesManager);
+		 }
+	 }
+		 
 	 newScene.filepath = filepath;
  }
