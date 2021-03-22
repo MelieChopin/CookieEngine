@@ -21,17 +21,17 @@ namespace Cookie
 			namespace Save
 			{
 				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity);
-				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler component);
+				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component);
 
-				void SaveScene(const Cookie::Editor::Scene& actScene);
+				void SaveScene(Cookie::Editor::Scene& actScene);
 			}
 
 			namespace Load
 			{
 				void FromJson(json& js, Cookie::ECS::EntityHandler& entity);
-				void FromJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager resourcesManager);
+				void FromJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, const Cookie::Resources::ResourcesManager& resourcesManager);
 
-				void LoadScene(const char* filepath, Cookie::Editor::Scene& newScene, Cookie::Resources::ResourcesManager resourcesManager);
+				void LoadScene(const char* filepath, Cookie::Editor::Scene& newScene, const Cookie::Resources::ResourcesManager& resourcesManager);
 			}
 		}
 	}

@@ -100,7 +100,7 @@ void Engine::Run()
     ui.AddWItem(new UIwidget::TextureEditor(renderer, resources), 1);
     
     
-    ui.AddWItem(new UIwidget::FileExplorer, 2);
+    ui.AddWItem(new UIwidget::FileExplorer(renderer, resources, scene), 2);
     
     UIwidget::Inspector* insp = new UIwidget::Inspector(resources, coordinator);
     ui.AddWItem(insp, 2);

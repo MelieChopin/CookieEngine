@@ -15,7 +15,7 @@ using namespace Cookie::Editor::Serialization;
 		js["EntityHandler"] += json{ { "entity", { { "id", entity.entities[i].id }, { "signature", entity.entities[i].signature }, { "name", entity.entities[i].name } } } };
 }
 
- void Cookie::Editor::Serialization::Save::ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler component)
+ void Cookie::Editor::Serialization::Save::ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component)
  {
 	 for (int i = 0; i < entity.livingEntities; i++)
 	 {
@@ -33,7 +33,7 @@ using namespace Cookie::Editor::Serialization;
  }
 
 
- void Cookie::Editor::Serialization::Save::SaveScene(const Cookie::Editor::Scene& actScene)
+ void Cookie::Editor::Serialization::Save::SaveScene(Cookie::Editor::Scene& actScene)
 {
 	std::ofstream file(actScene.filepath);
 
@@ -74,7 +74,7 @@ using namespace Cookie::Editor::Serialization;
 		 entity.entities[i] = (Cookie::ECS::Entity(js["EntityHandler"][i].at("entity").at("id").get<int>(), js["EntityHandler"][i].at("entity").at("signature").get<int>(), js["EntityHandler"][i].at("entity").at("name").get<std::string>()));
  }
 
- void Cookie::Editor::Serialization::Load::FromJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager resourcesManager)
+ void Cookie::Editor::Serialization::Load::FromJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, const Cookie::Resources::ResourcesManager& resourcesManager)
  {
 	 for (int i = 0; i < entity.livingEntities; i++)
 	 {
@@ -96,7 +96,7 @@ using namespace Cookie::Editor::Serialization;
 	 }
  }
 
- void Cookie::Editor::Serialization::Load::LoadScene(const char* filepath, Cookie::Editor::Scene& newScene, Cookie::Resources::ResourcesManager resourcesManager)
+ void Cookie::Editor::Serialization::Load::LoadScene(const char* filepath, Cookie::Editor::Scene& newScene, const Cookie::Resources::ResourcesManager& resourcesManager)
  {
 	 std::ifstream file(filepath);
 

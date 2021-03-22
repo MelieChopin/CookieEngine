@@ -34,8 +34,8 @@ void Inspector::EntityInspection()
     if (selectedEntity->signature & SIGNATURE_TRANSFORM)    TransformInterface();
     if (selectedEntity->signature & SIGNATURE_RIGIDBODY)    RigidBodyInterface();
     if (selectedEntity->signature & SIGNATURE_MODEL)        ModelInterface();
-    //if (selectedEntity->signature & SIGNATURE_MAP)          MapInterface();
     if (selectedEntity->signature & SIGNATURE_SCRIPT)       ScriptInterface();
+    //if (selectedEntity->signature & SIGNATURE_MAP)          MapInterface();
 
 
     if (Button("Add component...")) OpenPopup("Add component popup");
@@ -208,6 +208,57 @@ void Inspector::ModelInterface()
     ImGui::Separator();
 }
 
+void Inspector::ScriptInterface()
+{
+    if (TreeNode("Script"))
+    {
+        ComponentScript& scriptC = coordinator.componentHandler->GetComponentScript(selectedEntity->id);
+        
+        for (size_t i = 0; i < scriptC.scripts.size();)
+        { 
+            Text("%s", scriptC.scripts[i].script->filename.c_str());
+            Indent();
+            
+            if (Button( ("Remove##SCRIPT_" + std::to_string(i)).c_str() ))
+            {
+                scriptC.scripts.erase(scriptC.scripts.begin() + i);
+            }
+            else ++i;
+
+            NewLine();
+            Unindent();
+        }
+
+
+        if (Button("Add a script")) OpenPopup("Script selector popup");
+        
+        if (BeginPopup("Script selector popup"))
+        {
+            for (const std::shared_ptr<Cookie::Resources::Script>& scriPtr : resources.scripts)
+            {
+                if (Button(scriPtr->filename.c_str()))
+                {
+                    scriptC.scripts.push_back(scriPtr->CreateObject(std::to_string(selectedEntity->id)));
+                    CloseCurrentPopup();
+                }
+            }
+
+            EndPopup();
+        }
+
+
+        NewLine();
+        if (Button("Remove component##SCRIPT"))
+        {
+            coordinator.componentHandler->RemoveComponentScript(*selectedEntity);
+        }
+
+        TreePop();
+    }
+
+    ImGui::Separator();
+}
+
 void Inspector::MapInterface()
 {
     if (TreeNode("Map transform"))
@@ -225,46 +276,6 @@ void Inspector::MapInterface()
     ImGui::Separator();
 }
 
-void Inspector::ScriptInterface()
-{
-    if (TreeNode("Script"))
-    {
-        ComponentScript& cScript = coordinator.componentHandler->GetComponentScript(selectedEntity->id);
-        
-        for (int i = 0; i < cScript.scripts.size(); ++i)
-        { 
-            Text("%s", cScript.scripts[i].script->filename.c_str() );
-            std::string buttonText("Remove Script##");
-            buttonText += i;
-            if (Button(buttonText.c_str() ))
-            {
-                cScript.scripts.erase(cScript.scripts.begin() + i);
-                i = (i > 0) ? i - 1 : 0;
-            }
-            ImGui::NewLine();
-        }
-
-        for (int i = 0; i < resources.scripts.size(); ++i)
-        {
-            ImGui::NewLine();  
-            std::string buttonText("Add Script##");
-            buttonText += i;
-            if (Button(buttonText.c_str() ))
-                {cScript.scripts.push_back(resources.scripts[i]->CreateObject(std::to_string(selectedEntity->id))); }
-        }
-
-
-        ImGui::NewLine();
-        if (Button("Remove component##RIBOD"))
-        {
-            coordinator.componentHandler->RemoveComponentScript(*selectedEntity);
-        }
-
-        TreePop();
-    }
-
-    ImGui::Separator();
-}
 
 void Inspector::SelectScene(Cookie::Editor::Scene* newSelection)
 {

@@ -73,13 +73,13 @@ void Console::UngroupedDisplay()
 {
 	bool latestErrorEncountered = false;
 
-	for (std::vector<DebugMessage>::reverse_iterator i = debugManager.storedMessages.rbegin(); i != debugManager.storedMessages.rend(); ++i)
+	for (std::vector<DebugMessage>::reverse_iterator it = debugManager.storedMessages.rbegin(); it != debugManager.storedMessages.rend(); ++it)
 	{
-		DisplayMessage(*i);
+		DisplayMessage(*it);
 
-		if (!latestErrorEncountered && i->messageType == DebugMessage::Error)
+		if (!latestErrorEncountered && it->messageType == DebugMessage::Error)
 		{
-			errorFlash = i->colorVariant;
+			errorFlash = it->colorVariant;
 			latestErrorEncountered = true;
 		}
 	}
@@ -91,13 +91,13 @@ void Console::GroupedDisplay()
 	std::vector<unsigned int> repetitions;
 	bool isNew;
 
-	for (std::vector<DebugMessage>::reverse_iterator i = debugManager.storedMessages.rbegin(); i != debugManager.storedMessages.rend(); ++i)
+	for (std::vector<DebugMessage>::reverse_iterator it = debugManager.storedMessages.rbegin(); it != debugManager.storedMessages.rend(); ++it)
 	{
 		isNew = true;
 
 		for (size_t fo = 0; fo < firstOccurences.size(); fo++)
 		{
-			if ((strcmp(i->text, firstOccurences[fo]->text) == 0) && (i->messageType == firstOccurences[fo]->messageType))
+			if ((strcmp(it->text, firstOccurences[fo]->text) == 0) && (it->messageType == firstOccurences[fo]->messageType))
 			{
 				isNew = false;
 				repetitions[fo]++;
@@ -106,7 +106,7 @@ void Console::GroupedDisplay()
 
 		if (isNew)
 		{
-			firstOccurences.push_back(&*i);
+			firstOccurences.push_back(&*it);
 			repetitions.push_back(0);
 		}
 	}

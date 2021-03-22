@@ -1,13 +1,28 @@
 #include <string>
 #include <filesystem>
+#include "Renderer.hpp"
+#include "Resources/Texture.hpp"
+#include "Resources/ResourcesManager.hpp"
+#include "Scene.hpp"
 #include "FileExplorerWidget.hpp"
 
 #include <imgui.h>
+#include "Serialization.hpp"
+
+#include "CustomImWidget.hpp"
 
 namespace fs = std::filesystem;
 using namespace ImGui;
 using namespace Cookie::UIwidget;
 
+
+FileExplorer::FileExplorer(Cookie::Render::Renderer& _renderer, const Cookie::Resources::ResourcesManager& _resources, Cookie::Editor::Scene& _scene)
+            : WItemBase ("File explorer"),
+              resources (_resources),
+              scene     (_scene)
+{
+    saveIcon = std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/Save2.ico");
+}
 
 void FileExplorer::ExploreFiles(const fs::path& path, const char* researchQuery)const
 {
@@ -32,9 +47,17 @@ void FileExplorer::ExploreFiles(const fs::path& path, const char* researchQuery)
             const fs::path& filename = entry.path().c_str();
             if (fs::is_regular_file(entry.status()))
             {
-                if (filename.string().find(researchQuery) != std::string::npos && Button(filename.filename().string().c_str()))
+                if (filename.string().find(researchQuery) != std::string::npos)
                 {
-                    // something to actually open the file
+                    if (filename.extension().string() == ".CAsset")
+                    {
+                        if (Custom::FileButton(filename.filename().string().c_str(), saveIcon->GetResourceView()))
+                            Cookie::Editor::Serialization::Load::LoadScene(filename.string().c_str(), scene, resources);
+                    }
+                    else
+                    {
+                        Text("%s", filename.filename().string().c_str());
+                    }
                 }
             }
         }
@@ -68,14 +91,12 @@ void FileExplorer::WindowDisplay()
         static char searchQuery[25]{ 0 };
         InputText("File search", &searchQuery[0], 25);
 
-        ImGuiStyle& style = GetStyle();
-        style.FrameRounding = 25.f;
-        style.IndentSpacing = 30.0f;
+
+        PushStyleVar(ImGuiStyleVar_IndentSpacing, 35.f);
 
         ExploreFiles("Assets/", &searchQuery[0]);
 
-        style.FrameRounding = 0.f;
-        style.IndentSpacing = 21.0f;
+        PopStyleVar();
     }
 
     ImGui::End();

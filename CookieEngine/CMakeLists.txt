@@ -78,6 +78,7 @@ set (SRC_FILES
     "${SRC_DIR}/Resources/Texture.cpp"
 
     "${SRC_DIR}/UI/UIeditor.cpp"
+    "${SRC_DIR}/UI/CustomImWidget.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgetBases.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgets.cpp" 
     "${SRC_DIR}/UI/Widgets/ConsoleWidget.cpp"
@@ -87,9 +88,9 @@ set (SRC_FILES
     "${SRC_DIR}/UI/Widgets/TextureEditorWidget.cpp"
     "${SRC_DIR}/UI/Widgets/ToolbarWidget.cpp"
     "${SRC_DIR}/UI/Widgets/ViewportWidget.cpp"
-    "${SRC_DIR}/Resources/Texture.cpp"
-    "${SRC_DIR}/Render/FrameBuffer.cpp"
+    
     "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
+
     "${SRC_DIR}/Editor/Scene.cpp"
     "${SRC_DIR}/Editor/Tiles.cpp"
     "${SRC_DIR}/Editor/Serialization.cpp")
