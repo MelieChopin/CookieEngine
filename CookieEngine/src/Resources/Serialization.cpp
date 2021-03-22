@@ -175,3 +175,56 @@ using namespace Cookie::Resources::Serialization;
 
 	 return newScene;
  }
+
+ void Cookie::Editor::Serialization::Load::LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager)
+ {
+	 std::vector<std::string> filesPath;
+	 for (const fs::directory_entry& path : fs::directory_iterator("Assets/Prefabs"))
+	 {
+		 if (path.path().string().find(".PAsset") != std::string::npos)
+			filesPath.push_back(path.path().string());
+	 }
+	 
+	 for (int i = 0; i < filesPath.size(); i++)
+	 {
+		 std::cout << filesPath[i] << "\t";
+
+		 std::ifstream file(filesPath[i]);
+
+		 if (!file.is_open())
+		 {
+			 std::cout << "DON'T FIND THE FILE\n";
+			 return;
+		 }
+
+		 json js;
+		 file >> js;
+
+		 Cookie::Resources::Prefab newPrefab;
+
+		 if (js.contains("Name"))
+			 newPrefab.name = js["Name"];
+
+		 if (js.contains("Mesh"))
+			 newPrefab.nameMesh = js["Mesh"];
+
+		 if (js.contains("Texture"))
+			 newPrefab.nameTexture = js["Texture"];
+
+		 if (js.contains("Shader"))
+			 newPrefab.nameShader = js["Shader"];
+
+		 if (js.contains("Rotation"))
+			js["Rotation"].get_to(newPrefab.rotation.e);
+
+		 if (js.contains("Scale"))
+			 js["Scale"].get_to(newPrefab.rotation.e);
+
+		 if (js.contains("Script"))
+			 newPrefab.nameMesh = js["Mesh"];
+	 }
+
+		
+	 //std::size_t found = 
+	 //resourcesManager.prefabs
+ }
