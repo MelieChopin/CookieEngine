@@ -6,15 +6,15 @@
 
 using namespace Cookie::Resources;
 
-Mesh::Mesh(aiMesh* mesh, Render::Renderer& renderer)
+Mesh::Mesh(std::string _name, aiMesh* mesh, Render::Renderer& renderer)
 {
-    name    = mesh->mName.C_Str();
+    name    = _name;
     INb     = mesh->mNumFaces * 3;//a face is a triangle as triangulate flag is enabled
     InitVBuffer(mesh, renderer);
     InitIBuffer(mesh,renderer);
 }
 
-Mesh::Mesh(std::vector<float> vertices, std::vector<unsigned int> indices, unsigned int inb, Render::Renderer& renderer)
+Mesh::Mesh(std::vector<float>& vertices, std::vector<unsigned int>& indices, unsigned int inb, Render::Renderer& renderer)
 {
     INb = inb;
     InitVBuffer(vertices, renderer);
@@ -90,7 +90,7 @@ void Mesh::InitIBuffer(aiMesh* mesh, Render::Renderer& renderer)
     renderer.CreateBuffer(bDesc, InitData, &IBuffer);
 }
 
-void Mesh::InitVBuffer(std::vector<float> vertices, Render::Renderer& renderer)
+void Mesh::InitVBuffer(std::vector<float>& vertices, Render::Renderer& renderer)
 {
     D3D11_BUFFER_DESC bDesc = {};
 
@@ -109,7 +109,7 @@ void Mesh::InitVBuffer(std::vector<float> vertices, Render::Renderer& renderer)
     renderer.CreateBuffer(bDesc, InitData, &VBuffer);
 }
 
-void Mesh::InitIBuffer(std::vector<unsigned int> indices, Render::Renderer& renderer)
+void Mesh::InitIBuffer(std::vector<unsigned int>& indices, Render::Renderer& renderer)
 {
     D3D11_BUFFER_DESC bDesc = {};
 

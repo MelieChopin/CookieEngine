@@ -4,7 +4,7 @@
 #include "EntityHandler.hpp"
 #include "ComponentHandler.hpp"
 #include "SystemHandler.hpp"
-#include "Resources/ResourcesManager.hpp"
+#include "ResourcesManager.hpp"
 #include "Render/Camera.hpp"
 #include <assert.h>
 
@@ -41,7 +41,7 @@ namespace Cookie
 					componentHandler->AddComponentScript(entityHandler->entities[id]);
 
 				//not clean should be moved somewhere else
-				componentHandler->GetComponentModel(id).shader = resources.GetDefaultShader();
+				componentHandler->GetComponentModel(id).shader = resources.shaders.at("dfltShader");
 			}
 			//will be removed when scene clean
 			static void AddEntity(EntityHandler& entityHandler, ComponentHandler& componentHandler, const int signature, const Resources::ResourcesManager& resources, std::string name = std::string("No Name") )
@@ -62,7 +62,7 @@ namespace Cookie
 					componentHandler.AddComponentScript(entityHandler.entities[id]);
 
 				//not clean should be moved somewhere else
-				componentHandler.GetComponentModel(id).shader = resources.GetDefaultShader();
+				componentHandler.GetComponentModel(id).shader = resources.shaders.at("dfltShader");
 			}
 			void RemoveEntity(Entity& entity)
 			{

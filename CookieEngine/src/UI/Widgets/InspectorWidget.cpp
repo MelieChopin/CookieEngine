@@ -1,6 +1,6 @@
 #include "Resources/ResourcesManager.hpp"
 #include "Coordinator.hpp"
-#include "Scene.hpp"
+#include "Resources/Scene.hpp"
 #include "InspectorWidget.hpp"
 
 #include <string>
@@ -138,11 +138,11 @@ void Inspector::ModelInterface()
 
         if (BeginPopup("Mesh selector popup"))
         {
-            for (const std::shared_ptr<Cookie::Resources::Mesh>& meshPtr : resources.GetMeshes())
+            for (std::unordered_map<std::string, std::shared_ptr<Mesh>>::iterator meshIt = resources.meshes.begin(); meshIt != resources.meshes.end(); meshIt++)
             {
-                if (Button(meshPtr->name.c_str()))
+                if (Button(meshIt->second->name.c_str()))
                 {
-                    modelComp.mesh = meshPtr;
+                    modelComp.mesh = meshIt->second;
                     CloseCurrentPopup();
                     break;
                 }
@@ -168,11 +168,11 @@ void Inspector::ModelInterface()
 
         if (BeginPopup("Texture selector popup"))
         {
-            for (const std::shared_ptr<Cookie::Resources::Texture>& textPtr : resources.GetTextures())
+            for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator texIt = resources.textures.begin(); texIt != resources.textures.end(); texIt++)
             {
-                if (Button(textPtr->name.c_str()))
+                if (Button(texIt->second->name.c_str()))
                 {
-                    modelComp.texture = textPtr;
+                    modelComp.texture = texIt->second;
                     CloseCurrentPopup();
                     break;
                 }
@@ -180,7 +180,7 @@ void Inspector::ModelInterface()
                 if (IsItemHovered())
                 {
                     BeginTooltip();
-                    Image(static_cast<ImTextureID>(textPtr->GetResourceView()), {75, 75});
+                    Image(static_cast<ImTextureID>(texIt->second->GetResourceView()), {75, 75});
                     EndTooltip();
                 }
             }
@@ -234,11 +234,11 @@ void Inspector::ScriptInterface()
         
         if (BeginPopup("Script selector popup"))
         {
-            for (const std::shared_ptr<Cookie::Resources::Script>& scriPtr : resources.scripts)
+            for (std::unordered_map<std::string, std::shared_ptr<Script>>::iterator scrIt = resources.scripts.begin(); scrIt != resources.scripts.end(); scrIt++)
             {
-                if (Button(scriPtr->filename.c_str()))
+                if (Button(scrIt->second->filename.c_str()))
                 {
-                    scriptC.scripts.push_back(scriPtr->CreateObject(std::to_string(selectedEntity->id)));
+                    scriptC.scripts.push_back(scrIt->second->CreateObject(std::to_string(selectedEntity->id)));
                     CloseCurrentPopup();
                 }
             }
@@ -277,7 +277,7 @@ void Inspector::MapInterface()
 }
 
 
-void Inspector::SelectScene(Cookie::Editor::Scene* newSelection)
+void Inspector::SelectScene(Cookie::Resources::Scene* newSelection)
 {
     selectedScene   = newSelection;
     selectedEntity  = nullptr;

@@ -5,7 +5,7 @@
 
 namespace Cookie
 {
-	namespace Editor
+	namespace Resources
 	{
 		struct TileProp
 		{

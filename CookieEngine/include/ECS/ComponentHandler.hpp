@@ -17,11 +17,11 @@ namespace Cookie
 	namespace ECS
 	{
 		#define SIGNATURE_EMPTY         0b00000
-		#define SIGNATURE_TRANSFORM     0b10000
-		#define SIGNATURE_RIGIDBODY     0b01000
-		#define SIGNATURE_MODEL         0b00100
-		#define SIGNATURE_SCRIPT        0b00010
-		#define SIGNATURE_COLLIDER		0b00001
+		#define SIGNATURE_TRANSFORM     0b00001
+		#define SIGNATURE_MODEL         0b00010
+		#define SIGNATURE_RIGIDBODY     0b00100
+		#define SIGNATURE_COLLIDER		0b01000
+		#define SIGNATURE_SCRIPT        0b10000
 		#define SIGNATURE_ALL_COMPONENT 0b11111
 
 

@@ -22,7 +22,7 @@ namespace Cookie
 
 				void Load(const char* fileName, ResourcesManager& _resources, Render::Renderer& _renderer);
 				void InitScene(const char* fileName, const aiScene* _scene, ResourcesManager& _resources, Render::Renderer& _renderer);
-				void InitMeshes(aiMesh** meshes, unsigned int nMeshes, ResourcesManager& _resources, Render::Renderer& _renderer);
+				void InitMeshes(const char* fileName, aiMesh** meshes, unsigned int nMeshes, ResourcesManager& _resources, Render::Renderer& _renderer);
 				void InitTextures(const char* pathToFile, aiMaterial** materials, unsigned int nMatNb, ResourcesManager& _resources, Render::Renderer& _renderer);
 		};
 	}

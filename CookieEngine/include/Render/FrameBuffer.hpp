@@ -35,7 +35,7 @@ namespace Cookie
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
-				FrameBuffer(const Resources::ResourcesManager& _resources, Renderer& _renderer);
+				FrameBuffer(Resources::ResourcesManager& _resources, Renderer& _renderer);
 				~FrameBuffer();
 
 				void Resize(Renderer& _renderer);

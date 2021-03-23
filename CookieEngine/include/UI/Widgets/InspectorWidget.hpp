@@ -5,7 +5,7 @@
 
 namespace Cookie::Resources  { class ResourcesManager; }
 namespace Cookie::ECS		 { class Coordinator; class Entity; }
-namespace Cookie::Editor	 { class Scene; }
+namespace Cookie::Resources { class Scene; }
 namespace Cookie::Core::Math { union Vec2; }
 
 
@@ -17,11 +17,11 @@ namespace Cookie::UIwidget
 		Cookie::ECS::Coordinator& coordinator;
 
 
-		Cookie::Editor::Scene*	 selectedScene	= nullptr;
-		Cookie::Core::Math::Vec2 sceneTiles;
+		Cookie::Resources::Scene*	selectedScene	= nullptr;
+		Cookie::Core::Math::Vec2	sceneTiles;
 
 	public:
-		Cookie::ECS::Entity*	selectedEntity	= nullptr;
+		Cookie::ECS::Entity* selectedEntity	= nullptr;
 	
 	private:
 		void EntityInspection();
@@ -47,7 +47,7 @@ namespace Cookie::UIwidget
 		inline void SelectEntity(Cookie::ECS::Entity* newSelection)
 		{ selectedEntity = newSelection; selectedScene = nullptr; }
 
-		void SelectScene(Cookie::Editor::Scene* newSelection);
+		void SelectScene(Cookie::Resources::Scene* newSelection);
 	};
 }
 

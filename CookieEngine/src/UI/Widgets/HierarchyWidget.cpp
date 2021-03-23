@@ -1,5 +1,5 @@
 #include <vector>
-#include "Scene.hpp"
+#include "Resources/Scene.hpp"
 #include "Coordinator.hpp"
 #include "InspectorWidget.hpp"
 #include "HierarchyWidget.hpp"
@@ -8,7 +8,6 @@
 
 using namespace ImGui;
 using namespace Cookie::UIwidget;
-using namespace Cookie::Editor;
 using namespace Cookie::ECS;
 
 
@@ -30,7 +29,7 @@ void Hierarchy::WindowDisplay()
 
         //for (size_t i = 0; i < scenes->size(); i++)
         //{
-            Scene& _scene = *scenes;
+            Resources::Scene& _scene = *scenes;
 
             std::string SceneNameTag;
 

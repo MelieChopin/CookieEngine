@@ -2,8 +2,7 @@
 #include <filesystem>
 #include "Renderer.hpp"
 #include "Resources/Texture.hpp"
-#include "Resources/ResourcesManager.hpp"
-#include "Scene.hpp"
+#include "Game.hpp"
 #include "FileExplorerWidget.hpp"
 
 #include <imgui.h>
@@ -16,10 +15,9 @@ using namespace ImGui;
 using namespace Cookie::UIwidget;
 
 
-FileExplorer::FileExplorer(Cookie::Render::Renderer& _renderer, const Cookie::Resources::ResourcesManager& _resources, Cookie::Editor::Scene& _scene)
+FileExplorer::FileExplorer(Cookie::Render::Renderer& _renderer, Cookie::Game& _game)
             : WItemBase ("File explorer"),
-              resources (_resources),
-              scene     (_scene)
+              game      (_game)
 {
     saveIcon = std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/Save2.ico");
 }
@@ -52,7 +50,7 @@ void FileExplorer::ExploreFiles(const fs::path& path, const char* researchQuery)
                     if (filename.extension().string() == ".CAsset")
                     {
                         if (Custom::FileButton(filename.filename().string().c_str(), saveIcon->GetResourceView()))
-                            Cookie::Editor::Serialization::Load::LoadScene(filename.string().c_str(), scene, resources);
+                            game.SetScene(filename.string().c_str());
                     }
                     else
                     {

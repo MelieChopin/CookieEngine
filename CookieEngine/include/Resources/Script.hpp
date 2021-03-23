@@ -7,17 +7,12 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 /*
 #ifdef _WIN32
 #pragma comment (lib, "liblua54.a")
 #endif*/
-
-#include "Time.hpp"
-#include "Debug.hpp"
-
-
-
 
 namespace Cookie
 {
@@ -31,6 +26,8 @@ namespace Cookie
 		{
 		public:
 			std::string filename;
+			std::filesystem::file_time_type lastUpdateTime;
+
 			sol::state state;
 			sol::function construct;
 			sol::function start;
@@ -38,6 +35,8 @@ namespace Cookie
 
 			Script(const char* _filename) : filename(_filename)
 			{
+				lastUpdateTime = std::filesystem::last_write_time(filename);
+
 				state.open_libraries(sol::lib::base);
 				state.script_file(filename);
 				construct = state["Construct"];

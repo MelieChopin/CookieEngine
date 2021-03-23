@@ -10,8 +10,8 @@ using namespace Cookie::Resources;
 
 ResourcesManager::ResourcesManager()
 {
-	scripts.push_back(std::make_shared<Script>("Assets\\scripts\\test.lua"));
-	scripts.push_back(std::make_shared<Script>("Assets\\scripts\\test2.lua"));
+	//scripts.push_back(std::make_shared<Script>("Assets\\scripts\\test.lua"));
+	//scripts.push_back(std::make_shared<Script>("Assets\\scripts\\test2.lua"));
 }
 
 ResourcesManager::~ResourcesManager()
@@ -21,21 +21,16 @@ ResourcesManager::~ResourcesManager()
 
 void ResourcesManager::Load(Render::Renderer& _renderer)
 {
-	if (!HasMesh("Quad"))
-		meshes.push_back(Cookie::Core::Primitives::CreateQuad(_renderer));
-	if (!HasMesh("Triangle"))
-		meshes.push_back(Cookie::Core::Primitives::CreateTriangle(_renderer));
+	meshes["Quad"] =  Cookie::Core::Primitives::CreateQuad(_renderer);
+	meshes["Triangle"] = Cookie::Core::Primitives::CreateTriangle(_renderer);
 
 	std::vector<std::string> gltfFiles;
 	SearchForGltf(std::string("Assets\\"),gltfFiles);
 
 	Loader loader;
 
-	if (GetDefaultShader() == nullptr)
-	{
-		std::shared_ptr<Shader> dfltShader = std::make_shared<Shader>(_renderer);
-		AddShader(std::move(dfltShader));
-	}
+	shaders["dfltShader"] = std::make_shared<Shader>(_renderer);
+	
 
 	for (unsigned int i = 0; i < gltfFiles.size(); i++)
 	{
@@ -69,89 +64,4 @@ void ResourcesManager::SearchForGltf(const fs::path& path, std::vector<std::stri
 
 		}
 	}
-}
-
-std::shared_ptr<Mesh> ResourcesManager::AddMesh(std::shared_ptr<Mesh>&& _mesh)
-{
-	meshes.push_back(_mesh);
-	return meshes.back();
-}
-
-bool ResourcesManager::HasMesh(const std::string& _name) const
-{
-	for (unsigned int i = 0; i < meshes.size(); i++)
-	{
-		if (meshes[i]->name == _name)
-			return true;
-	}
-
-	return false;
-}
-
-std::shared_ptr<Mesh> ResourcesManager::GetMesh(std::string _name) const
-{
-	for (unsigned int i = 0; i < meshes.size(); i++)
-	{
-		if (meshes[i]->name == _name)
-			return meshes[i];
-	}
-
-	return nullptr;
-}
-
-
-std::shared_ptr<Shader> ResourcesManager::AddShader(std::shared_ptr<Shader>&& shader)
-{
-	shaders.push_back(shader);
-	return shaders.back();
-}
-
-std::shared_ptr<Shader> ResourcesManager::AddShader(const std::shared_ptr<Shader>& shader)
-{
-	shaders.push_back(shader);
-	return shaders.back();
-}
-
-std::shared_ptr<Shader> ResourcesManager::GetDefaultShader() const
-{
-	if (!shaders.empty())
-		return shaders.front();
-	else
-		return nullptr;
-}
-
-std::shared_ptr<Texture> ResourcesManager::AddTexture(std::shared_ptr<Texture>&& texture)
-{
-	textures.push_back(texture);
-	return textures.back();
-}
-
-std::shared_ptr<Texture> ResourcesManager::AddTexture(const std::shared_ptr<Texture>& texture)
-{
-	textures.push_back(texture);
-	return textures.back();
-}
-
-std::shared_ptr<Texture> ResourcesManager::GetTexture(const std::string& _name)const
-{
-	for (unsigned int i = 0; i < textures.size(); i++)
-	{
-		if (textures[i]->name.find(_name) != std::string::npos)
-		{
-			return textures[i];
-		}
-	}
-
-	return nullptr;
-}
-
-bool ResourcesManager::HasTexture(const std::string& _name)const
-{
-	for (unsigned int i = 0; i < textures.size(); i++)
-	{
-		if (textures[i]->name == _name)
-			return true;
-	}
-
-	return false;
 }

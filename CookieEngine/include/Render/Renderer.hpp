@@ -32,6 +32,7 @@ namespace Cookie
 				std::vector<std::unique_ptr<FrameBuffer>> frameBuffers;
 				
 			public:
+				Core::Window					window;
 				RendererRemote					remote;
 				RendererState					state;
 
@@ -42,7 +43,7 @@ namespace Cookie
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
-				Renderer(Core::Window& window);
+				Renderer();
 				~Renderer();
 
 				void AddFrameBuffer(Resources::ResourcesManager& resources);

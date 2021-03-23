@@ -13,7 +13,7 @@ using namespace Cookie::Core::Math;
 
 /*========================= CONSTRUCTORS/DESTRUCTORS ===========================*/
 
-Renderer::Renderer(Core::Window& window)
+Renderer::Renderer()
 {
     bool result = true;
     result = InitDevice(window);

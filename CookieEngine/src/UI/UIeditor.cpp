@@ -12,10 +12,10 @@
 
 
 using namespace ImGui;
-using namespace Cookie::Core;
+using namespace Cookie::UI;
 
 
-UIeditor::UIeditor(GLFWwindow* _window, const Cookie::Render::Renderer& _renderer)
+UIeditor::UIeditor(const Cookie::Render::Renderer& _renderer)
 {
 	IMGUI_CHECKVERSION();
 	CreateContext();
@@ -36,7 +36,7 @@ UIeditor::UIeditor(GLFWwindow* _window, const Cookie::Render::Renderer& _rendere
 
 	GetStyle().Colors[ImGuiCol_DockingEmptyBg]	= {0, 0, 0, 0};
 
-	ImGui_ImplGlfw_InitNoAPI(_window, true);
+	ImGui_ImplGlfw_InitNoAPI(_renderer.window.window, true);
 	ImGui_ImplDX11_Init(_renderer.GetDevice(), _renderer.remote.context);
 	ImGui_ImplDX11_CreateDeviceObjects();
 }
