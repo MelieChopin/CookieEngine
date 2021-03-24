@@ -13,35 +13,35 @@ using namespace Cookie;
 using namespace Cookie::Resources;
 using namespace Cookie::Resources::Serialization;
 
- void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS::EntityHandler& entity)
+void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS::EntityHandler& entity)
 {
 	for (int i = 0; i < entity.livingEntities; i++)
 		js["EntityHandler"] += json{ { "entity", { { "id", entity.entities[i].id }, { "signature", entity.entities[i].signature }, { "name", entity.entities[i].name } } } };
 }
 
- void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler component)
- {
-	 for (int i = 0; i < entity.livingEntities; i++)
-	 {
-		 if (entity.entities[i].signature & SIGNATURE_TRANSFORM)
-		 {
-			 Cookie::ECS::ComponentTransform transform = component.GetComponentTransform(entity.entities[i].id);
-			 js["ComponentHandler"]["Transform"] += json{ { "localTRS", { { "translate", transform.localTRS.pos.e }, 
-														{ "rotation", transform.localTRS.rot.e }, 
-														{ "scale", transform.localTRS.scale.e } } } };
-		 }
-		 if (entity.entities[i].signature & SIGNATURE_MODEL)
-		 {
-			 Cookie::ECS::ComponentModel model = component.GetComponentModel(entity.entities[i].id);
-			 js["ComponentHandler"]["Model"] += json{ { "model", model.mesh != nullptr ? model.mesh.get()->name: "NO MESH" }, 
-													{ "shader", "default" },
-													{ "texture", model.texture != nullptr ? model.texture.get()->name: "NO TEXTURE" } };
-		 }
-	 }
- }
+void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component)
+{
+	for (int i = 0; i < entity.livingEntities; i++)
+	{
+		if (entity.entities[i].signature & SIGNATURE_TRANSFORM)
+		{
+			Cookie::ECS::ComponentTransform transform = component.GetComponentTransform(entity.entities[i].id);
+			js["ComponentHandler"]["Transform"] += json{ { "localTRS", { { "translate", transform.localTRS.pos.e }, 
+													{ "rotation", transform.localTRS.rot.e }, 
+													{ "scale", transform.localTRS.scale.e } } } };
+		}
+		if (entity.entities[i].signature & SIGNATURE_MODEL)
+		{
+			Cookie::ECS::ComponentModel model = component.GetComponentModel(entity.entities[i].id);
+			js["ComponentHandler"]["Model"] += json{ { "model", model.mesh != nullptr ? model.mesh.get()->name: "NO MESH" }, 
+												{ "shader", "default" },
+												{ "texture", model.texture != nullptr ? model.texture.get()->name: "NO TEXTURE" } };
+		}
+	}
+}
 
 
- void Cookie::Resources::Serialization::Save::SaveScene(const Cookie::Resources::Scene& actScene)
+void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene& actScene)
 {
 	std::ofstream file(actScene.filepath);
 
@@ -84,7 +84,7 @@ using namespace Cookie::Resources::Serialization;
 		 entity.entities[i] = (Cookie::ECS::Entity(js["EntityHandler"][i].at("entity").at("id").get<int>(), js["EntityHandler"][i].at("entity").at("signature").get<int>(), js["EntityHandler"][i].at("entity").at("name").get<std::string>()));
  }
 
- void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager resourcesManager)
+ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager)
  {
 	 for (int i = 0; i < entity.livingEntities; i++)
 	 {
@@ -167,10 +167,9 @@ using namespace Cookie::Resources::Serialization;
 		 {
 			 Cookie::Resources::Serialization::Load::FromJson(js, newScene->entityHandler, newScene->componentHandler, game.resources);
 		 }
-
-		 game.resources.scenes[newScene->name] = (newScene);
 	 }
 		 
+	 //game.resources.scenes[newScene->name] = (newScene);
 	 newScene->filepath = filepath;
 
 	 return newScene;

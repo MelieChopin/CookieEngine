@@ -1,20 +1,31 @@
 #include "Coordinator.hpp"
 #include "FrameBuffer.hpp"
 #include <GLFW/glfw3.h>
+#include "Scene.hpp"
 #include "UIwidgets.hpp"
 
 #include <imgui.h>
-
+#include "Serialization.hpp"
 
 using namespace ImGui;
 using namespace Cookie::UIwidget;
 using namespace Cookie::ECS;
+using namespace Cookie::Resources;
 
 
 void GamePort::WindowDisplay()
 {
     ImGui::Begin(windowName, nullptr);
     ImGui::End();
+}
+
+
+void SaveButton::ItemDisplay()
+{
+	if (visible && MenuItem(itemName, shortcutSeq))
+	{
+		Cookie::Resources::Serialization::Save::SaveScene(*activeScene);
+	}
 }
 
 

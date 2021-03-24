@@ -8,6 +8,9 @@
 
 namespace Cookie
 {
+	namespace ECS
+	{ class Entity; }
+
 	class Editor
 	{
 		private:
@@ -16,6 +19,8 @@ namespace Cookie
 			UI::UIeditor			ui;
 			Render::FreeFlyCam		cam;
 			Render::DebugRenderer	dbgRenderer;
+
+			ECS::Entity*		selectedEntity = nullptr;
 
 			bool				isPlaying = false;
 			

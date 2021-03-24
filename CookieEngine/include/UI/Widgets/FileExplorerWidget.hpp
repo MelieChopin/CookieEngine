@@ -3,8 +3,12 @@
 
 #include "UIwidgetBases.hpp"
 
-namespace std				{using string = basic_string<char, char_traits<char>, allocator<char>>;}
-namespace std::filesystem	{class path;}
+namespace std				{ using string = basic_string<char, char_traits<char>, allocator<char>>; }
+namespace std::filesystem	{ class path; }
+namespace Cookie::Resources { class Texture; }
+namespace Cookie::Render	{ class Renderer; }
+namespace Cookie::ECS		{ class Entity; }
+namespace Cookie			{ class Game; }
 
 
 namespace Cookie::UIwidget
@@ -14,10 +18,14 @@ namespace Cookie::UIwidget
 		void ExploreFiles(const std::filesystem::path& path, const char* researchQuery)const;
 		bool HasReleventFile(const std::filesystem::path& folderPath, const std::string& researchQuery)const;
 
+
+		std::unique_ptr<Cookie::Resources::Texture> saveIcon;
+
+		Cookie::Game& game;
+		Cookie::ECS::Entity*& selectedEntity;
+
 	public:
-		inline FileExplorer()
-			: WItemBase("File explorer")
-		{}
+		FileExplorer(Cookie::Render::Renderer& _renderer, Cookie::Game& _game, Cookie::ECS::Entity*& _selectedEntity);
 
 		void WindowDisplay() override;
 	};

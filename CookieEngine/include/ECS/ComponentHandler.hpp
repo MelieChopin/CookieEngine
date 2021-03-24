@@ -151,13 +151,11 @@ namespace Cookie
 				CDebug.Warning("No Component Script present");
 			}
 
-			ComponentTransform& GetComponentTransform(const unsigned int id) { return componentTransforms[id]; }
-			ComponentRigidBody& GetComponentRigidBody(const unsigned int id) { return componentRigidBodies[id]; }
-			ComponentModel&		GetComponentModel    (const unsigned int id) { return componentModels[id]; }
-			ComponentScript&    GetComponentScript   (const unsigned int id) { return componentScripts[id]; }
-			ComponentCollider&	GetComponentCollider (const unsigned int id) { return componentColliders[id]; }
-
-
+			ComponentTransform& GetComponentTransform	(const unsigned int id) { return componentTransforms[id];	}
+			ComponentRigidBody& GetComponentRigidBody	(const unsigned int id) { return componentRigidBodies[id];	}
+			ComponentModel&		GetComponentModel		(const unsigned int id) { return componentModels[id];		}
+			ComponentScript&    GetComponentScript		(const unsigned int id) { return componentScripts[id];		}
+			ComponentCollider&	GetComponentCollider	(const unsigned int id) { return componentColliders[id];	}
 		};
 
 	}

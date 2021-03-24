@@ -3,10 +3,11 @@
 #include "UIallIn.hpp"
 #include "Serialization.hpp"
 
+
 using namespace Cookie;
 
-Editor::Editor():
-	ui{game.renderer} 
+Editor::Editor()
+    : ui(game.renderer) 
 {
     game.resources.Load(game.renderer);
     game.renderer.AddFrameBuffer(game.resources);
@@ -33,23 +34,28 @@ Editor::Editor():
     game.scene = _scene;
     game.scene->InitCoordinator(game.coordinator);
 
+
+    ui.AddItem(new UIwidget::SaveButton(game.scene), 0);
+
+    
     ui.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
 
     ui.AddWItem(new UIwidget::TextureEditor(game.renderer, game.resources), 1);
 
+    ui.AddWItem(new UIwidget::FileExplorer(game.renderer, game, selectedEntity), 2);
 
-    ui.AddWItem(new UIwidget::FileExplorer, 2);
+    ui.AddWItem(new UIwidget::Inspector(game.resources, game.coordinator, selectedEntity), 2);
 
-    UIwidget::Inspector* insp = new UIwidget::Inspector(game.resources, game.coordinator);
-    ui.AddWItem(insp, 2);
-    ui.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene.get(), game.coordinator, insp), 2);
+    ui.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
 
     ui.AddWItem(new UIwidget::Console(CDebug, game.renderer), 2);
 
     ui.AddWItem(new UIwidget::DemoWindow, 3);
 
+
     UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.renderer);
-    ui.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, game.renderer.GetLastFrameBuffer(), &cam, game.coordinator, insp->selectedEntity));
+    ui.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, game.renderer.GetLastFrameBuffer(), &cam, game.coordinator, selectedEntity));
+
 
     for (int i = 0; i <= game.coordinator.entityHandler->livingEntities; i++)
     {
@@ -77,6 +83,11 @@ void Editor::Loop()
     {
         // Present frame
         CDebug.UpdateTime();
+        
+        game.resources.UpdateScriptsContent();
+        game.coordinator.ApplyScriptUpdate();
+        
+
 
         // Present frame
         if (isPlaying)
@@ -97,6 +108,7 @@ void Editor::Loop()
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_H) == GLFW_PRESS)
             Resources::Serialization::Save::SaveScene(*game.scene);
 
+    
         game.renderer.Draw(cam.GetViewProj(), game.coordinator);
         game.renderer.SetBackBuffer();
 

@@ -17,8 +17,7 @@ void Inspector::WindowDisplay()
 {
     TryBeginWindow()
     {
-        if      (selectedEntity)    EntityInspection();
-        else if (selectedScene)     SceneInspection();
+        if (selectedEntity) EntityInspection();
     }
     
     ImGui::End();
@@ -34,8 +33,8 @@ void Inspector::EntityInspection()
     if (selectedEntity->signature & SIGNATURE_TRANSFORM)    TransformInterface();
     if (selectedEntity->signature & SIGNATURE_RIGIDBODY)    RigidBodyInterface();
     if (selectedEntity->signature & SIGNATURE_MODEL)        ModelInterface();
-    //if (selectedEntity->signature & SIGNATURE_MAP)          MapInterface();
     if (selectedEntity->signature & SIGNATURE_SCRIPT)       ScriptInterface();
+    //if (selectedEntity->signature & SIGNATURE_MAP)          MapInterface();
 
 
     if (Button("Add component...")) OpenPopup("Add component popup");
@@ -138,11 +137,11 @@ void Inspector::ModelInterface()
 
         if (BeginPopup("Mesh selector popup"))
         {
-            for (std::unordered_map<std::string, std::shared_ptr<Mesh>>::iterator meshPtr = resources.meshes.begin(); meshPtr != resources.meshes.end(); meshPtr++)
+            for (std::unordered_map<std::string, std::shared_ptr<Mesh>>::iterator meshIt = resources.meshes.begin(); meshIt != resources.meshes.end(); meshIt++)
             {
-                if (Button(meshPtr->second->name.c_str()))
+                if (Button(meshIt->second->name.c_str()))
                 {
-                    modelComp.mesh = meshPtr->second;
+                    modelComp.mesh = meshIt->second;
                     CloseCurrentPopup();
                     break;
                 }
@@ -168,11 +167,11 @@ void Inspector::ModelInterface()
 
         if (BeginPopup("Texture selector popup"))
         {
-            for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator textPtr = resources.textures.begin(); textPtr != resources.textures.end(); textPtr++)
+            for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator texIt = resources.textures.begin(); texIt != resources.textures.end(); texIt++)
             {
-                if (Button(textPtr->second->name.c_str()))
+                if (Button(texIt->second->name.c_str()))
                 {
-                    modelComp.texture = textPtr->second;
+                    modelComp.texture = texIt->second;
                     CloseCurrentPopup();
                     break;
                 }
@@ -180,7 +179,7 @@ void Inspector::ModelInterface()
                 if (IsItemHovered())
                 {
                     BeginTooltip();
-                    Image(static_cast<ImTextureID>(textPtr->second->GetResourceView()), {75, 75});
+                    Image(static_cast<ImTextureID>(texIt->second->GetResourceView()), {75, 75});
                     EndTooltip();
                 }
             }
@@ -208,6 +207,57 @@ void Inspector::ModelInterface()
     ImGui::Separator();
 }
 
+void Inspector::ScriptInterface()
+{
+    if (TreeNode("Script"))
+    {
+        ComponentScript& scriptC = coordinator.componentHandler->GetComponentScript(selectedEntity->id);
+        
+        for (size_t i = 0; i < scriptC.scripts.size();)
+        { 
+            Text("%s", scriptC.scripts[i].script->filename.c_str());
+            Indent();
+            
+            if (Button( ("Remove##SCRIPT_" + std::to_string(i)).c_str() ))
+            {
+                scriptC.scripts.erase(scriptC.scripts.begin() + i);
+            }
+            else ++i;
+
+            NewLine();
+            Unindent();
+        }
+
+
+        if (Button("Add a script")) OpenPopup("Script selector popup");
+        
+        if (BeginPopup("Script selector popup"))
+        {
+            for (std::unordered_map<std::string, std::shared_ptr<Script>>::iterator scrIt = resources.scripts.begin(); scrIt != resources.scripts.end(); scrIt++)
+            {
+                if (Button(scrIt->second->filename.c_str()))
+                {
+                    scriptC.scripts.push_back(scrIt->second->CreateObject(std::to_string(selectedEntity->id)));
+                    CloseCurrentPopup();
+                }
+            }
+
+            EndPopup();
+        }
+
+
+        NewLine();
+        if (Button("Remove component##SCRIPT"))
+        {
+            coordinator.componentHandler->RemoveComponentScript(*selectedEntity);
+        }
+
+        TreePop();
+    }
+
+    ImGui::Separator();
+}
+
 void Inspector::MapInterface()
 {
     if (TreeNode("Map transform"))
@@ -225,57 +275,8 @@ void Inspector::MapInterface()
     ImGui::Separator();
 }
 
-void Inspector::ScriptInterface()
-{
-    if (TreeNode("Script"))
-    {
-        ComponentScript& cScript = coordinator.componentHandler->GetComponentScript(selectedEntity->id);
-        
-        for (int i = 0; i < cScript.scripts.size(); ++i)
-        { 
-            Text("%s", cScript.scripts[i].script->filename.c_str() );
-            std::string buttonText("Remove Script##");
-            buttonText += i;
-            if (Button(buttonText.c_str() ))
-            {
-                cScript.scripts.erase(cScript.scripts.begin() + i);
-                i = (i > 0) ? i - 1 : 0;
-            }
-            ImGui::NewLine();
-        }
 
-        //for (int i = 0; i < resources.scripts.size(); ++i)
-        //{
-        //    ImGui::NewLine();  
-        //    std::string buttonText("Add Script##");
-        //    buttonText += i;
-        //    if (Button(buttonText.c_str() ))
-        //        {cScript.scripts.push_back(resources.scripts[i]->CreateObject(std::to_string(selectedEntity->id))); }
-        //}
-
-
-        ImGui::NewLine();
-        if (Button("Remove component##RIBOD"))
-        {
-            coordinator.componentHandler->RemoveComponentScript(*selectedEntity);
-        }
-
-        TreePop();
-    }
-
-    ImGui::Separator();
-}
-
-void Inspector::SelectScene(Cookie::Resources::Scene* newSelection)
-{
-    selectedScene   = newSelection;
-    selectedEntity  = nullptr;
-
-    sceneTiles.x = (float)selectedScene->tiles.widthTile, 
-    sceneTiles.y = (float)selectedScene->tiles.depthTile;
-}
-
-void Inspector::SceneInspection()
+/*void Inspector::SceneInspection()
 {
     InputText("Scene name", &selectedScene->name);
 
@@ -309,4 +310,4 @@ void Inspector::SceneInspection()
 
         TreePop();
     }
-}
+}*/
