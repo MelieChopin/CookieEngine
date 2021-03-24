@@ -43,7 +43,7 @@ Editor::Editor()
 
     ui.AddWItem(new UIwidget::FileExplorer(game.renderer, game, selectedEntity), 2);
 
-    ui.AddWItem(new UIwidget::Inspector(game.resources, game.coordinator, selectedEntity), 2);
+    ui.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator, game.scene->physSim), 2);
 
     ui.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
 

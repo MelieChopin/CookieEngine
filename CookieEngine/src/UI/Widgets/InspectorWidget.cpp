@@ -7,6 +7,8 @@
 #include <imgui.h>
 #include <imgui_stdlib.h>
 
+#include <reactphysics3d.h>
+
 using namespace ImGui;
 using namespace Cookie::UIwidget;
 using namespace Cookie::ECS;
@@ -31,37 +33,40 @@ void Inspector::EntityInspection()
     ImGui::Separator();
 
     if (selectedEntity->signature & SIGNATURE_TRANSFORM)    TransformInterface();
-    if (selectedEntity->signature & SIGNATURE_RIGIDBODY)    RigidBodyInterface();
     if (selectedEntity->signature & SIGNATURE_MODEL)        ModelInterface();
+    if (selectedEntity->signature & SIGNATURE_PHYSICS)      PhysicsInterface();
     if (selectedEntity->signature & SIGNATURE_SCRIPT)       ScriptInterface();
     //if (selectedEntity->signature & SIGNATURE_MAP)          MapInterface();
-
 
     if (Button("Add component...")) OpenPopup("Add component popup");
 
     if (BeginPopup("Add component popup"))
     {
-        if (Button("Add component Transform"))  
+        if  (selectedEntity->signature & SIGNATURE_TRANSFORM) TextDisabled("Component Transform already added");
+        else if (Button("Add component Transform"))
         { 
-            coordinator.componentHandler->AddComponentTransform  (*selectedEntity);
-            CloseCurrentPopup();
-        }
-            
-        if (Button("Add component RigidBody"))
-        {
-            coordinator.componentHandler->AddComponentRigidBody  (*selectedEntity);
-            CloseCurrentPopup();
-        }
-            
-        if (Button("Add component Model"))
-        {
-            coordinator.componentHandler->AddComponentModel      (*selectedEntity);
+            coordinator.componentHandler->AddComponentTransform (*selectedEntity);
             CloseCurrentPopup();
         }
 
-        if (Button("Add component Script"))
+        if (selectedEntity->signature & SIGNATURE_MODEL) TextDisabled("Component Model already added");
+        else if (Button("Add component Model"))
         {
-            coordinator.componentHandler->AddComponentScript     (*selectedEntity);
+            coordinator.componentHandler->AddComponentModel     (*selectedEntity);
+            CloseCurrentPopup();
+        }
+        
+        if (selectedEntity->signature & SIGNATURE_PHYSICS) TextDisabled("Component Physics already added");
+        else if (Button("Add component Physics"))
+        {
+            coordinator.componentHandler->AddComponentPhysics   (*selectedEntity, physSim);
+            CloseCurrentPopup();
+        }
+
+        if (selectedEntity->signature & SIGNATURE_SCRIPT) TextDisabled("Component Script already added");
+        else if (Button("Add component Script"))
+        {
+            coordinator.componentHandler->AddComponentScript    (*selectedEntity);
             CloseCurrentPopup();
         }
 
@@ -85,36 +90,6 @@ void Inspector::TransformInterface()
         if (Button("Remove component##TRSF"))
         {
             coordinator.componentHandler->RemoveComponentTransform(*selectedEntity);
-        }
-
-        TreePop();
-    }
-
-    ImGui::Separator();
-}
-
-void Inspector::RigidBodyInterface()
-{
-    if (TreeNode("RigidBody"))
-    {
-        ComponentRigidBody& rigibod = coordinator.componentHandler->GetComponentRigidBody(selectedEntity->id);
-
-        //Text("Velocity:");          SameLine(110.f); DragFloat3("##VEL", rigibod.linearVelocity.e);
-        //
-        //Text("Mass:");              SameLine(110.f); DragFloat("##MASS", &rigibod.mass);
-        //Text("Drag:");              SameLine(110.f); DragFloat("##DRAG", &rigibod.drag);
-        //
-        //Text("TargetPos:");         SameLine(110.f); DragFloat3("##TargetPos", rigibod.targetPosition.e);
-        //
-        //Text("Speed:");             SameLine(110.f); DragFloat("##Speed", &rigibod.speed);
-        //
-        //Text("GoTowardPosition:");  SameLine(160.f); Checkbox("##GoTowardPosition", &rigibod.goTowardTarget);
-
-
-        ImGui::NewLine();
-        if (Button("Remove component##RIBOD"))
-        {
-            coordinator.componentHandler->RemoveComponentRigidBody(*selectedEntity);
         }
 
         TreePop();
@@ -205,6 +180,23 @@ void Inspector::ModelInterface()
     }
 
     ImGui::Separator();
+}
+
+void Inspector::PhysicsInterface()
+{
+    if (TreeNode("Physics"))
+    {
+        ComponentPhysics& physicComp = coordinator.componentHandler->GetComponentPhysics(selectedEntity->id);
+
+
+        ImGui::NewLine();
+        if (Button("Remove component##COLLIDER"))
+        {
+            coordinator.componentHandler->RemoveComponentPhysics(*selectedEntity);
+        }
+
+        TreePop();
+    }
 }
 
 void Inspector::ScriptInterface()
