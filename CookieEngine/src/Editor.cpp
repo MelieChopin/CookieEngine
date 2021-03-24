@@ -3,6 +3,7 @@
 #include "UIallIn.hpp"
 #include "Serialization.hpp"
 
+
 using namespace Cookie;
 
 Editor::Editor()
@@ -70,6 +71,11 @@ void Editor::Loop()
     {
         // Present frame
         CDebug.UpdateTime();
+        
+        game.resources.UpdateScriptsContent();
+        game.coordinator.ApplyScriptUpdate();
+        
+
 
         // Present frame
         if (isPlaying)
@@ -90,6 +96,7 @@ void Editor::Loop()
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_H) == GLFW_PRESS)
             Resources::Serialization::Save::SaveScene(*game.scene);
 
+    
         game.renderer.Draw(cam.GetViewProj(), game.coordinator);
         game.renderer.SetBackBuffer();
 

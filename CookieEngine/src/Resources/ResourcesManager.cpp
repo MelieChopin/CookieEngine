@@ -10,8 +10,9 @@ using namespace Cookie::Resources;
 
 ResourcesManager::ResourcesManager()
 {
-	//scripts.push_back(std::make_shared<Script>("Assets\\scripts\\test.lua"));
-	//scripts.push_back(std::make_shared<Script>("Assets\\scripts\\test2.lua"));
+	scripts["test.lua"] = std::make_shared<Script>("Assets\\scripts\\test.lua");
+	scripts["test2.lua"] = std::make_shared<Script>("Assets\\scripts\\test2.lua");
+
 }
 
 ResourcesManager::~ResourcesManager()
@@ -19,25 +20,6 @@ ResourcesManager::~ResourcesManager()
 
 }
 
-void ResourcesManager::Load(Render::Renderer& _renderer)
-{
-	meshes["Quad"] =  Cookie::Core::Primitives::CreateQuad(_renderer);
-	meshes["Triangle"] = Cookie::Core::Primitives::CreateTriangle(_renderer);
-
-	std::vector<std::string> gltfFiles;
-	SearchForGltf(std::string("Assets\\"),gltfFiles);
-
-	Loader loader;
-
-	shaders["dfltShader"] = std::make_shared<Shader>(_renderer);
-	
-
-	for (unsigned int i = 0; i < gltfFiles.size(); i++)
-	{
-		loader.Load(gltfFiles.at(i).c_str(),*this,_renderer);
-		printf("%s\n", gltfFiles.at(i).c_str());
-	}
-}
 
 void ResourcesManager::SearchForGltf(const fs::path& path, std::vector<std::string>& gltfFiles)
 {
@@ -65,3 +47,24 @@ void ResourcesManager::SearchForGltf(const fs::path& path, std::vector<std::stri
 		}
 	}
 }
+
+void ResourcesManager::Load(Render::Renderer& _renderer)
+{
+	meshes["Quad"] =  Cookie::Core::Primitives::CreateQuad(_renderer);
+	meshes["Triangle"] = Cookie::Core::Primitives::CreateTriangle(_renderer);
+
+	std::vector<std::string> gltfFiles;
+	SearchForGltf(std::string("Assets\\"),gltfFiles);
+
+	Loader loader;
+
+	shaders["dfltShader"] = std::make_shared<Shader>(_renderer);
+	
+
+	for (unsigned int i = 0; i < gltfFiles.size(); i++)
+	{
+		loader.Load(gltfFiles.at(i).c_str(),*this,_renderer);
+		printf("%s\n", gltfFiles.at(i).c_str());
+	}
+}
+
