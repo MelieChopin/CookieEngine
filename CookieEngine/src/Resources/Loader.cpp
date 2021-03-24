@@ -43,7 +43,8 @@ void Loader::InitMeshes(const char* fileName, aiMesh** meshes, unsigned int nMes
 	for (unsigned int i = 0; i < nMeshes; i++)
 	{
 		aiMesh* iMesh = meshes[i];
-		_resources.meshes[iMesh->mName.C_Str()] = std::make_shared<Mesh>(iMesh->mName.C_Str(),iMesh, _renderer);
+		std::string iName = std::string(fileName) + " - " + std::string(iMesh->mName.C_Str());
+		_resources.meshes[iName] = std::make_shared<Mesh>(iName,iMesh, _renderer);
 	}
 
 }

@@ -1,8 +1,6 @@
 #ifndef __COMPONENT_RIGIDBODY_HPP__
 #define __COMPONENT_RIGIDBODY_HPP__
 
-
-
 #include <reactphysics3d/reactphysics3d.h>
 
 namespace Cookie

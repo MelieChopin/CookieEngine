@@ -51,6 +51,18 @@ Editor::Editor():
     UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.renderer);
     ui.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, game.renderer.GetLastFrameBuffer(), &cam, game.coordinator, insp->selectedEntity));
 
+    for (int i = 0; i <= game.coordinator.entityHandler->livingEntities; i++)
+    {
+        ECS::Entity& iEntity = game.coordinator.entityHandler->entities[i];
+        if (iEntity.signature & SIGNATURE_RIGIDBODY)
+        {
+            ECS::ComponentRigidBody& iRigidBody = game.coordinator.componentHandler->componentRigidBodies[i];
+            iRigidBody.physBody = game.scene->physSim.worldSim->createRigidBody(game.coordinator.componentHandler->componentTransforms[i].physTransform);
+            iRigidBody.physBody->setType(rp3d::BodyType::DYNAMIC);
+        }
+    }
+
+    dbgRenderer.physicsDebug = &game.scene->physSim.worldSim->getDebugRenderer();
 }
 
 Editor::~Editor()

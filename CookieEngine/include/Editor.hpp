@@ -4,6 +4,7 @@
 #include "Game.hpp"
 #include "UI/UIeditor.hpp"
 #include "Render/Camera.hpp"
+#include "DebugRenderer.hpp"
 
 namespace Cookie
 {
@@ -11,9 +12,10 @@ namespace Cookie
 	{
 		private:
 		public:
-			Game				game;
-			UI::UIeditor		ui;
-			Render::FreeFlyCam	cam;
+			Game					game;
+			UI::UIeditor			ui;
+			Render::FreeFlyCam		cam;
+			Render::DebugRenderer	dbgRenderer;
 
 			bool				isPlaying = false;
 			

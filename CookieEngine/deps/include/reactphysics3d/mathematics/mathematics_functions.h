@@ -26,9 +26,6 @@
 #ifndef REACTPHYSICS3D_MATHEMATICS_FUNCTIONS_H
 #define REACTPHYSICS3D_MATHEMATICS_FUNCTIONS_H
 
-#undef min
-#undef max
-
 // Libraries
 #include <reactphysics3d/configuration.h>
 #include <reactphysics3d/decimal.h>
