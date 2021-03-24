@@ -19,6 +19,8 @@ namespace Cookie
 
 	namespace Resources
 	{
+
+
 		class ScriptObject;
 
 
@@ -33,23 +35,26 @@ namespace Cookie
 			sol::function start;
 			sol::function update;
 
-			Script(const char* _filename) : filename(_filename)
-			{
-				lastUpdateTime = std::filesystem::last_write_time(filename);
+			std::vector<ScriptObject*> ScriptObjectsChild;
 
+			Script(const std::string _filename) : filename(_filename)
+			{
 				state.open_libraries(sol::lib::base);
-				state.script_file(filename);
-				construct = state["Construct"];
-				update = state["Start"];
-				update = state["Update"];
+				UpdateContent();
 			}
 
 			~Script() {}
 
 			inline ScriptObject CreateObject(std::string entityId);
-		};
 
-		
+			inline bool isUpToDate()
+			{
+				return (lastUpdateTime == std::filesystem::last_write_time(filename));
+			}
+
+			inline void UpdateContent();
+		};
+				
 		class ScriptObject
 		{
 		public:
@@ -57,6 +62,7 @@ namespace Cookie
 			{
 				table = script->state[entityId].get_or_create<sol::table>();
 				script->construct(table);
+				script->ScriptObjectsChild.push_back(this);
 			}
 
 			void Start() const { script->start(table); }
@@ -67,12 +73,28 @@ namespace Cookie
 			sol::table table;
 		};
 		
-		
+
 		inline ScriptObject Script::CreateObject(std::string entityId)
 		{
 			return ScriptObject(*this, entityId);
 		}
+		inline void Script::UpdateContent()
+		{
+			std::cout << "Updating Script\n";
+			lastUpdateTime = std::filesystem::last_write_time(filename);
 
+
+			state.script_file(filename);
+			construct = state["Construct"];
+			start = state["Start"];
+			update = state["Update"];
+
+			for (int i = 0; i < ScriptObjectsChild.size(); ++i)
+			{
+				//ScriptObjectsChild[i]->table.clear();
+				construct(ScriptObjectsChild[i]->table);
+			}
+		}
 
 	}
 }
