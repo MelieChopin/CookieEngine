@@ -33,23 +33,28 @@ Editor::Editor()
     game.scene = _scene;
     game.scene->InitCoordinator(game.coordinator);
 
+
+    ui.AddItem(new UIwidget::SaveButton(game.scene), 0);
+
+    
     ui.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
 
     ui.AddWItem(new UIwidget::TextureEditor(game.renderer, game.resources), 1);
 
+    ui.AddWItem(new UIwidget::FileExplorer(game.renderer, game, selectedEntity), 2);
 
-    ui.AddWItem(new UIwidget::FileExplorer(game.renderer, game), 2);
+    ui.AddWItem(new UIwidget::Inspector(game.resources, game.coordinator, selectedEntity), 2);
 
-    UIwidget::Inspector* insp = new UIwidget::Inspector(game.resources, game.coordinator);
-    ui.AddWItem(insp, 2);
-    ui.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene.get(), game.coordinator, insp), 2);
+    ui.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
 
     ui.AddWItem(new UIwidget::Console(CDebug, game.renderer), 2);
 
     ui.AddWItem(new UIwidget::DemoWindow, 3);
 
+
     UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.renderer);
-    ui.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, game.renderer.GetLastFrameBuffer(), &cam, game.coordinator, insp->selectedEntity));
+    ui.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, game.renderer.GetLastFrameBuffer(), &cam, game.coordinator, selectedEntity));
+
 
 }
 

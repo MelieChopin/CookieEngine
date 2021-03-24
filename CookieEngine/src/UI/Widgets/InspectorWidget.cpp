@@ -17,8 +17,7 @@ void Inspector::WindowDisplay()
 {
     TryBeginWindow()
     {
-        if      (selectedEntity)    EntityInspection();
-        else if (selectedScene)     SceneInspection();
+        if (selectedEntity) EntityInspection();
     }
     
     ImGui::End();
@@ -277,16 +276,7 @@ void Inspector::MapInterface()
 }
 
 
-void Inspector::SelectScene(Cookie::Resources::Scene* newSelection)
-{
-    selectedScene   = newSelection;
-    selectedEntity  = nullptr;
-
-    sceneTiles.x = (float)selectedScene->tiles.widthTile, 
-    sceneTiles.y = (float)selectedScene->tiles.depthTile;
-}
-
-void Inspector::SceneInspection()
+/*void Inspector::SceneInspection()
 {
     InputText("Scene name", &selectedScene->name);
 
@@ -320,4 +310,4 @@ void Inspector::SceneInspection()
 
         TreePop();
     }
-}
+}*/

@@ -20,11 +20,15 @@ void Viewport::WindowDisplay()
 	{
 		toolbar->WindowDisplay();
 	
+		viewportDrawspace.posx = GetWindowPos().x + GetCursorPosX();
+		viewportDrawspace.posy = GetWindowPos().y + GetCursorPosY();
 
-		if ((recordedWinSize.x != GetWindowSize().x) || (recordedWinSize.y != GetContentRegionAvail().y))
+		if ((viewportDrawspace.width != GetContentRegionAvail().x) || (viewportDrawspace.height != GetContentRegionAvail().y))
 		{
-			recordedWinSize = { {GetWindowSize().x, GetContentRegionAvail().y} };
-			camera->SetProj(Core::Math::ToRadians(60.f), recordedWinSize.x, recordedWinSize.y, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+			viewportDrawspace.width  = GetContentRegionAvail().x;
+			viewportDrawspace.height = GetContentRegionAvail().y;
+
+			camera->SetProj(Core::Math::ToRadians(60.f), viewportDrawspace.width, viewportDrawspace.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
 		}
 
 		ImGui::Image(static_cast<ImTextureID>(*frameBuffer.GetShaderResource()), GetContentRegionAvail());
@@ -63,9 +67,7 @@ void Viewport::GizmoManipulator()
 	Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity->id).localTRS;
 	Mat4 trsfTMat = trsf.ToTRS().Transpose();
 
-	ImGuizmo::SetDrawlist();
-	ImGuizmo::SetRect(GetWindowPos().x, GetWindowPos().y, GetWindowSize().x, GetWindowSize().y);
-	
+	ImGuizmo::SetRect(viewportDrawspace.posx, viewportDrawspace.posy, viewportDrawspace.width, viewportDrawspace.height);
 
 	static ImGuizmo::OPERATION transformTool;
 

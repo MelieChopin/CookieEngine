@@ -7,6 +7,7 @@ namespace std				{ using string = basic_string<char, char_traits<char>, allocato
 namespace std::filesystem	{ class path; }
 namespace Cookie::Resources { class Texture; }
 namespace Cookie::Render	{ class Renderer; }
+namespace Cookie::ECS		{ class Entity; }
 namespace Cookie			{ class Game; }
 
 
@@ -21,9 +22,10 @@ namespace Cookie::UIwidget
 		std::unique_ptr<Cookie::Resources::Texture> saveIcon;
 
 		Cookie::Game& game;
-	
+		Cookie::ECS::Entity*& selectedEntity;
+
 	public:
-		FileExplorer(Cookie::Render::Renderer& _renderer, Cookie::Game& _game);
+		FileExplorer(Cookie::Render::Renderer& _renderer, Cookie::Game& _game, Cookie::ECS::Entity*& _selectedEntity);
 
 		void WindowDisplay() override;
 	};

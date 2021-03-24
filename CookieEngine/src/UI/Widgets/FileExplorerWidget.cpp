@@ -15,9 +15,10 @@ using namespace ImGui;
 using namespace Cookie::UIwidget;
 
 
-FileExplorer::FileExplorer(Cookie::Render::Renderer& _renderer, Cookie::Game& _game)
-            : WItemBase ("File explorer"),
-              game      (_game)
+FileExplorer::FileExplorer(Cookie::Render::Renderer& _renderer, Cookie::Game& _game, Cookie::ECS::Entity*& _selectedEntity)
+            : WItemBase     ("File explorer"),
+              game          (_game),
+              selectedEntity(_selectedEntity)
 {
     saveIcon = std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/Save2.ico");
 }
@@ -50,7 +51,10 @@ void FileExplorer::ExploreFiles(const fs::path& path, const char* researchQuery)
                     if (filename.extension().string() == ".CAsset")
                     {
                         if (Custom::FileButton(filename.filename().string().c_str(), saveIcon->GetResourceView()))
-                            game.SetScene(filename.string().c_str());
+                        {
+                            selectedEntity = nullptr;
+                            game.SetScene(Cookie::Resources::Serialization::Load::LoadScene(filename.string().c_str(), game));
+                        }
                     }
                     else
                     {

@@ -28,9 +28,8 @@ namespace Cookie
 				std::unordered_map<std::string, std::shared_ptr<Mesh>>		meshes;
 				std::unordered_map<std::string, std::shared_ptr<Shader>>	shaders;
 				std::unordered_map<std::string, std::shared_ptr<Texture>>	textures;
-				std::unordered_map<std::string, std::shared_ptr<Scene>>		scenes;
 				std::unordered_map<std::string, std::shared_ptr<Script>>	scripts;
-				
+
 			private:
 				void SearchForGltf(const fs::path& path, std::vector<std::string>& gltfFiles);
 				

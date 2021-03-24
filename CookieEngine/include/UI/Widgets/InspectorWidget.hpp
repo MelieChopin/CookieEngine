@@ -5,7 +5,6 @@
 
 namespace Cookie::Resources  { class ResourcesManager; }
 namespace Cookie::ECS		 { class Coordinator; class Entity; }
-namespace Cookie::Resources { class Scene; }
 namespace Cookie::Core::Math { union Vec2; }
 
 
@@ -16,12 +15,7 @@ namespace Cookie::UIwidget
 		Cookie::Resources::ResourcesManager& resources;
 		Cookie::ECS::Coordinator& coordinator;
 
-
-		Cookie::Resources::Scene*	selectedScene	= nullptr;
-		Cookie::Core::Math::Vec2	sceneTiles;
-
-	public:
-		Cookie::ECS::Entity* selectedEntity	= nullptr;
+		Cookie::ECS::Entity*&		selectedEntity;
 	
 	private:
 		void EntityInspection();
@@ -35,19 +29,14 @@ namespace Cookie::UIwidget
 		void SceneInspection();
 
 	public:
-		inline Inspector(Cookie::Resources::ResourcesManager& _resources, Cookie::ECS::Coordinator& _coordinator)
+		inline Inspector(Cookie::Resources::ResourcesManager& _resources, Cookie::ECS::Coordinator& _coordinator, Cookie::ECS::Entity*& _selectedEntity)
 			: WItemBase			("Inspector", false),
 			  resources			(_resources),
-			  coordinator		(_coordinator)
+			  coordinator		(_coordinator),
+			  selectedEntity	(_selectedEntity)
 		{}
 
 		void WindowDisplay() override;
-
-
-		inline void SelectEntity(Cookie::ECS::Entity* newSelection)
-		{ selectedEntity = newSelection; selectedScene = nullptr; }
-
-		void SelectScene(Cookie::Resources::Scene* newSelection);
 	};
 }
 

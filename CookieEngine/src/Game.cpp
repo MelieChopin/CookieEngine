@@ -47,9 +47,9 @@ void Game::Update()
 
 /*================== SETTER/GETTER ==================*/
 
-void Game::SetScene(std::string sceneName)
+void Game::SetScene(std::shared_ptr<Resources::Scene> _scene)
 {
-    scene = resources.scenes[sceneName];
+    scene = _scene;
     scene->InitCoordinator(coordinator);
 }
 

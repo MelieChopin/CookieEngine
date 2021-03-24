@@ -4,6 +4,7 @@
 #include "UIwidgetBases.hpp"
 
 struct GLFWwindow;
+namespace Cookie::Resources { class Scene; }
 
 
 namespace Cookie::UIwidget
@@ -19,6 +20,19 @@ namespace Cookie::UIwidget
 		void WindowDisplay() override;
 	};
 
+
+	class SaveButton final : public ItemBase
+	{
+		std::shared_ptr<Cookie::Resources::Scene>& activeScene;
+
+	public:
+		SaveButton(std::shared_ptr<Cookie::Resources::Scene>& _activeScene)
+			: ItemBase		("Save", "Ctrl + S"),
+			  activeScene	(_activeScene)
+		{}
+
+		void ItemDisplay() override;
+	};
 
 
 	class ExitPannel final : public WItemBase

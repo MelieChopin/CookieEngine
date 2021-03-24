@@ -167,10 +167,9 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 		 {
 			 Cookie::Resources::Serialization::Load::FromJson(js, newScene->entityHandler, newScene->componentHandler, game.resources);
 		 }
-
-		 game.resources.scenes[newScene->name] = (newScene);
 	 }
 		 
+	 //game.resources.scenes[newScene->name] = (newScene);
 	 newScene->filepath = filepath;
 
 	 return newScene;
