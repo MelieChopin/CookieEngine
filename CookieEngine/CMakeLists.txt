@@ -21,6 +21,7 @@ include_directories("${INC_DIR}/UI/Widgets/")
 include_directories("${INC_DIR}/Render/")
 include_directories("${INC_DIR}/ECS/")
 include_directories("${INC_DIR}/Resources/")
+include_directories("${INC_DIR}/Gameplay/")
 include_directories("${DEPS_INC_DIR}/ImGui/")
 include_directories("${DEPS_INC_DIR}/ImGuizmo/")
 include_directories("${DEPS_INC_DIR}/")
@@ -104,7 +105,7 @@ set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
 # Ajoutez une source à l'exécutable de ce projet.
-add_executable (CookieEngine ${SUB_SYS} ${SRC_FILES} )
+add_executable (CookieEngine ${SUB_SYS} ${SRC_FILES})
 
 set_target_properties(CookieEngine PROPERTIES CXX_STANDARD 17)
 
