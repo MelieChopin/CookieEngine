@@ -3,6 +3,8 @@
 #include "UIallIn.hpp"
 #include "Serialization.hpp"
 
+#include "Resources/Prefab.hpp"
+
 using namespace Cookie;
 
 Editor::Editor():
@@ -26,6 +28,9 @@ Editor::Editor():
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_LEFT_CONTROL);
     game.resources.textures["Pink"] = (std::make_shared<Resources::Texture>(game.renderer, "Pink", Core::Math::Vec4(1.0f, 0.5f, 0.5f, 1.0f)));
     game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>(game.renderer, "Assets/Floor_DefaultMaterial_BaseColor.png"));
+
+    //Load All Prefabs
+    Resources::Serialization::Load::LoadAllPrefabs(game.resources);
 
     //Load default Scene
     std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/DefaultDuck.CAsset", game);
@@ -60,7 +65,6 @@ Editor::~Editor()
 
 void Editor::Loop()
 {
-
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
         // Present frame

@@ -24,11 +24,11 @@ namespace Cookie
 	{
 		class ResourcesManager;
 		class Scene;
+		class Prefab;
 	}
 
 	namespace Resources
 	{
-		class Scene;
 		namespace Serialization
 		{
 			namespace Save
@@ -37,6 +37,8 @@ namespace Cookie
 				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler component);
 
 				void SaveScene(const Cookie::Resources::Scene& actScene);
+				void SavePrefab(const std::shared_ptr<Prefab>& prefab);
+				void SaveAllPrefabs(Cookie::Resources::ResourcesManager resourcesManager);
 			}
 
 			namespace Load

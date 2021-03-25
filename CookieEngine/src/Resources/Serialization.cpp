@@ -6,6 +6,7 @@
 #include "Resources/Scene.hpp"
 #include "Game.hpp"
 #include "Resources/Serialization.hpp"
+#include "Resources/Prefab.hpp"
 #include <bitset>
 #include <filesystem>
 
@@ -76,6 +77,32 @@ using namespace Cookie::Resources::Serialization;
 	file << std::setw(4) << js << std::endl;
 }
 
+ void Cookie::Resources::Serialization::Save::SavePrefab(const std::shared_ptr<Prefab>& prefab)
+ {
+	 std::ofstream file(prefab->filepath);
+
+	 std::cout << prefab->filepath << "\n";
+
+	 json js;
+
+	 js["Mesh"] = prefab->nameMesh;
+	 js["Name"] = prefab->name;
+	 js["Rotation"] = prefab->rotation.e;
+	 js["Scale"] = prefab->scale.e;
+	 js["Script"] = prefab->nameScript;
+	 js["Shader"] = prefab->nameShader;
+	 js["Texture"] = prefab->nameTexture;
+
+	 file << std::setw(4) << js << std::endl;
+ }
+
+ void Cookie::Resources::Serialization::Save::SaveAllPrefabs(Cookie::Resources::ResourcesManager resourcesManager)
+ {
+	 for (std::unordered_map<std::string, std::shared_ptr<Prefab>>::iterator prefab = resourcesManager.prefabs.begin(); prefab != resourcesManager.prefabs.end(); prefab++)
+		 Resources::Serialization::Save::SavePrefab(prefab->second);
+ }
+
+
  //------------------------------------------------------------------------------------------------------------------
 
  void Cookie::Resources::Serialization::Load::FromJson(json& js, Cookie::ECS::EntityHandler& entity)
@@ -117,6 +144,8 @@ using namespace Cookie::Resources::Serialization;
 		 return nullptr;
 	 }
 	 
+	 std::cout << filepath << "\n";
+
 	 json js;
 	 file >> js;
 	 
@@ -176,7 +205,7 @@ using namespace Cookie::Resources::Serialization;
 	 return newScene;
  }
 
- void Cookie::Editor::Serialization::Load::LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager)
+ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager)
  {
 	 std::vector<std::string> filesPath;
 	 for (const fs::directory_entry& path : fs::directory_iterator("Assets/Prefabs"))
@@ -184,17 +213,17 @@ using namespace Cookie::Resources::Serialization;
 		 if (path.path().string().find(".PAsset") != std::string::npos)
 			filesPath.push_back(path.path().string());
 	 }
-	 
+
 	 for (int i = 0; i < filesPath.size(); i++)
 	 {
-		 std::cout << filesPath[i] << "\t";
+		 std::cout << filesPath[i] << "\n";
 
 		 std::ifstream file(filesPath[i]);
 
 		 if (!file.is_open())
 		 {
 			 std::cout << "DON'T FIND THE FILE\n";
-			 return;
+			 continue;
 		 }
 
 		 json js;
@@ -215,16 +244,16 @@ using namespace Cookie::Resources::Serialization;
 			 newPrefab.nameShader = js["Shader"];
 
 		 if (js.contains("Rotation"))
-			js["Rotation"].get_to(newPrefab.rotation.e);
+			 js["Rotation"].get_to(newPrefab.rotation.e);
 
 		 if (js.contains("Scale"))
-			 js["Scale"].get_to(newPrefab.rotation.e);
+			 js["Scale"].get_to(newPrefab.scale.e);
 
 		 if (js.contains("Script"))
-			 newPrefab.nameMesh = js["Mesh"];
-	 }
+			 newPrefab.nameScript = js["Script"];
 
-		
-	 //std::size_t found = 
-	 //resourcesManager.prefabs
+		 newPrefab.filepath = filesPath[i];
+
+		 resourcesManager.prefabs[newPrefab.name] = std::make_shared<Prefab>(newPrefab);
+	 }
  }
