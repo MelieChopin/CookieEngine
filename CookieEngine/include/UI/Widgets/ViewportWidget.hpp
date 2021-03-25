@@ -19,7 +19,8 @@ namespace Cookie::UIwidget
 		Toolbar* toolbar;
 
 		
-		Cookie::Core::Math::Vec2 recordedWinSize;
+		struct { float posx, posy, width, height; } viewportDrawspace;
+
 
 		GLFWwindow* window;
 

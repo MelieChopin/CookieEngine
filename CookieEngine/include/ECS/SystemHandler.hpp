@@ -2,7 +2,7 @@
 #define __SYSTEM_HANDLER_HPP__
 
 #include "ComponentTransform.hpp"
-#include "ComponentRigidBody.hpp"
+#include "ComponentPhysics.hpp"
 #include "ComponentModel.hpp"
 #include "ComponentScript.hpp"
 
@@ -21,9 +21,9 @@ namespace Cookie
 		namespace System
 		{
 			//void SystemCollision(const ComponentTransform&, const ComponentRigidBody&, const ComponentCollider&);
-			inline void SystemPhysics(ComponentTransform& trs, ComponentRigidBody& rb, float factor)
+			inline void SystemPhysics(ComponentTransform& trs, ComponentPhysics& ph, float factor)
 			{
-				trs.physTransform = rb.physBody->getTransform();
+				trs.physTransform = ph.physBody->getTransform();
 
 				trs.Update(factor);
 

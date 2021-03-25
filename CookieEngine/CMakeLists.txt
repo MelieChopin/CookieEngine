@@ -76,8 +76,12 @@ set (SRC_FILES
     "${SRC_DIR}/Resources/Mesh.cpp"
     "${SRC_DIR}/Resources/Shader.cpp"
     "${SRC_DIR}/Resources/Texture.cpp"
+    "${SRC_DIR}/Resources/Scene.cpp"
+    "${SRC_DIR}/Resources/Tiles.cpp"
+    "${SRC_DIR}/Resources/Serialization.cpp" 
 
     "${SRC_DIR}/UI/UIeditor.cpp"
+    "${SRC_DIR}/UI/CustomImWidget.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgetBases.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgets.cpp" 
     "${SRC_DIR}/UI/Widgets/ConsoleWidget.cpp"
@@ -87,13 +91,12 @@ set (SRC_FILES
     "${SRC_DIR}/UI/Widgets/TextureEditorWidget.cpp"
     "${SRC_DIR}/UI/Widgets/ToolbarWidget.cpp"
     "${SRC_DIR}/UI/Widgets/ViewportWidget.cpp"
-    "${SRC_DIR}/Resources/Texture.cpp"
-    "${SRC_DIR}/Render/FrameBuffer.cpp"
+    
     "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
-    "${SRC_DIR}/Resources/Scene.cpp"
-    "src/Resources/Tiles.cpp"
-    "src/Resources/Serialization.cpp" 
-    "${SRC_DIR}/Editor.cpp" "src/Game.cpp")
+
+    "${SRC_DIR}/Editor.cpp" 
+    "${SRC_DIR}/Game.cpp"
+    )
 
 set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
         "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/lua54.dll")

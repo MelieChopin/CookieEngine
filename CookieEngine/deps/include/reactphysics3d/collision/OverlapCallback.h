@@ -96,7 +96,7 @@ class OverlapCallback {
                 OverlapPair(const OverlapPair& contactPair) = default;
 
                 /// Assignment operator
-                OverlapPair& operator=(const OverlapPair& contactPair) = default;
+                //OverlapPair& operator=(const OverlapPair& contactPair) = default;
 
                 /// Destructor
                 ~OverlapPair() = default;

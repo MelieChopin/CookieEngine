@@ -23,7 +23,7 @@ namespace Cookie
 			Coordinator() {}
 			~Coordinator() {}
 
-			void AddEntity(const int signature, const Resources::ResourcesManager&	resources, std::string name = std::string("No Name"))
+			void AddEntity(const int signature, const Resources::ResourcesManager& resources, std::string name = std::string("No Name"))
 			{
 				assert(entityHandler->livingEntities < MAX_ENTITIES && "Too many entities in existence.");
 
@@ -33,10 +33,10 @@ namespace Cookie
 
 				if (CheckSignature(signature, SIGNATURE_TRANSFORM))
 					componentHandler->AddComponentTransform(entityHandler->entities[id]);
-				if (CheckSignature(signature, SIGNATURE_RIGIDBODY))
-					componentHandler->AddComponentRigidBody(entityHandler->entities[id]);
 				if (CheckSignature(signature, SIGNATURE_MODEL))
 					componentHandler->AddComponentModel(entityHandler->entities[id]);
+				//if (CheckSignature(signature, SIGNATURE_PHYSICS))
+				//	componentHandler->AddComponentPhysics(entityHandler->entities[id], phs);
 				if (CheckSignature(signature, SIGNATURE_SCRIPT))
 					componentHandler->AddComponentScript(entityHandler->entities[id]);
 
@@ -54,10 +54,10 @@ namespace Cookie
 
 				if (CheckSignature(signature, SIGNATURE_TRANSFORM))
 					componentHandler.AddComponentTransform(entityHandler.entities[id]);
-				if (CheckSignature(signature, SIGNATURE_RIGIDBODY))
-					componentHandler.AddComponentRigidBody(entityHandler.entities[id]);
 				if (CheckSignature(signature, SIGNATURE_MODEL))
 					componentHandler.AddComponentModel(entityHandler.entities[id]);
+				//if (CheckSignature(signature, SIGNATURE_PHYSICS))
+				//	componentHandler.AddComponentPhysics(entityHandler.entities[id], phs);
 				if (CheckSignature(signature, SIGNATURE_SCRIPT))
 					componentHandler.AddComponentScript(entityHandler.entities[id]);
 
@@ -71,10 +71,10 @@ namespace Cookie
 				//Reset Components
 				if (CheckSignature(entity.signature, SIGNATURE_TRANSFORM))
 					componentHandler->GetComponentTransform(entity.id).ToDefault();
-				if (CheckSignature(entity.signature, SIGNATURE_RIGIDBODY))
-					componentHandler->GetComponentRigidBody(entity.id).ToDefault();
 				if (CheckSignature(entity.signature, SIGNATURE_MODEL))
 					componentHandler->GetComponentModel(entity.id).ToDefault();
+				if (CheckSignature(entity.signature, SIGNATURE_PHYSICS))
+					componentHandler->GetComponentPhysics(entity.id).ToDefault();
 				if (CheckSignature(entity.signature, SIGNATURE_SCRIPT))
 					componentHandler->GetComponentScript(entity.id).ToDefault();
 
@@ -101,9 +101,9 @@ namespace Cookie
 			void ApplySystemPhysics(float factor) 
 			{
 				for (int i = 0; i < entityHandler->livingEntities; ++i)
-					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_RIGIDBODY))
+					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_PHYSICS))
 						System::SystemPhysics(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
-											   componentHandler->GetComponentRigidBody(entityHandler->entities[i].id),factor);
+											   componentHandler->GetComponentPhysics(entityHandler->entities[i].id), factor);
 			}
 
 			void ApplyDraw(Render::RendererRemote& remote, const Core::Math::Mat4& viewProj)

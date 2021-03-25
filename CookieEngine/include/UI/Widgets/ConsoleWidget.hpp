@@ -3,14 +3,9 @@
 
 #include "UIwidgetBases.hpp"
 
-namespace Cookie::Core 
-{
-	class  DebugMessageHandler;
-	struct DebugMessage;
-}
-
-namespace Cookie::Resources { class  Texture;	}
-namespace Cookie::Render	{ class  Renderer;	}
+namespace Cookie::Core		{ class  DebugMessageHandler; struct DebugMessage; }
+namespace Cookie::Resources { class  Texture; }
+namespace Cookie::Render	{ class  Renderer; }
 
 
 namespace Cookie::UIwidget

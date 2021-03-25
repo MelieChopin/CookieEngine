@@ -30,7 +30,6 @@ namespace Cookie
 				std::unordered_map<std::string, std::shared_ptr<Mesh>>		meshes;
 				std::unordered_map<std::string, std::shared_ptr<Shader>>	shaders;
 				std::unordered_map<std::string, std::shared_ptr<Texture>>	textures;
-				std::unordered_map<std::string, std::shared_ptr<Scene>>		scenes;
 				std::unordered_map<std::string, std::shared_ptr<Script>>	scripts;
 				std::unordered_map<std::string, std::shared_ptr<Prefab>>	prefabs;
 				
@@ -43,6 +42,13 @@ namespace Cookie
 
 
 				void Load(Render::Renderer& _renderer);
+
+				void UpdateScriptsContent()
+				{
+					for (std::unordered_map<std::string, std::shared_ptr<Script>>::iterator scrIt = scripts.begin(); scrIt != scripts.end(); scrIt++)
+						if (!(scrIt->second->isUpToDate()))
+							scrIt->second->UpdateContent();
+				}
 		};
 	}
 }

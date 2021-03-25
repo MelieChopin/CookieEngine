@@ -15,19 +15,19 @@ namespace Cookie::UIwidget
 
 	class Hierarchy final : public WItemBase
 	{
-		Cookie::Resources::ResourcesManager&	resources;
-		Cookie::Resources::Scene*				scenes;
-		Cookie::ECS::Coordinator&				coordinator;
+		Cookie::Resources::ResourcesManager&		resources;
+		std::shared_ptr<Cookie::Resources::Scene>&	scene;
+		Cookie::ECS::Coordinator&					coordinator;
 
-		Inspector* inspector;
+		Cookie::ECS::Entity*& selectedEntity;
 
 	public:
-		inline Hierarchy(Cookie::Resources::ResourcesManager& _resources, Cookie::Resources::Scene* _scenes, Cookie::ECS::Coordinator& _coordinator, Inspector* _inspector)
+		inline Hierarchy(Cookie::Resources::ResourcesManager& _resources, std::shared_ptr<Cookie::Resources::Scene>& _scene, Cookie::ECS::Coordinator& _coordinator, Cookie::ECS::Entity*& _selectedEntity)
 			: WItemBase		("Hierarchy", false),
 			  resources     (_resources),
-			  scenes		(_scenes),
+			  scene			(_scene),
 			  coordinator	(_coordinator),
-			  inspector		(_inspector)
+			  selectedEntity(_selectedEntity)
 		{}
 
 		void WindowDisplay() override;

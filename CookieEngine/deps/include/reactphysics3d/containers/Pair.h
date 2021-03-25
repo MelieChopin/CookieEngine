@@ -90,9 +90,9 @@ class Pair {
 // Hash function for a reactphysics3d Pair
 namespace std {
 
-  template <typename T1, typename T2> struct hash<::reactphysics3d::Pair<T1, T2>> {
+  template <typename T1, typename T2> struct hash<reactphysics3d::Pair<T1, T2>> {
 
-    size_t operator()(const ::reactphysics3d::Pair<T1, T2>& pair) const {
+    size_t operator()(const reactphysics3d::Pair<T1, T2>& pair) const {
 
         std::size_t seed = 0;
         ::reactphysics3d::hash_combine<T1>(seed, pair.first);

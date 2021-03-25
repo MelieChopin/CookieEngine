@@ -47,9 +47,9 @@ void Game::Update()
 
 /*================== SETTER/GETTER ==================*/
 
-void Game::SetScene(std::string sceneName)
+void Game::SetScene(std::shared_ptr<Resources::Scene> _scene)
 {
-    scene = resources.scenes[sceneName];
+    scene = _scene;
     scene->InitCoordinator(coordinator);
 }
 
@@ -71,6 +71,6 @@ void Game::TryResizeWindow()
         renderer.window.height = height;
 
         renderer.ResizeBuffer(width, height);
-        scene->camera->SetProj(Core::Math::ToRadians(60.f), width, height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+        //scene->camera->SetProj(Core::Math::ToRadians(60.f), width, height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     }
 }
