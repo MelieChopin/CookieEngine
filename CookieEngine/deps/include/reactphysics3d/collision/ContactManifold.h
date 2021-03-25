@@ -58,7 +58,7 @@ class ContactManifold {
         // -------------------- Constants -------------------- //
 
         /// Maximum number of contact points in a reduced contact manifold
-        const int MAX_CONTACT_POINTS_IN_MANIFOLD = 4;
+        int MAX_CONTACT_POINTS_IN_MANIFOLD = 4;
 
         // -------------------- Attributes -------------------- //
 

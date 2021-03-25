@@ -12,7 +12,7 @@ namespace Cookie
 		{
 			public:
 				reactphysics3d::RigidBody* physBody		= nullptr;
-				std::vector<reactphysics3d::Collider*>	physCollider;
+				std::vector<reactphysics3d::Collider*>	physColliders;
 
 			public:
 				ComponentPhysics() {}
@@ -30,7 +30,7 @@ namespace Cookie
 
 				//physTransform.push_back(trs);
 
-				physCollider.push_back(physBody->addCollider(sphere, trs));
+				physColliders.push_back(physBody->addCollider(sphere, trs));
 			}
 
 			inline void AddCubeCollider(std::shared_ptr<reactphysics3d::PhysicsCommon> physCom, const Core::Math::Vec3& halfExtent, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles)
@@ -45,7 +45,7 @@ namespace Cookie
 
 				//physTransform.push_back(trs);
 
-				physCollider.push_back(physBody->addCollider(cube, trs));
+				physColliders.push_back(physBody->addCollider(cube, trs));
 			}
 
 			inline void AddCapsuleCollider(std::shared_ptr<reactphysics3d::PhysicsCommon> physCom, const Core::Math::Vec2& capsuleInfo, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles)
@@ -60,13 +60,13 @@ namespace Cookie
 
 				//physTransform.push_back(trs);
 
-				physCollider.push_back(physBody->addCollider(capsule, trs));
+				physColliders.push_back(physBody->addCollider(capsule, trs));
 			}
 
 			inline void ToDefault()
 			{
 				physBody = nullptr;
-				std::vector<reactphysics3d::Collider*>().swap(physCollider);
+				std::vector<reactphysics3d::Collider*>().swap(physColliders);
 			}
 		};
 

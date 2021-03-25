@@ -1,11 +1,7 @@
 #ifndef __PHYSICS_SIMULATOR_HPP__
 #define __PHYSICS_SIMULATOR_HPP__
 
-namespace reactphysics3d
-{
-	class PhysicsCommon;
-	class PhysicsWorld;
-}
+#include <reactphysics3d/reactphysics3d.h>
 
 namespace Cookie
 {

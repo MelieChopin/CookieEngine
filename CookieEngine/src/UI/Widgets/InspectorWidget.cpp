@@ -188,7 +188,6 @@ void Inspector::PhysicsInterface()
     {
         ComponentPhysics& physicComp = coordinator.componentHandler->GetComponentPhysics(selectedEntity->id);
 
-
         ImGui::NewLine();
         if (Button("Remove component##COLLIDER"))
         {

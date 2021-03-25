@@ -3,6 +3,7 @@
 #include "UIallIn.hpp"
 #include "Serialization.hpp"
 
+
 using namespace Cookie;
 
 Editor::Editor()
@@ -56,6 +57,18 @@ Editor::Editor()
     ui.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, game.renderer.GetLastFrameBuffer(), &cam, game.coordinator, selectedEntity));
 
 
+    for (int i = 0; i <= game.coordinator.entityHandler->livingEntities; i++)
+    {
+        ECS::Entity& iEntity = game.coordinator.entityHandler->entities[i];
+        if (iEntity.signature & SIGNATURE_RIGIDBODY)
+        {
+            ECS::ComponentRigidBody& iRigidBody = game.coordinator.componentHandler->componentRigidBodies[i];
+            iRigidBody.physBody = game.scene->physSim.worldSim->createRigidBody(game.coordinator.componentHandler->componentTransforms[i].physTransform);
+            iRigidBody.physBody->setType(rp3d::BodyType::DYNAMIC);
+        }
+    }
+
+    dbgRenderer.physicsDebug = &game.scene->physSim.worldSim->getDebugRenderer();
 }
 
 Editor::~Editor()
@@ -70,6 +83,11 @@ void Editor::Loop()
     {
         // Present frame
         CDebug.UpdateTime();
+        
+        game.resources.UpdateScriptsContent();
+        game.coordinator.ApplyScriptUpdate();
+        
+
 
         // Present frame
         if (isPlaying)
@@ -90,6 +108,7 @@ void Editor::Loop()
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_H) == GLFW_PRESS)
             Resources::Serialization::Save::SaveScene(*game.scene);
 
+    
         game.renderer.Draw(cam.GetViewProj(), game.coordinator);
         game.renderer.SetBackBuffer();
 
