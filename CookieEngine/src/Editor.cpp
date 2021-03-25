@@ -60,11 +60,11 @@ Editor::Editor()
     for (int i = 0; i <= game.coordinator.entityHandler->livingEntities; i++)
     {
         ECS::Entity& iEntity = game.coordinator.entityHandler->entities[i];
-        if (iEntity.signature & SIGNATURE_RIGIDBODY)
+        if (iEntity.signature & SIGNATURE_PHYSICS)
         {
-            ECS::ComponentRigidBody& iRigidBody = game.coordinator.componentHandler->componentRigidBodies[i];
-            iRigidBody.physBody = game.scene->physSim.worldSim->createRigidBody(game.coordinator.componentHandler->componentTransforms[i].physTransform);
-            iRigidBody.physBody->setType(rp3d::BodyType::DYNAMIC);
+            ECS::ComponentPhysics& iPhysics = game.coordinator.componentHandler->componentPhysics[i];
+            iPhysics.physBody = game.scene->physSim.worldSim->createRigidBody(game.coordinator.componentHandler->componentTransforms[i].physTransform);
+            iPhysics.physBody->setType(rp3d::BodyType::DYNAMIC);
         }
     }
 

@@ -188,6 +188,16 @@ void Inspector::PhysicsInterface()
     {
         ComponentPhysics& physicComp = coordinator.componentHandler->GetComponentPhysics(selectedEntity->id);
 
+        TextDisabled("Active colliders:");
+        Indent(15.f);
+
+
+        for (reactphysics3d::Collider* collider : physicComp.physColliders)
+        {
+
+        }
+
+
         ImGui::NewLine();
         if (Button("Remove component##COLLIDER"))
         {
