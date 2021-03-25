@@ -26,8 +26,8 @@ Editor::Editor()
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_D);
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_SPACE);
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_LEFT_CONTROL);
-    game.resources.textures["Pink"] = (std::make_shared<Resources::Texture>(game.renderer, "Pink", Core::Math::Vec4(1.0f, 0.5f, 0.5f, 1.0f)));
-    game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>(game.renderer, "Assets/Floor_DefaultMaterial_BaseColor.png"));
+    game.resources.textures["Pink"] = (std::make_shared<Resources::Texture>("Pink", Core::Math::Vec4(1.0f, 0.5f, 0.5f, 1.0f)));
+    game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>("Assets/Floor_DefaultMaterial_BaseColor.png"));
 
     //Load default Scene
     std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/DefaultDuck.CAsset", game);
@@ -69,14 +69,6 @@ Editor::Editor()
             iPhysics.AddSphereCollider(1.0f, { 0.0f,0.0f,0.0f }, {0.0f,0.0f,0.0f});
         }
     }
-
-    game.scene->physSim.worldSim->setIsDebugRenderingEnabled(true);
-    dbgRenderer.physicsDebug = &game.scene->physSim.worldSim->getDebugRenderer();
-    dbgRenderer.physicsDebug->setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLISION_SHAPE,true);
-    dbgRenderer.physicsDebug->setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::CONTACT_POINT, true);
-    dbgRenderer.physicsDebug->setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::CONTACT_NORMAL, true);
-    dbgRenderer.physicsDebug->setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLIDER_AABB, true);
-    dbgRenderer.physicsDebug->setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLIDER_BROADPHASE_AABB, true);
 }
 
 Editor::~Editor()
@@ -86,7 +78,7 @@ Editor::~Editor()
 
 void Editor::Loop()
 {
-
+    Physics::PhysicsHandle physHandle;
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
         // Present frame
@@ -109,31 +101,18 @@ void Editor::Loop()
             cam.Update();
         }
 
-        if (dbgRenderer.showDebug)
+        if (physHandle.physSim->getIsDebugRenderingEnabled() != dbgRenderer.showDebug)
         {
-            //game.scene->physSim.Update();
-            //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
-            //rp3d::DebugRenderer& ren = game.scene->physSim.worldSim->getDebugRenderer();
-            //rp3d::List<rp3d::DebugRenderer::DebugTriangle> triangles = ren.getTriangles();
-            //
-            //std::vector<rp3d::DebugRenderer::DebugTriangle> triArray;
-            //triArray.resize(dbgRenderer.physicsDebug->getNbTriangles(), rp3d::DebugRenderer::DebugTriangle({ 0.0,0.0,0.0 }, { 0.0,0.0,0.0 }, { 0.0,0.0,0.0 }, {0}));
-            //memcpy(triArray.data(), (void*)dbgRenderer.physicsDebug->getTrianglesArray(), sizeof(rp3d::DebugRenderer::DebugTriangle) * dbgRenderer.physicsDebug->getNbTriangles());
-            //
-            //
-            //
-            //for (int i = 0; i < triArray.size(); i++)
-            //{
-            //    float x = triArray[i].point1.x;
-            //    (void)x;
-            //}
-            //
+            dbgRenderer.SetPhysicsRendering();
         }
 
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_H) == GLFW_PRESS)
             Resources::Serialization::Save::SaveScene(*game.scene);
 
         game.renderer.Draw(cam.GetViewProj(), game.coordinator);
+
+        dbgRenderer.Draw();
+
         game.renderer.SetBackBuffer();
 
         ui.UpdateUI();

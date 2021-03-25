@@ -101,7 +101,7 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 			 std::string test;
 			 component.componentModels[entity.entities[i].id].mesh = resourcesManager.meshes[(js["ComponentHandler"]["Model"][i].at("model").get<std::string>())];
 			 component.componentModels[entity.entities[i].id].texture = resourcesManager.textures[(js["ComponentHandler"]["Model"][i].at("texture").get<std::string>())];
-			 component.componentModels[entity.entities[i].id].shader = resourcesManager.shaders["dfltShader"];//resourcesManager.GetMesh(js["ComponentHandler"]["Model"][i].at("shader").get<std::string>());
+			 component.componentModels[entity.entities[i].id].shader = resourcesManager.shaders["Texture_Shader"];//resourcesManager.GetMesh(js["ComponentHandler"]["Model"][i].at("shader").get<std::string>());
 		 }
 	 }
  }

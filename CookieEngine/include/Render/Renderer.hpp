@@ -25,7 +25,7 @@ namespace Cookie
 		class Renderer
 		{
 			private:
-				struct ID3D11Device*			device			= nullptr;
+				
 				struct IDXGISwapChain*			swapchain		= nullptr;
 				struct ID3D11RenderTargetView*	backbuffer		= nullptr;
 				struct ID3D11DepthStencilView*	depthBuffer		= nullptr;
@@ -50,8 +50,6 @@ namespace Cookie
 
 
 				bool CreateBuffer(D3D11_BUFFER_DESC bufferDesc, D3D11_SUBRESOURCE_DATA data, ID3D11Buffer** buffer);
-				bool CreateVertexBuffer(ID3D11VertexShader** vertexShader, ID3DBlob** VS);
-				bool CreatePixelBuffer(ID3D11PixelShader** pixelShader, ID3DBlob** PS);
 				
 				void Draw(const Core::Math::Mat4& viewProj, ECS::Coordinator& coordinator);
 				void Render();
@@ -62,11 +60,7 @@ namespace Cookie
 
 				inline FrameBuffer& GetLastFrameBuffer() { return *frameBuffers[frameBuffers.size() - 1 ]; }
 
-
 				void ResizeBuffer(int width, int height);
-
-				inline ID3D11Device* GetDevice() const {return device;};
-
 		};
 	}
 }

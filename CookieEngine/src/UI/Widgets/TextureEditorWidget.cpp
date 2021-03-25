@@ -67,7 +67,7 @@ void TextureEditor::WindowDisplay()
 			}
 			else if (Button("Confirm and save"))
 			{				
-				resources.textures[newTexture.name] = (std::make_shared<Texture>(renderer, newTexture.name, newTexture.color));
+				resources.textures[newTexture.name] = (std::make_shared<Texture>(newTexture.name, newTexture.color));
 				
 				newTexture.creating = false;
 				newTexture.name.clear();

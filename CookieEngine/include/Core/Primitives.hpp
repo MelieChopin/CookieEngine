@@ -9,7 +9,7 @@ namespace Cookie
 	{
 		namespace Primitives
 		{
-			inline std::shared_ptr<Cookie::Resources::Mesh> CreateQuad(Render::Renderer& _renderer)
+			inline std::shared_ptr<Cookie::Resources::Mesh> CreateQuad()
 			{
 				std::vector<float> vertices = { -1, -1, 0, 0, 0, 0, 0, 1,
 												 1, -1, 0, 1, 0, 0, 0, 1,
@@ -19,12 +19,11 @@ namespace Cookie
 				std::vector<unsigned int> indices = { 1, 2, 3, 3, 1, 0 };
 
 
-				std::shared_ptr<Cookie::Resources::Mesh> quad = std::make_shared<Cookie::Resources::Mesh>(vertices, indices, 6, _renderer);
-				quad->name = "Quad";
+				std::shared_ptr<Cookie::Resources::Mesh> quad = std::make_shared<Cookie::Resources::Mesh>("Quad", vertices, indices, 6);
 				return quad;
 			}
 
-			inline std::shared_ptr<Cookie::Resources::Mesh> CreateTriangle(Render::Renderer& _renderer)
+			inline std::shared_ptr<Cookie::Resources::Mesh> CreateTriangle()
 			{
 				std::vector<float> vertices = { -1, -1, 0, 0,   0, 0, 0, 1,
 												 1, -1, 0, 0,   1, 0, 0, 1,
@@ -32,8 +31,7 @@ namespace Cookie
 
 				std::vector<unsigned int> indices = { 0, 1, 2 };
 
-				std::shared_ptr<Cookie::Resources::Mesh> triangle = std::make_shared<Cookie::Resources::Mesh>(vertices, indices, 3, _renderer);
-				triangle->name = "Triangle";
+				std::shared_ptr<Cookie::Resources::Mesh> triangle = std::make_shared<Cookie::Resources::Mesh>("Triangle",vertices, indices, 3);
 				return triangle;
 			}
 		}

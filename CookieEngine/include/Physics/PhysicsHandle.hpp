@@ -1,7 +1,7 @@
 #ifndef __PHYSICS_HANDLE_HPP__
 #define __PHYSICS_HANDLE_HPP__
 
-#include "Physics/PhysicsSimulator.hpp"
+#include <reactphysics3d/reactphysics3d.h>
 
 namespace Cookie
 {

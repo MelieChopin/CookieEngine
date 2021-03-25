@@ -1,7 +1,7 @@
 #ifndef __DEBUG_RENDERER_HPP__
 #define __DEBUG_RENDERER_HPP__
 
-#include <reactphysics3d/reactphysics3d.h>
+#include "Physics/PhysicsHandle.hpp"
 
 namespace Cookie
 {
@@ -10,13 +10,17 @@ namespace Cookie
 		class DebugRenderer
 		{
 			private:
+				Physics::PhysicsHandle physHandle;
+
 			public:
 				bool showDebug = true;
 
-				rp3d::DebugRenderer* physicsDebug;
+				void SetPhysicsRendering();
 
-				DebugRenderer() {}
-				~DebugRenderer() {}
+				void Draw();
+
+				DebugRenderer();
+				~DebugRenderer();
 
 		};
 	}
