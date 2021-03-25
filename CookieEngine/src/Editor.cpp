@@ -3,9 +3,11 @@
 #include "UIallIn.hpp"
 #include "Serialization.hpp"
 #include "Physics/PhysicsHandle.hpp"
+#include "Map.hpp"
 
 
 using namespace Cookie;
+using namespace rp3d;
 
 Editor::Editor()
     : ui(game.renderer) 
@@ -86,6 +88,13 @@ Editor::~Editor()
 
 void Editor::Loop()
 {
+    /*
+    ECS::ComponentPhysics	physic;
+    physic.physBody = Physics::PhysicsHandle::physSim->createRigidBody(rp3d::Transform(rp3d::Vector3(0.0, 0.0, 0.0), rp3d::Quaternion::identity()));
+    physic.physBody->setType(rp3d::BodyType::STATIC);
+    physic.AddCubeCollider(Core::Math::Vec3(1000, 1, 1000), Core::Math::Vec3(0, 0, 0), Core::Math::Vec3(0, 0, 0));
+    */
+
 
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
@@ -94,6 +103,28 @@ void Editor::Loop()
         
         game.resources.UpdateScriptsContent();
         game.coordinator.ApplyScriptUpdate();
+
+        /*
+        // Create the ray
+        Vector3 startPoint(cam.pos.x, cam.pos.y, cam.pos.z);
+        Core::Math::Vec3 camDir = cam.MouseToWorldDir();
+        Vector3 endPoint(camDir.x, camDir.y, camDir.z);
+        endPoint = startPoint + endPoint * 1000;
+
+        Ray ray(startPoint, endPoint);
+        // Create the raycast info object for the
+        // raycast result
+        RaycastInfo raycastInfo;
+        // Raycast test
+        if(physic.physBody->raycast(ray, raycastInfo))
+            std::cout << "Hit point : " <<
+            raycastInfo.worldPoint.x << " " <<
+            raycastInfo.worldPoint.y << " " <<
+            raycastInfo.worldPoint.z << " " <<
+            std::endl;
+            */
+        
+
 
         // Present frame
         if (isPlaying)

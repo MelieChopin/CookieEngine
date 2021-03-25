@@ -5,6 +5,7 @@
 #include "ComponentTransform.hpp"
 #include "ComponentModel.hpp"
 #include "ComponentPhysics.hpp"
+#include "Physics/PhysicsHandle.hpp"
 
 #include <string>
 #include <algorithm>
@@ -25,7 +26,13 @@ namespace Cookie
 			ECS::ComponentPhysics	physic;
 
 
-			Map() {}
+			Map(rp3d::PhysicsWorld* physicWorld)
+			{				
+				physic.physBody = physicWorld->createRigidBody(rp3d::Transform(rp3d::Vector3(0.0, 0.0, 0.0), rp3d::Quaternion::identity()));
+				physic.physBody->setType(rp3d::BodyType::STATIC);
+				physic.AddCubeCollider(Core::Math::Vec3(1000, 1, 1000), Core::Math::Vec3(0, 0, 0), Core::Math::Vec3(0, 0, 0));
+
+			}
 			~Map() {}
 
 			Core::Math::Vec2 GetCenterOfBuilding(Core::Math::Vec2& mousePos, const Core::Math::Vec2& buildingNbOfTiles)
