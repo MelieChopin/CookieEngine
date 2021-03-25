@@ -38,7 +38,7 @@ namespace Cookie
 			Resources::Tiles						tiles;//will be map
 
 		public:
-			Scene(const std::shared_ptr<reactphysics3d::PhysicsCommon>& physCom);
+			Scene();
 			~Scene();
 
 			/// <Temp>

@@ -108,7 +108,7 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 
  std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Game& game)
  {
-	 std::shared_ptr<Resources::Scene> newScene = std::make_shared<Resources::Scene>(game.physCom);
+	 std::shared_ptr<Resources::Scene> newScene = std::make_shared<Resources::Scene>();
 	 std::ifstream file(filepath);
 
 	 if (!file.is_open())

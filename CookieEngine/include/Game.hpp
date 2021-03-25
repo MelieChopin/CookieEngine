@@ -18,8 +18,6 @@ namespace Cookie
 			ECS::Coordinator			coordinator;
 
 			std::shared_ptr<Resources::Scene>				scene{nullptr};
-			std::shared_ptr<reactphysics3d::PhysicsCommon>	physCom{ std::make_shared<reactphysics3d::PhysicsCommon>() };
-
 
 		public:
 			 Game();

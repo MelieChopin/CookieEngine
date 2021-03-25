@@ -2,6 +2,7 @@
 #include "Editor.hpp" 
 #include "UIallIn.hpp"
 #include "Serialization.hpp"
+#include "Physics/PhysicsHandle.hpp"
 
 
 using namespace Cookie;
@@ -31,9 +32,7 @@ Editor::Editor()
     //Load default Scene
     std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/DefaultDuck.CAsset", game);
 
-    game.scene = _scene;
-    game.scene->InitCoordinator(game.coordinator);
-
+    game.SetScene(_scene);
 
     ui.AddItem(new UIwidget::SaveButton(game.scene), 0);
 
@@ -63,12 +62,21 @@ Editor::Editor()
         if (iEntity.signature & SIGNATURE_PHYSICS)
         {
             ECS::ComponentPhysics& iPhysics = game.coordinator.componentHandler->componentPhysics[i];
+            game.coordinator.componentHandler->componentTransforms[i].SetPhysics();
             iPhysics.physBody = game.scene->physSim.worldSim->createRigidBody(game.coordinator.componentHandler->componentTransforms[i].physTransform);
             iPhysics.physBody->setType(rp3d::BodyType::DYNAMIC);
+
+            iPhysics.AddSphereCollider(1.0f, { 0.0f,0.0f,0.0f }, {0.0f,0.0f,0.0f});
         }
     }
 
+    game.scene->physSim.worldSim->setIsDebugRenderingEnabled(true);
     dbgRenderer.physicsDebug = &game.scene->physSim.worldSim->getDebugRenderer();
+    dbgRenderer.physicsDebug->setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLISION_SHAPE,true);
+    dbgRenderer.physicsDebug->setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::CONTACT_POINT, true);
+    dbgRenderer.physicsDebug->setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::CONTACT_NORMAL, true);
+    dbgRenderer.physicsDebug->setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLIDER_AABB, true);
+    dbgRenderer.physicsDebug->setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLIDER_BROADPHASE_AABB, true);
 }
 
 Editor::~Editor()
@@ -86,8 +94,6 @@ void Editor::Loop()
         
         game.resources.UpdateScriptsContent();
         game.coordinator.ApplyScriptUpdate();
-        
-
 
         // Present frame
         if (isPlaying)
@@ -101,14 +107,32 @@ void Editor::Loop()
             game.renderer.Clear();
 
             cam.Update();
+        }
 
-            
+        if (dbgRenderer.showDebug)
+        {
+            //game.scene->physSim.Update();
+            //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
+            //rp3d::DebugRenderer& ren = game.scene->physSim.worldSim->getDebugRenderer();
+            //rp3d::List<rp3d::DebugRenderer::DebugTriangle> triangles = ren.getTriangles();
+            //
+            //std::vector<rp3d::DebugRenderer::DebugTriangle> triArray;
+            //triArray.resize(dbgRenderer.physicsDebug->getNbTriangles(), rp3d::DebugRenderer::DebugTriangle({ 0.0,0.0,0.0 }, { 0.0,0.0,0.0 }, { 0.0,0.0,0.0 }, {0}));
+            //memcpy(triArray.data(), (void*)dbgRenderer.physicsDebug->getTrianglesArray(), sizeof(rp3d::DebugRenderer::DebugTriangle) * dbgRenderer.physicsDebug->getNbTriangles());
+            //
+            //
+            //
+            //for (int i = 0; i < triArray.size(); i++)
+            //{
+            //    float x = triArray[i].point1.x;
+            //    (void)x;
+            //}
+            //
         }
 
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_H) == GLFW_PRESS)
             Resources::Serialization::Save::SaveScene(*game.scene);
 
-    
         game.renderer.Draw(cam.GetViewProj(), game.coordinator);
         game.renderer.SetBackBuffer();
 
