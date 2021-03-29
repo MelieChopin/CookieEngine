@@ -37,7 +37,7 @@ UIeditor::UIeditor(const Cookie::Render::Renderer& _renderer)
 	GetStyle().Colors[ImGuiCol_DockingEmptyBg]	= {0, 0, 0, 0};
 
 	ImGui_ImplGlfw_InitNoAPI(_renderer.window.window, true);
-	ImGui_ImplDX11_Init(_renderer.GetDevice(), _renderer.remote.context);
+	ImGui_ImplDX11_Init(Render::RendererRemote::device, _renderer.remote.context);
 	ImGui_ImplDX11_CreateDeviceObjects();
 }
 

@@ -14,9 +14,9 @@ Console::Console(DebugMessageHandler& _debugManager, Cookie::Render::Renderer& _
 	: WItemBase		("Console", false),
 	  debugManager	(_debugManager)
 {
-	icons[0] = std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/Log.ico");
-	icons[1] = std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/Warning.ico");
-	icons[2] = std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/Error.ico");
+	icons[0] = std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/Log.ico");
+	icons[1] = std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/Warning.ico");
+	icons[2] = std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/Error.ico");
 }
 
 

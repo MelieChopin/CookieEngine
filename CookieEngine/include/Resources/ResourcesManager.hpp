@@ -36,6 +36,8 @@ namespace Cookie
 				
 			private:
 				void SearchForGltf(const fs::path& path, std::vector<std::string>& gltfFiles);
+
+				void InitShaders();
 				
 			public: 
 				ResourcesManager();

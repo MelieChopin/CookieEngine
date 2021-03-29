@@ -2,6 +2,7 @@
 #include "Editor.hpp" 
 #include "UIallIn.hpp"
 #include "Serialization.hpp"
+#include "Physics/PhysicsHandle.hpp"
 
 using namespace Cookie;
 
@@ -24,8 +25,8 @@ Editor::Editor()
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_D);
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_SPACE);
     ImGui::GetIO().AddInputCharacter(GLFW_KEY_LEFT_CONTROL);
-    game.resources.textures["Pink"] = (std::make_shared<Resources::Texture>(game.renderer, "Pink", Core::Math::Vec4(1.0f, 0.5f, 0.5f, 1.0f)));
-    game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>(game.renderer, "Assets/Floor_DefaultMaterial_BaseColor.png"));
+    game.resources.textures["Pink"] = (std::make_shared<Resources::Texture>("Pink", Core::Math::Vec4(1.0f, 0.5f, 0.5f, 1.0f)));
+    game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>("Assets/Floor_DefaultMaterial_BaseColor.png"));
 
     //Load all prefabs in folder Prefabs
     Resources::Serialization::Load::LoadAllPrefabs(game.resources);
@@ -33,9 +34,7 @@ Editor::Editor()
     //Load default Scene
     std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/DefaultDuck.CAsset", game);
 
-    game.scene = _scene;
-    game.scene->InitCoordinator(game.coordinator);
-
+    game.SetScene(_scene);
 
     ui.AddItem(new UIwidget::SaveButton(game.scene, game.resources), 0);
 
@@ -65,12 +64,15 @@ Editor::Editor()
         if (iEntity.signature & SIGNATURE_PHYSICS)
         {
             ECS::ComponentPhysics& iPhysics = game.coordinator.componentHandler->componentPhysics[i];
+            game.coordinator.componentHandler->componentTransforms[i].SetPhysics();
             iPhysics.physBody = game.scene->physSim.worldSim->createRigidBody(game.coordinator.componentHandler->componentTransforms[i].physTransform);
             iPhysics.physBody->setType(rp3d::BodyType::DYNAMIC);
+
+            iPhysics.AddSphereCollider(2.0f, { 0.5f,1.5f,0.0f }, {0.0f,0.0f,0.0f});
         }
     }
 
-    dbgRenderer.physicsDebug = &game.scene->physSim.worldSim->getDebugRenderer();
+    dbgRenderer.SetPhysicsRendering();
 }
 
 Editor::~Editor()
@@ -81,6 +83,7 @@ Editor::~Editor()
 
 void Editor::Loop()
 {
+    Physics::PhysicsHandle physHandle;
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
         // Present frame
@@ -88,8 +91,6 @@ void Editor::Loop()
         
         game.resources.UpdateScriptsContent();
         game.coordinator.ApplyScriptUpdate();
-        
-
 
         // Present frame
         if (isPlaying)
@@ -105,6 +106,13 @@ void Editor::Loop()
             cam.Update();
         }
 
+        if (physHandle.physSim->getIsDebugRenderingEnabled() != dbgRenderer.showDebug)
+        {
+            dbgRenderer.SetPhysicsRendering();
+        }
+
+        physHandle.physSim->update(1.0e-7f);
+
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_H) == GLFW_PRESS)
             Resources::Serialization::Save::SaveScene(*game.scene, game.resources);
 
@@ -119,6 +127,9 @@ void Editor::Loop()
 
 
         game.renderer.Draw(cam.GetViewProj(), game.coordinator);
+
+        dbgRenderer.Draw(cam.GetViewProj());
+
         game.renderer.SetBackBuffer();
 
         ui.UpdateUI();

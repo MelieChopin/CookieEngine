@@ -10,14 +10,14 @@ using namespace Cookie::Resources;
 
 /*===================================== CONSTRUCTORS/DESTRUCTORS =====================================*/
 
-Texture::Texture(Render::Renderer& renderer, const std::string& texPath) :
+Texture::Texture(const std::string& texPath) :
 	name{texPath}
 {
 	std::wstring wString = std::wstring(texPath.begin(),texPath.end());
 
 	if (name.find(".dss") != std::string::npos)
 	{
-		HRESULT result = DirectX::CreateDDSTextureFromFile(renderer.GetDevice(), wString.c_str(), &texture, &shaderResourceView);
+		HRESULT result = DirectX::CreateDDSTextureFromFile(Render::RendererRemote::device, wString.c_str(), &texture, &shaderResourceView);
 		if (FAILED(result))
 		{
 			printf("Failing Loading Texture %s: %s\n", name.c_str(), std::system_category().message(result).c_str());
@@ -25,7 +25,7 @@ Texture::Texture(Render::Renderer& renderer, const std::string& texPath) :
 	}
 	else
 	{
-		HRESULT result = DirectX::CreateWICTextureFromFile(renderer.GetDevice(), wString.c_str(), &texture, &shaderResourceView);
+		HRESULT result = DirectX::CreateWICTextureFromFile(Render::RendererRemote::device, wString.c_str(), &texture, &shaderResourceView);
 		if (FAILED(result))
 		{
 			printf("Failing Loading Texture %s: %s\n", name.c_str(), std::system_category().message(result).c_str());
@@ -34,12 +34,12 @@ Texture::Texture(Render::Renderer& renderer, const std::string& texPath) :
 		
 }
 
-Texture::Texture(Render::Renderer& _renderer, const std::string& texName, const Core::Math::Vec4& color):
+Texture::Texture(const std::string& texName, const Core::Math::Vec4& color):
 	name {texName}
 {
-	if (CreateTextureFromColor(_renderer, color))
+	if (CreateTextureFromColor(color))
 	{
-		CreateShaderResource(_renderer);
+		CreateShaderResource();
 	}
 }
 
@@ -51,14 +51,14 @@ Texture::~Texture()
 		shaderResourceView->Release();
 }
 
-void Texture::Set(Render::RendererRemote& remote)
+void Texture::Set()
 {
-	remote.context->PSSetShaderResources(0, 1, &shaderResourceView);
+	Render::RendererRemote::context->PSSetShaderResources(0, 1, &shaderResourceView);
 }
 
 /*==================== CREATE METHODS ========================*/
 
-bool Texture::CreateTextureFromColor(Render::Renderer& _renderer, const Core::Math::Vec4& color)
+bool Texture::CreateTextureFromColor(const Core::Math::Vec4& color)
 {
 	D3D11_TEXTURE2D_DESC desc = {};
 
@@ -77,7 +77,7 @@ bool Texture::CreateTextureFromColor(Render::Renderer& _renderer, const Core::Ma
 	subResource.SysMemPitch = 1;
 	subResource.SysMemSlicePitch = 0;
 
-	HRESULT result = _renderer.GetDevice()->CreateTexture2D(&desc, &subResource, (ID3D11Texture2D**)&texture);
+	HRESULT result = Render::RendererRemote::device->CreateTexture2D(&desc, &subResource, (ID3D11Texture2D**)&texture);
 	if (FAILED(result))
 	{
 		printf("Failing Creating Texture: %s\n", std::system_category().message(result).c_str());
@@ -87,7 +87,7 @@ bool Texture::CreateTextureFromColor(Render::Renderer& _renderer, const Core::Ma
 	return true;
 }
 
-bool Texture::CreateShaderResource(Render::Renderer& _renderer)
+bool Texture::CreateShaderResource()
 {
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 
@@ -96,7 +96,7 @@ bool Texture::CreateShaderResource(Render::Renderer& _renderer)
 	srvDesc.Texture2D.MipLevels			= 1;
 	srvDesc.Texture2D.MostDetailedMip	= 0;
 
-	HRESULT result = _renderer.GetDevice()->CreateShaderResourceView(texture, &srvDesc, &shaderResourceView);
+	HRESULT result = Render::RendererRemote::device->CreateShaderResourceView(texture, &srvDesc, &shaderResourceView);
 	if (FAILED(result))
 	{
 		printf("Failing Creating FrameBuffer ShaderResource: %s\n", std::system_category().message(result).c_str());

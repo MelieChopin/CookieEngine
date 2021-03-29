@@ -6,19 +6,20 @@
 
 using namespace Cookie::Resources;
 
-Mesh::Mesh(std::string _name, aiMesh* mesh, Render::Renderer& renderer)
+Mesh::Mesh(std::string _name, aiMesh* mesh):
+    name{_name}
 {
-    name    = _name;
     INb     = mesh->mNumFaces * 3;//a face is a triangle as triangulate flag is enabled
-    InitVBuffer(mesh, renderer);
-    InitIBuffer(mesh,renderer);
+    InitVBuffer(mesh);
+    InitIBuffer(mesh);
 }
 
-Mesh::Mesh(std::vector<float>& vertices, std::vector<unsigned int>& indices, unsigned int inb, Render::Renderer& renderer)
+Mesh::Mesh(std::string meshName, std::vector<float>& vertices, std::vector<unsigned int>& indices, unsigned int inb):
+    name{meshName}
 {
     INb = inb;
-    InitVBuffer(vertices, renderer);
-    InitIBuffer(indices, renderer);
+    InitVBuffer(vertices);
+    InitIBuffer(indices);
 }
 
 Mesh::~Mesh()
@@ -29,7 +30,7 @@ Mesh::~Mesh()
         IBuffer->Release();
 }
 
-void Mesh::InitVBuffer(aiMesh* mesh, Render::Renderer& renderer)
+void Mesh::InitVBuffer(aiMesh* mesh)
 {
     D3D11_BUFFER_DESC bDesc = {};
 
@@ -59,10 +60,13 @@ void Mesh::InitVBuffer(aiMesh* mesh, Render::Renderer& renderer)
     InitData.SysMemPitch        = 0;
     InitData.SysMemSlicePitch   = 0;
 
-    renderer.CreateBuffer(bDesc, InitData, &VBuffer);
+    if (FAILED(Render::RendererRemote::device->CreateBuffer(&bDesc, &InitData, &VBuffer)))
+    {
+        printf("Failed Creating Buffer: %p of size %llu \n", VBuffer, sizeof(InitData.pSysMem));
+    }
 }
 
-void Mesh::InitIBuffer(aiMesh* mesh, Render::Renderer& renderer)
+void Mesh::InitIBuffer(aiMesh* mesh)
 {
     D3D11_BUFFER_DESC bDesc = {};
 
@@ -87,10 +91,13 @@ void Mesh::InitIBuffer(aiMesh* mesh, Render::Renderer& renderer)
     InitData.SysMemPitch = 0;
     InitData.SysMemSlicePitch = 0;
 
-    renderer.CreateBuffer(bDesc, InitData, &IBuffer);
+    if (FAILED(Render::RendererRemote::device->CreateBuffer(&bDesc, &InitData, &IBuffer)))
+    {
+        printf("Failed Creating Buffer: %p of size %llu \n", IBuffer, sizeof(InitData.pSysMem));
+    }
 }
 
-void Mesh::InitVBuffer(std::vector<float>& vertices, Render::Renderer& renderer)
+void Mesh::InitVBuffer(std::vector<float>& vertices)
 {
     D3D11_BUFFER_DESC bDesc = {};
 
@@ -106,10 +113,13 @@ void Mesh::InitVBuffer(std::vector<float>& vertices, Render::Renderer& renderer)
     InitData.SysMemPitch = 0;
     InitData.SysMemSlicePitch = 0;
 
-    renderer.CreateBuffer(bDesc, InitData, &VBuffer);
+    if (FAILED(Render::RendererRemote::device->CreateBuffer(&bDesc, &InitData, &VBuffer)))
+    {
+        printf("Failed Creating Buffer: %p of size %llu \n", VBuffer, sizeof(InitData.pSysMem));
+    }
 }
 
-void Mesh::InitIBuffer(std::vector<unsigned int>& indices, Render::Renderer& renderer)
+void Mesh::InitIBuffer(std::vector<unsigned int>& indices)
 {
     D3D11_BUFFER_DESC bDesc = {};
 
@@ -125,19 +135,22 @@ void Mesh::InitIBuffer(std::vector<unsigned int>& indices, Render::Renderer& ren
     InitData.SysMemPitch = 0;
     InitData.SysMemSlicePitch = 0;
 
-    renderer.CreateBuffer(bDesc, InitData, &IBuffer);
+    if (FAILED(Render::RendererRemote::device->CreateBuffer(&bDesc, &InitData, &IBuffer)))
+    {
+        printf("Failed Creating Buffer: %p of size %llu \n", IBuffer, sizeof(InitData.pSysMem));
+    }
 }
 
-void Mesh::Set(Render::RendererRemote& remote)
+void Mesh::Set()
 {
     UINT stride = ((2 * sizeof(Core::Math::Vec3)) + sizeof(Core::Math::Vec2));
     UINT offset = 0;
-    remote.context->IASetVertexBuffers(0,1,&VBuffer,&stride,&offset);
-    remote.context->IASetIndexBuffer(IBuffer, DXGI_FORMAT_R32_UINT,0);
-    remote.context->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    Render::RendererRemote::context->IASetVertexBuffers(0,1,&VBuffer,&stride,&offset);
+    Render::RendererRemote::context->IASetIndexBuffer(IBuffer, DXGI_FORMAT_R32_UINT,0);
+    Render::RendererRemote::context->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Mesh::Draw(Render::RendererRemote& remote)
+void Mesh::Draw()
 {
-    remote.context->DrawIndexed(INb, 0, 0);
+    Render::RendererRemote::context->DrawIndexed(INb, 0, 0);
 }

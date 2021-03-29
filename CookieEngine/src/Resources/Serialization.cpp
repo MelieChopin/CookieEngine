@@ -181,14 +181,14 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 				 component.componentModels[entity.entities[i].id].texture = 
 									resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameTexture];
 
-			 component.componentModels[entity.entities[i].id].shader = resourcesManager.shaders["dfltShader"];//resourcesManager.GetMesh(js["ComponentHandler"]["Model"][i].at("shader").get<std::string>());
+			 component.componentModels[entity.entities[i].id].shader = resourcesManager.shaders["Texture_Shader"];//resourcesManager.GetMesh(js["ComponentHandler"]["Model"][i].at("shader").get<std::string>());
 		 }
 	 }
  }
 
  std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Game& game)
  {
-	 std::shared_ptr<Resources::Scene> newScene = std::make_shared<Resources::Scene>(game.physCom);
+	 std::shared_ptr<Resources::Scene> newScene = std::make_shared<Resources::Scene>();
 	 std::ifstream file(filepath);
 
 	 if (!file.is_open())

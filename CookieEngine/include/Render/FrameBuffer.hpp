@@ -29,17 +29,17 @@ namespace Cookie
 
 
 			private:
-				bool CreateTexture(Renderer& _renderer);
-				bool CreateShaderResource(Renderer& _renderer);
-				bool CreateRenderTargetView(Renderer& _renderer);
+				bool CreateTexture(int width, int height);
+				bool CreateShaderResource();
+				bool CreateRenderTargetView();
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
-				FrameBuffer(Resources::ResourcesManager& _resources, Renderer& _renderer);
+				FrameBuffer(Resources::ResourcesManager& _resources, int width, int height);
 				~FrameBuffer();
 
-				void Resize(Renderer& _renderer);
-				void Draw(Render::RendererRemote& _remote);
+				void Resize(int width, int height);
+				void Draw();
 
 				inline ID3D11Texture2D*const*			GetTexture()const			{ return &texBuffer; }
 				inline ID3D11ShaderResourceView*const*	GetShaderResource()const	{ return &shaderResource; }

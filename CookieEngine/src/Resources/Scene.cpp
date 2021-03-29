@@ -9,8 +9,7 @@ using namespace Cookie::Core::Math;
 
 #define EPSILON 1/4096
 
-Scene::Scene(const std::shared_ptr<reactphysics3d::PhysicsCommon>& physCom):
-	physSim{physCom}
+Scene::Scene()
 {
 	int length = 15;
 	int width = 15;
