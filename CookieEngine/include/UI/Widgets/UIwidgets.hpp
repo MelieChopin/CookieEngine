@@ -24,11 +24,13 @@ namespace Cookie::UIwidget
 	class SaveButton final : public ItemBase
 	{
 		std::shared_ptr<Cookie::Resources::Scene>& activeScene;
+		Resources::ResourcesManager& resourceManager;
 
 	public:
-		SaveButton(std::shared_ptr<Cookie::Resources::Scene>& _activeScene)
-			: ItemBase		("Save", "Ctrl + S"),
-			  activeScene	(_activeScene)
+		SaveButton(std::shared_ptr<Cookie::Resources::Scene>& _activeScene, Resources::ResourcesManager& _resourceManager)
+			: ItemBase			("Save", "Ctrl + S"),
+			  activeScene		(_activeScene),
+			  resourceManager(_resourceManager)
 		{}
 
 		void ItemDisplay() override;

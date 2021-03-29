@@ -4,7 +4,6 @@
 #include "Serialization.hpp"
 #include "Physics/PhysicsHandle.hpp"
 
-
 using namespace Cookie;
 
 Editor::Editor()
@@ -29,12 +28,15 @@ Editor::Editor()
     game.resources.textures["Pink"] = (std::make_shared<Resources::Texture>("Pink", Core::Math::Vec4(1.0f, 0.5f, 0.5f, 1.0f)));
     game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>("Assets/Floor_DefaultMaterial_BaseColor.png"));
 
+    //Load all prefabs in folder Prefabs
+    Resources::Serialization::Load::LoadAllPrefabs(game.resources);
+
     //Load default Scene
     std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/DefaultDuck.CAsset", game);
 
     game.SetScene(_scene);
 
-    ui.AddItem(new UIwidget::SaveButton(game.scene), 0);
+    ui.AddItem(new UIwidget::SaveButton(game.scene, game.resources), 0);
 
     
     ui.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
@@ -75,7 +77,8 @@ Editor::Editor()
 
 Editor::~Editor()
 {
-
+    //Save all prefabs in folder Prefabs
+    Resources::Serialization::Save::SaveAllPrefabs(game.resources);
 }
 
 void Editor::Loop()
@@ -110,8 +113,18 @@ void Editor::Loop()
 
         physHandle.physSim->update(1.0e-7f);
 
+        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
+            Resources::Serialization::Save::SaveScene(*game.scene, game.resources);
+
+        ////TEMP
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_H) == GLFW_PRESS)
-            Resources::Serialization::Save::SaveScene(*game.scene);
+        {
+            std::string duck = "Duck";
+            game.coordinator.componentHandler->ModifyComponentOfEntityToPrefab(game.coordinator.entityHandler->entities[1], game.resources, duck);
+        }
+            
+        /////
+
 
         game.renderer.Draw(cam.GetViewProj(), game.coordinator);
 

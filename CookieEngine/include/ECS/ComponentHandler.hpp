@@ -11,11 +11,17 @@
 #include <array>
 #include <unordered_map>
 
+#include "ECS/EntityHandler.hpp"
 #include "Physics/PhysicsSimulator.hpp"
 
 
 namespace Cookie
 {
+	namespace Resources
+	{
+		class ResourcesManager;
+	}
+
 	namespace ECS
 	{
 		#define SIGNATURE_EMPTY         0b0000
@@ -86,6 +92,8 @@ namespace Cookie
 
 				entity.signature += SIGNATURE_SCRIPT;
 			}
+
+			void ModifyComponentOfEntityToPrefab(Entity& entity, Cookie::Resources::ResourcesManager& resourcesManager, std::string& namePrefab);
 
 			void RemoveComponentTransform(Entity& entity)
 			{

@@ -24,19 +24,21 @@ namespace Cookie
 	{
 		class ResourcesManager;
 		class Scene;
+		class Prefab;
 	}
 
 	namespace Resources
 	{
-		class Scene;
 		namespace Serialization
 		{
 			namespace Save
 			{
 				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity);
-				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component);
+				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager);
 
-				void SaveScene(Cookie::Resources::Scene& actScene);
+				void SaveScene(Cookie::Resources::Scene& actScene, Cookie::Resources::ResourcesManager& resourcesManager);
+				void SavePrefab(const std::shared_ptr<Prefab>& prefab);
+				void SaveAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
 			}
 
 			namespace Load
@@ -45,6 +47,7 @@ namespace Cookie
 				void FromJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager);
 
 				std::shared_ptr<Scene> LoadScene(const char* filepath, Game& game);
+				void LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
 			}
 		}
 	}
