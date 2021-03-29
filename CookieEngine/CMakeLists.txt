@@ -94,6 +94,8 @@ set (SRC_FILES
     
     "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
 
+    "${SRC_DIR}/ECS/ComponentHandler.cpp"
+
     "${SRC_DIR}/Editor.cpp" 
     "${SRC_DIR}/Game.cpp"
     )

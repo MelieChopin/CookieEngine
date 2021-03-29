@@ -17,32 +17,58 @@ using namespace Cookie::Resources::Serialization;
 void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS::EntityHandler& entity)
 {
 	for (int i = 0; i < entity.livingEntities; i++)
-		js["EntityHandler"] += json{ { "entity", { { "id", entity.entities[i].id }, { "signature", entity.entities[i].signature }, { "name", entity.entities[i].name } } } };
+		js["EntityHandler"] += json{ { "entity", { { "id", entity.entities[i].id }, { "signature", entity.entities[i].signature }, { "name", entity.entities[i].name }, { "namePrefab", entity.entities[i].namePrefab } } } };
 }
 
-void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component)
+void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager)
 {
 	for (int i = 0; i < entity.livingEntities; i++)
 	{
 		if (entity.entities[i].signature & SIGNATURE_TRANSFORM)
 		{
 			Cookie::ECS::ComponentTransform transform = component.GetComponentTransform(entity.entities[i].id);
-			js["ComponentHandler"]["Transform"] += json{ { "localTRS", { { "translate", transform.localTRS.pos.e }, 
-													{ "rotation", transform.localTRS.rot.e }, 
+
+			if (entity.entities[i].namePrefab != "NONE")
+			{
+				js["ComponentHandler"]["Transform"] += json{ { "localTRS", { { "translate", transform.localTRS.pos.e } } } };
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->rotation != transform.localTRS.rot)
+					js["ComponentHandler"]["Transform"].at(js["ComponentHandler"]["Transform"].size() - 1).at("localTRS")["rotation"] = transform.localTRS.rot.e;
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->scale != transform.localTRS.scale)
+					js["ComponentHandler"]["Transform"].at(js["ComponentHandler"]["Transform"].size() - 1).at("localTRS")["scale"] = transform.localTRS.scale.e;
+			}
+			else
+			{
+				js["ComponentHandler"]["Transform"] += json{ { "localTRS", { { "translate", transform.localTRS.pos.e },
+													{ "rotation", transform.localTRS.rot.e },
 													{ "scale", transform.localTRS.scale.e } } } };
+			}
 		}
 		if (entity.entities[i].signature & SIGNATURE_MODEL)
 		{
 			Cookie::ECS::ComponentModel model = component.GetComponentModel(entity.entities[i].id);
-			js["ComponentHandler"]["Model"] += json{ { "model", model.mesh != nullptr ? model.mesh.get()->name: "NO MESH" }, 
+			if (entity.entities[i].namePrefab != "NONE")
+			{
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameMesh != model.mesh.get()->name)
+					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size()]["model"] = model.mesh.get()->name;
+				else
+					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size()]["model"] = 0;
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameTexture != model.texture.get()->name)
+					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["texture"] = model.texture.get()->name;
+				else
+					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["texture"] = 0;
+			}
+			else
+			{
+				js["ComponentHandler"]["Model"] += json{ { "model", model.mesh != nullptr ? model.mesh.get()->name : "NO MESH" },
 												{ "shader", "default" },
-												{ "texture", model.texture != nullptr ? model.texture.get()->name: "NO TEXTURE" } };
+												{ "texture", model.texture != nullptr ? model.texture.get()->name : "NO TEXTURE" } };
+			}
 		}
 	}
 }
 
 
-void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene& actScene)
+void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene& actScene, Cookie::Resources::ResourcesManager& resourcesManager)
 {
 	std::ofstream file(actScene.filepath);
 
@@ -70,7 +96,7 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 
 		//Components
 		{
-			Cookie::Resources::Serialization::Save::ToJson(js, actScene.entityHandler, actScene.componentHandler);
+			Cookie::Resources::Serialization::Save::ToJson(js, actScene.entityHandler, actScene.componentHandler, resourcesManager);
 		}
 	}
 
@@ -86,6 +112,7 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 	 json js;
 
 	 js["Mesh"] = prefab->nameMesh;
+	 js["Signature"] = prefab->signature;
 	 js["Name"] = prefab->name;
 	 js["Rotation"] = prefab->rotation.e;
 	 js["Scale"] = prefab->scale.e;
@@ -96,7 +123,7 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 	 file << std::setw(4) << js << std::endl;
  }
 
- void Cookie::Resources::Serialization::Save::SaveAllPrefabs(Cookie::Resources::ResourcesManager resourcesManager)
+ void Cookie::Resources::Serialization::Save::SaveAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager)
  {
 	 for (std::unordered_map<std::string, std::shared_ptr<Prefab>>::iterator prefab = resourcesManager.prefabs.begin(); prefab != resourcesManager.prefabs.end(); prefab++)
 		 Resources::Serialization::Save::SavePrefab(prefab->second);
@@ -108,7 +135,12 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
  void Cookie::Resources::Serialization::Load::FromJson(json& js, Cookie::ECS::EntityHandler& entity)
  {
 	 for (int i = 0; i < entity.livingEntities; i++)
-		 entity.entities[i] = (Cookie::ECS::Entity(js["EntityHandler"][i].at("entity").at("id").get<int>(), js["EntityHandler"][i].at("entity").at("signature").get<int>(), js["EntityHandler"][i].at("entity").at("name").get<std::string>()));
+	 {
+		 json newEntity = js["EntityHandler"][i].at("entity");
+		 entity.entities[i] = (Cookie::ECS::Entity(newEntity.at("id").get<int>(), newEntity.at("signature").get<int>(), 
+								newEntity.at("name").get<std::string>(), newEntity.at("namePrefab").get<std::string>()));
+		 entity.entities[i].namePrefab = newEntity.at("namePrefab").get<std::string>();
+	 }
  }
 
  void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager)
@@ -118,16 +150,37 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 		 if (entity.entities[i].signature & SIGNATURE_TRANSFORM)
 		 {
 			 Cookie::ECS::ComponentTransform transform;
-			 js["ComponentHandler"]["Transform"][i].at("localTRS").at("translate").get_to(transform.localTRS.pos.e);
-			 js["ComponentHandler"]["Transform"][i].at("localTRS").at("rotation").get_to(transform.localTRS.rot.e);
-			 js["ComponentHandler"]["Transform"][i].at("localTRS").at("scale").get_to(transform.localTRS.scale.e);
+			 json TRS = js["ComponentHandler"]["Transform"][i].at("localTRS");
+			 TRS.at("translate").get_to(transform.localTRS.pos.e);
+			 
+			 if (TRS.contains("rotation"))
+				 TRS.at("rotation").get_to(transform.localTRS.rot.e);
+			 else
+				 transform.localTRS.rot = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->rotation;
+			 
+			 if (TRS.contains("scale"))
+				TRS.at("scale").get_to(transform.localTRS.scale.e);
+			 else
+				 transform.localTRS.scale = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->scale;
+			 
 			 component.componentTransforms[entity.entities[i].id].localTRS = transform.localTRS;
 		 }
 		 if (entity.entities[i].signature & SIGNATURE_MODEL)
 		 {
 			 std::string test;
-			 component.componentModels[entity.entities[i].id].mesh = resourcesManager.meshes[(js["ComponentHandler"]["Model"][i].at("model").get<std::string>())];
-			 component.componentModels[entity.entities[i].id].texture = resourcesManager.textures[(js["ComponentHandler"]["Model"][i].at("texture").get<std::string>())];
+			 json model = js["ComponentHandler"]["Model"][i];
+			 if (model.at("model").is_string())
+				component.componentModels[entity.entities[i].id].mesh = resourcesManager.meshes[(model.at("model").get<std::string>())];
+			 else if (entity.entities[i].namePrefab != "NONE")
+				 component.componentModels[entity.entities[i].id].mesh =
+						resourcesManager.meshes[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameMesh];
+
+			 if (model.at("texture").is_string())
+				component.componentModels[entity.entities[i].id].texture = resourcesManager.textures[(model.at("texture").get<std::string>())];
+			 else
+				 component.componentModels[entity.entities[i].id].texture = 
+									resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameTexture];
+
 			 component.componentModels[entity.entities[i].id].shader = resourcesManager.shaders["dfltShader"];//resourcesManager.GetMesh(js["ComponentHandler"]["Model"][i].at("shader").get<std::string>());
 		 }
 	 }
@@ -250,6 +303,9 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 
 		 if (js.contains("Script"))
 			 newPrefab.nameScript = js["Script"];
+
+		 if (js.contains("Signature"))
+			 newPrefab.signature = js["Signature"];
 
 		 newPrefab.filepath = filesPath[i];
 

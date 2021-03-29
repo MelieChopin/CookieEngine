@@ -4,6 +4,7 @@
 #include "Resources/Loader.hpp"
 #include "Resources/ResourcesManager.hpp"
 #include "Core/Primitives.hpp"
+#include "Resources/Prefab.hpp"
 
 
 using namespace Cookie::Resources;
@@ -66,5 +67,21 @@ void ResourcesManager::Load(Render::Renderer& _renderer)
 		loader.Load(gltfFiles.at(i).c_str(),*this,_renderer);
 		printf("%s\n", gltfFiles.at(i).c_str());
 	}
+}
+
+void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandler& component)
+{
+	Prefab newPrefab;
+
+	newPrefab.name = entity.name;
+	newPrefab.nameMesh = component.componentModels[entity.id].mesh->name;
+	newPrefab.nameShader = "default";//component.componentModels[entity.id].shader->name;
+	newPrefab.nameTexture = component.componentModels[entity.id].texture->name;
+	newPrefab.signature = entity.id;
+	newPrefab.rotation = component.componentTransforms[entity.id].localTRS.rot;
+	newPrefab.scale = component.componentTransforms[entity.id].localTRS.scale;
+	newPrefab.filepath = "Assets/Prefabs" + entity.name + ".PAsset";
+
+	entity.namePrefab = entity.name;
 }
 

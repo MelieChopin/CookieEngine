@@ -18,6 +18,7 @@ namespace Cookie
 	namespace ECS
 	{
 		class ComponentHandler;
+		class Entity;
 	}
 
 	namespace Resources
@@ -49,6 +50,8 @@ namespace Cookie
 						if (!(scrIt->second->isUpToDate()))
 							scrIt->second->UpdateContent();
 				}
+
+				void CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandler& component);
 		};
 	}
 }

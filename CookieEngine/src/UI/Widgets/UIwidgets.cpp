@@ -24,7 +24,7 @@ void SaveButton::ItemDisplay()
 {
 	if (visible && MenuItem(itemName, shortcutSeq))
 	{
-		Cookie::Resources::Serialization::Save::SaveScene(*activeScene);
+		Cookie::Resources::Serialization::Save::SaveScene(*activeScene, resourceManager);
 	}
 }
 

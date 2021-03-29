@@ -34,11 +34,11 @@ namespace Cookie
 			namespace Save
 			{
 				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity);
-				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component);
+				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager);
 
-				void SaveScene(Cookie::Resources::Scene& actScene);
+				void SaveScene(Cookie::Resources::Scene& actScene, Cookie::Resources::ResourcesManager& resourcesManager);
 				void SavePrefab(const std::shared_ptr<Prefab>& prefab);
-				void SaveAllPrefabs(Cookie::Resources::ResourcesManager resourcesManager);
+				void SaveAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
 			}
 
 			namespace Load

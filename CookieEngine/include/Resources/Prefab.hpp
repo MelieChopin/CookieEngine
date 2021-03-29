@@ -12,14 +12,14 @@ namespace Cookie
 		{
 		public:
 			std::string			name		= "No Name";
-
-			std::string			nameMesh	= "No Mesh";
-			std::string			nameTexture = "No Testure";
-			std::string			nameShader	= "No Shader";
+			std::string			nameMesh	= "Null";
+			std::string			nameTexture = "Null";
+			std::string			nameShader	= "Null";
+			std::string			nameScript	= "Null";
+			std::string			filepath	= "Null";
 			Core::Math::Vec3	rotation;
 			Core::Math::Vec3	scale;
-			std::string			nameScript	= "No Script";
-			std::string			filepath	= "No File";
+			int					signature	= 0;
 
 			Prefab() {}
 			Prefab(const std::string& _name) : name{ _name }  {}
