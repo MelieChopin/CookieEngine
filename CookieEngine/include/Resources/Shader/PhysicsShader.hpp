@@ -28,7 +28,7 @@ namespace Cookie
 				PhysicsShader(std::string _name);
 				virtual ~PhysicsShader();
 
-				virtual void Set(const Core::Math::Mat4& projMat, const Core::Math::Mat4& viewMat)override;
+				virtual void Set(const Core::Math::Mat4& projMat, const Core::Math::Mat4& viewMat = Core::Math::Mat4::Identity())override;
 		};
 	}
 }

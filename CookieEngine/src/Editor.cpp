@@ -66,9 +66,11 @@ Editor::Editor()
             iPhysics.physBody = game.scene->physSim.worldSim->createRigidBody(game.coordinator.componentHandler->componentTransforms[i].physTransform);
             iPhysics.physBody->setType(rp3d::BodyType::DYNAMIC);
 
-            iPhysics.AddSphereCollider(1.0f, { 0.0f,0.0f,0.0f }, {0.0f,0.0f,0.0f});
+            iPhysics.AddSphereCollider(2.0f, { 0.5f,1.5f,0.0f }, {0.0f,0.0f,0.0f});
         }
     }
+
+    dbgRenderer.SetPhysicsRendering();
 }
 
 Editor::~Editor()
@@ -106,12 +108,14 @@ void Editor::Loop()
             dbgRenderer.SetPhysicsRendering();
         }
 
+        physHandle.physSim->update(1.0e-7f);
+
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_H) == GLFW_PRESS)
             Resources::Serialization::Save::SaveScene(*game.scene);
 
         game.renderer.Draw(cam.GetViewProj(), game.coordinator);
 
-        dbgRenderer.Draw();
+        dbgRenderer.Draw(cam.GetViewProj());
 
         game.renderer.SetBackBuffer();
 

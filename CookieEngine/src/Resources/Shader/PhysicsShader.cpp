@@ -40,15 +40,15 @@ std::string PhysicsShader::GetVertexSource()
     return (const char*)R"(struct VOut
     {
         float4 position : SV_POSITION;
-        float  color : COLOR
+        uint  color : COLOR;
     };
-    
+
     cbuffer VS_CONSTANT_BUFFER : register(b0)
     {
         float4x4  viewProj;
     };
     
-    VOut main(float3 position : POSITION, float color : COLOR)
+    VOut main(float3 position : POSITION, uint color : COLOR)
     {
         VOut output;
     
@@ -57,16 +57,20 @@ std::string PhysicsShader::GetVertexSource()
     
         return output;
 
-    })";
+    }
+    )";
 }
 
 std::string PhysicsShader::GetPixelSource()
 {
     return (const char*)R"(
-
-    float4 main(float4 position : SV_POSITION, float color : COLOR) : SV_TARGET
+    float4 main(float4 position : SV_POSITION, uint color : COLOR) : SV_TARGET
     {
-        return color;
+        float3 finalColor;
+        finalColor.r = floor(color / 65536);
+        finalColor.g = floor((color - finalColor.r * 65536) / 256.0);
+        finalColor.b = floor(color - finalColor.r * 65536 - finalColor.g * 256.0);
+        return float4(finalColor,1.0);
     })";
 }
 
@@ -119,7 +123,7 @@ bool PhysicsShader::CreateLayout(ID3DBlob** VS)
     D3D11_INPUT_ELEMENT_DESC ied[] =
     {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(rp3d::DebugRenderer::DebugTriangle,point1), D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"UV", 0, DXGI_FORMAT_R32_FLOAT, 0,  offsetof(rp3d::DebugRenderer::DebugTriangle,color1), D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"COLOR", 0, DXGI_FORMAT_R32_FLOAT, 0,  offsetof(rp3d::DebugRenderer::DebugTriangle,color1), D3D11_INPUT_PER_VERTEX_DATA, 0},
     };
 
     if (FAILED(Render::RendererRemote::device->CreateInputLayout(ied, 2, (*VS)->GetBufferPointer(), (*VS)->GetBufferSize(), &layout)))
@@ -142,7 +146,7 @@ bool PhysicsShader::CreateBuffer()
     bDesc.MiscFlags = 0;
     bDesc.StructureByteStride = 0;
 
-    VS_CONSTANT_BUFFER buffer;
+    VS_CONSTANT_BUFFER buffer = {};
 
     D3D11_SUBRESOURCE_DATA InitData;
     InitData.pSysMem = &buffer;
