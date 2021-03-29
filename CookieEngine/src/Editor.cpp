@@ -113,11 +113,11 @@ void Editor::Loop()
 
         physHandle.physSim->update(1.0e-7f);
 
-        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_H) == GLFW_PRESS)
+        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
             Resources::Serialization::Save::SaveScene(*game.scene, game.resources);
 
         ////TEMP
-        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
+        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_H) == GLFW_PRESS)
         {
             std::string duck = "Duck";
             game.coordinator.componentHandler->ModifyComponentOfEntityToPrefab(game.coordinator.entityHandler->entities[1], game.resources, duck);

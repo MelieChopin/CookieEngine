@@ -155,12 +155,12 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 			 
 			 if (TRS.contains("rotation"))
 				 TRS.at("rotation").get_to(transform.localTRS.rot.e);
-			 else
+			 else if (entity.entities[i].namePrefab != "NONE")
 				 transform.localTRS.rot = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->rotation;
 			 
 			 if (TRS.contains("scale"))
 				TRS.at("scale").get_to(transform.localTRS.scale.e);
-			 else
+			 else if (entity.entities[i].namePrefab != "NONE")
 				 transform.localTRS.scale = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->scale;
 			 
 			 component.componentTransforms[entity.entities[i].id].localTRS = transform.localTRS;
@@ -177,7 +177,7 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 
 			 if (model.at("texture").is_string())
 				component.componentModels[entity.entities[i].id].texture = resourcesManager.textures[(model.at("texture").get<std::string>())];
-			 else
+			 else if (entity.entities[i].namePrefab != "NONE")
 				 component.componentModels[entity.entities[i].id].texture = 
 									resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameTexture];
 
