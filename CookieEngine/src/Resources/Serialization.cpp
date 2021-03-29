@@ -56,11 +56,15 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["texture"] = model.texture.get()->name;
 				else
 					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["texture"] = 0;
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameShader != model.shader.get()->name)
+					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["shader"] = model.shader.get()->name;
+				else
+					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["shader"] = 0;
 			}
 			else
 			{
 				js["ComponentHandler"]["Model"] += json{ { "model", model.mesh != nullptr ? model.mesh.get()->name : "NO MESH" },
-												{ "shader", "default" },
+												{ "shader", model.shader.get()->name },
 												{ "texture", model.texture != nullptr ? model.texture.get()->name : "NO TEXTURE" } };
 			}
 		}
@@ -181,7 +185,11 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 				 component.componentModels[entity.entities[i].id].texture = 
 									resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameTexture];
 
-			 component.componentModels[entity.entities[i].id].shader = resourcesManager.shaders["Texture_Shader"];//resourcesManager.GetMesh(js["ComponentHandler"]["Model"][i].at("shader").get<std::string>());
+			 if (model.at("shader").is_string())
+				component.componentModels[entity.entities[i].id].shader = resourcesManager.shaders[model.at("shader").get<std::string>()];
+			 else if (entity.entities[i].namePrefab != "NONE")
+				 component.componentModels[entity.entities[i].id].shader =
+									resourcesManager.shaders[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameShader];
 		 }
 	 }
  }
