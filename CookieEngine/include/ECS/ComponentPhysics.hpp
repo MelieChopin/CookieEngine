@@ -2,6 +2,7 @@
 #define __COMPONENT_PHYSICS_HPP__
 
 #include <reactphysics3d/reactphysics3d.h>
+#include "Physics/PhysicsHandle.hpp"
 
 namespace Cookie
 {
@@ -18,9 +19,9 @@ namespace Cookie
 				ComponentPhysics() {}
 				~ComponentPhysics() {}
 
-			inline void AddSphereCollider(std::shared_ptr<reactphysics3d::PhysicsCommon> physCom, float radius, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles)
+			inline void AddSphereCollider(float radius, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles)
 			{
-				reactphysics3d::SphereShape* sphere = physCom->createSphereShape(radius);
+				reactphysics3d::SphereShape* sphere = Physics::PhysicsHandle().physCom->createSphereShape(radius);
 				
 				reactphysics3d::Transform trs;
 
@@ -33,9 +34,9 @@ namespace Cookie
 				physColliders.push_back(physBody->addCollider(sphere, trs));
 			}
 
-			inline void AddCubeCollider(std::shared_ptr<reactphysics3d::PhysicsCommon> physCom, const Core::Math::Vec3& halfExtent, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles)
+			inline void AddCubeCollider(const Core::Math::Vec3& halfExtent, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles)
 			{
-				reactphysics3d::BoxShape* cube = physCom->createBoxShape({halfExtent.x,halfExtent.y,halfExtent.z});
+				reactphysics3d::BoxShape* cube = Physics::PhysicsHandle().physCom->createBoxShape({halfExtent.x,halfExtent.y,halfExtent.z});
 
 				reactphysics3d::Transform trs;
 
@@ -48,9 +49,9 @@ namespace Cookie
 				physColliders.push_back(physBody->addCollider(cube, trs));
 			}
 
-			inline void AddCapsuleCollider(std::shared_ptr<reactphysics3d::PhysicsCommon> physCom, const Core::Math::Vec2& capsuleInfo, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles)
+			inline void AddCapsuleCollider(const Core::Math::Vec2& capsuleInfo, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles)
 			{
-				reactphysics3d::CapsuleShape* capsule = physCom->createCapsuleShape(capsuleInfo.x,capsuleInfo.y);
+				reactphysics3d::CapsuleShape* capsule = Physics::PhysicsHandle().physCom->createCapsuleShape(capsuleInfo.x,capsuleInfo.y);
 
 				reactphysics3d::Transform trs;
 

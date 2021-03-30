@@ -10,7 +10,6 @@ namespace Cookie
 		class PhysicsSimulator
 		{
 			private:
-				std::shared_ptr<reactphysics3d::PhysicsCommon> physCreator	{nullptr};
 				float accumulator = 0.f;
 
 			public:
@@ -20,7 +19,7 @@ namespace Cookie
 				float factor		= 0.f;
 
 
-				PhysicsSimulator(std::shared_ptr<reactphysics3d::PhysicsCommon> _physCreator);
+				PhysicsSimulator();
 				~PhysicsSimulator();
 
 				void Update();

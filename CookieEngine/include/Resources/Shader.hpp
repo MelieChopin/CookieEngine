@@ -21,32 +21,30 @@ namespace Cookie
 	{
 		class Shader
 		{
-			private:
+			protected:
 				ID3D11VertexShader* VShader = nullptr;
 				ID3D11PixelShader*	PShader = nullptr;
 				ID3D11InputLayout*	layout	= nullptr;
 				ID3D11Buffer*		CBuffer = nullptr;
 
-			private:
-				bool CompileDefaultVertex(Render::Renderer& _renderer,ID3DBlob** VS);
-				bool CompileDefaultPixel(Render::Renderer& _renderer);
-
-				bool CreateDefaultLayout(Render::Renderer& _renderer,ID3DBlob** VS);
-				bool CreateDefaultBuffer(Render::Renderer& _renderer);
-
-				std::string GetDefaultVertexSource();
-				std::string GetDefaultPixelSource();
-
-				bool CompileVertex(Render::Renderer& _renderer, ID3DBlob** VS, std::string VShaderPath);
-				bool CompilePixel(Render::Renderer& _renderer, std::string PShaderPath);
+			protected:
+				virtual bool CompileVertex(ID3DBlob** VS) = 0;
+				virtual bool CompilePixel() = 0;
+				 
+				virtual bool CreateLayout(ID3DBlob** VS) = 0;
+				virtual bool CreateBuffer() = 0;
+				 
+				virtual std::string GetVertexSource() = 0;
+				virtual std::string GetPixelSource() = 0;
 
 			public:
-				/* CONSTRUCTORS/DESTRUCTORS */
-				Shader(Render::Renderer& _renderer);
-				Shader(Render::Renderer& _renderer, std::string VShaderPath, std::string PShaderPath);
-				~Shader();
+				std::string name;
 
-				void Set(Render::RendererRemote& remote, const Core::Math::Mat4& projMat, const Core::Math::Mat4& viewMat);
+				/* CONSTRUCTORS/DESTRUCTORS */
+				Shader(std::string _name) :name{ _name } {}
+				virtual ~Shader() {}
+
+				virtual void Set(const Core::Math::Mat4& projMat, const Core::Math::Mat4& viewMat) = 0;
 		};
 	}
 }

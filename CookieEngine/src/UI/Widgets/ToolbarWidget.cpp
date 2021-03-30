@@ -11,14 +11,14 @@ using namespace Cookie::UIwidget;
 Toolbar::Toolbar(Cookie::Render::Renderer& _renderer)
 	: WindowBase	("##TOOLBAR")
 {
-	icons[(int)ToolbarIcons::Translator]	= std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/translate.ico");
-	icons[(int)ToolbarIcons::Rotator]		= std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/rotate.ico");
-	icons[(int)ToolbarIcons::Scaler]		= std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/zoom.ico");
-	icons[(int)ToolbarIcons::Quader]		= std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/quad.ico");
-	icons[(int)ToolbarIcons::Play]			= std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/play.ico");
-	icons[(int)ToolbarIcons::Stop]			= std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/stop.ico");
-	icons[(int)ToolbarIcons::Pause]			= std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/pause.ico");
-	icons[(int)ToolbarIcons::Frame]			= std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/frame.ico");
+	icons[(int)ToolbarIcons::Translator]	= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/translate.ico");
+	icons[(int)ToolbarIcons::Rotator]		= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/rotate.ico");
+	icons[(int)ToolbarIcons::Scaler]		= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/zoom.ico");
+	icons[(int)ToolbarIcons::Quader]		= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/quad.ico");
+	icons[(int)ToolbarIcons::Play]			= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/play.ico");
+	icons[(int)ToolbarIcons::Stop]			= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/stop.ico");
+	icons[(int)ToolbarIcons::Pause]			= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/pause.ico");
+	icons[(int)ToolbarIcons::Frame]			= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/frame.ico");
 }
 
 bool Toolbar::BeginWindow(int windowFlags)

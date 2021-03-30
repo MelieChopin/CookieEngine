@@ -5,7 +5,7 @@
 #include "Mat4.hpp"
 #include "Render/Renderer.hpp"
 #include "Render/RendererRemote.hpp"
-#include "Resources/Shader.hpp"
+#include "Resources/Shader/TextureShader.hpp"
 
 using namespace Cookie::Resources;
 
@@ -15,25 +15,17 @@ struct VS_CONSTANT_BUFFER
     Cookie::Core::Math::Mat4 modelMat = Cookie::Core::Math::Mat4::Identity();
 };
 
-Shader::Shader(Render::Renderer& _renderer)
+TextureShader::TextureShader(std::string _name):
+    Shader(_name)
 {
     ID3DBlob* VS;
 
-    if (CompileDefaultVertex(_renderer, &VS) && CompileDefaultPixel(_renderer))
-        if (CreateDefaultLayout(_renderer, &VS))
-            CreateDefaultBuffer(_renderer);
+    if (CompileVertex(&VS) && CompilePixel())
+        if (CreateLayout(&VS))
+            CreateBuffer();
 }
 
-Shader::Shader(Render::Renderer& _renderer, std::string VShaderPath, std::string PShaderPath)
-{
-    ID3DBlob* VS;
-
-    if (CompileVertex(_renderer,&VS,VShaderPath) && CompilePixel(_renderer,PShaderPath))
-        if (CreateDefaultLayout(_renderer, &VS))
-            CreateDefaultBuffer(_renderer);
-}
-
-Shader::~Shader()
+TextureShader::~TextureShader()
 {
     if (PShader)
         PShader->Release();
@@ -43,7 +35,7 @@ Shader::~Shader()
         layout->Release();
 }
 
-std::string Shader::GetDefaultVertexSource()
+std::string TextureShader::GetVertexSource()
 {
 	return (const char*)R"(struct VOut
     {
@@ -71,7 +63,7 @@ std::string Shader::GetDefaultVertexSource()
     })";
 }
 
-std::string Shader::GetDefaultPixelSource()
+std::string TextureShader::GetPixelSource()
 {
 	return (const char*)R"(
 
@@ -92,10 +84,10 @@ std::string Shader::GetDefaultPixelSource()
 
 
 
-bool Shader::CompileDefaultVertex(Render::Renderer& _renderer, ID3DBlob** VS)
+bool TextureShader::CompileVertex(ID3DBlob** VS)
 {
     ID3DBlob* VSErr;
-    std::string source = GetDefaultVertexSource();
+    std::string source = GetVertexSource();
 
     if (FAILED(D3DCompile(source.c_str(), source.length(), nullptr, nullptr, nullptr, "main", "vs_5_0", 0, 0, VS, &VSErr)))
     {
@@ -103,15 +95,21 @@ bool Shader::CompileDefaultVertex(Render::Renderer& _renderer, ID3DBlob** VS)
         return false;
     }
 
-    return _renderer.CreateVertexBuffer(&VShader,VS);
+    if (FAILED(Render::RendererRemote::device->CreateVertexShader((*VS)->GetBufferPointer(), (*VS)->GetBufferSize(), NULL, &VShader)))
+    {
+        printf("Failed Creating Vertex Shader \n");
+        return false;
+    }
+
+    return true;
 }
 
-bool Shader::CompileDefaultPixel(Render::Renderer& _renderer)
+bool TextureShader::CompilePixel()
 {
     ID3DBlob* PS;
     ID3DBlob* PSErr;
 
-    std::string source = GetDefaultPixelSource();
+    std::string source = GetPixelSource();
 
     if (FAILED(D3DCompile(source.c_str(), source.length(), nullptr, nullptr, nullptr, "main", "ps_5_0", 0, 0, &PS, &PSErr)))
     {
@@ -119,10 +117,16 @@ bool Shader::CompileDefaultPixel(Render::Renderer& _renderer)
         return false;
     }
 
-    return _renderer.CreatePixelBuffer(&PShader, &PS);
+    if (FAILED(Render::RendererRemote::device->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &PShader)))
+    {
+        printf("Failed Creating Pixel Shader \n");
+        return false;
+    }
+
+    return true;
 }
 
-bool Shader::CreateDefaultLayout(Render::Renderer& _renderer, ID3DBlob** VS)
+bool TextureShader::CreateLayout(ID3DBlob** VS)
 {
     struct Vertex
     {
@@ -139,7 +143,7 @@ bool Shader::CreateDefaultLayout(Render::Renderer& _renderer, ID3DBlob** VS)
         {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, normal), D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
 
-    if (FAILED(_renderer.GetDevice()->CreateInputLayout(ied, 3, (*VS)->GetBufferPointer(), (*VS)->GetBufferSize(), &layout)))
+    if (FAILED(Render::RendererRemote::device->CreateInputLayout(ied, 3, (*VS)->GetBufferPointer(), (*VS)->GetBufferSize(), &layout)))
     {
         printf("FAILED to create input layout \n");
         return false;
@@ -148,7 +152,7 @@ bool Shader::CreateDefaultLayout(Render::Renderer& _renderer, ID3DBlob** VS)
     return true;
 }
 
-bool Shader::CreateDefaultBuffer(Render::Renderer& _renderer)
+bool TextureShader::CreateBuffer()
 {
     D3D11_BUFFER_DESC bDesc = {};
 
@@ -166,64 +170,34 @@ bool Shader::CreateDefaultBuffer(Render::Renderer& _renderer)
     InitData.SysMemPitch = 0;
     InitData.SysMemSlicePitch = 0;
 
-    if (FAILED(_renderer.CreateBuffer(bDesc, InitData, &CBuffer)))
+    if (FAILED(Render::RendererRemote::device->CreateBuffer(&bDesc, &InitData, &CBuffer)))
     {
-        printf("Failed Creating Buffer: %p \n", (CBuffer));
+        printf("Failed Creating Buffer: %p of size %llu \n", CBuffer, sizeof(InitData.pSysMem));
         return false;
     }
 
     return true;
 }
 
-bool Shader::CompileVertex(Render::Renderer& _renderer, ID3DBlob** VS, std::string VShaderPath)
+void TextureShader::Set(const Core::Math::Mat4& viewProj, const Core::Math::Mat4& model)
 {
-    ID3DBlob* VSErr;
-
-    if (FAILED(D3DCompileFromFile((LPCWSTR)VShaderPath.c_str(), nullptr, nullptr, "main", "vs_5_0", 0, 0, VS, &VSErr)))
-    {
-        printf("%s\n", (const char*)(VSErr->GetBufferPointer()));
-        return false;
-    }
-
-    return _renderer.CreateVertexBuffer(&VShader, VS);
-}
-
-bool Shader::CompilePixel(Render::Renderer& _renderer, std::string PShaderPath)
-{
-
-    ID3DBlob* PS;
-    ID3DBlob* PSErr;
-
-    if (FAILED(D3DCompileFromFile((LPCWSTR)PShaderPath.c_str(), nullptr, nullptr, "main", "ps_5_0", 0, 0, &PS, &PSErr)))
-    {
-        printf("%s\n", (const char*)(PSErr->GetBufferPointer()));
-        return false;
-    }
-
-    return _renderer.CreatePixelBuffer(&PShader, &PS);
-}
-
-void Shader::Set(Render::RendererRemote& remote, const Core::Math::Mat4& viewProj, const Core::Math::Mat4& model)
-{
-    remote.context->VSSetShader(VShader, nullptr, 0);
-    remote.context->PSSetShader(PShader, nullptr, 0);
+    Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
+    Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
 
     D3D11_MAPPED_SUBRESOURCE ms;
 
-    if (FAILED(remote.context->Map(CBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms)))
+    if (FAILED(Render::RendererRemote::context->Map(CBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms)))
     {
         printf("Failed to update Buffer nb %u: %p\n", 0, CBuffer);
         return;
     }
 
-
-
     VS_CONSTANT_BUFFER vcb = { viewProj,model };
 
     memcpy(ms.pData, &vcb, sizeof(vcb));
 
-    remote.context->Unmap(CBuffer, 0);
+    Render::RendererRemote::context->Unmap(CBuffer, 0);
 
-    remote.context->IASetInputLayout(layout);
-    remote.context->VSSetConstantBuffers(0, 1, &CBuffer);
+    Render::RendererRemote::context->IASetInputLayout(layout);
+    Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
 }

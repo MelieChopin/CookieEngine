@@ -21,6 +21,7 @@ include_directories("${INC_DIR}/UI/Widgets/")
 include_directories("${INC_DIR}/Render/")
 include_directories("${INC_DIR}/ECS/")
 include_directories("${INC_DIR}/Resources/")
+include_directories("${INC_DIR}/Gameplay/")
 include_directories("${DEPS_INC_DIR}/ImGui/")
 include_directories("${DEPS_INC_DIR}/ImGuizmo/")
 include_directories("${DEPS_INC_DIR}/")
@@ -68,13 +69,14 @@ set (SRC_FILES
     "${SRC_DIR}/Core/Window.cpp"
     
     "${SRC_DIR}/Render/Renderer.cpp"
+    "${SRC_DIR}/Render/DebugRenderer.cpp"
     "${SRC_DIR}/Render/RendererRemote.cpp"
     "${SRC_DIR}/Render/FrameBuffer.cpp"
     
     "${SRC_DIR}/Resources/Loader.cpp" 
     "${SRC_DIR}/Resources/ResourcesManager.cpp"
     "${SRC_DIR}/Resources/Mesh.cpp"
-    "${SRC_DIR}/Resources/Shader.cpp"
+    "src/Resources/Shader/TextureShader.cpp"
     "${SRC_DIR}/Resources/Texture.cpp"
     "${SRC_DIR}/Resources/Scene.cpp"
     "${SRC_DIR}/Resources/Tiles.cpp"
@@ -94,9 +96,11 @@ set (SRC_FILES
     
     "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
 
+    "${SRC_DIR}/ECS/ComponentHandler.cpp"
+
     "${SRC_DIR}/Editor.cpp" 
     "${SRC_DIR}/Game.cpp"
-    )
+     "src/Resources/Shader/PhysicsShader.cpp")
 
 set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
         "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/lua54.dll")
@@ -104,7 +108,7 @@ set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
 # Ajoutez une source à l'exécutable de ce projet.
-add_executable (CookieEngine ${SUB_SYS} ${SRC_FILES} )
+add_executable (CookieEngine ${SUB_SYS} ${SRC_FILES})
 
 set_target_properties(CookieEngine PROPERTIES CXX_STANDARD 17)
 

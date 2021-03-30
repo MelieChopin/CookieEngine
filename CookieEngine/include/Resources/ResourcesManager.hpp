@@ -18,10 +18,13 @@ namespace Cookie
 	namespace ECS
 	{
 		class ComponentHandler;
+		class Entity;
 	}
 
 	namespace Resources
 	{
+		class Prefab;
+
 		class ResourcesManager
 		{
 			public:
@@ -29,9 +32,12 @@ namespace Cookie
 				std::unordered_map<std::string, std::shared_ptr<Shader>>	shaders;
 				std::unordered_map<std::string, std::shared_ptr<Texture>>	textures;
 				std::unordered_map<std::string, std::shared_ptr<Script>>	scripts;
-
+				std::unordered_map<std::string, std::shared_ptr<Prefab>>	prefabs;
+				
 			private:
 				void SearchForGltf(const fs::path& path, std::vector<std::string>& gltfFiles);
+
+				void InitShaders();
 				
 			public: 
 				ResourcesManager();
@@ -46,6 +52,8 @@ namespace Cookie
 						if (!(scrIt->second->isUpToDate()))
 							scrIt->second->UpdateContent();
 				}
+
+				void CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandler& component);
 		};
 	}
 }

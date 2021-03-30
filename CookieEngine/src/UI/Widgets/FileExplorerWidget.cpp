@@ -20,7 +20,7 @@ FileExplorer::FileExplorer(Cookie::Render::Renderer& _renderer, Cookie::Game& _g
               game          (_game),
               selectedEntity(_selectedEntity)
 {
-    saveIcon = std::make_unique<Cookie::Resources::Texture>(_renderer, "Assets/EditorUIcons/Save2.ico");
+    saveIcon = std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/Save2.ico");
 }
 
 void FileExplorer::ExploreFiles(const fs::path& path, const char* researchQuery)const
