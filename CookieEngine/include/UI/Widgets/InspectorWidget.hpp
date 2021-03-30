@@ -6,27 +6,50 @@
 namespace Cookie::Resources  { class ResourcesManager; }
 namespace Cookie::ECS		 { class Coordinator; class Entity; }
 namespace Cookie::Core::Math { union Vec2; }
+namespace reactphysics3d	 { class Collider; }
 
 
 namespace Cookie::UIwidget
 {
 	class Inspector final : public WItemBase
 	{
-		Cookie::ECS::Entity*&		selectedEntity;
+		Cookie::ECS::Entity*&	selectedEntity;
+		Cookie::ECS::Entity*	recordedEntity = nullptr;
 	
 		Cookie::Resources::ResourcesManager& resources;
 		Cookie::ECS::Coordinator& coordinator;
 
 		Physics::PhysicsSimulator& physSim;
+		reactphysics3d::Collider* selectedCollider = nullptr;
+
 
 	private:
+		// Starter of the entity analysis. Determines what component it has and allows sub-sections to display, and also allows to add new components.
 		void EntityInspection();
 
+		// Basic interface for the Transform:
+		// Allows live editing of the position, rotation, and scale.
 		void TransformInterface();
+
+		// Allows live editing of the current model used by the entity, as well as it's texture.
 		void ModelInterface();
+
+		/*
+			Advanced interface:
+				- Allows tp edit colliders after selected from the display list,
+				- Allows to add/remove colliders,
+				- Provides many options to edit the rigibody/entity as well.
+
+			Fair warning for your sanity: the interface is very, very long. Refer yourself to the other comments to know where you are inside!
+		*/
 		void PhysicsInterface();
+
+		// Allows live/hot-swapping of the scripts in-use by the entity.
 		void ScriptInterface();
+		
+		// Allows editing of different parameters used exclusively by map entities.
 		void MapInterface();
+
 
 		void SceneInspection();
 
