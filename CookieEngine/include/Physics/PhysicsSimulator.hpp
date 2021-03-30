@@ -23,8 +23,6 @@ namespace Cookie
 				~PhysicsSimulator();
 
 				void Update();
-
-				const std::shared_ptr<reactphysics3d::PhysicsCommon> GetSharedCommon() const { return physCreator; };
 		};
 	}
 }

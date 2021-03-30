@@ -297,7 +297,7 @@ void Inspector::PhysicsInterface()
             {
                 if (Button("Add a sphere collider"))
                 { 
-                    physicComp.AddSphereCollider(physSim.GetSharedCommon(), 1, {0, 0, 0}, {0, 0, 0});
+                    physicComp.AddSphereCollider(1, {0, 0, 0}, {0, 0, 0});
                 
                     selectedCollider = colliders.back();
                     CloseCurrentPopup();
@@ -305,7 +305,7 @@ void Inspector::PhysicsInterface()
 
                 if (Button("Add a box collider"))
                 {
-                    physicComp.AddCubeCollider(physSim.GetSharedCommon(), {1, 1, 1}, { 0, 0, 0 }, { 0, 0, 0 });
+                    physicComp.AddCubeCollider({1, 1, 1}, { 0, 0, 0 }, { 0, 0, 0 });
                 
                     selectedCollider = colliders.back();
                     CloseCurrentPopup();
@@ -313,7 +313,7 @@ void Inspector::PhysicsInterface()
 
                 if (Button("Add a capsule collider"))
                 {
-                    physicComp.AddCapsuleCollider(physSim.GetSharedCommon(), {1, 1}, { 0, 0, 0 }, { 0, 0, 0 });
+                    physicComp.AddCapsuleCollider({1, 1}, { 0, 0, 0 }, { 0, 0, 0 });
                 
                     selectedCollider = colliders.back();
                     CloseCurrentPopup();
