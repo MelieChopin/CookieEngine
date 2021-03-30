@@ -14,6 +14,7 @@ Editor::Editor()
     cam.SetProj(Core::Math::ToRadians(60.f), game.renderer.state.viewport.Width, game.renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
     cam.rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
+
     cam.ResetPreviousMousePos();
     cam.Update();
     cam.Deactivate();
@@ -43,7 +44,7 @@ Editor::Editor()
 
     ui.AddWItem(new UIwidget::TextureEditor(game.renderer, game.resources), 1);
 
-    ui.AddWItem(new UIwidget::FileExplorer(game.renderer, game, selectedEntity), 2);
+    ui.AddWItem(new UIwidget::FileExplorer(game.renderer, game), 2);
 
     ui.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator, game.scene->physSim), 2);
 
@@ -72,13 +73,41 @@ Editor::Editor()
         }
     }
 
+    Physics::PhysicsHandle::editWorld = Physics::PhysicsHandle::physCom->createPhysicsWorld();
+    InitEditComp();
     dbgRenderer.SetPhysicsRendering();
+    Physics::PhysicsHandle::physSim->update(1.0e-7f);
+    Physics::PhysicsHandle::editWorld->update(1.0e-7f);
+
 }
 
 Editor::~Editor()
 {
     //Save all prefabs in folder Prefabs
     Resources::Serialization::Save::SaveAllPrefabs(game.resources);
+}
+
+
+void Editor::InitEditComp()
+{
+    for (int i = 1; i < MAX_ENTITIES; i++)
+    {
+        editingComponent[i].InitComponent(game.coordinator.componentHandler->GetComponentTransform(i).localTRS);
+    }
+}
+
+void Editor::ModifyEditComp()
+{
+    for (int i = 1; i < MAX_ENTITIES; i++)
+    {
+        editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i).localTRS;
+        editingComponent[i].Update();
+        if ((game.coordinator.entityHandler->entities[i].signature & SIGNATURE_MODEL) == SIGNATURE_MODEL)
+        {
+            editingComponent[i].AABB = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBhalfExtent;
+            editingComponent[i].MakeCollider();
+        }
+    }
 }
 
 void Editor::Loop()
@@ -111,7 +140,16 @@ void Editor::Loop()
             dbgRenderer.SetPhysicsRendering();
         }
 
-        physHandle.physSim->update(1.0e-7f);
+        if (currentScene != game.scene.get())
+        {
+            PopulateFocusedEntity();
+            selectedEntity = {};
+            selectedEntity.componentHandler = game.coordinator.componentHandler;
+            ModifyEditComp();
+            currentScene = game.scene.get();
+        }
+
+        Physics::PhysicsHandle::editWorld->update(1.0e-7f);
 
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
             Resources::Serialization::Save::SaveScene(*game.scene, game.resources);
@@ -121,6 +159,19 @@ void Editor::Loop()
         {
             std::string duck = "Duck";
             game.coordinator.componentHandler->ModifyComponentOfEntityToPrefab(game.coordinator.entityHandler->entities[1], game.resources, duck);
+        }
+
+        if (!ImGui::GetIO().MouseDownDuration[0])
+        {
+            
+            Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
+            rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, {fwdRay.x,fwdRay.y,fwdRay.z});
+            physHandle.editWorld->raycast(ray,this);
+        }
+
+        if (selectedEntity.toChangeEntityId >= 0)
+        {
+            PopulateFocusedEntity();
         }
             
         /////

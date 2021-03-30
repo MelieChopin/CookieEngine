@@ -6,13 +6,14 @@
 namespace Cookie::Resources  { class ResourcesManager; }
 namespace Cookie::ECS		 { class Coordinator; class Entity; }
 namespace Cookie::Core::Math { union Vec2; }
+namespace Cookie			 { struct FocusEntity; }
 
 
 namespace Cookie::UIwidget
 {
 	class Inspector final : public WItemBase
 	{
-		Cookie::ECS::Entity*&		selectedEntity;
+		FocusEntity&		selectedEntity;
 	
 		Cookie::Resources::ResourcesManager& resources;
 		Cookie::ECS::Coordinator& coordinator;
@@ -31,7 +32,7 @@ namespace Cookie::UIwidget
 		void SceneInspection();
 
 	public:
-		inline Inspector(Cookie::ECS::Entity*& _selectedEntity, Cookie::Resources::ResourcesManager& _resources, Cookie::ECS::Coordinator& _coordinator, Physics::PhysicsSimulator& _physSim)
+		inline Inspector(FocusEntity& _selectedEntity, Cookie::Resources::ResourcesManager& _resources, Cookie::ECS::Coordinator& _coordinator, Physics::PhysicsSimulator& _physSim)
 			: WItemBase			("Inspector", false),
 			  selectedEntity	(_selectedEntity),
 			  resources			(_resources),

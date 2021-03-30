@@ -82,8 +82,8 @@ void DebugRenderer::SetPhysicsRendering()
     Physics::PhysicsHandle physHandle;
 	if (showDebug)
 	{
-        physHandle.physSim->setIsDebugRenderingEnabled(true);
-        rp3d::DebugRenderer& physicsDebug = physHandle.physSim->getDebugRenderer();
+        physHandle.editWorld->setIsDebugRenderingEnabled(true);
+        rp3d::DebugRenderer& physicsDebug = physHandle.editWorld->getDebugRenderer();
         physicsDebug.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLISION_SHAPE, true);
         physicsDebug.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::CONTACT_POINT, true);
         physicsDebug.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::CONTACT_NORMAL, true);
@@ -111,7 +111,7 @@ void DebugRenderer::Draw(const Mat4& viewProj)
         Render::RendererRemote::context->RSGetState(&previousState);
         Render::RendererRemote::context->RSSetState(rasterState);
 
-        rp3d::DebugRenderer& dbgRenderer = physHandle.physSim->getDebugRenderer();
+        rp3d::DebugRenderer& dbgRenderer = physHandle.editWorld->getDebugRenderer();
 
         if (dbgRenderer.getNbTriangles() > 0)
         {

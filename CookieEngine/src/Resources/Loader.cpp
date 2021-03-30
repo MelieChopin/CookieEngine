@@ -18,7 +18,7 @@ Loader::~Loader()
 
 void Loader::Load(const char* fileName, ResourcesManager& resources, Render::Renderer& _renderer)
 {
-	const aiScene* scene = importer.ReadFile(fileName, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_JoinIdenticalVertices);
+	const aiScene* scene = importer.ReadFile(fileName, aiProcessPreset_TargetRealtime_Fast | aiProcess_ConvertToLeftHanded | aiProcess_GenBoundingBoxes);
 
 	if (scene)
 	{
@@ -45,6 +45,7 @@ void Loader::InitMeshes(const char* fileName, aiMesh** meshes, unsigned int nMes
 		aiMesh* iMesh = meshes[i];
 		std::string iName = std::string(fileName) + " - " + std::string(iMesh->mName.C_Str());
 		_resources.meshes[iName] = std::make_shared<Mesh>(iName,iMesh);
+
 	}
 
 }

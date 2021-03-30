@@ -2,6 +2,7 @@
 #include "Coordinator.hpp"
 #include "Resources/Scene.hpp"
 #include "InspectorWidget.hpp"
+#include "Editor.hpp"
 
 #include <string>
 #include <imgui.h>
@@ -19,7 +20,7 @@ void Inspector::WindowDisplay()
 {
     TryBeginWindow()
     {
-        if (selectedEntity) EntityInspection();
+        if (selectedEntity.focusedEntity) EntityInspection();
     }
     
     ImGui::End();
@@ -28,45 +29,45 @@ void Inspector::WindowDisplay()
 
 void Inspector::EntityInspection()
 {
-    InputText("Entity name", &selectedEntity->name);
+    InputText("Entity name", &selectedEntity.focusedEntity->name);
 
     ImGui::Separator();
 
-    if (selectedEntity->signature & SIGNATURE_TRANSFORM)    TransformInterface();
-    if (selectedEntity->signature & SIGNATURE_MODEL)        ModelInterface();
-    if (selectedEntity->signature & SIGNATURE_PHYSICS)      PhysicsInterface();
-    if (selectedEntity->signature & SIGNATURE_SCRIPT)       ScriptInterface();
+    if (selectedEntity.focusedEntity->signature & SIGNATURE_TRANSFORM)    TransformInterface();
+    if (selectedEntity.focusedEntity->signature & SIGNATURE_MODEL)        ModelInterface();
+    if (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS)      PhysicsInterface();
+    if (selectedEntity.focusedEntity->signature & SIGNATURE_SCRIPT)       ScriptInterface();
     //if (selectedEntity->signature & SIGNATURE_MAP)          MapInterface();
 
     if (Button("Add component...")) OpenPopup("Add component popup");
 
     if (BeginPopup("Add component popup"))
     {
-        if  (selectedEntity->signature & SIGNATURE_TRANSFORM) TextDisabled("Component Transform already added");
+        if  (selectedEntity.focusedEntity->signature & SIGNATURE_TRANSFORM) TextDisabled("Component Transform already added");
         else if (Button("Add component Transform"))
         { 
-            coordinator.componentHandler->AddComponentTransform (*selectedEntity);
+            coordinator.componentHandler->AddComponentTransform (*selectedEntity.focusedEntity);
             CloseCurrentPopup();
         }
 
-        if (selectedEntity->signature & SIGNATURE_MODEL) TextDisabled("Component Model already added");
+        if (selectedEntity.focusedEntity->signature & SIGNATURE_MODEL) TextDisabled("Component Model already added");
         else if (Button("Add component Model"))
         {
-            coordinator.componentHandler->AddComponentModel     (*selectedEntity);
+            coordinator.componentHandler->AddComponentModel     (*selectedEntity.focusedEntity);
             CloseCurrentPopup();
         }
         
-        if (selectedEntity->signature & SIGNATURE_PHYSICS) TextDisabled("Component Physics already added");
+        if (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS) TextDisabled("Component Physics already added");
         else if (Button("Add component Physics"))
         {
-            coordinator.componentHandler->AddComponentPhysics   (*selectedEntity, physSim);
+            coordinator.componentHandler->AddComponentPhysics   (*selectedEntity.focusedEntity, physSim);
             CloseCurrentPopup();
         }
 
-        if (selectedEntity->signature & SIGNATURE_SCRIPT) TextDisabled("Component Script already added");
+        if (selectedEntity.focusedEntity->signature & SIGNATURE_SCRIPT) TextDisabled("Component Script already added");
         else if (Button("Add component Script"))
         {
-            coordinator.componentHandler->AddComponentScript    (*selectedEntity);
+            coordinator.componentHandler->AddComponentScript    (*selectedEntity.focusedEntity);
             CloseCurrentPopup();
         }
 
@@ -78,7 +79,7 @@ void Inspector::TransformInterface()
 {
     if (TreeNode("Transform"))
     {
-        ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity->id);
+        ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id);
 
         Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.localTRS.pos.e);
         Text("Rot:"); SameLine(65.f); DragFloat3("##ROT", trsf.localTRS.rot.e);
@@ -89,7 +90,7 @@ void Inspector::TransformInterface()
         ImGui::NewLine();
         if (Button("Remove component##TRSF"))
         {
-            coordinator.componentHandler->RemoveComponentTransform(*selectedEntity);
+            coordinator.componentHandler->RemoveComponentTransform(*selectedEntity.focusedEntity);
         }
 
         TreePop();
@@ -102,7 +103,7 @@ void Inspector::ModelInterface()
 {
     if (TreeNode("Model"))
     {
-        ComponentModel& modelComp = coordinator.componentHandler->GetComponentModel(selectedEntity->id);
+        ComponentModel& modelComp = coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id);
 
 //===== MESH =====//
 
@@ -173,7 +174,7 @@ void Inspector::ModelInterface()
         ImGui::NewLine();
         if (Button("Remove component##MODEL"))
         {
-            coordinator.componentHandler->RemoveComponentModel(*selectedEntity);
+            coordinator.componentHandler->RemoveComponentModel(*selectedEntity.focusedEntity);
         }
 
         TreePop();
@@ -186,7 +187,7 @@ void Inspector::PhysicsInterface()
 {
     if (TreeNode("Physics"))
     {
-        ComponentPhysics& physicComp = coordinator.componentHandler->GetComponentPhysics(selectedEntity->id);
+        ComponentPhysics& physicComp = coordinator.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id);
 
         TextDisabled("Active colliders:");
         Indent(15.f);
@@ -201,7 +202,7 @@ void Inspector::PhysicsInterface()
         ImGui::NewLine();
         if (Button("Remove component##COLLIDER"))
         {
-            coordinator.componentHandler->RemoveComponentPhysics(*selectedEntity);
+            coordinator.componentHandler->RemoveComponentPhysics(*selectedEntity.focusedEntity);
         }
 
         TreePop();
@@ -212,7 +213,7 @@ void Inspector::ScriptInterface()
 {
     if (TreeNode("Script"))
     {
-        ComponentScript& scriptC = coordinator.componentHandler->GetComponentScript(selectedEntity->id);
+        ComponentScript& scriptC = coordinator.componentHandler->GetComponentScript(selectedEntity.focusedEntity->id);
         
         for (size_t i = 0; i < scriptC.scripts.size();)
         { 
@@ -238,7 +239,7 @@ void Inspector::ScriptInterface()
             {
                 if (Button(scrIt->second->filename.c_str()))
                 {
-                    scriptC.scripts.push_back(scrIt->second->CreateObject(std::to_string(selectedEntity->id)));
+                    scriptC.scripts.push_back(scrIt->second->CreateObject(std::to_string(selectedEntity.focusedEntity->id)));
                     CloseCurrentPopup();
                 }
             }
@@ -250,7 +251,7 @@ void Inspector::ScriptInterface()
         NewLine();
         if (Button("Remove component##SCRIPT"))
         {
-            coordinator.componentHandler->RemoveComponentScript(*selectedEntity);
+            coordinator.componentHandler->RemoveComponentScript(*selectedEntity.focusedEntity);
         }
 
         TreePop();
@@ -263,7 +264,7 @@ void Inspector::MapInterface()
 {
     if (TreeNode("Map transform"))
     {
-        Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity->id).localTRS;
+        Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id).localTRS;
 
         Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.pos.e);
         

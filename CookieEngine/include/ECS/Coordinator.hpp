@@ -18,7 +18,6 @@ namespace Cookie
 		public:
 			EntityHandler*     entityHandler    {nullptr};
 			ComponentHandler*  componentHandler {nullptr};
-			Entity*            selectedEntity   {nullptr};
 
 			Coordinator() {}
 			~Coordinator() {}

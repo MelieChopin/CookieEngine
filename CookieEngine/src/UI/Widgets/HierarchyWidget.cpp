@@ -3,6 +3,7 @@
 #include "Coordinator.hpp"
 #include "InspectorWidget.hpp"
 #include "HierarchyWidget.hpp"
+#include "Editor.hpp"
 
 #include <imgui.h>
 
@@ -39,7 +40,7 @@ void Hierarchy::WindowDisplay()
 
             if (Button(entityNameTag.c_str()))
             {
-                selectedEntity = &entityHandler.entities[i];
+                selectedEntity.toChangeEntityId = i;
             }
 
             if (BeginPopupContextItem(entityNameTag.c_str()))
