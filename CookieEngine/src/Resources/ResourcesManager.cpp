@@ -8,6 +8,8 @@
 #include "Core/Primitives.hpp"
 #include "Resources/Prefab.hpp"
 
+#include <memory>
+
 using namespace Cookie::Resources;
 
 ResourcesManager::ResourcesManager()
@@ -86,8 +88,10 @@ void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandl
 	newPrefab.signature = entity.id;
 	newPrefab.rotation = component.componentTransforms[entity.id].localTRS.rot;
 	newPrefab.scale = component.componentTransforms[entity.id].localTRS.scale;
-	newPrefab.filepath = "Assets/Prefabs" + entity.name + ".PAsset";
+	newPrefab.filepath = "Assets/Prefabs/" + entity.name + ".PAsset";
 
 	entity.namePrefab = entity.name;
+
+	prefabs[newPrefab.name] = std::make_shared<Prefab>(newPrefab);
 }
 

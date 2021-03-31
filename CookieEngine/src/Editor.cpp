@@ -83,6 +83,7 @@ Editor::~Editor()
 
 void Editor::Loop()
 {
+    soundManager.system->playSound(soundManager.sound, nullptr, false, nullptr);
     Physics::PhysicsHandle physHandle;
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {

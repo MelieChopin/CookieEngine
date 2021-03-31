@@ -5,6 +5,7 @@
 #include "UI/UIeditor.hpp"
 #include "Render/Camera.hpp"
 #include "DebugRenderer.hpp"
+#include "Resources/SoundManager.hpp"
 
 namespace Cookie
 {
@@ -21,6 +22,8 @@ namespace Cookie
 			Render::DebugRenderer	dbgRenderer;
 
 			ECS::Entity*		selectedEntity = nullptr;
+
+			Resources::SoundManager soundManager;
 
 			bool				isPlaying = false;
 			
