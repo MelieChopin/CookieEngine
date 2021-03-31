@@ -14,6 +14,7 @@ Editor::Editor()
     cam.SetProj(Core::Math::ToRadians(60.f), game.renderer.state.viewport.Width, game.renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
     cam.rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
+
     cam.ResetPreviousMousePos();
     cam.Update();
     cam.Deactivate();
@@ -43,7 +44,7 @@ Editor::Editor()
 
     ui.AddWItem(new UIwidget::TextureEditor(game.renderer, game.resources), 1);
 
-    ui.AddWItem(new UIwidget::FileExplorer(game.renderer, game, selectedEntity), 2);
+    ui.AddWItem(new UIwidget::FileExplorer(game.renderer, game), 2);
 
     ui.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator, game.scene->physSim), 2);
 
@@ -58,27 +59,54 @@ Editor::Editor()
     ui.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, game.renderer.GetLastFrameBuffer(), &cam, game.coordinator, selectedEntity));
 
 
-    for (int i = 0; i <= game.coordinator.entityHandler->livingEntities; i++)
-    {
-        ECS::Entity& iEntity = game.coordinator.entityHandler->entities[i];
-        if (iEntity.signature & SIGNATURE_PHYSICS)
-        {
-            ECS::ComponentPhysics& iPhysics = game.coordinator.componentHandler->componentPhysics[i];
-            game.coordinator.componentHandler->componentTransforms[i].SetPhysics();
-            iPhysics.physBody = game.scene->physSim.worldSim->createRigidBody(game.coordinator.componentHandler->componentTransforms[i].physTransform);
-            iPhysics.physBody->setType(rp3d::BodyType::DYNAMIC);
+    //for (int i = 0; i <= game.coordinator.entityHandler->livingEntities; i++)
+    //{
+    //    ECS::Entity& iEntity = game.coordinator.entityHandler->entities[i];
+    //    if (iEntity.signature & SIGNATURE_PHYSICS)
+    //    {
+    //        ECS::ComponentPhysics& iPhysics = game.coordinator.componentHandler->componentPhysics[i];
+    //        game.coordinator.componentHandler->componentTransforms[i].SetPhysics();
+    //        iPhysics.physBody = game.scene->physSim.worldSim->createRigidBody(game.coordinator.componentHandler->componentTransforms[i].physTransform);
+    //        iPhysics.physBody->setType(rp3d::BodyType::DYNAMIC);
+    //
+    //        iPhysics.AddSphereCollider(2.0f, { 0.5f,1.5f,0.0f }, {0.0f,0.0f,0.0f});
+    //    }
+    //}
 
-            iPhysics.AddSphereCollider(2.0f, { 0.5f,1.5f,0.0f }, {0.0f,0.0f,0.0f});
-        }
-    }
+    InitEditComp();
 
-    dbgRenderer.SetPhysicsRendering();
+    //Physics::PhysicsHandle::physSim->update(1.0e-7f);
+    //Physics::PhysicsHandle::editWorld->update(1.0e-7f);
+
 }
 
 Editor::~Editor()
 {
     //Save all prefabs in folder Prefabs
     Resources::Serialization::Save::SaveAllPrefabs(game.resources);
+}
+
+
+void Editor::InitEditComp()
+{
+    for (int i = 1; i < MAX_ENTITIES; i++)
+    {
+        editingComponent[i].InitComponent(game.coordinator.componentHandler->GetComponentTransform(i).localTRS);
+    }
+}
+
+void Editor::ModifyEditComp()
+{
+    for (int i = 1; i < MAX_ENTITIES; i++)
+    {
+        if ((game.coordinator.entityHandler->entities[i].signature & SIGNATURE_MODEL) == SIGNATURE_MODEL)
+        {
+            editingComponent[i].AABB = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBhalfExtent;
+            editingComponent[i].MakeCollider();
+        }
+        editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i).localTRS;
+        editingComponent[i].Update();
+    }
 }
 
 void Editor::Loop()
@@ -107,12 +135,26 @@ void Editor::Loop()
             cam.Update();
         }
 
-        if (physHandle.physSim->getIsDebugRenderingEnabled() != dbgRenderer.showDebug)
+        if (currentScene != game.scene.get())
         {
-            dbgRenderer.SetPhysicsRendering();
+            if (selectedEntity.editComp)
+            {
+                selectedEntity.editComp->editTrs = &game.coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id).localTRS;
+                selectedEntity.editComp->Update();
+                if ((selectedEntity.focusedEntity->signature & SIGNATURE_MODEL) == SIGNATURE_MODEL)
+                {
+                    selectedEntity.editComp->AABB = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBhalfExtent;
+                    selectedEntity.editComp->MakeCollider();
+                }
+            }
+            selectedEntity = {};
+            selectedEntity.componentHandler = game.coordinator.componentHandler;
+            ModifyEditComp();
+            currentScene = game.scene.get();
         }
 
-        physHandle.physSim->update(1.0e-7f);
+        Physics::PhysicsHandle::editWorld->update(1.0e-7f);
+        Physics::PhysicsHandle::physSim->update(1.0e-7f);
 
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
             Resources::Serialization::Save::SaveScene(*game.scene, game.resources);
@@ -122,6 +164,25 @@ void Editor::Loop()
         {
             std::string duck = "Duck";
             game.coordinator.componentHandler->ModifyComponentOfEntityToPrefab(game.coordinator.entityHandler->entities[1], game.resources, duck);
+        }
+
+        if (!ImGui::GetIO().MouseDownDuration[0])
+        {
+            
+            Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
+            rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, {fwdRay.x,fwdRay.y,fwdRay.z});
+            physHandle.editWorld->raycast(ray,this);
+        }
+
+        if (selectedEntity.toChangeEntityId >= 0)
+        {
+            PopulateFocusedEntity();
+        }
+
+        if (selectedEntity.focusedEntity)
+        {
+            selectedEntity.componentHandler->componentTransforms[selectedEntity.focusedEntity->id].SetPhysics();
+            selectedEntity.componentHandler->componentPhysics[selectedEntity.focusedEntity->id].physBody->setTransform(selectedEntity.componentHandler->componentTransforms[selectedEntity.focusedEntity->id].physTransform);
         }
             
         /////

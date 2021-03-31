@@ -22,10 +22,9 @@ namespace Cookie::UIwidget
 		std::unique_ptr<Cookie::Resources::Texture> saveIcon;
 
 		Cookie::Game& game;
-		Cookie::ECS::Entity*& selectedEntity;
 
 	public:
-		FileExplorer(Cookie::Render::Renderer& _renderer, Cookie::Game& _game, Cookie::ECS::Entity*& _selectedEntity);
+		FileExplorer(Cookie::Render::Renderer& _renderer, Cookie::Game& _game);
 
 		void WindowDisplay() override;
 	};

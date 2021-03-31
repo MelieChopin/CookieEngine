@@ -3,6 +3,7 @@
 #include "FrameBuffer.hpp"
 #include "Camera.hpp"
 #include "Coordinator.hpp"
+#include "Editor.hpp"
 #include "ViewportWidget.hpp"
 
 #include <imgui.h>
@@ -32,7 +33,7 @@ void Viewport::WindowDisplay()
 		}
 
 		ImGui::Image(static_cast<ImTextureID>(*frameBuffer.GetShaderResource()), GetContentRegionAvail());
-		camera->windowOffset = { { ImGui::GetWindowPos().x,  ImGui::GetWindowPos().y } };
+		camera->windowOffset = { {viewportDrawspace.posx, viewportDrawspace.posy } };
 
 
 		ImGuiIO& io = GetIO();
@@ -54,7 +55,7 @@ void Viewport::WindowDisplay()
 			camera->Deactivate();
 		}
 		
-		if (selectedEntity)
+		if (selectedEntity.focusedEntity)
 			GizmoManipulator();
 	}
 
@@ -64,8 +65,8 @@ void Viewport::WindowDisplay()
 
 void Viewport::GizmoManipulator()
 {
-	Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity->id).localTRS;
-	Mat4 trsfTMat = trsf.ToTRS().Transpose();
+	Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id).localTRS;
+	Mat4 trsfTMat = trsf.TRS.Transpose();
 
 	ImGuizmo::SetRect(viewportDrawspace.posx, viewportDrawspace.posy, viewportDrawspace.width, viewportDrawspace.height);
 
@@ -81,5 +82,9 @@ void Viewport::GizmoManipulator()
 
 
 	if (ImGuizmo::Manipulate(camera->GetView().Transpose().e, camera->GetProj().Transpose().e, transformTool, ImGuizmo::MODE::WORLD, trsfTMat.e))
+	{
+		trsfTMat.Transpose();
 		ImGuizmo::DecomposeMatrixToComponents(trsfTMat.e, trsf.pos.e, trsf.rot.e, trsf.scale.e);
+	}
+
 }

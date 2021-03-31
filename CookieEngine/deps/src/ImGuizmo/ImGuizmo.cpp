@@ -2188,9 +2188,26 @@ namespace ImGuizmo
 
       mat.OrthoNormalize();
 
-      rotation[0] = RAD2DEG * atan2f(mat.m[1][2], mat.m[2][2]);
-      rotation[1] = RAD2DEG * atan2f(-mat.m[0][2], sqrtf(mat.m[1][2] * mat.m[1][2] + mat.m[2][2] * mat.m[2][2]));
-      rotation[2] = RAD2DEG * atan2f(mat.m[0][1], mat.m[0][0]);
+      //rotation[0] = RAD2DEG * atan2f(mat.m[1][2], mat.m[2][2]);
+      //rotation[1] = RAD2DEG * atan2f(-mat.m[0][2], sqrtf(mat.m[1][2] * mat.m[1][2] + mat.m[2][2] * mat.m[2][2]));
+      //
+      //printf("%f\n", rotation[1]);
+      //rotation[2] = RAD2DEG * atan2f(mat.m[0][1], mat.m[0][0]);
+
+      rotation[0] = -asinf(mat.m[2][1]);//Pitch
+
+      if (cosf(rotation[0]) > 0.0001)                 // Not at poles
+      {
+          rotation[1] = RAD2DEG * atan2f(mat.m[2][0], mat.m[2][2]);     // Yaw
+          rotation[2] = RAD2DEG * atan2f(mat.m[0][1], mat.m[1][1]);     // Roll
+      }
+      else
+      {
+          rotation[1] = 0.0f;                         // Yaw
+          rotation[2] = RAD2DEG * atan2f(-mat.m[1][0], mat.m[0][0]);    // Roll
+      }
+
+      rotation[0] *= RAD2DEG;
 
       translation[0] = mat.v.position.x;
       translation[1] = mat.v.position.y;

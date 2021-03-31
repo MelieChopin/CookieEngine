@@ -6,22 +6,40 @@
 #include "Render/Camera.hpp"
 #include "DebugRenderer.hpp"
 #include "Resources/SoundManager.hpp"
+#include "ECS/ComponentEditor.hpp"
 
 namespace Cookie
 {
 	namespace ECS
-	{ class Entity; }
+	{
+		class Entity;
+	}
 
-	class Editor
+	struct FocusEntity
+	{
+		int						toChangeEntityId{ -1 };
+		ECS::Entity*			focusedEntity	{ nullptr };
+		ECS::ComponentHandler*	componentHandler{ nullptr };
+		ECS::ComponentEditor*	editComp		{ nullptr };
+
+	};
+
+	class Editor : public rp3d::RaycastCallback
 	{
 		private:
 		public:
+
+
 			Game					game;
 			UI::UIeditor			ui;
 			Render::FreeFlyCam		cam;
 			Render::DebugRenderer	dbgRenderer;
 
-			ECS::Entity*		selectedEntity = nullptr;
+			std::array<ECS::ComponentEditor, MAX_ENTITIES> editingComponent;
+
+			FocusEntity			selectedEntity	= {};
+			Resources::Scene*	currentScene	= nullptr;
+
 
 			Resources::SoundManager soundManager;
 
@@ -33,6 +51,43 @@ namespace Cookie
 			~Editor();
 
 			void Loop();
+
+			void InitEditComp();
+			void ModifyEditComp();
+
+			inline void PopulateFocusedEntity()
+			{
+				if (selectedEntity.editComp)
+				{
+					if ((selectedEntity.focusedEntity->signature & SIGNATURE_MODEL) == SIGNATURE_MODEL)
+					{
+						selectedEntity.editComp->AABB = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBhalfExtent;
+						selectedEntity.editComp->MakeCollider();
+					}
+					selectedEntity.editComp->editTrs = &game.coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id).localTRS;
+					selectedEntity.editComp->Update();
+				}
+
+				selectedEntity.focusedEntity	= &game.coordinator.entityHandler->entities[selectedEntity.toChangeEntityId];
+				selectedEntity.editComp			= &editingComponent[selectedEntity.toChangeEntityId];
+				selectedEntity.toChangeEntityId = -1;
+			}
+
+			inline virtual float notifyRaycastHit(const rp3d::RaycastInfo& info)
+			{
+				printf("HIT : %f , %f , %f \n", info.worldPoint.x, info.worldPoint.y, info.worldPoint.z);
+				for (int i = 1; i < MAX_ENTITIES; i++)
+				{
+					if (editingComponent[i].body == info.body)
+					{
+						selectedEntity.toChangeEntityId = i;
+						PopulateFocusedEntity();
+					}
+				}
+
+				return 0.0f;
+			}
+
 	};
 }
 

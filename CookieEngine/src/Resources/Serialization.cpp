@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <reactphysics3d/reactphysics3d.h>
+#include "Physics/PhysicsHandle.hpp"
 #include "Coordinator.hpp"
 #include "Resources/Scene.hpp"
 #include "Game.hpp"
@@ -191,12 +191,18 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 				 component.componentModels[entity.entities[i].id].shader =
 									resourcesManager.shaders[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameShader];
 		 }
+		 if (entity.entities[i].signature & SIGNATURE_PHYSICS)
+		 {
+			 component.componentTransforms[entity.entities[i].id].SetPhysics();
+			 component.componentPhysics[entity.entities[i].id].physBody = Physics::PhysicsHandle::physSim->createRigidBody(component.componentTransforms[entity.entities[i].id].physTransform);
+		 }
 	 }
  }
 
  std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Game& game)
  {
 	 std::shared_ptr<Resources::Scene> newScene = std::make_shared<Resources::Scene>();
+	 Physics::PhysicsHandle::physSim = newScene->physSim.worldSim;
 	 std::ifstream file(filepath);
 
 	 if (!file.is_open())
@@ -242,8 +248,6 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 				 newScene->componentHandler.componentTransforms[newScene->entityHandler.entities[i].id].ToDefault();
 			 if (newScene->entityHandler.entities[i].signature & SIGNATURE_MODEL)
 				 newScene->componentHandler.componentModels[newScene->entityHandler.entities[i].id].ToDefault();
-			 /*if (newScene->entityHandler.entities[i].signature & SIGNATURE_RIGIDBODY)
-				 newScene->componentHandler.componentRigidBodies[newScene->entityHandler.entities[i].id].ToDefault();*/
 			 newScene->entityHandler.entities[i] = Cookie::ECS::Entity(i);
 		 }
 
@@ -259,7 +263,6 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 		 }
 	 }
 		 
-	 //game.resources.scenes[newScene->name] = (newScene);
 	 newScene->filepath = filepath;
 
 	 return newScene;

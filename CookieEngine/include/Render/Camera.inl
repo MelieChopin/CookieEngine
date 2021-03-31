@@ -27,9 +27,9 @@ namespace Cookie
 		{
 			Core::Math::Vec2 mousePos = { { ImGui::GetIO().MousePos.x - windowOffset.x,ImGui::GetIO().MousePos.y - windowOffset.y} };
 
-			Core::Math::Vec2 ratio = { { (mousePos.x / (width * 0.5f)) - 1.0f,  (-mousePos.y / (height * 0.5f)) + 1.0f } };
+			Core::Math::Vec2 ratio = { { (mousePos.x / (width * 0.5f)) - 1.0f,  (-mousePos.y / (height * 0.5f)) + 1.0f} };
 
-			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(projMat * viewMat) * Core::Math::Vec4(ratio.x,ratio.y,1.0f,1.0f);
+			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(projMat * viewMat) * Core::Math::Vec4(ratio.x,ratio.y, 1.0f,1.0f);
 
 			return Core::Math::Vec3({ r.x / r.a,r.y / r.a,r.z / r.a }).Normalize();
 		}
@@ -49,12 +49,6 @@ namespace Cookie
 
 		inline void FreeFlyCam::UpdateFreeFlyPos()
 		{
-			// Spheric coordinates
-			float cosPitch = std::cos(rot.x);
-			float sinPitch = std::sin(rot.x);
-			float cosYaw = std::cos(rot.y);
-			float sinYaw = std::sin(rot.y);
-
 			// Compute speed
 			float speed = (CAM_MOUSE_SPEED * Core::UnscaledDeltaTime());
 			if (ImGui::GetIO().KeyShift)
@@ -70,14 +64,8 @@ namespace Cookie
 			if (ImGui::GetIO().KeysDown[GLFW_KEY_A])  strafeVelocity -= speed;
 			else if (ImGui::GetIO().KeysDown[GLFW_KEY_D]) strafeVelocity += speed;
 
-			// Forward movement
-			pos.z += cosYaw * cosPitch * forwardVelocity;
-			pos.x += -sinYaw * cosPitch * forwardVelocity;
-			pos.y += sinPitch * forwardVelocity;
-
-			// Strafe movement
-			pos.z += sinYaw * strafeVelocity;
-			pos.x += cosYaw * strafeVelocity;
+			pos += Core::Math::Vec3({ viewMat.c[2].x, viewMat.c[2].y, viewMat.c[2].z }) * forwardVelocity;
+			pos += Core::Math::Vec3({ viewMat.c[0].x, viewMat.c[0].y, viewMat.c[0].z }) * strafeVelocity;
 
 			// Up movement
 			if (ImGui::GetIO().KeysDown[GLFW_KEY_SPACE]) pos.y += speed;

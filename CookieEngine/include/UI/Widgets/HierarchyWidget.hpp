@@ -6,6 +6,7 @@
 namespace Cookie::Resources { class ResourcesManager; }
 namespace Cookie::Resources	{ class Scene; }
 namespace Cookie::ECS		{ class Coordinator; }
+namespace Cookie			{ struct FocusEntity; }
 
 
 namespace Cookie::UIwidget
@@ -19,10 +20,10 @@ namespace Cookie::UIwidget
 		std::shared_ptr<Cookie::Resources::Scene>&	scene;
 		Cookie::ECS::Coordinator&					coordinator;
 
-		Cookie::ECS::Entity*& selectedEntity;
+		FocusEntity& selectedEntity;
 
 	public:
-		inline Hierarchy(Cookie::Resources::ResourcesManager& _resources, std::shared_ptr<Cookie::Resources::Scene>& _scene, Cookie::ECS::Coordinator& _coordinator, Cookie::ECS::Entity*& _selectedEntity)
+		inline Hierarchy(Cookie::Resources::ResourcesManager& _resources, std::shared_ptr<Cookie::Resources::Scene>& _scene, Cookie::ECS::Coordinator& _coordinator, FocusEntity& _selectedEntity)
 			: WItemBase		("Hierarchy", false),
 			  resources     (_resources),
 			  scene			(_scene),

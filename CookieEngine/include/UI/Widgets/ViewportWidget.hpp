@@ -7,7 +7,7 @@ struct GLFWwindow;
 namespace Cookie::Core::Math	{ union Vec2; }
 namespace Cookie::Render		{ class FrameBuffer; class Camera; }
 namespace Cookie::ECS			{ class Coordinator; class Entity; }
-
+namespace Cookie				{ struct FocusEntity; }
 
 namespace Cookie::UIwidget
 {
@@ -29,7 +29,7 @@ namespace Cookie::UIwidget
 
 
 		Cookie::ECS::Coordinator&	coordinator;
-		Cookie::ECS::Entity*&		selectedEntity;
+		FocusEntity&		selectedEntity;
 
 
 	private:
@@ -37,12 +37,12 @@ namespace Cookie::UIwidget
 		void GizmoManipulator();
 
 	public:
-		inline Viewport(Toolbar*									_toolbar, 
-						GLFWwindow*									_window, 
-						const Cookie::Render::FrameBuffer&			_frameBuffer, 
-						Cookie::Render::Camera*						_camera, 
-						Cookie::ECS::Coordinator&					_coordinator,
-						Cookie::ECS::Entity*&						_selectedEntity)
+		inline Viewport(Toolbar*							_toolbar, 
+						GLFWwindow*							_window, 
+						const Cookie::Render::FrameBuffer&	_frameBuffer, 
+						Cookie::Render::Camera*				_camera, 
+						Cookie::ECS::Coordinator&			_coordinator,
+						FocusEntity&						_selectedEntity)
 
 			: WindowBase		("Viewport"),
 			  toolbar			(_toolbar),

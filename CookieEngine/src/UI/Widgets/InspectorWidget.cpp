@@ -2,6 +2,7 @@
 #include "Coordinator.hpp"
 #include "Resources/Scene.hpp"
 #include "InspectorWidget.hpp"
+#include "Editor.hpp"
 
 #include <string>
 
@@ -18,15 +19,15 @@ using namespace Cookie::Resources;
 
 void Inspector::WindowDisplay()
 {
-    if (selectedEntity != recordedEntity)
+    if (selectedEntity.focusedEntity != recordedEntity)
     {
-        recordedEntity = selectedEntity;
+        recordedEntity = selectedEntity.focusedEntity;
         selectedCollider = nullptr;
     }
 
     TryBeginWindow()
     {
-        if (selectedEntity) EntityInspection();
+        if (selectedEntity.focusedEntity) EntityInspection();
     }
     
     ImGui::End();
@@ -35,45 +36,45 @@ void Inspector::WindowDisplay()
 
 void Inspector::EntityInspection()
 {
-    InputText("Entity name", &selectedEntity->name);
+    InputText("Entity name", &selectedEntity.focusedEntity->name);
 
     ImGui::Separator();
 
-    if (selectedEntity->signature & SIGNATURE_TRANSFORM)    TransformInterface();
-    if (selectedEntity->signature & SIGNATURE_MODEL)        ModelInterface();
-    if (selectedEntity->signature & SIGNATURE_PHYSICS)      PhysicsInterface();
-    if (selectedEntity->signature & SIGNATURE_SCRIPT)       ScriptInterface();
+    if (selectedEntity.focusedEntity->signature & SIGNATURE_TRANSFORM)    TransformInterface();
+    if (selectedEntity.focusedEntity->signature & SIGNATURE_MODEL)        ModelInterface();
+    if (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS)      PhysicsInterface();
+    if (selectedEntity.focusedEntity->signature & SIGNATURE_SCRIPT)       ScriptInterface();
     //if (selectedEntity->signature & SIGNATURE_MAP)          MapInterface();
 
     if (Button("Add component...")) OpenPopup("Add component popup");
 
     if (BeginPopup("Add component popup"))
     {
-        if  (selectedEntity->signature & SIGNATURE_TRANSFORM) TextDisabled("Component Transform already added");
+        if  (selectedEntity.focusedEntity->signature & SIGNATURE_TRANSFORM) TextDisabled("Component Transform already added");
         else if (Button("Add component Transform"))
         { 
-            coordinator.componentHandler->AddComponentTransform (*selectedEntity);
+            coordinator.componentHandler->AddComponentTransform (*selectedEntity.focusedEntity);
             CloseCurrentPopup();
         }
 
-        if (selectedEntity->signature & SIGNATURE_MODEL) TextDisabled("Component Model already added");
+        if (selectedEntity.focusedEntity->signature & SIGNATURE_MODEL) TextDisabled("Component Model already added");
         else if (Button("Add component Model"))
         {
-            coordinator.componentHandler->AddComponentModel     (*selectedEntity);
+            coordinator.componentHandler->AddComponentModel     (*selectedEntity.focusedEntity);
             CloseCurrentPopup();
         }
         
-        if (selectedEntity->signature & SIGNATURE_PHYSICS) TextDisabled("Component Physics already added");
+        if (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS) TextDisabled("Component Physics already added");
         else if (Button("Add component Physics"))
         {
-            coordinator.componentHandler->AddComponentPhysics   (*selectedEntity, physSim);
+            coordinator.componentHandler->AddComponentPhysics   (*selectedEntity.focusedEntity, physSim);
             CloseCurrentPopup();
         }
 
-        if (selectedEntity->signature & SIGNATURE_SCRIPT) TextDisabled("Component Script already added");
+        if (selectedEntity.focusedEntity->signature & SIGNATURE_SCRIPT) TextDisabled("Component Script already added");
         else if (Button("Add component Script"))
         {
-            coordinator.componentHandler->AddComponentScript    (*selectedEntity);
+            coordinator.componentHandler->AddComponentScript    (*selectedEntity.focusedEntity);
             CloseCurrentPopup();
         }
 
@@ -85,18 +86,16 @@ void Inspector::TransformInterface()
 {
     if (TreeNode("Transform"))
     {
-        ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity->id);
+        ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id);
 
         Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.localTRS.pos.e);
         Text("Rot:"); SameLine(65.f); DragFloat3("##ROT", trsf.localTRS.rot.e);
         Text("Scl:"); SameLine(65.f); DragFloat3("##SCL", trsf.localTRS.scale.e);
 
-        trsf.SetPhysics();
-
         ImGui::NewLine();
         if (Button("Remove component##TRSF"))
         {
-            coordinator.componentHandler->RemoveComponentTransform(*selectedEntity);
+            coordinator.componentHandler->RemoveComponentTransform(*selectedEntity.focusedEntity);
         }
 
         TreePop();
@@ -109,7 +108,7 @@ void Inspector::ModelInterface()
 {
     if (TreeNode("Model"))
     {
-        ComponentModel& modelComp = coordinator.componentHandler->GetComponentModel(selectedEntity->id);
+        ComponentModel& modelComp = coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id);
 
 //===== MESH =====//
 
@@ -180,7 +179,7 @@ void Inspector::ModelInterface()
         ImGui::NewLine();
         if (Button("Remove component##MODEL"))
         {
-            coordinator.componentHandler->RemoveComponentModel(*selectedEntity);
+            coordinator.componentHandler->RemoveComponentModel(*selectedEntity.focusedEntity);
         }
 
         TreePop();
@@ -194,7 +193,7 @@ void Inspector::PhysicsInterface()
 {
     if (TreeNode("Physics"))
     {
-        ComponentPhysics& physicComp = coordinator.componentHandler->GetComponentPhysics(selectedEntity->id);
+        ComponentPhysics& physicComp = coordinator.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id);
         
         // due to the nature of how we can access and set variables in react physic 3D, this variable are used numerous times to ease the manipulations with ImGui and save memory.
         static float multiUseFloat = 0; static bool multiUseBool = false;
@@ -223,7 +222,7 @@ void Inspector::PhysicsInterface()
                 case reactphysics3d::CollisionShapeName::BOX:       nameTag += "Box";       break;
 
                 default: break;
-                } 
+                }
 
                 if (selectedCollider == colliders[i])
                     nameTag += ']';
@@ -243,7 +242,7 @@ void Inspector::PhysicsInterface()
             if (BeginChild(windowName, { GetContentRegionAvail().x, 150 }, true) && (selectedCollider != nullptr))
             {
                 multiUseBool = selectedCollider->getIsTrigger();
-                if (Checkbox("Trigger:", &multiUseBool))
+                if (Checkbox("Trigger", &multiUseBool))
                     selectedCollider->setIsTrigger(multiUseBool);
 
 
@@ -254,12 +253,48 @@ void Inspector::PhysicsInterface()
                     Core::Math::Vec3            rot = Core::Math::Quat::ToEulerAngle({ quat.w, quat.x, quat.y, quat.z });
 
                     Text("Pos:"); SameLine(60.f);
-                    if (DragFloat3("##COLPOS", &pos[0]))
+                    if (DragFloat3("##COLPOS", &pos[0], 0.25))
                         selectedCollider->setLocalToBodyTransform({ pos, quat });
 
                     Text("Rot:"); SameLine(60.f);
                     if (DragFloat3("##COLROT", rot.e))
                         selectedCollider->setLocalToBodyTransform({ pos, reactphysics3d::Quaternion::fromEulerAngles(Core::Math::ToRadians(rot.x), Core::Math::ToRadians(rot.y), Core::Math::ToRadians(rot.z)) });
+
+                    NewLine();
+                    Text("Characteristics:");
+
+                    if      (selectedCollider->getCollisionShape()->getName() == reactphysics3d::CollisionShapeName::SPHERE)
+                    {
+                        reactphysics3d::SphereShape* sphereCol = static_cast<reactphysics3d::SphereShape*>(selectedCollider->getCollisionShape());
+
+
+                        multiUseFloat = sphereCol->getRadius();
+                        if (DragFloat("##SRADIUS", &multiUseFloat, 0.25, 0, 0, "Radius: %.3f"))
+                            sphereCol->setRadius(multiUseFloat > 0 ? multiUseFloat : 0.001);
+                    }
+                    else if (selectedCollider->getCollisionShape()->getName() == reactphysics3d::CollisionShapeName::CAPSULE)
+                    {
+                        reactphysics3d::CapsuleShape* capsuleCol = static_cast<reactphysics3d::CapsuleShape*>(selectedCollider->getCollisionShape());
+
+
+                        multiUseFloat = capsuleCol->getHeight();
+                        if (DragFloat("##CHEIGHT", &multiUseFloat, 0.25, 0, 0, "Height: %.3f"))
+                            capsuleCol->setHeight(multiUseFloat > 0 ? multiUseFloat : 0.001);
+
+                        multiUseFloat = capsuleCol->getRadius();
+                        if (DragFloat("##CRADIUS", &multiUseFloat, 0.25, 0, 0, "Radius: %.3f"))
+                            capsuleCol->setRadius(multiUseFloat > 0 ? multiUseFloat : 0.001);
+                    }
+                    else if (selectedCollider->getCollisionShape()->getName() == reactphysics3d::CollisionShapeName::BOX)
+                    {
+                        reactphysics3d::BoxShape* boxCol = static_cast<reactphysics3d::BoxShape*>(selectedCollider->getCollisionShape());
+
+
+                        reactphysics3d::Vector3&& halfExtents = boxCol->getHalfExtents();
+                        Text("Half extents:"); SameLine();
+                        if (DragFloat3("##BSIZE", &halfExtents[0], 0.25))
+                            boxCol->setHalfExtents(reactphysics3d::Vector3::max({0.001, 0.001, 0.001}, halfExtents));
+                    }
 
                     TreePop();
                 }
@@ -331,7 +366,7 @@ void Inspector::PhysicsInterface()
         {
             reactphysics3d::RigidBody*& rigibod = physicComp.physBody;
 
-//====== RIGIBODY - all editable options ======//
+            //====== RIGIBODY - all editable options ======//
 
             Text("Current entity dynamism:"); SameLine();
 
@@ -342,14 +377,14 @@ void Inspector::PhysicsInterface()
             case reactphysics3d::BodyType::DYNAMIC:     TextColored({ 1.00, 1.00, 1.00, 1 }, "Dynamic");    break;
             }
 
-            Text("Change to:"); 
-            
+            Text("Change to:");
+
             SameLine();
-            if (Button("Static")    && rigibod->getType() != reactphysics3d::BodyType::STATIC)      rigibod->setType(reactphysics3d::BodyType::STATIC);
+            if (Button("Static") && rigibod->getType() != reactphysics3d::BodyType::STATIC)         rigibod->setType(reactphysics3d::BodyType::STATIC);
             SameLine();
             if (Button("Kinematic") && rigibod->getType() != reactphysics3d::BodyType::KINEMATIC)   rigibod->setType(reactphysics3d::BodyType::KINEMATIC);
             SameLine();
-            if (Button("Dynamic")   && rigibod->getType() != reactphysics3d::BodyType::DYNAMIC)     rigibod->setType(reactphysics3d::BodyType::DYNAMIC);
+            if (Button("Dynamic") && rigibod->getType() != reactphysics3d::BodyType::DYNAMIC)       rigibod->setType(reactphysics3d::BodyType::DYNAMIC);
 
             NewLine();
 
@@ -364,7 +399,7 @@ void Inspector::PhysicsInterface()
             multiUseFloat = rigibod->getMass();
             if (DragFloat("##MASS", &multiUseFloat, 1.0, 0, 0, "Mass: %.3f"))
                 rigibod->setMass(multiUseFloat);
-            
+
 
             multiUseBool = rigibod->isActive();
             if (Checkbox("Active", &multiUseBool))
@@ -373,10 +408,10 @@ void Inspector::PhysicsInterface()
             multiUseBool = rigibod->isAllowedToSleep();
             if (Checkbox("Allowed to sleep", &multiUseBool))
                 rigibod->setIsAllowedToSleep(multiUseBool);
-            
+
             multiUseBool = rigibod->isSleeping();
             Checkbox("Sleeping", &multiUseBool);
-            
+
             multiUseBool = rigibod->isGravityEnabled();
             if (Checkbox("Gravity enabled", &multiUseBool))
                 rigibod->enableGravity(multiUseBool);
@@ -385,11 +420,10 @@ void Inspector::PhysicsInterface()
             TreePop();
         }
 
-
         ImGui::NewLine();
         if (Button("Remove component##COLLIDER"))
         {
-            coordinator.componentHandler->RemoveComponentPhysics(*selectedEntity);
+            coordinator.componentHandler->RemoveComponentPhysics(*selectedEntity.focusedEntity);
         }
 
         TreePop();
@@ -401,7 +435,7 @@ void Inspector::ScriptInterface()
 {
     if (TreeNode("Script"))
     {
-        ComponentScript& scriptC = coordinator.componentHandler->GetComponentScript(selectedEntity->id);
+        ComponentScript& scriptC = coordinator.componentHandler->GetComponentScript(selectedEntity.focusedEntity->id);
         
         for (size_t i = 0; i < scriptC.scripts.size();)
         { 
@@ -427,7 +461,7 @@ void Inspector::ScriptInterface()
             {
                 if (Button(scrIt->second->filename.c_str()))
                 {
-                    scriptC.scripts.push_back(scrIt->second->CreateObject(std::to_string(selectedEntity->id)));
+                    scriptC.scripts.push_back(scrIt->second->CreateObject(std::to_string(selectedEntity.focusedEntity->id)));
                     CloseCurrentPopup();
                 }
             }
@@ -439,7 +473,7 @@ void Inspector::ScriptInterface()
         NewLine();
         if (Button("Remove component##SCRIPT"))
         {
-            coordinator.componentHandler->RemoveComponentScript(*selectedEntity);
+            coordinator.componentHandler->RemoveComponentScript(*selectedEntity.focusedEntity);
         }
 
         TreePop();
@@ -452,7 +486,7 @@ void Inspector::MapInterface()
 {
     if (TreeNode("Map transform"))
     {
-        Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity->id).localTRS;
+        Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id).localTRS;
 
         Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.pos.e);
         

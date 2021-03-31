@@ -28,9 +28,10 @@ namespace Cookie
 				trs.Update(factor);
 
 			}
-			inline void SystemDraw(const ComponentTransform& trs, ComponentModel& model, Render::RendererRemote& remote, const Core::Math::Mat4& viewProj) 
+			inline void SystemDraw(ComponentTransform& trs, ComponentModel& model, Render::RendererRemote& remote, const Core::Math::Mat4& viewProj) 
 			{
-				model.Draw(remote, viewProj, trs.localTRS.ToTRS());
+				trs.localTRS.ComputeTRS();
+				model.Draw(remote, viewProj, trs.localTRS.TRS);
 			}
 			//void SystemRemoveBelowLevel(const ComponentTransform&);
 			//void SystemRemoveNeeded();

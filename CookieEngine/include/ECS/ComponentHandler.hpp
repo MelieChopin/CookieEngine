@@ -36,13 +36,13 @@ namespace Cookie
 		{
 		public:
 
-			std::array<ComponentTransform, MAX_ENTITIES> componentTransforms;
+			std::array<ComponentTransform,	MAX_ENTITIES> componentTransforms;
 
-			std::array<ComponentModel, MAX_ENTITIES> componentModels;
+			std::array<ComponentModel,		MAX_ENTITIES> componentModels;
 
-			std::array<ComponentPhysics, MAX_ENTITIES> componentPhysics;
+			std::array<ComponentPhysics,	MAX_ENTITIES> componentPhysics;
 
-			std::array<ComponentScript, MAX_ENTITIES> componentScripts;
+			std::array<ComponentScript,		MAX_ENTITIES> componentScripts;
 
 
 
@@ -79,7 +79,9 @@ namespace Cookie
 
 				entity.signature += SIGNATURE_PHYSICS;
 
-				componentTransforms [entity.id].SetPhysics();
+				if (entity.signature & SIGNATURE_TRANSFORM)
+					componentTransforms [entity.id].SetPhysics();
+
 				componentPhysics	[entity.id].physBody = phs.worldSim->createRigidBody(componentTransforms[entity.id].physTransform);
 			}
 			void AddComponentScript(Entity& entity)

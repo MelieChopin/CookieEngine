@@ -2,6 +2,7 @@
 #include "Render/RendererRemote.hpp"
 #include "Render/Renderer.hpp"
 #include <vector>
+#include "Physics/PhysicsHandle.hpp"
 #include "Resources/Mesh.hpp"
 
 using namespace Cookie::Resources;
@@ -12,6 +13,9 @@ Mesh::Mesh(std::string _name, aiMesh* mesh):
     INb     = mesh->mNumFaces * 3;//a face is a triangle as triangulate flag is enabled
     InitVBuffer(mesh);
     InitIBuffer(mesh);
+
+    aiVector3D center   = (mesh->mAABB.mMax + mesh->mAABB.mMin) * 0.5f;
+    AABBhalfExtent      = {mesh->mAABB.mMax.x - center.x,mesh->mAABB.mMax.y - center.y,mesh->mAABB.mMax.z - center.z};
 }
 
 Mesh::Mesh(std::string meshName, std::vector<float>& vertices, std::vector<unsigned int>& indices, unsigned int inb):
@@ -20,6 +24,7 @@ Mesh::Mesh(std::string meshName, std::vector<float>& vertices, std::vector<unsig
     INb = inb;
     InitVBuffer(vertices);
     InitIBuffer(indices);
+    ComputeAABB(vertices);
 }
 
 Mesh::~Mesh()
@@ -28,6 +33,25 @@ Mesh::~Mesh()
 	    VBuffer->Release();
     if (IBuffer)
         IBuffer->Release();
+}
+
+void Mesh::ComputeAABB(const std::vector<float>& vertices)
+{
+    for (int i = 0; i < vertices.size()/3; i++)
+    {
+        if (std::abs(vertices[i]) > AABBhalfExtent.x)
+        {
+            AABBhalfExtent.x = vertices[i];
+        }
+        if (std::abs(vertices[i+1]) > AABBhalfExtent.y)
+        {
+            AABBhalfExtent.y = vertices[i+1];
+        }
+        if (std::abs(vertices[i+2]) > AABBhalfExtent.z)
+        {
+            AABBhalfExtent.z = vertices[i+2];
+        }
+    }
 }
 
 void Mesh::InitVBuffer(aiMesh* mesh)
