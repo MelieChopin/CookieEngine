@@ -54,13 +54,13 @@ namespace Cookie
 			{
 				if (selectedEntity.editComp)
 				{
-					selectedEntity.editComp->editTrs = &game.coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id).localTRS;
-					selectedEntity.editComp->Update();
 					if ((selectedEntity.focusedEntity->signature & SIGNATURE_MODEL) == SIGNATURE_MODEL)
 					{
 						selectedEntity.editComp->AABB = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBhalfExtent;
 						selectedEntity.editComp->MakeCollider();
 					}
+					selectedEntity.editComp->editTrs = &game.coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id).localTRS;
+					selectedEntity.editComp->Update();
 				}
 
 				selectedEntity.focusedEntity	= &game.coordinator.entityHandler->entities[selectedEntity.toChangeEntityId];

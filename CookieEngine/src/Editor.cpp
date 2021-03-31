@@ -100,13 +100,13 @@ void Editor::ModifyEditComp()
 {
     for (int i = 1; i < MAX_ENTITIES; i++)
     {
-        editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i).localTRS;
-        editingComponent[i].Update();
         if ((game.coordinator.entityHandler->entities[i].signature & SIGNATURE_MODEL) == SIGNATURE_MODEL)
         {
             editingComponent[i].AABB = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBhalfExtent;
             editingComponent[i].MakeCollider();
         }
+        editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i).localTRS;
+        editingComponent[i].Update();
     }
 }
 
@@ -142,7 +142,16 @@ void Editor::Loop()
 
         if (currentScene != game.scene.get())
         {
-            PopulateFocusedEntity();
+            if (selectedEntity.editComp)
+            {
+                selectedEntity.editComp->editTrs = &game.coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id).localTRS;
+                selectedEntity.editComp->Update();
+                if ((selectedEntity.focusedEntity->signature & SIGNATURE_MODEL) == SIGNATURE_MODEL)
+                {
+                    selectedEntity.editComp->AABB = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBhalfExtent;
+                    selectedEntity.editComp->MakeCollider();
+                }
+            }
             selectedEntity = {};
             selectedEntity.componentHandler = game.coordinator.componentHandler;
             ModifyEditComp();
