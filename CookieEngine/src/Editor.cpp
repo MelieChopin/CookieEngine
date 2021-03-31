@@ -59,25 +59,24 @@ Editor::Editor()
     ui.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, game.renderer.GetLastFrameBuffer(), &cam, game.coordinator, selectedEntity));
 
 
-    for (int i = 0; i <= game.coordinator.entityHandler->livingEntities; i++)
-    {
-        ECS::Entity& iEntity = game.coordinator.entityHandler->entities[i];
-        if (iEntity.signature & SIGNATURE_PHYSICS)
-        {
-            ECS::ComponentPhysics& iPhysics = game.coordinator.componentHandler->componentPhysics[i];
-            game.coordinator.componentHandler->componentTransforms[i].SetPhysics();
-            iPhysics.physBody = game.scene->physSim.worldSim->createRigidBody(game.coordinator.componentHandler->componentTransforms[i].physTransform);
-            iPhysics.physBody->setType(rp3d::BodyType::DYNAMIC);
+    //for (int i = 0; i <= game.coordinator.entityHandler->livingEntities; i++)
+    //{
+    //    ECS::Entity& iEntity = game.coordinator.entityHandler->entities[i];
+    //    if (iEntity.signature & SIGNATURE_PHYSICS)
+    //    {
+    //        ECS::ComponentPhysics& iPhysics = game.coordinator.componentHandler->componentPhysics[i];
+    //        game.coordinator.componentHandler->componentTransforms[i].SetPhysics();
+    //        iPhysics.physBody = game.scene->physSim.worldSim->createRigidBody(game.coordinator.componentHandler->componentTransforms[i].physTransform);
+    //        iPhysics.physBody->setType(rp3d::BodyType::DYNAMIC);
+    //
+    //        iPhysics.AddSphereCollider(2.0f, { 0.5f,1.5f,0.0f }, {0.0f,0.0f,0.0f});
+    //    }
+    //}
 
-            iPhysics.AddSphereCollider(2.0f, { 0.5f,1.5f,0.0f }, {0.0f,0.0f,0.0f});
-        }
-    }
-
-    Physics::PhysicsHandle::editWorld = Physics::PhysicsHandle::physCom->createPhysicsWorld();
     InitEditComp();
-    dbgRenderer.SetPhysicsRendering();
-    Physics::PhysicsHandle::physSim->update(1.0e-7f);
-    Physics::PhysicsHandle::editWorld->update(1.0e-7f);
+
+    //Physics::PhysicsHandle::physSim->update(1.0e-7f);
+    //Physics::PhysicsHandle::editWorld->update(1.0e-7f);
 
 }
 
@@ -135,11 +134,6 @@ void Editor::Loop()
             cam.Update();
         }
 
-        if (physHandle.physSim->getIsDebugRenderingEnabled() != dbgRenderer.showDebug)
-        {
-            dbgRenderer.SetPhysicsRendering();
-        }
-
         if (currentScene != game.scene.get())
         {
             if (selectedEntity.editComp)
@@ -159,6 +153,7 @@ void Editor::Loop()
         }
 
         Physics::PhysicsHandle::editWorld->update(1.0e-7f);
+        Physics::PhysicsHandle::physSim->update(1.0e-7f);
 
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
             Resources::Serialization::Save::SaveScene(*game.scene, game.resources);
@@ -181,6 +176,12 @@ void Editor::Loop()
         if (selectedEntity.toChangeEntityId >= 0)
         {
             PopulateFocusedEntity();
+        }
+
+        if (selectedEntity.focusedEntity)
+        {
+            selectedEntity.componentHandler->componentTransforms[selectedEntity.focusedEntity->id].SetPhysics();
+            selectedEntity.componentHandler->componentPhysics[selectedEntity.focusedEntity->id].physBody->setTransform(selectedEntity.componentHandler->componentTransforms[selectedEntity.focusedEntity->id].physTransform);
         }
             
         /////

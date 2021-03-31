@@ -13,6 +13,8 @@ namespace Cookie
 		class Transform
 		{
 		public:
+			Core::Math::Mat4 TRS = Core::Math::Mat4::Identity();
+
 			Core::Math::Vec3 pos{ 0,0,0 };
 			Core::Math::Vec3 rot{ 0,0,0 };
 			Core::Math::Vec3 scale{ 1,1,1 };
@@ -21,9 +23,9 @@ namespace Cookie
 			Transform() {}
 			Transform(const Core::Math::Vec3& _translation, const Core::Math::Vec3& _rotation, const Core::Math::Vec3& _scale) : pos{_translation},rot{_rotation}, scale{ _scale } {}
 			
-			inline Core::Math::Mat4 ToTRS() const 
+			inline void ComputeTRS() 
 			{ 
-				return Core::Math::Mat4::TRS(pos, {Core::Math::ToRadians(rot.x),Core::Math::ToRadians(rot.y) ,Core::Math::ToRadians(rot.z) }, scale);
+				TRS = Core::Math::Mat4::TRS(pos, {Core::Math::ToRadians(rot.x),Core::Math::ToRadians(rot.y) ,Core::Math::ToRadians(rot.z) }, scale);
 			}
 			
 			~Transform() {}
@@ -43,20 +45,20 @@ namespace Cookie
 			ComponentTransform() { ToDefault(); }
 			~ComponentTransform() {}
 
-			void Update(float factor)
+			inline void Update(float factor)noexcept
 			{
 				physTransform = reactphysics3d::Transform::interpolateTransforms(oldTransform, physTransform, factor);
 
 				reactphysics3d::Vector3		pos = physTransform.getPosition();
 				reactphysics3d::Quaternion	rot = physTransform.getOrientation();
 
-				localTRS.pos = {pos.x,pos.y,pos.z};
-				localTRS.rot = Core::Math::Quat::ToEulerAngle({rot.w,rot.x,rot.y,rot.z});
+				localTRS.pos = { pos.x,pos.y,pos.z };
+				localTRS.rot = Core::Math::Quat::ToEulerAngle({ rot.w,rot.x,rot.y,rot.z });
 
 				oldTransform = physTransform;
 			}
 
-			void SetPhysics()
+			inline void SetPhysics()noexcept
 			{
 				physTransform.setPosition({ localTRS.pos.x,localTRS.pos.y,localTRS.pos.z });
 				Core::Math::Quat quat = Core::Math::Quat::ToQuat(localTRS.rot);

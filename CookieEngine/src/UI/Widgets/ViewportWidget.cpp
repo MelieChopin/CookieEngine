@@ -66,7 +66,7 @@ void Viewport::WindowDisplay()
 void Viewport::GizmoManipulator()
 {
 	Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id).localTRS;
-	Mat4 trsfTMat = trsf.ToTRS().Transpose();
+	Mat4 trsfTMat = trsf.TRS.Transpose();
 
 	ImGuizmo::SetRect(viewportDrawspace.posx, viewportDrawspace.posy, viewportDrawspace.width, viewportDrawspace.height);
 
@@ -82,5 +82,9 @@ void Viewport::GizmoManipulator()
 
 
 	if (ImGuizmo::Manipulate(camera->GetView().Transpose().e, camera->GetProj().Transpose().e, transformTool, ImGuizmo::MODE::WORLD, trsfTMat.e))
+	{
+		trsfTMat.Transpose();
 		ImGuizmo::DecomposeMatrixToComponents(trsfTMat.e, trsf.pos.e, trsf.rot.e, trsf.scale.e);
+	}
+
 }

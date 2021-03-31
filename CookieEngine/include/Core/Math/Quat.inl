@@ -125,9 +125,9 @@ namespace Cookie
 
 				// pitch (y-axis rotation)
 				double sinp = 2 * (q.w * q.y - q.z * q.x);
-				if (std::abs(sinp) >= 1)
-					angles.y = ToDegrees(std::copysign(PI / 2, sinp)); // use 90 degrees if out of range
-				else
+				//if (std::abs(sinp) >= 1)
+				//	angles.y = ToDegrees(std::copysign(PI / 2, sinp)); // use 90 degrees if out of range
+				//else
 					angles.y = ToDegrees(std::asin(sinp));
 
 				// yaw (z-axis rotation)

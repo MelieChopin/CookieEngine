@@ -29,8 +29,6 @@ namespace Cookie
 				Core::Math::Quat quat = Core::Math::Quat::ToQuat(eulerAngles);
 				trs.setOrientation({ quat.x,quat.y,quat.z,quat.w });
 
-				//physTransform.push_back(trs);
-
 				physColliders.push_back(physBody->addCollider(sphere, trs));
 			}
 
@@ -44,8 +42,6 @@ namespace Cookie
 				Core::Math::Quat quat = Core::Math::Quat::ToQuat(eulerAngles);
 				trs.setOrientation({ quat.x,quat.y,quat.z,quat.w });
 
-				//physTransform.push_back(trs);
-
 				physColliders.push_back(physBody->addCollider(cube, trs));
 			}
 
@@ -58,8 +54,6 @@ namespace Cookie
 				trs.setPosition({ localPos.x,localPos.y,localPos.z });
 				Core::Math::Quat quat = Core::Math::Quat::ToQuat(eulerAngles);
 				trs.setOrientation({ quat.x,quat.y,quat.z,quat.w });
-
-				//physTransform.push_back(trs);
 
 				physColliders.push_back(physBody->addCollider(capsule, trs));
 			}

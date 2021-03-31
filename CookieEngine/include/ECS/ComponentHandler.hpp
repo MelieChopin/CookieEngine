@@ -79,7 +79,9 @@ namespace Cookie
 
 				entity.signature += SIGNATURE_PHYSICS;
 
-				componentTransforms [entity.id].SetPhysics();
+				if (entity.signature & SIGNATURE_TRANSFORM)
+					componentTransforms [entity.id].SetPhysics();
+
 				componentPhysics	[entity.id].physBody = phs.worldSim->createRigidBody(componentTransforms[entity.id].physTransform);
 			}
 			void AddComponentScript(Entity& entity)

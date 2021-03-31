@@ -9,10 +9,16 @@ using namespace Cookie::Core::Math;
 
 /*========== CONSTRUCTORS/DESTRUCTORS ==========*/
 
-DebugRenderer::DebugRenderer()
+DebugRenderer::DebugRenderer():
+    physDbgRenderer{Physics::PhysicsHandle::editWorld->getDebugRenderer()}
 {
     AllocateVBuffer(1);
     InitRasterizerState();
+    physDbgRenderer.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLISION_SHAPE, true);
+    physDbgRenderer.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::CONTACT_POINT, true);
+    physDbgRenderer.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::CONTACT_NORMAL, true);
+    physDbgRenderer.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLIDER_AABB, true);
+    physDbgRenderer.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLIDER_BROADPHASE_AABB, true);
 }
 
 DebugRenderer::~DebugRenderer()
@@ -77,25 +83,6 @@ void DebugRenderer::UpdateVBuffer(size_t vBufferSize, void* data)
     Render::RendererRemote::context->Unmap(VBuffer, 0);
 }
 
-void DebugRenderer::SetPhysicsRendering()
-{
-    Physics::PhysicsHandle physHandle;
-	if (showDebug)
-	{
-        physHandle.editWorld->setIsDebugRenderingEnabled(true);
-        rp3d::DebugRenderer& physicsDebug = physHandle.editWorld->getDebugRenderer();
-        physicsDebug.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLISION_SHAPE, true);
-        physicsDebug.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::CONTACT_POINT, true);
-        physicsDebug.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::CONTACT_NORMAL, true);
-        physicsDebug.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLIDER_AABB, true);
-        physicsDebug.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLIDER_BROADPHASE_AABB, true);
-	}
-    else
-    {
-        physHandle.physSim->setIsDebugRenderingEnabled(false);
-    }
-}
-
 void DebugRenderer::Draw(const Mat4& viewProj)
 {
     if (showDebug)
@@ -111,37 +98,38 @@ void DebugRenderer::Draw(const Mat4& viewProj)
         Render::RendererRemote::context->RSGetState(&previousState);
         Render::RendererRemote::context->RSSetState(rasterState);
 
-        rp3d::DebugRenderer& dbgRenderer = physHandle.editWorld->getDebugRenderer();
+        physDbgRenderer.reset();
+        physDbgRenderer.computeDebugRenderingPrimitives(*Physics::PhysicsHandle::physSim);
 
-        if (dbgRenderer.getNbTriangles() > 0)
+        if (physDbgRenderer.getNbTriangles() > 0)
         {
             Render::RendererRemote::context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-            if (bDesc.ByteWidth < (dbgRenderer.getNbTriangles() * sizeof(rp3d::DebugRenderer::DebugTriangle)))
+            if (bDesc.ByteWidth < (physDbgRenderer.getNbTriangles() * sizeof(rp3d::DebugRenderer::DebugTriangle)))
             {
                 VBuffer->Release();
-                AllocateVBuffer((dbgRenderer.getNbTriangles() * sizeof(rp3d::DebugRenderer::DebugTriangle)));
+                AllocateVBuffer((physDbgRenderer.getNbTriangles() * sizeof(rp3d::DebugRenderer::DebugTriangle)));
             }
 
-            UpdateVBuffer((dbgRenderer.getNbTriangles() * sizeof(rp3d::DebugRenderer::DebugTriangle)), (void*)dbgRenderer.getTrianglesArray());
+            UpdateVBuffer((physDbgRenderer.getNbTriangles() * sizeof(rp3d::DebugRenderer::DebugTriangle)), (void*)physDbgRenderer.getTrianglesArray());
 
             Render::RendererRemote::context->IASetVertexBuffers(0, 1, &VBuffer, &stride, &offset);
 
-            Render::RendererRemote::context->Draw(dbgRenderer.getNbTriangles() * 3, 0);
+            Render::RendererRemote::context->Draw(physDbgRenderer.getNbTriangles() * 3, 0);
         }
 
-        if (dbgRenderer.getNbLines() > 0)
+        if (physDbgRenderer.getNbLines() > 0)
         {
             Render::RendererRemote::context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-            if (bDesc.ByteWidth < (dbgRenderer.getNbLines() * sizeof(rp3d::DebugRenderer::DebugLine)))
+            if (bDesc.ByteWidth < (physDbgRenderer.getNbLines() * sizeof(rp3d::DebugRenderer::DebugLine)))
             {
                 VBuffer->Release();
-                AllocateVBuffer((dbgRenderer.getNbLines() * sizeof(rp3d::DebugRenderer::DebugLine)));
+                AllocateVBuffer((physDbgRenderer.getNbLines() * sizeof(rp3d::DebugRenderer::DebugLine)));
             }
 
-            UpdateVBuffer((dbgRenderer.getNbLines() * sizeof(rp3d::DebugRenderer::DebugLine)), (void*)dbgRenderer.getLinesArray());
+            UpdateVBuffer((physDbgRenderer.getNbLines() * sizeof(rp3d::DebugRenderer::DebugLine)), (void*)physDbgRenderer.getLinesArray());
             Render::RendererRemote::context->IASetVertexBuffers(0, 1, &VBuffer, &stride, &offset);
 
-            Render::RendererRemote::context->Draw(dbgRenderer.getNbLines() * 2, 0);
+            Render::RendererRemote::context->Draw(physDbgRenderer.getNbLines() * 2, 0);
         }
 
         Render::RendererRemote::context->IASetPrimitiveTopology(topo);

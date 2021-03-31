@@ -5,6 +5,7 @@
 #include "Editor.hpp"
 
 #include <string>
+
 #include <imgui.h>
 #include <imgui_stdlib.h>
 
@@ -18,6 +19,12 @@ using namespace Cookie::Resources;
 
 void Inspector::WindowDisplay()
 {
+    if (selectedEntity.focusedEntity != recordedEntity)
+    {
+        recordedEntity = selectedEntity.focusedEntity;
+        selectedCollider = nullptr;
+    }
+
     TryBeginWindow()
     {
         if (selectedEntity.focusedEntity) EntityInspection();
@@ -84,8 +91,6 @@ void Inspector::TransformInterface()
         Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.localTRS.pos.e);
         Text("Rot:"); SameLine(65.f); DragFloat3("##ROT", trsf.localTRS.rot.e);
         Text("Scl:"); SameLine(65.f); DragFloat3("##SCL", trsf.localTRS.scale.e);
-
-        trsf.SetPhysics();
 
         ImGui::NewLine();
         if (Button("Remove component##TRSF"))
@@ -183,21 +188,201 @@ void Inspector::ModelInterface()
     ImGui::Separator();
 }
 
+
 void Inspector::PhysicsInterface()
 {
     if (TreeNode("Physics"))
     {
         ComponentPhysics& physicComp = coordinator.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id);
+        
+        // due to the nature of how we can access and set variables in react physic 3D, this variable are used numerous times to ease the manipulations with ImGui and save memory.
+        static float multiUseFloat = 0; static bool multiUseBool = false;
 
-        TextDisabled("Active colliders:");
-        Indent(15.f);
 
-
-        for (reactphysics3d::Collider* collider : physicComp.physColliders)
+        if (TreeNode("Colliders"))
         {
+            Text("Active colliders:");
+            Indent(15.f);
 
+            std::vector<reactphysics3d::Collider*>& colliders = physicComp.physColliders;
+            
+//====== COLLIDERS - beginning list of current colliders ======//
+
+            for (size_t i = 0; i < colliders.size(); i++)
+            {
+                std::string nameTag;
+            
+                if (selectedCollider == colliders[i])
+                    nameTag += '[';
+            
+                switch (colliders[i]->getCollisionShape()->getName())
+                {
+                case reactphysics3d::CollisionShapeName::SPHERE:    nameTag += "Sphere";    break;
+                case reactphysics3d::CollisionShapeName::CAPSULE:   nameTag += "Capsule";   break;
+                case reactphysics3d::CollisionShapeName::BOX:       nameTag += "Box";       break;
+
+                default: break;
+                } 
+
+                if (selectedCollider == colliders[i])
+                    nameTag += ']';
+
+                nameTag += "##";
+                nameTag += std::to_string(i);
+
+
+                if (Button(nameTag.c_str()))
+                    selectedCollider = colliders[i];
+            }
+
+            Unindent(15.f);
+
+//====== COLLIDERS - sub-window for editing ======//
+            
+            if (BeginChild(windowName, { GetContentRegionAvail().x, 150 }, true) && (selectedCollider != nullptr))
+            {
+                multiUseBool = selectedCollider->getIsTrigger();
+                if (Checkbox("Trigger:", &multiUseBool))
+                    selectedCollider->setIsTrigger(multiUseBool);
+
+
+                if (TreeNode("Collider transform"))
+                {
+                    reactphysics3d::Vector3     pos = selectedCollider->getLocalToBodyTransform().getPosition();
+                    reactphysics3d::Quaternion  quat = selectedCollider->getLocalToBodyTransform().getOrientation();
+                    Core::Math::Vec3            rot = Core::Math::Quat::ToEulerAngle({ quat.w, quat.x, quat.y, quat.z });
+
+                    Text("Pos:"); SameLine(60.f);
+                    if (DragFloat3("##COLPOS", &pos[0]))
+                        selectedCollider->setLocalToBodyTransform({ pos, quat });
+
+                    Text("Rot:"); SameLine(60.f);
+                    if (DragFloat3("##COLROT", rot.e))
+                        selectedCollider->setLocalToBodyTransform({ pos, reactphysics3d::Quaternion::fromEulerAngles(Core::Math::ToRadians(rot.x), Core::Math::ToRadians(rot.y), Core::Math::ToRadians(rot.z)) });
+
+                    TreePop();
+                }
+
+                if (TreeNode("Collider material"))
+                {
+                    reactphysics3d::Material& colM = selectedCollider->getMaterial();
+
+                    multiUseFloat = colM.getBounciness();
+                    if (SliderFloat("##BOUNCINESS", &multiUseFloat, 0, 1, "Bounciness: %.5f"))
+                        colM.setBounciness(multiUseFloat);
+
+                    multiUseFloat = colM.getFrictionCoefficient();
+                    if (DragFloat("##FRICTION", &multiUseFloat, 0.5, 0, 0, "Friction coef: %.3f"))
+                        colM.setFrictionCoefficient(multiUseFloat >= 0 ? multiUseFloat : 0);
+
+                    multiUseFloat = colM.getMassDensity();
+                    if (DragFloat("##DENSITY", &multiUseFloat, 0.5, 0, 0, "Density: %.2f"))
+                        colM.setMassDensity(multiUseFloat);
+
+                    multiUseFloat = colM.getRollingResistance();
+                    if (DragFloat("##ROLLRESIST", &multiUseFloat, 0.5, 0, 0, "Rolling resistance: %.5f"))
+                        colM.setRollingResistance(multiUseFloat >= 0 ? multiUseFloat : 0);
+
+                    TreePop();
+                }
+            }
+            
+            EndChild();
+
+//====== COLLIDERS - options to add new colliders ======//
+
+            if (Button("Add a collider")) OpenPopup("Collider adder popup");
+            if (BeginPopup("Collider adder popup"))
+            {
+                if (Button("Add a sphere collider"))
+                { 
+                    physicComp.AddSphereCollider(1, {0, 0, 0}, {0, 0, 0});
+                
+                    selectedCollider = colliders.back();
+                    CloseCurrentPopup();
+                }
+
+                if (Button("Add a box collider"))
+                {
+                    physicComp.AddCubeCollider({1, 1, 1}, { 0, 0, 0 }, { 0, 0, 0 });
+                
+                    selectedCollider = colliders.back();
+                    CloseCurrentPopup();
+                }
+
+                if (Button("Add a capsule collider"))
+                {
+                    physicComp.AddCapsuleCollider({1, 1}, { 0, 0, 0 }, { 0, 0, 0 });
+                
+                    selectedCollider = colliders.back();
+                    CloseCurrentPopup();
+                }
+
+                EndPopup();
+            }
+
+
+            TreePop();
         }
+        
 
+        if (TreeNode("Rigibody"))
+        {
+            reactphysics3d::RigidBody*& rigibod = physicComp.physBody;
+
+            //====== RIGIBODY - all editable options ======//
+
+            Text("Current entity dynamism:"); SameLine();
+
+            switch (rigibod->getType())
+            {
+            case reactphysics3d::BodyType::STATIC:      TextColored({ 0.50, 0.50, 0.50, 1 }, "Static");     break;
+            case reactphysics3d::BodyType::KINEMATIC:   TextColored({ 0.75, 0.75, 0.75, 1 }, "Kinematic");  break;
+            case reactphysics3d::BodyType::DYNAMIC:     TextColored({ 1.00, 1.00, 1.00, 1 }, "Dynamic");    break;
+            }
+
+            Text("Change to:");
+
+            SameLine();
+            if (Button("Static") && rigibod->getType() != reactphysics3d::BodyType::STATIC)      rigibod->setType(reactphysics3d::BodyType::STATIC);
+            SameLine();
+            if (Button("Kinematic") && rigibod->getType() != reactphysics3d::BodyType::KINEMATIC)   rigibod->setType(reactphysics3d::BodyType::KINEMATIC);
+            SameLine();
+            if (Button("Dynamic") && rigibod->getType() != reactphysics3d::BodyType::DYNAMIC)     rigibod->setType(reactphysics3d::BodyType::DYNAMIC);
+
+            NewLine();
+
+            multiUseFloat = rigibod->getAngularDamping();
+            if (DragFloat("##ANGULARDAMP", &multiUseFloat, 0.5, 0, 0, "Angular damping: %.3f"))
+                rigibod->setAngularDamping(multiUseFloat >= 0 ? multiUseFloat : 0);
+
+            multiUseFloat = rigibod->getLinearDamping();
+            if (DragFloat("##LINEARDAMP", &multiUseFloat, 0.5, 0, 0, "Linear damping: %.3f"))
+                rigibod->setLinearDamping(multiUseFloat >= 0 ? multiUseFloat : 0);
+
+            multiUseFloat = rigibod->getMass();
+            if (DragFloat("##MASS", &multiUseFloat, 1.0, 0, 0, "Mass: %.3f"))
+                rigibod->setMass(multiUseFloat);
+
+
+            multiUseBool = rigibod->isActive();
+            if (Checkbox("Active", &multiUseBool))
+                rigibod->setIsActive(multiUseBool);
+
+            multiUseBool = rigibod->isAllowedToSleep();
+            if (Checkbox("Allowed to sleep", &multiUseBool))
+                rigibod->setIsAllowedToSleep(multiUseBool);
+
+            multiUseBool = rigibod->isSleeping();
+            Checkbox("Sleeping", &multiUseBool);
+
+            multiUseBool = rigibod->isGravityEnabled();
+            if (Checkbox("Gravity enabled", &multiUseBool))
+                rigibod->enableGravity(multiUseBool);
+
+
+            TreePop();
+        }
 
         ImGui::NewLine();
         if (Button("Remove component##COLLIDER"))
@@ -208,6 +393,7 @@ void Inspector::PhysicsInterface()
         TreePop();
     }
 }
+
 
 void Inspector::ScriptInterface()
 {
