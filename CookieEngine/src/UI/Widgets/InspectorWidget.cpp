@@ -222,7 +222,7 @@ void Inspector::PhysicsInterface()
                 case reactphysics3d::CollisionShapeName::BOX:       nameTag += "Box";       break;
 
                 default: break;
-                } 
+                }
 
                 if (selectedCollider == colliders[i])
                     nameTag += ']';
@@ -242,7 +242,7 @@ void Inspector::PhysicsInterface()
             if (BeginChild(windowName, { GetContentRegionAvail().x, 150 }, true) && (selectedCollider != nullptr))
             {
                 multiUseBool = selectedCollider->getIsTrigger();
-                if (Checkbox("Trigger:", &multiUseBool))
+                if (Checkbox("Trigger", &multiUseBool))
                     selectedCollider->setIsTrigger(multiUseBool);
 
 
@@ -253,12 +253,48 @@ void Inspector::PhysicsInterface()
                     Core::Math::Vec3            rot = Core::Math::Quat::ToEulerAngle({ quat.w, quat.x, quat.y, quat.z });
 
                     Text("Pos:"); SameLine(60.f);
-                    if (DragFloat3("##COLPOS", &pos[0]))
+                    if (DragFloat3("##COLPOS", &pos[0], 0.25))
                         selectedCollider->setLocalToBodyTransform({ pos, quat });
 
                     Text("Rot:"); SameLine(60.f);
                     if (DragFloat3("##COLROT", rot.e))
                         selectedCollider->setLocalToBodyTransform({ pos, reactphysics3d::Quaternion::fromEulerAngles(Core::Math::ToRadians(rot.x), Core::Math::ToRadians(rot.y), Core::Math::ToRadians(rot.z)) });
+
+                    NewLine();
+                    Text("Characteristics:");
+
+                    if      (selectedCollider->getCollisionShape()->getName() == reactphysics3d::CollisionShapeName::SPHERE)
+                    {
+                        reactphysics3d::SphereShape* sphereCol = static_cast<reactphysics3d::SphereShape*>(selectedCollider->getCollisionShape());
+
+
+                        multiUseFloat = sphereCol->getRadius();
+                        if (DragFloat("##SRADIUS", &multiUseFloat, 0.25, 0, 0, "Radius: %.3f"))
+                            sphereCol->setRadius(multiUseFloat > 0 ? multiUseFloat : 0.001);
+                    }
+                    else if (selectedCollider->getCollisionShape()->getName() == reactphysics3d::CollisionShapeName::CAPSULE)
+                    {
+                        reactphysics3d::CapsuleShape* capsuleCol = static_cast<reactphysics3d::CapsuleShape*>(selectedCollider->getCollisionShape());
+
+
+                        multiUseFloat = capsuleCol->getHeight();
+                        if (DragFloat("##CHEIGHT", &multiUseFloat, 0.25, 0, 0, "Height: %.3f"))
+                            capsuleCol->setHeight(multiUseFloat > 0 ? multiUseFloat : 0.001);
+
+                        multiUseFloat = capsuleCol->getRadius();
+                        if (DragFloat("##CRADIUS", &multiUseFloat, 0.25, 0, 0, "Radius: %.3f"))
+                            capsuleCol->setRadius(multiUseFloat > 0 ? multiUseFloat : 0.001);
+                    }
+                    else if (selectedCollider->getCollisionShape()->getName() == reactphysics3d::CollisionShapeName::BOX)
+                    {
+                        reactphysics3d::BoxShape* boxCol = static_cast<reactphysics3d::BoxShape*>(selectedCollider->getCollisionShape());
+
+
+                        reactphysics3d::Vector3&& halfExtents = boxCol->getHalfExtents();
+                        Text("Half extents:"); SameLine();
+                        if (DragFloat3("##BSIZE", &halfExtents[0], 0.25))
+                            boxCol->setHalfExtents(reactphysics3d::Vector3::max({0.001, 0.001, 0.001}, halfExtents));
+                    }
 
                     TreePop();
                 }
@@ -344,11 +380,11 @@ void Inspector::PhysicsInterface()
             Text("Change to:");
 
             SameLine();
-            if (Button("Static") && rigibod->getType() != reactphysics3d::BodyType::STATIC)      rigibod->setType(reactphysics3d::BodyType::STATIC);
+            if (Button("Static") && rigibod->getType() != reactphysics3d::BodyType::STATIC)         rigibod->setType(reactphysics3d::BodyType::STATIC);
             SameLine();
             if (Button("Kinematic") && rigibod->getType() != reactphysics3d::BodyType::KINEMATIC)   rigibod->setType(reactphysics3d::BodyType::KINEMATIC);
             SameLine();
-            if (Button("Dynamic") && rigibod->getType() != reactphysics3d::BodyType::DYNAMIC)     rigibod->setType(reactphysics3d::BodyType::DYNAMIC);
+            if (Button("Dynamic") && rigibod->getType() != reactphysics3d::BodyType::DYNAMIC)       rigibod->setType(reactphysics3d::BodyType::DYNAMIC);
 
             NewLine();
 
