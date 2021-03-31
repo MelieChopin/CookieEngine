@@ -37,51 +37,33 @@ Editor::Editor()
 
     game.SetScene(_scene);
 
-    ui.AddItem(new UIwidget::SaveButton(game.scene, game.resources), 0);
+    ui.AddItem(std::make_shared<UIwidget::SaveButton>(game.scene, game.resources), 0);
 
     
-    ui.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
+    ui.AddWItem(std::make_shared<UIwidget::ExitPannel>(game.renderer.window.window), 0);
 
-    ui.AddWItem(new UIwidget::TextureEditor(game.renderer, game.resources), 1);
+    ui.AddWItem(std::make_shared<UIwidget::TextureEditor>(game.renderer, game.resources), 1);
 
-    ui.AddWItem(new UIwidget::FileExplorer(game.renderer, game), 2);
+    ui.AddWItem(std::make_shared<UIwidget::FileExplorer>(game.renderer, game), 2);
 
-    ui.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator, game.scene->physSim), 2);
+    ui.AddWItem(std::make_shared<UIwidget::Inspector>(selectedEntity, game.resources, game.coordinator, game.scene->physSim), 2);
 
-    ui.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
+    ui.AddWItem(std::make_shared<UIwidget::Hierarchy>(game.resources, game.scene, game.coordinator, selectedEntity), 2);
 
-    ui.AddWItem(new UIwidget::Console(CDebug, game.renderer), 2);
+    ui.AddWItem(std::make_shared<UIwidget::Console>(CDebug, game.renderer), 2);
 
-    ui.AddWItem(new UIwidget::DemoWindow, 3);
+    ui.AddWItem(std::make_shared<UIwidget::DemoWindow>(), 3);
 
-
-    UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.renderer);
-    ui.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, game.renderer.GetLastFrameBuffer(), &cam, game.coordinator, selectedEntity));
-
-
-    //for (int i = 0; i <= game.coordinator.entityHandler->livingEntities; i++)
-    //{
-    //    ECS::Entity& iEntity = game.coordinator.entityHandler->entities[i];
-    //    if (iEntity.signature & SIGNATURE_PHYSICS)
-    //    {
-    //        ECS::ComponentPhysics& iPhysics = game.coordinator.componentHandler->componentPhysics[i];
-    //        game.coordinator.componentHandler->componentTransforms[i].SetPhysics();
-    //        iPhysics.physBody = game.scene->physSim.worldSim->createRigidBody(game.coordinator.componentHandler->componentTransforms[i].physTransform);
-    //        iPhysics.physBody->setType(rp3d::BodyType::DYNAMIC);
-    //
-    //        iPhysics.AddSphereCollider(2.0f, { 0.5f,1.5f,0.0f }, {0.0f,0.0f,0.0f});
-    //    }
-    //}
+    ui.AddWindow(std::make_shared <UIwidget::Viewport>(std::make_shared<UIwidget::Toolbar>(game.renderer), game.renderer.window.window, game.renderer.GetLastFrameBuffer(), &cam, game.coordinator, selectedEntity));
 
     InitEditComp();
-
-    //Physics::PhysicsHandle::physSim->update(1.0e-7f);
-    //Physics::PhysicsHandle::editWorld->update(1.0e-7f);
 
 }
 
 Editor::~Editor()
 {
+    ui.Terminate();
+    Physics::PhysicsHandle::Terminate();
     //Save all prefabs in folder Prefabs
     Resources::Serialization::Save::SaveAllPrefabs(game.resources);
 }
@@ -153,7 +135,7 @@ void Editor::Loop()
         }
 
         Physics::PhysicsHandle::editWorld->update(1.0e-7f);
-        Physics::PhysicsHandle::physSim->update(1.0e-7f);
+        //Physics::PhysicsHandle::physSim->update(1.0e-7f);
 
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
             Resources::Serialization::Save::SaveScene(*game.scene, game.resources);

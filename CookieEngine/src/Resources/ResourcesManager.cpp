@@ -20,7 +20,11 @@ ResourcesManager::ResourcesManager()
 
 ResourcesManager::~ResourcesManager()
 {
-
+	meshes.clear();
+	shaders.clear();
+	textures.clear();
+	scripts.clear();
+	prefabs.clear();
 }
 
 

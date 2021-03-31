@@ -33,6 +33,13 @@ PhysicsShader::~PhysicsShader()
         VShader->Release();
     if (layout)
         layout->Release();
+    if (CBuffer)
+        CBuffer->Release();
+
+    PShader = nullptr;
+    VShader = nullptr;
+    layout = nullptr;
+    CBuffer = nullptr;
 }
 
 std::string PhysicsShader::GetVertexSource()

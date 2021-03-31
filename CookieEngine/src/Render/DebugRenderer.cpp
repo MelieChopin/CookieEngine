@@ -110,8 +110,8 @@ void DebugRenderer::Draw(const Mat4& viewProj)
                 AllocateVBuffer((physDbgRenderer.getNbTriangles() * sizeof(rp3d::DebugRenderer::DebugTriangle)));
             }
 
+            Render::RendererRemote::context->IASetVertexBuffers(0, 1, &VBuffer, &stride, &offset);
             UpdateVBuffer((physDbgRenderer.getNbTriangles() * sizeof(rp3d::DebugRenderer::DebugTriangle)), (void*)physDbgRenderer.getTrianglesArray());
-
             Render::RendererRemote::context->IASetVertexBuffers(0, 1, &VBuffer, &stride, &offset);
 
             Render::RendererRemote::context->Draw(physDbgRenderer.getNbTriangles() * 3, 0);
@@ -126,8 +126,10 @@ void DebugRenderer::Draw(const Mat4& viewProj)
                 AllocateVBuffer((physDbgRenderer.getNbLines() * sizeof(rp3d::DebugRenderer::DebugLine)));
             }
 
+            Render::RendererRemote::context->IASetVertexBuffers(0, 1, &VBuffer, &stride, &offset);
             UpdateVBuffer((physDbgRenderer.getNbLines() * sizeof(rp3d::DebugRenderer::DebugLine)), (void*)physDbgRenderer.getLinesArray());
             Render::RendererRemote::context->IASetVertexBuffers(0, 1, &VBuffer, &stride, &offset);
+           
 
             Render::RendererRemote::context->Draw(physDbgRenderer.getNbLines() * 2, 0);
         }

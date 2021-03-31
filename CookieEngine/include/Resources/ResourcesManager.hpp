@@ -43,7 +43,6 @@ namespace Cookie
 				ResourcesManager();
 				~ResourcesManager();
 
-
 				void Load(Render::Renderer& _renderer);
 
 				void UpdateScriptsContent()

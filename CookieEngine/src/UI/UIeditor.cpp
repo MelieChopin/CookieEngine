@@ -80,7 +80,7 @@ void UIeditor::UpdateUI()
 		{
 			if (ImGui::BeginMenu(menus[i]))
 			{
-				for (UIwidget::ItemBase* cI : UItems[i])
+				for (std::shared_ptr<UIwidget::ItemBase>& cI : UItems[i])
 				{
 					cI->ItemDisplay();
 				}
@@ -88,7 +88,7 @@ void UIeditor::UpdateUI()
 				ImGui::EndMenu();
 			}
 
-			for (UIwidget::WindowBase* cW : UIndows[i])
+			for (std::shared_ptr<UIwidget::WindowBase>& cW : UIndows[i])
 			{
 				cW->WindowDisplay();
 			}
@@ -96,7 +96,7 @@ void UIeditor::UpdateUI()
 
 		EndMainMenuBar();
 
-		for (UIwidget::WindowBase* cOW : UIndows[menus.size()])
+		for (std::shared_ptr<UIwidget::WindowBase>& cOW : UIndows[menus.size()])
 		{
 			cOW->WindowDisplay();
 		}
