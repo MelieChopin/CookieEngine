@@ -44,9 +44,9 @@ Editor::Editor()
 
     ui.AddWItem(new UIwidget::TextureEditor(game.renderer, game.resources), 1);
 
-    ui.AddWItem(new UIwidget::FileExplorer(game.renderer, game), 2);
+    ui.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
 
-    ui.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator, game.scene->physSim), 2);
+    ui.AddWItem(new UIwidget::FileExplorer(game.renderer, game), 2);
 
     ui.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
 

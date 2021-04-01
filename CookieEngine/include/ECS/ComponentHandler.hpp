@@ -12,7 +12,7 @@
 #include <unordered_map>
 
 #include "ECS/EntityHandler.hpp"
-#include "Physics/PhysicsSimulator.hpp"
+#include "Physics/PhysicsHandle.hpp"
 
 
 namespace Cookie
@@ -69,7 +69,7 @@ namespace Cookie
 
 				entity.signature += SIGNATURE_MODEL; 
 			}
-			void AddComponentPhysics(Entity& entity, const Physics::PhysicsSimulator& phs)
+			void AddComponentPhysics(Entity& entity)
 			{
 				if (entity.signature & SIGNATURE_PHYSICS)
 				{
@@ -82,7 +82,7 @@ namespace Cookie
 				if (entity.signature & SIGNATURE_TRANSFORM)
 					componentTransforms [entity.id].SetPhysics();
 
-				componentPhysics	[entity.id].physBody = phs.worldSim->createRigidBody(componentTransforms[entity.id].physTransform);
+				componentPhysics	[entity.id].physBody = Physics::PhysicsHandle::physSim->createRigidBody(componentTransforms[entity.id].physTransform);
 			}
 			void AddComponentScript(Entity& entity)
 			{

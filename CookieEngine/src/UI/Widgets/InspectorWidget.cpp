@@ -19,7 +19,7 @@ using namespace Cookie::Resources;
 
 void Inspector::WindowDisplay()
 {
-    if (selectedEntity.focusedEntity != recordedEntity)
+    if (selectedEntity.focusedEntity != recordedEntity || selectedEntity.componentHandler != coordinator.componentHandler)
     {
         recordedEntity = selectedEntity.focusedEntity;
         selectedCollider = nullptr;
@@ -67,7 +67,7 @@ void Inspector::EntityInspection()
         if (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS) TextDisabled("Component Physics already added");
         else if (Button("Add component Physics"))
         {
-            coordinator.componentHandler->AddComponentPhysics   (*selectedEntity.focusedEntity, physSim);
+            coordinator.componentHandler->AddComponentPhysics   (*selectedEntity.focusedEntity);
             CloseCurrentPopup();
         }
 

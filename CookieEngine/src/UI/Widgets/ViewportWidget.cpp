@@ -55,7 +55,7 @@ void Viewport::WindowDisplay()
 			camera->Deactivate();
 		}
 		
-		if (selectedEntity.focusedEntity)
+		if (selectedEntity.focusedEntity && selectedEntity.componentHandler == coordinator.componentHandler)
 			GizmoManipulator();
 	}
 

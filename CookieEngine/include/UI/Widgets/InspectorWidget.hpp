@@ -21,7 +21,6 @@ namespace Cookie::UIwidget
 		Cookie::Resources::ResourcesManager& resources;
 		Cookie::ECS::Coordinator& coordinator;
 
-		Physics::PhysicsSimulator& physSim;
 		reactphysics3d::Collider* selectedCollider = nullptr;
 
 
@@ -56,12 +55,11 @@ namespace Cookie::UIwidget
 		void SceneInspection();
 
 	public:
-		inline Inspector(FocusEntity& _selectedEntity, Cookie::Resources::ResourcesManager& _resources, Cookie::ECS::Coordinator& _coordinator, Physics::PhysicsSimulator& _physSim)
+		inline Inspector(FocusEntity& _selectedEntity, Cookie::Resources::ResourcesManager& _resources, Cookie::ECS::Coordinator& _coordinator)
 			: WItemBase			("Inspector", false),
 			  selectedEntity	(_selectedEntity),
 			  resources			(_resources),
-			  coordinator		(_coordinator),
-			  physSim			(_physSim)
+			  coordinator		(_coordinator)
 		{}
 
 		void WindowDisplay() override;
