@@ -57,9 +57,9 @@ namespace Cookie
 
 			inline void PopulateFocusedEntity()
 			{
-				if (selectedEntity.editComp)
+				if (selectedEntity.editComp && selectedEntity.editComp->body)
 				{
-					if ((selectedEntity.focusedEntity->signature & SIGNATURE_MODEL) == SIGNATURE_MODEL)
+					if ((selectedEntity.focusedEntity->signature & SIGNATURE_MODEL) && game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh != nullptr)
 					{
 						selectedEntity.editComp->AABB = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBhalfExtent;
 						selectedEntity.editComp->MakeCollider();
