@@ -83,19 +83,19 @@ void Editor::ModifyEditComp()
 {
     for (int i = 1; i < MAX_ENTITIES; i++)
     {
-        if ((game.coordinator.entityHandler->entities[i].signature & SIGNATURE_MODEL) == SIGNATURE_MODEL)
+        editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i).localTRS;
+        if ((game.coordinator.entityHandler->entities[i].signature & SIGNATURE_MODEL))
         {
             editingComponent[i].AABB = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBhalfExtent;
             editingComponent[i].MakeCollider();
         }
-        editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i).localTRS;
         editingComponent[i].Update();
     }
 }
 
 void Editor::Loop()
 {
-    soundManager.system->playSound(soundManager.sound, nullptr, false, nullptr);
+    //soundManager.system->playSound(soundManager.sound, nullptr, false, nullptr);
     Physics::PhysicsHandle physHandle;
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
@@ -155,11 +155,13 @@ void Editor::Loop()
             selectedEntity.componentHandler->componentTransforms[selectedEntity.focusedEntity->id].SetPhysics();
             selectedEntity.componentHandler->componentPhysics[selectedEntity.focusedEntity->id].physBody->setTransform(selectedEntity.componentHandler->componentTransforms[selectedEntity.focusedEntity->id].physTransform);
         }
-            
-        /////
+           
 
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
+        /////
+
+
         game.renderer.Draw(cam.GetViewProj(), game.coordinator);
 
         dbgRenderer.Draw(cam.GetViewProj());

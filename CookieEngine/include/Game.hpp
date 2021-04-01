@@ -26,7 +26,7 @@ namespace Cookie
 			void Update();
 			void Loop();
 
-			void SetScene(std::shared_ptr<Resources::Scene> _scene);
+			void SetScene(const std::shared_ptr<Resources::Scene>& _scene);
 			void TryResizeWindow();
 	};
 }
