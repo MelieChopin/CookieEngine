@@ -75,7 +75,6 @@ namespace Cookie
 
 			inline virtual float notifyRaycastHit(const rp3d::RaycastInfo& info)
 			{
-				printf("HIT : %f , %f , %f \n", info.worldPoint.x, info.worldPoint.y, info.worldPoint.z);
 				for (int i = 1; i < MAX_ENTITIES; i++)
 				{
 					if (editingComponent[i].body == info.body)
