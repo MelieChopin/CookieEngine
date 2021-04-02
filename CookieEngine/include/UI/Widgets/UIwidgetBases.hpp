@@ -18,7 +18,10 @@ namespace Cookie::UIwidget
 
 	public:
 		WindowBase(const char* _windowName, bool _opened = true);
+		
+		virtual ~WindowBase() = default;
 
+		
 		virtual void WindowDisplay() = 0;
 	};
 
@@ -34,6 +37,8 @@ namespace Cookie::UIwidget
 	public:
 		ItemBase(const char* _itemName,							  bool _visible = true);
 		ItemBase(const char* _itemName, const char* _shortcutSeq, bool _visible = true);
+
+		virtual ~ItemBase() = default;
 
 
 		virtual void ItemDisplay();
@@ -87,6 +92,9 @@ namespace Cookie::UIwidget
 			:	WindowBase	(_windowName,			   !_isItemFirst),
 				ItemBase	(_itemName,	  _shortcutSeq, _isItemFirst)
 		{}
+
+
+		virtual ~WItemBase() override = default;
 
 
 		virtual void ItemDisplay() override;

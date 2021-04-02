@@ -89,5 +89,7 @@ void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandl
 	newPrefab.filepath = "Assets/Prefabs" + entity.name + ".PAsset";
 
 	entity.namePrefab = entity.name;
+
+	prefabs[newPrefab.name] = std::make_shared<Prefab>(newPrefab);
 }
 

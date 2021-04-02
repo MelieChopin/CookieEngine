@@ -41,8 +41,29 @@ UIeditor::UIeditor(const Cookie::Render::Renderer& _renderer)
 	ImGui_ImplDX11_CreateDeviceObjects();
 }
 
+void UIeditor::ClearWidgets()
+{
+	for (std::vector<std::shared_ptr<UIwidget::WindowBase>>& WiVec : UIndows)
+	{
+		for (std::shared_ptr<UIwidget::WindowBase>& WiW : WiVec)
+		{ WiW.reset(); }
+
+		std::vector<std::shared_ptr<UIwidget::WindowBase>>().swap(WiVec);
+	}
+
+	for (std::vector<std::shared_ptr<UIwidget::ItemBase>>& ItVec : UItems)
+	{
+		for (std::shared_ptr<UIwidget::ItemBase>& ItW : ItVec)
+		{ ItW.reset(); }
+
+		std::vector<std::shared_ptr<UIwidget::ItemBase>>().swap(ItVec);
+	}
+}
+
 void UIeditor::Terminate()
 {
+	ClearWidgets();
+
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	DestroyContext();
@@ -80,7 +101,7 @@ void UIeditor::UpdateUI()
 		{
 			if (ImGui::BeginMenu(menus[i]))
 			{
-				for (UIwidget::ItemBase* cI : UItems[i])
+				for (std::shared_ptr<UIwidget::ItemBase>& cI : UItems[i])
 				{
 					cI->ItemDisplay();
 				}
@@ -88,7 +109,7 @@ void UIeditor::UpdateUI()
 				ImGui::EndMenu();
 			}
 
-			for (UIwidget::WindowBase* cW : UIndows[i])
+			for (std::shared_ptr<UIwidget::WindowBase>& cW : UIndows[i])
 			{
 				cW->WindowDisplay();
 			}
@@ -96,7 +117,7 @@ void UIeditor::UpdateUI()
 
 		EndMainMenuBar();
 
-		for (UIwidget::WindowBase* cOW : UIndows[menus.size()])
+		for (std::shared_ptr<UIwidget::WindowBase>& cOW : UIndows[menus.size()])
 		{
 			cOW->WindowDisplay();
 		}
