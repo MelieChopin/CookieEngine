@@ -7,6 +7,8 @@
 
 #include <imgui.h>
 
+#include "Serialization.hpp"
+
 using namespace ImGui;
 using namespace Cookie::UIwidget;
 using namespace Cookie::ECS;
@@ -50,6 +52,14 @@ void Hierarchy::WindowDisplay()
                     coordinator.RemoveEntity(entityHandler.entities[i]);
                     CloseCurrentPopup();
                 }
+
+                if (Button("Save as prefab"))
+                {
+                    resources.CreateNewPrefabs(entityHandler.entities[i], *coordinator.componentHandler);
+                    Cookie::Resources::Serialization::Save::SavePrefab(resources.prefabs[entityHandler.entities[i].namePrefab]);
+                    CloseCurrentPopup();
+                }
+                
             
                 EndPopup();
             }
