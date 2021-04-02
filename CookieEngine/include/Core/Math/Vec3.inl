@@ -9,6 +9,7 @@ namespace Cookie
 	{
 		namespace Math
 		{
+			constexpr float EPSILON = 1 / 4060;
 
 			inline void Vec3::Debug() const { std::cout << "{" << x << " ," << y << " ," << z << "}\n"; }
 
@@ -139,6 +140,19 @@ namespace Cookie
 			inline Vec3& Vec3::operator*=(float other) { *this = *this * other; return *this; }
 			inline Vec3& Vec3::operator/=(float other) { *this = *this / other; return *this; }
 
+			inline bool Vec3::operator==(const Vec3& other) 
+			{ 
+				return this->x - other.x >= -Math::EPSILON && this->x - other.x <= Math::EPSILON
+					&& this->y - other.y >= -Math::EPSILON && this->y - other.y <= Math::EPSILON
+					&& this->z - other.z >= -Math::EPSILON && this->z - other.z <= Math::EPSILON;
+			}
+
+			inline bool Vec3::operator!=(const Vec3& other)
+			{
+				return this->x - other.x < -Math::EPSILON || this->x - other.x > Math::EPSILON
+					|| this->y - other.y < -Math::EPSILON || this->y - other.y > Math::EPSILON
+					|| this->z - other.z < -Math::EPSILON || this->z - other.z > Math::EPSILON;
+			}
 
 			inline float Vec3::Length() const { return std::sqrt(x * x + y * y + z * z); }
 			inline Vec3 Vec3::Normalize() const { return *this / Length(); }

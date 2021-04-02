@@ -11,11 +11,17 @@
 #include <array>
 #include <unordered_map>
 
-#include "Physics/PhysicsSimulator.hpp"
+#include "ECS/EntityHandler.hpp"
+#include "Physics/PhysicsHandle.hpp"
 
 
 namespace Cookie
 {
+	namespace Resources
+	{
+		class ResourcesManager;
+	}
+
 	namespace ECS
 	{
 		#define SIGNATURE_EMPTY         0b0000
@@ -30,13 +36,13 @@ namespace Cookie
 		{
 		public:
 
-			std::array<ComponentTransform, MAX_ENTITIES> componentTransforms;
+			std::array<ComponentTransform,	MAX_ENTITIES> componentTransforms;
 
-			std::array<ComponentModel, MAX_ENTITIES> componentModels;
+			std::array<ComponentModel,		MAX_ENTITIES> componentModels;
 
-			std::array<ComponentPhysics, MAX_ENTITIES> componentPhysics;
+			std::array<ComponentPhysics,	MAX_ENTITIES> componentPhysics;
 
-			std::array<ComponentScript, MAX_ENTITIES> componentScripts;
+			std::array<ComponentScript,		MAX_ENTITIES> componentScripts;
 
 
 
@@ -63,7 +69,7 @@ namespace Cookie
 
 				entity.signature += SIGNATURE_MODEL; 
 			}
-			void AddComponentPhysics(Entity& entity, const Physics::PhysicsSimulator& phs)
+			void AddComponentPhysics(Entity& entity)
 			{
 				if (entity.signature & SIGNATURE_PHYSICS)
 				{
@@ -73,8 +79,10 @@ namespace Cookie
 
 				entity.signature += SIGNATURE_PHYSICS;
 
-				componentTransforms [entity.id].SetPhysics();
-				componentPhysics	[entity.id].physBody = phs.worldSim->createRigidBody(componentTransforms[entity.id].physTransform);
+				if (entity.signature & SIGNATURE_TRANSFORM)
+					componentTransforms [entity.id].SetPhysics();
+
+				componentPhysics	[entity.id].physBody = Physics::PhysicsHandle::physSim->createRigidBody(componentTransforms[entity.id].physTransform);
 			}
 			void AddComponentScript(Entity& entity)
 			{
@@ -86,6 +94,8 @@ namespace Cookie
 
 				entity.signature += SIGNATURE_SCRIPT;
 			}
+
+			void ModifyComponentOfEntityToPrefab(Entity& entity, Cookie::Resources::ResourcesManager& resourcesManager, std::string& namePrefab);
 
 			void RemoveComponentTransform(Entity& entity)
 			{

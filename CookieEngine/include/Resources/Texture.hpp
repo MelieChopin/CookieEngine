@@ -27,17 +27,17 @@ namespace Cookie
 				std::string name;
 
 			private:
-				bool CreateTextureFromColor(Render::Renderer& renderer,const Core::Math::Vec4& color);
-				bool CreateShaderResource(Render::Renderer& renderer);
+				bool CreateTextureFromColor(const Core::Math::Vec4& color);
+				bool CreateShaderResource();
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
-				Texture(Render::Renderer& renderer, const std::string& texPath);
-				Texture(Render::Renderer& renderer, const std::string& texName, const Core::Math::Vec4& color);
+				Texture(const std::string& texPath);
+				Texture(const std::string& texName, const Core::Math::Vec4& color);
 				~Texture();
 
 
-				void Set(Render::RendererRemote& remote);
+				void Set();
 
 				inline ID3D11ShaderResourceView* GetResourceView() const { return shaderResourceView; };
 		};

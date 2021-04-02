@@ -124,6 +124,15 @@ namespace Cookie
                     0.f, 0.f, 0.f, 1.f
                 } };
             }
+            inline Mat4 Mat4::Rotate(const Quat& quat)
+            {
+                return { {
+                        1.0f - (2.0f * quat.y * quat.y) - (2.0f * quat.z * quat.z), 2.0f * quat.x * quat.y - 2.0f * quat.w * quat.z, 2.0f * quat.x * quat.z + 2.0f * quat.w * quat.y, 0.0f,
+                        2.0f * quat.x * quat.y + 2.0f * quat.w * quat.z, 1.0f - (2.0f * quat.x * quat.x) - (2.0f * quat.z * quat.z), 2.0f * quat.y * quat.z - 2.0f * quat.w * quat.x, 0.0f,
+                        2.0f * quat.x * quat.z - 2.0f * quat.w * quat.y, 2.0f * quat.y * quat.z + 2.0f * quat.w * quat.x, 1.0f - (2.0f * quat.x * quat.x) - (2.0f * quat.y * quat.y), 0.0f,
+                        0.0f, 0.0f, 0.0f, 1.0f
+                } };
+            }
             inline Mat4 Mat4::RotateX(float radians)
             {
                 float c = std::cos(radians);

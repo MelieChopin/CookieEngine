@@ -4,6 +4,7 @@
 struct ID3D11Buffer;
 
 #include <string>
+#include "Core/Math/Vec3.hpp"
 #include <assimp/mesh.h>
 #include <vector>
 
@@ -25,23 +26,27 @@ namespace Cookie
 				unsigned int  INb		= 0;
 
 			public:
+				Core::Math::Vec3 AABBhalfExtent = {0.0f,0.0f,0.0f};
 				std::string name;
+				
 
 			private:
-				void InitVBuffer(aiMesh* mesh, Render::Renderer& renderer);
-				void InitIBuffer(aiMesh* mesh, Render::Renderer& renderer);
-				void InitVBuffer(std::vector<float>& vertices, Render::Renderer& renderer);
-				void InitIBuffer(std::vector<unsigned int>& indices, Render::Renderer& renderer);
+				void InitVBuffer(aiMesh* mesh);
+				void InitIBuffer(aiMesh* mesh);
+				void InitVBuffer(std::vector<float>& vertices);
+				void InitIBuffer(std::vector<unsigned int>& indices);
+
+				void ComputeAABB(const std::vector<float>& vertices);
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
-				Mesh(std::string meshName, aiMesh* mesh, Render::Renderer& renderer);
-				Mesh(std::vector<float>& vertices, std::vector<unsigned int>& indices, unsigned int INb, Render::Renderer& renderer);
+				Mesh(std::string meshName, aiMesh* mesh);
+				Mesh(std::string meshName, std::vector<float>& vertices, std::vector<unsigned int>& indices, unsigned int INb);
 				~Mesh();
 
 				inline unsigned int GetIndicesNb() { return INb; }
-				void Set(Render::RendererRemote& remote);
-				void Draw(Render::RendererRemote& remote);
+				void Set();
+				void Draw();
 		};
 	}
 }

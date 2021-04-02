@@ -11,7 +11,7 @@ constexpr float initTimeStep = 1.0f / 60.0f;
 /*================ CONSTRUCTORS/DESTRUCTORS ================*/
 
 PhysicsSimulator::PhysicsSimulator()
-	:worldSim{ PhysicsHandle().physCom->createPhysicsWorld() }, timeStep{initTimeStep}
+	:worldSim{ PhysicsHandle::physCom->createPhysicsWorld() }, timeStep{initTimeStep}
 {
 }
 

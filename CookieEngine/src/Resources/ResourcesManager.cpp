@@ -1,10 +1,14 @@
+#include <d3d11.h>
+#include "Resources/Shader/TextureShader.hpp"
+
 #include "Resources/Mesh.hpp"
-#include "Resources/Shader.hpp"
 #include "Render/Renderer.hpp"
 #include "Resources/Loader.hpp"
 #include "Resources/ResourcesManager.hpp"
 #include "Core/Primitives.hpp"
+#include "Resources/Prefab.hpp"
 
+#include <memory>
 
 using namespace Cookie::Resources;
 
@@ -13,6 +17,7 @@ ResourcesManager::ResourcesManager()
 	scripts["test.lua"] = std::make_shared<Script>("Assets\\scripts\\test.lua");
 	scripts["test2.lua"] = std::make_shared<Script>("Assets\\scripts\\test2.lua");
 
+	InitShaders();
 }
 
 ResourcesManager::~ResourcesManager()
@@ -48,23 +53,45 @@ void ResourcesManager::SearchForGltf(const fs::path& path, std::vector<std::stri
 	}
 }
 
+void ResourcesManager::InitShaders()
+{
+	shaders["Texture_Shader"] = std::make_shared<TextureShader>("Texture_Shader");
+}
+
 void ResourcesManager::Load(Render::Renderer& _renderer)
 {
-	meshes["Quad"] =  Cookie::Core::Primitives::CreateQuad(_renderer);
-	meshes["Triangle"] = Cookie::Core::Primitives::CreateTriangle(_renderer);
+	meshes["Quad"] =  Cookie::Core::Primitives::CreateQuad();
+	meshes["Triangle"] = Cookie::Core::Primitives::CreateTriangle();
+
+
 
 	std::vector<std::string> gltfFiles;
 	SearchForGltf(std::string("Assets\\"),gltfFiles);
 
 	Loader loader;
-
-	shaders["dfltShader"] = std::make_shared<Shader>(_renderer);
 	
-
 	for (unsigned int i = 0; i < gltfFiles.size(); i++)
 	{
 		loader.Load(gltfFiles.at(i).c_str(),*this,_renderer);
 		printf("%s\n", gltfFiles.at(i).c_str());
 	}
+}
+
+void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandler& component)
+{
+	Prefab newPrefab;
+
+	newPrefab.name = entity.name;
+	newPrefab.nameMesh = component.componentModels[entity.id].mesh->name;
+	newPrefab.nameShader = "default";//component.componentModels[entity.id].shader->name;
+	newPrefab.nameTexture = component.componentModels[entity.id].texture->name;
+	newPrefab.signature = entity.id;
+	newPrefab.rotation = component.componentTransforms[entity.id].localTRS.rot;
+	newPrefab.scale = component.componentTransforms[entity.id].localTRS.scale;
+	newPrefab.filepath = "Assets/Prefabs/" + entity.name + ".PAsset";
+
+	entity.namePrefab = entity.name;
+
+	prefabs[newPrefab.name] = std::make_shared<Prefab>(newPrefab);
 }
 

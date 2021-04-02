@@ -47,6 +47,9 @@ namespace Cookie
                 inline Vec3& operator*=(float other);
                 inline Vec3& operator/=(float other);
 
+                inline bool operator==(const Vec3& other);
+                inline bool operator!=(const Vec3& other);
+
                 inline float Length() const;
                 inline Vec3 Normalize() const;
                 inline float Dot(const Vec3& other) const;

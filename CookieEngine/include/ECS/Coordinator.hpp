@@ -18,7 +18,6 @@ namespace Cookie
 		public:
 			EntityHandler*     entityHandler    {nullptr};
 			ComponentHandler*  componentHandler {nullptr};
-			Entity*            selectedEntity   {nullptr};
 
 			Coordinator() {}
 			~Coordinator() {}
@@ -41,7 +40,7 @@ namespace Cookie
 					componentHandler->AddComponentScript(entityHandler->entities[id]);
 
 				//not clean should be moved somewhere else
-				componentHandler->GetComponentModel(id).shader = resources.shaders.at("dfltShader");
+				componentHandler->GetComponentModel(id).shader = resources.shaders.at("Texture_Shader");
 			}
 			//will be removed when scene clean
 			static void AddEntity(EntityHandler& entityHandler, ComponentHandler& componentHandler, const int signature, const Resources::ResourcesManager& resources, std::string name = std::string("No Name") )
@@ -62,7 +61,7 @@ namespace Cookie
 					componentHandler.AddComponentScript(entityHandler.entities[id]);
 
 				//not clean should be moved somewhere else
-				componentHandler.GetComponentModel(id).shader = resources.shaders.at("dfltShader");
+				componentHandler.GetComponentModel(id).shader = resources.shaders.at("Texture_Shader");
 			}
 			void RemoveEntity(Entity& entity)
 			{

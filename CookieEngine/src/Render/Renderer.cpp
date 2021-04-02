@@ -31,8 +31,8 @@ Renderer::~Renderer()
         backbuffer->Release();
     if (depthBuffer)
         depthBuffer->Release();
-    if (device)
-        device->Release();
+    if (remote.device)
+        remote.device->Release();
 }
 
 /*========================= INIT METHODS =========================*/
@@ -68,7 +68,7 @@ bool Renderer::InitDevice(Core::Window& window)
         D3D11_SDK_VERSION,
         &scd,
         &swapchain,
-        &device,
+        &remote.device,
         NULL,
         &remote.context))
         return false;
@@ -86,7 +86,7 @@ bool Renderer::CreateDrawBuffer(int width, int height)
         return false;
 
     // use the back buffer address to create the render target
-    if (FAILED(device->CreateRenderTargetView(pBackBuffer, NULL, &backbuffer)))
+    if (FAILED(remote.device->CreateRenderTargetView(pBackBuffer, NULL, &backbuffer)))
         return false;
 
     D3D11_TEXTURE2D_DESC depthBufferDesc = {};
@@ -104,7 +104,7 @@ bool Renderer::CreateDrawBuffer(int width, int height)
     depthBufferDesc.CPUAccessFlags      = 0;
     depthBufferDesc.MiscFlags           = 0;
 
-    if (FAILED(device->CreateTexture2D(&depthBufferDesc, NULL, &depthTexture)))
+    if (FAILED(remote.device->CreateTexture2D(&depthBufferDesc, NULL, &depthTexture)))
         return false;
 
     // Initialize the depth stencil view.
@@ -115,7 +115,7 @@ bool Renderer::CreateDrawBuffer(int width, int height)
     depthStencilViewDesc.ViewDimension      = D3D11_DSV_DIMENSION_TEXTURE2D;
     depthStencilViewDesc.Texture2D.MipSlice = 0;
 
-    if (FAILED(device->CreateDepthStencilView(depthTexture, &depthStencilViewDesc, &depthBuffer)))
+    if (FAILED(remote.device->CreateDepthStencilView(depthTexture, &depthStencilViewDesc, &depthBuffer)))
         return false;
 
     pBackBuffer->Release();
@@ -150,7 +150,7 @@ bool Renderer::InitState(int width, int height)
     depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
     depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-    device->CreateDepthStencilState(&depthStencilDesc, &state.depthStencilState);
+    remote.device->CreateDepthStencilState(&depthStencilDesc, &state.depthStencilState);
 
     // Set the depth stencil state.
     remote.context->OMSetDepthStencilState(state.depthStencilState, 1);
@@ -169,7 +169,7 @@ bool Renderer::InitState(int width, int height)
     rasterDesc.ScissorEnable = false;
     rasterDesc.SlopeScaledDepthBias = 0.0f;
 
-    device->CreateRasterizerState(&rasterDesc, &state.rasterizerState);
+    remote.device->CreateRasterizerState(&rasterDesc, &state.rasterizerState);
 
     // Now set the rasterizer state.
     remote.context->RSSetState(state.rasterizerState);
@@ -190,36 +190,14 @@ bool Renderer::InitState(int width, int height)
 
 void Renderer::AddFrameBuffer(Resources::ResourcesManager& resources)
 {
-    frameBuffers.push_back(std::move(std::make_unique<FrameBuffer>(resources,*this)));
+    frameBuffers.push_back(std::move(std::make_unique<FrameBuffer>(resources,state.viewport.Width,state.viewport.Height)));
 }
 
 bool Renderer::CreateBuffer(D3D11_BUFFER_DESC bufferDesc, D3D11_SUBRESOURCE_DATA data, ID3D11Buffer** buffer)
 {
-    if (FAILED(device->CreateBuffer(&bufferDesc, &data, buffer)))
+    if (FAILED(remote.device->CreateBuffer(&bufferDesc, &data, buffer)))
     {
         printf("Failed Creating Buffer: %p of size %llu \n", (*buffer), sizeof(data.pSysMem));
-        return false;
-    }
-
-    return true;
-}
-
-bool Renderer::CreateVertexBuffer(ID3D11VertexShader** vertexShader, ID3DBlob** VS)
-{
-    if (FAILED(device->CreateVertexShader((*VS)->GetBufferPointer(), (*VS)->GetBufferSize(), NULL, vertexShader)))
-    {
-        printf("Failed Creating Vertex Shader \n");
-        return false;
-    }
-
-    return true;
-}
-
-bool Renderer::CreatePixelBuffer(ID3D11PixelShader** pixelShader, ID3DBlob** PS)
-{
-    if (FAILED(device->CreatePixelShader((*PS)->GetBufferPointer(), (*PS)->GetBufferSize(), NULL, pixelShader)))
-    {
-        printf("Failed Creating Pixel Shader \n");
         return false;
     }
 
@@ -254,7 +232,7 @@ void Renderer::ResizeBuffer(int width, int height)
     {
         for (int i = 0; i < frameBuffers.size(); i++)
         {
-            frameBuffers[i]->Resize(*this);
+            frameBuffers[i]->Resize(width,height);
         }
     }
 }
@@ -269,8 +247,6 @@ void Renderer::Draw(const Mat4& viewProj, Cookie::ECS::Coordinator& coordinator)
     }
 
     coordinator.ApplyDraw(remote,viewProj);
-    
-    remote.context->OMSetRenderTargets(1, &backbuffer, depthBuffer);
 }
 
 void Renderer::Clear()

@@ -31,6 +31,7 @@ include_directories("${DEPS_INC_DIR}/DirectXTex/")
 include_directories("${DEPS_INC_DIR}/reactphysics3d/")
 include_directories("${DEPS_INC_DIR}/Lua/")
 include_directories("${DEPS_INC_DIR}/Sol/")
+include_directories("${DEPS_INC_DIR}/FMOD/")
 
 # Record SUB_SYS configuration (WIN32 for release en Windows to remove console)
 IF(CMAKE_BUILD_TYPE MATCHES Release)
@@ -69,17 +70,19 @@ set (SRC_FILES
     "${SRC_DIR}/Core/Window.cpp"
     
     "${SRC_DIR}/Render/Renderer.cpp"
+    "${SRC_DIR}/Render/DebugRenderer.cpp"
     "${SRC_DIR}/Render/RendererRemote.cpp"
     "${SRC_DIR}/Render/FrameBuffer.cpp"
     
     "${SRC_DIR}/Resources/Loader.cpp" 
     "${SRC_DIR}/Resources/ResourcesManager.cpp"
     "${SRC_DIR}/Resources/Mesh.cpp"
-    "${SRC_DIR}/Resources/Shader.cpp"
+    "src/Resources/Shader/TextureShader.cpp"
     "${SRC_DIR}/Resources/Texture.cpp"
     "${SRC_DIR}/Resources/Scene.cpp"
     "${SRC_DIR}/Resources/Tiles.cpp"
     "${SRC_DIR}/Resources/Serialization.cpp" 
+    "${SRC_DIR}/Resources/SoundManager.cpp" 
 
     "${SRC_DIR}/UI/UIeditor.cpp"
     "${SRC_DIR}/UI/CustomImWidget.cpp"
@@ -95,12 +98,18 @@ set (SRC_FILES
     
     "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
 
+    "${SRC_DIR}/ECS/ComponentHandler.cpp"
+
     "${SRC_DIR}/Editor.cpp" 
     "${SRC_DIR}/Game.cpp"
-    )
+     "src/Resources/Shader/PhysicsShader.cpp")
 
 set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
-        "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/lua54.dll")
+        "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/lua54.dll"
+        "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/fmod.dll"
+        "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/fmodL.dll"
+        "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/fmodstudio.dll"
+        "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/fmodstudioL.dll")
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
@@ -126,8 +135,12 @@ target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/liblua54.a")
 
 IF(CMAKE_BUILD_TYPE MATCHES Release)
     target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/reactphysics3d.lib")
+    target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/fmod_vc.lib")
+    target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/fmodstudio_vc.lib")
 ELSE()
     target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/debug_reactphysics3d.lib")
+    target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/fmodL_vc.lib")
+    target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/fmodstudioL_vc.lib")
 ENDIF(CMAKE_BUILD_TYPE MATCHES Release)
 
 

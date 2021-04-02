@@ -1,6 +1,7 @@
 #ifndef __COMPONENT_MODEL_HPP__
 #define __COMPONENT_MODEL_HPP__
 
+#include "Render/RendererRemote.hpp"
 #include "Resources/Mesh.hpp"
 #include "Resources/Shader.hpp"
 #include "Resources/Texture.hpp"
@@ -34,13 +35,13 @@ namespace Cookie
             void Draw(Render::RendererRemote& remote, const Core::Math::Mat4& viewProj, const Core::Math::Mat4& modelMat)
             {
                 if (shader)
-                    shader->Set(remote, viewProj, modelMat);
+                    shader->Set(viewProj, modelMat);
                 if (texture)
-                    texture->Set(remote);
+                    texture->Set();
                 if (mesh)
                 {
-                    mesh->Set(remote);
-                    mesh->Draw(remote);
+                    mesh->Set();
+                    mesh->Draw();
                 }
             }
         };
