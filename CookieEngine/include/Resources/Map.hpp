@@ -6,6 +6,7 @@
 #include "ComponentModel.hpp"
 #include "ComponentPhysics.hpp"
 #include "Physics/PhysicsHandle.hpp"
+#include "ResourcesManager.hpp"
 
 #include <string>
 #include <algorithm>
@@ -26,11 +27,15 @@ namespace Cookie
 			ECS::ComponentPhysics	physic;
 
 
-			Map(rp3d::PhysicsWorld* physicWorld)
+			Map()
 			{				
-				physic.physBody = physicWorld->createRigidBody(rp3d::Transform(rp3d::Vector3(0.0, 0.0, 0.0), rp3d::Quaternion::identity()));
+				trs.localTRS.scale = {100, 100, 1};
+				trs.localTRS.rot = {90, 0, 0};
+
+
+				physic.physBody = Physics::PhysicsHandle::physSim->createRigidBody(rp3d::Transform(rp3d::Vector3(0.0, 0.0, 0.0), rp3d::Quaternion::identity()));
 				physic.physBody->setType(rp3d::BodyType::STATIC);
-				physic.AddCubeCollider(Core::Math::Vec3(1000, 1, 1000), Core::Math::Vec3(0, 0, 0), Core::Math::Vec3(0, 0, 0));
+				physic.AddCubeCollider(trs.localTRS.scale, trs.localTRS.pos, trs.localTRS.rot);
 
 			}
 			~Map() {}

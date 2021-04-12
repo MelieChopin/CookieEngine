@@ -6,6 +6,10 @@
 #include "Map.hpp"
 
 using namespace Cookie;
+using namespace Cookie::Core;
+using namespace Cookie::Core::Math;
+using namespace Cookie::ECS;
+using namespace Cookie::ECS::System;
 using namespace rp3d;
 
 Editor::Editor()
@@ -99,6 +103,13 @@ void Editor::Loop()
 {
     //soundManager.system->playSound(soundManager.sound, nullptr, false, nullptr);
     Physics::PhysicsHandle physHandle;
+    
+    game.scene->map.model.mesh = game.resources.meshes["Quad"];
+    game.scene->map.model.texture = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"];
+    game.scene->map.model.shader = game.resources.shaders["Texture_Shader"];
+
+
+
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
         // Present frame
@@ -140,11 +151,18 @@ void Editor::Loop()
         }
 
         if (!ImGui::GetIO().MouseDownDuration[0])
-        {
-            
+        {            
             Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
             rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, {fwdRay.x,fwdRay.y,fwdRay.z});
             physHandle.editWorld->raycast(ray,this);
+
+            //Raycast with Map
+            RaycastInfo raycastInfo;
+            if (game.scene->map.physic.physBody->raycast(ray, raycastInfo))
+            {
+                Vec3 hitPoint{ raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z };
+                hitPoint.Debug();
+            }
         }
 
         if (selectedEntity.toChangeEntityId >= 0)
@@ -159,12 +177,15 @@ void Editor::Loop()
         }
            
 
+
+
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
         /////
 
 
         game.renderer.Draw(cam.GetViewProj(), game.coordinator);
+        SystemDraw(game.scene->map.trs, game.scene->map.model, game.renderer.remote, cam.GetViewProj());
 
         dbgRenderer.Draw(cam.GetViewProj());
 

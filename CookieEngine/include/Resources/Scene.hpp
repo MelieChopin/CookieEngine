@@ -8,6 +8,7 @@
 #include "Camera.hpp"
 #include "Vec3.hpp"
 #include "Tiles.hpp"
+#include "Map.hpp"
 
 
 //temp
@@ -33,6 +34,7 @@ namespace Cookie
 			ECS::EntityHandler						entityHandler;
 			ECS::ComponentHandler					componentHandler;
 			Physics::PhysicsSimulator				physSim;
+			Resources::Map							map;
 			UI::UIgame								uiGame;
 			std::shared_ptr<Cookie::Render::Camera> camera{nullptr};
 			Resources::Tiles						tiles;//will be map
