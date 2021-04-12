@@ -26,12 +26,6 @@ Editor::Editor()
     cam.Deactivate();
     //scene = Editor::Scene(resources, coordinator);
     game.scene->InitCoordinator(game.coordinator);
-    ImGui::GetIO().AddInputCharacter(GLFW_KEY_W);
-    ImGui::GetIO().AddInputCharacter(GLFW_KEY_S);
-    ImGui::GetIO().AddInputCharacter(GLFW_KEY_A);
-    ImGui::GetIO().AddInputCharacter(GLFW_KEY_D);
-    ImGui::GetIO().AddInputCharacter(GLFW_KEY_SPACE);
-    ImGui::GetIO().AddInputCharacter(GLFW_KEY_LEFT_CONTROL);
     game.resources.textures["Pink"] = (std::make_shared<Resources::Texture>("Pink", Core::Math::Vec4(1.0f, 0.5f, 0.5f, 1.0f)));
     game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>("Assets/Floor_DefaultMaterial_BaseColor.png"));
 
@@ -92,7 +86,8 @@ void Editor::ModifyEditComp()
         editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i).localTRS;
         if ((game.coordinator.entityHandler->entities[i].signature & SIGNATURE_MODEL))
         {
-            editingComponent[i].AABB = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBhalfExtent;
+            editingComponent[i].AABBMin = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBMin;
+            editingComponent[i].AABBMax = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBMax;
             editingComponent[i].MakeCollider();
         }
         editingComponent[i].Update();

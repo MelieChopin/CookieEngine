@@ -61,7 +61,8 @@ namespace Cookie
 				{
 					if ((selectedEntity.focusedEntity->signature & SIGNATURE_MODEL) && game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh != nullptr)
 					{
-						selectedEntity.editComp->AABB = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBhalfExtent;
+						selectedEntity.editComp->AABBMin = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBMin;
+						selectedEntity.editComp->AABBMax = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBMax;
 						selectedEntity.editComp->MakeCollider();
 					}
 					selectedEntity.editComp->editTrs = &game.coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id).localTRS;
