@@ -100,7 +100,7 @@ void DebugRenderer::Draw(const Mat4& viewProj)
         Render::RendererRemote::context->RSSetState(rasterState);
 
         physDbgRenderer.reset();
-        physDbgRenderer.computeDebugRenderingPrimitives(*Physics::PhysicsHandle::editWorld);
+        physDbgRenderer.computeDebugRenderingPrimitives(*Physics::PhysicsHandle::physSim);
 
         if (physDbgRenderer.getNbTriangles() > 0)
         {
