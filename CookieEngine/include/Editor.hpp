@@ -3,7 +3,6 @@
 
 #include "Game.hpp"
 #include "UI/UIeditor.hpp"
-#include "Render/Camera.hpp"
 #include "DebugRenderer.hpp"
 #include "Resources/SoundManager.hpp"
 #include "ECS/ComponentEditor.hpp"
@@ -65,7 +64,7 @@ namespace Cookie
 						selectedEntity.editComp->AABBMax = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBMax;
 						selectedEntity.editComp->MakeCollider();
 					}
-					selectedEntity.editComp->editTrs = &game.coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id).localTRS;
+					selectedEntity.editComp->editTrs = &game.coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id);
 					selectedEntity.editComp->Update();
 				}
 

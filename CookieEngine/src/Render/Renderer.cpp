@@ -246,7 +246,7 @@ void Renderer::Draw(const Mat4& viewProj, Cookie::ECS::Coordinator& coordinator)
         remote.context->OMSetRenderTargets(1, frameBuffers[0]->GetRenderTarget(), depthBuffer);
     }
 
-    coordinator.ApplyDraw(remote,viewProj);
+    coordinator.ApplyDraw(viewProj);
 }
 
 void Renderer::Clear()

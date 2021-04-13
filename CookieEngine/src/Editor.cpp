@@ -1,4 +1,3 @@
-#include <reactphysics3d/reactphysics3d.h>
 #include "Editor.hpp" 
 #include "UIallIn.hpp"
 #include "Serialization.hpp"
@@ -75,7 +74,7 @@ void Editor::InitEditComp()
 {
     for (int i = 1; i < MAX_ENTITIES; i++)
     {
-        editingComponent[i].InitComponent(game.coordinator.componentHandler->GetComponentTransform(i).localTRS);
+        editingComponent[i].InitComponent(game.coordinator.componentHandler->GetComponentTransform(i));
     }
 }
 
@@ -83,7 +82,7 @@ void Editor::ModifyEditComp()
 {
     for (int i = 1; i < MAX_ENTITIES; i++)
     {
-        editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i).localTRS;
+        editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i);
         if ((game.coordinator.entityHandler->entities[i].signature & SIGNATURE_MODEL))
         {
             editingComponent[i].AABBMin = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBMin;
@@ -167,8 +166,7 @@ void Editor::Loop()
 
         if (selectedEntity.focusedEntity && (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS))
         {
-            selectedEntity.componentHandler->componentTransforms[selectedEntity.focusedEntity->id].SetPhysics();
-            selectedEntity.componentHandler->componentPhysics[selectedEntity.focusedEntity->id].physBody->setTransform(selectedEntity.componentHandler->componentTransforms[selectedEntity.focusedEntity->id].physTransform);
+            selectedEntity.componentHandler->componentPhysics[selectedEntity.focusedEntity->id].Set(selectedEntity.componentHandler->componentTransforms[selectedEntity.focusedEntity->id]);
         }
            
 
@@ -180,7 +178,7 @@ void Editor::Loop()
 
 
         game.renderer.Draw(cam.GetViewProj(), game.coordinator);
-        SystemDraw(game.scene->map.trs, game.scene->map.model, game.renderer.remote, cam.GetViewProj());
+        SystemDraw(game.scene->map.trs, game.scene->map.model, cam.GetViewProj());
 
         dbgRenderer.Draw(cam.GetViewProj());
 

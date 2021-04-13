@@ -84,6 +84,8 @@ set (SRC_FILES
     "${SRC_DIR}/Resources/Serialization.cpp" 
     "${SRC_DIR}/Resources/SoundManager.cpp" 
 
+    "${SRC_DIR}/Resources/Shader/PhysicsShader.cpp" 
+
     "${SRC_DIR}/UI/UIeditor.cpp"
     "${SRC_DIR}/UI/CustomImWidget.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgetBases.cpp"
@@ -100,10 +102,12 @@ set (SRC_FILES
     "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
 
     "${SRC_DIR}/ECS/ComponentHandler.cpp"
+    "${SRC_DIR}/ECS/ComponentEditor.cpp" 
+    "${SRC_DIR}/ECS/ComponentModel.cpp" 
+    "${SRC_DIR}/ECS/ComponentPhysics.cpp"
 
     "${SRC_DIR}/Editor.cpp" 
-    "${SRC_DIR}/Game.cpp"
-     "src/Resources/Shader/PhysicsShader.cpp")
+    "${SRC_DIR}/Game.cpp")
 
 set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
         "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/lua54.dll"
@@ -115,7 +119,7 @@ set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
 # Ajoutez une source à l'exécutable de ce projet.
-add_executable (CookieEngine ${SUB_SYS} ${SRC_FILES})
+add_executable (CookieEngine ${SUB_SYS} ${SRC_FILES} "src/ECS/ComponentEditor.cpp")
 
 set_target_properties(CookieEngine PROPERTIES CXX_STANDARD 17)
 

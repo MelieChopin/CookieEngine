@@ -3,7 +3,6 @@
 
 #include <memory>
 #include "Resources/ResourcesManager.hpp"
-#include "Physics/PhysicsSimulator.hpp"
 #include "Render/Renderer.hpp" 
 #include "ECS/Coordinator.hpp"
 

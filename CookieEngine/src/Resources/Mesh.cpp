@@ -17,8 +17,6 @@ Mesh::Mesh(std::string _name, aiMesh* mesh):
 
     AABBMin = { mesh->mAABB.mMin.x, mesh->mAABB.mMin.y, mesh->mAABB.mMin.z };
     AABBMax = { mesh->mAABB.mMax.x, mesh->mAABB.mMax.y, mesh->mAABB.mMax.z };
-    //aiVector3D center   = (mesh->mAABB.mMax + mesh->mAABB.mMin) * 0.5f;
-    //AABBhalfExtent      = {mesh->mAABB.mMax.x - center.x,mesh->mAABB.mMax.y - center.y,mesh->mAABB.mMax.z - center.z};
 }
 
 Mesh::Mesh(std::string meshName, std::vector<float>& vertices, std::vector<unsigned int>& indices, unsigned int inb):
@@ -75,7 +73,7 @@ void Mesh::InitVBuffer(aiMesh* mesh)
 
     std::vector<float> vertices;
 
-    for (int i = 0; i <= mesh->mNumVertices; i++)
+    for (int i = 0; i < mesh->mNumVertices; i++)
     {
         vertices.push_back(mesh->mVertices[i].x);
         vertices.push_back(mesh->mVertices[i].y);
@@ -115,7 +113,9 @@ void Mesh::InitIBuffer(aiMesh* mesh)
     {
         aiFace iFace = mesh->mFaces[i];
         for (unsigned int j = 0; j < iFace.mNumIndices; j++)
+        {
             indices.push_back(iFace.mIndices[j]);
+        }
     }
 
     bDesc.ByteWidth             = indices.size() * sizeof(unsigned int);
