@@ -7,11 +7,13 @@
 #include "Game.hpp"
 #include "Resources/Serialization.hpp"
 #include "Resources/Prefab.hpp"
+#include "ComponentPhysics.hpp"
 #include <bitset>
 #include <filesystem>
+#include <reactphysics3d/reactphysics3d.h>
 
-using namespace Cookie;
 using namespace Cookie::Resources;
+using namespace Cookie::ECS;
 using namespace Cookie::Resources::Serialization;
 
 void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS::EntityHandler& entity)
@@ -42,6 +44,13 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 													{ "rotation", transform.localTRS.rot.e },
 													{ "scale", transform.localTRS.scale.e } } } };
 			}
+			::reactphysics3d::Transform physTrans = transform.physTransform;
+			::reactphysics3d::Vector3 pos = physTrans.getPosition();
+			::reactphysics3d::Quaternion quat = physTrans.getOrientation();
+
+			js["ComponentHandler"]["Transform"].at(js["ComponentHandler"]["Transform"].size() - 1)["physicTRS"]["position"] = { pos.x, pos.y, pos.z };
+			js["ComponentHandler"]["Transform"].at(js["ComponentHandler"]["Transform"].size() - 1)["physicTRS"]["quaternion"] = { quat.w, quat.x, quat.y, quat.z };
+
 		}
 		if (entity.entities[i].signature & SIGNATURE_MODEL)
 		{
@@ -67,6 +76,67 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 												{ "shader", model.shader.get()->name },
 												{ "texture", model.texture != nullptr ? model.texture.get()->name : "NO TEXTURE" } };
 			}
+		}
+		if (entity.entities[i].signature & SIGNATURE_PHYSICS)
+		{
+			std::vector<::reactphysics3d::Collider*> colliders = component.GetComponentPhysics(entity.entities[i].id).physColliders;
+			int index = js["PhysicHandler"].size();
+			for (int j = 0; j < colliders.size(); j++)
+			{
+				::reactphysics3d::Collider* actCollider = colliders[j];
+				if (actCollider->getCollisionShape()->getName() == ::reactphysics3d::CollisionShapeName::SPHERE)
+				{
+					float radius = static_cast<::reactphysics3d::SphereShape*>(actCollider->getCollisionShape())->getRadius();
+					js["PhysicHandler"][index]["Colliders"][j]["type"] = "Sphere";
+					js["PhysicHandler"][index]["Colliders"][j]["radius"] = radius;
+				}
+				else if (actCollider->getCollisionShape()->getName() == ::reactphysics3d::CollisionShapeName::CAPSULE)
+				{
+					::reactphysics3d::CapsuleShape* capsule = static_cast<::reactphysics3d::CapsuleShape*>(actCollider->getCollisionShape());
+					js["PhysicHandler"][index]["Colliders"][j]["type"] = "Capsule";
+					js["PhysicHandler"][index]["Colliders"][j]["radius"] = capsule->getRadius();
+					js["PhysicHandler"][index]["Colliders"][j]["height"] = capsule->getHeight();
+				}
+				else if (actCollider->getCollisionShape()->getName() == ::reactphysics3d::CollisionShapeName::BOX)
+				{
+					::reactphysics3d::Vector3 box = static_cast<::reactphysics3d::BoxShape*>(actCollider->getCollisionShape())->getHalfExtents();
+					js["PhysicHandler"][index]["Colliders"][j]["type"] = "Box";
+					js["PhysicHandler"][index]["Colliders"][j]["HalfExtents"] = { box.x, box.y, box.z };
+				}
+
+				::reactphysics3d::Material& mat = actCollider->getMaterial();
+
+				::reactphysics3d::Vector3		vec = actCollider->getLocalToBodyTransform().getPosition();
+				::reactphysics3d::Quaternion	quat = actCollider->getLocalToBodyTransform().getOrientation();
+				js["PhysicHandler"][index]["Colliders"][j]["transform"]["pos"] = { vec.x, vec.y, vec.z };
+				js["PhysicHandler"][index]["Colliders"][j]["transform"]["quaternion"] = { quat.w, quat.x, quat.y, quat.z };
+				js["PhysicHandler"][index]["Colliders"][j]["bounciness"] = mat.getBounciness();
+				js["PhysicHandler"][index]["Colliders"][j]["frictionCoeff"] = mat.getFrictionCoefficient();
+				js["PhysicHandler"][index]["Colliders"][j]["density"] = mat.getMassDensity();
+				js["PhysicHandler"][index]["Colliders"][j]["rollingResistance"] = mat.getRollingResistance();
+			}
+			::reactphysics3d::RigidBody*& rigibody = component.GetComponentPhysics(entity.entities[i].id).physBody;
+			switch (rigibody->getType())
+			{
+			case ::reactphysics3d::BodyType::STATIC:
+				js["PhysicHandler"][index]["Rigidbody"]["type"] = "static";
+				break;
+			case ::reactphysics3d::BodyType::KINEMATIC:
+				js["PhysicHandler"][index]["Rigidbody"]["type"] = "kinematic";
+				break;
+			case ::reactphysics3d::BodyType::DYNAMIC:
+				js["PhysicHandler"][index]["Rigidbody"]["type"] = "dynamic";
+				break;
+			}
+
+			js["PhysicHandler"][index]["Rigidbody"]["angularDamping"] = rigibody->getAngularDamping();
+			js["PhysicHandler"][index]["Rigidbody"]["linearDamping"] = rigibody->getLinearDamping();
+			js["PhysicHandler"][index]["Rigidbody"]["mass"] = rigibody->getMass();
+			js["PhysicHandler"][index]["Rigidbody"]["active"] = rigibody->isActive();
+			js["PhysicHandler"][index]["Rigidbody"]["allowedToSleep"] = rigibody->isAllowedToSleep();
+			js["PhysicHandler"][index]["Rigidbody"]["sleeping"] = rigibody->isSleeping();
+			js["PhysicHandler"][index]["Rigidbody"]["gravityEnabled"] = rigibody->isGravityEnabled();
+			
 		}
 	}
 }
@@ -147,8 +217,10 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 	 }
  }
 
- void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager)
+ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::ECS::EntityHandler& entity,
+	 Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager)
  {
+	 int indexOfPhysic = 0;
 	 for (int i = 0; i < entity.livingEntities; i++)
 	 {
 		 if (entity.entities[i].signature & SIGNATURE_TRANSFORM)
@@ -156,22 +228,28 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 			 Cookie::ECS::ComponentTransform transform;
 			 json TRS = js["ComponentHandler"]["Transform"][i].at("localTRS");
 			 TRS.at("translate").get_to(transform.localTRS.pos.e);
-			 
+
 			 if (TRS.contains("rotation"))
 				 TRS.at("rotation").get_to(transform.localTRS.rot.e);
 			 else if (entity.entities[i].namePrefab != "NONE")
 				 transform.localTRS.rot = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->rotation;
-			 
+
 			 if (TRS.contains("scale"))
-				TRS.at("scale").get_to(transform.localTRS.scale.e);
+				 TRS.at("scale").get_to(transform.localTRS.scale.e);
 			 else if (entity.entities[i].namePrefab != "NONE")
 				 transform.localTRS.scale = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->scale;
-			 
+
 			 component.componentTransforms[entity.entities[i].id].localTRS = transform.localTRS;
+
+			 json pTRS = js["ComponentHandler"]["Transform"][i].at("physicTRS").at("position");
+			 json qTRS = js["ComponentHandler"]["Transform"][i].at("physicTRS").at("quaternion");
+
+			 ::reactphysics3d::Vector3 vecTemp(pTRS[0].get<float>(), pTRS[1].get<float>(), pTRS[1].get<float>());
+			 ::reactphysics3d::Quaternion quatTemp(qTRS[1].get<float>(), qTRS[2].get<float>(), qTRS[3].get<float>(), qTRS[0].get<float>());
+			 component.componentTransforms[entity.entities[i].id].physTransform = ::reactphysics3d::Transform({ vecTemp, quatTemp });
 		 }
 		 if (entity.entities[i].signature & SIGNATURE_MODEL)
 		 {
-			 std::string test;
 			 json model = js["ComponentHandler"]["Model"][i];
 			 if (model.at("model").is_string())
 				component.componentModels[entity.entities[i].id].mesh = resourcesManager.meshes[(model.at("model").get<std::string>())];
@@ -194,7 +272,69 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 		 if (entity.entities[i].signature & SIGNATURE_PHYSICS)
 		 {
 			 component.componentTransforms[entity.entities[i].id].SetPhysics();
-			 component.componentPhysics[entity.entities[i].id].physBody = Physics::PhysicsHandle::physSim->createRigidBody(component.componentTransforms[entity.entities[i].id].physTransform);
+			 component.componentPhysics[entity.entities[i].id].physBody = 
+				 Physics::PhysicsHandle::physSim->createRigidBody(component.componentTransforms[entity.entities[i].id].physTransform);
+
+			 json physic = js["PhysicHandler"][indexOfPhysic];
+
+			 //Rigidbody
+			 {
+				 json rigid = physic["Rigidbody"];
+				 ::reactphysics3d::RigidBody* actRigidBody = component.componentPhysics[entity.entities[i].id].physBody;
+
+				 if (rigid["type"].get<std::string>() == "STATIC")
+					 actRigidBody->setType(::reactphysics3d::BodyType::STATIC);
+				 if (rigid["type"].get<std::string>() == "KINEMATIC")
+					 actRigidBody->setType(::reactphysics3d::BodyType::KINEMATIC);
+				 if (rigid["type"].get<std::string>() == "DYNAMIC")
+					 actRigidBody->setType(::reactphysics3d::BodyType::DYNAMIC);
+
+				 actRigidBody->setIsActive(rigid["active"].get<bool>());
+				 actRigidBody->setIsAllowedToSleep(rigid["allowedToSleep"].get<bool>());
+				 actRigidBody->setAngularDamping(rigid["angularDamping"].get<float>());
+				 actRigidBody->enableGravity(rigid["gravityEnabled"].get<bool>());
+				 actRigidBody->setLinearDamping(rigid["linearDamping"].get<float>());
+				 actRigidBody->setMass(rigid["mass"].get<float>());
+				 //check for sleeping 
+			 }
+
+
+			 for (int j = 0; j < physic["Colliders"].size(); j++)
+			 {
+				 json colliders = physic["Colliders"][j];
+
+				 Cookie::Core::Math::Vec3 pos;
+				 Cookie::Core::Math::Vec4 quat;
+				 colliders["transform"]["pos"].get_to(pos.e);
+				 colliders["transform"]["quaternion"].get_to(quat.e);
+				 Cookie::Core::Math::Vec3 rot = Cookie::Core::Math::Quat::ToEulerAngle({ quat.x, quat.y, quat.z, quat.w });
+
+				 if (colliders["type"].get<std::string>() == "Sphere")
+				 {
+					 float radius = colliders["radius"].get<float>();
+					 component.componentPhysics[entity.entities[i].id].AddSphereCollider(radius, pos, rot);
+				 }
+				 else if (colliders["type"].get<std::string>() == "Capsule")
+				 {
+					 float radius = colliders["radius"].get<float>();
+					 float height = colliders["height"].get<float>();
+					 component.componentPhysics[entity.entities[i].id].AddCapsuleCollider(Cookie::Core::Math::Vec2{ radius, height }, pos, rot);
+				 }
+				 else if (colliders["type"].get<std::string>() == "Box")
+				 {
+					 Cookie::Core::Math::Vec3 halfExtents;
+					 colliders["HalfExtents"].get_to(halfExtents.e);
+					 component.GetComponentPhysics(entity.entities[i].id).AddCubeCollider(halfExtents, pos, rot);
+				 }
+				 
+				 ::reactphysics3d::Material& mat = component.componentPhysics[entity.entities[i].id].physColliders[j]->getMaterial();
+				 mat.setBounciness(colliders["bounciness"].get<float>());
+				 mat.setMassDensity(colliders["density"].get<float>());
+				 mat.setFrictionCoefficient(colliders["frictionCoeff"].get<float>());
+				 mat.setRollingResistance(colliders["rollingResistance"].get<float>());
+			 }
+
+			 indexOfPhysic += 1;
 		 }
 	 }
  }
@@ -248,6 +388,8 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 				 newScene->componentHandler.componentTransforms[newScene->entityHandler.entities[i].id].ToDefault();
 			 if (newScene->entityHandler.entities[i].signature & SIGNATURE_MODEL)
 				 newScene->componentHandler.componentModels[newScene->entityHandler.entities[i].id].ToDefault();
+			 if (newScene->entityHandler.entities[i].signature & SIGNATURE_PHYSICS)
+				 newScene->componentHandler.componentPhysics[newScene->entityHandler.entities[i].id].ToDefault();
 			 newScene->entityHandler.entities[i] = Cookie::ECS::Entity(i);
 		 }
 
