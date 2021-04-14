@@ -26,7 +26,9 @@ namespace Cookie
 				unsigned int  INb		= 0;
 
 			public:
-				Core::Math::Vec3 AABBhalfExtent = {0.0f,0.0f,0.0f};
+				Core::Math::Vec3 AABBMin;
+				Core::Math::Vec3 AABBMax;
+
 				std::string name;
 				
 

@@ -1,4 +1,3 @@
-#include <reactphysics3d/reactphysics3d.h>
 #include "Editor.hpp" 
 #include "UIallIn.hpp"
 #include "Serialization.hpp"
@@ -26,12 +25,6 @@ Editor::Editor()
     cam.Deactivate();
     //scene = Editor::Scene(resources, coordinator);
     game.scene->InitCoordinator(game.coordinator);
-    ImGui::GetIO().AddInputCharacter(GLFW_KEY_W);
-    ImGui::GetIO().AddInputCharacter(GLFW_KEY_S);
-    ImGui::GetIO().AddInputCharacter(GLFW_KEY_A);
-    ImGui::GetIO().AddInputCharacter(GLFW_KEY_D);
-    ImGui::GetIO().AddInputCharacter(GLFW_KEY_SPACE);
-    ImGui::GetIO().AddInputCharacter(GLFW_KEY_LEFT_CONTROL);
     game.resources.textures["Pink"] = (std::make_shared<Resources::Texture>("Pink", Core::Math::Vec4(1.0f, 0.5f, 0.5f, 1.0f)));
     game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>("Assets/Floor_DefaultMaterial_BaseColor.png"));
 
@@ -81,7 +74,7 @@ void Editor::InitEditComp()
 {
     for (int i = 1; i < MAX_ENTITIES; i++)
     {
-        editingComponent[i].InitComponent(game.coordinator.componentHandler->GetComponentTransform(i).localTRS);
+        editingComponent[i].InitComponent(game.coordinator.componentHandler->GetComponentTransform(i));
     }
 }
 
@@ -89,10 +82,11 @@ void Editor::ModifyEditComp()
 {
     for (int i = 1; i < MAX_ENTITIES; i++)
     {
-        editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i).localTRS;
+        editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i);
         if ((game.coordinator.entityHandler->entities[i].signature & SIGNATURE_MODEL))
         {
-            editingComponent[i].AABB = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBhalfExtent;
+            editingComponent[i].AABBMin = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBMin;
+            editingComponent[i].AABBMax = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBMax;
             editingComponent[i].MakeCollider();
         }
         editingComponent[i].Update();
@@ -110,10 +104,10 @@ void Editor::Loop()
 
     ComponentTransform buildingTrs;
     ComponentModel     buildingModel;
-    Vec2 buildingTileSize {3, 3};
+    Vec2 buildingTileSize {{3, 3}};
     {
-        buildingTrs.localTRS.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
-        buildingTrs.localTRS.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
+        buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
+        buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
         buildingModel.mesh = game.resources.meshes["Assets\\Primitives\\cube.gltf - Cube"];
         buildingModel.texture = game.resources.textures["Pink"];
         buildingModel.shader = game.resources.shaders["Texture_Shader"];
@@ -166,7 +160,7 @@ void Editor::Loop()
             physHandle.editWorld->raycast(ray,this);
         }
 
-        /*
+        
         //Raycast EachFrame with Map
         {
             Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
@@ -181,7 +175,7 @@ void Editor::Loop()
                 Vec2 mousePos {hitPoint.x, hitPoint.z};
                 Vec2 centerOfBuilding = game.scene->map.GetCenterOfBuilding(mousePos, buildingTileSize);
 
-                buildingTrs.localTRS.pos = {centerOfBuilding.x, hitPoint.y , centerOfBuilding.y};
+                buildingTrs.pos = {centerOfBuilding.x, hitPoint.y , centerOfBuilding.y};
             }
         }
         //Bind Keys to change Nb of Tiles of Building
@@ -189,25 +183,25 @@ void Editor::Loop()
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_K])
             {
                 buildingTileSize.x--;
-                buildingTrs.localTRS.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
+                buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
             }
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
             {
                 buildingTileSize.y--;
-                buildingTrs.localTRS.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
+                buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
             }
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
             {
                 buildingTileSize.x++;
-                buildingTrs.localTRS.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
+                buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
             }
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_O])
             {
                 buildingTileSize.y++;
-                buildingTrs.localTRS.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
+                buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
             }
         }
-        */
+        
 
         if (selectedEntity.toChangeEntityId >= 0)
         {
@@ -216,8 +210,7 @@ void Editor::Loop()
 
         if (selectedEntity.focusedEntity && (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS))
         {
-            selectedEntity.componentHandler->componentTransforms[selectedEntity.focusedEntity->id].SetPhysics();
-            selectedEntity.componentHandler->componentPhysics[selectedEntity.focusedEntity->id].physBody->setTransform(selectedEntity.componentHandler->componentTransforms[selectedEntity.focusedEntity->id].physTransform);
+            selectedEntity.componentHandler->componentPhysics[selectedEntity.focusedEntity->id].Set(selectedEntity.componentHandler->componentTransforms[selectedEntity.focusedEntity->id]);
         }
            
 
@@ -225,12 +218,12 @@ void Editor::Loop()
 
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
-        /////
+
 
 
         game.renderer.Draw(cam.GetViewProj(), game.coordinator);
-        SystemDraw(game.scene->map.trs, game.scene->map.model, game.renderer.remote, cam.GetViewProj());
-        //SystemDraw(buildingTrs, buildingModel, game.renderer.remote, cam.GetViewProj());
+        SystemDraw(game.scene->map.trs, game.scene->map.model, cam.GetViewProj());
+        SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
 
         dbgRenderer.Draw(cam.GetViewProj());
 
