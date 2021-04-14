@@ -5,6 +5,7 @@
 #include "Resources/ResourcesManager.hpp"
 #include "Render/Renderer.hpp" 
 #include "ECS/Coordinator.hpp"
+#include "Render/Skybox.hpp"
 
 namespace Cookie
 {
@@ -14,6 +15,7 @@ namespace Cookie
 		public:
 			Render::Renderer			renderer;
 			Resources::ResourcesManager resources;
+			Render::SkyBox				skyBox;
 			ECS::Coordinator			coordinator;
 
 			std::shared_ptr<Resources::Scene>				scene{nullptr};

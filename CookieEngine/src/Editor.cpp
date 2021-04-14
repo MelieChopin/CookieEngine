@@ -177,8 +177,7 @@ void Editor::Loop()
         /////
 
 
-        game.renderer.Draw(cam.GetViewProj(), game.coordinator);
-        SystemDraw(game.scene->map.trs, game.scene->map.model, cam.GetViewProj());
+        game.renderer.Draw(&cam, game);
 
         dbgRenderer.Draw(cam.GetViewProj());
 

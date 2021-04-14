@@ -1,5 +1,4 @@
 #include <d3d11.h>
-#include "Resources/Shader/TextureShader.hpp"
 
 #include "Resources/Mesh.hpp"
 #include "Render/Renderer.hpp"
@@ -7,6 +6,9 @@
 #include "Resources/ResourcesManager.hpp"
 #include "Core/Primitives.hpp"
 #include "Resources/Prefab.hpp"
+
+#include "Resources/Shader/TextureShader.hpp"
+#include "Resources/Shader/SkyBoxShader.hpp"
 
 #include <memory>
 
@@ -17,6 +19,7 @@ ResourcesManager::ResourcesManager()
 	scripts["test.lua"] = std::make_shared<Script>("Assets\\scripts\\test.lua");
 	scripts["test2.lua"] = std::make_shared<Script>("Assets\\scripts\\test2.lua");
 
+	InitPrimitives();
 	InitShaders();
 }
 
@@ -56,15 +59,18 @@ void ResourcesManager::SearchForGltf(const fs::path& path, std::vector<std::stri
 void ResourcesManager::InitShaders()
 {
 	shaders["Texture_Shader"] = std::make_shared<TextureShader>("Texture_Shader");
+	shaders["SkyBox_Shader"] = std::make_shared<SkyBoxShader>("SkyBox_Shader");
+}
+
+void ResourcesManager::InitPrimitives()
+{
+	meshes["Quad"] = Cookie::Core::Primitives::CreateQuad();
+	meshes["Triangle"] = Cookie::Core::Primitives::CreateTriangle();
+	meshes["Cube"] = Cookie::Core::Primitives::CreateCube();
 }
 
 void ResourcesManager::Load(Render::Renderer& _renderer)
 {
-	meshes["Quad"] =  Cookie::Core::Primitives::CreateQuad();
-	meshes["Triangle"] = Cookie::Core::Primitives::CreateTriangle();
-
-
-
 	std::vector<std::string> gltfFiles;
 	SearchForGltf(std::string("Assets\\"),gltfFiles);
 

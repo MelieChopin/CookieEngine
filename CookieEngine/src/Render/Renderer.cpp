@@ -4,9 +4,10 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
-#include "Render/Renderer.hpp"
 #include "Resources/ResourcesManager.hpp"
-#include "ECS/Coordinator.hpp"
+#include "Game.hpp"
+#include "Render/Renderer.hpp"
+
 
 using namespace Cookie::Render;
 using namespace Cookie::Core::Math;
@@ -58,7 +59,7 @@ bool Renderer::InitDevice(Core::Window& window)
         NULL,
         D3D_DRIVER_TYPE_HARDWARE,
         NULL,
-#if 0
+#if 1
         D3D11_CREATE_DEVICE_DEBUG,
 #else
         NULL,
@@ -239,14 +240,22 @@ void Renderer::ResizeBuffer(int width, int height)
 
 /*========================= RENDER METHODS =========================*/
 
-void Renderer::Draw(const Mat4& viewProj, Cookie::ECS::Coordinator& coordinator)
+void Renderer::Draw(const Camera* cam, Game& game)
 {
+    remote.context->OMSetRenderTargets(1, frameBuffers[0]->GetRenderTarget(), depthBuffer);
+
+    Core::Math::Mat4 viewProj = cam->GetViewProj();
+    
+    game.skyBox.Draw(cam->GetView(), cam->GetProj());
+
     if (!frameBuffers.empty())
     {
         remote.context->OMSetRenderTargets(1, frameBuffers[0]->GetRenderTarget(), depthBuffer);
     }
 
-    coordinator.ApplyDraw(viewProj);
+    game.scene->map.Draw(viewProj);
+
+    game.coordinator.ApplyDraw(viewProj);
 }
 
 void Renderer::Clear()

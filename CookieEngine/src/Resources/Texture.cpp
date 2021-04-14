@@ -15,13 +15,29 @@ Texture::Texture(const std::string& texPath) :
 {
 	std::wstring wString = std::wstring(texPath.begin(),texPath.end());
 
-	if (name.find(".dss") != std::string::npos)
+	if (name.find(".dds") != std::string::npos)
 	{
-		HRESULT result = DirectX::CreateDDSTextureFromFile(Render::RendererRemote::device, wString.c_str(), &texture, &shaderResourceView);
+		HRESULT result = DirectX::CreateDDSTextureFromFileEx(Render::RendererRemote::device, Render::RendererRemote::context, wString.c_str(), 0ULL, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, false, &texture, &shaderResourceView);
 		if (FAILED(result))
 		{
 			printf("Failing Loading Texture %s: %s\n", name.c_str(), std::system_category().message(result).c_str());
 		}
+
+		//shaderResourceView->Release();
+		//
+		//D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		//srvDesc.Format					= DXGI_FORMAT_R32G32B32A32_FLOAT;
+		//srvDesc.ViewDimension			= D3D11_SRV_DIMENSION_TEXTURECUBE;
+		//srvDesc.TextureCube.MipLevels	= 0;
+		//srvDesc.TextureCube.MostDetailedMip = 0;
+		//
+		//result = Render::RendererRemote::device->CreateShaderResourceView(texture, &srvDesc, &shaderResourceView);
+		//
+		//if (FAILED(result))
+		//{
+		//	printf("Failed Loading SkyBox %s: %s",name.c_str(), std::system_category().message(result).c_str());
+		//}
+
 	}
 	else
 	{

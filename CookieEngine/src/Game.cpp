@@ -5,9 +5,11 @@ using namespace Cookie;
 
 /*================== CONSTRUCTORS/DESTRUCTORS ==================*/
 
-Game::Game()
+Game::Game():
+    skyBox{resources}
 {
-
+    resources.textures["SkyBoxTex"] = std::make_shared<Resources::Texture>("Assets/SkyBox01.dds");
+    skyBox.texture = resources.textures["SkyBoxTex"];
 }
 
 Game::~Game()
@@ -40,7 +42,7 @@ void Game::Update()
     scene->camera->Update();
     coordinator.ApplyScriptUpdate();
 
-    renderer.Draw(scene->camera->GetViewProj(), coordinator);
+    renderer.Draw(scene->camera.get(), *this);
     renderer.SetBackBuffer();
 }
 
