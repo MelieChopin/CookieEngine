@@ -44,13 +44,6 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 													{ "rotation", transform.rot.e },
 													{ "scale", transform.scale.e } } } };
 			}
-			::reactphysics3d::Transform physTrans = transform.physTransform;
-			::reactphysics3d::Vector3 pos = physTrans.getPosition();
-			::reactphysics3d::Quaternion quat = physTrans.getOrientation();
-
-			js["ComponentHandler"]["Transform"].at(js["ComponentHandler"]["Transform"].size() - 1)["physicTRS"]["position"] = { pos.x, pos.y, pos.z };
-			js["ComponentHandler"]["Transform"].at(js["ComponentHandler"]["Transform"].size() - 1)["physicTRS"]["quaternion"] = { quat.w, quat.x, quat.y, quat.z };
-
 		}
 		if (entity.entities[i].signature & SIGNATURE_MODEL)
 		{
@@ -136,7 +129,13 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 			js["PhysicHandler"][index]["Rigidbody"]["allowedToSleep"] = rigibody->isAllowedToSleep();
 			js["PhysicHandler"][index]["Rigidbody"]["sleeping"] = rigibody->isSleeping();
 			js["PhysicHandler"][index]["Rigidbody"]["gravityEnabled"] = rigibody->isGravityEnabled();
-			
+
+			::reactphysics3d::Transform physTrans = component.GetComponentPhysics(entity.entities[i].id).physTransform;
+			::reactphysics3d::Vector3 pos = physTrans.getPosition();
+			::reactphysics3d::Quaternion quat = physTrans.getOrientation();
+
+			js["PhysicHandler"][index]["physicTRS"]["position"] = { pos.x, pos.y, pos.z };
+			js["PhysicHandler"][index]["physicTRS"]["quaternion"] = { quat.w, quat.x, quat.y, quat.z };
 		}
 	}
 }
@@ -240,13 +239,6 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 				 transform.scale = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->scale;
 			 
 			 component.componentTransforms[entity.entities[i].id] = transform;
-
-			 json pTRS = js["ComponentHandler"]["Transform"][i].at("physicTRS").at("position");
-			 json qTRS = js["ComponentHandler"]["Transform"][i].at("physicTRS").at("quaternion");
-
-			 ::reactphysics3d::Vector3 vecTemp(pTRS[0].get<float>(), pTRS[1].get<float>(), pTRS[1].get<float>());
-			 ::reactphysics3d::Quaternion quatTemp(qTRS[1].get<float>(), qTRS[2].get<float>(), qTRS[3].get<float>(), qTRS[0].get<float>());
-			 component.componentTransforms[entity.entities[i].id].physTransform = ::reactphysics3d::Transform({ vecTemp, quatTemp });
 		 }
 		 if (entity.entities[i].signature & SIGNATURE_MODEL)
 		 {
@@ -271,11 +263,16 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 		 }
 		 if (entity.entities[i].signature & SIGNATURE_PHYSICS)
 		 {
-			 component.componentTransforms[entity.entities[i].id].SetPhysics();
-			 component.componentPhysics[entity.entities[i].id].physBody = 
-				 Physics::PhysicsHandle::physSim->createRigidBody(component.componentTransforms[entity.entities[i].id].physTransform);
-
 			 json physic = js["PhysicHandler"][indexOfPhysic];
+			 json pTRS = physic["physicTRS"].at("position");
+			 json qTRS = physic["physicTRS"].at("quaternion");
+
+			 ::reactphysics3d::Vector3 vecTemp(pTRS[0].get<float>(), pTRS[1].get<float>(), pTRS[1].get<float>());
+			 ::reactphysics3d::Quaternion quatTemp(qTRS[1].get<float>(), qTRS[2].get<float>(), qTRS[3].get<float>(), qTRS[0].get<float>());
+			 component.componentPhysics[entity.entities[i].id].physTransform = ::reactphysics3d::Transform({ vecTemp, quatTemp });
+
+			 component.componentPhysics[entity.entities[i].id].physBody = 
+				 Physics::PhysicsHandle::physSim->createRigidBody(component.componentPhysics[entity.entities[i].id].physTransform);
 
 			 //Rigidbody
 			 {
