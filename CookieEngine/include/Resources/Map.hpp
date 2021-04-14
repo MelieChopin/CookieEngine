@@ -29,9 +29,11 @@ namespace Cookie
 
 			Map()
 			{				
-				trs.scale = {100, 100, 1};
+				trs.scale = {100, 100, 0.01};
 				trs.rot = {90, 0, 0};
 
+				tilesNb = { 10, 10 };
+				tilesSize = { trs.scale.x *2 / tilesNb.x, trs.scale.y *2 / tilesNb.y };
 
 				physic.physBody = Physics::PhysicsHandle::physSim->createRigidBody(rp3d::Transform(rp3d::Vector3(0.0, 0.0, 0.0), rp3d::Quaternion::identity()));
 				physic.physBody->setType(rp3d::BodyType::STATIC);
@@ -42,10 +44,17 @@ namespace Cookie
 			}
 			~Map() {}
 
-			Core::Math::Vec2 GetCenterOfBuilding(Core::Math::Vec2& mousePos, const Core::Math::Vec2& buildingNbOfTiles)
+			Core::Math::Vec2 GetCenterOfBuilding(Core::Math::Vec2& mousePos, Core::Math::Vec2& buildingNbOfTiles)
 			{
-				return { {mousePos.x - ((int)mousePos.x % (int)tilesSize.x) + (tilesSize.x / buildingNbOfTiles.x),
-						mousePos.y - ((int)mousePos.y % (int)tilesSize.y) + (tilesSize.y / buildingNbOfTiles.y) } };
+				Core::Math::Vec2 unsignedMousePos {mousePos.x + trs.scale.x, mousePos.y + trs.scale.y};
+				
+				Core::Math::Vec2 centerOfBuilding {tilesSize.x * (int)(unsignedMousePos.x / tilesSize.x) + (2 - (int)buildingNbOfTiles.x % 2) * tilesSize.x /2,
+												   tilesSize.y * (int)(unsignedMousePos.y / tilesSize.y) + (2 - (int)buildingNbOfTiles.y % 2) * tilesSize.y /2};
+
+				return {std::clamp(centerOfBuilding.x, buildingNbOfTiles.x * tilesSize.x / 2, trs.scale.x * 2 - buildingNbOfTiles.x * tilesSize.x / 2) - trs.scale.x,
+						std::clamp(centerOfBuilding.y, buildingNbOfTiles.y * tilesSize.y / 2, trs.scale.y * 2 - buildingNbOfTiles.y * tilesSize.y / 2) - trs.scale.y};
+
+
 			}
 
 			void DisplayTilesIcons(Core::Math::Vec2& mousePos, const Core::Math::Vec2& buildingNbOfTiles)

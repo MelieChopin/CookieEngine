@@ -5,6 +5,8 @@
 #include <imgui.h>
 #include <imgui_stdlib.h>
 
+#include "CustomImWidget.hpp"
+
 using namespace ImGui;
 using namespace Cookie::UIwidget;
 using namespace Cookie::Resources;
@@ -15,22 +17,32 @@ void TextureEditor::WindowDisplay()
 	TryBeginWindow()
 	{
 		Text("Currently loaded and available textures:");
-		Indent();
+		
+		
+		BeginGroup();
 
         for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator textPtr = resources.textures.begin(); textPtr != resources.textures.end(); textPtr++)
         {
-			Image(static_cast<ImTextureID>(textPtr->second->GetResourceView()), { 25, 25 });
-			SameLine(); 
+			BeginGroup();
+
+			Custom::Zoomimage(static_cast<ImTextureID>(textPtr->second->GetResourceView()), 100, 100, 10, true);
 			
 			if (newTexture.name == textPtr->second->name)
 			{
 				TextColored({0.75, 0.25, 0.25, 1}, "%s (<- Already in use!)", textPtr->second->name.c_str());
 				newTexture.invalidName = true;
 			}
-			else Text("%s", textPtr->second->name.c_str());
+			else Custom::TextSnip(textPtr->second->name.c_str(), 15);
+
+			EndGroup();
+
+			SameLine();
+			if (GetContentRegionAvail().x < 100.f) NewLine();
         }
 
-		Unindent();
+		EndGroup();
+
+
 		Separator();
 
 		if (!newTexture.creating)
