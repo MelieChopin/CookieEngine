@@ -73,7 +73,7 @@ void ResourcesManager::Load(Render::Renderer& _renderer)
 	for (unsigned int i = 0; i < gltfFiles.size(); i++)
 	{
 		loader.Load(gltfFiles.at(i).c_str(),*this,_renderer);
-		printf("%s\n", gltfFiles.at(i).c_str());
+		//printf("%s\n", gltfFiles.at(i).c_str());
 	}
 }
 
@@ -86,8 +86,8 @@ void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandl
 	newPrefab.nameShader = "default";//component.componentModels[entity.id].shader->name;
 	newPrefab.nameTexture = component.componentModels[entity.id].texture->name;
 	newPrefab.signature = entity.id;
-	newPrefab.rotation = component.componentTransforms[entity.id].localTRS.rot;
-	newPrefab.scale = component.componentTransforms[entity.id].localTRS.scale;
+	newPrefab.rotation = component.componentTransforms[entity.id].rot;
+	newPrefab.scale = component.componentTransforms[entity.id].scale;
 	newPrefab.filepath = "Assets/Prefabs/" + entity.name + ".PAsset";
 
 	entity.namePrefab = entity.name;

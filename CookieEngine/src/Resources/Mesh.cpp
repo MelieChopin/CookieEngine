@@ -14,8 +14,9 @@ Mesh::Mesh(std::string _name, aiMesh* mesh):
     InitVBuffer(mesh);
     InitIBuffer(mesh);
 
-    aiVector3D center   = (mesh->mAABB.mMax + mesh->mAABB.mMin) * 0.5f;
-    AABBhalfExtent      = {mesh->mAABB.mMax.x - center.x,mesh->mAABB.mMax.y - center.y,mesh->mAABB.mMax.z - center.z};
+
+    AABBMin = { mesh->mAABB.mMin.x, mesh->mAABB.mMin.y, mesh->mAABB.mMin.z };
+    AABBMax = { mesh->mAABB.mMax.x, mesh->mAABB.mMax.y, mesh->mAABB.mMax.z };
 }
 
 Mesh::Mesh(std::string meshName, std::vector<float>& vertices, std::vector<unsigned int>& indices, unsigned int inb):
@@ -37,19 +38,31 @@ Mesh::~Mesh()
 
 void Mesh::ComputeAABB(const std::vector<float>& vertices)
 {
-    for (int i = 0; i < vertices.size()/3; i++)
+    for (int i = 0; i < vertices.size()/8; i+=8)//position, uv, normal
     {
-        if (std::abs(vertices[i]) > AABBhalfExtent.x)
+        if (vertices[i] > AABBMax.x)
         {
-            AABBhalfExtent.x = vertices[i];
+            AABBMax.x = vertices[i];
         }
-        if (std::abs(vertices[i+1]) > AABBhalfExtent.y)
+        if (vertices[i] < AABBMin.x)
         {
-            AABBhalfExtent.y = vertices[i+1];
+            AABBMin.x = vertices[i];
         }
-        if (std::abs(vertices[i+2]) > AABBhalfExtent.z)
+        if (vertices[i+1] > AABBMax.y)
         {
-            AABBhalfExtent.z = vertices[i+2];
+            AABBMax.y = vertices[i+1];
+        }
+        if (vertices[i + 1] > AABBMin.y)
+        {
+            AABBMin.y = vertices[i + 1];
+        }
+        if (vertices[i+2] > AABBMax.z)
+        {
+            AABBMax.z = vertices[i+2];
+        }
+        if (vertices[i + 2] < AABBMin.z)
+        {
+            AABBMin.z = vertices[i + 2];
         }
     }
 }
@@ -60,7 +73,7 @@ void Mesh::InitVBuffer(aiMesh* mesh)
 
     std::vector<float> vertices;
 
-    for (int i = 0; i <= mesh->mNumVertices; i++)
+    for (int i = 0; i < mesh->mNumVertices; i++)
     {
         vertices.push_back(mesh->mVertices[i].x);
         vertices.push_back(mesh->mVertices[i].y);
@@ -100,7 +113,9 @@ void Mesh::InitIBuffer(aiMesh* mesh)
     {
         aiFace iFace = mesh->mFaces[i];
         for (unsigned int j = 0; j < iFace.mNumIndices; j++)
+        {
             indices.push_back(iFace.mIndices[j]);
+        }
     }
 
     bDesc.ByteWidth             = indices.size() * sizeof(unsigned int);

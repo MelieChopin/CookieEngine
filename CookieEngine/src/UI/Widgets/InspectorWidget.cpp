@@ -89,9 +89,9 @@ void Inspector::TransformInterface()
     {
         ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id);
 
-        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.localTRS.pos.e);
-        Text("Rot:"); SameLine(65.f); DragFloat3("##ROT", trsf.localTRS.rot.e);
-        Text("Scl:"); SameLine(65.f); DragFloat3("##SCL", trsf.localTRS.scale.e);
+        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.pos.e);
+        Text("Rot:"); SameLine(65.f); DragFloat3("##ROT", trsf.rot.e);
+        Text("Scl:"); SameLine(65.f); DragFloat3("##SCL", trsf.scale.e);
 
         ImGui::NewLine();
         if (Button("Remove component##TRSF"))
@@ -508,7 +508,7 @@ void Inspector::MapInterface()
 {
     if (TreeNode("Map transform"))
     {
-        Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id).localTRS;
+        ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id);
 
         Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.pos.e);
         
