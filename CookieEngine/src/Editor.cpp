@@ -108,7 +108,16 @@ void Editor::Loop()
     game.scene->map.model.texture = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"];
     game.scene->map.model.shader = game.resources.shaders["Texture_Shader"];
 
-
+    ComponentTransform buildingTrs;
+    ComponentModel     buildingModel;
+    Vec2 buildingTileSize {3, 3};
+    {
+        buildingTrs.localTRS.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
+        buildingTrs.localTRS.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
+        buildingModel.mesh = game.resources.meshes["Assets\\Primitives\\cube.gltf - Cube"];
+        buildingModel.texture = game.resources.textures["Pink"];
+        buildingModel.shader = game.resources.shaders["Texture_Shader"];
+    }
 
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
@@ -155,15 +164,50 @@ void Editor::Loop()
             Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
             rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, {fwdRay.x,fwdRay.y,fwdRay.z});
             physHandle.editWorld->raycast(ray,this);
+        }
 
-            //Raycast with Map
+        /*
+        //Raycast EachFrame with Map
+        {
+            Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
+            rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, { fwdRay.x,fwdRay.y,fwdRay.z });  
             RaycastInfo raycastInfo;
+
             if (game.scene->map.physic.physBody->raycast(ray, raycastInfo))
             {
                 Vec3 hitPoint{ raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z };
                 hitPoint.Debug();
+
+                Vec2 mousePos {hitPoint.x, hitPoint.z};
+                Vec2 centerOfBuilding = game.scene->map.GetCenterOfBuilding(mousePos, buildingTileSize);
+
+                buildingTrs.localTRS.pos = {centerOfBuilding.x, hitPoint.y , centerOfBuilding.y};
             }
         }
+        //Bind Keys to change Nb of Tiles of Building
+        {
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_K])
+            {
+                buildingTileSize.x--;
+                buildingTrs.localTRS.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
+            }
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
+            {
+                buildingTileSize.y--;
+                buildingTrs.localTRS.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
+            }
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
+            {
+                buildingTileSize.x++;
+                buildingTrs.localTRS.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
+            }
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_O])
+            {
+                buildingTileSize.y++;
+                buildingTrs.localTRS.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
+            }
+        }
+        */
 
         if (selectedEntity.toChangeEntityId >= 0)
         {
@@ -186,6 +230,7 @@ void Editor::Loop()
 
         game.renderer.Draw(cam.GetViewProj(), game.coordinator);
         SystemDraw(game.scene->map.trs, game.scene->map.model, game.renderer.remote, cam.GetViewProj());
+        //SystemDraw(buildingTrs, buildingModel, game.renderer.remote, cam.GetViewProj());
 
         dbgRenderer.Draw(cam.GetViewProj());
 
