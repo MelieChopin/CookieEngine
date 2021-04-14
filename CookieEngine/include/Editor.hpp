@@ -3,7 +3,6 @@
 
 #include "Game.hpp"
 #include "UI/UIeditor.hpp"
-#include "Render/Camera.hpp"
 #include "DebugRenderer.hpp"
 #include "Resources/SoundManager.hpp"
 #include "ECS/ComponentEditor.hpp"
@@ -57,14 +56,15 @@ namespace Cookie
 
 			inline void PopulateFocusedEntity()
 			{
-				if (selectedEntity.editComp)
+				if (selectedEntity.editComp && selectedEntity.editComp->body)
 				{
-					if ((selectedEntity.focusedEntity->signature & SIGNATURE_MODEL) == SIGNATURE_MODEL)
+					if ((selectedEntity.focusedEntity->signature & SIGNATURE_MODEL) && game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh != nullptr)
 					{
-						selectedEntity.editComp->AABB = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBhalfExtent;
+						selectedEntity.editComp->AABBMin = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBMin;
+						selectedEntity.editComp->AABBMax = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBMax;
 						selectedEntity.editComp->MakeCollider();
 					}
-					selectedEntity.editComp->editTrs = &game.coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id).localTRS;
+					selectedEntity.editComp->editTrs = &game.coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id);
 					selectedEntity.editComp->Update();
 				}
 
@@ -75,7 +75,6 @@ namespace Cookie
 
 			inline virtual float notifyRaycastHit(const rp3d::RaycastInfo& info)
 			{
-				printf("HIT : %f , %f , %f \n", info.worldPoint.x, info.worldPoint.y, info.worldPoint.z);
 				for (int i = 1; i < MAX_ENTITIES; i++)
 				{
 					if (editingComponent[i].body == info.body)

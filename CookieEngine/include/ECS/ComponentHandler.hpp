@@ -1,18 +1,13 @@
 #ifndef __COMPONENT_HANDLER_HPP__
 #define __COMPONENT_HANDLER_HPP__
 
-#include "ComponentTransform.hpp"
-#include "ComponentModel.hpp"
-#include "ComponentPhysics.hpp"
-#include "ComponentModel.hpp"
-#include "ComponentScript.hpp"
-#include "Debug.hpp"
-
 #include <array>
-#include <unordered_map>
 
-#include "ECS/EntityHandler.hpp"
-#include "Physics/PhysicsSimulator.hpp"
+#include "ECS/ComponentTransform.hpp"
+#include "ECS/ComponentPhysics.hpp"
+#include "ECS/ComponentScript.hpp"
+#include "ECS/ComponentModel.hpp"
+#include "Debug.hpp"
 
 
 namespace Cookie
@@ -32,6 +27,11 @@ namespace Cookie
 		#define SIGNATURE_ALL_COMPONENT 0b1111
 
 
+		class ComponentTransform;
+		class ComponentModel;
+		class ComponentPhysics;
+		class ComponentScript;
+
 		class ComponentHandler
 		{
 		public:
@@ -49,7 +49,7 @@ namespace Cookie
 			ComponentHandler() {}
 			~ComponentHandler() {}
 
-			void AddComponentTransform(Entity& entity)
+			inline void AddComponentTransform(Entity& entity)noexcept
 			{
 				if (entity.signature & SIGNATURE_TRANSFORM)
 				{
@@ -59,7 +59,7 @@ namespace Cookie
 
 				entity.signature += SIGNATURE_TRANSFORM;
 			}
-			void AddComponentModel(Entity& entity)
+			inline void AddComponentModel(Entity& entity)noexcept
 			{
 				if (entity.signature & SIGNATURE_MODEL)
 				{
@@ -69,7 +69,7 @@ namespace Cookie
 
 				entity.signature += SIGNATURE_MODEL; 
 			}
-			void AddComponentPhysics(Entity& entity, const Physics::PhysicsSimulator& phs)
+			inline void AddComponentPhysics(Entity& entity)noexcept
 			{
 				if (entity.signature & SIGNATURE_PHYSICS)
 				{
@@ -79,12 +79,13 @@ namespace Cookie
 
 				entity.signature += SIGNATURE_PHYSICS;
 
-				if (entity.signature & SIGNATURE_TRANSFORM)
-					componentTransforms [entity.id].SetPhysics();
 
-				componentPhysics	[entity.id].physBody = phs.worldSim->createRigidBody(componentTransforms[entity.id].physTransform);
+				InitComponentPhysic(entity);
 			}
-			void AddComponentScript(Entity& entity)
+
+			void InitComponentPhysic(Entity& entity);
+
+			inline void AddComponentScript(Entity& entity)noexcept
 			{
 				if (entity.signature & SIGNATURE_SCRIPT)
 				{
@@ -97,7 +98,7 @@ namespace Cookie
 
 			void ModifyComponentOfEntityToPrefab(Entity& entity, Cookie::Resources::ResourcesManager& resourcesManager, std::string& namePrefab);
 
-			void RemoveComponentTransform(Entity& entity)
+			inline void RemoveComponentTransform(Entity& entity)noexcept
 			{
 				if (entity.signature & SIGNATURE_TRANSFORM)
 				{
@@ -108,7 +109,7 @@ namespace Cookie
 				
 				CDebug.Warning("No Component Transform present");
 			}
-			void RemoveComponentModel(Entity& entity)
+			inline void RemoveComponentModel(Entity& entity)noexcept
 			{
 				if (entity.signature & SIGNATURE_MODEL)
 				{
@@ -119,7 +120,7 @@ namespace Cookie
 
 				CDebug.Warning("No Component Model present");
 			}
-			void RemoveComponentPhysics(Entity& entity)
+			inline void RemoveComponentPhysics(Entity& entity)noexcept
 			{
 				if (entity.signature & SIGNATURE_PHYSICS)
 				{
@@ -130,7 +131,7 @@ namespace Cookie
 
 				CDebug.Warning("No Component RigidBody present");
 			}
-			void RemoveComponentScript(Entity& entity)
+			inline void RemoveComponentScript(Entity& entity)noexcept
 			{
 				if (entity.signature & SIGNATURE_SCRIPT)
 				{
@@ -142,10 +143,10 @@ namespace Cookie
 				CDebug.Warning("No Component Script present");
 			}
 
-			ComponentTransform& GetComponentTransform	(const unsigned int id) { return componentTransforms[id];	}
-			ComponentModel&		GetComponentModel		(const unsigned int id) { return componentModels[id];		}
-			ComponentPhysics&	GetComponentPhysics		(const unsigned int id) { return componentPhysics[id];		}
-			ComponentScript&    GetComponentScript		(const unsigned int id) { return componentScripts[id];		}
+			inline ComponentTransform&	GetComponentTransform	(const unsigned int id)noexcept { return componentTransforms[id];	}
+			inline ComponentModel&		GetComponentModel		(const unsigned int id)noexcept { return componentModels[id];		}
+			inline ComponentPhysics&	GetComponentPhysics		(const unsigned int id)noexcept { return componentPhysics[id];		}
+			inline ComponentScript&		GetComponentScript		(const unsigned int id)noexcept { return componentScripts[id];		}
 		};
 
 	}

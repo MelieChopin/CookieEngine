@@ -8,6 +8,7 @@
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
+#include "CustomImWidget.hpp"
 
 #include <reactphysics3d.h>
 
@@ -19,7 +20,7 @@ using namespace Cookie::Resources;
 
 void Inspector::WindowDisplay()
 {
-    if (selectedEntity.focusedEntity != recordedEntity)
+    if (selectedEntity.focusedEntity != recordedEntity || selectedEntity.componentHandler != coordinator.componentHandler)
     {
         recordedEntity = selectedEntity.focusedEntity;
         selectedCollider = nullptr;
@@ -67,7 +68,7 @@ void Inspector::EntityInspection()
         if (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS) TextDisabled("Component Physics already added");
         else if (Button("Add component Physics"))
         {
-            coordinator.componentHandler->AddComponentPhysics   (*selectedEntity.focusedEntity, physSim);
+            coordinator.componentHandler->AddComponentPhysics   (*selectedEntity.focusedEntity);
             CloseCurrentPopup();
         }
 
@@ -88,9 +89,9 @@ void Inspector::TransformInterface()
     {
         ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id);
 
-        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.localTRS.pos.e);
-        Text("Rot:"); SameLine(65.f); DragFloat3("##ROT", trsf.localTRS.rot.e);
-        Text("Scl:"); SameLine(65.f); DragFloat3("##SCL", trsf.localTRS.scale.e);
+        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.pos.e);
+        Text("Rot:"); SameLine(65.f); DragFloat3("##ROT", trsf.rot.e);
+        Text("Scl:"); SameLine(65.f); DragFloat3("##SCL", trsf.scale.e);
 
         ImGui::NewLine();
         if (Button("Remove component##TRSF"))
@@ -110,33 +111,45 @@ void Inspector::ModelInterface()
     {
         ComponentModel& modelComp = coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id);
 
+        static std::string researchString;
+
 //===== MESH =====//
 
         Text("Mesh:"); SameLine(100);
 
-        if (Button(modelComp.mesh != nullptr ? modelComp.mesh->name.c_str() : "No mesh applied##MESHCHECK")) OpenPopup("Mesh selector popup");
-
-        if (BeginPopup("Mesh selector popup"))
+        if (BeginCombo("##MESHSELECT", modelComp.mesh != nullptr ? modelComp.mesh->name.c_str() : "No mesh applied", ImGuiComboFlags_HeightLarge))
         {
+            InputText("Mesh search", &researchString, ImGuiInputTextFlags_AutoSelectAll);
+
+            NewLine();
+            
             for (std::unordered_map<std::string, std::shared_ptr<Mesh>>::iterator meshIt = resources.meshes.begin(); meshIt != resources.meshes.end(); meshIt++)
             {
-                if (Button(meshIt->second->name.c_str()))
+                const bool is_selected = (modelComp.mesh != nullptr && modelComp.mesh->name == meshIt->second->name);
+
+                if ((meshIt->second->name.find(researchString) != std::string::npos) && ImGui::Selectable(meshIt->second->name.c_str(), is_selected))
                 {
                     modelComp.mesh = meshIt->second;
-                    CloseCurrentPopup();
-                    break;
                 }
+
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
             }
 
-            if (modelComp.mesh != nullptr && Button("Clear current mesh"))
+            NewLine();
+
+            if (modelComp.mesh != nullptr)
             {
-                modelComp.mesh.reset();
-                CloseCurrentPopup();
+                if (Button("Clear current mesh"))
+                    modelComp.mesh.reset();
             }
+            else TextDisabled("Clear current mesh");
 
-            EndPopup();
+            EndCombo();
         }
 
+        if (ImGui::IsItemClicked())
+            researchString.clear();
         
 //===== SHADER =====//
 
@@ -144,35 +157,44 @@ void Inspector::ModelInterface()
         
         Text("Texture:"); SameLine(100);
 
-        if (Button(modelComp.texture != nullptr ? modelComp.texture->name.c_str() : "No texture applied##TEXTCHECK")) OpenPopup("Texture selector popup");
-
-        if (BeginPopup("Texture selector popup"))
+        if (BeginCombo("##TEXTSELECT", modelComp.texture != nullptr ? modelComp.texture->name.c_str() : "No texture applied", ImGuiComboFlags_HeightLarge))
         {
-            for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator texIt = resources.textures.begin(); texIt != resources.textures.end(); texIt++)
+            InputText("Texture search", &researchString, ImGuiInputTextFlags_AutoSelectAll);
+
+            NewLine();
+
+            for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator textIt = resources.textures.begin(); textIt != resources.textures.end(); textIt++)
             {
-                if (Button(texIt->second->name.c_str()))
+                const bool is_selected = (modelComp.texture != nullptr && modelComp.texture->name == textIt->second->name);
+
+                if (textIt->second->name.find(researchString) != std::string::npos)
                 {
-                    modelComp.texture = texIt->second;
-                    CloseCurrentPopup();
-                    break;
+                    Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
+                        
+                    SameLine();
+
+                    if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
+                        modelComp.texture = textIt->second;
                 }
 
-                if (IsItemHovered())
-                {
-                    BeginTooltip();
-                    Image(static_cast<ImTextureID>(texIt->second->GetResourceView()), {75, 75});
-                    EndTooltip();
-                }
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
             }
 
-            if (modelComp.texture != nullptr && Button("Clear current texture"))
+            NewLine();
+
+            if (modelComp.texture != nullptr)
             {
-                modelComp.texture.reset();
-                CloseCurrentPopup();
+                if (Button("Clear current texture"))
+                    modelComp.texture.reset();
             }
+            else TextDisabled("Clear current texture");
 
-            EndPopup();
+            EndCombo();
         }
+
+        if (ImGui::IsItemClicked())
+            researchString.clear();
 
 //===================//
 
@@ -348,7 +370,7 @@ void Inspector::PhysicsInterface()
 
                 if (Button("Add a capsule collider"))
                 {
-                    physicComp.AddCapsuleCollider({1, 1}, { 0, 0, 0 }, { 0, 0, 0 });
+                    physicComp.AddCapsuleCollider({{1, 1}}, { 0, 0, 0 }, { 0, 0, 0 });
                 
                     selectedCollider = colliders.back();
                     CloseCurrentPopup();
@@ -486,7 +508,7 @@ void Inspector::MapInterface()
 {
     if (TreeNode("Map transform"))
     {
-        Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id).localTRS;
+        ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id);
 
         Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.pos.e);
         

@@ -159,7 +159,7 @@ bool Renderer::InitState(int width, int height)
 
     // Setup the raster description which will determine how and what polygons will be drawn.
     rasterDesc.AntialiasedLineEnable = false;
-    rasterDesc.CullMode = D3D11_CULL_NONE;
+    rasterDesc.CullMode = D3D11_CULL_FRONT;
     rasterDesc.DepthBias = 0;
     rasterDesc.DepthBiasClamp = 0.0f;
     rasterDesc.DepthClipEnable = true;
@@ -246,7 +246,7 @@ void Renderer::Draw(const Mat4& viewProj, Cookie::ECS::Coordinator& coordinator)
         remote.context->OMSetRenderTargets(1, frameBuffers[0]->GetRenderTarget(), depthBuffer);
     }
 
-    coordinator.ApplyDraw(remote,viewProj);
+    coordinator.ApplyDraw(viewProj);
 }
 
 void Renderer::Clear()

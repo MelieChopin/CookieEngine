@@ -1,13 +1,15 @@
 #ifndef __COMPONENT_MODEL_HPP__
 #define __COMPONENT_MODEL_HPP__
 
-#include "Render/RendererRemote.hpp"
-#include "Resources/Mesh.hpp"
-#include "Resources/Shader.hpp"
-#include "Resources/Texture.hpp"
-
 namespace Cookie
 {
+    namespace Resources
+    {
+        class Mesh;
+        class Shader;
+        class Texture;
+    }
+
     namespace ECS
     {
 
@@ -22,28 +24,12 @@ namespace Cookie
             //Material material;
 
         public:
-            ComponentModel() {}
-            ~ComponentModel() {}
+            ComponentModel();
+            ~ComponentModel();
 
-            void ToDefault()
-            {
-                mesh    = nullptr;
-                //shader  = nullptr;
-                texture = nullptr;
-            }
+            void ToDefault();
 
-            void Draw(Render::RendererRemote& remote, const Core::Math::Mat4& viewProj, const Core::Math::Mat4& modelMat)
-            {
-                if (shader)
-                    shader->Set(viewProj, modelMat);
-                if (texture)
-                    texture->Set();
-                if (mesh)
-                {
-                    mesh->Set();
-                    mesh->Draw();
-                }
-            }
+            void Draw(const Core::Math::Mat4& viewProj, const Core::Math::Mat4& modelMat);
         };
 
     }

@@ -26,6 +26,8 @@ namespace Cookie
 
 				void Draw(const Core::Math::Mat4& viewProj);
 
+				inline void Reset()noexcept { physDbgRenderer.reset(); };
+
 				DebugRenderer();
 				~DebugRenderer();
 

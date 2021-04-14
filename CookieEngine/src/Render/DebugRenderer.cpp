@@ -12,6 +12,7 @@ using namespace Cookie::Core::Math;
 DebugRenderer::DebugRenderer():
     physDbgRenderer{Physics::PhysicsHandle::editWorld->getDebugRenderer()}
 {
+
     AllocateVBuffer(1);
     InitRasterizerState();
     physDbgRenderer.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLISION_SHAPE, true);
@@ -78,7 +79,7 @@ void DebugRenderer::UpdateVBuffer(size_t vBufferSize, void* data)
         return;
     }
 
-    memcpy(ms.pData, data, vBufferSize * sizeof(float));
+    memcpy(ms.pData, data, vBufferSize);
 
     Render::RendererRemote::context->Unmap(VBuffer, 0);
 }

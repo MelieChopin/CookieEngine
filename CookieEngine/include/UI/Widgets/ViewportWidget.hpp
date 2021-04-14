@@ -28,8 +28,8 @@ namespace Cookie::UIwidget
 		Cookie::Render::Camera* camera;
 
 
-		Cookie::ECS::Coordinator&	coordinator;
-		FocusEntity&		selectedEntity;
+		Cookie::ECS::Coordinator& coordinator;
+		FocusEntity& selectedEntity;
 
 
 	private:

@@ -32,17 +32,17 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 
 			if (entity.entities[i].namePrefab != "NONE")
 			{
-				js["ComponentHandler"]["Transform"] += json{ { "localTRS", { { "translate", transform.localTRS.pos.e } } } };
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->rotation != transform.localTRS.rot)
-					js["ComponentHandler"]["Transform"].at(js["ComponentHandler"]["Transform"].size() - 1).at("localTRS")["rotation"] = transform.localTRS.rot.e;
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->scale != transform.localTRS.scale)
-					js["ComponentHandler"]["Transform"].at(js["ComponentHandler"]["Transform"].size() - 1).at("localTRS")["scale"] = transform.localTRS.scale.e;
+				js["ComponentHandler"]["Transform"] += json{ { "localTRS", { { "translate", transform.pos.e } } } };
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->rotation != transform.rot)
+					js["ComponentHandler"]["Transform"].at(js["ComponentHandler"]["Transform"].size() - 1).at("localTRS")["rotation"] = transform.rot.e;
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->scale != transform.scale)
+					js["ComponentHandler"]["Transform"].at(js["ComponentHandler"]["Transform"].size() - 1).at("localTRS")["scale"] = transform.scale.e;
 			}
 			else
 			{
-				js["ComponentHandler"]["Transform"] += json{ { "localTRS", { { "translate", transform.localTRS.pos.e },
-													{ "rotation", transform.localTRS.rot.e },
-													{ "scale", transform.localTRS.scale.e } } } };
+				js["ComponentHandler"]["Transform"] += json{ { "localTRS", { { "translate", transform.pos.e },
+													{ "rotation", transform.rot.e },
+													{ "scale", transform.scale.e } } } };
 			}
 			::reactphysics3d::Transform physTrans = transform.physTransform;
 			::reactphysics3d::Vector3 pos = physTrans.getPosition();
@@ -181,7 +181,7 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
  {
 	 std::ofstream file(prefab->filepath);
 
-	 std::cout << prefab->filepath << "\n";
+	 //std::cout << prefab->filepath << "\n";
 
 	 json js;
 
@@ -227,19 +227,19 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 		 {
 			 Cookie::ECS::ComponentTransform transform;
 			 json TRS = js["ComponentHandler"]["Transform"][i].at("localTRS");
-			 TRS.at("translate").get_to(transform.localTRS.pos.e);
-
+			 TRS.at("translate").get_to(transform.pos.e);
+			 
 			 if (TRS.contains("rotation"))
-				 TRS.at("rotation").get_to(transform.localTRS.rot.e);
+				 TRS.at("rotation").get_to(transform.rot.e);
 			 else if (entity.entities[i].namePrefab != "NONE")
-				 transform.localTRS.rot = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->rotation;
-
+				 transform.rot = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->rotation;
+			 
 			 if (TRS.contains("scale"))
-				 TRS.at("scale").get_to(transform.localTRS.scale.e);
+				TRS.at("scale").get_to(transform.scale.e);
 			 else if (entity.entities[i].namePrefab != "NONE")
-				 transform.localTRS.scale = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->scale;
-
-			 component.componentTransforms[entity.entities[i].id].localTRS = transform.localTRS;
+				 transform.scale = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->scale;
+			 
+			 component.componentTransforms[entity.entities[i].id] = transform;
 
 			 json pTRS = js["ComponentHandler"]["Transform"][i].at("physicTRS").at("position");
 			 json qTRS = js["ComponentHandler"]["Transform"][i].at("physicTRS").at("quaternion");
@@ -351,7 +351,7 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 		 return nullptr;
 	 }
 	 
-	 std::cout << filepath << "\n";
+	 //std::cout << filepath << "\n";
 
 	 json js;
 	 file >> js;

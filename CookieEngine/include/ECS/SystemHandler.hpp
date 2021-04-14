@@ -1,6 +1,8 @@
 #ifndef __SYSTEM_HANDLER_HPP__
 #define __SYSTEM_HANDLER_HPP__
 
+#include "Physics/PhysicsHandle.hpp"
+
 #include "ComponentTransform.hpp"
 #include "ComponentPhysics.hpp"
 #include "ComponentModel.hpp"
@@ -20,18 +22,15 @@ namespace Cookie
 	{
 		namespace System
 		{
-			//void SystemCollision(const ComponentTransform&, const ComponentRigidBody&, const ComponentCollider&);
-			inline void SystemPhysics(ComponentTransform& trs, ComponentPhysics& ph, float factor)
+			inline void SystemPhysics(ComponentPhysics& ph, float factor)
 			{
-				trs.physTransform = ph.physBody->getTransform();
-
-				trs.Update(factor);
+				ph.Update(factor);
 
 			}
-			inline void SystemDraw(ComponentTransform& trs, ComponentModel& model, Render::RendererRemote& remote, const Core::Math::Mat4& viewProj) 
+			inline void SystemDraw(ComponentTransform& trs, ComponentModel& model, const Core::Math::Mat4& viewProj)
 			{
-				trs.localTRS.ComputeTRS();
-				model.Draw(remote, viewProj, trs.localTRS.TRS);
+				trs.ComputeTRS();
+				model.Draw(viewProj, trs.TRS);
 			}
 			//void SystemRemoveBelowLevel(const ComponentTransform&);
 			//void SystemRemoveNeeded();

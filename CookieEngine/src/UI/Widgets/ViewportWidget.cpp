@@ -55,7 +55,7 @@ void Viewport::WindowDisplay()
 			camera->Deactivate();
 		}
 		
-		if (selectedEntity.focusedEntity)
+		if (selectedEntity.focusedEntity && selectedEntity.componentHandler == coordinator.componentHandler)
 			GizmoManipulator();
 	}
 
@@ -65,7 +65,7 @@ void Viewport::WindowDisplay()
 
 void Viewport::GizmoManipulator()
 {
-	Transform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id).localTRS;
+	ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id);
 	Mat4 trsfTMat = trsf.TRS.Transpose();
 
 	ImGuizmo::SetRect(viewportDrawspace.posx, viewportDrawspace.posy, viewportDrawspace.width, viewportDrawspace.height);

@@ -42,27 +42,7 @@ namespace Cookie
 				//not clean should be moved somewhere else
 				componentHandler->GetComponentModel(id).shader = resources.shaders.at("Texture_Shader");
 			}
-			//will be removed when scene clean
-			static void AddEntity(EntityHandler& entityHandler, ComponentHandler& componentHandler, const int signature, const Resources::ResourcesManager& resources, std::string name = std::string("No Name") )
-			{
-				assert(entityHandler.livingEntities < MAX_ENTITIES && "Too many entities in existence.");
-
-				entityHandler.entities[entityHandler.livingEntities].name = name;
-				unsigned int id = entityHandler.entities[entityHandler.livingEntities].id;
-				entityHandler.livingEntities++;
-
-				if (CheckSignature(signature, SIGNATURE_TRANSFORM))
-					componentHandler.AddComponentTransform(entityHandler.entities[id]);
-				if (CheckSignature(signature, SIGNATURE_MODEL))
-					componentHandler.AddComponentModel(entityHandler.entities[id]);
-				//if (CheckSignature(signature, SIGNATURE_PHYSICS))
-				//	componentHandler.AddComponentPhysics(entityHandler.entities[id], phs);
-				if (CheckSignature(signature, SIGNATURE_SCRIPT))
-					componentHandler.AddComponentScript(entityHandler.entities[id]);
-
-				//not clean should be moved somewhere else
-				componentHandler.GetComponentModel(id).shader = resources.shaders.at("Texture_Shader");
-			}
+			
 			void RemoveEntity(Entity& entity)
 			{
 				assert(entityHandler->livingEntities > 0 && "No Entity to remove");
@@ -101,16 +81,15 @@ namespace Cookie
 			{
 				for (int i = 0; i < entityHandler->livingEntities; ++i)
 					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_PHYSICS))
-						System::SystemPhysics(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
-											   componentHandler->GetComponentPhysics(entityHandler->entities[i].id), factor);
+						System::SystemPhysics(componentHandler->GetComponentPhysics(entityHandler->entities[i].id), factor);
 			}
 
-			void ApplyDraw(Render::RendererRemote& remote, const Core::Math::Mat4& viewProj)
+			void ApplyDraw(const Core::Math::Mat4& viewProj)
 			{
 				for (int i = 0; i < entityHandler->livingEntities; ++i)
 					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_MODEL))
 						System::SystemDraw(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
-							componentHandler->GetComponentModel(entityHandler->entities[i].id),remote, viewProj);
+							componentHandler->GetComponentModel(entityHandler->entities[i].id), viewProj);
 			}
 
 			void ApplyScriptUpdate()

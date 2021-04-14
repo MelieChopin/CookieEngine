@@ -13,13 +13,6 @@ using namespace Cookie::ECS;
 using namespace Cookie::Resources;
 
 
-void GamePort::WindowDisplay()
-{
-    ImGui::Begin(windowName, nullptr);
-    ImGui::End();
-}
-
-
 void SaveButton::ItemDisplay()
 {
 	if (visible && MenuItem(itemName, shortcutSeq))
