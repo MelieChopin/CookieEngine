@@ -127,14 +127,10 @@ void Inspector::ModelInterface()
             {
                 const bool is_selected = (modelComp.mesh != nullptr && modelComp.mesh->name == meshIt->second->name);
 
-                if (!researchString.empty())
+                if ((meshIt->second->name.find(researchString) != std::string::npos) && ImGui::Selectable(meshIt->second->name.c_str(), is_selected))
                 {
-                    if ((meshIt->second->name.find(researchString) != std::string::npos) && ImGui::Selectable(meshIt->second->name.c_str(), is_selected))
-                        modelComp.mesh = meshIt->second;
+                    modelComp.mesh = meshIt->second;
                 }
-                else if (ImGui::Selectable(meshIt->second->name.c_str(), is_selected))
-                        modelComp.mesh = meshIt->second;
-
 
                 if (is_selected)
                     ImGui::SetItemDefaultFocus();
@@ -171,24 +167,12 @@ void Inspector::ModelInterface()
             {
                 const bool is_selected = (modelComp.texture != nullptr && modelComp.texture->name == textIt->second->name);
 
-                if (!researchString.empty())
-                {
-                    if (textIt->second->name.find(researchString) != std::string::npos)
-                    {
-                        Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
-                        
-                        SameLine();
-
-                        if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
-                            modelComp.texture = textIt->second;
-                    }
-                }
-                else
+                if (textIt->second->name.find(researchString) != std::string::npos)
                 {
                     Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
-                    
+                        
                     SameLine();
-                    
+
                     if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
                         modelComp.texture = textIt->second;
                 }
