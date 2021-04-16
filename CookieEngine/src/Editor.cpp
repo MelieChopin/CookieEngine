@@ -25,7 +25,6 @@ Editor::Editor()
     cam.Deactivate();
     //scene = Editor::Scene(resources, coordinator);
     game.scene->InitCoordinator(game.coordinator);
-    
     game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>("Assets/Floor_DefaultMaterial_BaseColor.png"));
 
     //Load all prefabs in folder Prefabs
@@ -103,7 +102,18 @@ void Editor::Loop()
     game.scene->map.model.texture = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"];
     game.scene->map.model.shader = game.resources.shaders["Texture_Shader"];
 
-
+    ComponentTransform buildingTrs;
+    ComponentModel     buildingModel;
+    Vec2 buildingTileSize {{3, 3}};
+    int nbOfBuildings = 0;
+    bool isRaycastingWithMap = false;
+    {
+        buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
+        buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
+        buildingModel.mesh = game.resources.meshes["Assets\\Primitives\\cube.gltf - Cube"];
+        buildingModel.texture = game.resources.textures["Pink"];
+        buildingModel.shader = game.resources.shaders["Texture_Shader"];
+    }
 
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
@@ -150,15 +160,74 @@ void Editor::Loop()
             Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
             rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, {fwdRay.x,fwdRay.y,fwdRay.z});
             physHandle.editWorld->raycast(ray,this);
+        }
 
-            //Raycast with Map
+        
+        //Raycast with Map
+        if(isRaycastingWithMap)
+        {
+            Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
+            rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, { fwdRay.x,fwdRay.y,fwdRay.z });  
             RaycastInfo raycastInfo;
+
             if (game.scene->map.physic.physBody->raycast(ray, raycastInfo))
             {
                 Vec3 hitPoint{ raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z };
                 hitPoint.Debug();
+
+                Vec2 mousePos {{hitPoint.x, hitPoint.z}};
+                Vec2 centerOfBuilding = game.scene->map.GetCenterOfBuilding(mousePos, buildingTileSize);
+
+                buildingTrs.pos = {centerOfBuilding.x, hitPoint.y , centerOfBuilding.y};
             }
         }
+        //Bind Keys to change Nb of Tiles of Building or create Building
+        {
+            //Key M on Azerty Keyboard
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_SEMICOLON])
+            {
+                isRaycastingWithMap = !isRaycastingWithMap;
+            }
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_K])
+            {
+                buildingTileSize.x = std::fmax(1, buildingTileSize.x - 1);
+                buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
+            }
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
+            {
+                buildingTileSize.y = std::fmax(1, buildingTileSize.y - 1);
+                buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
+            }
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
+            {
+                buildingTileSize.x = std::fmin(game.scene->map.tilesNb.x , buildingTileSize.x + 1);
+                buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
+            }
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_O])
+            {
+                buildingTileSize.y = std::fmin(game.scene->map.tilesNb.y, buildingTileSize.y + 1);
+                buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
+            }
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_ENTER] && isRaycastingWithMap)
+            {
+                game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL, game.resources, "Building " + std::to_string(nbOfBuildings) );
+                //should create constructor copy for each Component 
+                {
+                    ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(game.coordinator.entityHandler->livingEntities - 1);
+                    ComponentModel& model   = game.coordinator.componentHandler->GetComponentModel(game.coordinator.entityHandler->livingEntities - 1);
+
+                    trs.pos = buildingTrs.pos;
+                    trs.scale = buildingTrs.scale;
+
+                    model.mesh = buildingModel.mesh;
+                    model.texture = game.resources.textures["Green"];
+                    model.shader = buildingModel.shader;
+                }
+
+                nbOfBuildings++;
+            }
+        }
+        
 
         if (selectedEntity.toChangeEntityId >= 0)
         {
@@ -175,11 +244,13 @@ void Editor::Loop()
 
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
-        /////
+
 
 
         game.renderer.Draw(cam.GetViewProj(), game.coordinator);
         SystemDraw(game.scene->map.trs, game.scene->map.model, cam.GetViewProj());
+        if(isRaycastingWithMap)
+            SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
 
         dbgRenderer.Draw(cam.GetViewProj());
 
