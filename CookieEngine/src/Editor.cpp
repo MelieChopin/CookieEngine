@@ -27,7 +27,7 @@ Editor::Editor()
     game.scene->InitCoordinator(game.coordinator);
     game.resources.textures["Pink"] = (std::make_shared<Resources::Texture>("Pink", Core::Math::Vec4(1.0f, 0.5f, 0.5f, 1.0f)));
     game.resources.textures["Green"] = (std::make_shared<Resources::Texture>("Green", Core::Math::Vec4(0.0f, 1.0f, 0.f, 1.0f)));
-    game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>("Assets/Floor_DefaultMaterial_BaseColor.png"));
+    //game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>("Assets/Floor_DefaultMaterial_BaseColor.png"));
 
     //Load all prefabs in folder Prefabs
     Resources::Serialization::Load::LoadAllPrefabs(game.resources);
@@ -84,7 +84,7 @@ void Editor::ModifyEditComp()
     for (int i = 1; i < MAX_ENTITIES; i++)
     {
         editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i);
-        if ((game.coordinator.entityHandler->entities[i].signature & SIGNATURE_MODEL))
+        if ((game.coordinator.entityHandler->entities[i].signature & SIGNATURE_MODEL) && game.coordinator.componentHandler->GetComponentModel(i).mesh != nullptr)
         {
             editingComponent[i].AABBMin = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBMin;
             editingComponent[i].AABBMax = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBMax;
@@ -111,7 +111,7 @@ void Editor::Loop()
     {
         buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
         buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
-        buildingModel.mesh = game.resources.meshes["Assets\\Primitives\\cube.gltf - Cube"];
+        buildingModel.mesh = game.resources.meshes["Assets/Primitives/cube.gltf - Cube"];
         buildingModel.texture = game.resources.textures["Pink"];
         buildingModel.shader = game.resources.shaders["Texture_Shader"];
     }

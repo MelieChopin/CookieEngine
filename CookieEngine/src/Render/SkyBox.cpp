@@ -48,6 +48,11 @@ void SkyBox::Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view)
 		shader->Set(proj, view);
 	if (texture)
 		texture->Set();
+    else
+    {
+        ID3D11ShaderResourceView* tex = nullptr;
+        RendererRemote::context->PSSetShaderResources(0, 1, &tex);
+    }
 	if (cube)
 	{
 		cube->Set();

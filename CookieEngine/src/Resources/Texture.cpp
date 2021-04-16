@@ -1,4 +1,5 @@
 #include <DirectXTex/initguid.h>
+#include <fstream>
 #include <system_error>
 #include <DirectXTex/DDSTextureLoader11.h>
 #include <DirectXTex/WICTextureLoader11.h>
@@ -17,27 +18,13 @@ Texture::Texture(const std::string& texPath) :
 
 	if (name.find(".dds") != std::string::npos)
 	{
-		HRESULT result = DirectX::CreateDDSTextureFromFileEx(Render::RendererRemote::device, Render::RendererRemote::context, wString.c_str(), 0ULL, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, false, &texture, &shaderResourceView);
+		HRESULT result = DirectX::CreateDDSTextureFromFile(Render::RendererRemote::device, Render::RendererRemote::context, wString.c_str(), &texture, &shaderResourceView);
 		if (FAILED(result))
 		{
 			printf("Failing Loading Texture %s: %s\n", name.c_str(), std::system_category().message(result).c_str());
+			return;
 		}
-
-		//shaderResourceView->Release();
-		//
-		//D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-		//srvDesc.Format					= DXGI_FORMAT_R32G32B32A32_FLOAT;
-		//srvDesc.ViewDimension			= D3D11_SRV_DIMENSION_TEXTURECUBE;
-		//srvDesc.TextureCube.MipLevels	= 0;
-		//srvDesc.TextureCube.MostDetailedMip = 0;
-		//
-		//result = Render::RendererRemote::device->CreateShaderResourceView(texture, &srvDesc, &shaderResourceView);
-		//
-		//if (FAILED(result))
-		//{
-		//	printf("Failed Loading SkyBox %s: %s",name.c_str(), std::system_category().message(result).c_str());
-		//}
-
+		shaderResourceView->GetDesc(&desc);
 	}
 	else
 	{
@@ -45,7 +32,9 @@ Texture::Texture(const std::string& texPath) :
 		if (FAILED(result))
 		{
 			printf("Failing Loading Texture %s: %s\n", name.c_str(), std::system_category().message(result).c_str());
+			return;
 		}
+		shaderResourceView->GetDesc(&desc);
 	}
 		
 }

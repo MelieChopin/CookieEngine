@@ -8,8 +8,7 @@ using namespace Cookie;
 Game::Game():
     skyBox{resources}
 {
-    resources.textures["SkyBoxTex"] = std::make_shared<Resources::Texture>("Assets/SkyBox01.dds");
-    skyBox.texture = resources.textures["SkyBoxTex"];
+
 }
 
 Game::~Game()

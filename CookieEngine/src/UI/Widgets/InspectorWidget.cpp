@@ -169,12 +169,15 @@ void Inspector::ModelInterface()
 
                 if (textIt->second->name.find(researchString) != std::string::npos)
                 {
-                    Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
-                        
-                    SameLine();
+                    if (textIt->second->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
+                    {
+                        Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
 
-                    if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
-                        modelComp.texture = textIt->second;
+                        SameLine();
+
+                        if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
+                            modelComp.texture = textIt->second;
+                    }
                 }
 
                 if (is_selected)
