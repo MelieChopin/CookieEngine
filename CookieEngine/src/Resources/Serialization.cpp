@@ -108,20 +108,11 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 				js["PhysicHandler"][index]["Colliders"][j]["density"] = mat.getMassDensity();
 				js["PhysicHandler"][index]["Colliders"][j]["rollingResistance"] = mat.getRollingResistance();
 			}
-			::reactphysics3d::RigidBody*& rigibody = component.GetComponentPhysics(entity.entities[i].id).physBody;
-			switch (rigibody->getType())
-			{
-			case ::reactphysics3d::BodyType::STATIC:
-				js["PhysicHandler"][index]["Rigidbody"]["type"] = "static";
-				break;
-			case ::reactphysics3d::BodyType::KINEMATIC:
-				js["PhysicHandler"][index]["Rigidbody"]["type"] = "kinematic";
-				break;
-			case ::reactphysics3d::BodyType::DYNAMIC:
-				js["PhysicHandler"][index]["Rigidbody"]["type"] = "dynamic";
-				break;
-			}
 
+			::reactphysics3d::RigidBody*& rigibody = component.GetComponentPhysics(entity.entities[i].id).physBody;
+
+			
+			js["PhysicHandler"][index]["Rigidbody"]["type"] = rigibody->getType();
 			js["PhysicHandler"][index]["Rigidbody"]["angularDamping"] = rigibody->getAngularDamping();
 			js["PhysicHandler"][index]["Rigidbody"]["linearDamping"] = rigibody->getLinearDamping();
 			js["PhysicHandler"][index]["Rigidbody"]["mass"] = rigibody->getMass();
@@ -193,6 +184,60 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 	 js["Shader"] = prefab->nameShader;
 	 js["Texture"] = prefab->nameTexture;
 
+	 if (prefab->rigidBody != nullptr)
+	 {
+		 js["Rigidbody"]["type"] = prefab->rigidBody->getType();
+		 js["Rigidbody"]["angularDamping"] = prefab->rigidBody->getAngularDamping();
+		 js["Rigidbody"]["linearDamping"] = prefab->rigidBody->getLinearDamping();
+		 js["Rigidbody"]["mass"] = prefab->rigidBody->getMass();
+		 js["Rigidbody"]["active"] = prefab->rigidBody->isActive();
+		 js["Rigidbody"]["allowedToSleep"] = prefab->rigidBody->isAllowedToSleep();
+		 js["Rigidbody"]["sleeping"] = prefab->rigidBody->isSleeping();
+		 js["Rigidbody"]["gravityEnabled"] = prefab->rigidBody->isGravityEnabled();
+	 }
+	 else
+		 js["Rigidbody"] = "nullptr";
+
+	 if (prefab->colliders.size() != 0)
+	 {
+		 for (int i = 0; i < prefab->colliders.size(); i++)
+		 {
+			 ::reactphysics3d::Collider* actCollider = prefab->colliders[i];
+			 if (actCollider->getCollisionShape()->getName() == ::reactphysics3d::CollisionShapeName::SPHERE)
+			 {
+				 float radius = static_cast<::reactphysics3d::SphereShape*>(actCollider->getCollisionShape())->getRadius();
+				 js["Colliders"][i]["type"] = "Sphere";
+				 js["Colliders"][i]["radius"] = radius;
+			 }
+			 else if (actCollider->getCollisionShape()->getName() == ::reactphysics3d::CollisionShapeName::CAPSULE)
+			 {
+				 ::reactphysics3d::CapsuleShape* capsule = static_cast<::reactphysics3d::CapsuleShape*>(actCollider->getCollisionShape());
+				 js["Colliders"][i]["type"] = "Capsule";
+				 js["Colliders"][i]["radius"] = capsule->getRadius();
+				 js["Colliders"][i]["height"] = capsule->getHeight();
+			 }
+			 else if (actCollider->getCollisionShape()->getName() == ::reactphysics3d::CollisionShapeName::BOX)
+			 {
+				 ::reactphysics3d::Vector3 box = static_cast<::reactphysics3d::BoxShape*>(actCollider->getCollisionShape())->getHalfExtents();
+				 js["Colliders"][i]["type"] = "Box";
+				 js["Colliders"][i]["HalfExtents"] = { box.x, box.y, box.z };
+			 }
+
+			 ::reactphysics3d::Material& mat = actCollider->getMaterial();
+
+			 ::reactphysics3d::Vector3		vec = actCollider->getLocalToBodyTransform().getPosition();
+			 ::reactphysics3d::Quaternion	quat = actCollider->getLocalToBodyTransform().getOrientation();
+			 js["Colliders"][i]["transform"]["pos"] = { vec.x, vec.y, vec.z };
+			 js["Colliders"][i]["transform"]["quaternion"] = { quat.w, quat.x, quat.y, quat.z };
+			 js["Colliders"][i]["bounciness"] = mat.getBounciness();
+			 js["Colliders"][i]["frictionCoeff"] = mat.getFrictionCoefficient();
+			 js["Colliders"][i]["density"] = mat.getMassDensity();
+			 js["Colliders"][i]["rollingResistance"] = mat.getRollingResistance();
+		 }
+	 }
+	 else
+		 js["Colliders"] = "nullptr";
+
 	 file << std::setw(4) << js << std::endl;
  }
 
@@ -202,6 +247,18 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 		 Resources::Serialization::Save::SavePrefab(prefab->second);
  }
 
+
+ void Cookie::Resources::Serialization::Save::SaveTexture(std::string& name, Cookie::Core::Math::Vec4& color)
+ {
+	 std::ofstream file("Assets/Textures/" + name + ".TAsset");
+
+	 json js;
+
+	 js["color"] = color.e;
+	 js["name"] = name;
+
+	 file << std::setw(4) << js << std::endl;
+ }
 
  //------------------------------------------------------------------------------------------------------------------
 
@@ -279,11 +336,11 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 				 json rigid = physic["Rigidbody"];
 				 ::reactphysics3d::RigidBody* actRigidBody = component.componentPhysics[entity.entities[i].id].physBody;
 
-				 if (rigid["type"].get<std::string>() == "STATIC")
+				 if (rigid["type"].get<int>() == 0)
 					 actRigidBody->setType(::reactphysics3d::BodyType::STATIC);
-				 if (rigid["type"].get<std::string>() == "KINEMATIC")
+				 else if (rigid["type"].get<int>() == 1)
 					 actRigidBody->setType(::reactphysics3d::BodyType::KINEMATIC);
-				 if (rigid["type"].get<std::string>() == "DYNAMIC")
+				 else if (rigid["type"].get<int>() == 2)
 					 actRigidBody->setType(::reactphysics3d::BodyType::DYNAMIC);
 
 				 actRigidBody->setIsActive(rigid["active"].get<bool>());
@@ -460,5 +517,39 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 		 newPrefab.filepath = filesPath[i];
 
 		 resourcesManager.prefabs[newPrefab.name] = std::make_shared<Prefab>(newPrefab);
+	 }
+ }
+
+
+ void Cookie::Resources::Serialization::Load::LoadAllTextures(Cookie::Resources::ResourcesManager& resourcesManager)
+ {
+	 std::vector<std::string> filesPath;
+	 for (const fs::directory_entry& path : fs::directory_iterator("Assets/Textures"))
+	 {
+		 if (path.path().string().find(".TAsset") != std::string::npos)
+			 filesPath.push_back(path.path().string());
+	 }
+
+	 for (int i = 0; i < filesPath.size(); i++)
+	 {
+		 std::cout << filesPath[i] << "\n";
+
+		 std::ifstream file(filesPath[i]);
+
+		 if (!file.is_open())
+		 {
+			 std::cout << "DON'T FIND THE FILE\n";
+			 continue;
+		 }
+
+		 json js;
+		 file >> js;
+
+		 Cookie::Core::Math::Vec4 color;
+		 std::string name;
+		 js["color"].get_to(color.e);
+		 js["name"].get_to(name);
+
+		 resourcesManager.textures[name] = std::make_shared<Texture>(name, color);
 	 }
  }

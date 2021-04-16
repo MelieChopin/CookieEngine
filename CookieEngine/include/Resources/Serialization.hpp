@@ -20,11 +20,17 @@ namespace Cookie
 		class PhysicsCommon;
 	}
 
+	namespace Core::Math
+	{
+		union Vec4;
+	}
+
 	namespace Resources
 	{
 		class ResourcesManager;
 		class Scene;
 		class Prefab;
+		class Texture;
 	}
 
 	namespace Resources
@@ -41,6 +47,7 @@ namespace Cookie
 				void SavePrefab(const std::shared_ptr<Prefab>& prefab);
 
 				void SaveAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
+				void SaveTexture(std::string& name, Cookie::Core::Math::Vec4& color);
 			}
 
 			namespace Load
@@ -51,6 +58,7 @@ namespace Cookie
 
 				std::shared_ptr<Scene> LoadScene(const char* filepath, Game& game);
 				void LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
+				void LoadAllTextures(Cookie::Resources::ResourcesManager& resourcesManager);
 			}
 		}
 	}

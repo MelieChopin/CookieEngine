@@ -83,12 +83,14 @@ void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandl
 
 	newPrefab.name = entity.name;
 	newPrefab.nameMesh = component.componentModels[entity.id].mesh->name;
-	newPrefab.nameShader = "default";//component.componentModels[entity.id].shader->name;
+	newPrefab.nameShader = component.componentModels[entity.id].shader->name;
 	newPrefab.nameTexture = component.componentModels[entity.id].texture->name;
 	newPrefab.signature = entity.id;
 	newPrefab.rotation = component.componentTransforms[entity.id].rot;
 	newPrefab.scale = component.componentTransforms[entity.id].scale;
 	newPrefab.filepath = "Assets/Prefabs/" + entity.name + ".PAsset";
+	newPrefab.rigidBody = component.componentPhysics[entity.id].physBody;
+	newPrefab.colliders = component.componentPhysics[entity.id].physColliders;
 
 	entity.namePrefab = entity.name;
 
