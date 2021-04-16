@@ -242,14 +242,15 @@ void Renderer::ResizeBuffer(int width, int height)
 
 void Renderer::Draw(const Camera* cam, Game& game)
 {
-    remote.context->OMSetRenderTargets(1, frameBuffers[0]->GetRenderTarget(), depthBuffer);
+    remote.context->OMSetRenderTargets(1, frameBuffers[0]->GetRenderTarget(), nullptr);
 
     Core::Math::Mat4 viewProj = cam->GetViewProj();
     
-    game.skyBox.Draw(cam->GetView(), cam->GetProj());
+    game.skyBox.Draw(cam->GetProj(), cam->GetView());
 
     if (!frameBuffers.empty())
     {
+        remote.context->RSSetState(state.rasterizerState);
         remote.context->OMSetRenderTargets(1, frameBuffers[0]->GetRenderTarget(), depthBuffer);
     }
 

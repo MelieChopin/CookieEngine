@@ -58,13 +58,11 @@ std::string SkyBoxShader::GetVertexSource()
     {
         VOut output;
 
-        float4 pos = mul(float4(position,1.0),proj);
+        float3 pos      = mul(position,(float3x3)view);
 
-        float temp = pos.w;
-
-        output.position = float4(mul(pos.xyz,(float3x3)view),temp);
-        output.pos = position;
-        output.uv = uv;
+        output.position = mul(float4(pos,1.0),proj);
+        output.pos      = position;
+        output.uv       = uv;
     
         return output;
 
@@ -76,13 +74,13 @@ std::string SkyBoxShader::GetPixelSource()
 {
     return (const char*)R"(
 
-    Texture2D skybox : register( t0 );
+    TextureCube skybox : register( t0 );
 
     SamplerState WrapSampler : register (s0);
 
     float4 main(float4 position : SV_POSITION, float3 pos : POSITION, float2 uv : UV) : SV_TARGET
     {
-        return skybox.Sample(WrapSampler,uv);
+        return skybox.Sample(WrapSampler,pos);
     })";
 }
 

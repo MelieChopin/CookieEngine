@@ -16,18 +16,34 @@ using namespace Cookie::Render;
 SkyBox::SkyBox(Resources::ResourcesManager& _resources):
 	cube {_resources.meshes["Cube"]}, shader {_resources.shaders["SkyBox_Shader"]}
 {
+    D3D11_RASTERIZER_DESC rasterDesc = {};
 
+    // Setup the raster description which will determine how and what polygons will be drawn.
+    rasterDesc.AntialiasedLineEnable = false;
+    rasterDesc.CullMode = D3D11_CULL_BACK;
+    rasterDesc.DepthBias = 0;
+    rasterDesc.DepthBiasClamp = 0.0f;
+    rasterDesc.DepthClipEnable = false;
+    rasterDesc.FillMode = D3D11_FILL_SOLID;
+    rasterDesc.FrontCounterClockwise = false;
+    rasterDesc.MultisampleEnable = false;
+    rasterDesc.ScissorEnable = false;
+    rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+    RendererRemote::device->CreateRasterizerState(&rasterDesc, &rasterizerState);
 }
 
 SkyBox::~SkyBox()
 {
-
+    if (rasterizerState)
+        rasterizerState->Release();
 }
 
 /*==================== REALTIME METHODS ====================*/
 
 void SkyBox::Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view)
 {
+    RendererRemote::context->RSSetState(rasterizerState);
 	if (shader)
 		shader->Set(proj, view);
 	if (texture)

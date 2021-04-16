@@ -22,9 +22,10 @@ namespace Cookie
 		class SkyBox
 		{
 			public:
-				std::shared_ptr<Cookie::Resources::Mesh>			cube{ nullptr };
-				std::shared_ptr<Cookie::Resources::Shader>	shader{ nullptr };
-				std::shared_ptr<Cookie::Resources::Texture>			texture{ nullptr };
+				std::shared_ptr<Cookie::Resources::Mesh>			cube			{ nullptr };
+				std::shared_ptr<Cookie::Resources::Shader>			shader			{ nullptr };
+				std::shared_ptr<Cookie::Resources::Texture>			texture			{ nullptr };
+				ID3D11RasterizerState*								rasterizerState	{ nullptr };
 
 				/* CONSTRUCTORS/DESTRUCTORS */
 				SkyBox(Resources::ResourcesManager& _resources);
