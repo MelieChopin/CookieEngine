@@ -473,6 +473,12 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 			filesPath.push_back(path.path().string());
 	 }
 
+	 for (unsigned int i = 0; i < filesPath.size(); i++)
+	 {
+		 std::string& iFile = filesPath.at(i);
+		 std::replace(iFile.begin(), iFile.end(), '\\', '/');
+	 }
+
 	 for (int i = 0; i < filesPath.size(); i++)
 	 {
 		 std::cout << filesPath[i] << "\n";
@@ -528,6 +534,12 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 	 {
 		 if (path.path().string().find(".TAsset") != std::string::npos)
 			 filesPath.push_back(path.path().string());
+	 }
+
+	 for (unsigned int i = 0; i < filesPath.size(); i++)
+	 {
+		 std::string& iFile = filesPath.at(i);
+		 std::replace(iFile.begin(), iFile.end(), '\\', '/');
 	 }
 
 	 for (int i = 0; i < filesPath.size(); i++)

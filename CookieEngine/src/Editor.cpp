@@ -25,7 +25,7 @@ Editor::Editor()
     cam.Deactivate();
     //scene = Editor::Scene(resources, coordinator);
     game.scene->InitCoordinator(game.coordinator);
-    game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>("Assets/Floor_DefaultMaterial_BaseColor.png"));
+    //game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>("Assets/Floor_DefaultMaterial_BaseColor.png"));
 
     //Load all prefabs in folder Prefabs
     Resources::Serialization::Load::LoadAllPrefabs(game.resources);
