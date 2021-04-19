@@ -25,12 +25,13 @@ Editor::Editor()
     cam.Deactivate();
     //scene = Editor::Scene(resources, coordinator);
     game.scene->InitCoordinator(game.coordinator);
-    game.resources.textures["Pink"] = (std::make_shared<Resources::Texture>("Pink", Core::Math::Vec4(1.0f, 0.5f, 0.5f, 1.0f)));
-    game.resources.textures["Green"] = (std::make_shared<Resources::Texture>("Green", Core::Math::Vec4(0.0f, 1.0f, 0.f, 1.0f)));
     //game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>("Assets/Floor_DefaultMaterial_BaseColor.png"));
 
     //Load all prefabs in folder Prefabs
     Resources::Serialization::Load::LoadAllPrefabs(game.resources);
+
+    //Load all Textures we have create in texture editor
+    Resources::Serialization::Load::LoadAllTextures(game.resources);
 
     //Load default Scene
     std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/DefaultDuck.CAsset", game);
@@ -39,7 +40,6 @@ Editor::Editor()
 
     ui.AddItem(new UIwidget::SaveButton(game.scene, game.resources), 0);
 
-    
     ui.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
 
     ui.AddWItem(new UIwidget::TextureEditor(game.renderer, game.resources), 1);
@@ -61,7 +61,6 @@ Editor::Editor()
     InitEditComp();
 
     Physics::PhysicsHandle::editWorld->setIsDebugRenderingEnabled(false);
-
 }
 
 Editor::~Editor()

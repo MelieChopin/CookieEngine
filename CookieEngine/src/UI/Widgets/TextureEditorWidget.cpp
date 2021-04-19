@@ -1,6 +1,7 @@
 #include "Resources/ResourcesManager.hpp"
 #include <string>
 #include "TextureEditorWidget.hpp"
+#include "Serialization.hpp"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -82,7 +83,8 @@ void TextureEditor::WindowDisplay()
 			else if (Button("Confirm and save"))
 			{				
 				resources.textures[newTexture.name] = (std::make_shared<Texture>(newTexture.name, newTexture.color));
-				
+				Cookie::Resources::Serialization::Save::SaveTexture(newTexture.name, newTexture.color);
+
 				newTexture.creating = false;
 				newTexture.name.clear();
 				newTexture.color = { 0, 0, 0, 1 };
