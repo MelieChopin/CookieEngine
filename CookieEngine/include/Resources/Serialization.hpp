@@ -45,6 +45,7 @@ namespace Cookie
 
 				void SaveScene(Cookie::Resources::Scene& actScene, Cookie::Resources::ResourcesManager& resourcesManager);
 				void SavePrefab(const std::shared_ptr<Prefab>& prefab);
+				void SavePhysic(json& js, Cookie::ECS::ComponentPhysics& physics);
 
 				void SaveAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
 				void SaveTexture(std::string& name, Cookie::Core::Math::Vec4& color);
@@ -59,6 +60,7 @@ namespace Cookie
 				std::shared_ptr<Scene> LoadScene(const char* filepath, Game& game);
 				void LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
 				void LoadAllTextures(Cookie::Resources::ResourcesManager& resourcesManager);
+				void LoadPhysic(json& physic, Cookie::ECS::ComponentPhysics& physics);
 			}
 		}
 	}

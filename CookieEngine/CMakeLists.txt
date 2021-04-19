@@ -80,7 +80,6 @@ set (SRC_FILES
     "${SRC_DIR}/Resources/Mesh.cpp"
     "${SRC_DIR}/Resources/Texture.cpp"
     "${SRC_DIR}/Resources/Scene.cpp"
-    "${SRC_DIR}/Resources/Tiles.cpp"
     "${SRC_DIR}/Resources/Serialization.cpp" 
     "${SRC_DIR}/Resources/SoundManager.cpp" 
 

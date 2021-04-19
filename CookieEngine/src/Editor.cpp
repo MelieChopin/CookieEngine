@@ -97,10 +97,6 @@ void Editor::Loop()
 {
     //soundManager.system->playSound(soundManager.sound, nullptr, false, nullptr);
     Physics::PhysicsHandle physHandle;
-    
-    game.scene->map.model.mesh = game.resources.meshes["Quad"];
-    game.scene->map.model.texture = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"];
-    game.scene->map.model.shader = game.resources.shaders["Texture_Shader"];
 
     ComponentTransform buildingTrs;
     ComponentModel     buildingModel;
