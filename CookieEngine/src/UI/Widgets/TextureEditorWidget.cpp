@@ -23,21 +23,23 @@ void TextureEditor::WindowDisplay()
 
         for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator textPtr = resources.textures.begin(); textPtr != resources.textures.end(); textPtr++)
         {
-			BeginGroup();
-
-			Custom::Zoomimage(static_cast<ImTextureID>(textPtr->second->GetResourceView()), 100, 100, 10, true);
-			
-			if (newTexture.name == textPtr->second->name)
+			if (textPtr->second && textPtr->second->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
 			{
-				TextColored({0.75, 0.25, 0.25, 1}, "%s (<- Already in use!)", textPtr->second->name.c_str());
-				newTexture.invalidName = true;
+				BeginGroup();
+				Custom::Zoomimage(static_cast<ImTextureID>(textPtr->second->GetResourceView()), 100, 100, 10, true);
+
+				if (newTexture.name == textPtr->second->name)
+				{
+					TextColored({ 0.75, 0.25, 0.25, 1 }, "%s (<- Already in use!)", textPtr->second->name.c_str());
+					newTexture.invalidName = true;
+				}
+				else Custom::TextSnip(textPtr->second->name.c_str(), 15);
+
+				EndGroup();
+
+				SameLine();
+				if (GetContentRegionAvail().x < 100.f) NewLine();
 			}
-			else Custom::TextSnip(textPtr->second->name.c_str(), 15);
-
-			EndGroup();
-
-			SameLine();
-			if (GetContentRegionAvail().x < 100.f) NewLine();
         }
 
 		EndGroup();
