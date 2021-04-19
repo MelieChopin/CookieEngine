@@ -36,8 +36,9 @@ namespace Cookie
 				std::unordered_map<std::string, std::shared_ptr<Prefab>>		prefabs;
 				
 			private:
-				void SearchForGltf(const fs::path& path, std::vector<std::string>& gltfFiles);
+				void SearchForAssets(const fs::path& path, std::vector<std::string>& gltfFiles);
 
+				void InitPrimitives();
 				void InitShaders();
 				
 			public: 

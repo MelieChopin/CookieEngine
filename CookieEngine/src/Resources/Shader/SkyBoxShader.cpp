@@ -1,21 +1,23 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
+#include <system_error>
 
+#include "reactphysics3d/reactphysics3d.h"
 #include "Vec4.hpp"
 #include "Mat4.hpp"
 #include "Render/Renderer.hpp"
 #include "Render/RendererRemote.hpp"
-#include "Resources/Shader/TextureShader.hpp"
+#include "Resources/Shader/SkyBoxShader.hpp"
 
 using namespace Cookie::Resources;
 
 struct VS_CONSTANT_BUFFER
 {
-    Cookie::Core::Math::Mat4 viewProj = Cookie::Core::Math::Mat4::Identity();
-    Cookie::Core::Math::Mat4 modelMat = Cookie::Core::Math::Mat4::Identity();
+    Cookie::Core::Math::Mat4 proj = Cookie::Core::Math::Mat4::Identity();
+    Cookie::Core::Math::Mat4 view = Cookie::Core::Math::Mat4::Identity();
 };
 
-TextureShader::TextureShader(std::string _name):
+SkyBoxShader::SkyBoxShader(std::string _name) :
     Shader(_name)
 {
     ID3DBlob* VS;
@@ -25,7 +27,7 @@ TextureShader::TextureShader(std::string _name):
             CreateBuffer();
 }
 
-TextureShader::~TextureShader()
+SkyBoxShader::~SkyBoxShader()
 {
     if (PShader)
         PShader->Release();
@@ -37,51 +39,53 @@ TextureShader::~TextureShader()
         sampler->Release();
 }
 
-std::string TextureShader::GetVertexSource()
+std::string SkyBoxShader::GetVertexSource()
 {
-	return (const char*)R"(struct VOut
+    return (const char*)R"(struct VOut
     {
         float4 position : SV_POSITION;
-        float2 uv : UV; 
-        float3 normal : NORMAL;
+        float3 pos : POSITION;
+        float2 uv : UV;
     };
-    
+
     cbuffer VS_CONSTANT_BUFFER : register(b0)
     {
-        float4x4  viewProj;
-        float4x4  model;
+        float4x4  proj;
+        float4x4  view;
     };
     
     VOut main(float3 position : POSITION, float2 uv : UV, float3 normal : NORMAL)
     {
         VOut output;
-    
-        output.position = mul(mul(float4(position,1.0),model), viewProj);
+
+        float3 pos      = mul(position,(float3x3)view);
+
+        output.position = mul(float4(pos,1.0),proj);
+        output.pos      = position;
         output.uv       = uv;
-        output.normal   = normal;
     
         return output;
 
-    })";
+    }
+    )";
 }
 
-std::string TextureShader::GetPixelSource()
+std::string SkyBoxShader::GetPixelSource()
 {
-	return (const char*)R"(
+    return (const char*)R"(
 
-    Texture2D	diffuseTex2D : register( t0 );    
+    TextureCube skybox : register( t0 );
 
     SamplerState WrapSampler : register (s0);
 
-    float4 main(float4 position : SV_POSITION, float2 uv : UV, float3 normal : NORMAL) : SV_TARGET
+    float4 main(float4 position : SV_POSITION, float3 pos : POSITION, float2 uv : UV) : SV_TARGET
     {
-        return diffuseTex2D.Sample(WrapSampler,uv);
+        return skybox.Sample(WrapSampler,pos);
     })";
 }
 
 
-
-bool TextureShader::CompileVertex(ID3DBlob** VS)
+bool SkyBoxShader::CompileVertex(ID3DBlob** VS)
 {
     ID3DBlob* VSErr;
     std::string source = GetVertexSource();
@@ -101,7 +105,7 @@ bool TextureShader::CompileVertex(ID3DBlob** VS)
     return true;
 }
 
-bool TextureShader::CompilePixel()
+bool SkyBoxShader::CompilePixel()
 {
     ID3DBlob* PS;
     ID3DBlob* PSErr;
@@ -123,7 +127,7 @@ bool TextureShader::CompilePixel()
     return true;
 }
 
-bool TextureShader::CreateLayout(ID3DBlob** VS)
+bool SkyBoxShader::CreateLayout(ID3DBlob** VS)
 {
     struct Vertex
     {
@@ -131,7 +135,6 @@ bool TextureShader::CreateLayout(ID3DBlob** VS)
         Core::Math::Vec2 uv;
         Core::Math::Vec3 normal;
     };
-
     // create the input layout object
     D3D11_INPUT_ELEMENT_DESC ied[] =
     {
@@ -140,16 +143,19 @@ bool TextureShader::CreateLayout(ID3DBlob** VS)
         {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, normal), D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
 
-    if (FAILED(Render::RendererRemote::device->CreateInputLayout(ied, 3, (*VS)->GetBufferPointer(), (*VS)->GetBufferSize(), &layout)))
+    HRESULT result = Render::RendererRemote::device->CreateInputLayout(ied, 3, (*VS)->GetBufferPointer(), (*VS)->GetBufferSize(), &layout);
+
+    if (FAILED(result))
     {
-        printf("FAILED to create input layout \n");
+
+        printf("FAILED to create input layout: %s \n", std::system_category().message(result).c_str());
         return false;
     }
 
     return true;
 }
 
-bool TextureShader::CreateBuffer()
+bool SkyBoxShader::CreateBuffer()
 {
     D3D11_BUFFER_DESC bDesc = {};
 
@@ -160,7 +166,7 @@ bool TextureShader::CreateBuffer()
     bDesc.MiscFlags = 0;
     bDesc.StructureByteStride = 0;
 
-    VS_CONSTANT_BUFFER buffer;
+    VS_CONSTANT_BUFFER buffer = {};
 
     D3D11_SUBRESOURCE_DATA InitData;
     InitData.pSysMem = &buffer;
@@ -176,7 +182,7 @@ bool TextureShader::CreateBuffer()
     return true;
 }
 
-bool TextureShader::CreateSampler()
+bool SkyBoxShader::CreateSampler()
 {
     // Create a sampler state
     D3D11_SAMPLER_DESC SamDesc = {};
@@ -191,7 +197,7 @@ bool TextureShader::CreateSampler()
     SamDesc.MinLOD = 0;
     SamDesc.MaxLOD = 0;
 
-    if (FAILED(Render::RendererRemote::device->CreateSamplerState(&SamDesc, &sampler)))
+    if (FAILED(Render::RendererRemote::device->CreateSamplerState(&SamDesc,&sampler)))
     {
         printf("Failed Creating sampler state");
         return false;
@@ -200,7 +206,7 @@ bool TextureShader::CreateSampler()
     return true;
 }
 
-void TextureShader::Set(const Core::Math::Mat4& viewProj, const Core::Math::Mat4& model)
+void SkyBoxShader::Set(const Core::Math::Mat4& proj, const Core::Math::Mat4& view)
 {
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
@@ -213,7 +219,7 @@ void TextureShader::Set(const Core::Math::Mat4& viewProj, const Core::Math::Mat4
         return;
     }
 
-    VS_CONSTANT_BUFFER vcb = { viewProj,model };
+    VS_CONSTANT_BUFFER vcb = { proj,view };
 
     memcpy(ms.pData, &vcb, sizeof(vcb));
 

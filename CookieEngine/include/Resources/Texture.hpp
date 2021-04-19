@@ -25,6 +25,7 @@ namespace Cookie
 
 			public:
 				std::string name;
+				D3D11_SHADER_RESOURCE_VIEW_DESC desc = {};
 
 			private:
 				bool CreateTextureFromColor(const Core::Math::Vec4& color);

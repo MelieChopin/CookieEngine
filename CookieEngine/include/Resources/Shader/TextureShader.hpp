@@ -11,6 +11,8 @@ namespace Cookie
 		class TextureShader : public Shader
 		{
 			protected:
+				ID3D11SamplerState* sampler = nullptr;
+
 				virtual bool CompileVertex(ID3DBlob** VS)override;
 				virtual bool CompilePixel()override;
 
@@ -19,6 +21,8 @@ namespace Cookie
 			
 				virtual std::string GetVertexSource()override;
 				virtual std::string GetPixelSource()override;
+
+				bool CreateSampler();
 
 			public:
 

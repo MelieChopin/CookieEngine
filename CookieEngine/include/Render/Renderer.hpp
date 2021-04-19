@@ -10,10 +10,7 @@
 
 namespace Cookie
 {
-	namespace ECS
-	{
-		class Coordinator;
-	};
+	class Game;
 
 	namespace Resources
 	{
@@ -22,6 +19,8 @@ namespace Cookie
 
 	namespace Render
 	{
+		class Camera;
+
 		class Renderer
 		{
 			private:
@@ -51,7 +50,7 @@ namespace Cookie
 
 				bool CreateBuffer(D3D11_BUFFER_DESC bufferDesc, D3D11_SUBRESOURCE_DATA data, ID3D11Buffer** buffer);
 				
-				void Draw(const Core::Math::Mat4& viewProj, ECS::Coordinator& coordinator);
+				void Draw(const Camera* cam, Game& game);
 				void Render();
 				void Clear();
 				void SetBackBuffer();

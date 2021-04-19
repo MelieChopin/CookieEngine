@@ -83,7 +83,7 @@ void Editor::ModifyEditComp()
     for (int i = 1; i < MAX_ENTITIES; i++)
     {
         editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i);
-        if ((game.coordinator.entityHandler->entities[i].signature & SIGNATURE_MODEL))
+        if ((game.coordinator.entityHandler->entities[i].signature & SIGNATURE_MODEL) && game.coordinator.componentHandler->GetComponentModel(i).mesh != nullptr)
         {
             editingComponent[i].AABBMin = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBMin;
             editingComponent[i].AABBMax = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBMax;
@@ -110,7 +110,7 @@ void Editor::Loop()
     {
         buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
         buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
-        buildingModel.mesh = game.resources.meshes["Assets\\Primitives\\cube.gltf - Cube"];
+        buildingModel.mesh = game.resources.meshes["Assets/Primitives/cube.gltf - Cube"];
         buildingModel.texture = game.resources.textures["Pink"];
         buildingModel.shader = game.resources.shaders["Texture_Shader"];
     }
@@ -245,10 +245,7 @@ void Editor::Loop()
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
 
-
-
-        game.renderer.Draw(cam.GetViewProj(), game.coordinator);
-        SystemDraw(game.scene->map.trs, game.scene->map.model, cam.GetViewProj());
+        game.renderer.Draw(&cam, game);
         if(isRaycastingWithMap)
             SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
 

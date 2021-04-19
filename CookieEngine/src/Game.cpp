@@ -5,7 +5,8 @@ using namespace Cookie;
 
 /*================== CONSTRUCTORS/DESTRUCTORS ==================*/
 
-Game::Game()
+Game::Game():
+    skyBox{resources}
 {
 
 }
@@ -40,7 +41,7 @@ void Game::Update()
     scene->camera->Update();
     coordinator.ApplyScriptUpdate();
 
-    renderer.Draw(scene->camera->GetViewProj(), coordinator);
+    renderer.Draw(scene->camera.get(), *this);
     renderer.SetBackBuffer();
 }
 

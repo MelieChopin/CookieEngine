@@ -1,5 +1,5 @@
 #include <d3d11.h>
-#include "Resources/Shader/TextureShader.hpp"
+#include <algorithm>
 
 #include "Resources/Mesh.hpp"
 #include "Render/Renderer.hpp"
@@ -7,6 +7,9 @@
 #include "Resources/ResourcesManager.hpp"
 #include "Core/Primitives.hpp"
 #include "Resources/Prefab.hpp"
+
+#include "Resources/Shader/TextureShader.hpp"
+#include "Resources/Shader/SkyBoxShader.hpp"
 
 #include <memory>
 
@@ -17,6 +20,7 @@ ResourcesManager::ResourcesManager()
 	scripts["test.lua"] = std::make_shared<Script>("Assets\\scripts\\test.lua");
 	scripts["test2.lua"] = std::make_shared<Script>("Assets\\scripts\\test2.lua");
 
+	InitPrimitives();
 	InitShaders();
 }
 
@@ -26,7 +30,7 @@ ResourcesManager::~ResourcesManager()
 }
 
 
-void ResourcesManager::SearchForGltf(const fs::path& path, std::vector<std::string>& gltfFiles)
+void ResourcesManager::SearchForAssets(const fs::path& path, std::vector<std::string>& gltfFiles)
 {
 
 	if (fs::exists(path) && fs::is_directory(path))
@@ -36,7 +40,7 @@ void ResourcesManager::SearchForGltf(const fs::path& path, std::vector<std::stri
 			const fs::path& filename = entry.path().c_str();
 			if (fs::is_directory(entry.status()))
 			{
-				SearchForGltf(filename,gltfFiles);
+				SearchForAssets(filename,gltfFiles);
 			}
 		}
 
@@ -47,6 +51,14 @@ void ResourcesManager::SearchForGltf(const fs::path& path, std::vector<std::stri
 			{
 				if (filename.string().find(".gltf") != std::string::npos)
 					gltfFiles.push_back(filename.string());
+				else if (filename.string().find(".png") != std::string::npos)
+					gltfFiles.push_back(filename.string());
+				else if (filename.string().find(".dds") != std::string::npos)
+					gltfFiles.push_back(filename.string());
+				else if (filename.string().find(".jpg") != std::string::npos)
+					gltfFiles.push_back(filename.string());
+				else if (filename.string().find(".ico") != std::string::npos)
+					gltfFiles.push_back(filename.string());
 			}
 
 		}
@@ -56,23 +68,49 @@ void ResourcesManager::SearchForGltf(const fs::path& path, std::vector<std::stri
 void ResourcesManager::InitShaders()
 {
 	shaders["Texture_Shader"] = std::make_shared<TextureShader>("Texture_Shader");
+	shaders["SkyBox_Shader"] = std::make_shared<SkyBoxShader>("SkyBox_Shader");
+}
+
+void ResourcesManager::InitPrimitives()
+{
+	meshes["Quad"] = Cookie::Core::Primitives::CreateQuad();
+	meshes["Triangle"] = Cookie::Core::Primitives::CreateTriangle();
+	meshes["Cube"] = Cookie::Core::Primitives::CreateCube();
 }
 
 void ResourcesManager::Load(Render::Renderer& _renderer)
 {
-	meshes["Quad"] =  Cookie::Core::Primitives::CreateQuad();
-	meshes["Triangle"] = Cookie::Core::Primitives::CreateTriangle();
-
-
-
-	std::vector<std::string> gltfFiles;
-	SearchForGltf(std::string("Assets\\"),gltfFiles);
+	std::vector<std::string> assetsFiles;
+	SearchForAssets(std::string("Assets/"), assetsFiles);
 
 	Loader loader;
-	
-	for (unsigned int i = 0; i < gltfFiles.size(); i++)
+
+	for (unsigned int i = 0; i < assetsFiles.size(); i++)
 	{
-		loader.Load(gltfFiles.at(i).c_str(),*this,_renderer);
+		std::string& iFile = assetsFiles.at(i);
+		std::replace(iFile.begin(),iFile.end(),'\\','/');
+		//printf("%s\n", gltfFiles.at(i).c_str());
+	}
+	
+	for (unsigned int i = 0; i < assetsFiles.size(); i++)
+	{
+		std::string iFile = assetsFiles.at(i);
+		printf("%s\n", iFile.c_str());
+		if (iFile.find(".gltf") != std::string::npos)
+		{
+			loader.Load(iFile.c_str(), *this, _renderer);
+			assetsFiles.erase(assetsFiles.begin() + i);
+			i--;
+		}
+		//printf("%s\n", gltfFiles.at(i).c_str());
+	}
+	for (unsigned int i = 0; i < assetsFiles.size(); i++)
+	{
+		std::string iFile = assetsFiles.at(i);
+		if (textures.find(iFile) == textures.end())
+		{
+			textures[iFile] = std::make_shared<Texture>(iFile);
+		}
 		//printf("%s\n", gltfFiles.at(i).c_str());
 	}
 }

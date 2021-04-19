@@ -39,6 +39,8 @@ namespace Cookie
 				physic.physBody->setType(rp3d::BodyType::STATIC);
 				physic.AddCubeCollider(trs.scale, trs.pos, trs.rot);
 
+				trs.ComputeTRS();
+
 			}
 			~Map() {}
 
@@ -71,6 +73,11 @@ namespace Cookie
 				//	}
 				//
 				//
+			}
+
+			void Draw(const Core::Math::Mat4& viewProj)
+			{
+				model.Draw(viewProj, trs.TRS);
 			}
 
 

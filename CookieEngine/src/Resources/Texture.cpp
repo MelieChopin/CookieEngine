@@ -1,4 +1,5 @@
 #include <DirectXTex/initguid.h>
+#include <fstream>
 #include <system_error>
 #include <DirectXTex/DDSTextureLoader11.h>
 #include <DirectXTex/WICTextureLoader11.h>
@@ -15,13 +16,15 @@ Texture::Texture(const std::string& texPath) :
 {
 	std::wstring wString = std::wstring(texPath.begin(),texPath.end());
 
-	if (name.find(".dss") != std::string::npos)
+	if (name.find(".dds") != std::string::npos)
 	{
-		HRESULT result = DirectX::CreateDDSTextureFromFile(Render::RendererRemote::device, wString.c_str(), &texture, &shaderResourceView);
+		HRESULT result = DirectX::CreateDDSTextureFromFile(Render::RendererRemote::device, Render::RendererRemote::context, wString.c_str(), &texture, &shaderResourceView);
 		if (FAILED(result))
 		{
 			printf("Failing Loading Texture %s: %s\n", name.c_str(), std::system_category().message(result).c_str());
+			return;
 		}
+		shaderResourceView->GetDesc(&desc);
 	}
 	else
 	{
@@ -29,7 +32,9 @@ Texture::Texture(const std::string& texPath) :
 		if (FAILED(result))
 		{
 			printf("Failing Loading Texture %s: %s\n", name.c_str(), std::system_category().message(result).c_str());
+			return;
 		}
+		shaderResourceView->GetDesc(&desc);
 	}
 		
 }
