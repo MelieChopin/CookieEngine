@@ -7,6 +7,8 @@
 #include "ComponentModel.hpp"
 #include "ComponentPhysics.hpp"
 #include "ResourcesManager.hpp"
+#include "Core/Primitives.hpp"
+#include "Render/DebugRenderer.hpp"
 
 #include <string>
 #include <algorithm>
@@ -68,7 +70,7 @@ namespace Cookie
 					for (int y = 0; y < tilesNb.y; y++)
 					{
 						Tile& currentTile = tiles[x + y * tilesNb.x];
-						currentTile.pos = { x * tilesSize.x + tilesSize.x / 2 - trs.scale.x / 2, y * tilesSize.y + tilesSize.y / 2 - trs.scale.y / 2};
+						currentTile.pos = { { x * tilesSize.x + tilesSize.x / 2 - trs.scale.x / 2, y * tilesSize.y + tilesSize.y / 2 - trs.scale.y / 2} };
 				
 						//Connect to neighbours
 						{
@@ -109,7 +111,7 @@ namespace Cookie
 				Core::Math::Vec2 tilePos = tiles[GetTileIndex(mousePos)].pos;
 
 				//if buildingNbOfTiles has peer values add half tileSize for each
-				tilePos += {(int)(buildingNbOfTiles.x + 1) % 2 * tilesSize.x / 2, (int)(buildingNbOfTiles.y + 1) % 2 * tilesSize.y / 2};
+				tilePos += { {(int)(buildingNbOfTiles.x + 1) % 2 * tilesSize.x / 2, (int)(buildingNbOfTiles.y + 1) % 2 * tilesSize.y / 2}};
 
 				return {{std::clamp(tilePos.x, -trs.scale.x / 2 + buildingNbOfTiles.x * tilesSize.x / 2, trs.scale.x / 2 - buildingNbOfTiles.x * tilesSize.x / 2),
 						 std::clamp(tilePos.y, -trs.scale.y / 2 + buildingNbOfTiles.y * tilesSize.y / 2, trs.scale.y / 2 - buildingNbOfTiles.y * tilesSize.y / 2)}};
@@ -146,8 +148,9 @@ namespace Cookie
 
 						currentTile.isVisited = false;
 						currentTile.f = INFINITY;
+						currentTile.g = INFINITY;
 						currentTile.h = INFINITY;
-						currentTile.parent = nullptr;	// No parents
+						currentTile.parent = nullptr;
 					}
 
 				// Setup starting conditions
@@ -223,7 +226,7 @@ namespace Cookie
 					}
 
 			}
-			void DrawPath()
+			void DrawPath(Render::DebugRenderer& debug)
 			{
 				if (tileEnd != nullptr)
 				{
@@ -231,7 +234,7 @@ namespace Cookie
 
 					while (currentTile->parent != nullptr)
 					{
-						//DrawLine
+						debug.AddDebugElement(Core::Primitives::CreateLine({ currentTile->pos.x, 1, currentTile->pos.y }, { currentTile->parent->pos.x, 1, currentTile->parent->pos.y }, 0x00FFFF, 0x00FFFF));
 						currentTile = currentTile->parent;
 					}
 				}

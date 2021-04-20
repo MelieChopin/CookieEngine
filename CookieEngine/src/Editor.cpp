@@ -119,7 +119,7 @@ void Editor::Loop()
     }
     ComponentTransform buildingTrs;
     ComponentModel     buildingModel;
-    Vec2 buildingTileSize {{3, 3}};
+    Vec2 buildingTileSize {{1, 1}};
     int nbOfBuildings = 0;
     bool isRaycastingWithMap = false;
     int indexOfSelectedTile = 0;
@@ -189,7 +189,7 @@ void Editor::Loop()
             if (game.scene->map.physic.physBody->raycast(ray, raycastInfo))
             {
                 Vec3 hitPoint{ raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z };
-                hitPoint.Debug();
+                //hitPoint.Debug();
 
                 Vec2 mousePos {{hitPoint.x, hitPoint.z}};
                 indexOfSelectedTile = game.scene->map.GetTileIndex(mousePos);
@@ -247,24 +247,21 @@ void Editor::Loop()
                 nbOfBuildings++;
             }
         }
-        //Bind Keys to Set Specific Tiles and Run pathfinding
+        //Bind Keys to Set Specific Tiles
         {
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V])
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V] && isRaycastingWithMap)
             {
                 game.scene->map.tileStart = &game.scene->map.tiles[indexOfSelectedTile];
             }
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B])
-            {
-                game.scene->map.tileEnd = &game.scene->map.tiles[indexOfSelectedTile];
-            }
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B] && isRaycastingWithMap)
             {
                 game.scene->map.tiles[indexOfSelectedTile].isObstacle = !game.scene->map.tiles[indexOfSelectedTile].isObstacle;
             }
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_ENTER])
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N] && isRaycastingWithMap)
             {
-                game.scene->map.ApplyPathfinding();
+                game.scene->map.tileEnd = &game.scene->map.tiles[indexOfSelectedTile];
             }
+            
         }
         
 
@@ -283,12 +280,16 @@ void Editor::Loop()
 
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
+        
+
+        game.scene->map.ApplyPathfinding();
+
 
         game.renderer.Draw(&cam, game);
         if(isRaycastingWithMap)
             SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
         game.scene->map.DrawSpecificTiles(cam.GetViewProj());
-        game.scene->map.DrawPath();
+        game.scene->map.DrawPath(dbgRenderer);
 
 
         dbgRenderer.Draw(cam.GetViewProj());

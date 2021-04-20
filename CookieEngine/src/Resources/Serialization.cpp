@@ -575,7 +575,7 @@ void Cookie::Resources::Serialization::Load::LoadPhysic(json& physic, Cookie::EC
 		{
 			float radius = colliders["radius"].get<float>();
 			float height = colliders["height"].get<float>();
-			physicsComp.AddCapsuleCollider(Cookie::Core::Math::Vec2{ radius, height }, pos, rot);
+			physicsComp.AddCapsuleCollider(Cookie::Core::Math::Vec2{ {radius, height } }, pos, rot);
 		}
 		else if (colliders["type"].get<std::string>() == "Box")
 		{

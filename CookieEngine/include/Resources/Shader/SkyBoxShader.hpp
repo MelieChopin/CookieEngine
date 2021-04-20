@@ -1,5 +1,5 @@
-#ifndef __PHYSICS_SHADER_HPP__
-#define __PHYSICS_SHADER_HPP__
+#ifndef __SKYBOX_SHADER_HPP__
+#define __SKYBOX_SHADER_HPP__
 
 #include "Render/RendererRemote.hpp"
 #include "Resources/Shader.hpp"
