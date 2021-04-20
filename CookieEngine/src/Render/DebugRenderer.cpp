@@ -142,7 +142,6 @@ void DebugRenderer::Draw(const Mat4& viewProj)
             Render::RendererRemote::context->Draw(physDbgRenderer.getNbLines() * 2, 0);
         }
 
-
         if (debugElement.size() > 0)
         {
             Render::RendererRemote::context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
@@ -156,10 +155,11 @@ void DebugRenderer::Draw(const Mat4& viewProj)
 
             Render::RendererRemote::context->IASetVertexBuffers(0, 1, &VBuffer, &stride, &offset);
 
-            Render::RendererRemote::context->Draw(debugElement.size() * 2, 0);
-            debugElement.clear();
+            Render::RendererRemote::context->Draw(debugElement.size(), 0);
+            
         }
 
+        debugElement.clear();
 
         Render::RendererRemote::context->IASetPrimitiveTopology(topo);
         Render::RendererRemote::context->RSSetState(previousState);

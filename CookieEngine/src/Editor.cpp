@@ -100,15 +100,33 @@ void Editor::Loop()
     //soundManager.system->playSound(soundManager.sound, nullptr, false, nullptr);
     Physics::PhysicsHandle physHandle;
 
+    {
+        game.scene->map.model.mesh                 = game.resources.meshes["Quad"];
+        game.scene->map.model.texture              = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"];
+        game.scene->map.model.shader               = game.resources.shaders["Texture_Shader"];
+
+        game.scene->map.modelTileStart.mesh        = game.resources.meshes["Cube"];
+        game.scene->map.modelTileStart.texture     = game.resources.textures["Green"];
+        game.scene->map.modelTileStart.shader      = game.resources.shaders["Texture_Shader"];
+
+        game.scene->map.modelTileEnd.mesh          = game.resources.meshes["Cube"];
+        game.scene->map.modelTileEnd.texture       = game.resources.textures["Red"];
+        game.scene->map.modelTileEnd.shader        = game.resources.shaders["Texture_Shader"];
+
+        game.scene->map.modelTileObstacle.mesh     = game.resources.meshes["Cube"];
+        game.scene->map.modelTileObstacle.texture  = game.resources.textures["Grey"];
+        game.scene->map.modelTileObstacle.shader   = game.resources.shaders["Texture_Shader"];
+    }
     ComponentTransform buildingTrs;
     ComponentModel     buildingModel;
-    Vec2 buildingTileSize {{3, 3}};
+    Vec2 buildingTileSize {{1, 1}};
     int nbOfBuildings = 0;
     bool isRaycastingWithMap = false;
+    int indexOfSelectedTile = 0;
     {
-        buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
-        buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
-        buildingModel.mesh = game.resources.meshes["Assets/Primitives/cube.gltf - Cube"];
+        buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x;
+        buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y;
+        buildingModel.mesh = game.resources.meshes["Cube"];
         buildingModel.texture = game.resources.textures["Pink"];
         buildingModel.shader = game.resources.shaders["Texture_Shader"];
     }
@@ -171,42 +189,46 @@ void Editor::Loop()
             if (game.scene->map.physic.physBody->raycast(ray, raycastInfo))
             {
                 Vec3 hitPoint{ raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z };
-                hitPoint.Debug();
+                //hitPoint.Debug();
 
                 Vec2 mousePos {{hitPoint.x, hitPoint.z}};
+                indexOfSelectedTile = game.scene->map.GetTileIndex(mousePos);
                 Vec2 centerOfBuilding = game.scene->map.GetCenterOfBuilding(mousePos, buildingTileSize);
 
                 buildingTrs.pos = {centerOfBuilding.x, hitPoint.y , centerOfBuilding.y};
             }
         }
-        //Bind Keys to change Nb of Tiles of Building or create Building
+        //Bind Keys to change Nb of Tiles of
+        {
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_K])
+            {
+                buildingTileSize.x = std::fmax(1, buildingTileSize.x - 1);
+                buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x;
+            }
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
+            {
+                buildingTileSize.y = std::fmax(1, buildingTileSize.y - 1);
+                buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y;
+            }
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
+            {
+                buildingTileSize.x = std::fmin(game.scene->map.tilesNb.x, buildingTileSize.x + 1);
+                buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x;
+            }
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_O])
+            {
+                buildingTileSize.y = std::fmin(game.scene->map.tilesNb.y, buildingTileSize.y + 1);
+                buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y;
+            }
+        }
+        //Bind Keys to create Building
         {
             //Key M on Azerty Keyboard
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_SEMICOLON])
             {
                 isRaycastingWithMap = !isRaycastingWithMap;
             }
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_K])
-            {
-                buildingTileSize.x = std::fmax(1, buildingTileSize.x - 1);
-                buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
-            }
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
-            {
-                buildingTileSize.y = std::fmax(1, buildingTileSize.y - 1);
-                buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
-            }
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
-            {
-                buildingTileSize.x = std::fmin(game.scene->map.tilesNb.x , buildingTileSize.x + 1);
-                buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x / 2;
-            }
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_O])
-            {
-                buildingTileSize.y = std::fmin(game.scene->map.tilesNb.y, buildingTileSize.y + 1);
-                buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y / 2;
-            }
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_ENTER] && isRaycastingWithMap)
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P] && isRaycastingWithMap)
             {
                 game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL, game.resources, "Building " + std::to_string(nbOfBuildings) );
                 //should create constructor copy for each Component 
@@ -225,6 +247,22 @@ void Editor::Loop()
                 nbOfBuildings++;
             }
         }
+        //Bind Keys to Set Specific Tiles
+        {
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V] && isRaycastingWithMap)
+            {
+                game.scene->map.tileStart = &game.scene->map.tiles[indexOfSelectedTile];
+            }
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B] && isRaycastingWithMap)
+            {
+                game.scene->map.tiles[indexOfSelectedTile].isObstacle = !game.scene->map.tiles[indexOfSelectedTile].isObstacle;
+            }
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N] && isRaycastingWithMap)
+            {
+                game.scene->map.tileEnd = &game.scene->map.tiles[indexOfSelectedTile];
+            }
+            
+        }
         
 
         if (selectedEntity.toChangeEntityId >= 0)
@@ -242,10 +280,17 @@ void Editor::Loop()
 
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
+        
+
+        game.scene->map.ApplyPathfinding();
+
 
         game.renderer.Draw(&cam, game);
         if(isRaycastingWithMap)
             SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
+        game.scene->map.DrawSpecificTiles(cam.GetViewProj());
+        game.scene->map.DrawPath(dbgRenderer);
+
 
         dbgRenderer.Draw(cam.GetViewProj());
 

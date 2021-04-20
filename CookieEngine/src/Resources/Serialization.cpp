@@ -89,7 +89,7 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 		js["Name"] = actScene.name;
 		js["Type"] = "map";
 	}
-
+	/*
 	//Map
 	{
 		json& map = js["Map"];
@@ -106,8 +106,8 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 		map["model"]["texture"] = actMap.model.texture.get()->name;
 		map["model"]["shader"] = actMap.model.shader.get()->name;
 
-		SavePhysic(map, actMap.physic);
-	}
+		//SavePhysic(map, actMap.physic);
+	}*/
 
 
 	if (actScene.entityHandler.livingEntities > 0)
@@ -370,7 +370,7 @@ std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const c
 		 }
 	 }
 	 
-	 
+	 /*
 	 if (js.contains("Map"))
 	 {
 		 Cookie::Resources::Scene* scene = newScene.get();
@@ -388,8 +388,8 @@ std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const c
 		 scene->map.model.texture = resources.textures[js["Map"]["model"]["texture"].get<std::string>()];
 		 scene->map.model.shader = resources.shaders[js["Map"]["model"]["shader"].get<std::string>()];
 
-		 LoadPhysic(js["Map"], scene->map.physic);
-	 } 
+		 //LoadPhysic(js["Map"], scene->map.physic);
+	 } */
 	 
 	 if (js.contains("EntityHandler"))
 	 {
@@ -575,7 +575,7 @@ void Cookie::Resources::Serialization::Load::LoadPhysic(json& physic, Cookie::EC
 		{
 			float radius = colliders["radius"].get<float>();
 			float height = colliders["height"].get<float>();
-			physicsComp.AddCapsuleCollider(Cookie::Core::Math::Vec2{ radius, height }, pos, rot);
+			physicsComp.AddCapsuleCollider(Cookie::Core::Math::Vec2{ {radius, height } }, pos, rot);
 		}
 		else if (colliders["type"].get<std::string>() == "Box")
 		{

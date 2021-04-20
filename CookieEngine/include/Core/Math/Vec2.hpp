@@ -41,6 +41,8 @@ namespace Cookie
                 inline Vec2& operator-=(float other);
                 inline Vec2& operator*=(float other);
                 inline Vec2& operator/=(float other);
+            
+                inline float Length() const;
             };
 
 

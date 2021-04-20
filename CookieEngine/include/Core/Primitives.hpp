@@ -19,10 +19,10 @@ namespace Cookie
 
 			inline std::shared_ptr<Cookie::Resources::Mesh> CreateQuad()
 			{
-				std::vector<float> vertices = { -1, -1, 0, 0, 0, 0, 0, 1,
-												 1, -1, 0, 1, 0, 0, 0, 1,
-												 1,  1, 0, 1, 1, 0, 0, 1,
-												-1,  1, 0, 0, 1, 0, 0, 1  };
+				std::vector<float> vertices = { -0.5, -0.5, 0, 0, 0, 0, 0, 1,
+												 0.5, -0.5, 0, 1, 0, 0, 0, 1,
+												 0.5,  0.5, 0, 1, 1, 0, 0, 1,
+												-0.5,  0.5, 0, 0, 1, 0, 0, 1  };
 
 				std::vector<unsigned int> indices = {  1, 0, 3, 2, 1, 3 };
 
