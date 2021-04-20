@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "Render/FrameBuffer.hpp"
+#include "Light.hpp"
 #include "Core/Window.hpp"
 #include "Render/RendererRemote.hpp"
 #include "Render/RendererState.hpp"
@@ -31,9 +32,10 @@ namespace Cookie
 				std::vector<std::unique_ptr<FrameBuffer>> frameBuffers;
 				
 			public:
-				Core::Window					window;
-				RendererRemote					remote;
-				RendererState					state;
+				LightsArray		lights;
+				Core::Window	window;
+				RendererRemote	remote;
+				RendererState	state;
 
 			private:
 				bool InitDevice(Core::Window& window);

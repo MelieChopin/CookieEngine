@@ -1,5 +1,5 @@
-#ifndef __SKYBOX_SHADER_HPP__
-#define __SKYBOX_SHADER_HPP__
+#ifndef __BLINN_PHONG_SHADER_HPP__
+#define __BLINN_PHONG_SHADER_HPP__
 
 #include "Render/RendererRemote.hpp"
 #include "Resources/Shader.hpp"
@@ -8,7 +8,7 @@ namespace Cookie
 {
 	namespace Resources
 	{
-		class SkyBoxShader : public Shader
+		class BlinnPhongShader : public Shader
 		{
 		protected:
 			ID3D11SamplerState* sampler = nullptr;
@@ -27,8 +27,8 @@ namespace Cookie
 		public:
 
 			/* CONSTRUCTORS/DESTRUCTORS */
-			SkyBoxShader(std::string _name);
-			virtual ~SkyBoxShader();
+			BlinnPhongShader(std::string _name);
+			virtual ~BlinnPhongShader();
 
 			virtual void Set(const Core::Math::Mat4& projMat, const Core::Math::Mat4& viewMat = Core::Math::Mat4::Identity())override;
 		};
@@ -36,4 +36,4 @@ namespace Cookie
 }
 
 
-#endif // !__SKYBOX_SHADER_HPP__
+#endif // !__BLINN_PHONG_SHADER_HPP__
