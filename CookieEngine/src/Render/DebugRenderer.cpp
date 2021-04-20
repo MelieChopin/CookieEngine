@@ -1,4 +1,5 @@
 #include <d3d11.h>
+#include "Core/Primitives.hpp"
 #include "Render/RendererRemote.hpp"
 #include "Physics/PhysicsHandle.hpp"
 #include "Render/DebugRenderer.hpp"
@@ -84,6 +85,14 @@ void DebugRenderer::UpdateVBuffer(size_t vBufferSize, void* data)
     Render::RendererRemote::context->Unmap(VBuffer, 0);
 }
 
+void DebugRenderer::AddDebugElement(const std::vector<Core::Primitives::DebugVertex>& dbgElement)
+{
+    for (int i = 0; i < dbgElement.size(); i++)
+    {
+        debugElement.push_back(dbgElement.at(i));
+    }
+}
+
 void DebugRenderer::Draw(const Mat4& viewProj)
 {
     if (showDebug)
@@ -132,6 +141,25 @@ void DebugRenderer::Draw(const Mat4& viewProj)
 
             Render::RendererRemote::context->Draw(physDbgRenderer.getNbLines() * 2, 0);
         }
+
+
+        if (debugElement.size() > 0)
+        {
+            Render::RendererRemote::context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+            if (bDesc.ByteWidth < (debugElement.size() * sizeof(Core::Primitives::DebugVertex)))
+            {
+                VBuffer->Release();
+                AllocateVBuffer((debugElement.size() * sizeof(Core::Primitives::DebugVertex)));
+            }
+
+            UpdateVBuffer(debugElement.size() * sizeof(Core::Primitives::DebugVertex), (void*)debugElement.data());
+
+            Render::RendererRemote::context->IASetVertexBuffers(0, 1, &VBuffer, &stride, &offset);
+
+            Render::RendererRemote::context->Draw(debugElement.size() * 2, 0);
+            debugElement.clear();
+        }
+
 
         Render::RendererRemote::context->IASetPrimitiveTopology(topo);
         Render::RendererRemote::context->RSSetState(previousState);

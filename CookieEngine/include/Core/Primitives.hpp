@@ -9,6 +9,14 @@ namespace Cookie
 	{
 		namespace Primitives
 		{
+			struct DebugVertex
+			{
+				Core::Math::Vec3	vertex = {0.0f,0.0f,0.0f};
+				uint32_t			color = 0;
+
+				DebugVertex(const Core::Math::Vec3& _vertex, uint32_t _color) :vertex{ _vertex }, color{_color} {}
+			};
+
 			inline std::shared_ptr<Cookie::Resources::Mesh> CreateQuad()
 			{
 				std::vector<float> vertices = { -0.5, -0.5, 0, 0, 0, 0, 0, 1,
@@ -21,6 +29,12 @@ namespace Cookie
 
 				std::shared_ptr<Cookie::Resources::Mesh> quad = std::make_shared<Cookie::Resources::Mesh>("Quad", vertices, indices, 6);
 				return quad;
+			}
+
+			inline std::vector<DebugVertex> CreateLine(const Core::Math::Vec3& start, const Core::Math::Vec3& end, uint32_t color1, uint32_t color2)
+			{
+				std::vector<DebugVertex> vertices = { {{start.x, start.y, start.z}, color1},{{ end.x, end.y, end.z}, color2} };
+				return vertices;
 			}
 
 			inline std::shared_ptr<Cookie::Resources::Mesh> CreateTriangle()
