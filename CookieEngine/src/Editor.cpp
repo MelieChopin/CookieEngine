@@ -1,4 +1,5 @@
 #include "Editor.hpp" 
+#include "Core/Primitives.hpp"
 #include "UIallIn.hpp"
 #include "Serialization.hpp"
 #include "Physics/PhysicsHandle.hpp"
@@ -15,6 +16,7 @@ Editor::Editor()
     : ui(game.renderer) 
 {
     game.resources.Load(game.renderer);
+    game.skyBox.texture = game.resources.textures["Assets/skybox.dds"];
     game.renderer.AddFrameBuffer(game.resources);
     cam.SetProj(Core::Math::ToRadians(60.f), game.renderer.state.viewport.Width, game.renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
@@ -236,7 +238,7 @@ void Editor::Loop()
         }
            
 
-
+        //dbgRenderer.AddDebugElement(Core::Primitives::CreateLine({0.0f,0.0f,0.0f }, {0.0f,10.0f,0.0f} ,0xFF0000, 0xFF0000));
 
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);

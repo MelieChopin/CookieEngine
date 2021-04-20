@@ -26,7 +26,7 @@ namespace Cookie
 		class ComponentPhysics
 		{
 			public:
-				::reactphysics3d::RigidBody* physBody		= nullptr;
+				::reactphysics3d::RigidBody*				physBody = nullptr;
 				std::vector<::reactphysics3d::Collider*>	physColliders;
 				::reactphysics3d::Transform					physTransform;
 				::reactphysics3d::Transform					oldTransform;
