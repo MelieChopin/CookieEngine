@@ -47,9 +47,12 @@ namespace Cookie
 		class LightsArray
 		{
 			private:
-				std::array<DirLight, DIR_LIGHT_MAX_NB>	dirLights;
+
 				std::vector<SphereLight>				sphereLights;
 				std::vector<SpotLight>					spotLights;
+
+			public:
+				std::array<DirLight, DIR_LIGHT_MAX_NB>	dirLights;
 
 			public:
 				LightsArray();

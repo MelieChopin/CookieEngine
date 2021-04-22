@@ -22,6 +22,9 @@ Renderer::Renderer()
         result = CreateDrawBuffer(window.width,window.height);
     if (result)
         result = InitState(window.width, window.height);
+
+    lights.dirLights[0].dir     = { 0.0f,-1.0f,0.0f };
+    lights.dirLights[0].color   = { 1.0f,1.0f,1.0f };
 }
 
 Renderer::~Renderer()

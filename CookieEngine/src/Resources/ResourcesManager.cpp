@@ -10,6 +10,7 @@
 
 #include "Resources/Shader/TextureShader.hpp"
 #include "Resources/Shader/SkyBoxShader.hpp"
+#include "Resources/Shader/BlinnPhongShader.hpp"
 
 #include <memory>
 
@@ -69,6 +70,7 @@ void ResourcesManager::InitShaders()
 {
 	shaders["Texture_Shader"] = std::make_shared<TextureShader>("Texture_Shader");
 	shaders["SkyBox_Shader"] = std::make_shared<SkyBoxShader>("SkyBox_Shader");
+	shaders["BlinnPhong_Shader"] = std::make_shared<BlinnPhongShader>("BlinnPhong_Shader");
 }
 
 void ResourcesManager::InitPrimitives()
@@ -95,7 +97,7 @@ void ResourcesManager::Load(Render::Renderer& _renderer)
 	for (unsigned int i = 0; i < assetsFiles.size(); i++)
 	{
 		std::string iFile = assetsFiles.at(i);
-		printf("%s\n", iFile.c_str());
+		//printf("%s\n", iFile.c_str());
 		if (iFile.find(".gltf") != std::string::npos)
 		{
 			loader.Load(iFile.c_str(), *this, _renderer);

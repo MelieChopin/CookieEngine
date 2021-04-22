@@ -46,6 +46,7 @@ std::string BlinnPhongShader::GetVertexSource()
         float4 position : SV_POSITION;
         float2 uv : UV; 
         float3 normal : NORMAL;
+        float3 fragPos : FRAGPOS;
     };
     
     cbuffer VS_CONSTANT_BUFFER : register(b0)
@@ -58,7 +59,8 @@ std::string BlinnPhongShader::GetVertexSource()
     {
         VOut output;
     
-        output.position = mul(mul(float4(position,1.0),model), viewProj);
+        output.fragPos  = mul(float4(position,1.0),model).xyz;
+        output.position = mul(float4(output.fragPos,1.0), viewProj);
         output.uv       = uv;
         output.normal   = normal;
     
@@ -70,7 +72,7 @@ std::string BlinnPhongShader::GetVertexSource()
 
 std::string BlinnPhongShader::GetPixelSource()
 {
-    return (const char*)R"(
+    return (const char*)R"(#line 75
 
     Texture2D	diffuseTex2D : register(t0);    
 
@@ -80,40 +82,75 @@ std::string BlinnPhongShader::GetPixelSource()
     #define MAX_POINT_LIGHTS   10
     #define MAX_SPOT_LIGHTS    10
 
-    struct PointLight
-    {
-        float3 pos;
-		float3 color;
-
-		float radius = 0.0;
-    };
-
     cbuffer DirLights : register(b1)
     {
-        float3 dir  [MAX_DIR_LIGHTS];
-        float3 color[MAX_DIR_LIGHTS];
+        float3 camPos;
     };
 
-    cbuffer SphereLights : register(b2)
+    cbuffer DirLights : register(b2)
     {
-        float3  pos     [MAX_POINT_LIGHTS];
-        float3  color   [MAX_POINT_LIGHTS];
-        float   radius  [MAX_POINT_LIGHTS];
+        float3 dir      [MAX_DIR_LIGHTS];
+        float3 dirColor [MAX_DIR_LIGHTS];
     };
 
-    cbuffer SpotLights : register(b3)
+    cbuffer SphereLights : register(b3)
     {
-        float3  pos     [MAX_SPOT_LIGHTS];
-        float3  dir     [MAX_SPOT_LIGHTS];
-        float3  color   [MAX_SPOT_LIGHTS];
-
-        float   radius  [MAX_SPOT_LIGHTS];
-        float   angle   [MAX_SPOT_LIGHTS];
+        float3  spherePos     [MAX_POINT_LIGHTS];
+        float3  sphereColor   [MAX_POINT_LIGHTS];
+        float   sphereRadius  [MAX_POINT_LIGHTS];
     };
 
-    float4 main(float4 position : SV_POSITION, float2 uv : UV, float3 normal : NORMAL) : SV_TARGET
+    cbuffer SpotLights : register(b4)
     {
-        return diffuseTex2D.Sample(WrapSampler,uv);
+        float3  spotPos     [MAX_SPOT_LIGHTS];
+        float3  spotDir     [MAX_SPOT_LIGHTS];
+        float3  spotColor   [MAX_SPOT_LIGHTS];
+
+        float   spotRadius  [MAX_SPOT_LIGHTS];
+        float   spotAngle   [MAX_SPOT_LIGHTS];
+    };
+
+    float	compute_diffuse		(float3 normal, float3 lightDir)
+    {   
+    	float diff 			= max(dot(normal,lightDir),0.0);
+    
+    	return diff;
+    }
+
+    float	compute_specular	(float3 normal, float3 viewDir, float3 lightDir, float shininess)
+    {
+    	float3 halfAngleVec	= normalize(lightDir + viewDir);
+    
+    	float spec			= pow(max(dot(normal,halfAngleVec),0.0f),shininess);
+    
+    	return  spec;
+    }
+
+    float3	compute_dir			(int i, float3 normal, float3 viewDir)
+    {
+    	float3 lightDir		= normalize(-dir[i].xyz);
+        float3 lightColor   = dirColor[i];
+
+    	float3 diffuse 		= compute_diffuse(normal,lightDir);
+    	float3 specular		= compute_specular(normal,viewDir,lightDir,64);
+    	
+    	return (0.04 + diffuse + specular) * lightColor;
+    }
+
+    float4 main(float4 position : SV_POSITION, float2 uv : UV, float3 normal : NORMAL, float3 fragPos : FRAGPOS) : SV_TARGET
+    {
+        float4 color        = diffuseTex2D.Sample(WrapSampler,uv);        
+        float3 fragRadiance = float3(0.0,0.0,0.0);
+
+        float3 norm     = normalize(normal);
+        float3 viewDir  = normalize(camPos - fragPos);
+
+	    for (int i = 0; i < MAX_DIR_LIGHTS; i++)
+	    {
+               fragRadiance += compute_dir(i,normal,viewDir);
+	    }
+
+        return float4(fragRadiance,1.0) * color;
     })";
 }
 

@@ -74,7 +74,7 @@ Editor::~Editor()
 
 void Editor::InitEditComp()
 {
-    for (int i = 1; i < MAX_ENTITIES; i++)
+    for (int i = 0; i < MAX_ENTITIES; i++)
     {
         editingComponent[i].InitComponent(game.coordinator.componentHandler->GetComponentTransform(i));
     }
@@ -82,7 +82,7 @@ void Editor::InitEditComp()
 
 void Editor::ModifyEditComp()
 {
-    for (int i = 1; i < MAX_ENTITIES; i++)
+    for (int i = 0; i < MAX_ENTITIES; i++)
     {
         editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i);
         if ((game.coordinator.entityHandler->entities[i].signature & SIGNATURE_MODEL) && game.coordinator.componentHandler->GetComponentModel(i).mesh != nullptr)
