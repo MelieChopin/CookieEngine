@@ -34,6 +34,8 @@ namespace Cookie
 			void ApplySystemPhysics(float factor);
 			void ApplyDraw(const Core::Math::Mat4& viewProj);
 			void ApplyScriptUpdate();
+
+			void ApplyGameplayMove();
 		};
 
 	}

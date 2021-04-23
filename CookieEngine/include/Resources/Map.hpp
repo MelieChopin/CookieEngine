@@ -35,8 +35,8 @@ namespace Cookie
 			Tile* parent = nullptr;
 		};
 
-		#define MAP_DEFAULT_TILESNB_WIDTH  10
-		#define MAP_DEFAULT_TILESNB_HEIGHT 10
+		#define MAP_DEFAULT_TILESNB_WIDTH  100
+		#define MAP_DEFAULT_TILESNB_HEIGHT 100
 		#define MAP_DEFAULT_SCALE_WIDTH    100
 		#define MAP_DEFAULT_SCALE_HEIGHT   100
 

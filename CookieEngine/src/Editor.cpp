@@ -4,12 +4,14 @@
 #include "Physics/PhysicsHandle.hpp"
 #include "ECS/SystemHandler.hpp"
 #include "Resources/Scene.hpp"
+#include "CGPMove.hpp"
 
 using namespace Cookie;
 using namespace Cookie::Core;
 using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
 using namespace Cookie::ECS::System;
+using namespace Cookie::Gameplay;
 using namespace rp3d;
 
 Editor::Editor()
@@ -101,6 +103,7 @@ void Editor::Loop()
     //soundManager.system->playSound(soundManager.sound, nullptr, false, nullptr);
     Physics::PhysicsHandle physHandle;
 
+    Vec2 mousePos;
     {
         game.scene->map.model.mesh                 = game.resources.meshes["Cube"];
         game.scene->map.model.texture              = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"];
@@ -189,19 +192,20 @@ void Editor::Loop()
             rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, { fwdRay.x,fwdRay.y,fwdRay.z });  
             RaycastInfo raycastInfo;
 
+            //if raycast hit
             if (game.scene->map.physic.physBody->raycast(ray, raycastInfo))
             {
                 Vec3 hitPoint{ raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z };
-                //hitPoint.Debug();
+                hitPoint.Debug();
 
-                Vec2 mousePos {{hitPoint.x, hitPoint.z}};
+                mousePos =  {{hitPoint.x, hitPoint.z}};
                 indexOfSelectedTile = game.scene->map.GetTileIndex(mousePos);
                 Vec2 centerOfBuilding = game.scene->map.GetCenterOfBuilding(mousePos, buildingTileSize);
 
                 buildingTrs.pos = {centerOfBuilding.x, hitPoint.y, centerOfBuilding.y};
             }
         }
-        //Bind Keys to change Nb of Tiles of
+        //Bind Keys to change Nb of Tiles of Building
         {
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_K])
             {
@@ -250,23 +254,23 @@ void Editor::Loop()
                 nbOfBuildings++;
             }
         }
-        //Bind Keys to Set Specific Tiles
+        //Bind Keys to Set Obstacle Tiles and to give orders to Units
         {
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V] && isRaycastingWithMap)
-            {
-                game.scene->map.tileStart = &game.scene->map.tiles[indexOfSelectedTile];
-            }
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B] && isRaycastingWithMap)
             {
                 game.scene->map.tiles[indexOfSelectedTile].isObstacle = !game.scene->map.tiles[indexOfSelectedTile].isObstacle;
             }
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N] && isRaycastingWithMap)
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_G] && isRaycastingWithMap)
             {
+                float selectedEntityId = selectedEntity.focusedEntity->id;
+                ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(selectedEntityId);
+                Vec2 PosOnMap = { {trs.pos.x, trs.pos.z} };
+                game.scene->map.tileStart = &game.scene->map.tiles[game.scene->map.GetTileIndex(PosOnMap)];
                 game.scene->map.tileEnd = &game.scene->map.tiles[indexOfSelectedTile];
+                game.scene->map.ApplyPathfinding();
+                game.coordinator.componentHandler->GetComponentGameplay(selectedEntityId).componentMove.SetPath(*game.scene->map.tileEnd);
             }
-            
         }
-        
 
         if (selectedEntity.toChangeEntityId >= 0)
         {
@@ -283,13 +287,11 @@ void Editor::Loop()
 
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
-        
-
-        game.scene->map.ApplyPathfinding();
+        game.coordinator.ApplyGameplayMove();
 
 
         game.renderer.Draw(&cam, game);
-        if(isRaycastingWithMap)
+        if (isRaycastingWithMap)
             SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
         game.scene->map.DrawSpecificTiles(cam.GetViewProj());
         game.scene->map.DrawPath(dbgRenderer);
