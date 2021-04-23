@@ -1,12 +1,11 @@
-#include <d3d11.h>
-
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
-#include "Resources/ResourcesManager.hpp"
 #include "Game.hpp"
+#include "Resources/Scene.hpp"
 #include "Render/Renderer.hpp"
+#include "imgui.h"
 
 
 using namespace Cookie::Render;
@@ -14,17 +13,12 @@ using namespace Cookie::Core::Math;
 
 /*========================= CONSTRUCTORS/DESTRUCTORS ===========================*/
 
-Renderer::Renderer()
+Renderer::Renderer():
+    remote {InitDevice(window)},
+    state {InitState(window.width, window.height)},
+    gPass{window.width,window.height}
 {
-    bool result = true;
-    result = InitDevice(window);
-    if (result)
-        result = CreateDrawBuffer(window.width,window.height);
-    if (result)
-        result = InitState(window.width, window.height);
-
-    lights.dirLights[0].dir     = { 0.0f,-1.0f,0.0f };
-    lights.dirLights[0].color   = { 1.0f,1.0f,1.0f };
+    CreateDrawBuffer(window.width,window.height);
 }
 
 Renderer::~Renderer()
@@ -41,8 +35,10 @@ Renderer::~Renderer()
 
 /*========================= INIT METHODS =========================*/
 
-bool Renderer::InitDevice(Core::Window& window)
+RendererRemote Renderer::InitDevice(Core::Window& window)
 {
+    RendererRemote _remote;
+
     DXGI_SWAP_CHAIN_DESC scd = {};
 
     // fill the swap chain description struct
@@ -72,12 +68,12 @@ bool Renderer::InitDevice(Core::Window& window)
         D3D11_SDK_VERSION,
         &scd,
         &swapchain,
-        &remote.device,
+        & _remote.device,
         NULL,
-        &remote.context))
-        return false;
+        & _remote.context))
+        return _remote;
 
-    return true;
+    return _remote;
 }
 
 bool Renderer::CreateDrawBuffer(int width, int height)
@@ -128,8 +124,10 @@ bool Renderer::CreateDrawBuffer(int width, int height)
     return true;
 }
 
-bool Renderer::InitState(int width, int height)
+RendererState Renderer::InitState(int width, int height)
 {
+    RendererState _state;
+
     // Initialize the description of the stencil state.
     D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 
@@ -154,10 +152,10 @@ bool Renderer::InitState(int width, int height)
     depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
     depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-    remote.device->CreateDepthStencilState(&depthStencilDesc, &state.depthStencilState);
+    remote.device->CreateDepthStencilState(&depthStencilDesc, &_state.depthStencilState);
 
     // Set the depth stencil state.
-    remote.context->OMSetDepthStencilState(state.depthStencilState, 1);
+    remote.context->OMSetDepthStencilState(_state.depthStencilState, 1);
 
     D3D11_RASTERIZER_DESC rasterDesc = {};
 
@@ -173,10 +171,10 @@ bool Renderer::InitState(int width, int height)
     rasterDesc.ScissorEnable = false;
     rasterDesc.SlopeScaledDepthBias = 0.0f;
 
-    remote.device->CreateRasterizerState(&rasterDesc, &state.rasterizerState);
+    remote.device->CreateRasterizerState(&rasterDesc, &_state.rasterizerState);
 
     // Now set the rasterizer state.
-    remote.context->RSSetState(state.rasterizerState);
+    remote.context->RSSetState(_state.rasterizerState);
 
     state.viewport.TopLeftX = 0;
     state.viewport.TopLeftY = 0;
@@ -185,27 +183,9 @@ bool Renderer::InitState(int width, int height)
     state.viewport.MinDepth = 0.0f;
     state.viewport.MaxDepth = 1.0f;
 
-    remote.context->RSSetViewports(1, &state.viewport);
+    remote.context->RSSetViewports(1, &_state.viewport);
 
-    return true;
-}
-
-/*========================= CREATE METHODS =========================*/
-
-void Renderer::AddFrameBuffer(Resources::ResourcesManager& resources)
-{
-    frameBuffers.push_back(std::move(std::make_unique<FrameBuffer>(resources,state.viewport.Width,state.viewport.Height)));
-}
-
-bool Renderer::CreateBuffer(D3D11_BUFFER_DESC bufferDesc, D3D11_SUBRESOURCE_DATA data, ID3D11Buffer** buffer)
-{
-    if (FAILED(remote.device->CreateBuffer(&bufferDesc, &data, buffer)))
-    {
-        printf("Failed Creating Buffer: %p of size %llu \n", (*buffer), sizeof(data.pSysMem));
-        return false;
-    }
-
-    return true;
+    return _state;
 }
 
 /*========================= CALLBACK METHODS =========================*/
@@ -232,34 +212,54 @@ void Renderer::ResizeBuffer(int width, int height)
     state.viewport.Height = height;
     remote.context->RSSetViewports(1, &state.viewport);
 
-    if (!frameBuffers.empty()) 
-    {
-        for (int i = 0; i < frameBuffers.size(); i++)
-        {
-            frameBuffers[i]->Resize(width,height);
-        }
-    }
+    gPass.posFBO.Resize(width,height);
+    gPass.normalFBO.Resize(width, height);
+    gPass.albedoFBO.Resize(width, height);
 }
 
 /*========================= RENDER METHODS =========================*/
 
-void Renderer::Draw(const Camera* cam, Game& game)
+void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
 {
-    remote.context->OMSetRenderTargets(1, frameBuffers[0]->GetRenderTarget(), nullptr);
+
+    remote.context->OMSetRenderTargets(1, &gPass.albedoFBO.renderTargetView, nullptr);
 
     Core::Math::Mat4 viewProj = cam->GetViewProj();
     
     game.skyBox.Draw(cam->GetProj(), cam->GetView());
 
-    if (!frameBuffers.empty())
-    {
-        remote.context->RSSetState(state.rasterizerState);
-        remote.context->OMSetRenderTargets(1, frameBuffers[0]->GetRenderTarget(), depthBuffer);
-    }
+    remote.context->RSSetState(state.rasterizerState);
+
+    gPass.Set(depthBuffer);
 
     game.scene->map.Draw(viewProj);
 
     game.coordinator.ApplyDraw(viewProj);
+
+    remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
+
+    if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F1] >= 0.0f)
+    {
+        DrawFrameBuffer(gPass.posFBO);
+    }
+    else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F2] >= 0.0f)
+    {
+        DrawFrameBuffer(gPass.normalFBO);
+    }
+    else
+    {
+        DrawFrameBuffer(gPass.albedoFBO);
+    }
+    
+    
+    remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, depthBuffer);
+}
+
+void Renderer::DrawFrameBuffer(FrameBuffer& fbo)
+{
+    fboDrawer.Set();
+    remote.context->PSSetShaderResources(0, 1, &fbo.shaderResource);
+    remote.context->Draw(3, 0);
 }
 
 void Renderer::Clear()
@@ -267,17 +267,20 @@ void Renderer::Clear()
     remote.context->ClearRenderTargetView(backbuffer, state.clearColor.e);
     remote.context->ClearDepthStencilView(depthBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0.0f);
 
-    if (!frameBuffers.empty())
-    {
-        for (int i = 0; i < frameBuffers.size(); i++)
-        {
-            remote.context->ClearRenderTargetView(*frameBuffers[i]->GetRenderTarget(), state.clearColor.e);
-        }
-    }
+    ID3D11ShaderResourceView* null = nullptr;
+
+    remote.context->PSSetShaderResources(0, 1, &null);
+
+    gPass.Clear(state.clearColor);
 
     remote.context->RSSetState(state.rasterizerState);
     remote.context->OMSetDepthStencilState(state.depthStencilState, 1);
     remote.context->RSSetViewports(1, &state.viewport);
+}
+
+void Renderer::ClearFrameBuffer(FrameBuffer& fbo)
+{
+    remote.context->ClearRenderTargetView(fbo.renderTargetView, state.clearColor.e);
 }
 
 void Renderer::SetBackBuffer()

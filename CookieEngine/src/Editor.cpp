@@ -1,9 +1,9 @@
 #include "Editor.hpp" 
-#include "Core/Primitives.hpp"
 #include "UIallIn.hpp"
 #include "Serialization.hpp"
 #include "Physics/PhysicsHandle.hpp"
-#include "Map.hpp"
+#include "ECS/SystemHandler.hpp"
+#include "Resources/Scene.hpp"
 
 using namespace Cookie;
 using namespace Cookie::Core;
@@ -13,11 +13,11 @@ using namespace Cookie::ECS::System;
 using namespace rp3d;
 
 Editor::Editor()
-    : ui(game.renderer) 
+    : ui(game.renderer),
+    editorFBO{game.renderer.window.width,game.renderer.window.height}
 {
     game.resources.Load(game.renderer);
     game.skyBox.texture = game.resources.textures["Assets/skybox.dds"];
-    game.renderer.AddFrameBuffer(game.resources);
     cam.SetProj(Core::Math::ToRadians(60.f), game.renderer.state.viewport.Width, game.renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
     cam.rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
@@ -58,7 +58,7 @@ Editor::Editor()
 
 
     UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.renderer);
-    ui.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, game.renderer.GetLastFrameBuffer(), &cam, game.coordinator, selectedEntity));
+    ui.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, editorFBO, &cam, game.coordinator, selectedEntity));
 
     InitEditComp();
 
@@ -95,16 +95,19 @@ void Editor::ModifyEditComp()
     }
 }
 
+
 void Editor::Loop()
 {
     //soundManager.system->playSound(soundManager.sound, nullptr, false, nullptr);
     Physics::PhysicsHandle physHandle;
 
     {
-        game.scene->map.model.mesh                 = game.resources.meshes["Quad"];
+        game.scene->map.model.mesh                 = game.resources.meshes["Cube"];
         game.scene->map.model.texture              = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"];
         game.scene->map.model.shader               = game.resources.shaders["Texture_Shader"];
 
+
+        //will be removed after testing phase
         game.scene->map.modelTileStart.mesh        = game.resources.meshes["Cube"];
         game.scene->map.modelTileStart.texture     = game.resources.textures["Green"];
         game.scene->map.modelTileStart.shader      = game.resources.shaders["Texture_Shader"];
@@ -147,8 +150,9 @@ void Editor::Loop()
         else
         {
             glfwPollEvents();
-            game.TryResizeWindow();
+            TryResizeWindow();
             game.renderer.Clear();
+            game.renderer.ClearFrameBuffer(editorFBO);
 
             cam.Update();
         }
@@ -195,7 +199,7 @@ void Editor::Loop()
                 indexOfSelectedTile = game.scene->map.GetTileIndex(mousePos);
                 Vec2 centerOfBuilding = game.scene->map.GetCenterOfBuilding(mousePos, buildingTileSize);
 
-                buildingTrs.pos = {centerOfBuilding.x, hitPoint.y , centerOfBuilding.y};
+                buildingTrs.pos = {centerOfBuilding.x, hitPoint.y, centerOfBuilding.y};
             }
         }
         //Bind Keys to change Nb of Tiles of
@@ -285,7 +289,7 @@ void Editor::Loop()
         game.scene->map.ApplyPathfinding();
 
 
-        game.renderer.Draw(&cam, game);
+        game.renderer.Draw(&cam, game,editorFBO);
         if(isRaycastingWithMap)
             SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
         game.scene->map.DrawSpecificTiles(cam.GetViewProj());
@@ -299,5 +303,30 @@ void Editor::Loop()
         ui.UpdateUI();
 
         game.renderer.Render();
+    }
+}
+
+void Editor::TryResizeWindow()
+{
+    int width = 0;
+    int height = 0;
+
+    glfwGetWindowSize(game.renderer.window.window, &width, &height);
+
+    if (width <= 0 || height <= 0)
+        return;
+
+    if (game.renderer.window.width != width || game.renderer.window.height != height)
+    {
+        Core::DebugMessageHandler::Summon().Log((std::to_string(width) + ' ' + std::to_string(height)).c_str());
+        printf("%d, %d\n", width, height);
+        game.renderer.window.width = width;
+        game.renderer.window.height = height;
+
+        game.renderer.ResizeBuffer(width, height);
+        game.frameBuffer.Resize(width, height);
+        editorFBO.Resize(width, height);
+
+        //scene->camera->SetProj(Core::Math::ToRadians(60.f), width, height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     }
 }

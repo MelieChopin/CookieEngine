@@ -1,21 +1,21 @@
-#include <d3d11.h>
 #include <d3dcompiler.h>
+#include <system_error>
 
 #include "Vec4.hpp"
 #include "Mat4.hpp"
 #include "Render/Renderer.hpp"
 #include "Render/RendererRemote.hpp"
-#include "Resources/Shader/TextureShader.hpp"
+#include "Resources/Shader/GeometryShader.hpp"
 
 using namespace Cookie::Resources;
 
 struct VS_CONSTANT_BUFFER
 {
-    Cookie::Core::Math::Mat4 viewProj = Cookie::Core::Math::Mat4::Identity();
-    Cookie::Core::Math::Mat4 modelMat = Cookie::Core::Math::Mat4::Identity();
+    Cookie::Core::Math::Mat4 proj = Cookie::Core::Math::Mat4::Identity();
+    Cookie::Core::Math::Mat4 view = Cookie::Core::Math::Mat4::Identity();
 };
 
-TextureShader::TextureShader(std::string _name):
+GeometryShader::GeometryShader(std::string _name) :
     Shader(_name)
 {
     ID3DBlob* VS;
@@ -25,7 +25,7 @@ TextureShader::TextureShader(std::string _name):
             CreateBuffer();
 }
 
-TextureShader::~TextureShader()
+GeometryShader::~GeometryShader()
 {
     if (PShader)
         PShader->Release();
@@ -37,13 +37,15 @@ TextureShader::~TextureShader()
         sampler->Release();
 }
 
-std::string TextureShader::GetVertexSource()
+std::string GeometryShader::GetVertexSource()
 {
-	return (const char*)R"(struct VOut
+    return (const char*)R"(
+    struct VOut
     {
         float4 position : SV_POSITION;
         float2 uv : UV; 
         float3 normal : NORMAL;
+        float3 fragPos : FRAGPOS;
     };
     
     cbuffer VS_CONSTANT_BUFFER : register(b0)
@@ -56,32 +58,47 @@ std::string TextureShader::GetVertexSource()
     {
         VOut output;
     
-        output.position = mul(mul(float4(position,1.0),model), viewProj);
+        output.fragPos  = mul(float4(position,1.0),model).xyz;
+        output.position = mul(float4(output.fragPos,1.0), viewProj);
         output.uv       = uv;
-        output.normal   = normal;
+        output.normal   = normalize(mul(normal,(float3x3)model));
     
         return output;
 
-    })";
+    }
+    )";
 }
 
-std::string TextureShader::GetPixelSource()
+std::string GeometryShader::GetPixelSource()
 {
-	return (const char*)R"(
+    return (const char*)R"(#line 75
 
-    Texture2D	diffuseTex2D : register( t0 );    
+    Texture2D	diffuseTex2D : register(t0);    
 
-    SamplerState WrapSampler : register (s0);
+    SamplerState WrapSampler : register(s0);
 
-    float4 main(float4 position : SV_POSITION, float2 uv : UV, float3 normal : NORMAL) : SV_TARGET
+    struct POut
     {
-        return diffuseTex2D.Sample(WrapSampler,uv);
+        float4 position : SV_TARGET0;
+        float4 normal : SV_TARGET1; 
+        float4 albedo : SV_TARGET2;
+    };
+
+    POut main(float4 position : SV_POSITION, float2 uv : UV, float3 normal : NORMAL, float3 fragPos : FRAGPOS) 
+    {
+        POut pOutput;
+
+        pOutput.position    = float4(fragPos,1.0);
+        pOutput.normal      = float4(normal,1.0);
+        pOutput.albedo      = float4(diffuseTex2D.Sample(WrapSampler,uv).rgb,1.0);
+
+
+        return pOutput;
     })";
 }
 
 
-
-bool TextureShader::CompileVertex(ID3DBlob** VS)
+bool GeometryShader::CompileVertex(ID3DBlob** VS)
 {
     ID3DBlob* VSErr;
     std::string source = GetVertexSource();
@@ -101,7 +118,7 @@ bool TextureShader::CompileVertex(ID3DBlob** VS)
     return true;
 }
 
-bool TextureShader::CompilePixel()
+bool GeometryShader::CompilePixel()
 {
     ID3DBlob* PS;
     ID3DBlob* PSErr;
@@ -123,7 +140,7 @@ bool TextureShader::CompilePixel()
     return true;
 }
 
-bool TextureShader::CreateLayout(ID3DBlob** VS)
+bool GeometryShader::CreateLayout(ID3DBlob** VS)
 {
     struct Vertex
     {
@@ -131,7 +148,6 @@ bool TextureShader::CreateLayout(ID3DBlob** VS)
         Core::Math::Vec2 uv;
         Core::Math::Vec3 normal;
     };
-
     // create the input layout object
     D3D11_INPUT_ELEMENT_DESC ied[] =
     {
@@ -140,16 +156,19 @@ bool TextureShader::CreateLayout(ID3DBlob** VS)
         {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, normal), D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
 
-    if (FAILED(Render::RendererRemote::device->CreateInputLayout(ied, 3, (*VS)->GetBufferPointer(), (*VS)->GetBufferSize(), &layout)))
+    HRESULT result = Render::RendererRemote::device->CreateInputLayout(ied, 3, (*VS)->GetBufferPointer(), (*VS)->GetBufferSize(), &layout);
+
+    if (FAILED(result))
     {
-        printf("FAILED to create input layout \n");
+
+        printf("FAILED to create input layout: %s \n", std::system_category().message(result).c_str());
         return false;
     }
 
     return true;
 }
 
-bool TextureShader::CreateBuffer()
+bool GeometryShader::CreateBuffer()
 {
     D3D11_BUFFER_DESC bDesc = {};
 
@@ -160,7 +179,7 @@ bool TextureShader::CreateBuffer()
     bDesc.MiscFlags = 0;
     bDesc.StructureByteStride = 0;
 
-    VS_CONSTANT_BUFFER buffer;
+    VS_CONSTANT_BUFFER buffer = {};
 
     D3D11_SUBRESOURCE_DATA InitData;
     InitData.pSysMem = &buffer;
@@ -176,7 +195,7 @@ bool TextureShader::CreateBuffer()
     return true;
 }
 
-bool TextureShader::CreateSampler()
+bool GeometryShader::CreateSampler()
 {
     // Create a sampler state
     D3D11_SAMPLER_DESC SamDesc = {};
@@ -200,11 +219,20 @@ bool TextureShader::CreateSampler()
     return true;
 }
 
-void TextureShader::Set(const Core::Math::Mat4& viewProj, const Core::Math::Mat4& model)
+void GeometryShader::Set()
 {
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
 
+    Render::RendererRemote::context->IASetInputLayout(layout);
+    Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
+    Render::RendererRemote::context->PSSetSamplers(0, 1, &sampler);
+
+    Render::RendererRemote::currentShader = (Shader*)this;
+}
+
+void GeometryShader::WriteCBuffer(const Core::Math::Mat4& proj, const Core::Math::Mat4& view)
+{
     D3D11_MAPPED_SUBRESOURCE ms;
 
     if (FAILED(Render::RendererRemote::context->Map(CBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms)))
@@ -213,13 +241,9 @@ void TextureShader::Set(const Core::Math::Mat4& viewProj, const Core::Math::Mat4
         return;
     }
 
-    VS_CONSTANT_BUFFER vcb = { viewProj,model };
+    VS_CONSTANT_BUFFER vcb = { proj,view };
 
     memcpy(ms.pData, &vcb, sizeof(vcb));
 
     Render::RendererRemote::context->Unmap(CBuffer, 0);
-
-    Render::RendererRemote::context->IASetInputLayout(layout);
-    Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
-    Render::RendererRemote::context->PSSetSamplers(0, 1, &sampler);
 }

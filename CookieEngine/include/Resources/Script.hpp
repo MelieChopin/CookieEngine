@@ -42,22 +42,20 @@ namespace Cookie
 				state.open_libraries(sol::lib::base);
 				UpdateContent();
 			}
-
 			~Script() {}
 
 			inline ScriptObject CreateObject(std::string entityId);
-
-			inline bool isUpToDate()
-			{
-				return (lastUpdateTime == std::filesystem::last_write_time(filename));
-			}
-
+			inline bool isUpToDate();
 			inline void UpdateContent();
 		};
 				
 		class ScriptObject
 		{
 		public:
+			Script* script;
+			sol::table table;
+
+
 			ScriptObject(Script& aScript, std::string entityId) : script(&aScript)
 			{
 				table = script->state[entityId].get_or_create<sol::table>();
@@ -65,38 +63,12 @@ namespace Cookie
 				script->ScriptObjectsChild.push_back(this);
 			}
 
-			void Start() const { script->start(table); }
-			void Update() const { script->update(table); }
-
-
-			Script* script;
-			sol::table table;
+			inline void Start() const;
+			inline void Update() const;
 		};
-		
-
-		inline ScriptObject Script::CreateObject(std::string entityId)
-		{
-			return ScriptObject(*this, entityId);
-		}
-		inline void Script::UpdateContent()
-		{
-			std::cout << "Updating Script\n";
-			lastUpdateTime = std::filesystem::last_write_time(filename);
-
-
-			state.script_file(filename);
-			construct = state["Construct"];
-			start = state["Start"];
-			update = state["Update"];
-
-			for (int i = 0; i < ScriptObjectsChild.size(); ++i)
-			{
-				//ScriptObjectsChild[i]->table.clear();
-				construct(ScriptObjectsChild[i]->table);
-			}
-		}
-
 	}
 }
+
+#include "Resources//Script.inl"
 
 #endif // !__SCRIPT_HPP__

@@ -1,12 +1,9 @@
-#include <d3d11.h>
-#include <d3dcompiler.h>
-
-#include "reactphysics3d/reactphysics3d.h"
-#include "Vec4.hpp"
-#include "Mat4.hpp"
-#include "Render/Renderer.hpp"
 #include "Render/RendererRemote.hpp"
+#include "reactphysics3d/reactphysics3d.h"
 #include "Resources/Shader/PhysicsShader.hpp"
+#include "Mat4.hpp"
+
+#include <d3dcompiler.h>
 
 using namespace Cookie::Resources;
 
@@ -162,11 +159,19 @@ bool PhysicsShader::CreateBuffer()
     return true;
 }
 
-void PhysicsShader::Set(const Core::Math::Mat4& viewProj, const Core::Math::Mat4& model)
+void PhysicsShader::Set()
 {
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
 
+    Render::RendererRemote::context->IASetInputLayout(layout);
+    Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
+
+    Render::RendererRemote::currentShader = (Shader*)this;
+}
+
+void PhysicsShader::WriteCBuffer(const Core::Math::Mat4& proj, const Core::Math::Mat4& view)
+{
     D3D11_MAPPED_SUBRESOURCE ms;
 
     if (FAILED(Render::RendererRemote::context->Map(CBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms)))
@@ -175,12 +180,9 @@ void PhysicsShader::Set(const Core::Math::Mat4& viewProj, const Core::Math::Mat4
         return;
     }
 
-    VS_CONSTANT_BUFFER vcb = { viewProj };
+    VS_CONSTANT_BUFFER vcb = { proj };
 
     memcpy(ms.pData, &vcb, sizeof(vcb));
 
     Render::RendererRemote::context->Unmap(CBuffer, 0);
-
-    Render::RendererRemote::context->IASetInputLayout(layout);
-    Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
 }

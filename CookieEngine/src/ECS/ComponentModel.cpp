@@ -1,5 +1,6 @@
-#include <d3d11.h>
+#include "Resources/Shader.hpp"
 #include "Render/RendererRemote.hpp"
+
 #include "Resources/Mesh.hpp"
 #include "Resources/Shader.hpp"
 #include "Resources/Texture.hpp"
@@ -30,8 +31,8 @@ void ComponentModel::ToDefault()
 
 void ComponentModel::Draw(const Core::Math::Mat4& viewProj, const Core::Math::Mat4& modelMat)
 {
-    if (shader)
-        shader->Set(viewProj, modelMat);
+    if (Render::RendererRemote::currentShader)
+        Render::RendererRemote::currentShader->WriteCBuffer(viewProj, modelMat);
     if (texture)
         texture->Set();
     if (mesh)

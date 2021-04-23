@@ -1,22 +1,18 @@
 #include <system_error>
 #include <string>
 #include <memory>
-#include <d3d11.h>
 
-#include "Core/Math/Calc.hpp"
+
 #include "Render/RendererRemote.hpp"
-#include "Render/Renderer.hpp"
-#include "Resources/ResourcesManager.hpp"
-#include "Resources/Shader.hpp"
 #include "Resources/Mesh.hpp"
+#include "Resources/Shader.hpp"
+#include "Resources/ResourcesManager.hpp"
 #include "Render/FrameBuffer.hpp"
-#include "Core/Primitives.hpp"
 
 
 using namespace Cookie::Render;
 
-FrameBuffer::FrameBuffer(Resources::ResourcesManager& _resources, int width, int height):
-	quad{ _resources.meshes["Quad"] }, shader{ _resources.shaders.at("Texture_Shader") }
+FrameBuffer::FrameBuffer(int width, int height)
 {
     if (CreateTexture(width,height))
     {
@@ -128,22 +124,5 @@ void FrameBuffer::Resize(int width, int height)
     {
         CreateShaderResource();
         CreateRenderTargetView();
-    }
-}
-
-void FrameBuffer::Draw()
-{
-    if (shader)
-    {
-        shader->Set(Core::Math::Mat4::Identity(), Core::Math::Mat4::TRS(Cookie::Core::Math::Vec3(0.0f,0.0f,0.99f),Cookie::Core::Math::Vec3(Core::Math::PI,0.0f,0.0f),Core::Math::Vec3(1.0f,1.0f,1.0f)));
-    }
-    if (shaderResource)
-    {
-        Render::RendererRemote::context->PSSetShaderResources(0,1,&shaderResource);
-    }
-    if (quad)
-    {
-        quad->Set();
-        quad->Draw();
     }
 }

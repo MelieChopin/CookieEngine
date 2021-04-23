@@ -1,9 +1,10 @@
 #ifndef __SHADER_HPP__
 #define __SHADER_HPP__
 
-#include <string>
 #include "Core/Math/Mat4.hpp"
-#include <d3dcommon.h>
+
+#include <string>
+#include <d3d11.h>
 
 class ID3D11VertexShader;
 class ID3D11PixelShader;
@@ -44,7 +45,8 @@ namespace Cookie
 				Shader(std::string _name) :name{ _name } {}
 				virtual ~Shader() {}
 
-				virtual void Set(const Core::Math::Mat4& projMat, const Core::Math::Mat4& viewMat) = 0;
+				virtual void Set() = 0;
+				virtual void WriteCBuffer(const Core::Math::Mat4& projMat, const Core::Math::Mat4& viewMat) = 0;
 		};
 	}
 }

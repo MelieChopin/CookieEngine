@@ -1,6 +1,7 @@
 #ifndef __QUAT_INL__
 #define __QUAT_INL__
 
+#include "Calc.hpp"
 #include <cmath>
 #include <assert.h>
 

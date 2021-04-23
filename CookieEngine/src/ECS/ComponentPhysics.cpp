@@ -1,5 +1,4 @@
 #include "Physics/PhysicsHandle.hpp"
-#include "Core/Math/Quat.hpp"
 #include "ECS/ComponentTransform.hpp"
 #include "ECS/ComponentPhysics.hpp"
 

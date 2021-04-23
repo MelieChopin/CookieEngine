@@ -1,5 +1,5 @@
-#ifndef __BLINN_PHONG_SHADER_HPP__
-#define __BLINN_PHONG_SHADER_HPP__
+#ifndef __FBO_DRAW_SHADER_HPP__
+#define __FBO_DRAW_SHADER_HPP__
 
 #include "Render/RendererRemote.hpp"
 #include "Resources/Shader.hpp"
@@ -8,7 +8,7 @@ namespace Cookie
 {
 	namespace Resources
 	{
-		class BlinnPhongShader : public Shader
+		class FBODrawShader : public Shader
 		{
 		protected:
 			ID3D11SamplerState* sampler = nullptr;
@@ -27,14 +27,17 @@ namespace Cookie
 		public:
 
 			/* CONSTRUCTORS/DESTRUCTORS */
-			BlinnPhongShader(std::string _name);
-			virtual ~BlinnPhongShader();
+			FBODrawShader(std::string _name);
+			virtual ~FBODrawShader();
 
 			virtual void Set()override;
 			virtual void WriteCBuffer(const Core::Math::Mat4& projMat, const Core::Math::Mat4& viewMat)override;
+
 		};
+
+
 	}
 }
 
 
-#endif // !__BLINN_PHONG_SHADER_HPP__
+#endif // !__FBO_DRAW_SHADER_HPP__

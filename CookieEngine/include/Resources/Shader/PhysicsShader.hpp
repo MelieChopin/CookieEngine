@@ -1,7 +1,6 @@
 #ifndef __PHYSICS_SHADER_HPP__
 #define __PHYSICS_SHADER_HPP__
 
-#include "Render/RendererRemote.hpp"
 #include "Resources/Shader.hpp"
 
 namespace Cookie
@@ -28,7 +27,8 @@ namespace Cookie
 				PhysicsShader(std::string _name);
 				virtual ~PhysicsShader();
 
-				virtual void Set(const Core::Math::Mat4& projMat, const Core::Math::Mat4& viewMat = Core::Math::Mat4::Identity())override;
+				virtual void Set()override;
+				virtual void WriteCBuffer(const Core::Math::Mat4& projMat, const Core::Math::Mat4& viewMat)override;
 		};
 	}
 }

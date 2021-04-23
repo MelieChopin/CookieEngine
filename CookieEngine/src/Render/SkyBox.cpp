@@ -1,12 +1,8 @@
-#include <d3d11.h>
-
 #include "Render/RendererRemote.hpp"
-
-#include "Resources/ResourcesManager.hpp"
+#include "Resources//ResourcesManager.hpp"
 #include "Resources/Mesh.hpp"
+#include "Resources/Shader.hpp"
 #include "Resources/Texture.hpp"
-#include "Resources/Shader/SkyBoxShader.hpp"
-
 #include "Skybox.hpp"
 
 using namespace Cookie::Render;
@@ -44,8 +40,11 @@ SkyBox::~SkyBox()
 void SkyBox::Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view)
 {
     RendererRemote::context->RSSetState(rasterizerState);
-	if (shader)
-		shader->Set(proj, view);
+    if (shader)
+    {
+        shader->Set();
+        shader->WriteCBuffer(proj, view);
+    }
 	if (texture)
 		texture->Set();
     else

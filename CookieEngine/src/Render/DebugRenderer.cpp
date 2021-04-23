@@ -1,8 +1,9 @@
-#include <d3d11.h>
-#include "Core/Primitives.hpp"
+
 #include "Render/RendererRemote.hpp"
+#include "Core/Primitives.hpp"
 #include "Physics/PhysicsHandle.hpp"
 #include "Render/DebugRenderer.hpp"
+
 
 using namespace Cookie::Render;
 using namespace Cookie::Resources;
@@ -99,7 +100,8 @@ void DebugRenderer::Draw(const Mat4& viewProj)
     {
         UINT stride = sizeof(Core::Math::Vec3) + sizeof(uint32_t);
         UINT offset = 0;
-        physShader.Set(viewProj);
+        physShader.Set();
+        physShader.WriteCBuffer(viewProj, Core::Math::Mat4());
 
         D3D11_PRIMITIVE_TOPOLOGY topo = D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
         Render::RendererRemote::context->IAGetPrimitiveTopology(&topo);

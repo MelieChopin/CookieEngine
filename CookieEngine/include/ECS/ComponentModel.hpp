@@ -1,6 +1,7 @@
 #ifndef __COMPONENT_MODEL_HPP__
 #define __COMPONENT_MODEL_HPP__
 
+
 namespace Cookie
 {
     namespace Resources

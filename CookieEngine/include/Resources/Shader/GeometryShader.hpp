@@ -1,5 +1,5 @@
-#ifndef __BLINN_PHONG_SHADER_HPP__
-#define __BLINN_PHONG_SHADER_HPP__
+#ifndef __GEOMETRY_SHADER_HPP__
+#define __GEOMETRY_SHADER_HPP__
 
 #include "Render/RendererRemote.hpp"
 #include "Resources/Shader.hpp"
@@ -8,7 +8,7 @@ namespace Cookie
 {
 	namespace Resources
 	{
-		class BlinnPhongShader : public Shader
+		class GeometryShader : public Shader
 		{
 		protected:
 			ID3D11SamplerState* sampler = nullptr;
@@ -27,8 +27,8 @@ namespace Cookie
 		public:
 
 			/* CONSTRUCTORS/DESTRUCTORS */
-			BlinnPhongShader(std::string _name);
-			virtual ~BlinnPhongShader();
+			GeometryShader(std::string _name);
+			virtual ~GeometryShader();
 
 			virtual void Set()override;
 			virtual void WriteCBuffer(const Core::Math::Mat4& projMat, const Core::Math::Mat4& viewMat)override;
@@ -37,4 +37,4 @@ namespace Cookie
 }
 
 
-#endif // !__BLINN_PHONG_SHADER_HPP__
+#endif // !__GEOMETRY_SHADER_HPP__

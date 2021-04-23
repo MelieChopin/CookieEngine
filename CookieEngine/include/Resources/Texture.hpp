@@ -4,11 +4,14 @@
 #include <d3d11.h>
 #include <string>
 
-#include "Vec4.hpp"
-
 
 namespace Cookie
 {
+	namespace Core::Math
+	{
+		union Vec4;
+	}
+
 	namespace Render
 	{
 		class Renderer;
