@@ -1,20 +1,10 @@
-#ifndef __UI_CORE_HPP_
-#define __UI_CORE_HPP_
+#ifndef __UI_EDITOR_HPP_
+#define __UI_EDITOR_HPP_
 
 
 #include "UIwidgetBases.hpp"
 
 #include <vector>
-
-
-struct GLFWwindow;
-
-struct ID3D11DeviceContext;
-struct ID3D11Device;
-struct ID3D11RenderTargetView;
-struct ID3D11DepthStencilView;
-
-namespace Cookie::Render {class Renderer;}
 
 
 namespace Cookie::UI
@@ -28,16 +18,10 @@ namespace Cookie::UI
 
 		// All stored item elements of the engine UI.
 		std::vector<std::shared_ptr<UIwidget::ItemBase>>	UItems[4];
-
-	private:
-		void BeginFrame();
-		void EndFrame();
 	
 	public:
-		UIeditor(const Cookie::Render::Renderer& _renderer);
+		UIeditor();
 		void ClearWidgets();
-		void Terminate();
-
 
 		// Adds a window inside the UI elements. Do mind, you'll need something to remote-control it if you intend to close it eventually.
 		inline void AddWindow (UIwidget::WindowBase* UIW)
@@ -61,9 +45,9 @@ namespace Cookie::UI
 
 
 		/*
-			Main rendering function for the overall UI
+			Main rendering function for the overall UI of the editor.
 
-			Displays the main window, as well as the docking space with all other opened windows, and the menu bar.
+			Displays the main window, as well as all the widgets added within.
 		*/
 		void UpdateUI();
 	};

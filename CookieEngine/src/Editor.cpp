@@ -12,7 +12,6 @@ using namespace Cookie::ECS::System;
 using namespace rp3d;
 
 Editor::Editor()
-    : ui(game.renderer) 
 {
     game.resources.Load(game.renderer);
     game.renderer.AddFrameBuffer(game.resources);
@@ -36,26 +35,22 @@ Editor::Editor()
 
     game.SetScene(_scene);
 
-    ui.AddItem(new UIwidget::SaveButton(game.scene, game.resources), 0);
+    editorUI.AddItem(new UIwidget::SaveButton(game.scene, game.resources), 0);
+    editorUI.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
 
-    
-    ui.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
+    editorUI.AddWItem(new UIwidget::TextureEditor(game.renderer, game.resources), 1);
 
-    ui.AddWItem(new UIwidget::TextureEditor(game.renderer, game.resources), 1);
+    editorUI.AddWItem(new UIwidget::GamePort(game), 2);
+    editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
+    editorUI.AddWItem(new UIwidget::FileExplorer(game.renderer, game), 2);
+    editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
+    editorUI.AddWItem(new UIwidget::Console(CDebug, game.renderer), 2);
 
-    ui.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
-
-    ui.AddWItem(new UIwidget::FileExplorer(game.renderer, game), 2);
-
-    ui.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
-
-    ui.AddWItem(new UIwidget::Console(CDebug, game.renderer), 2);
-
-    ui.AddWItem(new UIwidget::DemoWindow, 3);
+    editorUI.AddWItem(new UIwidget::DemoWindow, 3);
 
 
     UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.renderer);
-    ui.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, game.renderer.GetLastFrameBuffer(), &cam, game.coordinator, selectedEntity));
+    editorUI.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, game.renderer.GetLastFrameBuffer(), &cam, game.coordinator, selectedEntity));
 
     InitEditComp();
 
@@ -184,7 +179,9 @@ void Editor::Loop()
 
         game.renderer.SetBackBuffer();
 
-        ui.UpdateUI();
+        UIcore::BeginFrame();
+        editorUI.UpdateUI();
+        UIcore::EndFrame();
 
         game.renderer.Render();
     }

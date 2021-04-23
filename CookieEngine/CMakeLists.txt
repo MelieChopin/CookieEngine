@@ -18,6 +18,8 @@ include_directories("${INC_DIR}/Core/")
 include_directories("${INC_DIR}/Core/Math/")
 include_directories("${INC_DIR}/UI/")
 include_directories("${INC_DIR}/UI/Widgets/")
+include_directories("${INC_DIR}/UI/Widgets/EditorWs/")
+include_directories("${INC_DIR}/UI/Widgets/GameWs/")
 include_directories("${INC_DIR}/Render/")
 include_directories("${INC_DIR}/ECS/")
 include_directories("${INC_DIR}/Resources/")
@@ -86,18 +88,21 @@ set (SRC_FILES
 
     "${SRC_DIR}/Resources/Shader/PhysicsShader.cpp" 
 
+    "${SRC_DIR}/UI/UIcore.cpp"
     "${SRC_DIR}/UI/UIeditor.cpp"
+    "${SRC_DIR}/UI/UIgame.cpp"
+    "${SRC_DIR}/UI/UIscene.cpp"
     "${SRC_DIR}/UI/CustomImWidget.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgetBases.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgets.cpp" 
-    "${SRC_DIR}/UI/Widgets/ConsoleWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/FileExplorerWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/GameportWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/HierarchyWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/InspectorWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/TextureEditorWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/ToolbarWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/ViewportWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/ConsoleWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/FileExplorerWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/GameportWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/HierarchyWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/InspectorWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/TextureEditorWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/ToolbarWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/ViewportWidget.cpp"
     
     "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
 

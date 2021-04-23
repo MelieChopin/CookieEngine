@@ -1,13 +1,15 @@
 #include <reactphysics3d/reactphysics3d.h>
 #include "Game.hpp"
 
+#include "UIcore.hpp"
+
 using namespace Cookie;
 
 /*================== CONSTRUCTORS/DESTRUCTORS ==================*/
 
 Game::Game()
 {
-
+    Core::UIcore::FinishInit(renderer);
 }
 
 Game::~Game()

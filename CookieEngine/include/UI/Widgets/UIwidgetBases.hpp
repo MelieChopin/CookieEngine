@@ -24,7 +24,7 @@ namespace Cookie::UIwidget
 		
 		virtual void WindowDisplay() = 0;
 	};
-
+	
 
 	struct ItemBase
 	{

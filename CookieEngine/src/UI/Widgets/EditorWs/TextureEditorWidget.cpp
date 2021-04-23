@@ -36,6 +36,13 @@ void TextureEditor::WindowDisplay()
 
 			EndGroup();
 
+			if (BeginPopupContextItem())
+			{
+				if (Selectable("Delete this texture!"))
+				{ resources.textures.erase(textPtr); }
+			}
+
+
 			SameLine();
 			if (GetContentRegionAvail().x < 100.f) NewLine();
         }
