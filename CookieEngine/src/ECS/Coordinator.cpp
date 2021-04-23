@@ -85,3 +85,10 @@ void Coordinator::ApplyScriptUpdate()
 			System::SystemScriptUpdate(componentHandler->GetComponentScript(entityHandler->entities[i].id));
 }
 
+void Coordinator::ApplyGameplayMove()
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM) &&
+			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
+			componentHandler->GetComponentGameplay(i).componentMove.MoveTowardWaypoint(componentHandler->GetComponentTransform(i) );
+}

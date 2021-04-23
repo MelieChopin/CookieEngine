@@ -51,6 +51,16 @@ namespace Cookie
 
 			entity.signature += SIGNATURE_SCRIPT;
 		}
+		inline void ComponentHandler::AddComponentGameplay(Entity& entity)noexcept
+		{
+			if (entity.signature & SIGNATURE_GAMEPLAY)
+			{
+				CDebug.Warning("Component Gameplay already present");
+				return;
+			}
+
+			entity.signature += SIGNATURE_GAMEPLAY;
+		}
 
 		inline void ComponentHandler::RemoveComponentTransform(Entity& entity)noexcept
 		{
@@ -96,6 +106,17 @@ namespace Cookie
 
 			CDebug.Warning("No Component Script present");
 		}
+		inline void ComponentHandler::RemoveComponentGameplay(Entity& entity)noexcept
+		{
+			if (entity.signature & SIGNATURE_GAMEPLAY)
+			{
+				GetComponentGameplay(entity.id).ToDefault(entity);
+				entity.signature -= SIGNATURE_GAMEPLAY;
+				return;
+			}
+
+			CDebug.Warning("No Component Gameplay present");
+		}
 
 		inline ComponentTransform& ComponentHandler::GetComponentTransform(const unsigned int id) noexcept 
 		{
@@ -112,6 +133,10 @@ namespace Cookie
 		inline ComponentScript& ComponentHandler::GetComponentScript(const unsigned int id) noexcept
 		{
 			return componentScripts[id]; 
+		}
+		inline ComponentGameplay& ComponentHandler::GetComponentGameplay(const unsigned int id) noexcept
+		{
+			return componentGameplays[id];
 		}
 	}
 }

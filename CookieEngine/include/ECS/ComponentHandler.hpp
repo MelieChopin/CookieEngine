@@ -8,6 +8,7 @@
 #include "ECS/ComponentModel.hpp"
 #include "ECS/ComponentPhysics.hpp"
 #include "ECS/ComponentScript.hpp"
+#include "ECS/ComponentGameplay.hpp"
 
 
 namespace Cookie
@@ -19,12 +20,13 @@ namespace Cookie
 
 	namespace ECS
 	{
-		#define SIGNATURE_EMPTY         0b0000
-		#define SIGNATURE_TRANSFORM     0b0001
-		#define SIGNATURE_MODEL         0b0010
-		#define SIGNATURE_PHYSICS		0b0100
-		#define SIGNATURE_SCRIPT        0b1000
-		#define SIGNATURE_ALL_COMPONENT 0b1111
+		#define SIGNATURE_EMPTY         0b00000
+		#define SIGNATURE_TRANSFORM     0b00001
+		#define SIGNATURE_MODEL         0b00010
+		#define SIGNATURE_PHYSICS		0b00100
+		#define SIGNATURE_SCRIPT        0b01000
+		#define SIGNATURE_GAMEPLAY      0b10000
+		#define SIGNATURE_ALL_COMPONENT 0b11111
 
 
 
@@ -36,6 +38,7 @@ namespace Cookie
 			std::array<ComponentModel,		MAX_ENTITIES> componentModels;
 			std::array<ComponentPhysics,	MAX_ENTITIES> componentPhysics;
 			std::array<ComponentScript,		MAX_ENTITIES> componentScripts;
+			std::array<ComponentGameplay,   MAX_ENTITIES> componentGameplays;
 
 
 
@@ -46,6 +49,7 @@ namespace Cookie
 			inline void AddComponentModel     (Entity& entity) noexcept;
 			inline void AddComponentPhysics   (Entity& entity) noexcept;
 			inline void AddComponentScript    (Entity& entity) noexcept;
+			inline void AddComponentGameplay  (Entity& entity) noexcept;
 
 			void InitComponentPhysic(Entity& entity);
 			void ModifyComponentOfEntityToPrefab(Entity& entity, Cookie::Resources::ResourcesManager& resourcesManager, std::string& namePrefab);
@@ -54,11 +58,13 @@ namespace Cookie
 			inline void RemoveComponentModel     (Entity& entity) noexcept;
 			inline void RemoveComponentPhysics   (Entity& entity) noexcept;
 			inline void RemoveComponentScript    (Entity& entity) noexcept;
+			inline void RemoveComponentGameplay  (Entity& entity) noexcept;
 
 			inline ComponentTransform& GetComponentTransform (const unsigned int id) noexcept;
 			inline ComponentModel&     GetComponentModel     (const unsigned int id) noexcept;
 			inline ComponentPhysics&   GetComponentPhysics   (const unsigned int id) noexcept;
 			inline ComponentScript&    GetComponentScript    (const unsigned int id) noexcept;
+			inline ComponentGameplay&  GetComponentGameplay  (const unsigned int id) noexcept;
 		};
 
 	}
