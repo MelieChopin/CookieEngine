@@ -1,12 +1,8 @@
-#include <d3d11.h>
-
 #include "Render/RendererRemote.hpp"
-
-#include "Resources/ResourcesManager.hpp"
+#include "Resources//ResourcesManager.hpp"
 #include "Resources/Mesh.hpp"
+#include "Resources/Shader.hpp"
 #include "Resources/Texture.hpp"
-#include "Resources/Shader/SkyBoxShader.hpp"
-
 #include "Skybox.hpp"
 
 using namespace Cookie::Render;

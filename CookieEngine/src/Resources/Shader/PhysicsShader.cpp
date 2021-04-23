@@ -1,12 +1,9 @@
-#include <d3d11.h>
-#include <d3dcompiler.h>
-
-#include "reactphysics3d/reactphysics3d.h"
-#include "Vec4.hpp"
-#include "Mat4.hpp"
-#include "Render/Renderer.hpp"
 #include "Render/RendererRemote.hpp"
+#include "reactphysics3d/reactphysics3d.h"
 #include "Resources/Shader/PhysicsShader.hpp"
+#include "Mat4.hpp"
+
+#include <d3dcompiler.h>
 
 using namespace Cookie::Resources;
 

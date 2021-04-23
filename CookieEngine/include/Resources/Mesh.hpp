@@ -3,8 +3,9 @@
 
 struct ID3D11Buffer;
 
-#include <string>
 #include "Core/Math/Vec3.hpp"
+
+#include <string>
 #include <assimp/mesh.h>
 #include <vector>
 

@@ -1,9 +1,9 @@
-#include <d3d11.h>
-#include "Render/RendererRemote.hpp"
 #include "Resources/Mesh.hpp"
 #include "Resources/Shader.hpp"
 #include "Resources/Texture.hpp"
 #include "ECS/ComponentModel.hpp"
+
+#include <d3d11.h>
 
 using namespace Cookie::ECS;
 

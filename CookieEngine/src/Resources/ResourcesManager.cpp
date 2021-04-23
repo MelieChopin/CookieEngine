@@ -2,14 +2,20 @@
 #include <algorithm>
 
 #include "Resources/Mesh.hpp"
-#include "Render/Renderer.hpp"
-#include "Resources/Loader.hpp"
-#include "Resources/ResourcesManager.hpp"
-#include "Core/Primitives.hpp"
+#include "Resources/Shader.hpp"
+#include "Resources/Texture.hpp"
+#include "Resources/Script.hpp"
+#include "Resources/Scene.hpp"
 #include "Resources/Prefab.hpp"
-
+#include "Resources/Loader.hpp"
 #include "Resources/Shader/TextureShader.hpp"
 #include "Resources/Shader/SkyBoxShader.hpp"
+#include "Resources/ResourcesManager.hpp"
+
+#include "Render/Renderer.hpp"
+#include "Core/Primitives.hpp"
+#include "ECS/EntityHandler.hpp"
+
 
 #include <memory>
 
@@ -113,6 +119,13 @@ void ResourcesManager::Load(Render::Renderer& _renderer)
 		}
 		//printf("%s\n", gltfFiles.at(i).c_str());
 	}
+}
+
+void ResourcesManager::UpdateScriptsContent()
+{
+	for (std::unordered_map<std::string, std::shared_ptr<Script>>::iterator scrIt = scripts.begin(); scrIt != scripts.end(); scrIt++)
+		if (!(scrIt->second->isUpToDate()))
+			scrIt->second->UpdateContent();
 }
 
 void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandler& component)

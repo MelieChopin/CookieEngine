@@ -1,7 +1,6 @@
 #ifndef __TEXTURE_SHADER_HPP__
 #define __TEXTURE_SHADER_HPP__
 
-#include "Render/RendererRemote.hpp"
 #include "Resources/Shader.hpp"
 
 namespace Cookie

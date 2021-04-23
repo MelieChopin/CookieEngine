@@ -1,12 +1,11 @@
 #ifndef __RENDERER_HPP__
 #define __RENDERER_HPP__
 
-#include <vector>
-#include "Render/FrameBuffer.hpp"
 #include "Core/Window.hpp"
 #include "Render/RendererRemote.hpp"
 #include "Render/RendererState.hpp"
-#include "Core/Math/Mat4.hpp" 
+
+#include <vector>
 
 namespace Cookie
 {
@@ -20,6 +19,7 @@ namespace Cookie
 	namespace Render
 	{
 		class Camera;
+		class FrameBuffer;
 
 		class Renderer
 		{

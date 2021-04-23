@@ -1,6 +1,9 @@
-#include "Resources/ResourcesManager.hpp"
+
+#include <d3d11.h>
 #include "Coordinator.hpp"
 #include "Resources/Scene.hpp"
+#include "ECS/ComponentModel.hpp"
+#include "Resources/ResourcesManager.hpp" 
 #include "InspectorWidget.hpp"
 #include "Editor.hpp"
 

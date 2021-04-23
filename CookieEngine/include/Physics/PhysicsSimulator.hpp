@@ -13,7 +13,7 @@ namespace Cookie
 				float accumulator = 0.f;
 
 			public:
-				reactphysics3d::PhysicsWorld* worldSim{ nullptr };
+				::reactphysics3d::PhysicsWorld* worldSim{ nullptr };
 
 				float timeStep		= .0f;
 				float factor		= 0.f;

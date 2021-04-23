@@ -3,9 +3,15 @@
 
 #include "Game.hpp"
 #include "UI/UIeditor.hpp"
+#include "Render/Camera.hpp"
 #include "DebugRenderer.hpp"
+
 #include "Resources/SoundManager.hpp"
 #include "ECS/ComponentEditor.hpp"
+#include "ECS/ComponentHandler.hpp"
+
+#include "Resources/Mesh.hpp"
+#include "Resources/Texture.hpp"
 
 namespace Cookie
 {
@@ -13,6 +19,11 @@ namespace Cookie
 	{
 		class Entity;
 	}
+	namespace Resources
+	{
+		class Scene;
+	}
+
 
 	struct FocusEntity
 	{
@@ -49,7 +60,6 @@ namespace Cookie
 			Editor();
 			~Editor();
 
-			void Loop();
 
 			void InitEditComp();
 			void ModifyEditComp();
@@ -68,11 +78,10 @@ namespace Cookie
 					selectedEntity.editComp->Update();
 				}
 
-				selectedEntity.focusedEntity	= &game.coordinator.entityHandler->entities[selectedEntity.toChangeEntityId];
-				selectedEntity.editComp			= &editingComponent[selectedEntity.toChangeEntityId];
+				selectedEntity.focusedEntity = &game.coordinator.entityHandler->entities[selectedEntity.toChangeEntityId];
+				selectedEntity.editComp = &editingComponent[selectedEntity.toChangeEntityId];
 				selectedEntity.toChangeEntityId = -1;
 			}
-
 			inline virtual float notifyRaycastHit(const rp3d::RaycastInfo& info)
 			{
 				for (int i = 1; i < MAX_ENTITIES; i++)
@@ -86,6 +95,8 @@ namespace Cookie
 
 				return 0.0f;
 			}
+
+			void Loop();
 
 	};
 }

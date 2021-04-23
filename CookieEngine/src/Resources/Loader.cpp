@@ -1,10 +1,12 @@
+#include "Resources/ResourcesManager.hpp"
+#include "Resources/Mesh.hpp"
+#include "Resources/Texture.hpp"
+#include "Resources/Loader.hpp"
+
 #include <assimp/scene.h>
 #include <assimp/mesh.h>
 #include <string>
-#include "Render/Renderer.hpp"
 #include <assimp/postprocess.h>
-#include "Resources/ResourcesManager.hpp"
-#include "Resources/Loader.hpp"
 
 using namespace Cookie::Resources;
 

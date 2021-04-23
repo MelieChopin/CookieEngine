@@ -1,11 +1,12 @@
+#include "Core/Math/Vec4.hpp"
+#include "Render/RendererRemote.hpp"
+#include "Resources/Texture.hpp"
+
 #include <DirectXTex/initguid.h>
 #include <fstream>
 #include <system_error>
 #include <DirectXTex/DDSTextureLoader11.h>
 #include <DirectXTex/WICTextureLoader11.h>
-
-#include "Render/Renderer.hpp"
-#include "Resources/Texture.hpp"
 
 using namespace Cookie::Resources;
 

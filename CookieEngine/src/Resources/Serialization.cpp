@@ -1,17 +1,23 @@
+
+#include "Physics/PhysicsHandle.hpp"
+#include "Game.hpp"
+
+#include "Resources/Mesh.hpp"
+#include "Resources/Shader.hpp"
+#include "Resources/Texture.hpp"
+#include "Resources/Scene.hpp"
+#include "Resources/Prefab.hpp"
+#include "Resources/ResourcesManager.hpp"
+#include "Resources/Serialization.hpp"
+
+#include <reactphysics3d/reactphysics3d.h>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include "Physics/PhysicsHandle.hpp"
-#include "Coordinator.hpp"
-#include "Resources/Scene.hpp"
-#include "Game.hpp"
-#include "Resources/Serialization.hpp"
-#include "Resources/Prefab.hpp"
-#include "ComponentPhysics.hpp"
 #include <bitset>
 #include <filesystem>
-#include <reactphysics3d/reactphysics3d.h>
 
+namespace fs = std::filesystem;
 using namespace Cookie::Resources;
 using namespace Cookie::ECS;
 using namespace Cookie::Resources::Serialization;

@@ -1,14 +1,20 @@
 #ifndef __GAME_HPP__
 #define __GAME_HPP__
 
-#include <memory>
-#include "Resources/ResourcesManager.hpp"
 #include "Render/Renderer.hpp" 
-#include "ECS/Coordinator.hpp"
+#include "Resources/ResourcesManager.hpp"
 #include "Render/Skybox.hpp"
+#include "ECS/Coordinator.hpp"
+
+#include <memory>
 
 namespace Cookie
 {
+	namespace Resources
+	{
+		class Scene;
+	}
+
 	class Game
 	{
 		private:

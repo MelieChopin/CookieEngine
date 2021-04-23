@@ -3,7 +3,9 @@
 #include "Coordinator.hpp"
 #include "InspectorWidget.hpp"
 #include "HierarchyWidget.hpp"
+#include "Resources/ResourcesManager.hpp"
 #include "Editor.hpp"
+#include "Renderer.hpp"
 
 #include <imgui.h>
 

@@ -1,9 +1,9 @@
 #include "Editor.hpp" 
-#include "Core/Primitives.hpp"
 #include "UIallIn.hpp"
 #include "Serialization.hpp"
 #include "Physics/PhysicsHandle.hpp"
-#include "Map.hpp"
+#include "ECS/SystemHandler.hpp"
+#include "Resources/Scene.hpp"
 
 using namespace Cookie;
 using namespace Cookie::Core;
@@ -95,16 +95,19 @@ void Editor::ModifyEditComp()
     }
 }
 
+
 void Editor::Loop()
 {
     //soundManager.system->playSound(soundManager.sound, nullptr, false, nullptr);
     Physics::PhysicsHandle physHandle;
 
     {
-        game.scene->map.model.mesh                 = game.resources.meshes["Quad"];
+        game.scene->map.model.mesh                 = game.resources.meshes["Cube"];
         game.scene->map.model.texture              = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"];
         game.scene->map.model.shader               = game.resources.shaders["Texture_Shader"];
 
+
+        //will be removed after testing phase
         game.scene->map.modelTileStart.mesh        = game.resources.meshes["Cube"];
         game.scene->map.modelTileStart.texture     = game.resources.textures["Green"];
         game.scene->map.modelTileStart.shader      = game.resources.shaders["Texture_Shader"];
@@ -195,7 +198,7 @@ void Editor::Loop()
                 indexOfSelectedTile = game.scene->map.GetTileIndex(mousePos);
                 Vec2 centerOfBuilding = game.scene->map.GetCenterOfBuilding(mousePos, buildingTileSize);
 
-                buildingTrs.pos = {centerOfBuilding.x, hitPoint.y , centerOfBuilding.y};
+                buildingTrs.pos = {centerOfBuilding.x, hitPoint.y, centerOfBuilding.y};
             }
         }
         //Bind Keys to change Nb of Tiles of

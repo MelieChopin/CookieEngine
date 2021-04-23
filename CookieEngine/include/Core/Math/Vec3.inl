@@ -11,8 +11,10 @@ namespace Cookie
 		{
 			constexpr float EPSILON = 1 / 4060;
 
-			inline void Vec3::Debug() const { std::cout << "{" << x << " ," << y << " ," << z << "}\n"; }
-
+			inline void Vec3::Debug() const
+			{ 
+				std::cout << "{" << x << " ," << y << " ," << z << "}\n";
+			}
 			inline void Vec3::DebugAllTest()
 			{
 				std::cout << "/////////////////////////////////////////////////\n";
@@ -146,7 +148,6 @@ namespace Cookie
 					&& this->y - other.y >= -Math::EPSILON && this->y - other.y <= Math::EPSILON
 					&& this->z - other.z >= -Math::EPSILON && this->z - other.z <= Math::EPSILON;
 			}
-
 			inline bool Vec3::operator!=(const Vec3& other)
 			{
 				return this->x - other.x < -Math::EPSILON || this->x - other.x > Math::EPSILON

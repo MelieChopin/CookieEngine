@@ -1,9 +1,10 @@
 #ifndef __SHADER_HPP__
 #define __SHADER_HPP__
 
-#include <string>
 #include "Core/Math/Mat4.hpp"
-#include <d3dcommon.h>
+
+#include <string>
+#include <d3d11.h>
 
 class ID3D11VertexShader;
 class ID3D11PixelShader;

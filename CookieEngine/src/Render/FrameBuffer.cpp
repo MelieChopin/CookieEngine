@@ -1,16 +1,13 @@
 #include <system_error>
 #include <string>
 #include <memory>
-#include <d3d11.h>
 
-#include "Core/Math/Calc.hpp"
+
 #include "Render/RendererRemote.hpp"
-#include "Render/Renderer.hpp"
-#include "Resources/ResourcesManager.hpp"
-#include "Resources/Shader.hpp"
 #include "Resources/Mesh.hpp"
+#include "Resources/Shader.hpp"
+#include "Resources/ResourcesManager.hpp"
 #include "Render/FrameBuffer.hpp"
-#include "Core/Primitives.hpp"
 
 
 using namespace Cookie::Render;

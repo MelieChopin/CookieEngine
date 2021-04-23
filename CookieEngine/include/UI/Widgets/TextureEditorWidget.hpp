@@ -2,6 +2,7 @@
 #define __TEXTURE_EDITOR_W_HPP__
 
 #include "UIwidgetBases.hpp"
+#include "Core/Math/Vec4.hpp"
 
 namespace std				 { using string = basic_string<char, char_traits<char>, allocator<char>>; }
 namespace Cookie::Render	 { class Renderer; }

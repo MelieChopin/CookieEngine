@@ -1,13 +1,9 @@
-#include <d3d11.h>
-#include <d3dcompiler.h>
-#include <system_error>
-
-#include "reactphysics3d/reactphysics3d.h"
-#include "Vec4.hpp"
-#include "Mat4.hpp"
-#include "Render/Renderer.hpp"
 #include "Render/RendererRemote.hpp"
 #include "Resources/Shader/SkyBoxShader.hpp"
+#include "Mat4.hpp"
+
+#include <d3dcompiler.h>
+#include <system_error>
 
 using namespace Cookie::Resources;
 

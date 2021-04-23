@@ -1,6 +1,8 @@
 #ifndef __RENDERER_REMOTE_HPP__
 #define __RENDERER_REMOTE_HPP__
 
+#include <d3d11.h>
+
 namespace Cookie
 {
 	namespace Render

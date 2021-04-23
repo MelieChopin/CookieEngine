@@ -1,8 +1,11 @@
 #ifndef __DEBUG_RENDERER_HPP__
 #define __DEBUG_RENDERER_HPP__
 
-#include "Physics/PhysicsHandle.hpp"
+
 #include "Resources/Shader/PhysicsShader.hpp"
+
+#include <d3d11.h>
+#include <reactphysics3d/reactphysics3d.h>
 
 namespace Cookie
 {
