@@ -27,7 +27,7 @@ namespace Cookie::UI
 		
 		
 		// This will simply draw a global invisible window as a canvas, and display the current linked scene's UI elements/widgets on it as childs that can't be edited.
-		void DrawSceneUI	() const;
+		void DrawSceneUI	();
 
 		// Draws the scene's UI elements/widgets directly each as editable windows.
 		void EditSceneUI	();

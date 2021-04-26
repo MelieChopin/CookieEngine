@@ -23,8 +23,30 @@ namespace Cookie::UIwidget
 
 		
 		virtual void WindowDisplay() = 0;
+
+
+		//inline		 bool& GetOpenSwitch()			{ return opened; }
+		//inline const bool  GetOpenSwitch() const	{ return opened; }
 	};
 	
+	
+	struct GameWindowBase : WindowBase
+	{
+	private:
+		float xPos, yPos, width, height;
+
+	protected:
+		// Note: The flag to prevent docking is always given.
+		virtual bool BeginWindow(int windowFlags = 0) override;
+
+	public:
+		inline GameWindowBase(const char* _nameTag, bool _opened)
+			: WindowBase	(_nameTag, _opened)
+		{}
+
+		bool WindowEdit();
+	};
+
 
 	struct ItemBase
 	{

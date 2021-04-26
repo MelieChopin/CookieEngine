@@ -9,9 +9,15 @@
 
 namespace Cookie::UI
 {
-	struct UIscene
+	class UIscene
 	{
-		
+		std::vector<UIwidget::GameWindowBase> sceneWidgets;
+
+	public:
+		void UpdateUI();
+
+		inline std::vector<UIwidget::GameWindowBase>& EditWidgets()
+		{ return sceneWidgets; }
 	};
 }
 

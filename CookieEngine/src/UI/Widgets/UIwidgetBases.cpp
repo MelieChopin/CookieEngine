@@ -22,6 +22,40 @@ bool WindowBase::BeginWindow(int windowFlags)
 }
 
 
+bool GameWindowBase::BeginWindow(int windowFlags)
+{
+	if (!opened) return false;
+
+	SetNextWindowPos({xPos, yPos},		ImGuiCond_Appearing);
+	SetNextWindowSize({width, height},	ImGuiCond_Appearing);
+
+	contentVisible = ImGui::Begin(windowName, nullptr, windowFlags | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoCollapse);
+
+	return true;
+}
+
+bool GameWindowBase::WindowEdit()
+{
+	BeginWindow();
+
+	if (Button("Delete this widget"))
+	{
+		ImGui::End();
+		return false;
+	}
+
+	if (IsWindowFocused())
+	{
+		xPos = GetWindowPos().x;
+		yPos = GetWindowPos().y;
+		width = GetWindowWidth();
+		height = GetWindowHeight();
+	}
+
+	ImGui::End();
+}
+
+
 ItemBase::ItemBase(const char* _itemName, bool _visible)
 		  :	itemName	(_itemName),
 			shortcutSeq	(NULL),
