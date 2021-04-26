@@ -174,9 +174,13 @@ void GeometryPass::Draw(const Core::Math::Mat4& viewProj, const ECS::Coordinator
 
             const ECS::ComponentModel& model = components.componentModels[entityHandler.entities[i].id];
 
-            model.texture->Set();
-            model.mesh->Set();
-            model.mesh->Draw();
+            if (model.texture)
+                model.texture->Set();
+            if (model.mesh)
+            {
+                model.mesh->Set();
+                model.mesh->Draw();
+            }
         }
     }
 }

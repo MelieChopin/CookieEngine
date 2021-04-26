@@ -68,9 +68,16 @@ void ResourcesManager::SearchForAssets(const fs::path& path, std::vector<std::st
 
 void ResourcesManager::InitPrimitives()
 {
-	meshes["Quad"] = Cookie::Core::Primitives::CreateQuad();
-	meshes["Triangle"] = Cookie::Core::Primitives::CreateTriangle();
-	meshes["Cube"] = Cookie::Core::Primitives::CreateCube();
+	meshes["Quad"]		= Cookie::Core::Primitives::CreateQuad();
+	meshes["Triangle"]	= Cookie::Core::Primitives::CreateTriangle();
+	meshes["Cube"]		= Cookie::Core::Primitives::CreateCube();
+	meshes["Sphere"]	= Cookie::Core::Primitives::CreateSphere();
+	meshes["Pyramid"]	= Cookie::Core::Primitives::CreatePyramid();
+	meshes["IcoSphere"]	= Cookie::Core::Primitives::CreateIcoSphere();
+	meshes["Cylinder"]	= Cookie::Core::Primitives::CreateCylinder();
+	meshes["Cone"]		= Cookie::Core::Primitives::CreateCone();
+	meshes["Circle"]	= Cookie::Core::Primitives::CreateCircle();
+	meshes["Capsule"]	= Cookie::Core::Primitives::CreateCapsule();
 }
 
 void ResourcesManager::Load(Render::Renderer& _renderer)

@@ -71,6 +71,16 @@ void Mesh::InitVBuffer(aiMesh* mesh)
 
     std::vector<float> vertices;
 
+    bool primitives = false;
+
+    if (name.find("Primitives") != std::string::npos)
+    {
+        printf("\n\nPrimitives : %s, verticesNb : %u\n\n", name.c_str(), mesh->mNumVertices);
+        primitives = true;
+
+        printf("std::vector<float> %s = {\n", name.c_str());
+    }
+
     for (int i = 0; i < mesh->mNumVertices; i++)
     {
         vertices.push_back(mesh->mVertices[i].x);
@@ -81,6 +91,19 @@ void Mesh::InitVBuffer(aiMesh* mesh)
         vertices.push_back(mesh->mNormals[i].x);
         vertices.push_back(mesh->mNormals[i].y);
         vertices.push_back(mesh->mNormals[i].z);
+
+        if (primitives)
+        {
+            printf("%f, %f, %f, %f, %f, %f, %f, %f,\n", 
+                mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z, 
+                mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y, 
+                mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+        }
+    }
+
+    if (primitives)
+    {
+        printf("};");
     }
 
     bDesc.ByteWidth             = vertices.size() * sizeof(float);
@@ -107,13 +130,38 @@ void Mesh::InitIBuffer(aiMesh* mesh)
 
     std::vector<unsigned int> indices;
 
+    bool primitives = false;
+
+    if (name.find("Primitives") != std::string::npos)
+    {
+        printf("\nPrimitives : %s, indicesNb : %u\n\n", name.c_str(), mesh->mNumFaces);
+        primitives = true;
+
+        printf("std::vector<unsigned int> indices = {\n");
+    }
+
     for (unsigned int i = 0; i < mesh->mNumFaces; i++)
     {
         aiFace iFace = mesh->mFaces[i];
         for (unsigned int j = 0; j < iFace.mNumIndices; j++)
         {
             indices.push_back(iFace.mIndices[j]);
+
+            if (primitives)
+            {
+                printf("%u,", iFace.mIndices[j]);
+            }
         }
+
+        if (primitives)
+        {
+            printf("\n");
+        }
+    }
+
+    if (primitives)
+    {
+        printf("};");
     }
 
     bDesc.ByteWidth             = indices.size() * sizeof(unsigned int);
