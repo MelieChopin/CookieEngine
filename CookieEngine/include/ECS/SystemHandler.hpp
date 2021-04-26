@@ -22,7 +22,7 @@ namespace Cookie
 		namespace System
 		{
 			inline void SystemPhysics(ComponentPhysics& ph, float factor);
-			inline void SystemDraw(ComponentTransform& trs, ComponentModel& model, const Core::Math::Mat4& viewProj);
+			inline void SystemDraw(ComponentTransform& trs, ComponentModel& model, const Core::Math::Mat4& viewProj, ID3D11Buffer** CBuffer);
 			inline void SystemScriptStart(const ComponentScript& script);
 			inline void SystemScriptUpdate(ComponentScript& script);
 

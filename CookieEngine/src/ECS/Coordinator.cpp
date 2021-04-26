@@ -26,8 +26,6 @@ void Coordinator::AddEntity(const int signature, const Resources::ResourcesManag
 	if (CheckSignature(signature, SIGNATURE_SCRIPT))
 		componentHandler->AddComponentScript(entityHandler->entities[id]);
 
-	//not clean should be moved somewhere else
-	componentHandler->GetComponentModel(id).shader = resources.shaders.at("Texture_Shader");
 }
 void Coordinator::RemoveEntity(Entity& entity)
 {
@@ -71,13 +69,13 @@ void Coordinator::ApplySystemPhysics(float factor)
 		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_PHYSICS))
 			System::SystemPhysics(componentHandler->GetComponentPhysics(entityHandler->entities[i].id), factor);
 }
-void Coordinator::ApplyDraw(const Core::Math::Mat4& viewProj)
-{
-	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_MODEL))
-			System::SystemDraw(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
-				componentHandler->GetComponentModel(entityHandler->entities[i].id), viewProj);
-}
+//void Coordinator::ApplyDraw(const Core::Math::Mat4& viewProj, ID3D11Buffer* CBuffer)
+//{
+//	for (int i = 0; i < entityHandler->livingEntities; ++i)
+//		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_MODEL))
+//			System::SystemDraw(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
+//				componentHandler->GetComponentModel(entityHandler->entities[i].id), viewProj, CBuffer);
+//}
 void Coordinator::ApplyScriptUpdate()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)

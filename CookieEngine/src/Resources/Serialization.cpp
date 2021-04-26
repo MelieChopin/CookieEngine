@@ -3,7 +3,6 @@
 #include "Game.hpp"
 
 #include "Resources/Mesh.hpp"
-#include "Resources/Shader.hpp"
 #include "Resources/Texture.hpp"
 #include "Resources/Scene.hpp"
 #include "Resources/Prefab.hpp"
@@ -64,15 +63,10 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["texture"] = model.texture.get()->name;
 				else
 					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["texture"] = 0;
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameShader != model.shader.get()->name)
-					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["shader"] = model.shader.get()->name;
-				else
-					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["shader"] = 0;
 			}
 			else
 			{
 				js["ComponentHandler"]["Model"] += json{ { "model", model.mesh != nullptr ? model.mesh.get()->name : "NO MESH" },
-												{ "shader", model.shader.get()->name },
 												{ "texture", model.texture != nullptr ? model.texture.get()->name : "NO TEXTURE" } };
 			}
 		}
@@ -317,6 +311,7 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 else if (entity.entities[i].namePrefab != "NONE")
 				 transform.scale = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->scale;
 			 
+			 transform.ComputeTRS();
 			 component.componentTransforms[entity.entities[i].id] = transform;
 		 }
 		 if (entity.entities[i].signature & SIGNATURE_MODEL)
@@ -333,12 +328,6 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 else if (entity.entities[i].namePrefab != "NONE")
 				 component.componentModels[entity.entities[i].id].texture = 
 									resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameTexture];
-
-			 if (model.at("shader").is_string())
-				component.componentModels[entity.entities[i].id].shader = resourcesManager.shaders[model.at("shader").get<std::string>()];
-			 else if (entity.entities[i].namePrefab != "NONE")
-				 component.componentModels[entity.entities[i].id].shader =
-									resourcesManager.shaders[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameShader];
 		 }
 		 if (entity.entities[i].signature & SIGNATURE_PHYSICS)
 		 {

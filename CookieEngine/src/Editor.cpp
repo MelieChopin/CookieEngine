@@ -46,7 +46,7 @@ Editor::Editor()
 
     ui.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
 
-    ui.AddWItem(new UIwidget::TextureEditor(game.renderer, game.resources), 1);
+    ui.AddWItem(new UIwidget::TextureEditor(game.resources), 1);
 
     ui.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
 
@@ -107,21 +107,17 @@ void Editor::Loop()
     {
         game.scene->map.model.mesh                 = game.resources.meshes["Cube"];
         game.scene->map.model.texture              = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"];
-        game.scene->map.model.shader               = game.resources.shaders["Texture_Shader"];
 
 
         //will be removed after testing phase
         game.scene->map.modelTileStart.mesh        = game.resources.meshes["Cube"];
         game.scene->map.modelTileStart.texture     = game.resources.textures["Green"];
-        game.scene->map.modelTileStart.shader      = game.resources.shaders["Texture_Shader"];
 
         game.scene->map.modelTileEnd.mesh          = game.resources.meshes["Cube"];
         game.scene->map.modelTileEnd.texture       = game.resources.textures["Red"];
-        game.scene->map.modelTileEnd.shader        = game.resources.shaders["Texture_Shader"];
 
         game.scene->map.modelTileObstacle.mesh     = game.resources.meshes["Cube"];
         game.scene->map.modelTileObstacle.texture  = game.resources.textures["Grey"];
-        game.scene->map.modelTileObstacle.shader   = game.resources.shaders["Texture_Shader"];
     }
     ComponentTransform buildingTrs;
     ComponentModel     buildingModel;
@@ -134,7 +130,6 @@ void Editor::Loop()
         buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y;
         buildingModel.mesh = game.resources.meshes["Cube"];
         buildingModel.texture = game.resources.textures["Pink"];
-        buildingModel.shader = game.resources.shaders["Texture_Shader"];
     }
 
     while (!glfwWindowShouldClose(game.renderer.window.window))
@@ -249,7 +244,6 @@ void Editor::Loop()
 
                     model.mesh = buildingModel.mesh;
                     model.texture = game.resources.textures["Green"];
-                    model.shader = buildingModel.shader;
                 }
 
                 nbOfBuildings++;
@@ -282,26 +276,18 @@ void Editor::Loop()
         {
             selectedEntity.componentHandler->componentPhysics[selectedEntity.focusedEntity->id].Set(selectedEntity.componentHandler->componentTransforms[selectedEntity.focusedEntity->id]);
         }
-           
-
-        //dbgRenderer.AddDebugElement(Core::Primitives::CreateLine({0.0f,0.0f,0.0f }, {0.0f,10.0f,0.0f} ,0xFF0000, 0xFF0000));
 
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
         game.coordinator.ApplyGameplayMove();
 
-
         game.renderer.Draw(&cam, game,editorFBO);
-        if(isRaycastingWithMap)
-            SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
-        game.scene->map.DrawSpecificTiles(cam.GetViewProj());
-        game.scene->map.DrawPath(dbgRenderer);
 
+        game.scene->map.DrawPath(dbgRenderer);
 
         dbgRenderer.Draw(cam.GetViewProj());
 
         game.renderer.SetBackBuffer();
-
         ui.UpdateUI();
 
         game.renderer.Render();

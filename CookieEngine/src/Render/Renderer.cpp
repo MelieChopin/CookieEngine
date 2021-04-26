@@ -232,25 +232,24 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
 
     gPass.Set(depthBuffer);
 
-    game.scene->map.Draw(viewProj);
+    game.scene->map.Draw(viewProj,&gPass.CBuffer);
 
-    game.coordinator.ApplyDraw(viewProj);
+    gPass.Draw(viewProj,game.coordinator);
 
     remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
 
     if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F1] >= 0.0f)
     {
-        DrawFrameBuffer(gPass.posFBO);
+        game.renderer.DrawFrameBuffer(game.renderer.gPass.posFBO);
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F2] >= 0.0f)
     {
-        DrawFrameBuffer(gPass.normalFBO);
+        game.renderer.DrawFrameBuffer(game.renderer.gPass.normalFBO);
     }
     else
     {
-        DrawFrameBuffer(gPass.albedoFBO);
+        game.renderer.DrawFrameBuffer(game.renderer.gPass.albedoFBO);
     }
-    
     
     remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, depthBuffer);
 }
@@ -288,7 +287,7 @@ void Renderer::SetBackBuffer()
     remote.context->OMSetRenderTargets(1, &backbuffer, depthBuffer);
 }
 
-void Renderer::Render()
+void Renderer::Render()const
 {
     // switch the back buffer and the front buffer
     remote.context->OMSetRenderTargets(1, &backbuffer, nullptr);

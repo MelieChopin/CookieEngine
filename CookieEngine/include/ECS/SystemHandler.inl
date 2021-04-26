@@ -12,10 +12,10 @@ namespace Cookie
 			{
 				ph.Update(factor);
 			}
-			inline void SystemDraw(ComponentTransform& trs, ComponentModel& model, const Core::Math::Mat4& viewProj)
+			inline void SystemDraw(ComponentTransform& trs, ComponentModel& model, const Core::Math::Mat4& viewProj, ID3D11Buffer** CBuffer)
 			{
 				trs.ComputeTRS();
-				model.Draw(viewProj, trs.TRS);
+				model.Draw(viewProj, trs.TRS, CBuffer);
 			}
 			inline void SystemScriptStart(const ComponentScript& script)
 			{

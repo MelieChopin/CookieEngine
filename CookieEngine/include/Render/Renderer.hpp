@@ -3,7 +3,7 @@
 
 
 #include "Core/Window.hpp"
-#include "Resources/Shader/FBODrawShader.hpp"
+#include "Render/FBODrawer.hpp"
 #include "Render/RendererRemote.hpp"
 #include "Render/RendererState.hpp"
 #include "Render/GeometryPass.hpp"
@@ -29,10 +29,10 @@ namespace Cookie
 			private:
 				struct IDXGISwapChain*				swapchain		= nullptr;
 				struct ID3D11RenderTargetView*		backbuffer		= nullptr;
-				struct ID3D11DepthStencilView*		depthBuffer		= nullptr;
-				
 					
 			public:
+				struct ID3D11DepthStencilView* depthBuffer = nullptr;
+
 				Core::Window	window;
 				RendererRemote	remote;
 				RendererState	state;
@@ -40,7 +40,7 @@ namespace Cookie
 				LightsArray		lights;
 
 			private:
-				Resources::FBODrawShader			fboDrawer{ "FBODrawer_Shader" };
+				Render::FBODrawer	fboDrawer;
 
 			private:
 				RendererRemote InitDevice(Core::Window& window);
@@ -53,7 +53,7 @@ namespace Cookie
 				~Renderer();
 				
 				void Draw(const Camera* cam, Game& game, FrameBuffer& fbo);
-				void Render();
+				void Render()const;
 				void Clear();
 				void SetBackBuffer();
 				void DrawFrameBuffer(FrameBuffer& fbo);

@@ -36,7 +36,6 @@ namespace Cookie
 		{
 			public:
 				std::unordered_map<std::string, std::shared_ptr<Mesh>>			meshes;
-				std::unordered_map<std::string, std::shared_ptr<Shader>>		shaders;
 				std::unordered_map<std::string, std::shared_ptr<Texture>>		textures;
 				std::unordered_map<std::string, std::shared_ptr<Script>>		scripts;
 				std::unordered_map<std::string, std::shared_ptr<Prefab>>		prefabs;
@@ -45,7 +44,6 @@ namespace Cookie
 				void SearchForAssets(const fs::path& path, std::vector<std::string>& gltfFiles);
 
 				void InitPrimitives();
-				void InitShaders();
 				
 			public: 
 				ResourcesManager();

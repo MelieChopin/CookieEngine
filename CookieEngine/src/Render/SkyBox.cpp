@@ -1,16 +1,113 @@
-#include "Render/RendererRemote.hpp"
+#include "Render/D3D11Helper.hpp"
 #include "Resources//ResourcesManager.hpp"
 #include "Resources/Mesh.hpp"
-#include "Resources/Shader.hpp"
 #include "Resources/Texture.hpp"
 #include "Skybox.hpp"
+#include "Core/Math/Mat4.hpp"
 
 using namespace Cookie::Render;
+
+struct VS_CONSTANT_BUFFER
+{
+    Cookie::Core::Math::Mat4 proj = Cookie::Core::Math::Mat4::Identity();
+    Cookie::Core::Math::Mat4 view = Cookie::Core::Math::Mat4::Identity();
+};
 
 /*==================== CONSTRUCTORS/DESTRUCTORS ====================*/
 
 SkyBox::SkyBox(Resources::ResourcesManager& _resources):
-	cube {_resources.meshes["Cube"]}, shader {_resources.shaders["SkyBox_Shader"]}
+	cube {_resources.meshes["Cube"]}
+{
+    InitShader();
+    InitRasterizer();
+}
+
+SkyBox::~SkyBox()
+{
+    if (rasterizerState)
+        rasterizerState->Release();
+    if (VShader)
+        VShader->Release();
+    if (PShader)
+        PShader->Release();
+    if (CBuffer)
+        CBuffer->Release();
+    if (ILayout)
+        ILayout->Release();
+}
+
+/*==================== INIT METHODS ====================*/
+
+void SkyBox::InitShader()
+{
+    ID3DBlob* blob = nullptr;
+
+    std::string source = (const char*)R"(struct VOut
+    {
+        float4 position : SV_POSITION;
+        float3 pos : POSITION;
+        float2 uv : UV;
+    };
+
+    cbuffer VS_CONSTANT_BUFFER : register(b0)
+    {
+        float4x4  proj;
+        float4x4  view;
+    };
+    
+    VOut main(float3 position : POSITION, float2 uv : UV, float3 normal : NORMAL)
+    {
+        VOut output;
+
+        float3 pos      = mul(position,(float3x3)view);
+
+        output.position = mul(float4(pos,1.0),proj);
+        output.pos      = position;
+        output.uv       = uv;
+    
+        return output;
+
+    }
+    )";
+
+    Render::CompileVertex(source, &blob, &VShader);
+
+    source = (const char*)R"(
+
+    TextureCube skybox : register( t0 );
+
+    SamplerState WrapSampler : register (s0);
+
+    float4 main(float4 position : SV_POSITION, float3 pos : POSITION, float2 uv : UV) : SV_TARGET
+    {
+        return skybox.Sample(WrapSampler,pos);
+    })";
+
+    Render::CompilePixel(source, &PShader);
+
+    struct Vertex
+    {
+        Core::Math::Vec3 position;
+        Core::Math::Vec2 uv;
+        Core::Math::Vec3 normal;
+    };
+
+    // create the input layout object
+    D3D11_INPUT_ELEMENT_DESC ied[] =
+    {
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex,position), D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex, uv), D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, normal), D3D11_INPUT_PER_VERTEX_DATA, 0}
+    };
+
+    Render::CreateLayout(&blob, ied, 3, &ILayout);
+
+    VS_CONSTANT_BUFFER buffer = {};
+
+    Render::CreateBuffer(&buffer, sizeof(VS_CONSTANT_BUFFER), &CBuffer);
+}
+
+void SkyBox::InitRasterizer()
 {
     D3D11_RASTERIZER_DESC rasterDesc = {};
 
@@ -29,22 +126,23 @@ SkyBox::SkyBox(Resources::ResourcesManager& _resources):
     RendererRemote::device->CreateRasterizerState(&rasterDesc, &rasterizerState);
 }
 
-SkyBox::~SkyBox()
-{
-    if (rasterizerState)
-        rasterizerState->Release();
-}
-
 /*==================== REALTIME METHODS ====================*/
 
 void SkyBox::Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view)
 {
     RendererRemote::context->RSSetState(rasterizerState);
-    if (shader)
-    {
-        shader->Set();
-        shader->WriteCBuffer(proj, view);
-    }
+
+    /* Shader */
+    Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
+    Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
+
+    Render::RendererRemote::context->IASetInputLayout(ILayout);
+    Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
+
+    VS_CONSTANT_BUFFER buffer = { proj,view };
+
+    Render::WriteCBuffer(&buffer, sizeof(buffer), 0, &CBuffer);
+
 	if (texture)
 		texture->Set();
     else

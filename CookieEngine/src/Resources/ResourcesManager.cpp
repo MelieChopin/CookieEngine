@@ -2,14 +2,11 @@
 #include <algorithm>
 
 #include "Resources/Mesh.hpp"
-#include "Resources/Shader.hpp"
 #include "Resources/Texture.hpp"
 #include "Resources/Script.hpp"
 #include "Resources/Scene.hpp"
 #include "Resources/Prefab.hpp"
 #include "Resources/Loader.hpp"
-#include "Resources/Shader/SkyBoxShader.hpp"
-#include "Resources/Shader/BlinnPhongShader.hpp"
 #include "Resources/ResourcesManager.hpp"
 
 #include "Render/Renderer.hpp"
@@ -26,7 +23,6 @@ ResourcesManager::ResourcesManager()
 	scripts["test2.lua"] = std::make_shared<Script>("Assets\\scripts\\test2.lua");
 
 	InitPrimitives();
-	InitShaders();
 }
 
 ResourcesManager::~ResourcesManager()
@@ -68,12 +64,6 @@ void ResourcesManager::SearchForAssets(const fs::path& path, std::vector<std::st
 
 		}
 	}
-}
-
-void ResourcesManager::InitShaders()
-{
-	shaders["SkyBox_Shader"] = std::make_shared<SkyBoxShader>("SkyBox_Shader");
-	shaders["BlinnPhong_Shader"] = std::make_shared<BlinnPhongShader>("BlinnPhong_Shader");
 }
 
 void ResourcesManager::InitPrimitives()
@@ -133,7 +123,6 @@ void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandl
 
 	newPrefab.name = entity.name;
 	newPrefab.nameMesh = component.componentModels[entity.id].mesh->name;
-	newPrefab.nameShader = component.componentModels[entity.id].shader->name;
 	newPrefab.nameTexture = component.componentModels[entity.id].texture->name;
 	newPrefab.signature = entity.id;
 	newPrefab.rotation = component.componentTransforms[entity.id].rot;

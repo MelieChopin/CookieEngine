@@ -102,6 +102,8 @@ void Inspector::TransformInterface()
             coordinator.componentHandler->RemoveComponentTransform(*selectedEntity.focusedEntity);
         }
 
+        trsf.ComputeTRS();
+
         TreePop();
     }
 
