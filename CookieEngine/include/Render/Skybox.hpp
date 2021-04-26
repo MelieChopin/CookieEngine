@@ -24,6 +24,7 @@ namespace Cookie
 				ID3D11InputLayout*	ILayout{ nullptr };
 				ID3D11VertexShader* VShader{ nullptr };
 				ID3D11PixelShader*  PShader{ nullptr };
+				ID3D11SamplerState* PSampler{ nullptr };
 
 
 			public:

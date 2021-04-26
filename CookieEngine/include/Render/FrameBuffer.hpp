@@ -16,14 +16,15 @@ namespace Cookie
 	namespace Render
 	{
 		class Renderer;
-		class RendererRemote;
+		struct RendererRemote;
 
 		class FrameBuffer
 		{
 			public:
-				ID3D11Texture2D*							texBuffer			{ nullptr };
-				ID3D11ShaderResourceView*					shaderResource		{ nullptr };
-				ID3D11RenderTargetView*						renderTargetView	{ nullptr };
+				ID3D11Texture2D*			texBuffer			{ nullptr };
+				ID3D11ShaderResourceView*	shaderResource		{ nullptr };
+				ID3D11RenderTargetView*		renderTargetView	{ nullptr };
+				DXGI_FORMAT					format				{ DXGI_FORMAT_UNKNOWN };
 
 
 			private:
@@ -33,7 +34,7 @@ namespace Cookie
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
-				FrameBuffer(int width, int height);
+				FrameBuffer(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM);
 				~FrameBuffer();
 
 				void Resize(int width, int height);

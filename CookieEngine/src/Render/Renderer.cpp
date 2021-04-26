@@ -31,6 +31,10 @@ Renderer::~Renderer()
         depthBuffer->Release();
     if (remote.device)
         remote.device->Release();
+    if (state.depthStencilState)
+        state.depthStencilState->Release();
+    if (state.rasterizerState)
+        state.rasterizerState->Release();
 }
 
 /*========================= INIT METHODS =========================*/
@@ -54,7 +58,7 @@ RendererRemote Renderer::InitDevice(Core::Window& window)
     scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
     // create a device, device context and swap chain using the information in the scd struct
-    if (D3D11CreateDeviceAndSwapChain(
+    HRESULT result = D3D11CreateDeviceAndSwapChain(
         NULL,
         D3D_DRIVER_TYPE_HARDWARE,
         NULL,
@@ -68,10 +72,15 @@ RendererRemote Renderer::InitDevice(Core::Window& window)
         D3D11_SDK_VERSION,
         &scd,
         &swapchain,
-        & _remote.device,
+        &_remote.device,
         NULL,
-        & _remote.context))
+        &_remote.context);
+
+    if (FAILED(result))
+    {
+        printf("Failed Creating Device: %s\n", std::system_category().message(result).c_str());
         return _remote;
+    }
 
     return _remote;
 }
@@ -161,7 +170,7 @@ RendererState Renderer::InitState(int width, int height)
 
     // Setup the raster description which will determine how and what polygons will be drawn.
     rasterDesc.AntialiasedLineEnable = false;
-    rasterDesc.CullMode = D3D11_CULL_FRONT;
+    rasterDesc.CullMode = D3D11_CULL_NONE;
     rasterDesc.DepthBias = 0;
     rasterDesc.DepthBiasClamp = 0.0f;
     rasterDesc.DepthClipEnable = true;
@@ -176,12 +185,12 @@ RendererState Renderer::InitState(int width, int height)
     // Now set the rasterizer state.
     remote.context->RSSetState(_state.rasterizerState);
 
-    state.viewport.TopLeftX = 0;
-    state.viewport.TopLeftY = 0;
-    state.viewport.Width = width;
-    state.viewport.Height = height;
-    state.viewport.MinDepth = 0.0f;
-    state.viewport.MaxDepth = 1.0f;
+    _state.viewport.TopLeftX = 0;
+    _state.viewport.TopLeftY = 0;
+    _state.viewport.Width = width;
+    _state.viewport.Height = height;
+    _state.viewport.MinDepth = 0.0f;
+    _state.viewport.MaxDepth = 1.0f;
 
     remote.context->RSSetViewports(1, &_state.viewport);
 

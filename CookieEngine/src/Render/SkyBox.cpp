@@ -105,6 +105,21 @@ void SkyBox::InitShader()
     VS_CONSTANT_BUFFER buffer = {};
 
     Render::CreateBuffer(&buffer, sizeof(VS_CONSTANT_BUFFER), &CBuffer);
+
+    // Create a sampler state
+    D3D11_SAMPLER_DESC samDesc = {};
+    samDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    samDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    samDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    samDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    samDesc.MipLODBias = 0.0f;
+    samDesc.MaxAnisotropy = 1;
+    samDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+    samDesc.BorderColor[0] = samDesc.BorderColor[1] = samDesc.BorderColor[2] = samDesc.BorderColor[3] = 0;
+    samDesc.MinLOD = 0;
+    samDesc.MaxLOD = 0;
+
+    Render::CreateSampler(&samDesc, &PSampler);
 }
 
 void SkyBox::InitRasterizer()
@@ -123,7 +138,12 @@ void SkyBox::InitRasterizer()
     rasterDesc.ScissorEnable = false;
     rasterDesc.SlopeScaledDepthBias = 0.0f;
 
-    RendererRemote::device->CreateRasterizerState(&rasterDesc, &rasterizerState);
+    HRESULT result = RendererRemote::device->CreateRasterizerState(&rasterDesc, &rasterizerState);
+
+    if (FAILED(result))
+    {
+        printf("Failed Creating Rasterizer State: %s\n", std::system_category().message(result).c_str());
+    }
 }
 
 /*==================== REALTIME METHODS ====================*/
@@ -137,6 +157,7 @@ void SkyBox::Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view)
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
 
     Render::RendererRemote::context->IASetInputLayout(ILayout);
+    Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
 
     VS_CONSTANT_BUFFER buffer = { proj,view };

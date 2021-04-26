@@ -18,8 +18,8 @@ struct VS_CONSTANT_BUFFER
 /*=========================== CONSTRUCTORS/DESTRUCTORS ===========================*/
 
 GeometryPass::GeometryPass(int width, int height):
-	posFBO		{ width,height},
-	normalFBO	{ width,height },
+	posFBO		{ width,height,DXGI_FORMAT_R32G32B32A32_FLOAT},
+	normalFBO	{ width,height,DXGI_FORMAT_R32G32B32A32_FLOAT},
 	albedoFBO	{ width,height }
 {
 	InitShader();

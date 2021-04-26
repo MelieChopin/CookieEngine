@@ -202,7 +202,7 @@ inline decimal HeightFieldShape::getHeightAt(int x, int y) const {
 
 // Return the closest inside integer grid value of a given floating grid value
 inline int HeightFieldShape::computeIntegerGridValue(decimal value) const {
-    return (value < decimal(0.0)) ? value - decimal(0.5) : value + decimal(0.5);
+    return (value < decimal(0.0)) ? (int)(value - decimal(0.5)) : (int)(value + decimal(0.5));
 }
 
 // Compute the shape Id for a given triangle

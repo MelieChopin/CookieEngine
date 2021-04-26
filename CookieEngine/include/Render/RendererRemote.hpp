@@ -5,24 +5,19 @@
 
 namespace Cookie
 {
-	namespace Resources
-	{
-		class Shader;
-	}
-
 	namespace Render
 	{
 
 
-		class RendererRemote
+		struct RendererRemote
 		{
-			public:
-				static struct	ID3D11Device*			device;
-				static struct	ID3D11DeviceContext*	context;
+				static ID3D11Device*		device;
+				static ID3D11DeviceContext*	context;
 
 
 			/* CONSTRUCTORS/DESTRUCTORS */
 				RendererRemote();
+				RendererRemote(const RendererRemote& remote);
 				~RendererRemote();
 		};
 	}

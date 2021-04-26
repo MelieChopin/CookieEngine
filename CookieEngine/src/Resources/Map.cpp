@@ -9,7 +9,7 @@ using namespace Cookie::Core::Math;
 
 Map::Map()
 {
-	trs.scale = { MAP_DEFAULT_SCALE_WIDTH, 0.01, MAP_DEFAULT_SCALE_HEIGHT };
+	trs.scale = { MAP_DEFAULT_SCALE_WIDTH, 1.0f, MAP_DEFAULT_SCALE_HEIGHT };
 	trs.ComputeTRS();
 	tilesSize = { { trs.scale.x / tilesNb.x, trs.scale.z / tilesNb.y } };
 

@@ -9,7 +9,8 @@
 
 using namespace Cookie::Render;
 
-FrameBuffer::FrameBuffer(int width, int height)
+FrameBuffer::FrameBuffer(int width, int height, DXGI_FORMAT _format):
+    format {_format}
 {
     if (CreateTexture(width,height))
     {
@@ -45,7 +46,7 @@ bool FrameBuffer::CreateTexture(int width, int height)
     desc.Height             = height;
     desc.MipLevels          = 1;
     desc.ArraySize          = 1;
-    desc.Format             = DXGI_FORMAT_R32G32B32A32_FLOAT;
+    desc.Format             = format;
     desc.SampleDesc.Count   = 1;
     desc.Usage              = D3D11_USAGE_DEFAULT;
     desc.BindFlags          = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
@@ -66,7 +67,7 @@ bool FrameBuffer::CreateShaderResource()
 {
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 
-    srvDesc.Format                      = DXGI_FORMAT_R32G32B32A32_FLOAT;
+    srvDesc.Format                      = format;
     srvDesc.ViewDimension               = D3D11_SRV_DIMENSION_TEXTURE2D;
     srvDesc.Texture2D.MipLevels         = 1;
     srvDesc.Texture2D.MostDetailedMip   = 0;
@@ -85,7 +86,7 @@ bool FrameBuffer::CreateRenderTargetView()
 {
     D3D11_RENDER_TARGET_VIEW_DESC desc = {};
 
-    desc.Format             = DXGI_FORMAT_R32G32B32A32_FLOAT;
+    desc.Format             = format;
     desc.ViewDimension      = D3D11_RTV_DIMENSION_TEXTURE2D;
     desc.Texture2D.MipSlice = 0;
 

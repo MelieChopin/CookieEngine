@@ -13,7 +13,7 @@ namespace Cookie
 {
 	namespace Render
 	{
-		class RendererRemote;
+		struct RendererRemote;
 	}
 	
 

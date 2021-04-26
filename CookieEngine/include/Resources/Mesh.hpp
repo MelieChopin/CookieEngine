@@ -14,7 +14,7 @@ namespace Cookie
 	namespace Render
 	{
 		class Renderer;
-		class RendererRemote;
+		struct RendererRemote;
 	}
 
 	namespace Resources
