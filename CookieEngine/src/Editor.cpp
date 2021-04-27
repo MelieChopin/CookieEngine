@@ -323,9 +323,11 @@ void Editor::Loop()
 
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
+
         game.scene->map.ResetTilesTempObstacles();
         //game.coordinator.ApplyGameplayPosPrediction(game.scene->map);
         game.coordinator.ApplyGameplayMove();
+        game.coordinator.ApplyGameplayResolveCollision();
         game.coordinator.ApplyGameplayDrawPath(dbgRenderer);
 
 

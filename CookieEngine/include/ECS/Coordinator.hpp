@@ -43,8 +43,9 @@ namespace Cookie
 			void ApplyDraw(const Core::Math::Mat4& viewProj);
 			void ApplyScriptUpdate();
 
-			void ApplyGameplayMove();
 			void ApplyGameplayPosPrediction(Resources::Map& map);
+			void ApplyGameplayMove();
+			void ApplyGameplayResolveCollision();
 			void ApplyGameplayDrawPath(Render::DebugRenderer& debug);
 		};
 

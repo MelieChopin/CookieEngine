@@ -2,9 +2,9 @@
 #define __COMPONENT_GAMEPLAY_HPP__
 
 #include "EntityHandler.hpp"
-#include "CGPLive.hpp"
-#include "CGPMove.hpp"
-#include "CGPAttack.hpp"
+#include "Gameplay/CGPLive.hpp"
+#include "Gameplay/CGPMove.hpp"
+#include "Gameplay/CGPAttack.hpp"
 
 namespace Cookie
 {

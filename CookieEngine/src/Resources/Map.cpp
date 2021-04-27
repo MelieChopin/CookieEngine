@@ -99,6 +99,9 @@ Vec2 Map::GetCenterOfBuilding(Vec2& mousePos, Vec2& buildingNbOfTiles)
 
 bool Map::ApplyPathfinding(Tile& tileStart, Tile& tileEnd)
 {
+	if (tileEnd.isObstacle)
+		return false;
+
 	// Set all Tiles to default 
 	for (int x = 0; x < tilesNb.x; x++)
 		for (int y = 0; y < tilesNb.y; y++)

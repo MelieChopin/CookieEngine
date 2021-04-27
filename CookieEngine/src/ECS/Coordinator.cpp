@@ -12,6 +12,7 @@
 
 using namespace Cookie::Resources;
 using namespace Cookie::Render;
+using namespace Cookie::Gameplay;
 using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
 
@@ -105,6 +106,13 @@ void Coordinator::ApplyScriptUpdate()
 			System::SystemScriptUpdate(componentHandler->GetComponentScript(entityHandler->entities[i].id));
 }
 
+void Coordinator::ApplyGameplayPosPrediction(Map& map)
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM) &&
+			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
+			componentHandler->GetComponentGameplay(i).componentMove.PositionPrediction(map, componentHandler->GetComponentTransform(i));
+}
 void Coordinator::ApplyGameplayMove()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
@@ -112,12 +120,29 @@ void Coordinator::ApplyGameplayMove()
 			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
 			componentHandler->GetComponentGameplay(i).componentMove.MoveTowardWaypoint(componentHandler->GetComponentTransform(i) );
 }
-void Coordinator::ApplyGameplayPosPrediction(Map& map)
+void Coordinator::ApplyGameplayResolveCollision()
 {
+	std::vector<Entity*> entitiesToCheck;
+
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM) &&
 			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
-			componentHandler->GetComponentGameplay(i).componentMove.PositionPrediction(map, componentHandler->GetComponentTransform(i));
+		{
+			CGPMove& cgpMoveSelf = componentHandler->GetComponentGameplay(i).componentMove;
+			ComponentTransform& trsSelf = componentHandler->GetComponentTransform(i);
+
+			for (int j = 0; j < entitiesToCheck.size(); ++j)
+			{
+				CGPMove& cgpMoveOther = componentHandler->GetComponentGameplay(entitiesToCheck[j]->id).componentMove;
+				ComponentTransform& trsOther = componentHandler->GetComponentTransform(entitiesToCheck[j]->id);
+
+				//if the two circles collide
+				if ((trsSelf.pos - trsOther.pos).Length() < cgpMoveSelf.radius + cgpMoveOther.radius)
+					cgpMoveSelf.ResolveColision(trsSelf, cgpMoveOther, trsOther);
+			}
+
+			entitiesToCheck.push_back(&entityHandler->entities[i]);
+		}
 }
 void Coordinator::ApplyGameplayDrawPath(DebugRenderer& debug)
 {

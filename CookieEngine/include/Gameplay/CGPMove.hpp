@@ -4,7 +4,7 @@
 #include "Core/Primitives.hpp"
 #include "Render/DebugRenderer.hpp"
 
-#include "Map.hpp"
+#include "Resources/Map.hpp"
 #include "Core/Time.hpp"
 #include <vector>
 
@@ -12,14 +12,27 @@ namespace Cookie
 {
 	namespace Gameplay
 	{
+		enum CGPMOVE_STATE
+		{
+			E_STATIC,
+			E_MOVING,
+			E_WAITING
+		};
+
+
 		class CGPMove
 		{
 		public:
+			CGPMOVE_STATE state = CGPMOVE_STATE::E_STATIC;
 			float moveSpeed = 10;
 			bool  isFlying = false;
 
+			//use it for collision Detection making a circle with trs.pos
+			float radius = 0.7;
+
 			//temporary
 			Resources::Tile* lastTile = nullptr;
+
 			//maybe use a vector of Tile*
 			std::vector<Core::Math::Vec3> waypoints;
 
@@ -29,10 +42,17 @@ namespace Cookie
 			void MoveTowardWaypoint(ECS::ComponentTransform& trs)
 			{
 				while (waypoints.size() != 0 && (waypoints[0] - trs.pos).Length() < 0.1)
+				{
 					waypoints.erase(waypoints.begin());
+
+					//check if reach goal here to avoid to set the state each frame
+					if (waypoints.size() == 0)
+						state = CGPMOVE_STATE::E_STATIC;
+				}
 
 				if (waypoints.size() == 0)
 					return;
+
 
 				Core::Math::Vec3 direction = (waypoints[0] - trs.pos).Normalize();
 				trs.pos += direction * (moveSpeed * Core::DeltaTime());
@@ -41,6 +61,7 @@ namespace Cookie
 			void SetPath(Resources::Tile& lastWaypoint, ECS::ComponentTransform& trs)
 			{
 				waypoints.clear();
+				state = CGPMOVE_STATE::E_MOVING;
 				lastTile = &lastWaypoint;
 				Resources::Tile* currentTile = &lastWaypoint;
 
@@ -86,6 +107,38 @@ namespace Cookie
 					}
 				}
 					
+			}
+			void ResolveColision(ECS::ComponentTransform& trsSelf, CGPMove& other, ECS::ComponentTransform& trsOther)
+			{
+				//Priority High
+				if (state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_STATIC)
+				{
+					Core::Math::Vec3 direction = (trsOther.pos - trsSelf.pos).Normalize();
+					trsOther.pos = trsSelf.pos + direction * (radius + other.radius);
+				}
+				//Priority Medium not Handle Yet
+				else if (state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_MOVING)
+				{
+					float overlapLength = (radius + other.radius) - (trsSelf.pos - trsOther.pos).Length();
+
+					//Core::Math::Vec3 directionSelfToOther = (trsOther.pos - trsSelf.pos).Normalize();
+					Core::Math::Vec3 directionSelf = (waypoints[0] - trsSelf.pos).Normalize();
+					Core::Math::Vec3 directionOther = (other.waypoints[0] - trsOther.pos).Normalize();
+
+					//trsSelf.pos += -directionSelfToOther * (overlapLength / 2);
+					//trsOther.pos += directionSelfToOther * (overlapLength / 2);
+
+					trsSelf.pos += Core::Math::Vec3{-directionSelf.z, directionSelf.y, directionSelf.x} * (overlapLength / 2);
+					trsOther.pos += Core::Math::Vec3{ -directionOther.z, directionOther.y, directionOther.x } * (overlapLength / 2);
+
+
+				}
+				//Priority Low
+				else if (state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_MOVING)
+				{
+					Core::Math::Vec3 direction = (trsSelf.pos - trsOther.pos).Normalize();
+					trsSelf.pos = trsOther.pos + direction * (radius + other.radius);
+				}
 			}
 			void DrawPath(Render::DebugRenderer& debug, ECS::ComponentTransform& trs)
 			{
