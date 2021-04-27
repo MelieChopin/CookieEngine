@@ -1,6 +1,9 @@
 #ifndef _CGP_MOVE_HPP__
 #define _CGP_MOVE_HPP__
 
+#include "Core/Primitives.hpp"
+#include "Render/DebugRenderer.hpp"
+
 #include "Map.hpp"
 #include "Core/Time.hpp"
 #include <vector>
@@ -13,8 +16,12 @@ namespace Cookie
 		{
 		public:
 			float moveSpeed = 10;
-			std::vector<Core::Math::Vec3> waypoints;
 			bool  isFlying = false;
+
+			//temporary
+			Resources::Tile* lastTile = nullptr;
+			//maybe use a vector of Tile*
+			std::vector<Core::Math::Vec3> waypoints;
 
 			CGPMove() {}
 			~CGPMove() {}
@@ -31,23 +38,65 @@ namespace Cookie
 				trs.pos += direction * (moveSpeed * Core::DeltaTime());
 				trs.ComputeTRS();
 			}
-			void SetPath(Resources::Tile& lastWaypoint)
+			void SetPath(Resources::Tile& lastWaypoint, ECS::ComponentTransform& trs)
 			{
 				waypoints.clear();
-				Resources::Tile* currentWaypoint = &lastWaypoint;
+				lastTile = &lastWaypoint;
+				Resources::Tile* currentTile = &lastWaypoint;
 
+				//if Entity is Flying go as a straight line
 				if (isFlying)
 				{
-					waypoints.emplace(waypoints.begin(), Core::Math::Vec3{ currentWaypoint->pos.x, 0, currentWaypoint->pos.y });
+					waypoints.emplace(waypoints.begin(), Core::Math::Vec3{ currentTile->pos.x, 0, currentTile->pos.y });
 					return;
 				}
 
-				while (currentWaypoint->parent != nullptr)
+				while (currentTile->parent != nullptr)
 				{
-					waypoints.emplace(waypoints.begin(), Core::Math::Vec3{ currentWaypoint->pos.x, 0, currentWaypoint->pos.y });
-					currentWaypoint = currentWaypoint->parent;
+					Core::Math::Vec3 newWaypoint = { currentTile->pos.x, 0, currentTile->pos.y };
+
+					//if direction toward previous waypoint and new is same it's a straigth line so we only keep the last waypoint
+					if (waypoints.size() != 0 && (waypoints[0] - trs.pos).Normalize() == (newWaypoint - trs.pos).Normalize())
+						waypoints.erase(waypoints.begin());
+
+					waypoints.emplace(waypoints.begin(), newWaypoint);
+					currentTile = currentTile->parent;
 				}
 
+			}
+			void PositionPrediction(Resources::Map& map, ECS::ComponentTransform& trs)
+			{
+				if (waypoints.size() == 0)
+					return;
+
+				Core::Math::Vec3 nextPos = trs.pos + (waypoints[0] - trs.pos).Normalize() * (moveSpeed * Core::DeltaTime());
+				Resources::Tile& tempTile = map.GetTile(nextPos);
+
+				if (!tempTile.isTemporaryObstacle && !tempTile.isObstacle)
+				{
+					tempTile.isTemporaryObstacle = true;
+				}
+				else
+				{
+					if (map.ApplyPathfinding(map.GetTile(trs.pos), *lastTile))
+					{
+						SetPath(*lastTile, trs);
+						Core::Math::Vec3 nextPos = trs.pos + (waypoints[0] - trs.pos).Normalize() * (moveSpeed * Core::DeltaTime());
+						map.GetTile(nextPos).isTemporaryObstacle = true;;
+					}
+				}
+					
+			}
+			void DrawPath(Render::DebugRenderer& debug, ECS::ComponentTransform& trs)
+			{
+				if(waypoints.size() != 0)
+					debug.AddDebugElement(Core::Primitives::CreateLine({ trs.pos.x, 1, trs.pos.z }, { waypoints[0].x, 1, waypoints[0].z }, 0x00FFFF, 0x00FFFF));
+
+				for (int i = 1; i < waypoints.size(); ++i)
+				{
+					//use 1 for Y so the debug will not be mix up with the map
+					debug.AddDebugElement(Core::Primitives::CreateLine({waypoints[i - 1].x, 1, waypoints[i - 1].z}, {waypoints[i].x, 1, waypoints[i].z}, 0x00FFFF, 0x00FFFF));
+				}
 			}
 		};
 

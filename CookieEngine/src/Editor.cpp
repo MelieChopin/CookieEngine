@@ -111,14 +111,6 @@ void Editor::Loop()
 
 
         //will be removed after testing phase
-        game.scene->map.modelTileStart.mesh        = game.resources.meshes["Cube"];
-        game.scene->map.modelTileStart.texture     = game.resources.textures["Green"];
-        game.scene->map.modelTileStart.shader      = game.resources.shaders["Texture_Shader"];
-
-        game.scene->map.modelTileEnd.mesh          = game.resources.meshes["Cube"];
-        game.scene->map.modelTileEnd.texture       = game.resources.textures["Red"];
-        game.scene->map.modelTileEnd.shader        = game.resources.shaders["Texture_Shader"];
-
         game.scene->map.modelTileObstacle.mesh     = game.resources.meshes["Cube"];
         game.scene->map.modelTileObstacle.texture  = game.resources.textures["Grey"];
         game.scene->map.modelTileObstacle.shader   = game.resources.shaders["Texture_Shader"];
@@ -127,6 +119,7 @@ void Editor::Loop()
     ComponentModel     buildingModel;
     Vec2 buildingTileSize {{1, 1}};
     int nbOfBuildings = 0;
+    int nbOfUnits = 0;
     bool isRaycastingWithMap = false;
     int indexOfSelectedTile = 0;
     {
@@ -136,6 +129,8 @@ void Editor::Loop()
         buildingModel.texture = game.resources.textures["Pink"];
         buildingModel.shader = game.resources.shaders["Texture_Shader"];
     }
+    Vec2 selectionQuadStart;
+    bool makingASelectionQuad = false;
 
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
@@ -176,7 +171,6 @@ void Editor::Loop()
             std::string duck = "Duck";
             game.coordinator.componentHandler->ModifyComponentOfEntityToPrefab(game.coordinator.entityHandler->entities[1], game.resources, duck);
         }
-
         if (!ImGui::GetIO().MouseDownDuration[0])
         {            
             Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
@@ -196,7 +190,7 @@ void Editor::Loop()
             if (game.scene->map.physic.physBody->raycast(ray, raycastInfo))
             {
                 Vec3 hitPoint{ raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z };
-                hitPoint.Debug();
+                //hitPoint.Debug();
 
                 mousePos =  {{hitPoint.x, hitPoint.z}};
                 indexOfSelectedTile = game.scene->map.GetTileIndex(mousePos);
@@ -228,13 +222,16 @@ void Editor::Loop()
                 buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y;
             }
         }
-        //Bind Keys to create Building
+        //Bind Keys to activate/deactivate raycast with map 
         {
             //Key M on Azerty Keyboard
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_SEMICOLON])
             {
                 isRaycastingWithMap = !isRaycastingWithMap;
             }
+        }
+        //Bind Keys to create Building
+        {
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P] && isRaycastingWithMap)
             {
                 game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL, game.resources, "Building " + std::to_string(nbOfBuildings) );
@@ -262,13 +259,55 @@ void Editor::Loop()
             }
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_G] && isRaycastingWithMap)
             {
-                float selectedEntityId = selectedEntity.focusedEntity->id;
-                ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(selectedEntityId);
-                Vec2 PosOnMap = { {trs.pos.x, trs.pos.z} };
-                game.scene->map.tileStart = &game.scene->map.tiles[game.scene->map.GetTileIndex(PosOnMap)];
-                game.scene->map.tileEnd = &game.scene->map.tiles[indexOfSelectedTile];
-                game.scene->map.ApplyPathfinding();
-                game.coordinator.componentHandler->GetComponentGameplay(selectedEntityId).componentMove.SetPath(*game.scene->map.tileEnd);
+                for (int i = 0; i < game.coordinator.selectedEntities.size(); ++i)
+                {
+                    float selectedEntityId = game.coordinator.selectedEntities[i]->id;
+                    ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(selectedEntityId);
+
+                    if (game.scene->map.ApplyPathfinding(game.scene->map.GetTile(trs.pos), game.scene->map.tiles[indexOfSelectedTile]))
+                        game.coordinator.componentHandler->GetComponentGameplay(selectedEntityId).componentMove.SetPath(game.scene->map.tiles[indexOfSelectedTile], trs);
+
+                }
+            }
+        }
+        //Bind Key to create new unit
+        {
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N] && isRaycastingWithMap)
+            {
+                game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL, game.resources, "Unit " + std::to_string(nbOfUnits));
+                //should create constructor copy for each Component 
+                {
+                    ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(game.coordinator.entityHandler->livingEntities - 1);
+                    ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(game.coordinator.entityHandler->livingEntities - 1);
+
+                    trs.pos = {mousePos.x, 0, mousePos.y};
+
+                    model.mesh = game.resources.meshes["Cube"];
+                    model.texture = game.resources.textures["Green"];
+                    model.shader = game.resources.shaders["Texture_Shader"];
+                }
+
+                nbOfUnits++;
+            }
+        }
+        //Selection Quad
+        {
+            if (ImGui::GetIO().MouseClicked[0] && isRaycastingWithMap)
+            {
+                makingASelectionQuad = true;
+                selectionQuadStart = mousePos;
+            }
+            if (makingASelectionQuad)
+            {
+                dbgRenderer.AddDebugElement(Core::Primitives::CreateLine({ selectionQuadStart.x, 1, selectionQuadStart.y }, { mousePos.x, 1, selectionQuadStart.y }, 0x00FF00, 0x00FF00));
+                dbgRenderer.AddDebugElement(Core::Primitives::CreateLine({ selectionQuadStart.x, 1, selectionQuadStart.y }, { selectionQuadStart.x, 1, mousePos.y }, 0x00FF00, 0x00FF00));
+                dbgRenderer.AddDebugElement(Core::Primitives::CreateLine({ mousePos.x, 1, selectionQuadStart.y }, { mousePos.x, 1, mousePos.y }, 0x00FF00, 0x00FF00));
+                dbgRenderer.AddDebugElement(Core::Primitives::CreateLine({ selectionQuadStart.x, 1, mousePos.y }, { mousePos.x, 1, mousePos.y }, 0x00FF00, 0x00FF00));
+            }
+            if (ImGui::GetIO().MouseReleased[0] && isRaycastingWithMap)
+            {
+                makingASelectionQuad = false;
+                game.coordinator.SelectEntities(selectionQuadStart, mousePos);
             }
         }
 
@@ -276,26 +315,24 @@ void Editor::Loop()
         {
             PopulateFocusedEntity();
         }
-
         if (selectedEntity.focusedEntity && (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS))
         {
             selectedEntity.componentHandler->componentPhysics[selectedEntity.focusedEntity->id].Set(selectedEntity.componentHandler->componentTransforms[selectedEntity.focusedEntity->id]);
         }
            
 
-        //dbgRenderer.AddDebugElement(Core::Primitives::CreateLine({0.0f,0.0f,0.0f }, {0.0f,10.0f,0.0f} ,0xFF0000, 0xFF0000));
-
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
+        game.scene->map.ResetTilesTempObstacles();
+        //game.coordinator.ApplyGameplayPosPrediction(game.scene->map);
         game.coordinator.ApplyGameplayMove();
+        game.coordinator.ApplyGameplayDrawPath(dbgRenderer);
 
 
         game.renderer.Draw(&cam, game);
         if (isRaycastingWithMap)
             SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
         game.scene->map.DrawSpecificTiles(cam.GetViewProj());
-        game.scene->map.DrawPath(dbgRenderer);
-
 
         dbgRenderer.Draw(cam.GetViewProj());
 

@@ -3,6 +3,8 @@
 #include "Render/DebugRenderer.hpp"
 #include "Resources/Map.hpp"
 
+#include <list>
+
 using namespace Cookie::Resources;
 using namespace Cookie::Core::Math;
 
@@ -39,7 +41,7 @@ void Map::InitTiles()
 					currentTile.neighbours.push_back(&tiles[(x - 1) + y * tilesNb.x]);
 				if (x < tilesNb.x - 1)
 					currentTile.neighbours.push_back(&tiles[(x + 1) + y * tilesNb.x]);
-
+				
 				//diagonal
 				if (x > 0 && y > 0)
 					currentTile.neighbours.push_back(&tiles[(x - 1) + (y - 1) * tilesNb.x]);
@@ -54,12 +56,35 @@ void Map::InitTiles()
 		}
 
 }
+void Map::ResetTilesTempObstacles()
+{
+	for (int x = 0; x < tilesNb.x; x++)
+		for (int y = 0; y < tilesNb.y; y++)
+			tiles[x + y * tilesNb.x].isTemporaryObstacle = false;
+}
 int  Map::GetTileIndex(Vec2& mousePos)
 {
 	Vec2 unsignedMousePos{ {mousePos.x + trs.scale.x / 2, mousePos.y + trs.scale.z / 2} };
 
 	return int(unsignedMousePos.x / tilesSize.x) + tilesNb.x * int(unsignedMousePos.y / tilesSize.x);
 }
+int  Map::GetTileIndex(Vec3& pos)
+{
+	//helper, same as GetTileIndex(Vec2) juste use Vec3.z instead of Vec2.y
+
+	Vec2 unsignedPos{ {pos.x + trs.scale.x / 2, pos.z + trs.scale.z / 2} };
+
+	return int(unsignedPos.x / tilesSize.x) + tilesNb.x * int(unsignedPos.y / tilesSize.x);
+}
+Tile& Map::GetTile(Core::Math::Vec2& mousePos)
+{
+	return tiles[GetTileIndex(mousePos)];
+}
+Tile& Map::GetTile(Core::Math::Vec3& pos)
+{
+	return tiles[GetTileIndex(pos)];
+}
+
 Vec2 Map::GetCenterOfBuilding(Vec2& mousePos, Vec2& buildingNbOfTiles)
 {
 	Vec2 tilePos = tiles[GetTileIndex(mousePos)].pos;
@@ -72,11 +97,8 @@ Vec2 Map::GetCenterOfBuilding(Vec2& mousePos, Vec2& buildingNbOfTiles)
 
 }
 
-bool Map::ApplyPathfinding()
+bool Map::ApplyPathfinding(Tile& tileStart, Tile& tileEnd)
 {
-	if (tileStart == nullptr || tileEnd == nullptr)
-		return false;
-
 	// Set all Tiles to default 
 	for (int x = 0; x < tilesNb.x; x++)
 		for (int y = 0; y < tilesNb.y; y++)
@@ -91,15 +113,15 @@ bool Map::ApplyPathfinding()
 		}
 
 	// Setup starting conditions
-	tileStart->g = 0.0f;
-	tileStart->h = (tileEnd->pos - tileStart->pos).Length();
-	tileStart->f = tileStart->g + tileStart->h;
+	tileStart.g = 0.0f;
+	tileStart.h = (tileEnd.pos - tileStart.pos).Length();
+	tileStart.f = tileStart.g + tileStart.h;
 	std::list<Tile*> listNotTestedTiles;
-	listNotTestedTiles.push_back(tileStart);
-	Tile* currentTile = tileStart;
+	listNotTestedTiles.push_back(&tileStart);
+	Tile* currentTile = &tileStart;
 
 
-	while (!listNotTestedTiles.empty() && currentTile != tileEnd)
+	while (!listNotTestedTiles.empty() && currentTile != &tileEnd)
 	{
 		// Sort list of Tiles by lower f
 		listNotTestedTiles.sort([](const Tile* firstTile, const Tile* secondTile) { return firstTile->f < secondTile->f; });
@@ -121,7 +143,7 @@ bool Map::ApplyPathfinding()
 		for (Tile* currentNeighbour : currentTile->neighbours)
 		{
 			//Add currentNeighbour to the list only if not visited and not an obstacle
-			if (!currentNeighbour->isVisited && !currentNeighbour->isObstacle)
+			if (!currentNeighbour->isVisited && !currentNeighbour->isObstacle && !currentNeighbour->isTemporaryObstacle)
 				listNotTestedTiles.push_back(currentNeighbour);
 
 			// Calculate neighbour g value if currentTile become his parent
@@ -132,7 +154,7 @@ bool Map::ApplyPathfinding()
 			{
 				currentNeighbour->parent = currentTile;
 				currentNeighbour->g = possiblyNewGValue;
-				currentNeighbour->h = (currentNeighbour->pos - tileEnd->pos).Length();
+				currentNeighbour->h = (currentNeighbour->pos - tileEnd.pos).Length();
 				currentNeighbour->f = currentNeighbour->g + currentNeighbour->h;
 			}
 		}
@@ -147,11 +169,6 @@ void Map::Draw(const Mat4& viewProj)
 }
 void Map::DrawSpecificTiles(const Mat4& viewProj)
 {
-	if (tileStart)
-		modelTileStart.Draw(viewProj, Mat4::TRS({ tileStart->pos.x, 1, tileStart->pos.y }, { 0, 0, 0 }, { tilesSize.x, 1, tilesSize.y }));
-	if (tileEnd)
-		modelTileEnd.Draw(viewProj, Mat4::TRS({ tileEnd->pos.x, 1, tileEnd->pos.y }, { 0, 0, 0 }, { tilesSize.x, 1, tilesSize.y }));
-
 	for (int x = 0; x < tilesNb.x; x++)
 		for (int y = 0; y < tilesNb.y; y++)
 		{
@@ -161,17 +178,4 @@ void Map::DrawSpecificTiles(const Mat4& viewProj)
 				modelTileObstacle.Draw(viewProj, Mat4::TRS({ currentTile.pos.x, 1, currentTile.pos.y }, { 0, 0, 0 }, { tilesSize.x, 1, tilesSize.y }));
 		}
 
-}
-void Map::DrawPath(Render::DebugRenderer& debug)
-{
-	if (tileEnd != nullptr)
-	{
-		Tile* currentTile = tileEnd;
-
-		while (currentTile->parent != nullptr)
-		{
-			debug.AddDebugElement(Core::Primitives::CreateLine({ currentTile->pos.x, 1, currentTile->pos.y }, { currentTile->parent->pos.x, 1, currentTile->parent->pos.y }, 0x00FFFF, 0x00FFFF));
-			currentTile = currentTile->parent;
-		}
-	}
 }

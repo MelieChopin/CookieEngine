@@ -1,4 +1,8 @@
 #include "ResourcesManager.hpp"
+#include "Resources/Map.hpp"
+#include "Core/Primitives.hpp"
+#include "Render/DebugRenderer.hpp"
+
 #include "ECS/EntityHandler.hpp"
 #include "ECS/ComponentHandler.hpp"
 #include "ECS/SystemHandler.hpp"
@@ -6,6 +10,9 @@
 
 #include <assert.h>
 
+using namespace Cookie::Resources;
+using namespace Cookie::Render;
+using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
 
 
@@ -49,7 +56,7 @@ void Coordinator::RemoveEntity(Entity& entity)
 	entity.needToBeRemoved = false;
 
 	//for (unsigned int i = 0; i < entity.children.size(); ++i)
-	//	componentHandler->GetComponentTransform(entity.children[i]).parentTRS = Core::Math::Mat4::Identity();
+	//	componentHandler->GetComponentTransform(entity.children[i]).parentTRS = Mat4::Identity();
 
 	//Switch the removed one with the last alive
 	entityHandler->livingEntities--;
@@ -60,18 +67,31 @@ bool Coordinator::CheckSignature(const int entitySignature, const int signature)
 	return (entitySignature & signature) == signature;
 }
 
-void Coordinator::ApplySystemDisplayId()
+void Coordinator::SelectEntities(Vec2& selectionQuadStart, Vec2& selectionQuadEnd)
 {
+	selectedEntities.clear();
+	float minX = (selectionQuadStart.x < selectionQuadEnd.x) ? selectionQuadStart.x : selectionQuadEnd.x;
+	float maxX = (selectionQuadStart.x < selectionQuadEnd.x) ? selectionQuadEnd.x : selectionQuadStart.x;
+	float minZ = (selectionQuadStart.y < selectionQuadEnd.y) ? selectionQuadStart.y : selectionQuadEnd.y;
+	float maxZ = (selectionQuadStart.y < selectionQuadEnd.y) ? selectionQuadEnd.y : selectionQuadStart.y;
+
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		std::cout << entityHandler->entities[i].id << std::endl;
+		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM))
+		{
+			Vec3& entityPos = componentHandler->GetComponentTransform(i).pos;
+			if (minX <= entityPos.x && entityPos.x <= maxX && 
+				minZ <= entityPos.z && entityPos.z <= maxZ)
+				selectedEntities.push_back(&entityHandler->entities[i]);
+		}
 }
+
 void Coordinator::ApplySystemPhysics(float factor)
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_PHYSICS))
 			System::SystemPhysics(componentHandler->GetComponentPhysics(entityHandler->entities[i].id), factor);
 }
-void Coordinator::ApplyDraw(const Core::Math::Mat4& viewProj)
+void Coordinator::ApplyDraw(const Mat4& viewProj)
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_MODEL))
@@ -91,4 +111,18 @@ void Coordinator::ApplyGameplayMove()
 		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM) &&
 			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
 			componentHandler->GetComponentGameplay(i).componentMove.MoveTowardWaypoint(componentHandler->GetComponentTransform(i) );
+}
+void Coordinator::ApplyGameplayPosPrediction(Map& map)
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM) &&
+			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
+			componentHandler->GetComponentGameplay(i).componentMove.PositionPrediction(map, componentHandler->GetComponentTransform(i));
+}
+void Coordinator::ApplyGameplayDrawPath(DebugRenderer& debug)
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM) &&
+			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
+			componentHandler->GetComponentGameplay(i).componentMove.DrawPath(debug, componentHandler->GetComponentTransform(i));
 }

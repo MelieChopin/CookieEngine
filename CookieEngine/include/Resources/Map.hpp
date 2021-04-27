@@ -12,11 +12,6 @@
 
 namespace Cookie
 {
-	namespace Render
-	{
-		class DebugRenderer;
-	}
-
 	namespace Resources
 	{
 		
@@ -24,6 +19,7 @@ namespace Cookie
 		struct Tile
 		{
 			bool isObstacle = false;
+			bool isTemporaryObstacle = false;
 			bool isVisited = false;
 
 			float f = 0;
@@ -45,17 +41,13 @@ namespace Cookie
 		public:
 			Core::Math::Vec2 tilesNb      = {{ MAP_DEFAULT_TILESNB_WIDTH, MAP_DEFAULT_TILESNB_HEIGHT }};
 			Core::Math::Vec2 tilesSize    = {{ 0, 0 }};
+			std::array<Tile, MAP_DEFAULT_TILESNB_WIDTH * MAP_DEFAULT_TILESNB_HEIGHT> tiles;
 
 			ECS::ComponentTransform trs;
 			ECS::ComponentModel	    model;
 			ECS::ComponentPhysics	physic;
 
-			std::array<Tile, MAP_DEFAULT_TILESNB_WIDTH * MAP_DEFAULT_TILESNB_HEIGHT> tiles;
-			Tile* tileStart = nullptr;
-			Tile* tileEnd = nullptr;
-
-			ECS::ComponentModel	    modelTileStart;
-			ECS::ComponentModel	    modelTileEnd;
+			//will be removed
 			ECS::ComponentModel	    modelTileObstacle;
 
 
@@ -63,14 +55,18 @@ namespace Cookie
 			~Map() {}
 
 			void InitTiles();
+			void ResetTilesTempObstacles();
 			int GetTileIndex(Core::Math::Vec2& mousePos);
+			int GetTileIndex(Core::Math::Vec3& pos);
+			Tile& GetTile(Core::Math::Vec2& mousePos);
+			Tile& GetTile(Core::Math::Vec3& pos);
 			Core::Math::Vec2 GetCenterOfBuilding(Core::Math::Vec2& mousePos, Core::Math::Vec2& buildingNbOfTiles);
 
-			bool ApplyPathfinding();
+			bool ApplyPathfinding(Tile& tileStart, Tile& tileEnd);
 
 			void Draw(const Core::Math::Mat4& viewProj);
 			void DrawSpecificTiles(const Core::Math::Mat4& viewProj);
-			void DrawPath(Render::DebugRenderer& debug);
+
 
 		};
 
