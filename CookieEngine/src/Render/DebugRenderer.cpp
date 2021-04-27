@@ -11,7 +11,7 @@ using namespace Cookie::Core::Math;
 /*========== CONSTRUCTORS/DESTRUCTORS ==========*/
 
 DebugRenderer::DebugRenderer():
-    physDbgRenderer{Physics::PhysicsHandle::editWorld->getDebugRenderer()}
+    physDbgRenderer{InitEdit()}
 {
 
     AllocateVBuffer(1);
@@ -26,6 +26,14 @@ DebugRenderer::DebugRenderer():
 
 DebugRenderer::~DebugRenderer()
 {
+    int max = Physics::PhysicsHandle::editWorld->getNbRigidBodies();
+    for (int i = 0; i < max; i++)
+    {
+        Physics::PhysicsHandle::editWorld->destroyRigidBody(Physics::PhysicsHandle::editWorld->getRigidBody(0));
+    }
+
+    Physics::PhysicsHandle::physCom->destroyPhysicsWorld(Physics::PhysicsHandle::editWorld);
+
     if (VBuffer)
         VBuffer->Release();
     if (rasterState)
@@ -42,6 +50,12 @@ DebugRenderer::~DebugRenderer()
 
 
 /*========== INIT METHODS ==========*/
+
+rp3d::DebugRenderer& DebugRenderer::InitEdit()
+{
+    Physics::PhysicsHandle::editWorld = Physics::PhysicsHandle::physCom->createPhysicsWorld();
+    return Physics::PhysicsHandle::editWorld->getDebugRenderer();
+}
 
 void DebugRenderer::AllocateVBuffer(size_t vBufferSize)
 {
@@ -129,6 +143,8 @@ void DebugRenderer::InitShader()
     Render::CreateLayout(&blob,ied,2,&ILayout);
 
     Render::CreateBuffer(Core::Math::Mat4::Identity().e,sizeof(Core::Math::Mat4),&CBuffer);
+
+    blob->Release();
 }
 
 /*========== RUNTIME METHODS ==========*/

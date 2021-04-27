@@ -75,6 +75,8 @@ void FBODrawer::InitShader()
     samDesc.MaxLOD = 0;
 
     Render::CreateSampler(&samDesc, &PSampler);
+
+    blob->Release();
 }
 
 /*===================== REALTIME METHODS =====================*/

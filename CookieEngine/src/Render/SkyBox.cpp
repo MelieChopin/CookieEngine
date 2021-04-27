@@ -120,6 +120,8 @@ void SkyBox::InitShader()
     samDesc.MaxLOD = 0;
 
     Render::CreateSampler(&samDesc, &PSampler);
+
+    blob->Release();
 }
 
 void SkyBox::InitRasterizer()

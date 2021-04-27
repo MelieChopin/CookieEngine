@@ -142,6 +142,8 @@ void GeometryPass::InitShader()
     samDesc.MaxLOD = 0;
 
     Render::CreateSampler(&samDesc, &PSampler);
+
+    blob->Release();
 }
 
 void GeometryPass::InitState()

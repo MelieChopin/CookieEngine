@@ -1,3 +1,4 @@
+#include "Physics/PhysicsHandle.hpp"
 #include "Resources/Scene.hpp"
 #include "Game.hpp"
 
@@ -10,11 +11,12 @@ Game::Game():
     skyBox{resources},
     frameBuffer{renderer.window.width,renderer.window.height}
 {
-
+    Physics::PhysicsHandle::Init();
 }
 
 Game::~Game()
 {
+    Physics::PhysicsHandle::Terminate();
 }
 
 /*================== LOOP ==================*/

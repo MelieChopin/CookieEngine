@@ -38,6 +38,7 @@ namespace Cookie
 				rp3d::DebugRenderer&								physDbgRenderer;
 				std::vector<Core::Primitives::DebugVertex>			debugElement;
 
+				rp3d::DebugRenderer& InitEdit();
 				void InitRasterizerState();
 				void InitShader();
 				void AllocateVBuffer(size_t vBufferSize);

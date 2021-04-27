@@ -10,9 +10,19 @@ namespace Cookie
 		class PhysicsHandle
 		{
 			public:
-				inline static const std::unique_ptr<rp3d::PhysicsCommon>	physCom{std::make_unique<rp3d::PhysicsCommon>()};
+				inline static std::unique_ptr<rp3d::PhysicsCommon>			physCom{nullptr};
 				inline static rp3d::PhysicsWorld*							physSim{nullptr};
-				inline static rp3d::PhysicsWorld*							editWorld{Physics::PhysicsHandle::physCom->createPhysicsWorld()};
+				inline static rp3d::PhysicsWorld*							editWorld{nullptr};
+
+				static void Init()
+				{
+					physCom = std::make_unique<rp3d::PhysicsCommon>();
+				}
+
+				static void Terminate()
+				{
+					//physCom.reset();
+				}
 
 		};
 	}

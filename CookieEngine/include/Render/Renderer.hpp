@@ -26,8 +26,8 @@ namespace Cookie
 		class Renderer
 		{
 			private:
-				struct IDXGISwapChain*				swapchain		= nullptr;
-				struct ID3D11RenderTargetView*		backbuffer		= nullptr;
+				IDXGISwapChain*				swapchain		= nullptr;
+				ID3D11RenderTargetView*		backbuffer		= nullptr;
 					
 			public:
 				struct ID3D11DepthStencilView* depthBuffer = nullptr;

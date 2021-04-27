@@ -477,6 +477,8 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 		 newPrefab.filepath = filesPath[i];
 
 		 resourcesManager.prefabs[newPrefab.name] = std::make_shared<Prefab>(newPrefab);
+
+		 file.close();
 	 }
  }
 

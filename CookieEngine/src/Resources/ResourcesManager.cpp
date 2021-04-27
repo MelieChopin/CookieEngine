@@ -19,8 +19,8 @@ using namespace Cookie::Resources;
 
 ResourcesManager::ResourcesManager()
 {
-	scripts["test.lua"] = std::make_shared<Script>("Assets\\scripts\\test.lua");
-	scripts["test2.lua"] = std::make_shared<Script>("Assets\\scripts\\test2.lua");
+	//scripts["test.lua"] = std::make_shared<Script>("Assets\\scripts\\test.lua");
+	//scripts["test2.lua"] = std::make_shared<Script>("Assets\\scripts\\test2.lua");
 
 	InitPrimitives();
 }
