@@ -1,9 +1,7 @@
-#include <system_error>
-#include <string>
-#include <memory>
 
 #include "Render/RendererRemote.hpp"
 #include "Resources/Mesh.hpp"
+#include "Resources/Texture.hpp"
 #include "Resources/ResourcesManager.hpp"
 #include "Render/FrameBuffer.hpp"
 

@@ -29,9 +29,13 @@ Mesh::Mesh(std::string meshName, std::vector<float>& vertices, std::vector<unsig
 Mesh::~Mesh()
 {
     if (VBuffer)
-	    VBuffer->Release();
+    {
+        VBuffer->Release();
+    }
     if (IBuffer)
+    {
         IBuffer->Release();
+    }
 }
 
 void Mesh::ComputeAABB(const std::vector<float>& vertices)

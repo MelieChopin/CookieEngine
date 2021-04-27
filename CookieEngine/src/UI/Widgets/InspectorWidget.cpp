@@ -3,6 +3,8 @@
 #include "Coordinator.hpp"
 #include "Resources/Scene.hpp"
 #include "ECS/ComponentModel.hpp"
+#include "Resources/Mesh.hpp"
+#include "Resources/Texture.hpp"
 #include "Resources/ResourcesManager.hpp" 
 #include "InspectorWidget.hpp"
 #include "Editor.hpp"
@@ -128,13 +130,13 @@ void Inspector::ModelInterface()
 
             NewLine();
             
-            for (std::unordered_map<std::string, std::shared_ptr<Mesh>>::iterator meshIt = resources.meshes.begin(); meshIt != resources.meshes.end(); meshIt++)
+            for (std::unordered_map<std::string, std::unique_ptr<Mesh>>::iterator meshIt = resources.meshes.begin(); meshIt != resources.meshes.end(); meshIt++)
             {
                 const bool is_selected = (modelComp.mesh != nullptr && modelComp.mesh->name == meshIt->second->name);
 
                 if ((meshIt->second->name.find(researchString) != std::string::npos) && ImGui::Selectable(meshIt->second->name.c_str(), is_selected))
                 {
-                    modelComp.mesh = meshIt->second;
+                    modelComp.mesh = meshIt->second.get();
                 }
 
                 if (is_selected)
@@ -146,7 +148,7 @@ void Inspector::ModelInterface()
             if (modelComp.mesh != nullptr)
             {
                 if (Button("Clear current mesh"))
-                    modelComp.mesh.reset();
+                    modelComp.mesh = nullptr;
             }
             else TextDisabled("Clear current mesh");
 
@@ -168,7 +170,7 @@ void Inspector::ModelInterface()
 
             NewLine();
 
-            for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator textIt = resources.textures.begin(); textIt != resources.textures.end(); textIt++)
+            for (std::unordered_map<std::string, std::unique_ptr<Texture>>::iterator textIt = resources.textures.begin(); textIt != resources.textures.end(); textIt++)
             {
                 const bool is_selected = (modelComp.texture != nullptr && textIt->second &&  modelComp.texture->name == textIt->second->name);
 
@@ -181,7 +183,7 @@ void Inspector::ModelInterface()
                         SameLine();
 
                         if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
-                            modelComp.texture = textIt->second;
+                            modelComp.texture = textIt->second.get();
                     }
                 }
 
@@ -194,7 +196,7 @@ void Inspector::ModelInterface()
             if (modelComp.texture != nullptr)
             {
                 if (Button("Clear current texture"))
-                    modelComp.texture.reset();
+                    modelComp.texture = nullptr;
             }
             else TextDisabled("Clear current texture");
 

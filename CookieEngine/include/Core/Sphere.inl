@@ -7,7 +7,7 @@ namespace Cookie
 	{
 		namespace Primitives
 		{ 
-			inline std::shared_ptr<Resources::Mesh> CreateIcoSphere()
+			inline std::unique_ptr<Resources::Mesh> CreateIcoSphere()
 			{
 				std::vector<float> vertices = {
 				0.000000, -1.000000, 0.000000, 0.272727, 1.000000, -0.268034, -0.943523, 0.194736,
@@ -335,11 +335,11 @@ namespace Cookie
 				76,5,69
 				};
 
-				std::shared_ptr<Cookie::Resources::Mesh> sphereMesh = std::make_shared<Cookie::Resources::Mesh>("IcoSphere", vertices, indices, indices.size());
+				std::unique_ptr<Cookie::Resources::Mesh> sphereMesh = std::make_unique<Cookie::Resources::Mesh>("IcoSphere", vertices, indices, indices.size());
 				return sphereMesh;
 			}
 
-			inline std::shared_ptr<Resources::Mesh> CreateSphere()
+			inline std::unique_ptr<Resources::Mesh> CreateSphere()
 			{
 				std::vector<float> sphere = {
 				0.096134, -0.995185, 0.019122, 0.000000, 0.031250, 0.122179, -0.992211, 0.024303,
@@ -3418,7 +3418,7 @@ namespace Cookie
 				1086,1022,1021
 				};
 
-				std::shared_ptr<Cookie::Resources::Mesh> sphereMesh = std::make_shared<Cookie::Resources::Mesh>("Sphere", sphere, indices, indices.size());
+				std::unique_ptr<Cookie::Resources::Mesh> sphereMesh = std::make_unique<Cookie::Resources::Mesh>("Sphere", sphere, indices, indices.size());
 				return sphereMesh;
 			}
 		}

@@ -23,6 +23,7 @@ GeometryPass::GeometryPass(int width, int height):
 	albedoFBO	{ width,height }
 {
 	InitShader();
+    InitState();
 }
 
 GeometryPass::~GeometryPass()
@@ -37,6 +38,10 @@ GeometryPass::~GeometryPass()
         ILayout->Release();
     if (PSampler)
         PSampler->Release();
+    if (depthStencilState)
+        depthStencilState->Release();
+    if (rasterizerState)
+        rasterizerState->Release();
 }
 
 /*=========================== INIT METHODS ===========================*/
@@ -139,10 +144,60 @@ void GeometryPass::InitShader()
     Render::CreateSampler(&samDesc, &PSampler);
 }
 
+void GeometryPass::InitState()
+{
+    // Initialize the description of the stencil state.
+    D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
+
+    // Set up the description of the stencil state.
+    depthStencilDesc.DepthEnable = true;
+    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+    depthStencilDesc.StencilEnable = true;
+    depthStencilDesc.StencilReadMask = 0xFF;
+    depthStencilDesc.StencilWriteMask = 0xFF;
+
+    // Stencil operations if pixel is front-facing.
+    depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+    depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+    // Stencil operations if pixel is back-facing.
+    depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+    depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+    RendererRemote::device->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
+
+    D3D11_RASTERIZER_DESC rasterDesc = {};
+
+    // Setup the raster description which will determine how and what polygons will be drawn.
+    rasterDesc.AntialiasedLineEnable = false;
+    rasterDesc.CullMode = D3D11_CULL_FRONT;
+    rasterDesc.DepthBias = 0;
+    rasterDesc.DepthBiasClamp = 0.0f;
+    rasterDesc.DepthClipEnable = true;
+    rasterDesc.FillMode = D3D11_FILL_SOLID;
+    rasterDesc.FrontCounterClockwise = false;
+    rasterDesc.MultisampleEnable = false;
+    rasterDesc.ScissorEnable = false;
+    rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+    RendererRemote::device->CreateRasterizerState(&rasterDesc, &rasterizerState);
+}
+
 /*=========================== REALTIME METHODS ===========================*/
 
 void GeometryPass::Set(ID3D11DepthStencilView* depthStencilView)
 {
+    // Now set the rasterizer state.
+    Render::RendererRemote::context->RSSetState(rasterizerState);
+    // Set the depth stencil state.
+    Render::RendererRemote::context->OMSetDepthStencilState(depthStencilState, 1);
+
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
 

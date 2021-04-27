@@ -15,26 +15,42 @@ using namespace Cookie::Core::Math;
 
 Renderer::Renderer():
     remote {InitDevice(window)},
-    state {InitState(window.width, window.height)},
+    viewport {0.0f,0.0f,static_cast<float>(window.width),static_cast<float>(window.height),0.0f,1.0f},
     gPass{window.width,window.height}
 {
     CreateDrawBuffer(window.width,window.height);
+    remote.context->RSSetViewports(1, &viewport);
 }
 
 Renderer::~Renderer()
 {
+    remote.context->ClearState();
+
+    ID3D11RenderTargetView* nullViews[] = { nullptr,nullptr,nullptr,nullptr };
+
+    remote.context->OMSetRenderTargets(4, nullViews, nullptr);
+
+    ID3D11SamplerState* null[] = { nullptr};
+
+    remote.context->PSSetSamplers(0, 1, null);
+
+    remote.context->VSSetShader(nullptr,0,0);
+    remote.context->PSSetShader(nullptr,0,0);
+
     if (swapchain)
         swapchain->Release();
     if (backbuffer)
         backbuffer->Release();
     if (depthBuffer)
         depthBuffer->Release();
+    if (remote.context)
+    {
+        remote.context->Release();
+    }
     if (remote.device)
         remote.device->Release();
-    if (state.depthStencilState)
-        state.depthStencilState->Release();
-    if (state.rasterizerState)
-        state.rasterizerState->Release();
+
+    remote.context->Flush();
 }
 
 /*========================= INIT METHODS =========================*/
@@ -133,75 +149,15 @@ bool Renderer::CreateDrawBuffer(int width, int height)
     return true;
 }
 
-RendererState Renderer::InitState(int width, int height)
-{
-    RendererState _state;
-
-    // Initialize the description of the stencil state.
-    D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
-
-    // Set up the description of the stencil state.
-    depthStencilDesc.DepthEnable = true;
-    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-    depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-
-    depthStencilDesc.StencilEnable = true;
-    depthStencilDesc.StencilReadMask = 0xFF;
-    depthStencilDesc.StencilWriteMask = 0xFF;
-
-    // Stencil operations if pixel is front-facing.
-    depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-    depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-    // Stencil operations if pixel is back-facing.
-    depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-    depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-    remote.device->CreateDepthStencilState(&depthStencilDesc, &_state.depthStencilState);
-
-    // Set the depth stencil state.
-    remote.context->OMSetDepthStencilState(_state.depthStencilState, 1);
-
-    D3D11_RASTERIZER_DESC rasterDesc = {};
-
-    // Setup the raster description which will determine how and what polygons will be drawn.
-    rasterDesc.AntialiasedLineEnable = false;
-    rasterDesc.CullMode = D3D11_CULL_NONE;
-    rasterDesc.DepthBias = 0;
-    rasterDesc.DepthBiasClamp = 0.0f;
-    rasterDesc.DepthClipEnable = true;
-    rasterDesc.FillMode = D3D11_FILL_SOLID;
-    rasterDesc.FrontCounterClockwise = false;
-    rasterDesc.MultisampleEnable = false;
-    rasterDesc.ScissorEnable = false;
-    rasterDesc.SlopeScaledDepthBias = 0.0f;
-
-    remote.device->CreateRasterizerState(&rasterDesc, &_state.rasterizerState);
-
-    // Now set the rasterizer state.
-    remote.context->RSSetState(_state.rasterizerState);
-
-    _state.viewport.TopLeftX = 0;
-    _state.viewport.TopLeftY = 0;
-    _state.viewport.Width = width;
-    _state.viewport.Height = height;
-    _state.viewport.MinDepth = 0.0f;
-    _state.viewport.MaxDepth = 1.0f;
-
-    remote.context->RSSetViewports(1, &_state.viewport);
-
-    return _state;
-}
-
 /*========================= CALLBACK METHODS =========================*/
 
 void Renderer::ResizeBuffer(int width, int height)
 {
-    remote.context->OMSetRenderTargets(0, 0, 0);
+    remote.context->ClearState();
+
+    ID3D11RenderTargetView* nullViews[] = { nullptr,nullptr,nullptr,nullptr };
+
+    remote.context->OMSetRenderTargets(4, nullViews, nullptr);
 
     backbuffer->Release();
     depthBuffer->Release();
@@ -217,13 +173,16 @@ void Renderer::ResizeBuffer(int width, int height)
 
     remote.context->OMSetRenderTargets(1, &backbuffer, depthBuffer);
 
-    state.viewport.Width = width;
-    state.viewport.Height = height;
-    remote.context->RSSetViewports(1, &state.viewport);
+    viewport.Width = width;
+    viewport.Height = height;
+    remote.context->RSSetViewports(1, &viewport);
 
     gPass.posFBO.Resize(width,height);
     gPass.normalFBO.Resize(width, height);
     gPass.albedoFBO.Resize(width, height);
+
+    remote.context->ClearState();
+    remote.context->Flush();
 }
 
 /*========================= RENDER METHODS =========================*/
@@ -236,8 +195,6 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     Core::Math::Mat4 viewProj = cam->GetViewProj();
     
     game.skyBox.Draw(cam->GetProj(), cam->GetView());
-
-    remote.context->RSSetState(state.rasterizerState);
 
     gPass.Set(depthBuffer);
 
@@ -272,23 +229,22 @@ void Renderer::DrawFrameBuffer(FrameBuffer& fbo)
 
 void Renderer::Clear()
 {
-    remote.context->ClearRenderTargetView(backbuffer, state.clearColor.e);
+    Core::Math::Vec4 clearColor = {0.0f,0.0f,0.0f,1.0f};
+
+    remote.context->ClearRenderTargetView(backbuffer, clearColor.e);
     remote.context->ClearDepthStencilView(depthBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0.0f);
 
     ID3D11ShaderResourceView* null = nullptr;
 
     remote.context->PSSetShaderResources(0, 1, &null);
 
-    gPass.Clear(state.clearColor);
-
-    remote.context->RSSetState(state.rasterizerState);
-    remote.context->OMSetDepthStencilState(state.depthStencilState, 1);
-    remote.context->RSSetViewports(1, &state.viewport);
+    gPass.Clear(clearColor);
 }
 
 void Renderer::ClearFrameBuffer(FrameBuffer& fbo)
 {
-    remote.context->ClearRenderTargetView(fbo.renderTargetView, state.clearColor.e);
+    Core::Math::Vec4 clearColor = { 0.0f,0.0f,0.0f,1.0f };
+    remote.context->ClearRenderTargetView(fbo.renderTargetView, clearColor.e);
 }
 
 void Renderer::SetBackBuffer()

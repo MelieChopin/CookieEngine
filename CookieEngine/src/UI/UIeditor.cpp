@@ -66,6 +66,7 @@ void UIeditor::Terminate()
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	DestroyContext();
+	Render::RendererRemote::context->Flush();
 }
 
 

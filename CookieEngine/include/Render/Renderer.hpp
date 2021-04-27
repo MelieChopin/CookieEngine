@@ -5,7 +5,6 @@
 #include "Core/Window.hpp"
 #include "Render/FBODrawer.hpp"
 #include "Render/RendererRemote.hpp"
-#include "Render/RendererState.hpp"
 #include "Render/GeometryPass.hpp"
 
 #include "Light.hpp"
@@ -35,7 +34,7 @@ namespace Cookie
 
 				Core::Window	window;
 				RendererRemote	remote;
-				RendererState	state;
+				D3D11_VIEWPORT	viewport;
 				GeometryPass	gPass;
 				LightsArray		lights;
 
@@ -45,7 +44,6 @@ namespace Cookie
 			private:
 				RendererRemote InitDevice(Core::Window& window);
 				bool CreateDrawBuffer(int width, int height);
-				RendererState InitState(int width, int height);
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */

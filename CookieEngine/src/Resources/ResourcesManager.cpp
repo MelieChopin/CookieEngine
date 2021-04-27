@@ -111,7 +111,7 @@ void ResourcesManager::Load(Render::Renderer& _renderer)
 		std::string iFile = assetsFiles.at(i);
 		if (textures.find(iFile) == textures.end())
 		{
-			textures[iFile] = std::make_shared<Texture>(iFile);
+			textures[iFile] = std::make_unique<Texture>(iFile);
 		}
 		//printf("%s\n", gltfFiles.at(i).c_str());
 	}

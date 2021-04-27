@@ -18,8 +18,8 @@ namespace Cookie
         class ComponentModel
         {
         public:
-            std::shared_ptr<Resources::Mesh>    mesh    {nullptr};
-            std::shared_ptr<Resources::Texture> texture {nullptr};
+            Resources::Mesh*    mesh    {nullptr};
+            Resources::Texture* texture {nullptr};
 
 
             //Material material;

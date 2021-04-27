@@ -34,7 +34,7 @@ namespace Cookie
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
-				FrameBuffer(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM);
+				FrameBuffer(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R16G16B16A16_UNORM);
 				~FrameBuffer();
 
 				void Resize(int width, int height);

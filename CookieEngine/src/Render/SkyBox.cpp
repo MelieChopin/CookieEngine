@@ -1,7 +1,7 @@
 #include "Render/D3D11Helper.hpp"
-#include "Resources//ResourcesManager.hpp"
 #include "Resources/Mesh.hpp"
 #include "Resources/Texture.hpp"
+#include "Resources/ResourcesManager.hpp"
 #include "Skybox.hpp"
 #include "Core/Math/Mat4.hpp"
 
@@ -16,7 +16,7 @@ struct VS_CONSTANT_BUFFER
 /*==================== CONSTRUCTORS/DESTRUCTORS ====================*/
 
 SkyBox::SkyBox(Resources::ResourcesManager& _resources):
-	cube {_resources.meshes["Cube"]}
+	cube {_resources.meshes["Cube"].get()}
 {
     InitShader();
     InitRasterizer();

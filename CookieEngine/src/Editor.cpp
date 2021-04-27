@@ -19,8 +19,8 @@ Editor::Editor()
     editorFBO{game.renderer.window.width,game.renderer.window.height}
 {
     game.resources.Load(game.renderer);
-    game.skyBox.texture = game.resources.textures["Assets/skybox.dds"];
-    cam.SetProj(Core::Math::ToRadians(60.f), game.renderer.state.viewport.Width, game.renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+    game.skyBox.texture = game.resources.textures["Assets/skybox.dds"].get();
+    cam.SetProj(Core::Math::ToRadians(60.f), game.renderer.viewport.Width, game.renderer.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
     cam.rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
 
@@ -69,6 +69,7 @@ Editor::Editor()
 
 Editor::~Editor()
 {
+    ui.Terminate();
     //Save all prefabs in folder Prefabs
     Resources::Serialization::Save::SaveAllPrefabs(game.resources);
 }
@@ -105,19 +106,19 @@ void Editor::Loop()
 
     Vec2 mousePos;
     {
-        game.scene->map.model.mesh                 = game.resources.meshes["Cube"];
-        game.scene->map.model.texture              = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"];
+        game.scene->map.model.mesh                 = game.resources.meshes["Cube"].get();
+        game.scene->map.model.texture              = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
 
 
         //will be removed after testing phase
-        game.scene->map.modelTileStart.mesh        = game.resources.meshes["Cube"];
-        game.scene->map.modelTileStart.texture     = game.resources.textures["Green"];
+        game.scene->map.modelTileStart.mesh        = game.resources.meshes["Cube"].get();
+        game.scene->map.modelTileStart.texture     = game.resources.textures["Green"].get();
 
-        game.scene->map.modelTileEnd.mesh          = game.resources.meshes["Cube"];
-        game.scene->map.modelTileEnd.texture       = game.resources.textures["Red"];
+        game.scene->map.modelTileEnd.mesh          = game.resources.meshes["Cube"].get();
+        game.scene->map.modelTileEnd.texture       = game.resources.textures["Red"].get();
 
-        game.scene->map.modelTileObstacle.mesh     = game.resources.meshes["Cube"];
-        game.scene->map.modelTileObstacle.texture  = game.resources.textures["Grey"];
+        game.scene->map.modelTileObstacle.mesh     = game.resources.meshes["Cube"].get();
+        game.scene->map.modelTileObstacle.texture  = game.resources.textures["Grey"].get();
     }
     ComponentTransform buildingTrs;
     ComponentModel     buildingModel;
@@ -128,8 +129,8 @@ void Editor::Loop()
     {
         buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x;
         buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y;
-        buildingModel.mesh = game.resources.meshes["Cube"];
-        buildingModel.texture = game.resources.textures["Pink"];
+        buildingModel.mesh = game.resources.meshes["Cube"].get();
+        buildingModel.texture = game.resources.textures["Pink"].get();
     }
 
     while (!glfwWindowShouldClose(game.renderer.window.window))
@@ -243,7 +244,7 @@ void Editor::Loop()
                     trs.scale = buildingTrs.scale;
 
                     model.mesh = buildingModel.mesh;
-                    model.texture = game.resources.textures["Green"];
+                    model.texture = game.resources.textures["Green"].get();
                 }
 
                 nbOfBuildings++;

@@ -26,6 +26,9 @@ namespace Cookie
 				ID3D11PixelShader*	PShader{ nullptr };
 				ID3D11SamplerState*	PSampler{ nullptr };
 
+				ID3D11DepthStencilState*	depthStencilState	= nullptr;
+				ID3D11RasterizerState*		rasterizerState		= nullptr;
+
 			public:
 				ID3D11Buffer* CBuffer{ nullptr };
 
@@ -35,6 +38,7 @@ namespace Cookie
 
 			private:
 				void InitShader();
+				void InitState();
 
 			public:
 				GeometryPass(int width, int height);
