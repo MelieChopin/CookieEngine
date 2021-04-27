@@ -9,7 +9,6 @@ namespace Cookie
     {
         namespace Math
         {
-
             union Vec3
             {
                 Vec3() = default;

@@ -405,6 +405,10 @@ namespace Cookie
                 r.w = other.x * c[3].e[0] + other.y * c[3].e[1] + other.z * c[3].e[2] + other.w * c[3].e[3];
                 return r;
             }
+            inline Vec3 Mat4::operator*(const Vec3& other) const
+            {
+                return (*this * Vec4(other, 1)).ToVec3();
+            }
             inline Mat4& Mat4::operator*=(const Mat4& other) { *this = *this * other; return *this; }
 
         }

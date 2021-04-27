@@ -36,6 +36,7 @@ namespace Cookie
                 inline Mat4 Transpose()const;
                 inline float Det()const;
                 inline Vec4 operator*(const Vec4& other) const;
+                inline Vec3 operator*(const Vec3& other) const;
                 inline Mat4 operator*(const Mat4& other) const;
                 inline Mat4& operator*=(const Mat4& other);
             };

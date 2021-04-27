@@ -21,6 +21,7 @@ include_directories("${INC_DIR}/UI/Widgets/")
 include_directories("${INC_DIR}/Render/")
 include_directories("${INC_DIR}/ECS/")
 include_directories("${INC_DIR}/Resources/")
+include_directories("${INC_DIR}/Resources/Particles")
 include_directories("${INC_DIR}/Gameplay/")
 include_directories("${DEPS_INC_DIR}/ImGui/")
 include_directories("${DEPS_INC_DIR}/ImGuizmo/")
@@ -86,6 +87,10 @@ set (SRC_FILES
     "${SRC_DIR}/Resources/Shader/TextureShader.cpp"
     "${SRC_DIR}/Resources/Shader/PhysicsShader.cpp"
     "${SRC_DIR}/Resources/Shader/SkyBoxShader.cpp"
+    "${SRC_DIR}/Resources/Shader/ParticlesShader.cpp"
+
+    "${SRC_DIR}/Resources/Particles/ParticlesGenerator.cpp"
+    "${SRC_DIR}/Resources/Particles/ParticlesUpdate.cpp"
 
     "${SRC_DIR}/UI/UIeditor.cpp"
     "${SRC_DIR}/UI/CustomImWidget.cpp"
@@ -120,7 +125,7 @@ set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
 # Ajoutez une source à l'exécutable de ce projet.
-add_executable (CookieEngine ${SUB_SYS} ${SRC_FILES} "src/ECS/ComponentEditor.cpp")
+add_executable (CookieEngine ${SUB_SYS} ${SRC_FILES} "src/ECS/ComponentEditor.cpp" )
 
 set_target_properties(CookieEngine PROPERTIES CXX_STANDARD 17)
 

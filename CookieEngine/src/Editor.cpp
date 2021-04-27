@@ -36,7 +36,7 @@ Editor::Editor()
     Resources::Serialization::Load::LoadAllTextures(game.resources);
 
     //Load default Scene
-    std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/DefaultDuck.CAsset", game);
+    std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", game);
 
     game.SetScene(_scene);
 
@@ -131,11 +131,82 @@ void Editor::Loop()
         buildingModel.shader = game.resources.shaders["Texture_Shader"];
     }
 
+    /// Particles
+    game.particlesSystem = Cookie::Resources::Particles::ParticlesSystem(40, 20);
+    Cookie::Resources::Particles::ParticlesSystem& particlesSystem = game.particlesSystem;
+
+    particlesSystem.trs.pos = Vec3(0, 20, 0);
+    particlesSystem.trs.rot = Vec3(0, 0, 0);
+    particlesSystem.trs.scale = Vec3(1, 1, 1);
+    particlesSystem.trs.ComputeTRS();
+    Cookie::Resources::Particles::BoxPositionGenerate box(Vec3(0, 0, 0), Vec3(2, 2, 2));
+    Cookie::Resources::Particles::CirclePositionGenerate circle(Vec3(0, 0, 0), 5);
+    Cookie::Resources::Particles::VelocityConstGenerate vel(Vec3(0, 10, 0));
+    Cookie::Resources::Particles::VelocityRandGenerate velRand(Vec3(0, 7, 0), Vec3(0, 20, 0));
+    Cookie::Resources::Particles::MassConstGenerate mass(2);
+    Cookie::Resources::Particles::TimeGenerate time(2);
+    Cookie::Resources::Particles::TimeRandGenerate timeRand(1.5f, 3.5f);
+    particlesSystem.data.countAlive = 10;
+    particlesSystem.particlesEmiter.generators.push_back(&circle);
+    particlesSystem.particlesEmiter.generators.push_back(&velRand);
+    //particlesSystem.particlesEmiter.generators.push_back(&mass);
+    particlesSystem.particlesEmiter.generators.push_back(&timeRand);
+    for (int i = 0; i < particlesSystem.particlesEmiter.generators.size(); i++)
+        particlesSystem.particlesEmiter.generators[i]->generate(&particlesSystem.data, 0, 10);
+
+    Cookie::Resources::Particles::UpdateVelocity updateVel;
+    Cookie::Resources::Particles::EnabledGravity enabledGravity;
+    Cookie::Resources::Particles::UpdateTime updateTime;
+    //particlesSystem.particlesUpdate.push_back(&enabledGravity);
+    particlesSystem.particlesEmiter.updates.push_back(&updateVel);
+    particlesSystem.particlesEmiter.updates.push_back(&updateTime);
+    ///
+
+    for (int i = 0; i < 40; i++)
+    {
+        game.coordinator.AddEntity(3, game.resources);
+        game.coordinator.componentHandler->componentModels[i].mesh = game.resources.meshes["Quad"];
+        game.coordinator.componentHandler->componentModels[i].shader = game.resources.shaders["Particles_Shader"];
+        game.coordinator.componentHandler->componentModels[i].texture = game.resources.textures["Assets/Ligth.png"];
+
+        game.coordinator.componentHandler->componentTransforms[i].rot = Vec3(180, 0, 0);
+        if (i < particlesSystem.data.countAlive)
+            game.coordinator.componentHandler->componentTransforms[i].pos = particlesSystem.trs.TRS * particlesSystem.data.pos[i];
+        else
+            game.coordinator.componentHandler->componentTransforms[i].pos = Vec3(0, -100, 0);
+    }
+
+    game.coordinator.AddEntity(3, game.resources);
+    game.coordinator.componentHandler->componentModels[40].mesh = game.resources.meshes["Quad"];
+    game.coordinator.componentHandler->componentModels[40].shader = game.resources.shaders["Particles_Shader"];
+    game.coordinator.componentHandler->componentModels[40].texture = game.resources.textures["Assets/Circle.png"];
+    game.coordinator.componentHandler->componentTransforms[40].rot = Vec3(90, 0, 0);
+    game.coordinator.componentHandler->componentTransforms[40].pos = particlesSystem.trs.TRS * Vec3(0, 0, 0);
+    game.coordinator.componentHandler->componentTransforms[40].scale = Vec3(10, 10, 10);
+
+    bool isActive = false;
+
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
+        if (isActive)
+        {
+            particlesSystem.Update();
+            game.coordinator.componentHandler->componentTransforms[40].rot = Vec3(0, 0, 1) + game.coordinator.componentHandler->componentTransforms[40].rot;
+        }
+            
+        
+        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
+            isActive = true;
+
+        for (int i = 0; i < particlesSystem.data.countAlive; i++)
+        {
+            game.coordinator.componentHandler->componentTransforms[i].pos = particlesSystem.trs.TRS * particlesSystem.data.pos[i];
+        }
+
+        
         // Present frame
         CDebug.UpdateTime();
-        
+
         game.resources.UpdateScriptsContent();
         game.coordinator.ApplyScriptUpdate();
 
@@ -161,8 +232,8 @@ void Editor::Loop()
             currentScene = game.scene.get();
         }
 
-        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
-            Resources::Serialization::Save::SaveScene(*game.scene, game.resources);
+       // if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
+        //    Resources::Serialization::Save::SaveScene(*game.scene, game.resources);
 
         ////TEMP
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_H) == GLFW_PRESS)
@@ -290,7 +361,6 @@ void Editor::Loop()
             SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
         game.scene->map.DrawSpecificTiles(cam.GetViewProj());
         game.scene->map.DrawPath(dbgRenderer);
-
 
         dbgRenderer.Draw(cam.GetViewProj());
 

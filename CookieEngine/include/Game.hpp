@@ -6,6 +6,7 @@
 #include "Render/Renderer.hpp" 
 #include "ECS/Coordinator.hpp"
 #include "Render/Skybox.hpp"
+#include "Resources/Particles/ParticlesSystem.hpp"
 
 namespace Cookie
 {
@@ -13,10 +14,11 @@ namespace Cookie
 	{
 		private:
 		public:
-			Render::Renderer			renderer;
-			Resources::ResourcesManager resources;
-			Render::SkyBox				skyBox;
-			ECS::Coordinator			coordinator;
+			Render::Renderer								renderer;
+			Resources::ResourcesManager						resources;
+			Render::SkyBox									skyBox;
+			ECS::Coordinator								coordinator;
+			Resources::Particles::ParticlesSystem			particlesSystem;
 
 			std::shared_ptr<Resources::Scene>				scene{nullptr};
 

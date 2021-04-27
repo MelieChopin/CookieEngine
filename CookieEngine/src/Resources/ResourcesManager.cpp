@@ -10,6 +10,7 @@
 
 #include "Resources/Shader/TextureShader.hpp"
 #include "Resources/Shader/SkyBoxShader.hpp"
+#include "Resources/Shader/ParticlesShader.hpp"
 
 #include <memory>
 
@@ -69,6 +70,7 @@ void ResourcesManager::InitShaders()
 {
 	shaders["Texture_Shader"] = std::make_shared<TextureShader>("Texture_Shader");
 	shaders["SkyBox_Shader"] = std::make_shared<SkyBoxShader>("SkyBox_Shader");
+	shaders["Particles_Shader"] = std::make_shared<ParticlesShader>("Particles_Shader");
 }
 
 void ResourcesManager::InitPrimitives()

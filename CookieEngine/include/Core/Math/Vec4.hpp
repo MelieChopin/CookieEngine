@@ -9,7 +9,6 @@ namespace Cookie
     {
         namespace Math
         {
-
             union Vec4
             {
                 Vec4() = default;
@@ -21,6 +20,7 @@ namespace Cookie
                 float e[4];
 
                 inline void Debug() const { { std::cout << "{" << x << " ," << y << " ," << z << " ," << w << "}\n"; } }
+                inline Vec3 ToVec3() const { return Vec3(x, y, z); }
             };
 
         }
