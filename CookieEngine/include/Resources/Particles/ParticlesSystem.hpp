@@ -3,6 +3,7 @@
 
 #include "ParticlesEmitter.hpp"
 #include "ParticlesData.hpp"
+#include "ComponentTransform.hpp"
 
 namespace Cookie
 {

@@ -167,7 +167,7 @@ void Editor::Loop()
     {
         game.coordinator.AddEntity(3, game.resources);
         game.coordinator.componentHandler->componentModels[i].mesh = game.resources.meshes["Quad"];
-        game.coordinator.componentHandler->componentModels[i].shader = game.resources.shaders["Particles_Shader"];
+        ///game.coordinator.componentHandler->componentModels[i].shader = game.resources.shaders["Particles_Shader"];
         game.coordinator.componentHandler->componentModels[i].texture = game.resources.textures["Assets/Ligth.png"];
 
         game.coordinator.componentHandler->componentTransforms[i].rot = Vec3(180, 0, 0);
@@ -179,7 +179,7 @@ void Editor::Loop()
 
     game.coordinator.AddEntity(3, game.resources);
     game.coordinator.componentHandler->componentModels[40].mesh = game.resources.meshes["Quad"];
-    game.coordinator.componentHandler->componentModels[40].shader = game.resources.shaders["Particles_Shader"];
+    //game.coordinator.componentHandler->componentModels[40].shader = game.resources.shaders["Particles_Shader"];
     game.coordinator.componentHandler->componentModels[40].texture = game.resources.textures["Assets/Circle.png"];
     game.coordinator.componentHandler->componentTransforms[40].rot = Vec3(90, 0, 0);
     game.coordinator.componentHandler->componentTransforms[40].pos = particlesSystem.trs.TRS * Vec3(0, 0, 0);
@@ -192,7 +192,7 @@ void Editor::Loop()
         if (isActive)
         {
             particlesSystem.Update();
-            game.coordinator.componentHandler->componentTransforms[40].rot = Vec3(0, 0, 1) + game.coordinator.componentHandler->componentTransforms[40].rot;
+           // game.coordinator.componentHandler->componentTransforms[40].rot = Vec3(0, 0, 1) + game.coordinator.componentHandler->componentTransforms[40].rot;
         }
             
         
