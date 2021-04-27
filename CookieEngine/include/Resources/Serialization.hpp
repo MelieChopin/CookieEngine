@@ -13,6 +13,8 @@ namespace Cookie
 	namespace ECS
 	{
 		class Coordinator;
+		class ComponentPhysics;
+		class EntityHandler;
 	}
 
 	namespace reactphysics3d
@@ -32,6 +34,8 @@ namespace Cookie
 		class Prefab;
 		class Texture;
 	}
+
+
 
 	namespace Resources
 	{

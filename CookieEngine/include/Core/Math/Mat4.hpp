@@ -3,7 +3,6 @@
 
 #include "Vec4.hpp"
 #include "Quat.hpp"
-#include "Calc.hpp"
  
 namespace Cookie
 {

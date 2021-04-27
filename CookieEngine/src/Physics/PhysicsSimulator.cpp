@@ -1,8 +1,6 @@
-#include <reactphysics3d/reactphysics3d.h>
-#include "imgui.h"
 #include "Core/Time.hpp"
-#include "Physics/PhysicsSimulator.hpp"
 #include "Physics/PhysicsHandle.hpp"
+#include "Physics/PhysicsSimulator.hpp"
 
 using namespace Cookie::Physics;
 

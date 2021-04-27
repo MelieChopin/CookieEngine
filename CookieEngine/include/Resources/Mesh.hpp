@@ -3,8 +3,9 @@
 
 struct ID3D11Buffer;
 
-#include <string>
 #include "Core/Math/Vec3.hpp"
+
+#include <string>
 #include <assimp/mesh.h>
 #include <vector>
 
@@ -13,7 +14,7 @@ namespace Cookie
 	namespace Render
 	{
 		class Renderer;
-		class RendererRemote;
+		struct RendererRemote;
 	}
 
 	namespace Resources
@@ -46,9 +47,9 @@ namespace Cookie
 				Mesh(std::string meshName, std::vector<float>& vertices, std::vector<unsigned int>& indices, unsigned int INb);
 				~Mesh();
 
-				inline unsigned int GetIndicesNb() { return INb; }
-				void Set();
-				void Draw();
+				inline unsigned int GetIndicesNb()const noexcept{ return INb; }
+				void Set()const;
+				void Draw()const;
 		};
 	}
 }

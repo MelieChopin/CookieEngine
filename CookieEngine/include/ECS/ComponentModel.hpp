@@ -1,6 +1,8 @@
 #ifndef __COMPONENT_MODEL_HPP__
 #define __COMPONENT_MODEL_HPP__
 
+struct ID3D11Buffer;
+
 namespace Cookie
 {
     namespace Resources
@@ -17,7 +19,6 @@ namespace Cookie
         {
         public:
             std::shared_ptr<Resources::Mesh>    mesh    {nullptr};
-            std::shared_ptr<Resources::Shader>  shader  {nullptr};
             std::shared_ptr<Resources::Texture> texture {nullptr};
 
 
@@ -29,7 +30,7 @@ namespace Cookie
 
             void ToDefault();
 
-            void Draw(const Core::Math::Mat4& viewProj, const Core::Math::Mat4& modelMat);
+            void Draw(const Core::Math::Mat4& viewProj, const Core::Math::Mat4& modelMat, ID3D11Buffer** CBuffer);
         };
 
     }

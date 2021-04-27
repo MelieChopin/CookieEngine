@@ -1,23 +1,25 @@
 #include "Editor.hpp" 
-#include "Core/Primitives.hpp"
 #include "UIallIn.hpp"
 #include "Serialization.hpp"
 #include "Physics/PhysicsHandle.hpp"
-#include "Map.hpp"
+#include "ECS/SystemHandler.hpp"
+#include "Resources/Scene.hpp"
+#include "CGPMove.hpp"
 
 using namespace Cookie;
 using namespace Cookie::Core;
 using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
 using namespace Cookie::ECS::System;
+using namespace Cookie::Gameplay;
 using namespace rp3d;
 
 Editor::Editor()
-    : ui(game.renderer) 
+    : ui(game.renderer),
+    editorFBO{game.renderer.window.width,game.renderer.window.height}
 {
     game.resources.Load(game.renderer);
     game.skyBox.texture = game.resources.textures["Assets/skybox.dds"];
-    game.renderer.AddFrameBuffer(game.resources);
     cam.SetProj(Core::Math::ToRadians(60.f), game.renderer.state.viewport.Width, game.renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
     cam.rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
@@ -44,7 +46,7 @@ Editor::Editor()
 
     ui.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
 
-    ui.AddWItem(new UIwidget::TextureEditor(game.renderer, game.resources), 1);
+    ui.AddWItem(new UIwidget::TextureEditor(game.resources), 1);
 
     ui.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
 
@@ -58,7 +60,7 @@ Editor::Editor()
 
 
     UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.renderer);
-    ui.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, game.renderer.GetLastFrameBuffer(), &cam, game.coordinator, selectedEntity));
+    ui.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, editorFBO, &cam, game.coordinator, selectedEntity));
 
     InitEditComp();
 
@@ -74,7 +76,7 @@ Editor::~Editor()
 
 void Editor::InitEditComp()
 {
-    for (int i = 1; i < MAX_ENTITIES; i++)
+    for (int i = 0; i < MAX_ENTITIES; i++)
     {
         editingComponent[i].InitComponent(game.coordinator.componentHandler->GetComponentTransform(i));
     }
@@ -82,7 +84,7 @@ void Editor::InitEditComp()
 
 void Editor::ModifyEditComp()
 {
-    for (int i = 1; i < MAX_ENTITIES; i++)
+    for (int i = 0; i < MAX_ENTITIES; i++)
     {
         editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i);
         if ((game.coordinator.entityHandler->entities[i].signature & SIGNATURE_MODEL) && game.coordinator.componentHandler->GetComponentModel(i).mesh != nullptr)
@@ -95,27 +97,27 @@ void Editor::ModifyEditComp()
     }
 }
 
+
 void Editor::Loop()
 {
     //soundManager.system->playSound(soundManager.sound, nullptr, false, nullptr);
     Physics::PhysicsHandle physHandle;
 
+    Vec2 mousePos;
     {
-        game.scene->map.model.mesh                 = game.resources.meshes["Quad"];
+        game.scene->map.model.mesh                 = game.resources.meshes["Cube"];
         game.scene->map.model.texture              = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"];
-        game.scene->map.model.shader               = game.resources.shaders["Texture_Shader"];
 
+
+        //will be removed after testing phase
         game.scene->map.modelTileStart.mesh        = game.resources.meshes["Cube"];
         game.scene->map.modelTileStart.texture     = game.resources.textures["Green"];
-        game.scene->map.modelTileStart.shader      = game.resources.shaders["Texture_Shader"];
 
         game.scene->map.modelTileEnd.mesh          = game.resources.meshes["Cube"];
         game.scene->map.modelTileEnd.texture       = game.resources.textures["Red"];
-        game.scene->map.modelTileEnd.shader        = game.resources.shaders["Texture_Shader"];
 
         game.scene->map.modelTileObstacle.mesh     = game.resources.meshes["Cube"];
         game.scene->map.modelTileObstacle.texture  = game.resources.textures["Grey"];
-        game.scene->map.modelTileObstacle.shader   = game.resources.shaders["Texture_Shader"];
     }
     ComponentTransform buildingTrs;
     ComponentModel     buildingModel;
@@ -128,7 +130,6 @@ void Editor::Loop()
         buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y;
         buildingModel.mesh = game.resources.meshes["Cube"];
         buildingModel.texture = game.resources.textures["Pink"];
-        buildingModel.shader = game.resources.shaders["Texture_Shader"];
     }
 
     /// Particles
@@ -218,8 +219,9 @@ void Editor::Loop()
         else
         {
             glfwPollEvents();
-            game.TryResizeWindow();
+            TryResizeWindow();
             game.renderer.Clear();
+            game.renderer.ClearFrameBuffer(editorFBO);
 
             cam.Update();
         }
@@ -257,19 +259,20 @@ void Editor::Loop()
             rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, { fwdRay.x,fwdRay.y,fwdRay.z });  
             RaycastInfo raycastInfo;
 
+            //if raycast hit
             if (game.scene->map.physic.physBody->raycast(ray, raycastInfo))
             {
                 Vec3 hitPoint{ raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z };
-                //hitPoint.Debug();
+                hitPoint.Debug();
 
-                Vec2 mousePos {{hitPoint.x, hitPoint.z}};
+                mousePos =  {{hitPoint.x, hitPoint.z}};
                 indexOfSelectedTile = game.scene->map.GetTileIndex(mousePos);
                 Vec2 centerOfBuilding = game.scene->map.GetCenterOfBuilding(mousePos, buildingTileSize);
 
-                buildingTrs.pos = {centerOfBuilding.x, hitPoint.y , centerOfBuilding.y};
+                buildingTrs.pos = {centerOfBuilding.x, hitPoint.y, centerOfBuilding.y};
             }
         }
-        //Bind Keys to change Nb of Tiles of
+        //Bind Keys to change Nb of Tiles of Building
         {
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_K])
             {
@@ -312,29 +315,28 @@ void Editor::Loop()
 
                     model.mesh = buildingModel.mesh;
                     model.texture = game.resources.textures["Green"];
-                    model.shader = buildingModel.shader;
                 }
 
                 nbOfBuildings++;
             }
         }
-        //Bind Keys to Set Specific Tiles
+        //Bind Keys to Set Obstacle Tiles and to give orders to Units
         {
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V] && isRaycastingWithMap)
-            {
-                game.scene->map.tileStart = &game.scene->map.tiles[indexOfSelectedTile];
-            }
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B] && isRaycastingWithMap)
             {
                 game.scene->map.tiles[indexOfSelectedTile].isObstacle = !game.scene->map.tiles[indexOfSelectedTile].isObstacle;
             }
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N] && isRaycastingWithMap)
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_G] && isRaycastingWithMap)
             {
+                float selectedEntityId = selectedEntity.focusedEntity->id;
+                ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(selectedEntityId);
+                Vec2 PosOnMap = { {trs.pos.x, trs.pos.z} };
+                game.scene->map.tileStart = &game.scene->map.tiles[game.scene->map.GetTileIndex(PosOnMap)];
                 game.scene->map.tileEnd = &game.scene->map.tiles[indexOfSelectedTile];
+                game.scene->map.ApplyPathfinding();
+                game.coordinator.componentHandler->GetComponentGameplay(selectedEntityId).componentMove.SetPath(*game.scene->map.tileEnd);
             }
-            
         }
-        
 
         if (selectedEntity.toChangeEntityId >= 0)
         {
@@ -345,29 +347,45 @@ void Editor::Loop()
         {
             selectedEntity.componentHandler->componentPhysics[selectedEntity.focusedEntity->id].Set(selectedEntity.componentHandler->componentTransforms[selectedEntity.focusedEntity->id]);
         }
-           
-
-        //dbgRenderer.AddDebugElement(Core::Primitives::CreateLine({0.0f,0.0f,0.0f }, {0.0f,10.0f,0.0f} ,0xFF0000, 0xFF0000));
 
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
-        
+        game.coordinator.ApplyGameplayMove();
 
-        game.scene->map.ApplyPathfinding();
+        game.renderer.Draw(&cam, game,editorFBO);
 
-
-        game.renderer.Draw(&cam, game);
-        if(isRaycastingWithMap)
-            SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
-        game.scene->map.DrawSpecificTiles(cam.GetViewProj());
         game.scene->map.DrawPath(dbgRenderer);
 
         dbgRenderer.Draw(cam.GetViewProj());
 
         game.renderer.SetBackBuffer();
-
         ui.UpdateUI();
 
         game.renderer.Render();
+    }
+}
+
+void Editor::TryResizeWindow()
+{
+    int width = 0;
+    int height = 0;
+
+    glfwGetWindowSize(game.renderer.window.window, &width, &height);
+
+    if (width <= 0 || height <= 0)
+        return;
+
+    if (game.renderer.window.width != width || game.renderer.window.height != height)
+    {
+        Core::DebugMessageHandler::Summon().Log((std::to_string(width) + ' ' + std::to_string(height)).c_str());
+        printf("%d, %d\n", width, height);
+        game.renderer.window.width = width;
+        game.renderer.window.height = height;
+
+        game.renderer.ResizeBuffer(width, height);
+        game.frameBuffer.Resize(width, height);
+        editorFBO.Resize(width, height);
+
+        //scene->camera->SetProj(Core::Math::ToRadians(60.f), width, height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     }
 }

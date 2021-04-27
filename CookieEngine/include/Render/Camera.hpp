@@ -2,8 +2,6 @@
 #define __CAMERA_HPP__
 
 #include "Core/Math/Mat4.hpp"
-#include "Core/Math/Calc.hpp"
-#include "Core/Time.hpp"
 
 namespace Cookie
 {

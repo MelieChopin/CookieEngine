@@ -31,7 +31,6 @@ UIeditor::UIeditor(const Cookie::Render::Renderer& _renderer)
 	
 	io.ConfigViewportsNoDefaultParent = true;
 
-
 	StyleColorsDark();
 
 	GetStyle().Colors[ImGuiCol_DockingEmptyBg]	= {0, 0, 0, 0};

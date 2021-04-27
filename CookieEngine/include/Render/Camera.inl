@@ -1,10 +1,11 @@
 #ifndef __CAMERA_INL__
 #define __CAMERA_INL__
 
+#include "Core/Time.hpp"
+
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <Debug.hpp>
-#include "Core/Math/Quat.hpp"
 
 namespace Cookie
 {

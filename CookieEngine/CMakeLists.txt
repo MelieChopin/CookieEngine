@@ -75,8 +75,12 @@ set (SRC_FILES
     "${SRC_DIR}/Render/RendererRemote.cpp"
     "${SRC_DIR}/Render/FrameBuffer.cpp"
     "${SRC_DIR}/Render/SkyBox.cpp"
+    "${SRC_DIR}/Render/Light.cpp"
+    "${SRC_DIR}/Render/GeometryPass.cpp"
+    "${SRC_DIR}/Render/FBODrawer.cpp"
     
     "${SRC_DIR}/Resources/Loader.cpp" 
+    "${SRC_DIR}/Resources/Map.cpp" 
     "${SRC_DIR}/Resources/ResourcesManager.cpp"
     "${SRC_DIR}/Resources/Mesh.cpp"
     "${SRC_DIR}/Resources/Texture.cpp"
@@ -84,14 +88,8 @@ set (SRC_FILES
     "${SRC_DIR}/Resources/Serialization.cpp" 
     "${SRC_DIR}/Resources/SoundManager.cpp" 
 
-    "${SRC_DIR}/Resources/Shader/TextureShader.cpp"
-    "${SRC_DIR}/Resources/Shader/PhysicsShader.cpp"
-    "${SRC_DIR}/Resources/Shader/SkyBoxShader.cpp"
-    "${SRC_DIR}/Resources/Shader/ParticlesShader.cpp"
-
     "${SRC_DIR}/Resources/Particles/ParticlesGenerator.cpp"
     "${SRC_DIR}/Resources/Particles/ParticlesUpdate.cpp"
-
     "${SRC_DIR}/UI/UIeditor.cpp"
     "${SRC_DIR}/UI/CustomImWidget.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgetBases.cpp"
@@ -106,14 +104,17 @@ set (SRC_FILES
     "${SRC_DIR}/UI/Widgets/ViewportWidget.cpp"
     
     "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
-
+    
+    "${SRC_DIR}/ECS/ComponentEditor.cpp"
     "${SRC_DIR}/ECS/ComponentHandler.cpp"
-    "${SRC_DIR}/ECS/ComponentEditor.cpp" 
     "${SRC_DIR}/ECS/ComponentModel.cpp" 
     "${SRC_DIR}/ECS/ComponentPhysics.cpp"
+    "${SRC_DIR}/ECS/Coordinator.cpp"
+    "${SRC_DIR}/ECS/EntityHandler.cpp"
+    
 
     "${SRC_DIR}/Editor.cpp" 
-    "${SRC_DIR}/Game.cpp" )
+    "${SRC_DIR}/Game.cpp")
 
 set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
         "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/lua54.dll"
@@ -125,7 +126,7 @@ set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
 # Ajoutez une source à l'exécutable de ce projet.
-add_executable (CookieEngine ${SUB_SYS} ${SRC_FILES} "src/ECS/ComponentEditor.cpp" )
+add_executable (CookieEngine ${SUB_SYS} ${SRC_FILES})
 
 set_target_properties(CookieEngine PROPERTIES CXX_STANDARD 17)
 

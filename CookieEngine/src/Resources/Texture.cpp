@@ -1,11 +1,12 @@
+#include "Core/Math/Vec4.hpp"
+#include "Render/RendererRemote.hpp"
+#include "Resources/Texture.hpp"
+
 #include <DirectXTex/initguid.h>
 #include <fstream>
 #include <system_error>
 #include <DirectXTex/DDSTextureLoader11.h>
 #include <DirectXTex/WICTextureLoader11.h>
-
-#include "Render/Renderer.hpp"
-#include "Resources/Texture.hpp"
 
 using namespace Cookie::Resources;
 
@@ -94,14 +95,12 @@ bool Texture::CreateTextureFromColor(const Core::Math::Vec4& color)
 
 bool Texture::CreateShaderResource()
 {
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	desc.Format						= DXGI_FORMAT_R32G32B32A32_FLOAT;
+	desc.ViewDimension				= D3D11_SRV_DIMENSION_TEXTURE2D;
+	desc.Texture2D.MipLevels		= 1;
+	desc.Texture2D.MostDetailedMip	= 0;
 
-	srvDesc.Format						= DXGI_FORMAT_R32G32B32A32_FLOAT;
-	srvDesc.ViewDimension				= D3D11_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels			= 1;
-	srvDesc.Texture2D.MostDetailedMip	= 0;
-
-	HRESULT result = Render::RendererRemote::device->CreateShaderResourceView(texture, &srvDesc, &shaderResourceView);
+	HRESULT result = Render::RendererRemote::device->CreateShaderResourceView(texture, &desc, &shaderResourceView);
 	if (FAILED(result))
 	{
 		printf("Failing Creating FrameBuffer ShaderResource: %s\n", std::system_category().message(result).c_str());

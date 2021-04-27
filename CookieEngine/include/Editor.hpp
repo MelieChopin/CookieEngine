@@ -3,9 +3,15 @@
 
 #include "Game.hpp"
 #include "UI/UIeditor.hpp"
+#include "Render/Camera.hpp"
 #include "DebugRenderer.hpp"
+
 #include "Resources/SoundManager.hpp"
 #include "ECS/ComponentEditor.hpp"
+#include "ECS/ComponentHandler.hpp"
+
+#include "Resources/Mesh.hpp"
+#include "Resources/Texture.hpp"
 
 namespace Cookie
 {
@@ -13,6 +19,11 @@ namespace Cookie
 	{
 		class Entity;
 	}
+	namespace Resources
+	{
+		class Scene;
+	}
+
 
 	struct FocusEntity
 	{
@@ -33,6 +44,7 @@ namespace Cookie
 			UI::UIeditor			ui;
 			Render::FreeFlyCam		cam;
 			Render::DebugRenderer	dbgRenderer;
+			Render::FrameBuffer		editorFBO;
 
 			std::array<ECS::ComponentEditor, MAX_ENTITIES> editingComponent;
 
@@ -49,10 +61,10 @@ namespace Cookie
 			Editor();
 			~Editor();
 
-			void Loop();
 
 			void InitEditComp();
 			void ModifyEditComp();
+			void TryResizeWindow();
 
 			inline void PopulateFocusedEntity()
 			{
@@ -68,14 +80,13 @@ namespace Cookie
 					selectedEntity.editComp->Update();
 				}
 
-				selectedEntity.focusedEntity	= &game.coordinator.entityHandler->entities[selectedEntity.toChangeEntityId];
-				selectedEntity.editComp			= &editingComponent[selectedEntity.toChangeEntityId];
+				selectedEntity.focusedEntity = &game.coordinator.entityHandler->entities[selectedEntity.toChangeEntityId];
+				selectedEntity.editComp = &editingComponent[selectedEntity.toChangeEntityId];
 				selectedEntity.toChangeEntityId = -1;
 			}
-
 			inline virtual float notifyRaycastHit(const rp3d::RaycastInfo& info)
 			{
-				for (int i = 1; i < MAX_ENTITIES; i++)
+				for (int i = 0; i < MAX_ENTITIES; i++)
 				{
 					if (editingComponent[i].body == info.body)
 					{
@@ -86,6 +97,8 @@ namespace Cookie
 
 				return 0.0f;
 			}
+
+			void Loop();
 
 	};
 }
