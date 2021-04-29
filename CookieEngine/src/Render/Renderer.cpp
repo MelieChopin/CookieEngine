@@ -41,8 +41,6 @@ Renderer::~Renderer()
         swapchain->Release();
     if (backbuffer)
         backbuffer->Release();
-    if (depthBuffer)
-        depthBuffer->Release();
     if (remote.context)
     {
         remote.context->Release();
@@ -105,7 +103,7 @@ bool Renderer::CreateDrawBuffer(int width, int height)
 {
     // get the address of the back buffer
     ID3D11Texture2D* pBackBuffer = nullptr;
-    ID3D11Texture2D* depthTexture = nullptr;
+    
 
     if (FAILED(swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer)))
         return false;
@@ -114,37 +112,7 @@ bool Renderer::CreateDrawBuffer(int width, int height)
     if (FAILED(remote.device->CreateRenderTargetView(pBackBuffer, NULL, &backbuffer)))
         return false;
 
-    D3D11_TEXTURE2D_DESC depthBufferDesc = {};
-
-    // Set up the description of the depth buffer.
-    depthBufferDesc.Width               = width;
-    depthBufferDesc.Height              = height;
-    depthBufferDesc.MipLevels           = 1;
-    depthBufferDesc.ArraySize           = 1;
-    depthBufferDesc.Format              = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    depthBufferDesc.SampleDesc.Count    = 1;
-    depthBufferDesc.SampleDesc.Quality  = 0;
-    depthBufferDesc.Usage               = D3D11_USAGE_DEFAULT;
-    depthBufferDesc.BindFlags           = D3D11_BIND_DEPTH_STENCIL;
-    depthBufferDesc.CPUAccessFlags      = 0;
-    depthBufferDesc.MiscFlags           = 0;
-
-    if (FAILED(remote.device->CreateTexture2D(&depthBufferDesc, NULL, &depthTexture)))
-        return false;
-
-    // Initialize the depth stencil view.
-    D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
-
-    // Set up the depth stencil view description.
-    depthStencilViewDesc.Format             = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    depthStencilViewDesc.ViewDimension      = D3D11_DSV_DIMENSION_TEXTURE2D;
-    depthStencilViewDesc.Texture2D.MipSlice = 0;
-
-    if (FAILED(remote.device->CreateDepthStencilView(depthTexture, &depthStencilViewDesc, &depthBuffer)))
-        return false;
-
     pBackBuffer->Release();
-    depthTexture->Release();
 
     return true;
 }
@@ -159,8 +127,8 @@ void Renderer::ResizeBuffer(int width, int height)
 
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
 
+    gPass.depthBuffer->Release();
     backbuffer->Release();
-    depthBuffer->Release();
 
     HRESULT result = swapchain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
 
@@ -169,9 +137,10 @@ void Renderer::ResizeBuffer(int width, int height)
         printf("%s", (std::string("Failing Resizing SwapChain Buffer : ") + std::system_category().message(result)).c_str());
     }
 
+    gPass.CreateDepth(width,height);
     CreateDrawBuffer(width,height);
 
-    remote.context->OMSetRenderTargets(1, &backbuffer, depthBuffer);
+    remote.context->OMSetRenderTargets(1, &backbuffer, nullptr);
 
     viewport.Width = width;
     viewport.Height = height;
@@ -196,7 +165,7 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     
     game.skyBox.Draw(cam->GetProj(), cam->GetView());
 
-    gPass.Set(depthBuffer);
+    gPass.Set();
 
     game.scene->map.Draw(viewProj,&gPass.CBuffer);
 
@@ -217,7 +186,7 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
         game.renderer.DrawFrameBuffer(game.renderer.gPass.albedoFBO);
     }
     
-    remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, depthBuffer);
+    remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, gPass.depthBuffer);
 }
 
 void Renderer::DrawFrameBuffer(FrameBuffer& fbo)
@@ -232,7 +201,7 @@ void Renderer::Clear()
     Core::Math::Vec4 clearColor = {0.0f,0.0f,0.0f,1.0f};
 
     remote.context->ClearRenderTargetView(backbuffer, clearColor.e);
-    remote.context->ClearDepthStencilView(depthBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0.0f);
+    remote.context->ClearDepthStencilView(gPass.depthBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0.0f);
 
     ID3D11ShaderResourceView* null = nullptr;
 
@@ -249,7 +218,7 @@ void Renderer::ClearFrameBuffer(FrameBuffer& fbo)
 
 void Renderer::SetBackBuffer()
 {
-    remote.context->OMSetRenderTargets(1, &backbuffer, depthBuffer);
+    remote.context->OMSetRenderTargets(1, &backbuffer, nullptr);
 }
 
 void Renderer::Render()const

@@ -30,7 +30,6 @@ namespace Cookie
 				ID3D11RenderTargetView*		backbuffer		= nullptr;
 					
 			public:
-				struct ID3D11DepthStencilView* depthBuffer = nullptr;
 
 				Core::Window	window;
 				RendererRemote	remote;

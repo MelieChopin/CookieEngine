@@ -24,10 +24,13 @@ GeometryPass::GeometryPass(int width, int height):
 {
 	InitShader();
     InitState();
+    CreateDepth(width, height);
 }
 
 GeometryPass::~GeometryPass()
 {
+    if (depthBuffer)
+        depthBuffer->Release();
     if (VShader)
         VShader->Release();
     if (PShader)
@@ -191,9 +194,53 @@ void GeometryPass::InitState()
     RendererRemote::device->CreateRasterizerState(&rasterDesc, &rasterizerState);
 }
 
+void GeometryPass::CreateDepth(int width, int height)
+{
+    ID3D11Texture2D* depthTexture = nullptr;
+
+    D3D11_TEXTURE2D_DESC depthBufferDesc = {};
+
+    // Set up the description of the depth buffer.
+    depthBufferDesc.Width = width;
+    depthBufferDesc.Height = height;
+    depthBufferDesc.MipLevels = 1;
+    depthBufferDesc.ArraySize = 1;
+    depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthBufferDesc.SampleDesc.Count = 1;
+    depthBufferDesc.SampleDesc.Quality = 0;
+    depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    depthBufferDesc.CPUAccessFlags = 0;
+    depthBufferDesc.MiscFlags = 0;
+
+    HRESULT result = RendererRemote::device->CreateTexture2D(&depthBufferDesc, NULL, &depthTexture);
+    if (FAILED(result))
+    {
+        printf("Failing Creating Texture %p: %s\n", depthTexture, std::system_category().message(result).c_str());
+        return;
+    }
+
+    // Initialize the depth stencil view.
+    D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
+
+    // Set up the depth stencil view description.
+    depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+    result = RendererRemote::device->CreateDepthStencilView(depthTexture, &depthStencilViewDesc, &depthBuffer);
+    if (FAILED(result))
+    {
+        printf("Failing Creating depth Buffer %p: %s\n", depthTexture, std::system_category().message(result).c_str());
+        return;
+    }
+
+    depthTexture->Release();
+}
+
 /*=========================== REALTIME METHODS ===========================*/
 
-void GeometryPass::Set(ID3D11DepthStencilView* depthStencilView)
+void GeometryPass::Set()
 {
     // Now set the rasterizer state.
     Render::RendererRemote::context->RSSetState(rasterizerState);
@@ -209,7 +256,7 @@ void GeometryPass::Set(ID3D11DepthStencilView* depthStencilView)
 
 	ID3D11RenderTargetView* fbos[3] = {posFBO.renderTargetView,normalFBO.renderTargetView,albedoFBO.renderTargetView};
 
-	Render::RendererRemote::context->OMSetRenderTargets(3, fbos, depthStencilView);
+	Render::RendererRemote::context->OMSetRenderTargets(3, fbos, depthBuffer);
 }
 
 void GeometryPass::Draw(const Core::Math::Mat4& viewProj, const ECS::Coordinator& coordinator)
