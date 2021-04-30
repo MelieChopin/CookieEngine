@@ -307,8 +307,8 @@ void Editor::TryResizeWindow()
 
     if (game.renderer.window.width != width || game.renderer.window.height != height)
     {
-        Core::DebugMessageHandler::Summon().Log((std::to_string(width) + ' ' + std::to_string(height)).c_str());
-        printf("%d, %d\n", width, height);
+        //Core::DebugMessageHandler::Summon().Log((std::to_string(width) + ' ' + std::to_string(height)).c_str());
+        //printf("%d, %d\n", width, height);
         game.renderer.window.width = width;
         game.renderer.window.height = height;
 

@@ -62,6 +62,7 @@ void SkyBox::InitShader()
         float3 pos      = mul(position,(float3x3)view);
 
         output.position = mul(float4(pos,1.0),proj);
+        output.position.z = output.position.w;
         output.pos      = position;
         output.uv       = uv;
     

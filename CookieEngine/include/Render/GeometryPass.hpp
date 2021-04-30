@@ -28,6 +28,7 @@ namespace Cookie
 
 				ID3D11DepthStencilState*	depthStencilState	= nullptr;
 				ID3D11RasterizerState*		rasterizerState		= nullptr;
+				ID3D11BlendState*			blendState			= nullptr;
 
 			public:
 				ID3D11DepthStencilView* depthBuffer = nullptr;
@@ -49,7 +50,7 @@ namespace Cookie
 
 				void Set();
 				void Draw(const Core::Math::Mat4& viewProj, const ECS::Coordinator& coordinator);
-				void Clear(const Core::Math::Vec4& clearColor);
+				void Clear();
 		};
 	}
 }

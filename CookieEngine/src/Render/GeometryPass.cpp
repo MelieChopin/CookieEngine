@@ -123,7 +123,7 @@ void GeometryPass::InitShader()
     {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex,position), D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex, uv), D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, normal), D3D11_INPUT_PER_VERTEX_DATA, 0}
+        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, normal), D3D11_INPUT_PER_VERTEX_DATA, 0},
     };
 
     Render::CreateLayout(&blob, ied, 3, &ILayout);
@@ -192,6 +192,21 @@ void GeometryPass::InitState()
     rasterDesc.SlopeScaledDepthBias = 0.0f;
 
     RendererRemote::device->CreateRasterizerState(&rasterDesc, &rasterizerState);
+
+    D3D11_BLEND_DESC blenDesc = {  };
+
+    blenDesc.AlphaToCoverageEnable = false;
+    blenDesc.IndependentBlendEnable         = false;
+    blenDesc.RenderTarget[0].BlendEnable    = false;
+    blenDesc.RenderTarget[0].SrcBlend       = D3D11_BLEND_ONE;
+    blenDesc.RenderTarget[0].DestBlend      = D3D11_BLEND_ZERO;
+    blenDesc.RenderTarget[0].BlendOp        = D3D11_BLEND_OP_ADD;
+    blenDesc.RenderTarget[0].SrcBlendAlpha  = D3D11_BLEND_ONE;
+    blenDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+    blenDesc.RenderTarget[0].BlendOpAlpha   = D3D11_BLEND_OP_ADD;
+    blenDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+    RendererRemote::device->CreateBlendState(&blenDesc, &blendState);
 }
 
 void GeometryPass::CreateDepth(int width, int height)
@@ -246,6 +261,9 @@ void GeometryPass::Set()
     Render::RendererRemote::context->RSSetState(rasterizerState);
     // Set the depth stencil state.
     Render::RendererRemote::context->OMSetDepthStencilState(depthStencilState, 1);
+    // Set the Blend State.
+    const float blendFactor[4] = { 1.0f,1.0f,1.0f,0.0f };
+    Render::RendererRemote::context->OMSetBlendState(blendState, blendFactor, 0xffffffff);
 
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
@@ -289,11 +307,11 @@ void GeometryPass::Draw(const Core::Math::Mat4& viewProj, const ECS::Coordinator
     }
 }
 
-void GeometryPass::Clear(const Core::Math::Vec4& clearColor)
+void GeometryPass::Clear()
 {
 	float black[4] = { 0.0f,0.0f,0.0f,0.0f };
 
 	Render::RendererRemote::context->ClearRenderTargetView(posFBO.renderTargetView,		black);
 	Render::RendererRemote::context->ClearRenderTargetView(normalFBO.renderTargetView,  black);
-	Render::RendererRemote::context->ClearRenderTargetView(albedoFBO.renderTargetView,	clearColor.e);
+	Render::RendererRemote::context->ClearRenderTargetView(albedoFBO.renderTargetView,	black);
 }

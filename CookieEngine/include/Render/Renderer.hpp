@@ -6,8 +6,7 @@
 #include "Render/FBODrawer.hpp"
 #include "Render/RendererRemote.hpp"
 #include "Render/GeometryPass.hpp"
-
-#include "Light.hpp"
+#include "Render/LightPass.hpp"
 
 namespace Cookie
 {
@@ -35,7 +34,7 @@ namespace Cookie
 				RendererRemote	remote;
 				D3D11_VIEWPORT	viewport;
 				GeometryPass	gPass;
-				LightsArray		lights;
+				LightPass		lPass;
 
 			private:
 				Render::FBODrawer	fboDrawer;

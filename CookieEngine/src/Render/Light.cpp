@@ -15,8 +15,6 @@ LightsArray::LightsArray()
 };
 
 LightsArray::LightsArray(const LightsArray& _lights):
-	dirLights		{_lights.dirLights},
-	sphereLights	{_lights.sphereLights},
-	spotLights		{_lights.spotLights}
+	dirLights		{_lights.dirLights}
 {
 };

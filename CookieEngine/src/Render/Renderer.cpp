@@ -15,7 +15,7 @@ using namespace Cookie::Core::Math;
 
 Renderer::Renderer():
     remote {InitDevice(window)},
-    viewport {0.0f,0.0f,static_cast<float>(window.width),static_cast<float>(window.height),0.0f,1.0f},
+    viewport {0.0f,0.0f,static_cast<float>(window.width),static_cast<float>(window.height),0.0f,0.9999999f},
     gPass{window.width,window.height}
 {
     CreateDrawBuffer(window.width,window.height);
@@ -142,16 +142,17 @@ void Renderer::ResizeBuffer(int width, int height)
 
     remote.context->OMSetRenderTargets(1, &backbuffer, nullptr);
 
-    viewport.Width = width;
-    viewport.Height = height;
-    remote.context->RSSetViewports(1, &viewport);
-
     gPass.posFBO.Resize(width,height);
     gPass.normalFBO.Resize(width, height);
     gPass.albedoFBO.Resize(width, height);
 
     remote.context->ClearState();
     remote.context->Flush();
+
+
+    viewport.Width = width;
+    viewport.Height = height;
+    remote.context->RSSetViewports(1, &viewport);
 }
 
 /*========================= RENDER METHODS =========================*/
@@ -159,17 +160,21 @@ void Renderer::ResizeBuffer(int width, int height)
 void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
 {
 
-    remote.context->OMSetRenderTargets(1, &gPass.albedoFBO.renderTargetView, nullptr);
+    remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
 
     Core::Math::Mat4 viewProj = cam->GetViewProj();
-    
-    game.skyBox.Draw(cam->GetProj(), cam->GetView());
 
     gPass.Set();
 
     game.scene->map.Draw(viewProj,&gPass.CBuffer);
 
     gPass.Draw(viewProj,game.coordinator);
+
+    ID3D11RenderTargetView* nullViews[] = { nullptr,nullptr,nullptr,nullptr };
+
+    remote.context->OMSetRenderTargets(4, nullViews, nullptr);
+
+    lPass.Set(gPass.posFBO,gPass.normalFBO,gPass.albedoFBO,cam->pos);
 
     remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
 
@@ -181,12 +186,18 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     {
         game.renderer.DrawFrameBuffer(game.renderer.gPass.normalFBO);
     }
-    else
+    else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F3] >= 0.0f)
     {
         game.renderer.DrawFrameBuffer(game.renderer.gPass.albedoFBO);
     }
-    
+    else
+    {
+        lPass.Draw(framebuffer);
+    }
+
     remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, gPass.depthBuffer);
+
+    game.skyBox.Draw(cam->GetProj(), cam->GetView());
 }
 
 void Renderer::DrawFrameBuffer(FrameBuffer& fbo)
@@ -198,6 +209,14 @@ void Renderer::DrawFrameBuffer(FrameBuffer& fbo)
 
 void Renderer::Clear()
 {
+    ID3D11RenderTargetView* nullViews[] = { nullptr,nullptr,nullptr,nullptr };
+
+    remote.context->OMSetRenderTargets(4, nullViews, nullptr);
+
+    ID3D11ShaderResourceView* resources[3] = { nullptr,nullptr,nullptr };
+
+    Render::RendererRemote::context->PSSetShaderResources(0, 3, resources);
+
     Core::Math::Vec4 clearColor = {0.0f,0.0f,0.0f,1.0f};
 
     remote.context->ClearRenderTargetView(backbuffer, clearColor.e);
@@ -207,7 +226,7 @@ void Renderer::Clear()
 
     remote.context->PSSetShaderResources(0, 1, &null);
 
-    gPass.Clear(clearColor);
+    gPass.Clear();
 }
 
 void Renderer::ClearFrameBuffer(FrameBuffer& fbo)

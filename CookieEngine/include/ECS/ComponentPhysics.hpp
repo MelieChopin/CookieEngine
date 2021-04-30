@@ -38,12 +38,18 @@ namespace Cookie
 			void AddSphereCollider(float radius, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles);
 			void AddCubeCollider(const Core::Math::Vec3& halfExtent, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles);
 			void AddCapsuleCollider(const Core::Math::Vec2& capsuleInfo, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles);
+			void RemoveCollider(::reactphysics3d::Collider* collider);
 
 			void Update(float factor)noexcept;
 			void Set(const ComponentTransform& trs);
 
 			inline void ToDefault()
 			{
+				for (int i = 0; i < physColliders.size(); i++)
+				{
+					RemoveCollider(physColliders[i]);
+				}
+
 				physBody = nullptr;
 				std::vector<reactphysics3d::Collider*>().swap(physColliders);
 			}

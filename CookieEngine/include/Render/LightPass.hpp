@@ -1,6 +1,7 @@
 #ifndef __LIGHT_PASS_HPP__
 #define __LIGHT_PASS_HPP__
 
+#include "Light.hpp"
 #include "FrameBuffer.hpp"
 
 namespace Cookie
@@ -18,32 +19,34 @@ namespace Cookie
 
 	namespace Render
 	{
+
 		class LightPass
 		{
 		private:
-			ID3D11InputLayout*	ILayout{ nullptr };
+			ID3D11VertexShader* dirVShader	{ nullptr };
+			ID3D11PixelShader*	dirPShader	{ nullptr };
+			ID3D11Buffer*		dirCBuffer	{ nullptr };
 
-			ID3D11VertexShader* dirVShader{ nullptr };
-			ID3D11PixelShader*	dirPShader{ nullptr };
+			ID3D11Buffer*		lightCBuffer{ nullptr };
 
-			ID3D11SamplerState* PSampler{ nullptr };
+			ID3D11SamplerState* PSampler	{ nullptr };
 
 			ID3D11DepthStencilState*	depthStencilState	= nullptr;
 			ID3D11RasterizerState*		rasterizerState		= nullptr;
-
-			ID3D11Buffer*				CBuffer{ nullptr };
+			ID3D11BlendState*			blendState			= nullptr;
+		public:
+			LightsArray lights;
 
 		private:
 			void InitShader();
 			void InitState();
 
 		public:
-			LightPass(int width, int height);
+			LightPass();
 			~LightPass();
 
-			void Set(ID3D11DepthStencilView* depthStencilView);
-			void Draw(const Core::Math::Mat4& viewProj, const ECS::Coordinator& coordinator);
-			void Clear(const Core::Math::Vec4& clearColor);
+			void Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& albedoFBO, const Core::Math::Vec3& camPos);
+			void Draw(FrameBuffer& fbo);
 		};
 	}
 }
