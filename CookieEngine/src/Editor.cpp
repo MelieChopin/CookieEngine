@@ -268,17 +268,9 @@ void Editor::Loop()
                 ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(commander->id);
                 if (game.scene->map.ApplyPathfinding(game.scene->map.GetTile(trs.pos), game.scene->map.tiles[indexOfSelectedTile]))
                     game.coordinator.componentHandler->GetComponentGameplay(commander->id).componentMove.SetPath(game.scene->map.tiles[indexOfSelectedTile], trs);
+                else
+                    std::cout << "No Path Find\n";
 
-                /*
-                for (int i = 0; i < game.coordinator.selectedEntities.size(); ++i)
-                {
-                    float selectedEntityId = game.coordinator.selectedEntities[i]->id;
-                    ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(selectedEntityId);
-
-                    if (game.scene->map.ApplyPathfinding(game.scene->map.GetTile(trs.pos), game.scene->map.tiles[indexOfSelectedTile]))
-                        game.coordinator.componentHandler->GetComponentGameplay(selectedEntityId).componentMove.SetPath(game.scene->map.tiles[indexOfSelectedTile], trs);
-
-                }*/
             }
         }
         //Bind Key to create new unit
@@ -345,6 +337,24 @@ void Editor::Loop()
         game.coordinator.ApplyGameplayResolveCollision();
         game.coordinator.ApplyGameplayDrawPath(dbgRenderer);
 
+        /*
+        if (selectedEntity.focusedEntity)
+        {
+            CGPMove& cgpMove = game.coordinator.componentHandler->GetComponentGameplay(selectedEntity.focusedEntity->id).componentMove;
+            std::cout << "state : " << cgpMove.state << " size : " << cgpMove.waypoints.size() << "\n";
+            if (cgpMove.waypoints.size() != 0)
+            {
+                std::cout << " Waypoint pos : ";
+                cgpMove.waypoints[0].Debug();
+            }
+            if (cgpMove.commanderPos)
+            {
+                std::cout << " Commander pos : ";
+                cgpMove.commanderPos->Debug();
+            }
+
+        }
+        */
 
         game.renderer.Draw(&cam, game);
         if (isRaycastingWithMap)

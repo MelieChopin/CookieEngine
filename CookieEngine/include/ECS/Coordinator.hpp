@@ -37,7 +37,6 @@ namespace Cookie
 			void RemoveEntity(Entity& entity);
 			bool CheckSignature(const int entitySignature, const int signature);
 			
-			void SelectEntities(Core::Math::Vec2& selectionQuadStart, Core::Math::Vec2& selectionQuadEnd);
 
 			void ApplySystemPhysics(float factor);
 			void ApplyDraw(const Core::Math::Mat4& viewProj);
@@ -51,6 +50,8 @@ namespace Cookie
 			void ApplyGameplayResolveCollision();
 			void ApplyGameplayDrawPath(Render::DebugRenderer& debug);
 
+
+			void SelectEntities(Core::Math::Vec2& selectionQuadStart, Core::Math::Vec2& selectionQuadEnd);
 			Entity* GetSelectedEntitiesCommander();
 			void SetSelectedEntitiesCommander(Entity* commander);
 			

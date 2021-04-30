@@ -20,7 +20,8 @@ namespace Cookie
 			E_WAITING
 		};
 
-		#define CPGMOVE_CD_BEFORE_RETURN 3
+		//use constexpr, for now it bug
+		#define CPGMOVE_CD_BEFORE_RETURN 0.5f
 
 
 		class CGPMove
@@ -31,6 +32,7 @@ namespace Cookie
 			bool  isFlying = false;
 
 			//use it for collision Detection making a circle with trs.pos
+			// sqrt(0.5^2 + 0.5^2)
 			float radius = 0.7;
 
 			//temporary
@@ -67,28 +69,28 @@ namespace Cookie
 			{
 				waypoints.clear();
 				state = CGPMOVE_STATE::E_MOVING;
+				commanderPos = nullptr;
 				lastTile = &lastWaypoint;
 				Resources::Tile* currentTile = &lastWaypoint;
 
+				//Whatever happen always had the lastWaypoint
+				waypoints.emplace(waypoints.begin(), Core::Math::Vec3{ currentTile->pos.x, 0, currentTile->pos.y });
+
 				//if Entity is Flying go as a straight line
 				if (isFlying)
-				{
-					waypoints.emplace(waypoints.begin(), Core::Math::Vec3{ currentTile->pos.x, 0, currentTile->pos.y });
 					return;
-				}
 
 				while (currentTile->parent != nullptr)
 				{
+					currentTile = currentTile->parent;
 					Core::Math::Vec3 newWaypoint = { currentTile->pos.x, 0, currentTile->pos.y };
 
-					//if direction toward previous waypoint and new is same it's a straigth line so we only keep the last waypoint
-					if (waypoints.size() != 0 && (waypoints[0] - trs.pos).Normalize() == (newWaypoint - trs.pos).Normalize())
-						waypoints.erase(waypoints.begin());
-
-					waypoints.emplace(waypoints.begin(), newWaypoint);
-					currentTile = currentTile->parent;
+					//if direction toward previous waypoint and toward new is same it's a straigth line so we don't add the waypoint
+					//and if it's not the last tile because we are already on it
+					if ((waypoints[0] - trs.pos).Normalize() != (newWaypoint - trs.pos).Normalize() && currentTile->parent != nullptr)
+						waypoints.emplace(waypoints.begin(), newWaypoint);
 				}
-
+				
 			}
 			void SetCommander(ECS::ComponentTransform& commanderTrs, ECS::ComponentTransform& selfTrs)
 			{
@@ -159,9 +161,9 @@ namespace Cookie
 			void ResolveColision(ECS::ComponentTransform& trsSelf, CGPMove& other, ECS::ComponentTransform& trsOther)
 			{
 				//Priority High
-				if (state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_STATIC ||
-					state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_PUSHED ||
-					state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_STATIC)
+				if ((state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_STATIC) ||
+					(state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_PUSHED) ||
+					(state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_STATIC))
 				{
 					if (other.state != CGPMOVE_STATE::E_PUSHED)
 					{
@@ -182,18 +184,27 @@ namespace Cookie
 					//Core::Math::Vec3 directionSelf = (waypoints[0] - trsSelf.pos).Normalize();
 					//Core::Math::Vec3 directionOther = (other.waypoints[0] - trsOther.pos).Normalize();
 
-					trsSelf.pos += -directionSelfToOther * (overlapLength / 2);
-					trsOther.pos += directionSelfToOther * (overlapLength / 2);
+					//directionSelf.Debug();
+					//directionOther.Debug();
+
+					/*
+					if (directionSelf == -directionOther) // if they face each other
+					{		
+						trsSelf.pos += Core::Math::Vec3{directionSelf.z, directionSelf.y, -directionSelf.x} * (overlapLength / 2);
+						trsOther.pos += Core::Math::Vec3{ directionOther.z, directionOther.y, -directionOther.x } * (overlapLength / 2);
+
+					}
+					else // they colidde side by side
+					{*/
+						trsSelf.pos += -directionSelfToOther * (overlapLength / 2);
+						trsOther.pos += directionSelfToOther * (overlapLength / 2);
+					//}
 					
-					//trsSelf.pos += Core::Math::Vec3{-directionSelf.z, directionSelf.y, directionSelf.x} * (overlapLength / 2);
-					//trsOther.pos += Core::Math::Vec3{ -directionOther.z, directionOther.y, directionOther.x } * (overlapLength / 2);
-
-
 				}
 				//Priority Low
-				else if (state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_MOVING ||
-						 state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_MOVING ||
-					     state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_PUSHED)
+				else if ((state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_MOVING) ||
+						 (state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_MOVING) ||
+					     (state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_PUSHED))
 				{
 					if (state != CGPMOVE_STATE::E_PUSHED)
 					{

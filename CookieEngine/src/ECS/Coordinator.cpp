@@ -33,6 +33,8 @@ void Coordinator::AddEntity(const int signature, const Resources::ResourcesManag
 	//	componentHandler->AddComponentPhysics(entityHandler->entities[id], phs);
 	if (CheckSignature(signature, SIGNATURE_SCRIPT))
 		componentHandler->AddComponentScript(entityHandler->entities[id]);
+	if (CheckSignature(signature, SIGNATURE_GAMEPLAY))
+		componentHandler->AddComponentGameplay(entityHandler->entities[id]);
 
 	//not clean should be moved somewhere else
 	componentHandler->GetComponentModel(id).shader = resources.shaders.at("Texture_Shader");
@@ -50,6 +52,8 @@ void Coordinator::RemoveEntity(Entity& entity)
 		componentHandler->GetComponentPhysics(entity.id).ToDefault();
 	if (CheckSignature(entity.signature, SIGNATURE_SCRIPT))
 		componentHandler->GetComponentScript(entity.id).ToDefault();
+	if (CheckSignature(entity.signature, SIGNATURE_GAMEPLAY))
+		componentHandler->GetComponentGameplay(entity.id).ToDefault(entity);
 
 	//Reset Entity
 	entity.signature = 0;
@@ -68,23 +72,6 @@ bool Coordinator::CheckSignature(const int entitySignature, const int signature)
 	return (entitySignature & signature) == signature;
 }
 
-void Coordinator::SelectEntities(Vec2& selectionQuadStart, Vec2& selectionQuadEnd)
-{
-	selectedEntities.clear();
-	float minX = (selectionQuadStart.x < selectionQuadEnd.x) ? selectionQuadStart.x : selectionQuadEnd.x;
-	float maxX = (selectionQuadStart.x < selectionQuadEnd.x) ? selectionQuadEnd.x : selectionQuadStart.x;
-	float minZ = (selectionQuadStart.y < selectionQuadEnd.y) ? selectionQuadStart.y : selectionQuadEnd.y;
-	float maxZ = (selectionQuadStart.y < selectionQuadEnd.y) ? selectionQuadEnd.y : selectionQuadStart.y;
-
-	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM))
-		{
-			Vec3& entityPos = componentHandler->GetComponentTransform(i).pos;
-			if (minX <= entityPos.x && entityPos.x <= maxX && 
-				minZ <= entityPos.z && entityPos.z <= maxZ)
-				selectedEntities.push_back(&entityHandler->entities[i]);
-		}
-}
 
 void Coordinator::ApplySystemPhysics(float factor)
 {
@@ -105,6 +92,7 @@ void Coordinator::ApplyScriptUpdate()
 		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_SCRIPT))
 			System::SystemScriptUpdate(componentHandler->GetComponentScript(entityHandler->entities[i].id));
 }
+
 
 void Coordinator::ApplyGameplayUpdatePushedCooldown(Resources::Map& map)
 {
@@ -139,7 +127,7 @@ void Coordinator::ApplyGameplayResolveCollision()
 	std::vector<Entity*> entitiesToCheck;
 
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM) &&
+		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_GAMEPLAY) &&
 			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
 		{
 			
@@ -160,10 +148,12 @@ void Coordinator::ApplyGameplayResolveCollision()
 		}
 	/*
 	bool allCollisionResolved = false;
+	int counter = 0;
 
-	while (!allCollisionResolved)
+	while (!allCollisionResolved && counter < 20)
 	{
 		allCollisionResolved = true;
+		counter++;
 
 		for (int i = 0; i < entitiesToCheck.size(); ++i)
 		{
@@ -200,12 +190,30 @@ void Coordinator::ApplyGameplayDrawPath(DebugRenderer& debug)
 			componentHandler->GetComponentGameplay(i).componentMove.DrawPath(debug, componentHandler->GetComponentTransform(i));
 }
 
+
+void Coordinator::SelectEntities(Vec2& selectionQuadStart, Vec2& selectionQuadEnd)
+{
+	selectedEntities.clear();
+	float minX = (selectionQuadStart.x < selectionQuadEnd.x) ? selectionQuadStart.x : selectionQuadEnd.x;
+	float maxX = (selectionQuadStart.x < selectionQuadEnd.x) ? selectionQuadEnd.x : selectionQuadStart.x;
+	float minZ = (selectionQuadStart.y < selectionQuadEnd.y) ? selectionQuadStart.y : selectionQuadEnd.y;
+	float maxZ = (selectionQuadStart.y < selectionQuadEnd.y) ? selectionQuadEnd.y : selectionQuadStart.y;
+
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM))
+		{
+			Vec3& entityPos = componentHandler->GetComponentTransform(i).pos;
+			if (minX <= entityPos.x && entityPos.x <= maxX && 
+				minZ <= entityPos.z && entityPos.z <= maxZ)
+				selectedEntities.push_back(&entityHandler->entities[i]);
+		}
+}
 Entity* Coordinator::GetSelectedEntitiesCommander()
 {
 	float selectedEntitiesSize = selectedEntities.size();
 
 	//get Centroid
-	Vec3 centroid;
+	Vec3 centroid = {0, 0, 0};
 	for (int i = 0; i < selectedEntitiesSize; ++i)
 	{
 		//divide by selectedEntitiesSize in for loop, so we're sure we can't divide by 0
@@ -231,7 +239,8 @@ void Coordinator::SetSelectedEntitiesCommander(Entity* commander)
 {
 	for (int i = 0; i < selectedEntities.size(); ++i)
 	{
-		if (CheckSignature(selectedEntities[i]->signatureGameplay, SIGNATURE_CGP_MOVE) &&
+		if (CheckSignature(selectedEntities[i]->signature, SIGNATURE_GAMEPLAY) &&
+			CheckSignature(selectedEntities[i]->signatureGameplay, SIGNATURE_CGP_MOVE) &&
 			selectedEntities[i] != commander)
 			componentHandler->GetComponentGameplay(selectedEntities[i]->id).componentMove.SetCommander(componentHandler->GetComponentTransform(commander->id), componentHandler->GetComponentTransform(selectedEntities[i]->id));
 	}
