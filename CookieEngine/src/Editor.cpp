@@ -251,14 +251,25 @@ void Editor::Loop()
                 nbOfBuildings++;
             }
         }
-        //Bind Keys to Set Obstacle Tiles and to give orders to Units
+        //Bind Keys to Set Obstacle Tiles
         {
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B] && isRaycastingWithMap)
             {
                 game.scene->map.tiles[indexOfSelectedTile].isObstacle = !game.scene->map.tiles[indexOfSelectedTile].isObstacle;
             }
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_G] && isRaycastingWithMap)
+        }
+        //Bind Keys to give orders to Units
+        {
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_G] && isRaycastingWithMap && game.coordinator.selectedEntities.size() != 0)
             {
+                ECS::Entity* commander = game.coordinator.GetSelectedEntitiesCommander();
+                game.coordinator.SetSelectedEntitiesCommander(commander);
+
+                ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(commander->id);
+                if (game.scene->map.ApplyPathfinding(game.scene->map.GetTile(trs.pos), game.scene->map.tiles[indexOfSelectedTile]))
+                    game.coordinator.componentHandler->GetComponentGameplay(commander->id).componentMove.SetPath(game.scene->map.tiles[indexOfSelectedTile], trs);
+
+                /*
                 for (int i = 0; i < game.coordinator.selectedEntities.size(); ++i)
                 {
                     float selectedEntityId = game.coordinator.selectedEntities[i]->id;
@@ -267,24 +278,26 @@ void Editor::Loop()
                     if (game.scene->map.ApplyPathfinding(game.scene->map.GetTile(trs.pos), game.scene->map.tiles[indexOfSelectedTile]))
                         game.coordinator.componentHandler->GetComponentGameplay(selectedEntityId).componentMove.SetPath(game.scene->map.tiles[indexOfSelectedTile], trs);
 
-                }
+                }*/
             }
         }
         //Bind Key to create new unit
         {
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N] && isRaycastingWithMap)
             {
-                game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL, game.resources, "Unit " + std::to_string(nbOfUnits));
+                game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL + SIGNATURE_GAMEPLAY, game.resources, "Unit " + std::to_string(nbOfUnits));
                 //should create constructor copy for each Component 
                 {
                     ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(game.coordinator.entityHandler->livingEntities - 1);
                     ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(game.coordinator.entityHandler->livingEntities - 1);
+                    game.coordinator.entityHandler->entities[game.coordinator.entityHandler->livingEntities - 1].signatureGameplay = SIGNATURE_CGP_ALL;
 
                     trs.pos = {mousePos.x, 0, mousePos.y};
 
                     model.mesh = game.resources.meshes["Cube"];
                     model.texture = game.resources.textures["Green"];
                     model.shader = game.resources.shaders["Texture_Shader"];
+
                 }
 
                 nbOfUnits++;
@@ -324,9 +337,11 @@ void Editor::Loop()
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
 
-        game.scene->map.ResetTilesTempObstacles();
+        game.coordinator.ApplyGameplayUpdatePushedCooldown(game.scene->map);
+        //game.scene->map.ResetTilesTempObstacles();
         //game.coordinator.ApplyGameplayPosPrediction(game.scene->map);
         game.coordinator.ApplyGameplayMove();
+        game.coordinator.ApplyGameplayMoveWithCommander();
         game.coordinator.ApplyGameplayResolveCollision();
         game.coordinator.ApplyGameplayDrawPath(dbgRenderer);
 

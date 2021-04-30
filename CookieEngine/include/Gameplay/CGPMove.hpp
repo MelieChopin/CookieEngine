@@ -16,15 +16,18 @@ namespace Cookie
 		{
 			E_STATIC,
 			E_MOVING,
+			E_PUSHED,
 			E_WAITING
 		};
+
+		#define CPGMOVE_CD_BEFORE_RETURN 3
 
 
 		class CGPMove
 		{
 		public:
 			CGPMOVE_STATE state = CGPMOVE_STATE::E_STATIC;
-			float moveSpeed = 10;
+			float moveSpeed = 5;
 			bool  isFlying = false;
 
 			//use it for collision Detection making a circle with trs.pos
@@ -36,27 +39,29 @@ namespace Cookie
 			//maybe use a vector of Tile*
 			std::vector<Core::Math::Vec3> waypoints;
 
+			Core::Math::Vec3* commanderPos = nullptr;
+			Core::Math::Vec3  offsetFromCommander;
+
+			float pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
+			Core::Math::Vec3 posBeforePushed;
+
 			CGPMove() {}
 			~CGPMove() {}
 
-			void MoveTowardWaypoint(ECS::ComponentTransform& trs)
+			void UpdatePushedCooldown(Resources::Map& map, ECS::ComponentTransform& trs)
 			{
-				while (waypoints.size() != 0 && (waypoints[0] - trs.pos).Length() < 0.1)
-				{
-					waypoints.erase(waypoints.begin());
-
-					//check if reach goal here to avoid to set the state each frame
-					if (waypoints.size() == 0)
-						state = CGPMOVE_STATE::E_STATIC;
-				}
-
-				if (waypoints.size() == 0)
+				if (state != CGPMOVE_STATE::E_PUSHED)
 					return;
 
+				pushedCooldownBeforeReturn -= Core::DeltaTime();
+				std::cout << "pushedCooldown Reducing " << pushedCooldownBeforeReturn << "\n";
 
-				Core::Math::Vec3 direction = (waypoints[0] - trs.pos).Normalize();
-				trs.pos += direction * (moveSpeed * Core::DeltaTime());
-				trs.ComputeTRS();
+				if (pushedCooldownBeforeReturn < 0 && map.ApplyPathfinding(map.GetTile(trs.pos), map.GetTile(posBeforePushed)))
+				{
+					std::cout << "pushedCooldown FINISH\n";
+					pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
+					SetPath(map.GetTile(posBeforePushed), trs);
+				}
 			}
 			void SetPath(Resources::Tile& lastWaypoint, ECS::ComponentTransform& trs)
 			{
@@ -85,6 +90,49 @@ namespace Cookie
 				}
 
 			}
+			void SetCommander(ECS::ComponentTransform& commanderTrs, ECS::ComponentTransform& selfTrs)
+			{
+				waypoints.clear();
+				state = CGPMOVE_STATE::E_MOVING;
+				commanderPos = &(commanderTrs.pos);
+				offsetFromCommander = selfTrs.pos - commanderTrs.pos;
+			}
+			void MoveTowardWaypoint(ECS::ComponentTransform& trs)
+			{
+				while (waypoints.size() != 0 && (waypoints[0] - trs.pos).Length() < 0.1)
+				{
+					waypoints.erase(waypoints.begin());
+
+					//check if reach goal here to avoid to set the state each frame
+					if (waypoints.size() == 0)
+						state = CGPMOVE_STATE::E_STATIC;
+				}
+
+				if (waypoints.size() == 0)
+					return;
+
+
+				Core::Math::Vec3 direction = (waypoints[0] - trs.pos).Normalize();
+				trs.pos += direction * (moveSpeed * Core::DeltaTime());
+				trs.ComputeTRS();
+			}
+			void MoveWithCommander(ECS::ComponentTransform& trs)
+			{
+				if (commanderPos == nullptr)
+					return;
+
+				Core::Math::Vec3 previousPos = trs.pos;
+				trs.pos = *commanderPos + offsetFromCommander;
+
+				//check if commander is Static
+				if (previousPos == trs.pos)
+				{
+					commanderPos = nullptr;
+					state = CGPMOVE_STATE::E_STATIC;
+				}
+
+
+			}
 			void PositionPrediction(Resources::Map& map, ECS::ComponentTransform& trs)
 			{
 				if (waypoints.size() == 0)
@@ -111,34 +159,54 @@ namespace Cookie
 			void ResolveColision(ECS::ComponentTransform& trsSelf, CGPMove& other, ECS::ComponentTransform& trsOther)
 			{
 				//Priority High
-				if (state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_STATIC)
+				if (state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_STATIC ||
+					state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_PUSHED ||
+					state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_STATIC)
 				{
+					if (other.state != CGPMOVE_STATE::E_PUSHED)
+					{
+						other.state = CGPMOVE_STATE::E_PUSHED;
+						other.posBeforePushed = trsOther.pos;
+					}
+					other.pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
+
 					Core::Math::Vec3 direction = (trsOther.pos - trsSelf.pos).Normalize();
 					trsOther.pos = trsSelf.pos + direction * (radius + other.radius);
 				}
-				//Priority Medium not Handle Yet
+				//Priority Medium need some fixes
 				else if (state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_MOVING)
 				{
 					float overlapLength = (radius + other.radius) - (trsSelf.pos - trsOther.pos).Length();
 
-					//Core::Math::Vec3 directionSelfToOther = (trsOther.pos - trsSelf.pos).Normalize();
-					Core::Math::Vec3 directionSelf = (waypoints[0] - trsSelf.pos).Normalize();
-					Core::Math::Vec3 directionOther = (other.waypoints[0] - trsOther.pos).Normalize();
+					Core::Math::Vec3 directionSelfToOther = (trsOther.pos - trsSelf.pos).Normalize();
+					//Core::Math::Vec3 directionSelf = (waypoints[0] - trsSelf.pos).Normalize();
+					//Core::Math::Vec3 directionOther = (other.waypoints[0] - trsOther.pos).Normalize();
 
-					//trsSelf.pos += -directionSelfToOther * (overlapLength / 2);
-					//trsOther.pos += directionSelfToOther * (overlapLength / 2);
-
-					trsSelf.pos += Core::Math::Vec3{-directionSelf.z, directionSelf.y, directionSelf.x} * (overlapLength / 2);
-					trsOther.pos += Core::Math::Vec3{ -directionOther.z, directionOther.y, directionOther.x } * (overlapLength / 2);
+					trsSelf.pos += -directionSelfToOther * (overlapLength / 2);
+					trsOther.pos += directionSelfToOther * (overlapLength / 2);
+					
+					//trsSelf.pos += Core::Math::Vec3{-directionSelf.z, directionSelf.y, directionSelf.x} * (overlapLength / 2);
+					//trsOther.pos += Core::Math::Vec3{ -directionOther.z, directionOther.y, directionOther.x } * (overlapLength / 2);
 
 
 				}
 				//Priority Low
-				else if (state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_MOVING)
+				else if (state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_MOVING ||
+						 state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_MOVING ||
+					     state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_PUSHED)
 				{
+					if (state != CGPMOVE_STATE::E_PUSHED)
+					{
+						state = CGPMOVE_STATE::E_PUSHED;
+						posBeforePushed = trsSelf.pos;
+					}
+					pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
+
 					Core::Math::Vec3 direction = (trsSelf.pos - trsOther.pos).Normalize();
 					trsSelf.pos = trsOther.pos + direction * (radius + other.radius);
 				}
+
+
 			}
 			void DrawPath(Render::DebugRenderer& debug, ECS::ComponentTransform& trs)
 			{

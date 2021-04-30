@@ -106,6 +106,13 @@ void Coordinator::ApplyScriptUpdate()
 			System::SystemScriptUpdate(componentHandler->GetComponentScript(entityHandler->entities[i].id));
 }
 
+void Coordinator::ApplyGameplayUpdatePushedCooldown(Resources::Map& map)
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM) &&
+			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
+			componentHandler->GetComponentGameplay(i).componentMove.UpdatePushedCooldown(map, componentHandler->GetComponentTransform(i));
+}
 void Coordinator::ApplyGameplayPosPrediction(Map& map)
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
@@ -120,6 +127,13 @@ void Coordinator::ApplyGameplayMove()
 			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
 			componentHandler->GetComponentGameplay(i).componentMove.MoveTowardWaypoint(componentHandler->GetComponentTransform(i) );
 }
+void Coordinator::ApplyGameplayMoveWithCommander()
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM) &&
+			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
+			componentHandler->GetComponentGameplay(i).componentMove.MoveWithCommander(componentHandler->GetComponentTransform(i));
+}
 void Coordinator::ApplyGameplayResolveCollision()
 {
 	std::vector<Entity*> entitiesToCheck;
@@ -128,6 +142,7 @@ void Coordinator::ApplyGameplayResolveCollision()
 		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM) &&
 			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
 		{
+			
 			CGPMove& cgpMoveSelf = componentHandler->GetComponentGameplay(i).componentMove;
 			ComponentTransform& trsSelf = componentHandler->GetComponentTransform(i);
 
@@ -143,6 +158,39 @@ void Coordinator::ApplyGameplayResolveCollision()
 
 			entitiesToCheck.push_back(&entityHandler->entities[i]);
 		}
+	/*
+	bool allCollisionResolved = false;
+
+	while (!allCollisionResolved)
+	{
+		allCollisionResolved = true;
+
+		for (int i = 0; i < entitiesToCheck.size(); ++i)
+		{
+			CGPMove& cgpMoveSelf = componentHandler->GetComponentGameplay(entitiesToCheck[i]->id).componentMove;
+			ComponentTransform& trsSelf = componentHandler->GetComponentTransform(entitiesToCheck[i]->id);
+
+			for (int j = 0; j < entitiesToCheck.size(); ++j)
+			{
+				if (i != j)
+				{
+					CGPMove& cgpMoveOther = componentHandler->GetComponentGameplay(entitiesToCheck[j]->id).componentMove;
+					ComponentTransform& trsOther = componentHandler->GetComponentTransform(entitiesToCheck[j]->id);
+
+					//if the two circles collide
+					if ((trsSelf.pos - trsOther.pos).Length() < cgpMoveSelf.radius + cgpMoveOther.radius - 0.1)
+					{
+						std::cout << "length : " << (trsSelf.pos - trsOther.pos).Length() << " radius added : " << cgpMoveSelf.radius + cgpMoveOther.radius - 0.1 << "\n";
+						allCollisionResolved = false;
+						cgpMoveSelf.ResolveColision(trsSelf, cgpMoveOther, trsOther);
+					}
+				}
+			}
+
+		}
+
+	}*/
+
 }
 void Coordinator::ApplyGameplayDrawPath(DebugRenderer& debug)
 {
@@ -150,4 +198,42 @@ void Coordinator::ApplyGameplayDrawPath(DebugRenderer& debug)
 		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM) &&
 			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
 			componentHandler->GetComponentGameplay(i).componentMove.DrawPath(debug, componentHandler->GetComponentTransform(i));
+}
+
+Entity* Coordinator::GetSelectedEntitiesCommander()
+{
+	float selectedEntitiesSize = selectedEntities.size();
+
+	//get Centroid
+	Vec3 centroid;
+	for (int i = 0; i < selectedEntitiesSize; ++i)
+	{
+		//divide by selectedEntitiesSize in for loop, so we're sure we can't divide by 0
+		centroid += componentHandler->GetComponentTransform(selectedEntities[i]->id).pos / selectedEntitiesSize;
+	}
+
+	//get Commander
+	Entity* commander = nullptr;
+	float distFromCentroid = INFINITY;
+	for (int i = 0; i < selectedEntitiesSize; ++i)
+	{
+		float possibleNewDist = (centroid - componentHandler->GetComponentTransform(selectedEntities[i]->id).pos).Length();
+		if (possibleNewDist < distFromCentroid)
+		{
+			distFromCentroid = possibleNewDist;
+			commander = selectedEntities[i];
+		}		
+	}
+	
+	return commander;
+}
+void Coordinator::SetSelectedEntitiesCommander(Entity* commander)
+{
+	for (int i = 0; i < selectedEntities.size(); ++i)
+	{
+		if (CheckSignature(selectedEntities[i]->signatureGameplay, SIGNATURE_CGP_MOVE) &&
+			selectedEntities[i] != commander)
+			componentHandler->GetComponentGameplay(selectedEntities[i]->id).componentMove.SetCommander(componentHandler->GetComponentTransform(commander->id), componentHandler->GetComponentTransform(selectedEntities[i]->id));
+	}
+
 }

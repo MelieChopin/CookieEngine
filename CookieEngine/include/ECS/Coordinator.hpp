@@ -43,10 +43,17 @@ namespace Cookie
 			void ApplyDraw(const Core::Math::Mat4& viewProj);
 			void ApplyScriptUpdate();
 
+
+			void ApplyGameplayUpdatePushedCooldown(Resources::Map& map);
 			void ApplyGameplayPosPrediction(Resources::Map& map);
 			void ApplyGameplayMove();
+			void ApplyGameplayMoveWithCommander();
 			void ApplyGameplayResolveCollision();
 			void ApplyGameplayDrawPath(Render::DebugRenderer& debug);
+
+			Entity* GetSelectedEntitiesCommander();
+			void SetSelectedEntitiesCommander(Entity* commander);
+			
 		};
 
 	}
