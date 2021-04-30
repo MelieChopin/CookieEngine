@@ -24,35 +24,67 @@ bool WindowBase::BeginWindow(int windowFlags)
 
 bool GameWindowBase::BeginWindow(int windowFlags)
 {
-	if (!opened) return false;
+	if (!opened || invalid) return false;
 
-	SetNextWindowPos({xPos, yPos},		ImGuiCond_Appearing);
-	SetNextWindowSize({width, height},	ImGuiCond_Appearing);
+	SetNextWindowPos({ xPos + GetWindowPos().x, yPos + GetWindowPos().y }, ImGuiCond_Appearing);
 
-	contentVisible = ImGui::Begin(windowName, nullptr, windowFlags | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoCollapse);
+	contentVisible = BeginChild(windowName, {width, height}, true, windowFlags | ImGuiWindowFlags_NoMove);
 
 	return true;
 }
 
 bool GameWindowBase::WindowEdit()
 {
-	BeginWindow();
+	const ImVec2&& parentWindowPos  = GetWindowPos();
+	const ImVec2&& parentWindowSize = GetWindowSize();
 
-	if (Button("Delete this widget"))
+	SetNextWindowPos ({ xPos + parentWindowPos.x, yPos + parentWindowPos.y	}, ImGuiCond_Appearing);
+	SetNextWindowSize({ width					, height					}, ImGuiCond_Appearing);
+
+
+	invalid = (xPos < 0) || (yPos < 0) || (xPos + width > parentWindowSize.x) || (yPos + height > parentWindowSize.y);
+
+	if (invalid)
 	{
-		ImGui::End();
-		return false;
+		PushStyleColor(ImGuiCol_TitleBg			, { 0.75, 0, 0, 1 });
+		PushStyleColor(ImGuiCol_TitleBgActive	, { 1   , 0, 0, 1 });
 	}
+
+
+	ImGui::Begin(windowName);
 
 	if (IsWindowFocused())
 	{
-		xPos = GetWindowPos().x;
-		yPos = GetWindowPos().y;
-		width = GetWindowWidth();
-		height = GetWindowHeight();
+		xPos	= ((int)((GetWindowPos().x - parentWindowPos.x)	/ 10)) * 10;
+		yPos	= ((int)((GetWindowPos().y - parentWindowPos.y)	/ 10)) * 10;
+		width	= ((int)(GetWindowWidth()	/ 10)) * 10;
+		height	= ((int)(GetWindowHeight()	/ 10)) * 10;
+
+		SetWindowPos ({ xPos + parentWindowPos.x, yPos + parentWindowPos.y  });
+		SetWindowSize({ width					, height					});
+
+		if (!invalid)
+		{
+			if (Button("Delete this widget"))
+			{
+				ImGui::End();
+				return false;
+			}
+		}
+		else
+		{
+			BeginTooltip();
+			TextDisabled("This widget is currently illegally placed.\nIt prevents saving, can't be deleted, and will not appear in a game run.\nMove it back inside the editor.");
+			EndTooltip();
+		}
 	}
 
 	ImGui::End();
+	
+	if (invalid) PopStyleColor(2);
+	
+
+	return true;
 }
 
 

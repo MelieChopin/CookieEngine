@@ -9,6 +9,16 @@ namespace Cookie::Resources { class Scene; }
 
 namespace Cookie::UIwidget
 {
+	class TestWindow final : public GameWindowBase
+	{
+	public:
+		TestWindow()
+			: GameWindowBase("Sample test", true)
+		{}
+
+		void WindowDisplay() override;
+	};
+
 	class SaveButton final : public ItemBase
 	{
 		std::shared_ptr<Cookie::Resources::Scene>& activeScene;

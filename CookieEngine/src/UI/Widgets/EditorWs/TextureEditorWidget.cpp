@@ -36,10 +36,12 @@ void TextureEditor::WindowDisplay()
 
 			EndGroup();
 
-			if (BeginPopupContextItem())
+			if (BeginPopupContextItem("Texture interaction popup"))
 			{
 				if (Selectable("Delete this texture!"))
 				{ resources.textures.erase(textPtr); }
+
+				EndPopup();
 			}
 
 

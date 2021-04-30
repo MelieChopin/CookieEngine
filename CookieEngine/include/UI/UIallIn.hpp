@@ -8,6 +8,7 @@
 #include "Widgets/EditorWs/ConsoleWidget.hpp"
 #include "Widgets/EditorWs/FileExplorerWidget.hpp"
 #include "Widgets/EditorWs/GameportWidget.hpp"
+#include "Widgets/EditorWs/GameUIeditorWidget.hpp"
 #include "Widgets/EditorWs/HierarchyWidget.hpp"
 #include "Widgets/EditorWs/InspectorWidget.hpp"
 #include "Widgets/EditorWs/TextureEditorWidget.hpp"

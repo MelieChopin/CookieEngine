@@ -90,7 +90,6 @@ set (SRC_FILES
 
     "${SRC_DIR}/UI/UIcore.cpp"
     "${SRC_DIR}/UI/UIeditor.cpp"
-    "${SRC_DIR}/UI/UIgame.cpp"
     "${SRC_DIR}/UI/UIscene.cpp"
     "${SRC_DIR}/UI/CustomImWidget.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgetBases.cpp"
@@ -98,11 +97,14 @@ set (SRC_FILES
     "${SRC_DIR}/UI/Widgets/EditorWs/ConsoleWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/FileExplorerWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/GameportWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/GameUIeditorWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/HierarchyWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/InspectorWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/TextureEditorWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/ToolbarWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/ViewportWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/GameWs/TestWidget.cpp"
+
     
     "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
 

@@ -77,7 +77,6 @@ void Viewport::GizmoManipulator()
 	case TransformTool::Translate:	transformTool = ImGuizmo::OPERATION::TRANSLATE; break;
 	case TransformTool::Rotate:		transformTool = ImGuizmo::OPERATION::ROTATE;	break;
 	case TransformTool::Scale:		transformTool = ImGuizmo::OPERATION::SCALE;		break;
-	case TransformTool::Quad:		transformTool = ImGuizmo::OPERATION::BOUNDS;	break;
 	}
 
 

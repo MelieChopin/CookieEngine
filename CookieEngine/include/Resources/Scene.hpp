@@ -4,7 +4,7 @@
 #include "ECS/EntityHandler.hpp"
 #include "ECS/ComponentHandler.hpp"
 #include "Physics/PhysicsSimulator.hpp"
-#include "UI/UIgame.hpp"
+#include "UI/UIscene.hpp"
 #include "Camera.hpp"
 #include "Vec3.hpp"
 #include "Tiles.hpp"
@@ -35,7 +35,7 @@ namespace Cookie
 			ECS::ComponentHandler					componentHandler;
 			Physics::PhysicsSimulator				physSim;
 			Resources::Map							map;
-			UI::UIgame								uiGame;
+			UI::UIscene								uiScene;
 			std::shared_ptr<Cookie::Render::Camera> camera{nullptr};
 			Resources::Tiles						tiles;//will be map
 

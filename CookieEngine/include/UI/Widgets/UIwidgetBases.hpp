@@ -33,10 +33,16 @@ namespace Cookie::UIwidget
 	struct GameWindowBase : WindowBase
 	{
 	private:
-		float xPos, yPos, width, height;
+		float	xPos	= 10, 
+				yPos	= 10, 
+				width	= 100,
+				height	= 100;
+
+		// Invalid game windows are not ran at the beginning of a game and cannot be saved. Their tittle bar is red.
+		bool invalid = false;
 
 	protected:
-		// Note: The flag to prevent docking is always given.
+		// Note: The flags to prevent docking and collapsing are always given.
 		virtual bool BeginWindow(int windowFlags = 0) override;
 
 	public:

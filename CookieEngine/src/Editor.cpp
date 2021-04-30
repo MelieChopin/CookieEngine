@@ -39,6 +39,7 @@ Editor::Editor()
     editorUI.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
 
     editorUI.AddWItem(new UIwidget::TextureEditor(game.renderer, game.resources), 1);
+    editorUI.AddWItem(new UIwidget::GameUIeditor(game.renderer.window, game.scene), 1);
 
     editorUI.AddWItem(new UIwidget::GamePort(game), 2);
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
