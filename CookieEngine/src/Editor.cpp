@@ -107,18 +107,18 @@ void Editor::Loop()
     Vec2 mousePos;
     {
         game.scene->map.model.mesh                 = game.resources.meshes["Cube"].get();
-        game.scene->map.model.texture              = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
+        game.scene->map.model.albedo              = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
 
 
         //will be removed after testing phase
         game.scene->map.modelTileStart.mesh        = game.resources.meshes["Cube"].get();
-        game.scene->map.modelTileStart.texture     = game.resources.textures["Green"].get();
+        game.scene->map.modelTileStart.albedo     = game.resources.textures["Green"].get();
 
         game.scene->map.modelTileEnd.mesh          = game.resources.meshes["Cube"].get();
-        game.scene->map.modelTileEnd.texture       = game.resources.textures["Red"].get();
+        game.scene->map.modelTileEnd.albedo       = game.resources.textures["Red"].get();
 
         game.scene->map.modelTileObstacle.mesh     = game.resources.meshes["Cube"].get();
-        game.scene->map.modelTileObstacle.texture  = game.resources.textures["Grey"].get();
+        game.scene->map.modelTileObstacle.albedo  = game.resources.textures["Grey"].get();
     }
     ComponentTransform buildingTrs;
     ComponentModel     buildingModel;
@@ -130,7 +130,7 @@ void Editor::Loop()
         buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x;
         buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y;
         buildingModel.mesh = game.resources.meshes["Cube"].get();
-        buildingModel.texture = game.resources.textures["Pink"].get();
+        buildingModel.albedo = game.resources.textures["Pink"].get();
     }
 
     while (!glfwWindowShouldClose(game.renderer.window.window))
@@ -244,7 +244,7 @@ void Editor::Loop()
                     trs.scale = buildingTrs.scale;
 
                     model.mesh = buildingModel.mesh;
-                    model.texture = game.resources.textures["Green"].get();
+                    model.albedo = game.resources.textures["Green"].get();
                 }
 
                 nbOfBuildings++;

@@ -57,9 +57,9 @@ Texture::~Texture()
 		shaderResourceView->Release();
 }
 
-void Texture::Set()
+void Texture::Set(unsigned int slot)
 {
-	Render::RendererRemote::context->PSSetShaderResources(0, 1, &shaderResourceView);
+	Render::RendererRemote::context->PSSetShaderResources(slot, 1, &shaderResourceView);
 }
 
 /*==================== CREATE METHODS ========================*/

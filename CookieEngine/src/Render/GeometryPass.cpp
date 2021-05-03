@@ -86,7 +86,9 @@ void GeometryPass::InitShader()
 
     source = (const char*)R"(#line 58
 
-    Texture2D	diffuseTex2D : register(t0);    
+    Texture2D	albedoTex           : register(t0);
+    Texture2D	normalTex           : register(t1); 
+    Texture2D	metallicRoughness   : register(t2); 
 
     SamplerState WrapSampler : register(s0);
 
@@ -101,9 +103,11 @@ void GeometryPass::InitShader()
     {
         POut pOutput;
 
-        pOutput.position    = float4(fragPos,1.0);
-        pOutput.normal      = float4(normal,1.0);
-        pOutput.albedo      = float4(diffuseTex2D.Sample(WrapSampler,uv).rgb,1.0);
+        float3 texNormal = normalTex.Sample(WrapSampler,uv).xyz;
+
+        pOutput.position    = float4(fragPos,metallicRoughness.Sample(WrapSampler,uv).x);
+        pOutput.normal      = lerp(float4(normal,metallicRoughness.Sample(WrapSampler,uv).y),float4(texNormal,metallicRoughness.Sample(WrapSampler,uv).y),step(0.1,dot(texNormal,texNormal)));
+        pOutput.albedo      = float4(albedoTex.Sample(WrapSampler,uv).rgb,1.0);
 
 
         return pOutput;
@@ -287,6 +291,10 @@ void GeometryPass::Draw(const Core::Math::Mat4& viewProj, const ECS::Coordinator
 
     size_t bufferSize = sizeof(buffer);
 
+    ID3D11ShaderResourceView* fbos[3] = { nullptr, nullptr, nullptr};
+
+    
+
     for (int i = 0; i < entityHandler.livingEntities; ++i)
     {
         if (entityHandler.entities[i].signature & (SIGNATURE_TRANSFORM + SIGNATURE_MODEL))
@@ -296,13 +304,19 @@ void GeometryPass::Draw(const Core::Math::Mat4& viewProj, const ECS::Coordinator
 
             const ECS::ComponentModel& model = components.componentModels[entityHandler.entities[i].id];
 
-            if (model.texture)
-                model.texture->Set();
+            if (model.albedo)
+                model.albedo->Set(0);
+            if (model.normal)
+                model.normal->Set(1);
+            if (model.metallicRoughness)
+                model.metallicRoughness->Set(2);
             if (model.mesh)
             {
                 model.mesh->Set();
                 model.mesh->Draw();
             }
+
+            Render::RendererRemote::context->PSSetShaderResources(0, 3, fbos);
         }
     }
 }

@@ -130,7 +130,7 @@ void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandl
 
 	newPrefab.name = entity.name;
 	newPrefab.nameMesh = component.componentModels[entity.id].mesh->name;
-	newPrefab.nameTexture = component.componentModels[entity.id].texture->name;
+	newPrefab.nameTexture = component.componentModels[entity.id].albedo->name;
 	newPrefab.signature = entity.id;
 	newPrefab.rotation = component.componentTransforms[entity.id].rot;
 	newPrefab.scale = component.componentTransforms[entity.id].scale;

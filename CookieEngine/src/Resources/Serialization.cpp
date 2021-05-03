@@ -60,15 +60,15 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size()]["model"] = model.mesh->name;
 				else
 					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size()]["model"] = 0;
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameTexture != model.texture->name)
-					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["texture"] = model.texture->name;
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameTexture != model.albedo->name)
+					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["texture"] = model.albedo->name;
 				else
 					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["texture"] = 0;
 			}
 			else
 			{
 				js["ComponentHandler"]["Model"] += json{ { "model", model.mesh != nullptr ? model.mesh->name : "NO MESH" },
-												{ "texture", model.texture != nullptr ? model.texture->name : "NO TEXTURE" } };
+												{ "texture", model.albedo != nullptr ? model.albedo->name : "NO TEXTURE" } };
 			}
 		}
 		if (entity.entities[i].signature & SIGNATURE_PHYSICS)
@@ -325,9 +325,9 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 						resourcesManager.meshes[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameMesh].get();
 
 			 if (model.at("texture").is_string())
-				component.componentModels[entity.entities[i].id].texture = resourcesManager.textures[(model.at("texture").get<std::string>())].get();
+				component.componentModels[entity.entities[i].id].albedo = resourcesManager.textures[(model.at("texture").get<std::string>())].get();
 			 else if (entity.entities[i].namePrefab != "NONE")
-				 component.componentModels[entity.entities[i].id].texture = 
+				 component.componentModels[entity.entities[i].id].albedo =
 									resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameTexture].get();
 		 }
 		 if (entity.entities[i].signature & SIGNATURE_PHYSICS)

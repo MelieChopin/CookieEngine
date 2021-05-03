@@ -7,6 +7,7 @@
 #include "Render/RendererRemote.hpp"
 #include "Render/GeometryPass.hpp"
 #include "Render/LightPass.hpp"
+#include "Render/ComposePass.hpp"
 
 namespace Cookie
 {
@@ -35,6 +36,7 @@ namespace Cookie
 				D3D11_VIEWPORT	viewport;
 				GeometryPass	gPass;
 				LightPass		lPass;
+				ComposePass		cPass;
 
 			private:
 				Render::FBODrawer	fboDrawer;

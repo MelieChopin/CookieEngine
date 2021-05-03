@@ -19,7 +19,9 @@ namespace Cookie
         {
         public:
             Resources::Mesh*    mesh    {nullptr};
-            Resources::Texture* texture {nullptr};
+            Resources::Texture* albedo {nullptr};
+            Resources::Texture* normal{ nullptr };
+            Resources::Texture* metallicRoughness{ nullptr };
 
 
             //Material material;

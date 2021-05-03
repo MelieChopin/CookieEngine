@@ -29,7 +29,9 @@ ComponentModel::~ComponentModel()
 void ComponentModel::ToDefault()
 {
     mesh = nullptr;
-    texture = nullptr;
+    albedo = nullptr;
+    normal = nullptr;
+    metallicRoughness = nullptr;
 }
 
 void ComponentModel::Draw(const Core::Math::Mat4& viewProj, const Core::Math::Mat4& modelMat, ID3D11Buffer** CBuffer)
@@ -38,8 +40,12 @@ void ComponentModel::Draw(const Core::Math::Mat4& viewProj, const Core::Math::Ma
 
     Render::WriteCBuffer(&buffer, sizeof(buffer), 0, CBuffer);
 
-    if (texture)
-        texture->Set();
+    if (albedo)
+        albedo->Set(0);
+    if (normal)
+        normal->Set(1);
+    if (metallicRoughness)
+        metallicRoughness->Set(2);
     if (mesh)
     {
         mesh->Set();

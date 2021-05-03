@@ -16,7 +16,8 @@ using namespace Cookie::Core::Math;
 Renderer::Renderer():
     remote {InitDevice(window)},
     viewport {0.0f,0.0f,static_cast<float>(window.width),static_cast<float>(window.height),0.0f,0.9999999f},
-    gPass{window.width,window.height}
+    gPass{window.width,window.height},
+    lPass{window.width,window.height}
 {
     CreateDrawBuffer(window.width,window.height);
     remote.context->RSSetViewports(1, &viewport);
@@ -145,6 +146,8 @@ void Renderer::ResizeBuffer(int width, int height)
     gPass.posFBO.Resize(width,height);
     gPass.normalFBO.Resize(width, height);
     gPass.albedoFBO.Resize(width, height);
+    lPass.diffuseFBO.Resize(width, height);
+    lPass.specularFBO.Resize(width, height);
 
     remote.context->ClearState();
     remote.context->Flush();
@@ -159,7 +162,7 @@ void Renderer::ResizeBuffer(int width, int height)
 
 void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
 {
-
+    ID3D11RenderTargetView* nullViews[] = { nullptr,nullptr,nullptr,nullptr };
     remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
 
     Core::Math::Mat4 viewProj = cam->GetViewProj();
@@ -170,29 +173,43 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
 
     gPass.Draw(viewProj,game.coordinator);
 
-    ID3D11RenderTargetView* nullViews[] = { nullptr,nullptr,nullptr,nullptr };
+    remote.context->OMSetRenderTargets(4, nullViews, nullptr);
+
+    lPass.Set(gPass.posFBO,gPass.normalFBO,cam->pos);
+    lPass.Draw();
 
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
 
-    lPass.Set(gPass.posFBO,gPass.normalFBO,gPass.albedoFBO,cam->pos);
-
-    remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
-
     if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F1] >= 0.0f)
     {
-        game.renderer.DrawFrameBuffer(game.renderer.gPass.posFBO);
+        remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
+        DrawFrameBuffer(game.renderer.gPass.posFBO);
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F2] >= 0.0f)
     {
-        game.renderer.DrawFrameBuffer(game.renderer.gPass.normalFBO);
+        remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
+        DrawFrameBuffer(game.renderer.gPass.normalFBO);
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F3] >= 0.0f)
     {
-        game.renderer.DrawFrameBuffer(game.renderer.gPass.albedoFBO);
+        remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
+        DrawFrameBuffer(game.renderer.gPass.albedoFBO);
+    }
+    else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F4] >= 0.0f)
+    {
+        remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
+        DrawFrameBuffer(lPass.diffuseFBO);
+    }
+    else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F5] >= 0.0f)
+    {
+        remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
+        DrawFrameBuffer(lPass.specularFBO);
     }
     else
     {
-        lPass.Draw(framebuffer);
+        remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
+        cPass.Set(gPass.albedoFBO,lPass.diffuseFBO,lPass.specularFBO);
+        cPass.Draw();
     }
 
     remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, gPass.depthBuffer);
@@ -227,6 +244,8 @@ void Renderer::Clear()
     remote.context->PSSetShaderResources(0, 1, &null);
 
     gPass.Clear();
+    remote.context->ClearRenderTargetView(lPass.diffuseFBO.renderTargetView, clearColor.e);
+    remote.context->ClearRenderTargetView(lPass.specularFBO.renderTargetView, clearColor.e);
 }
 
 void Renderer::ClearFrameBuffer(FrameBuffer& fbo)

@@ -41,7 +41,7 @@ namespace Cookie
 				~Texture();
 
 
-				void Set();
+				void Set(unsigned int slot = 0u);
 
 				inline ID3D11ShaderResourceView* GetResourceView() const { return shaderResourceView; };
 		};

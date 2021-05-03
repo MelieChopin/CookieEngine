@@ -38,7 +38,7 @@ void ComponentHandler::ModifyComponentOfEntityToPrefab(Entity& entity, Cookie::R
 		AddComponentModel(entity);
 
 	componentModels[idEntity].mesh = resourcesManager.meshes[prefab->nameMesh].get();
-	componentModels[idEntity].texture = resourcesManager.textures[prefab->nameTexture].get();
+	componentModels[idEntity].albedo = resourcesManager.textures[prefab->nameTexture].get();
 	//componentModels[idEntity].shader = resourcesManager.shaders[prefab->nameShader]; 
 
 	//if (!(idEntity & SIGNATURE_SCRIPT))

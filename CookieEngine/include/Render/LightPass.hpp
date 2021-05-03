@@ -3,6 +3,7 @@
 
 #include "Light.hpp"
 #include "FrameBuffer.hpp"
+#include "DirLightPass.hpp"
 
 namespace Cookie
 {
@@ -23,18 +24,18 @@ namespace Cookie
 		class LightPass
 		{
 		private:
-			ID3D11VertexShader* dirVShader	{ nullptr };
-			ID3D11PixelShader*	dirPShader	{ nullptr };
-			ID3D11Buffer*		dirCBuffer	{ nullptr };
+			DirLightPass				dirLight;
 
-			ID3D11Buffer*		lightCBuffer{ nullptr };
-
-			ID3D11SamplerState* PSampler	{ nullptr };
+			ID3D11Buffer*				lightCBuffer		{ nullptr };
+			ID3D11SamplerState*			PSampler			{ nullptr };
 
 			ID3D11DepthStencilState*	depthStencilState	= nullptr;
 			ID3D11RasterizerState*		rasterizerState		= nullptr;
 			ID3D11BlendState*			blendState			= nullptr;
+
 		public:
+			FrameBuffer diffuseFBO;
+			FrameBuffer specularFBO;
 			LightsArray lights;
 
 		private:
@@ -42,11 +43,11 @@ namespace Cookie
 			void InitState();
 
 		public:
-			LightPass();
+			LightPass(int width, int height);
 			~LightPass();
 
-			void Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& albedoFBO, const Core::Math::Vec3& camPos);
-			void Draw(FrameBuffer& fbo);
+			void Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, const Core::Math::Vec3& camPos);
+			void Draw();
 		};
 	}
 }

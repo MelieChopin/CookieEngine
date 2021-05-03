@@ -16,13 +16,15 @@ struct PS_DIRLIGHT_BUFFER
 
 /*======================= CONSTRUCTORS/DESTRUCTORS =======================*/
 
-LightPass::LightPass()
+LightPass::LightPass(int width, int height) :
+    diffuseFBO{ width, height, DXGI_FORMAT_R32G32B32A32_FLOAT },
+    specularFBO {width, height, DXGI_FORMAT_R32G32B32A32_FLOAT}
 {
-    lights.dirLights[0] = { {0.0f,-1.0f,0.0f},{0.25f,0.25f,0.25f} };
+    lights.dirLights[0] = { {0.0f,-1.0f,0.0f},{0.5f,0.8f,1.0f} };
     lights.usedDir++;
-    lights.dirLights[1] = { {-1.0f,1.0f,0.0f},{0.25f,0.25f,0.25f} };
+    lights.dirLights[1] = { {-1.0f,1.0f,0.0f},{1.0f,1.0f,1.0f} };
     lights.usedDir++;
-    lights.dirLights[2] = { {0.0f,-1.0f,1.0f},{0.1f,0.1f,0.0f} };
+    lights.dirLights[2] = { {0.0f,-1.0f,1.0f},{1.0,1.0f,0.0f} };
     lights.usedDir++;
     //lights.dirLights[3] = { {0.0f,-1.0f,-1.0f},{0.25f,0.25f,0.25f} };
     //lights.usedDir++;
@@ -32,12 +34,8 @@ LightPass::LightPass()
 
 LightPass::~LightPass()
 {
-    if (dirVShader)
-        dirVShader->Release();
-    if (dirPShader)
-        dirPShader->Release();
-    if (dirCBuffer)
-        dirCBuffer->Release();
+    if (lightCBuffer)
+        lightCBuffer->Release();
     if (PSampler)
         PSampler->Release();
     if (depthStencilState)
@@ -50,72 +48,15 @@ LightPass::~LightPass()
 
 void LightPass::InitShader()
 {
-    ID3DBlob* blob = nullptr;
-
-    std::string source = (const char*)R"(#line 30
-    struct VOut
-    {
-        float4 position : SV_POSITION;
-        float2 uv : UV;
-    };
-    
-    VOut main(uint vI :SV_VertexId )
-    {
-        VOut output;
-    
-        float2 uv = float2((vI << 1) & 2, vI & 2);
-        output.uv = float2(1-uv.x,uv.y);
-        output.position = float4(-uv.x * 2 + 1, -uv.y * 2 + 1, 0, 1);
-    
-        return output;
-
-    }
-    )";
-
-    Render::CompileVertex(source, &blob, &dirVShader);
-
-    source = std::string(blinnPhong) + std::string((const char*)R"(#line 58
-
-    Texture2D	positionTex : register(t0);
-    Texture2D	normalTex   : register(t1); 
-    Texture2D	albedoTex   : register(t2);     
-
-    cbuffer DirLight : register(b0)
-    {
-        float3 lightDir;
-        float3 lightColor;
-    };
-
-    SamplerState ClampSampler : register(s0);
-
-    float4 main(float4 position : SV_POSITION, float2 uv : UV) : SV_TARGET0
-    {
-        float3  fragPos     = positionTex.Sample(ClampSampler,uv).xyz;
-        float3  normal      = normalize(normalTex.Sample(ClampSampler,uv).xyz);
-        float4  color       = albedoTex.Sample(ClampSampler,uv);
-        float   metalic     = positionTex.Sample(ClampSampler,uv).w;
-        float   roughness   = 0.9;//normalTex.Sample(ClampSampler,uv).w;
-
-        float3 luminance = compute_lighting(normal,fragPos,normalize(-lightDir),metalic,roughness * roughness) * lightColor;
-
-        return color * float4(luminance,1.0);
-    })");
-
-    Render::CompilePixel(source, &dirPShader);
-
-    PS_DIRLIGHT_BUFFER buffer = {};
-
-    Render::CreateBuffer(&buffer, sizeof(PS_DIRLIGHT_BUFFER), &dirCBuffer);
-
     Vec4 cam = {};
 
     Render::CreateBuffer(&cam, sizeof(Vec4), &lightCBuffer);
 
     D3D11_SAMPLER_DESC samDesc = {};
-    samDesc.Filter      = D3D11_FILTER_MIN_MAG_MIP_POINT;
-    samDesc.AddressU    = D3D11_TEXTURE_ADDRESS_CLAMP;
-    samDesc.AddressV    = D3D11_TEXTURE_ADDRESS_CLAMP;
-    samDesc.AddressW    = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+    samDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
     samDesc.MipLODBias = 0.0f;
     samDesc.MaxAnisotropy = 1;
     samDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
@@ -125,7 +66,7 @@ void LightPass::InitShader()
 
     Render::CreateSampler(&samDesc, &PSampler);
 
-    blob->Release();
+    Render::CreateBuffer(&cam, sizeof(Vec4), &lightCBuffer);
 }
 
 void LightPass::InitState()
@@ -190,7 +131,7 @@ void LightPass::InitState()
 
 /*======================= REALTIME METHODS =======================*/
 
-void LightPass::Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& albedoFBO, const Core::Math::Vec3& camPos)
+void LightPass::Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, const Core::Math::Vec3& camPos)
 {
     // Now set the rasterizer state.
     Render::RendererRemote::context->RSSetState(rasterizerState);
@@ -200,31 +141,24 @@ void LightPass::Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& al
     const float blendFactor[4] = { 1.0f,1.0f,1.0f,0.0f };
     Render::RendererRemote::context->OMSetBlendState(blendState, blendFactor, 0xffffffff);
 
-    Render::RendererRemote::context->VSSetShader(dirVShader, nullptr, 0);
-    Render::RendererRemote::context->PSSetShader(dirPShader, nullptr, 0);
-
-    Render::RendererRemote::context->IASetInputLayout(nullptr);
-    Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
-
-    ID3D11Buffer* buffer[] = { dirCBuffer, lightCBuffer };
-
-    Render::RendererRemote::context->PSSetConstantBuffers(0, 2, buffer);
-
     Vec4 cam = {camPos.x,camPos.y ,camPos.z ,0.0f };
     Render::WriteCBuffer(&cam, sizeof(Vec4), 0, &lightCBuffer);
 
-    ID3D11ShaderResourceView* fbos[3] = { posFBO.shaderResource,normalFBO.shaderResource,albedoFBO.shaderResource};
+    ID3D11RenderTargetView* rtvs[2] = { diffuseFBO.renderTargetView,specularFBO.renderTargetView};
 
-    Render::RendererRemote::context->PSSetShaderResources(0, 3, fbos);
+    Render::RendererRemote::context->OMSetRenderTargets(2, rtvs, nullptr);
+
+    ID3D11ShaderResourceView* fbos[2] = { posFBO.shaderResource,normalFBO.shaderResource};
+
+    Render::RendererRemote::context->PSSetShaderResources(0, 2, fbos);
 }
 
-void LightPass::Draw(FrameBuffer& fbo)
+void LightPass::Draw()
 {
-    Render::RendererRemote::context->OMSetRenderTargets(1, &fbo.renderTargetView, nullptr);
+    dirLight.Set(&lightCBuffer);
     for (int i = 0; i < lights.usedDir; i++)
     {
-        PS_DIRLIGHT_BUFFER buffer = { lights.dirLights[i].dir,0.0f, lights.dirLights[i].color,0.0f};
-        Render::WriteCBuffer(&buffer, sizeof(PS_DIRLIGHT_BUFFER), 0, &dirCBuffer);
+        dirLight.Write(lights.dirLights[i]);
         Render::RendererRemote::context->Draw(3, 0);
     }
 }

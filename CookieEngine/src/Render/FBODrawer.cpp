@@ -98,5 +98,6 @@ void FBODrawer::Set()
 
 void FBODrawer::Draw(FrameBuffer& fbo)
 {
+    Render::RendererRemote::context->OMSetRenderTargets(1, &fbo.renderTargetView, nullptr);
     Render::RendererRemote::context->Draw(3, 0);
 }
