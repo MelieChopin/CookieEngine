@@ -1,6 +1,9 @@
 #include "Resources/ResourcesManager.hpp"
 #include <string>
 #include "TextureEditorWidget.hpp"
+#include "Serialization.hpp"
+#include "Resources/Mesh.hpp"
+#include "Resources/Texture.hpp"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -23,18 +26,20 @@ void TextureEditor::WindowDisplay()
 
         for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator textPtr = resources.textures.begin(); textPtr != resources.textures.end(); textPtr++)
         {
-			BeginGroup();
-
-			Custom::Zoomimage(static_cast<ImTextureID>(textPtr->second->GetResourceView()), 100, 100, 10, true);
-			
-			if (newTexture.name == textPtr->second->name)
+			if (textPtr->second && textPtr->second->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
 			{
-				TextColored({0.75, 0.25, 0.25, 1}, "%s (<- Already in use!)", textPtr->second->name.c_str());
-				newTexture.invalidName = true;
-			}
-			else Custom::TextSnip(textPtr->second->name.c_str(), 15);
+				BeginGroup();
+				Custom::Zoomimage(static_cast<ImTextureID>(textPtr->second->GetResourceView()), 100, 100, 10, true);
 
-			EndGroup();
+				if (newTexture.name == textPtr->second->name)
+				{
+					TextColored({ 0.75, 0.25, 0.25, 1 }, "%s (<- Already in use!)", textPtr->second->name.c_str());
+					newTexture.invalidName = true;
+				}
+				else Custom::TextSnip(textPtr->second->name.c_str(), 15);
+
+				EndGroup();
+			}
 
 			if (BeginPopupContextItem("Texture interaction popup"))
 			{
@@ -89,7 +94,8 @@ void TextureEditor::WindowDisplay()
 			else if (Button("Confirm and save"))
 			{				
 				resources.textures[newTexture.name] = (std::make_shared<Texture>(newTexture.name, newTexture.color));
-				
+				Cookie::Resources::Serialization::Save::SaveTexture(newTexture.name, newTexture.color);
+
 				newTexture.creating = false;
 				newTexture.name.clear();
 				newTexture.color = { 0, 0, 0, 1 };

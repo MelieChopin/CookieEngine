@@ -26,7 +26,7 @@ namespace Cookie
 		class ComponentPhysics
 		{
 			public:
-				::reactphysics3d::RigidBody* physBody		= nullptr;
+				::reactphysics3d::RigidBody*				physBody = nullptr;
 				std::vector<::reactphysics3d::Collider*>	physColliders;
 				::reactphysics3d::Transform					physTransform;
 				::reactphysics3d::Transform					oldTransform;
@@ -36,13 +36,10 @@ namespace Cookie
 				~ComponentPhysics();
 
 			void AddSphereCollider(float radius, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles);
-
 			void AddCubeCollider(const Core::Math::Vec3& halfExtent, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles);
-
 			void AddCapsuleCollider(const Core::Math::Vec2& capsuleInfo, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles);
 
 			void Update(float factor)noexcept;
-
 			void Set(const ComponentTransform& trs);
 
 			inline void ToDefault()

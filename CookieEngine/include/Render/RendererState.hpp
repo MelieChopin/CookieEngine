@@ -14,6 +14,25 @@ namespace Cookie
 				ID3D11RasterizerState*		rasterizerState		= nullptr;
 				D3D11_VIEWPORT				viewport = {};
 				Core::Math::Vec4			clearColor = { 0.0f,0.0f,0.0f,0.0f };
+
+				RendererState()
+				{
+
+				};
+
+				RendererState(const RendererState& _state):
+					depthStencilState {_state.depthStencilState},
+					rasterizerState {_state.rasterizerState},
+					viewport {_state.viewport},
+					clearColor {_state.clearColor}
+				{
+
+				};
+
+				~RendererState()
+				{
+
+				};
 		};
 	}
 }

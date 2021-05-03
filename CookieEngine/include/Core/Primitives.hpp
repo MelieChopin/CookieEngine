@@ -1,6 +1,7 @@
 #ifndef __PRIMITIVES_HPP__
 #define __PRIMITIVES_HPP__
 
+#include "Core/Math/Vec3.hpp"
 #include "Resources/Mesh.hpp"
 
 namespace Cookie
@@ -9,81 +10,41 @@ namespace Cookie
 	{
 		namespace Primitives
 		{
-			inline std::shared_ptr<Cookie::Resources::Mesh> CreateQuad()
+			struct DebugVertex
 			{
-				std::vector<float> vertices = { -1, -1, 0, 0, 0, 0, 0, 1,
-												 1, -1, 0, 1, 0, 0, 0, 1,
-												 1,  1, 0, 1, 1, 0, 0, 1,
-												-1,  1, 0, 0, 1, 0, 0, 1  };
+				Math::Vec3	vertex = {0.0f,0.0f,0.0f};
+				uint32_t			color = 0;
 
-				std::vector<unsigned int> indices = {  1, 0, 3, 2, 1, 3 };
+				DebugVertex(const Math::Vec3& _vertex, uint32_t _color) :vertex{ _vertex }, color{_color} {}
+			};
 
+			inline std::shared_ptr<Resources::Mesh> CreateQuad();
 
-				std::shared_ptr<Cookie::Resources::Mesh> quad = std::make_shared<Cookie::Resources::Mesh>("Quad", vertices, indices, 6);
-				return quad;
-			}
+			inline std::vector<DebugVertex> CreateLine(const Math::Vec3& start, const Math::Vec3& end, uint32_t color1, uint32_t color2);
 
-			inline std::shared_ptr<Cookie::Resources::Mesh> CreateTriangle()
-			{
-				std::vector<float> vertices = { -1, -1, 0, 0,   0, 0, 0, 1,
-												 1, -1, 0, 0,   1, 0, 0, 1,
-												 0,  1, 0, 0.5, 1, 0, 0, 1 };
+			inline std::shared_ptr<Resources::Mesh> CreateTriangle();
 
-				std::vector<unsigned int> indices = { 0, 1, 2 };
+			inline std::shared_ptr<Resources::Mesh> CreateCube();
 
-				std::shared_ptr<Cookie::Resources::Mesh> triangle = std::make_shared<Cookie::Resources::Mesh>("Triangle",vertices, indices, 3);
-				return triangle;
-			}
+			inline std::shared_ptr<Resources::Mesh> CreateSphere();
 
-			inline std::shared_ptr<Cookie::Resources::Mesh> CreateCube()
-			{
-				
-				std::vector<float> vertices = {
-				  1.0f,  1.0f,  1.0f,	0.748573, 0.750412,	 1.0f,  1.0f,  1.0f,
-				  1.0f ,-1.0f,  1.0f,	0.749279, 0.501284,  1.0f, -1.0f,  1.0f,
-				 -1.0f, -1.0f,  1.0f,	0.999110, 0.501077, -1.0f, -1.0f,  1.0f,
-				 -1.0f,  1.0f,  1.0f,	0.999455, 0.750380, -1.0f,  1.0f,  1.0f,
-				 -1.0f, -1.0f, -1.0f,	0.250471, 0.500702, -1.0f, -1.0f, -1.0f,
-				 -1.0f,  1.0f, -1.0f,	0.249682, 0.749677, -1.0f,  1.0f, -1.0f,
-				 -1.0f,  1.0f,  1.0f,	0.001085, 0.750380, -1.0f,  1.0f,  1.0f,
-				 -1.0f, -1.0f,  1.0f,	0.001517, 0.499994, -1.0f, -1.0f,  1.0f,
-				  1.0f, -1.0f, -1.0f,	0.499422, 0.500239,  1.0f, -1.0f, -1.0f,
-				  1.0f,  1.0f, -1.0f,	0.500149, 0.750166,  1.0f,  1.0f, -1.0f,
-				 -1.0f, -1.0f, -1.0f,	0.250471, 0.500702, -1.0f, -1.0f, -1.0f,
-				 -1.0f,  1.0f, -1.0f,	0.249682, 0.749677, -1.0f,  1.0f, -1.0f,
-				  1.0f, -1.0f,  1.0f,	0.749279, 0.501284,  1.0f, -1.0f,  1.0f,
-				  1.0f,  1.0f,  1.0f,	0.748573, 0.750412,  1.0f,  1.0f,  1.0f,
-				  1.0f, -1.0f, -1.0f,	0.499422, 0.500239,  1.0f, -1.0f, -1.0f,
-				  1.0f,  1.0f, -1.0f,	0.500149, 0.750166,  1.0f,  1.0f  -1.0f,
-				  1.0f,  1.0f,  1.0f,	0.748573, 0.750412,  1.0f,  1.0f,  1.0f,
-				 -1.0f,  1.0f,  1.0f,	0.748355, 0.998230, -1.0f,  1.0f,  1.0f,
-				  1.0f,  1.0f  -1.0f,	0.500149, 0.750166,  1.0f,  1.0f, -1.0f,
-				 -1.0f,  1.0f, -1.0f,	0.500193, 0.998728, -1.0f,  1.0f, -1.0f,
-				  1.0f, -1.0f,  1.0f,	0.749279, 0.501284,  1.0f, -1.0f,  1.0f,
-				  1.0f, -1.0f, -1.0f,	0.499422, 0.500239,  1.0f, -1.0f, -1.0f,
-				 -1.0f, -1.0f, -1.0f,	0.498993, 0.250415, -1.0f, -1.0f, -1.0f,
-				 -1.0f, -1.0f,  1.0f,	0.748953, 0.250920, -1.0f, -1.0f,  1.0f
-				 };
+			inline std::shared_ptr<Resources::Mesh> CreateIcoSphere();
 
-				std::vector<unsigned int> indices = { 
-				2 , 1 , 0 ,
-				3 , 2 , 0 ,
-				6 , 5 , 4 ,
-				7 , 6 , 4 ,
-				10 , 9 , 8 ,
-				10 , 11 , 9 ,
-				14 , 13 , 12 ,
-				14 , 15 , 13 ,
-				18 , 17 , 16 ,
-				18 , 19 , 17 ,
-				22 , 21 , 20 ,
-				23 , 22 , 20};
+			inline std::shared_ptr<Resources::Mesh> CreatePyramid();
 
-				std::shared_ptr<Cookie::Resources::Mesh> cube = std::make_shared<Cookie::Resources::Mesh>("Cube", vertices, indices, 36);
-				return cube;
-			}
+			inline std::shared_ptr<Resources::Mesh> CreateCylinder();
+
+			inline std::shared_ptr<Resources::Mesh> CreateCone();
+
+			inline std::shared_ptr<Resources::Mesh> CreateCircle();
+
+			inline std::shared_ptr<Resources::Mesh> CreateCapsule();
 		}
 	}
 }
+
+
+#include "Primitives.inl"
+#include "Sphere.inl"
 
 #endif // !__PRIMITIVES_HPP__

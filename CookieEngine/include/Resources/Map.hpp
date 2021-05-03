@@ -1,68 +1,71 @@
 #ifndef __MAP_HPP__
 #define __MAP_HPP__
 
-#include "Vec2.hpp"
-#include "Physics/PhysicsHandle.hpp"
 #include "ComponentTransform.hpp"
 #include "ComponentModel.hpp"
 #include "ComponentPhysics.hpp"
-#include "ResourcesManager.hpp"
 
+#include <array>
 #include <string>
 #include <algorithm>
+
+struct ID3D11Buffer;
 
 namespace Cookie
 {
 	namespace Resources
 	{
+		
+
+		struct Tile
+		{
+			bool isObstacle = false;
+			bool isVisited = false;
+
+			float f = 0;
+			float g = 0;
+			float h = 0;
+			Core::Math::Vec2 pos = { { 0, 0 } };
+
+			std::vector<Tile*> neighbours;
+			Tile* parent = nullptr;
+		};
+
+		#define MAP_DEFAULT_TILESNB_WIDTH  100
+		#define MAP_DEFAULT_TILESNB_HEIGHT 100
+		#define MAP_DEFAULT_SCALE_WIDTH    100
+		#define MAP_DEFAULT_SCALE_HEIGHT   100
+
 		class Map
 		{
 		public:
-			Core::Math::Vec2 tilesNb      = {{ 0, 0 }};
+			Core::Math::Vec2 tilesNb      = {{ MAP_DEFAULT_TILESNB_WIDTH, MAP_DEFAULT_TILESNB_HEIGHT }};
 			Core::Math::Vec2 tilesSize    = {{ 0, 0 }};
-			Core::Math::Vec2 tilesNbIcons = {{ 2, 2 }};
+			std::array<Tile, MAP_DEFAULT_TILESNB_WIDTH * MAP_DEFAULT_TILESNB_HEIGHT> tiles;
 
 			ECS::ComponentTransform trs;
 			ECS::ComponentModel	    model;
 			ECS::ComponentPhysics	physic;
 
-
-			Map()
-			{				
-				trs.scale = {100, 100, 1};
-				trs.rot = {90, 0, 0};
+			//will be removed
+			ECS::ComponentModel	    modelTileObstacle;
 
 
-				physic.physBody = Physics::PhysicsHandle::physSim->createRigidBody(rp3d::Transform(rp3d::Vector3(0.0, 0.0, 0.0), rp3d::Quaternion::identity()));
-				physic.physBody->setType(rp3d::BodyType::STATIC);
-				physic.AddCubeCollider(trs.scale, trs.pos, trs.rot);
-
-			}
+			Map();
 			~Map() {}
 
-			Core::Math::Vec2 GetCenterOfBuilding(Core::Math::Vec2& mousePos, const Core::Math::Vec2& buildingNbOfTiles)
-			{
-				return { {mousePos.x - ((int)mousePos.x % (int)tilesSize.x) + (tilesSize.x / buildingNbOfTiles.x),
-						mousePos.y - ((int)mousePos.y % (int)tilesSize.y) + (tilesSize.y / buildingNbOfTiles.y) } };
-			}
+			void InitTiles();
+			void ResetTilesTempObstacles();
+			int GetTileIndex(Core::Math::Vec2& mousePos);
+			int GetTileIndex(Core::Math::Vec3& pos);
+			Tile& GetTile(Core::Math::Vec2& mousePos);
+			Tile& GetTile(Core::Math::Vec3& pos);
+			Core::Math::Vec2 GetCenterOfBuilding(Core::Math::Vec2& mousePos, Core::Math::Vec2& buildingNbOfTiles);
 
-			void DisplayTilesIcons(Core::Math::Vec2& mousePos, const Core::Math::Vec2& buildingNbOfTiles)
-			{
-				//Core::Math::Vec2 buildingTopLeftCorner = { {mousePos.x - ((int)mousePos.x % (int)tilesSize.x) - ((int(buildingNbOfTiles.x - 1) / 2) * tilesSize.x),
-				//										  mousePos.y - ((int)mousePos.y % (int)tilesSize.y) - ((int(buildingNbOfTiles.y - 1) / 2) * tilesSize.y)} };
-				//
-				//Core::Math::Vec2 iconsSquareTopLeftCorner = { {buildingTopLeftCorner.x - tilesNbIcons.x * 2 * tilesSize.x,
-				//											 buildingTopLeftCorner.y - tilesNbIcons.y * 2 * tilesSize.y} };
-				//
-				//for (int i = 0; i < buildingNbOfTiles.x + tilesNbIcons.x * 2; ++i)
-				//	for (int j = 0; j < buildingNbOfTiles.y + tilesNbIcons.y * 2; ++j)
-				//	{
-				//		//Core::Math::Vec2 iconPos = iconsSquareTopLeftCorner + Core::Math::Vec2{tilesSize.x* i, tilesSize.y* j};
-				//		//Display Icon at iconPos
-				//	}
-				//
-				//
-			}
+			bool ApplyPathfinding(Tile& tileStart, Tile& tileEnd);
+
+			void Draw(const Core::Math::Mat4& viewProj, ID3D11Buffer** CBuffer);
+			void DrawSpecificTiles(const Core::Math::Mat4& viewProj, ID3D11Buffer** CBuffer);
 
 
 		};

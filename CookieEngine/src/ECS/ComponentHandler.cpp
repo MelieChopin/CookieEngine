@@ -1,8 +1,6 @@
-#include "Physics/PhysicsHandle.hpp"
-
-#include "ECS/EntityHandler.hpp"
 #include "ECS/ComponentHandler.hpp"
 #include "Resources/ResourcesManager.hpp"
+#include "Physics/PhysicsHandle.hpp"
 #include "Resources/Prefab.hpp"
 
 using namespace Cookie::ECS;

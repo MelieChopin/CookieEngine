@@ -1,6 +1,9 @@
-#include "Resources/ResourcesManager.hpp"
+
+#include <d3d11.h>
 #include "Coordinator.hpp"
 #include "Resources/Scene.hpp"
+#include "ECS/ComponentModel.hpp"
+#include "Resources/ResourcesManager.hpp" 
 #include "InspectorWidget.hpp"
 #include "Editor.hpp"
 
@@ -99,6 +102,8 @@ void Inspector::TransformInterface()
             coordinator.componentHandler->RemoveComponentTransform(*selectedEntity.focusedEntity);
         }
 
+        trsf.ComputeTRS();
+
         TreePop();
     }
 
@@ -165,16 +170,19 @@ void Inspector::ModelInterface()
 
             for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator textIt = resources.textures.begin(); textIt != resources.textures.end(); textIt++)
             {
-                const bool is_selected = (modelComp.texture != nullptr && modelComp.texture->name == textIt->second->name);
+                const bool is_selected = (modelComp.texture != nullptr && textIt->second &&  modelComp.texture->name == textIt->second->name);
 
-                if (textIt->second->name.find(researchString) != std::string::npos)
+                if (textIt->second && textIt->second->name.find(researchString) != std::string::npos)
                 {
-                    Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
-                        
-                    SameLine();
+                    if (textIt->second->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
+                    {
+                        Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
 
-                    if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
-                        modelComp.texture = textIt->second;
+                        SameLine();
+
+                        if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
+                            modelComp.texture = textIt->second;
+                    }
                 }
 
                 if (is_selected)

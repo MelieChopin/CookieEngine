@@ -1,4 +1,4 @@
-#include <reactphysics3d/reactphysics3d.h>
+#include "Resources/Scene.hpp"
 #include "Game.hpp"
 
 #include "UIcore.hpp"
@@ -7,7 +7,9 @@ using namespace Cookie;
 
 /*================== CONSTRUCTORS/DESTRUCTORS ==================*/
 
-Game::Game()
+Game::Game():
+    skyBox{resources},
+    frameBuffer{renderer.window.width,renderer.window.height}
 {
     Core::UIcore::FinishInit(renderer);
 }
@@ -38,11 +40,12 @@ void Game::Update()
     //coordinator.ApplySystemPhysics(physSim.factor);
 
     renderer.Clear();
+    renderer.ClearFrameBuffer(frameBuffer);
 
     scene->camera->Update();
     coordinator.ApplyScriptUpdate();
 
-    renderer.Draw(scene->camera->GetViewProj(), coordinator);
+    renderer.Draw(scene->camera.get(), *this,frameBuffer);
     renderer.SetBackBuffer();
 }
 
@@ -73,6 +76,7 @@ void Game::TryResizeWindow()
         renderer.window.height = height;
 
         renderer.ResizeBuffer(width, height);
+        frameBuffer.Resize(width, height);
         //scene->camera->SetProj(Core::Math::ToRadians(60.f), width, height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     }
 }

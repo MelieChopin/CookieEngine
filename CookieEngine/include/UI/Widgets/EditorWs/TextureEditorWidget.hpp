@@ -2,6 +2,7 @@
 #define __TEXTURE_EDITOR_W_HPP__
 
 #include "UIwidgetBases.hpp"
+#include "Core/Math/Vec4.hpp"
 
 namespace std				 { using string = basic_string<char, char_traits<char>, allocator<char>>; }
 namespace Cookie::Render	 { class Renderer; }
@@ -13,7 +14,6 @@ namespace Cookie::UIwidget
 {
 	class TextureEditor final : public WItemBase
 	{
-		Cookie::Render::Renderer& renderer;
 		Cookie::Resources::ResourcesManager& resources;
 
 		struct {
@@ -27,9 +27,8 @@ namespace Cookie::UIwidget
 		} newTexture;
 
 	public:
-		inline TextureEditor(Cookie::Render::Renderer& _renderer, Cookie::Resources::ResourcesManager& _resources)
+		inline TextureEditor(Cookie::Resources::ResourcesManager& _resources)
 			: WItemBase	("Texture editor"),
-			  renderer	(_renderer),
 			  resources	(_resources)
 		{}
 

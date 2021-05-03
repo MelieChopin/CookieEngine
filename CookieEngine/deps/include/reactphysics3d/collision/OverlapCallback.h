@@ -186,7 +186,7 @@ class OverlapCallback {
 
 // Return the number of overlapping pairs of bodies
 inline uint OverlapCallback::CallbackData::getNbOverlappingPairs() const {
-    return mContactPairsIndices.size() + mLostContactPairsIndices.size();
+    return (uint)(mContactPairsIndices.size() + mLostContactPairsIndices.size());
 }
 
 // Return a given overlapping pair of bodies

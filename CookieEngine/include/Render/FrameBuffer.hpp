@@ -16,16 +16,15 @@ namespace Cookie
 	namespace Render
 	{
 		class Renderer;
-		class RendererRemote;
+		struct RendererRemote;
 
 		class FrameBuffer
 		{
-			private:
-				std::shared_ptr<Cookie::Resources::Mesh>	quad				{ nullptr };
-				std::shared_ptr<Cookie::Resources::Shader>	shader				{ nullptr };
-				ID3D11Texture2D*							texBuffer			{ nullptr };
-				ID3D11ShaderResourceView*					shaderResource		{ nullptr };
-				ID3D11RenderTargetView*						renderTargetView	{ nullptr };
+			public:
+				ID3D11Texture2D*			texBuffer			{ nullptr };
+				ID3D11ShaderResourceView*	shaderResource		{ nullptr };
+				ID3D11RenderTargetView*		renderTargetView	{ nullptr };
+				DXGI_FORMAT					format				{ DXGI_FORMAT_UNKNOWN };
 
 
 			private:
@@ -35,17 +34,10 @@ namespace Cookie
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
-				FrameBuffer(Resources::ResourcesManager& _resources, int width, int height);
+				FrameBuffer(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM);
 				~FrameBuffer();
 
 				void Resize(int width, int height);
-				void Draw();
-
-				inline ID3D11Texture2D*const*			GetTexture()const			{ return &texBuffer; }
-				inline ID3D11ShaderResourceView*const*	GetShaderResource()const	{ return &shaderResource; }
-				inline ID3D11RenderTargetView*const*	GetRenderTarget()const		{ return &renderTargetView; }
-
-
 		};
 	}
 }

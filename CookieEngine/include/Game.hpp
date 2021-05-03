@@ -1,20 +1,29 @@
 #ifndef __GAME_HPP__
 #define __GAME_HPP__
 
-#include <memory>
-#include "Resources/ResourcesManager.hpp"
 #include "Render/Renderer.hpp" 
+#include "Resources/ResourcesManager.hpp"
+#include "Render/Skybox.hpp"
 #include "ECS/Coordinator.hpp"
+
+#include <memory>
 
 namespace Cookie
 {
+	namespace Resources
+	{
+		class Scene;
+	}
+
 	class Game
 	{
 		private:
 		public:
 			Render::Renderer			renderer;
 			Resources::ResourcesManager resources;
+			Render::SkyBox				skyBox;
 			ECS::Coordinator			coordinator;
+			Render::FrameBuffer			frameBuffer;
 
 			std::shared_ptr<Resources::Scene>				scene{nullptr};
 
