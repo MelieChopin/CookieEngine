@@ -26,9 +26,11 @@ bool GameWindowBase::BeginWindow(int windowFlags)
 {
 	if (!opened || invalid) return false;
 
-	SetNextWindowPos({ xPos + GetWindowPos().x, yPos + GetWindowPos().y }, ImGuiCond_Appearing);
+	SetNextWindowPos ({ xPos + GetWindowPos().x, yPos + GetWindowPos().y }, ImGuiCond_Appearing);
+	SetNextWindowSize({ width				   , height					 }, ImGuiCond_Appearing);
 
-	contentVisible = BeginChild(windowName, {width, height}, true, windowFlags | ImGuiWindowFlags_NoMove);
+	SetNextWindowViewport(GetWindowViewport()->ID);
+	contentVisible = Begin(windowName, nullptr, windowFlags | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking);
 
 	return true;
 }
@@ -38,8 +40,7 @@ bool GameWindowBase::WindowEdit()
 	const ImVec2&& parentWindowPos  = GetWindowPos();
 	const ImVec2&& parentWindowSize = GetWindowSize();
 
-	SetNextWindowPos ({ xPos + parentWindowPos.x, yPos + parentWindowPos.y	}, ImGuiCond_Appearing);
-	SetNextWindowSize({ width					, height					}, ImGuiCond_Appearing);
+	SetNextWindowSize({ width, height }, ImGuiCond_Appearing);
 
 
 	invalid = (xPos < 0) || (yPos < 0) || (xPos + width > parentWindowSize.x) || (yPos + height > parentWindowSize.y);
@@ -50,8 +51,10 @@ bool GameWindowBase::WindowEdit()
 		PushStyleColor(ImGuiCol_TitleBgActive	, { 1   , 0, 0, 1 });
 	}
 
+	SetNextWindowViewport(GetWindowViewport()->ID);
+	ImGui::Begin(windowName, nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
 
-	ImGui::Begin(windowName);
+	SetWindowPos({ xPos + parentWindowPos.x, yPos + parentWindowPos.y }, IsWindowFocused() ? ImGuiCond_Appearing : ImGuiCond_Always);
 
 	if (IsWindowFocused())
 	{
@@ -71,7 +74,7 @@ bool GameWindowBase::WindowEdit()
 				return false;
 			}
 		}
-		else
+		else if (IsWindowHovered())
 		{
 			BeginTooltip();
 			TextDisabled("This widget is currently illegally placed.\nIt prevents saving, can't be deleted, and will not appear in a game run.\nMove it back inside the editor.");

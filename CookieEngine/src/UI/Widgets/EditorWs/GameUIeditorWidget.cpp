@@ -12,9 +12,9 @@ using namespace Cookie::UIwidget;
 
 void GameUIeditor::WindowDisplay()
 {
-	TryBeginWindow(ImGuiWindowFlags_AlwaysAutoResize)
+	TryBeginWindow(ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBringToFrontOnFocus)
 	{
-		if (BeginChild("Widget pannel", { 60.f, (float)window.height}, true))
+		if (BeginChild("Widget pannel", { 200.f, (float)window.height}, true))
 		{
 			if (Selectable("Add a test!"))
 				scene->uiScene.GetWidgets().push_back(new TestBoi());
@@ -25,7 +25,7 @@ void GameUIeditor::WindowDisplay()
 
 		SameLine();
 
-		if (BeginChild("Widget space", { (float)window.width, (float)window.height }, true))
+		if (BeginChild("Widget space", { (float)window.width, (float)window.height }, true, ImGuiWindowFlags_NoBringToFrontOnFocus))
 		{
 			std::vector<GameWindowBase*>& widgets = scene->uiScene.GetWidgets();
 
