@@ -178,7 +178,7 @@ void Mesh::InitIBuffer(std::vector<unsigned int>& indices)
     }
 }
 
-void Mesh::Set()
+void Mesh::Set()const
 {
     UINT stride = ((2 * sizeof(Core::Math::Vec3)) + sizeof(Core::Math::Vec2));
     UINT offset = 0;
@@ -187,7 +187,7 @@ void Mesh::Set()
     Render::RendererRemote::context->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Mesh::Draw()
+void Mesh::Draw()const
 {
     Render::RendererRemote::context->DrawIndexed(INb, 0, 0);
 }

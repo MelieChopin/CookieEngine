@@ -34,7 +34,7 @@ void Viewport::WindowDisplay()
 			camera->SetProj(Core::Math::ToRadians(60.f), viewportDrawspace.width, viewportDrawspace.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
 		}
 
-		ImGui::Image(static_cast<ImTextureID>(*frameBuffer.GetShaderResource()), GetContentRegionAvail());
+		ImGui::Image(static_cast<ImTextureID>(frameBuffer.shaderResource), GetContentRegionAvail());
 		camera->windowOffset = { {viewportDrawspace.posx, viewportDrawspace.posy } };
 
 
@@ -89,4 +89,5 @@ void Viewport::GizmoManipulator()
 		ImGuizmo::DecomposeMatrixToComponents(trsfTMat.e, trsf.pos.e, trsf.rot.e, trsf.scale.e);
 	}
 
+	trsf.ComputeTRS();
 }

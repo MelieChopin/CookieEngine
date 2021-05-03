@@ -43,7 +43,7 @@ bool Console::BeginWindow(int windowFlags)
 
 void Console::WindowDisplay()
 {
-	TryBeginWindow()
+	TryBeginWindow(0)
 	{
 		if (Button("Clear list"))
 		{

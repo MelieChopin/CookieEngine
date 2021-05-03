@@ -7,7 +7,8 @@ using namespace Cookie;
 /*================== CONSTRUCTORS/DESTRUCTORS ==================*/
 
 Game::Game():
-    skyBox{resources}
+    skyBox{resources},
+    frameBuffer{renderer.window.width,renderer.window.height}
 {
 
 }
@@ -38,11 +39,12 @@ void Game::Update()
     //coordinator.ApplySystemPhysics(physSim.factor);
 
     renderer.Clear();
+    renderer.ClearFrameBuffer(frameBuffer);
 
     scene->camera->Update();
     coordinator.ApplyScriptUpdate();
 
-    renderer.Draw(scene->camera.get(), *this);
+    renderer.Draw(scene->camera.get(), *this,frameBuffer);
     renderer.SetBackBuffer();
 }
 
@@ -73,6 +75,7 @@ void Game::TryResizeWindow()
         renderer.window.height = height;
 
         renderer.ResizeBuffer(width, height);
+        frameBuffer.Resize(width, height);
         //scene->camera->SetProj(Core::Math::ToRadians(60.f), width, height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     }
 }

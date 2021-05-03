@@ -1,7 +1,6 @@
 #ifndef __SKYBOX_HPP__
 #define __SKYBOX_HPP__
 
-
 namespace Cookie
 {
 	namespace Resources
@@ -9,7 +8,6 @@ namespace Cookie
 		class ResourcesManager;
 		class Mesh;
 		class Texture;
-		class Shader;
 	}
 
 	namespace Core::Math
@@ -21,11 +19,26 @@ namespace Cookie
 	{
 		class SkyBox
 		{
+			private:
+				ID3D11Buffer*		CBuffer{ nullptr };
+				ID3D11InputLayout*	ILayout{ nullptr };
+				ID3D11VertexShader* VShader{ nullptr };
+				ID3D11PixelShader*  PShader{ nullptr };
+				ID3D11SamplerState* PSampler{ nullptr };
+
+
 			public:
 				std::shared_ptr<Cookie::Resources::Mesh>			cube			{ nullptr };
-				std::shared_ptr<Cookie::Resources::Shader>			shader			{ nullptr };
 				std::shared_ptr<Cookie::Resources::Texture>			texture			{ nullptr };
+
 				ID3D11RasterizerState*								rasterizerState	{ nullptr };
+
+
+			private:
+				void InitShader();
+				void InitRasterizer();
+
+			public:
 
 				/* CONSTRUCTORS/DESTRUCTORS */
 				SkyBox(Resources::ResourcesManager& _resources);

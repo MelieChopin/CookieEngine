@@ -25,11 +25,26 @@ namespace Cookie
 			inline std::shared_ptr<Resources::Mesh> CreateTriangle();
 
 			inline std::shared_ptr<Resources::Mesh> CreateCube();
+
+			inline std::shared_ptr<Resources::Mesh> CreateSphere();
+
+			inline std::shared_ptr<Resources::Mesh> CreateIcoSphere();
+
+			inline std::shared_ptr<Resources::Mesh> CreatePyramid();
+
+			inline std::shared_ptr<Resources::Mesh> CreateCylinder();
+
+			inline std::shared_ptr<Resources::Mesh> CreateCone();
+
+			inline std::shared_ptr<Resources::Mesh> CreateCircle();
+
+			inline std::shared_ptr<Resources::Mesh> CreateCapsule();
 		}
 	}
 }
 
 
 #include "Primitives.inl"
+#include "Sphere.inl"
 
 #endif // !__PRIMITIVES_HPP__

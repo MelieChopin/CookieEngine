@@ -2,20 +2,16 @@
 #include <algorithm>
 
 #include "Resources/Mesh.hpp"
-#include "Resources/Shader.hpp"
 #include "Resources/Texture.hpp"
 #include "Resources/Script.hpp"
 #include "Resources/Scene.hpp"
 #include "Resources/Prefab.hpp"
 #include "Resources/Loader.hpp"
-#include "Resources/Shader/TextureShader.hpp"
-#include "Resources/Shader/SkyBoxShader.hpp"
 #include "Resources/ResourcesManager.hpp"
 
 #include "Render/Renderer.hpp"
 #include "Core/Primitives.hpp"
 #include "ECS/EntityHandler.hpp"
-
 
 #include <memory>
 
@@ -27,7 +23,6 @@ ResourcesManager::ResourcesManager()
 	scripts["test2.lua"] = std::make_shared<Script>("Assets\\scripts\\test2.lua");
 
 	InitPrimitives();
-	InitShaders();
 }
 
 ResourcesManager::~ResourcesManager()
@@ -71,17 +66,18 @@ void ResourcesManager::SearchForAssets(const fs::path& path, std::vector<std::st
 	}
 }
 
-void ResourcesManager::InitShaders()
-{
-	shaders["Texture_Shader"] = std::make_shared<TextureShader>("Texture_Shader");
-	shaders["SkyBox_Shader"] = std::make_shared<SkyBoxShader>("SkyBox_Shader");
-}
-
 void ResourcesManager::InitPrimitives()
 {
-	meshes["Quad"] = Cookie::Core::Primitives::CreateQuad();
-	meshes["Triangle"] = Cookie::Core::Primitives::CreateTriangle();
-	meshes["Cube"] = Cookie::Core::Primitives::CreateCube();
+	meshes["Quad"]		= Cookie::Core::Primitives::CreateQuad();
+	meshes["Triangle"]	= Cookie::Core::Primitives::CreateTriangle();
+	meshes["Cube"]		= Cookie::Core::Primitives::CreateCube();
+	meshes["Sphere"]	= Cookie::Core::Primitives::CreateSphere();
+	meshes["Pyramid"]	= Cookie::Core::Primitives::CreatePyramid();
+	meshes["IcoSphere"]	= Cookie::Core::Primitives::CreateIcoSphere();
+	meshes["Cylinder"]	= Cookie::Core::Primitives::CreateCylinder();
+	meshes["Cone"]		= Cookie::Core::Primitives::CreateCone();
+	meshes["Circle"]	= Cookie::Core::Primitives::CreateCircle();
+	meshes["Capsule"]	= Cookie::Core::Primitives::CreateCapsule();
 }
 
 void ResourcesManager::Load(Render::Renderer& _renderer)
@@ -101,7 +97,7 @@ void ResourcesManager::Load(Render::Renderer& _renderer)
 	for (unsigned int i = 0; i < assetsFiles.size(); i++)
 	{
 		std::string iFile = assetsFiles.at(i);
-		printf("%s\n", iFile.c_str());
+		//printf("%s\n", iFile.c_str());
 		if (iFile.find(".gltf") != std::string::npos)
 		{
 			loader.Load(iFile.c_str(), *this, _renderer);
@@ -134,7 +130,6 @@ void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandl
 
 	newPrefab.name = entity.name;
 	newPrefab.nameMesh = component.componentModels[entity.id].mesh->name;
-	newPrefab.nameShader = component.componentModels[entity.id].shader->name;
 	newPrefab.nameTexture = component.componentModels[entity.id].texture->name;
 	newPrefab.signature = entity.id;
 	newPrefab.rotation = component.componentTransforms[entity.id].rot;

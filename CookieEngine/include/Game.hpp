@@ -23,6 +23,7 @@ namespace Cookie
 			Resources::ResourcesManager resources;
 			Render::SkyBox				skyBox;
 			ECS::Coordinator			coordinator;
+			Render::FrameBuffer			frameBuffer;
 
 			std::shared_ptr<Resources::Scene>				scene{nullptr};
 

@@ -74,6 +74,9 @@ set (SRC_FILES
     "${SRC_DIR}/Render/RendererRemote.cpp"
     "${SRC_DIR}/Render/FrameBuffer.cpp"
     "${SRC_DIR}/Render/SkyBox.cpp"
+    "${SRC_DIR}/Render/Light.cpp"
+    "${SRC_DIR}/Render/GeometryPass.cpp"
+    "${SRC_DIR}/Render/FBODrawer.cpp"
     
     "${SRC_DIR}/Resources/Loader.cpp" 
     "${SRC_DIR}/Resources/Map.cpp" 
@@ -83,10 +86,6 @@ set (SRC_FILES
     "${SRC_DIR}/Resources/Scene.cpp"
     "${SRC_DIR}/Resources/Serialization.cpp" 
     "${SRC_DIR}/Resources/SoundManager.cpp" 
-
-    "${SRC_DIR}/Resources/Shader/TextureShader.cpp"
-    "${SRC_DIR}/Resources/Shader/PhysicsShader.cpp"
-    "${SRC_DIR}/Resources/Shader/SkyBoxShader.cpp"
 
     "${SRC_DIR}/UI/UIeditor.cpp"
     "${SRC_DIR}/UI/CustomImWidget.cpp"
@@ -112,7 +111,7 @@ set (SRC_FILES
     
 
     "${SRC_DIR}/Editor.cpp" 
-    "${SRC_DIR}/Game.cpp" )
+    "${SRC_DIR}/Game.cpp")
 
 set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
         "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/lua54.dll"

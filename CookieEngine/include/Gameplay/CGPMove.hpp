@@ -77,7 +77,7 @@ namespace Cookie
 				Resources::Tile* currentTile = &lastWaypoint;
 
 				//Whatever happen always had the lastWaypoint
-				waypoints.emplace(waypoints.begin(), Core::Math::Vec3{ currentTile->pos.x, 0, currentTile->pos.y });
+				waypoints.emplace(waypoints.begin(), Core::Math::Vec3{ currentTile->pos.x, 1, currentTile->pos.y });
 
 				//if Entity is Flying go as a straight line
 				//or if the lastWaypoint has no parent it mean we go to the Tile we are already on so we don't need to continue
@@ -88,8 +88,8 @@ namespace Cookie
 				//if the Tile has no parent it mean it is the start Tile of the path so we don't add it 
 				while (currentTile->parent != nullptr)
 				{
-					Core::Math::Vec3 currentWaypoint = { currentTile->pos.x, 0, currentTile->pos.y };
-					Core::Math::Vec3 parentWaypoint = { currentTile->parent->pos.x, 0, currentTile->parent->pos.y };
+					Core::Math::Vec3 currentWaypoint = { currentTile->pos.x, 1, currentTile->pos.y };
+					Core::Math::Vec3 parentWaypoint = { currentTile->parent->pos.x, 1, currentTile->parent->pos.y };
 
 					//if the direction from currentWaypoint to next Waypoint is the same as the direction from parentWaypoint
 					//to currentWaypoin then it's a straigth line so we don't add the waypoint

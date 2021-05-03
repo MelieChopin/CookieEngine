@@ -44,6 +44,7 @@ namespace Cookie
 			UI::UIeditor			ui;
 			Render::FreeFlyCam		cam;
 			Render::DebugRenderer	dbgRenderer;
+			Render::FrameBuffer		editorFBO;
 
 			std::array<ECS::ComponentEditor, MAX_ENTITIES> editingComponent;
 
@@ -63,6 +64,7 @@ namespace Cookie
 
 			void InitEditComp();
 			void ModifyEditComp();
+			void TryResizeWindow();
 
 			inline void PopulateFocusedEntity()
 			{
@@ -84,7 +86,7 @@ namespace Cookie
 			}
 			inline virtual float notifyRaycastHit(const rp3d::RaycastInfo& info)
 			{
-				for (int i = 1; i < MAX_ENTITIES; i++)
+				for (int i = 0; i < MAX_ENTITIES; i++)
 				{
 					if (editingComponent[i].body == info.body)
 					{

@@ -9,6 +9,7 @@
 #include <string>
 #include <algorithm>
 
+struct ID3D11Buffer;
 
 namespace Cookie
 {
@@ -63,8 +64,8 @@ namespace Cookie
 
 			bool ApplyPathfinding(Tile& tileStart, Tile& tileEnd);
 
-			void Draw(const Core::Math::Mat4& viewProj);
-			void DrawSpecificTiles(const Core::Math::Mat4& viewProj);
+			void Draw(const Core::Math::Mat4& viewProj, ID3D11Buffer** CBuffer);
+			void DrawSpecificTiles(const Core::Math::Mat4& viewProj, ID3D11Buffer** CBuffer);
 
 
 		};

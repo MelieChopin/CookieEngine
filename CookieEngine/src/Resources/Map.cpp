@@ -1,3 +1,4 @@
+#include "Render/D3D11Helper.hpp"
 #include "Physics/PhysicsHandle.hpp"
 #include "Core/Primitives.hpp"
 #include "Render/DebugRenderer.hpp"
@@ -10,7 +11,7 @@ using namespace Cookie::Core::Math;
 
 Map::Map()
 {
-	trs.scale = { MAP_DEFAULT_SCALE_WIDTH, 0.01, MAP_DEFAULT_SCALE_HEIGHT };
+	trs.scale = { MAP_DEFAULT_SCALE_WIDTH, 1.0f, MAP_DEFAULT_SCALE_HEIGHT };
 	trs.ComputeTRS();
 	tilesSize = { { trs.scale.x / tilesNb.x, trs.scale.z / tilesNb.y } };
 
@@ -163,11 +164,11 @@ bool Map::ApplyPathfinding(Tile& tileStart, Tile& tileEnd)
 	return true;
 }
 
-void Map::Draw(const Mat4& viewProj)
+void Map::Draw(const Mat4& viewProj, ID3D11Buffer** CBuffer)
 {
-	model.Draw(viewProj, trs.TRS);
+	model.Draw(viewProj, trs.TRS, CBuffer);
 }
-void Map::DrawSpecificTiles(const Mat4& viewProj)
+void Map::DrawSpecificTiles(const Mat4& viewProj, ID3D11Buffer** CBuffer)
 {
 	for (int x = 0; x < tilesNb.x; x++)
 		for (int y = 0; y < tilesNb.y; y++)
@@ -175,7 +176,7 @@ void Map::DrawSpecificTiles(const Mat4& viewProj)
 			Tile& currentTile = tiles[x + y * tilesNb.x];
 
 			if (currentTile.isObstacle)
-				modelTileObstacle.Draw(viewProj, Mat4::TRS({ currentTile.pos.x, 1, currentTile.pos.y }, { 0, 0, 0 }, { tilesSize.x, 1, tilesSize.y }));
+				modelTileObstacle.Draw(viewProj, Mat4::TRS({ currentTile.pos.x, 1, currentTile.pos.y }, { 0, 0, 0 }, { tilesSize.x, 1, tilesSize.y }),CBuffer);
 		}
 
 }

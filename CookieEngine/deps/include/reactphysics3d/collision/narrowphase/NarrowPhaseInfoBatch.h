@@ -126,7 +126,7 @@ struct NarrowPhaseInfoBatch {
 
 /// Return the number of objects in the batch
 inline uint NarrowPhaseInfoBatch::getNbObjects() const {
-    return overlappingPairIds.size();
+    return (uint)overlappingPairIds.size();
 }
 
 }

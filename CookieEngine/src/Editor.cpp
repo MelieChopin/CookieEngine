@@ -15,11 +15,11 @@ using namespace Cookie::Gameplay;
 using namespace rp3d;
 
 Editor::Editor()
-    : ui(game.renderer) 
+    : ui(game.renderer),
+    editorFBO{game.renderer.window.width,game.renderer.window.height}
 {
     game.resources.Load(game.renderer);
     game.skyBox.texture = game.resources.textures["Assets/skybox.dds"];
-    game.renderer.AddFrameBuffer(game.resources);
     cam.SetProj(Core::Math::ToRadians(60.f), game.renderer.state.viewport.Width, game.renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
     cam.rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
@@ -46,7 +46,7 @@ Editor::Editor()
 
     ui.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
 
-    ui.AddWItem(new UIwidget::TextureEditor(game.renderer, game.resources), 1);
+    ui.AddWItem(new UIwidget::TextureEditor(game.resources), 1);
 
     ui.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
 
@@ -60,7 +60,7 @@ Editor::Editor()
 
 
     UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.renderer);
-    ui.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, game.renderer.GetLastFrameBuffer(), &cam, game.coordinator, selectedEntity));
+    ui.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, editorFBO, &cam, game.coordinator, selectedEntity));
 
     InitEditComp();
 
@@ -76,7 +76,7 @@ Editor::~Editor()
 
 void Editor::InitEditComp()
 {
-    for (int i = 1; i < MAX_ENTITIES; i++)
+    for (int i = 0; i < MAX_ENTITIES; i++)
     {
         editingComponent[i].InitComponent(game.coordinator.componentHandler->GetComponentTransform(i));
     }
@@ -84,7 +84,7 @@ void Editor::InitEditComp()
 
 void Editor::ModifyEditComp()
 {
-    for (int i = 1; i < MAX_ENTITIES; i++)
+    for (int i = 0; i < MAX_ENTITIES; i++)
     {
         editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i);
         if ((game.coordinator.entityHandler->entities[i].signature & SIGNATURE_MODEL) && game.coordinator.componentHandler->GetComponentModel(i).mesh != nullptr)
@@ -107,13 +107,11 @@ void Editor::Loop()
     {
         game.scene->map.model.mesh                 = game.resources.meshes["Cube"];
         game.scene->map.model.texture              = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"];
-        game.scene->map.model.shader               = game.resources.shaders["Texture_Shader"];
 
 
         //will be removed after testing phase
         game.scene->map.modelTileObstacle.mesh     = game.resources.meshes["Cube"];
         game.scene->map.modelTileObstacle.texture  = game.resources.textures["Grey"];
-        game.scene->map.modelTileObstacle.shader   = game.resources.shaders["Texture_Shader"];
     }
     ComponentTransform buildingTrs;
     ComponentModel     buildingModel;
@@ -127,7 +125,6 @@ void Editor::Loop()
         buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y;
         buildingModel.mesh = game.resources.meshes["Cube"];
         buildingModel.texture = game.resources.textures["Pink"];
-        buildingModel.shader = game.resources.shaders["Texture_Shader"];
     }
     Vec2 selectionQuadStart;
     bool makingASelectionQuad = false;
@@ -148,8 +145,9 @@ void Editor::Loop()
         else
         {
             glfwPollEvents();
-            game.TryResizeWindow();
+            TryResizeWindow();
             game.renderer.Clear();
+            game.renderer.ClearFrameBuffer(editorFBO);
 
             cam.Update();
         }
@@ -245,7 +243,6 @@ void Editor::Loop()
 
                     model.mesh = buildingModel.mesh;
                     model.texture = game.resources.textures["Green"];
-                    model.shader = buildingModel.shader;
                 }
 
                 nbOfBuildings++;
@@ -284,11 +281,11 @@ void Editor::Loop()
                     ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(game.coordinator.entityHandler->livingEntities - 1);
                     game.coordinator.entityHandler->entities[game.coordinator.entityHandler->livingEntities - 1].signatureGameplay = SIGNATURE_CGP_ALL;
 
-                    trs.pos = {mousePos.x, 0, mousePos.y};
+                    trs.pos = {mousePos.x, 1, mousePos.y};
 
                     model.mesh = game.resources.meshes["Cube"];
                     model.texture = game.resources.textures["Green"];
-                    model.shader = game.resources.shaders["Texture_Shader"];
+                    //model.shader = game.resources.shaders["Texture_Shader"];
 
                 }
 
@@ -337,17 +334,40 @@ void Editor::Loop()
         game.coordinator.ApplyGameplayDrawPath(dbgRenderer);
         
 
-        game.renderer.Draw(&cam, game);
-        if (isRaycastingWithMap)
-            SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
-        game.scene->map.DrawSpecificTiles(cam.GetViewProj());
-
+        game.renderer.Draw(&cam, game,editorFBO);
+        //if (isRaycastingWithMap)
+            //SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
+        //game.scene->map.DrawSpecificTiles(cam.GetViewProj());
         dbgRenderer.Draw(cam.GetViewProj());
 
         game.renderer.SetBackBuffer();
-
         ui.UpdateUI();
 
         game.renderer.Render();
+    }
+}
+
+void Editor::TryResizeWindow()
+{
+    int width = 0;
+    int height = 0;
+
+    glfwGetWindowSize(game.renderer.window.window, &width, &height);
+
+    if (width <= 0 || height <= 0)
+        return;
+
+    if (game.renderer.window.width != width || game.renderer.window.height != height)
+    {
+        Core::DebugMessageHandler::Summon().Log((std::to_string(width) + ' ' + std::to_string(height)).c_str());
+        printf("%d, %d\n", width, height);
+        game.renderer.window.width = width;
+        game.renderer.window.height = height;
+
+        game.renderer.ResizeBuffer(width, height);
+        game.frameBuffer.Resize(width, height);
+        editorFBO.Resize(width, height);
+
+        //scene->camera->SetProj(Core::Math::ToRadians(60.f), width, height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     }
 }
