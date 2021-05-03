@@ -51,17 +51,31 @@ namespace Cookie
 			CGPMove() {}
 			~CGPMove() {}
 
+			inline void ToDefault() noexcept
+			{
+				state = CGPMOVE_STATE::E_STATIC;
+				moveSpeed = 0;
+				isFlying = false;
+				radius = 0;
+				lastTile = nullptr;
+				waypoints.clear();
+				commanderPos = nullptr;
+				commanderCGPMove = nullptr;
+				offsetFromCommander = { 0, 0, 0 };
+				pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
+			}
+
 			void UpdatePushedCooldown(Resources::Map& map, ECS::ComponentTransform& trs)
 			{
 				if (state != CGPMOVE_STATE::E_PUSHED)
 					return;
 
 				pushedCooldownBeforeReturn -= Core::DeltaTime();
-				std::cout << "pushedCooldown Reducing " << pushedCooldownBeforeReturn << "\n";
+				//std::cout << "pushedCooldown Reducing " << pushedCooldownBeforeReturn << "\n";
 
 				if (pushedCooldownBeforeReturn < 0 && map.ApplyPathfinding(map.GetTile(trs.pos), map.GetTile(posBeforePushed)))
 				{
-					std::cout << "pushedCooldown FINISH\n";
+					//std::cout << "pushedCooldown FINISH\n";
 					pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
 					SetPath(map.GetTile(posBeforePushed), trs);
 				}

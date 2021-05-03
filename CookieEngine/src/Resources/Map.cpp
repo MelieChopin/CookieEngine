@@ -25,6 +25,11 @@ Map::Map()
 
 void Map::InitTiles()
 {
+	tiles.clear();
+
+	for(int i = 0; i < tilesNb.x * tilesNb.y; i++)
+		tiles.push_back(Tile());
+
 	for (int x = 0; x < tilesNb.x; x++)
 		for (int y = 0; y < tilesNb.y; y++)
 		{
@@ -57,6 +62,22 @@ void Map::InitTiles()
 		}
 
 }
+void Map::ScaleHasChanged()
+{
+	trs.ComputeTRS();
+	tilesSize = { { trs.scale.x / tilesNb.x, trs.scale.z / tilesNb.y } };
+
+	physic.physColliders.clear();
+	physic.AddCubeCollider(trs.scale / 2.f, trs.pos, trs.rot);
+
+	InitTiles();
+}
+void Map::TileNbHasChanged()
+{
+	tilesSize = { { trs.scale.x / tilesNb.x, trs.scale.z / tilesNb.y } };
+	InitTiles();
+}
+
 int  Map::GetTileIndex(Vec2& mousePos)
 {
 	Vec2 unsignedMousePos{ {mousePos.x + trs.scale.x / 2, mousePos.y + trs.scale.z / 2} };

@@ -41,7 +41,7 @@ namespace Cookie
 		public:
 			Core::Math::Vec2 tilesNb      = {{ MAP_DEFAULT_TILESNB_WIDTH, MAP_DEFAULT_TILESNB_HEIGHT }};
 			Core::Math::Vec2 tilesSize    = {{ 0, 0 }};
-			std::array<Tile, MAP_DEFAULT_TILESNB_WIDTH * MAP_DEFAULT_TILESNB_HEIGHT> tiles;
+			std::vector<Tile> tiles;
 
 			ECS::ComponentTransform trs;
 			ECS::ComponentModel	    model;
@@ -55,6 +55,9 @@ namespace Cookie
 			~Map() {}
 
 			void InitTiles();
+			void ScaleHasChanged();
+			void TileNbHasChanged();
+
 			void ResetTilesTempObstacles();
 			int GetTileIndex(Core::Math::Vec2& mousePos);
 			int GetTileIndex(Core::Math::Vec3& pos);
