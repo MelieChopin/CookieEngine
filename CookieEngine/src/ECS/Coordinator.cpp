@@ -101,14 +101,7 @@ void Coordinator::ApplyGameplayUpdatePushedCooldown(Resources::Map& map)
 			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
 			componentHandler->GetComponentGameplay(i).componentMove.UpdatePushedCooldown(map, componentHandler->GetComponentTransform(i));
 }
-void Coordinator::ApplyGameplayPosPrediction(Map& map)
-{
-	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM) &&
-			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
-			componentHandler->GetComponentGameplay(i).componentMove.PositionPrediction(map, componentHandler->GetComponentTransform(i));
-}
-void Coordinator::ApplyGameplayMove()
+void Coordinator::ApplyGameplayMoveTowardWaypoint()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM) &&
@@ -121,6 +114,13 @@ void Coordinator::ApplyGameplayMoveWithCommander()
 		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM) &&
 			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
 			componentHandler->GetComponentGameplay(i).componentMove.MoveWithCommander(componentHandler->GetComponentTransform(i));
+}
+void Coordinator::ApplyGameplayPosPrediction()
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM) &&
+			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
+			componentHandler->GetComponentGameplay(i).componentMove.PositionPrediction();
 }
 void Coordinator::ApplyGameplayResolveCollision()
 {
@@ -242,7 +242,7 @@ void Coordinator::SetSelectedEntitiesCommander(Entity* commander)
 		if (CheckSignature(selectedEntities[i]->signature, SIGNATURE_GAMEPLAY) &&
 			CheckSignature(selectedEntities[i]->signatureGameplay, SIGNATURE_CGP_MOVE) &&
 			selectedEntities[i] != commander)
-			componentHandler->GetComponentGameplay(selectedEntities[i]->id).componentMove.SetCommander(componentHandler->GetComponentTransform(commander->id), componentHandler->GetComponentTransform(selectedEntities[i]->id));
+			componentHandler->GetComponentGameplay(selectedEntities[i]->id).componentMove.SetCommander(componentHandler->GetComponentGameplay(commander->id).componentMove, componentHandler->GetComponentTransform(commander->id), componentHandler->GetComponentTransform(selectedEntities[i]->id));
 	}
 
 }

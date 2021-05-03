@@ -44,9 +44,9 @@ namespace Cookie
 
 
 			void ApplyGameplayUpdatePushedCooldown(Resources::Map& map);
-			void ApplyGameplayPosPrediction(Resources::Map& map);
-			void ApplyGameplayMove();
+			void ApplyGameplayMoveTowardWaypoint();
 			void ApplyGameplayMoveWithCommander();
+			void ApplyGameplayPosPrediction();
 			void ApplyGameplayResolveCollision();
 			void ApplyGameplayDrawPath(Render::DebugRenderer& debug);
 

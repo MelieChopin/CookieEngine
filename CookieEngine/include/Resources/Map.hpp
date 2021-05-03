@@ -19,7 +19,6 @@ namespace Cookie
 		struct Tile
 		{
 			bool isObstacle = false;
-			bool isTemporaryObstacle = false;
 			bool isVisited = false;
 
 			float f = 0;

@@ -12,6 +12,7 @@ int main()
 	
 	editor.Loop();
 
+
 	//Mat4 mat = Mat4::TRS({ 0.0f,0.0f,0.0f }, { 0.0f,90.0f,0.0f }, { 1.0f,1.0f,1.0f });
 	//mat.Debug();
 	//

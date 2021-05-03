@@ -56,12 +56,6 @@ void Map::InitTiles()
 		}
 
 }
-void Map::ResetTilesTempObstacles()
-{
-	for (int x = 0; x < tilesNb.x; x++)
-		for (int y = 0; y < tilesNb.y; y++)
-			tiles[x + y * tilesNb.x].isTemporaryObstacle = false;
-}
 int  Map::GetTileIndex(Vec2& mousePos)
 {
 	Vec2 unsignedMousePos{ {mousePos.x + trs.scale.x / 2, mousePos.y + trs.scale.z / 2} };
@@ -101,6 +95,9 @@ bool Map::ApplyPathfinding(Tile& tileStart, Tile& tileEnd)
 {
 	if (tileEnd.isObstacle)
 		return false;
+	//if we are already on the tile end return true without doing any calculation
+	if (&tileStart == &tileEnd)
+		return true;
 
 	// Set all Tiles to default 
 	for (int x = 0; x < tilesNb.x; x++)
@@ -146,7 +143,7 @@ bool Map::ApplyPathfinding(Tile& tileStart, Tile& tileEnd)
 		for (Tile* currentNeighbour : currentTile->neighbours)
 		{
 			//Add currentNeighbour to the list only if not visited and not an obstacle
-			if (!currentNeighbour->isVisited && !currentNeighbour->isObstacle && !currentNeighbour->isTemporaryObstacle)
+			if (!currentNeighbour->isVisited && !currentNeighbour->isObstacle)
 				listNotTestedTiles.push_back(currentNeighbour);
 
 			// Calculate neighbour g value if currentTile become his parent

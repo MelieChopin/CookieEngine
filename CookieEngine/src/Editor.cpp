@@ -330,31 +330,12 @@ void Editor::Loop()
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
 
         game.coordinator.ApplyGameplayUpdatePushedCooldown(game.scene->map);
-        //game.scene->map.ResetTilesTempObstacles();
-        //game.coordinator.ApplyGameplayPosPrediction(game.scene->map);
-        game.coordinator.ApplyGameplayMove();
+        game.coordinator.ApplyGameplayMoveTowardWaypoint();
         game.coordinator.ApplyGameplayMoveWithCommander();
+        game.coordinator.ApplyGameplayPosPrediction();
         game.coordinator.ApplyGameplayResolveCollision();
         game.coordinator.ApplyGameplayDrawPath(dbgRenderer);
-
-        /*
-        if (selectedEntity.focusedEntity)
-        {
-            CGPMove& cgpMove = game.coordinator.componentHandler->GetComponentGameplay(selectedEntity.focusedEntity->id).componentMove;
-            std::cout << "state : " << cgpMove.state << " size : " << cgpMove.waypoints.size() << "\n";
-            if (cgpMove.waypoints.size() != 0)
-            {
-                std::cout << " Waypoint pos : ";
-                cgpMove.waypoints[0].Debug();
-            }
-            if (cgpMove.commanderPos)
-            {
-                std::cout << " Commander pos : ";
-                cgpMove.commanderPos->Debug();
-            }
-
-        }
-        */
+        
 
         game.renderer.Draw(&cam, game);
         if (isRaycastingWithMap)
