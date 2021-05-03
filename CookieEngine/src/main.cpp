@@ -1,6 +1,8 @@
 ﻿#include "Editor.hpp"
 
-#pragma comment( lib, "dxguid.lib")
+#include "UIcore.hpp"
+
+#pragma comment(lib, "dxguid.lib")
 
 using namespace Cookie;
 using namespace Cookie::Core;
@@ -8,6 +10,7 @@ using namespace Cookie::Core::Math;
 
 int main()
 {
+	Core::UIcore::PreInitContext();
 	Editor editor;
 	
 	editor.Loop();
