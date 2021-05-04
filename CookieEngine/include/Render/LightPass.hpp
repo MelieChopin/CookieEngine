@@ -46,7 +46,7 @@ namespace Cookie
 			LightPass(int width, int height);
 			~LightPass();
 
-			void Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, const Core::Math::Vec3& camPos);
+			void Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& albedoFBO, const Core::Math::Vec3& camPos);
 			void Draw();
 		};
 	}

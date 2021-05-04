@@ -8,7 +8,8 @@ using namespace Cookie::ECS;
 
 struct VS_CONSTANT_BUFFER
 {
-    Cookie::Core::Math::Mat4 viewproj = Cookie::Core::Math::Mat4::Identity();
+    Cookie::Core::Math::Mat4 proj = Cookie::Core::Math::Mat4::Identity();
+    Cookie::Core::Math::Mat4 view = Cookie::Core::Math::Mat4::Identity();
     Cookie::Core::Math::Mat4 model = Cookie::Core::Math::Mat4::Identity();
 };
 
@@ -34,9 +35,9 @@ void ComponentModel::ToDefault()
     metallicRoughness = nullptr;
 }
 
-void ComponentModel::Draw(const Core::Math::Mat4& viewProj, const Core::Math::Mat4& modelMat, ID3D11Buffer** CBuffer)
+void ComponentModel::Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view, const Core::Math::Mat4& modelMat, ID3D11Buffer** CBuffer)
 {
-    VS_CONSTANT_BUFFER buffer = { viewProj, modelMat };
+    VS_CONSTANT_BUFFER buffer = { proj, view, modelMat };
 
     Render::WriteCBuffer(&buffer, sizeof(buffer), 0, CBuffer);
 

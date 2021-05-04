@@ -142,16 +142,16 @@ bool Map::ApplyPathfinding()
 	return true;
 }
 
-void Map::Draw(const Mat4& viewProj, ID3D11Buffer** CBuffer)
+void Map::Draw(const Mat4& proj, const Mat4& view, ID3D11Buffer** CBuffer)
 {
-	model.Draw(viewProj, trs.TRS, CBuffer);
+	model.Draw(proj,view,trs.TRS, CBuffer);
 }
-void Map::DrawSpecificTiles(const Mat4& viewProj, ID3D11Buffer** CBuffer)
+void Map::DrawSpecificTiles(const Mat4& proj, const Mat4& view, ID3D11Buffer** CBuffer)
 {
 	if (tileStart)
-		modelTileStart.Draw(viewProj, Mat4::TRS({ tileStart->pos.x, 1, tileStart->pos.y }, { 0, 0, 0 }, { tilesSize.x, 1, tilesSize.y }), CBuffer);
+		modelTileStart.Draw(proj, view, Mat4::TRS({ tileStart->pos.x, 1, tileStart->pos.y }, { 0, 0, 0 }, { tilesSize.x, 1, tilesSize.y }), CBuffer);
 	if (tileEnd)
-		modelTileEnd.Draw(viewProj, Mat4::TRS({ tileEnd->pos.x, 1, tileEnd->pos.y }, { 0, 0, 0 }, { tilesSize.x, 1, tilesSize.y }),CBuffer);
+		modelTileEnd.Draw(proj, view, Mat4::TRS({ tileEnd->pos.x, 1, tileEnd->pos.y }, { 0, 0, 0 }, { tilesSize.x, 1, tilesSize.y }),CBuffer);
 
 	for (int x = 0; x < tilesNb.x; x++)
 		for (int y = 0; y < tilesNb.y; y++)
@@ -159,7 +159,7 @@ void Map::DrawSpecificTiles(const Mat4& viewProj, ID3D11Buffer** CBuffer)
 			Tile& currentTile = tiles[x + y * tilesNb.x];
 
 			if (currentTile.isObstacle)
-				modelTileObstacle.Draw(viewProj, Mat4::TRS({ currentTile.pos.x, 1, currentTile.pos.y }, { 0, 0, 0 }, { tilesSize.x, 1, tilesSize.y }),CBuffer);
+				modelTileObstacle.Draw(proj, view, Mat4::TRS({ currentTile.pos.x, 1, currentTile.pos.y }, { 0, 0, 0 }, { tilesSize.x, 1, tilesSize.y }),CBuffer);
 		}
 
 }

@@ -46,24 +46,20 @@ void ComposePass::InitShader()
 
     source = (const char*)R"(#line 58
 
-    Texture2D	albedoTex   : register(t0);
-    Texture2D	diffuseTex  : register(t1);    
-    Texture2D	specularTex : register(t2);  
+    Texture2D	diffuseTex  : register(t0);    
+    Texture2D	specularTex : register(t1);  
 
     SamplerState ClampSampler : register(s0);
 
     float4 main(float4 position : SV_POSITION, float2 uv : UV) : SV_TARGET0
     {
-        float3  albedoColor   = albedoTex.Sample(ClampSampler,uv).xyz;
-        float3  lightColor    = diffuseTex.Sample(ClampSampler,uv).xyz + specularTex.Sample(ClampSampler,uv).xyz;
-
-        float3 finalColor = albedoColor * lightColor;
+        float3  finalColor    = pow(diffuseTex.Sample(ClampSampler,uv).xyz + specularTex.Sample(ClampSampler,uv).xyz,2.2);
 
         float3 denominator = (finalColor + 1.0);
 
         float3 mapped = finalColor/denominator;
 
-        return float4(mapped,1.0);
+        return float4(pow(mapped,0.454545),1.0);
     })";
 
     CompilePixel(source, &PShader);
@@ -148,7 +144,7 @@ void ComposePass::InitState()
 /*======================= REALTIME METHODS =======================*/
 
 
-void ComposePass::Set(FrameBuffer& albedo, FrameBuffer& diffuse, FrameBuffer& specular)
+void ComposePass::Set(FrameBuffer& diffuse, FrameBuffer& specular)
 {
     // Now set the rasterizer state.
     Render::RendererRemote::context->RSSetState(rasterizerState);
@@ -165,9 +161,9 @@ void ComposePass::Set(FrameBuffer& albedo, FrameBuffer& diffuse, FrameBuffer& sp
     Render::RendererRemote::context->IASetInputLayout(nullptr);
     Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
 
-    ID3D11ShaderResourceView* fbos[3] = { albedo.shaderResource, diffuse.shaderResource, specular.shaderResource };
+    ID3D11ShaderResourceView* fbos[2] = {diffuse.shaderResource, specular.shaderResource };
 
-    Render::RendererRemote::context->PSSetShaderResources(0, 3, fbos);
+    Render::RendererRemote::context->PSSetShaderResources(0, 2, fbos);
 }
 
 void ComposePass::Draw()

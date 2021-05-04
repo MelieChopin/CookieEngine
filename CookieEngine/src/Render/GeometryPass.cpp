@@ -5,13 +5,15 @@
 #include "Resources/Texture.hpp"
 #include "Resources/Mesh.hpp"
 #include "Render/GeometryPass.hpp"
+#include "Render/Camera.hpp"
 
 
 using namespace Cookie::Render;
 
 struct VS_CONSTANT_BUFFER
 {
-    Cookie::Core::Math::Mat4 viewproj = Cookie::Core::Math::Mat4::Identity();
+    Cookie::Core::Math::Mat4 proj = Cookie::Core::Math::Mat4::Identity();
+    Cookie::Core::Math::Mat4 view = Cookie::Core::Math::Mat4::Identity();
     Cookie::Core::Math::Mat4 model = Cookie::Core::Math::Mat4::Identity();
 };
 
@@ -60,11 +62,13 @@ void GeometryPass::InitShader()
         float2 uv : UV; 
         float3 normal : NORMAL;
         float3 fragPos : FRAGPOS;
+        float4 view    : VIEW;
     };
     
     cbuffer VS_CONSTANT_BUFFER : register(b0)
     {
-        float4x4  viewProj;
+        float4x4  proj;
+        float4x4  view;
         float4x4  model;
     };
     
@@ -73,9 +77,11 @@ void GeometryPass::InitShader()
         VOut output;
     
         output.fragPos  = mul(float4(position,1.0),model).xyz;
-        output.position = mul(float4(output.fragPos,1.0), viewProj);
+        output.view     = mul(float4(output.fragPos,1.0),view);
+        output.position = mul(output.view, proj);
         output.uv       = uv;
         output.normal   = normalize(mul(normal,(float3x3)model));
+
     
         return output;
 
@@ -84,13 +90,41 @@ void GeometryPass::InitShader()
 
     Render::CompileVertex(source, &blob, &VShader);
 
-    source = (const char*)R"(#line 58
+    source = (const char*)R"(#line 93
 
     Texture2D	albedoTex           : register(t0);
     Texture2D	normalTex           : register(t1); 
     Texture2D	metallicRoughness   : register(t2); 
 
     SamplerState WrapSampler : register(s0);
+
+    float3x3 cotangent_frame(float3 normal, float3 p, float2 uv)
+    {
+        // get edge vectors of the pixel triangle
+        float3 dp1 = ddx( p );
+        float3 dp2 = ddy( p );
+        float2 duv1 = ddx( uv );
+        float2 duv2 = ddy( uv );
+     
+        // solve the linear system
+        float3 dp2perp = cross( dp2, normal );
+        float3 dp1perp = cross( normal, dp1 );
+        float3 T = dp2perp * duv1.x + dp1perp * duv2.x;
+        float3 B = dp2perp * duv1.y + dp1perp * duv2.y;
+     
+        // construct a scale-invariant frame 
+        float invmax = rsqrt( max( dot(T,T), dot(B,B) ) );
+        return float3x3( T * invmax, B * invmax, normal );
+    }
+
+    float3 perturb_normal(float3 normal, float3 viewEye, float2 uv, float3 texNormal)
+    {
+        // assume N, the interpolated vertex normal and 
+        // V, the view vector (vertex to eye)
+        texNormal = (texNormal * 2.0 - 1.0);
+        float3x3 TBN = cotangent_frame(normal, viewEye, uv);
+        return normalize(mul(texNormal,TBN));
+    }
 
     struct POut
     {
@@ -99,15 +133,17 @@ void GeometryPass::InitShader()
         float4 albedo : SV_TARGET2;
     };
 
-    POut main(float4 position : SV_POSITION, float2 uv : UV, float3 normal : NORMAL, float3 fragPos : FRAGPOS) 
+    POut main(float4 position : SV_POSITION, float2 uv : UV, float3 normal : NORMAL, float3 fragPos : FRAGPOS, float4 view : VIEW) 
     {
         POut pOutput;
 
-        float3 texNormal = normalTex.Sample(WrapSampler,uv).xyz;
+        float3 texNormal        = normalTex.Sample(WrapSampler,uv).xyz;
+        float3 viewEye          = normalize(view.xyz);
+        float3 perturbNormal    = perturb_normal(normal,viewEye,uv,texNormal);
 
-        pOutput.position    = float4(fragPos,metallicRoughness.Sample(WrapSampler,uv).x);
-        pOutput.normal      = lerp(float4(normal,metallicRoughness.Sample(WrapSampler,uv).y),float4(texNormal,metallicRoughness.Sample(WrapSampler,uv).y),step(0.1,dot(texNormal,texNormal)));
-        pOutput.albedo      = float4(albedoTex.Sample(WrapSampler,uv).rgb,1.0);
+        pOutput.position    = float4(fragPos,metallicRoughness.Sample(WrapSampler,uv).b);
+        pOutput.normal      = lerp(float4(normal,metallicRoughness.Sample(WrapSampler,uv).g),float4(perturbNormal,metallicRoughness.Sample(WrapSampler,uv).g),step(0.1,dot(texNormal,texNormal)));
+        pOutput.albedo      = float4(albedoTex.Sample(WrapSampler,uv).rgb,metallicRoughness.Sample(WrapSampler,uv).r);
 
 
         return pOutput;
@@ -281,13 +317,14 @@ void GeometryPass::Set()
 	Render::RendererRemote::context->OMSetRenderTargets(3, fbos, depthBuffer);
 }
 
-void GeometryPass::Draw(const Core::Math::Mat4& viewProj, const ECS::Coordinator& coordinator)
+void GeometryPass::Draw(const Camera& cam, const ECS::Coordinator& coordinator)
 {
     const ECS::EntityHandler& entityHandler = *coordinator.entityHandler;
     const ECS::ComponentHandler& components = *coordinator.componentHandler;
 
     VS_CONSTANT_BUFFER buffer = {};
-    buffer.viewproj = viewProj;
+    buffer.proj = cam.GetProj();
+    buffer.view = cam.GetView();
 
     size_t bufferSize = sizeof(buffer);
 

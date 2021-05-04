@@ -59,10 +59,11 @@ void DirLightPass::InitShader()
 
     CompileVertex(source, &blob, &VShader);
 
-    source = std::string(blinnPhong) + std::string((const char*)R"(
+    source = std::string(PBR) + std::string((const char*)R"(
 
     Texture2D	positionTex : register(t0);
-    Texture2D	normalTex   : register(t1);    
+    Texture2D	normalTex   : register(t1);
+    Texture2D   albedoTex   : register(t2);
 
     cbuffer DirLight : register(b0)
     {
@@ -78,10 +79,15 @@ void DirLightPass::InitShader()
             
         float3  fragPos     = positionTex.Sample(ClampSampler,uv).xyz;
         float3  normal      = normalize(normalTex.Sample(ClampSampler,uv).xyz);
+        float3  albedo      = pow(albedoTex.Sample(ClampSampler,uv).xyz,2.2);
         float   metallic    = positionTex.Sample(ClampSampler,uv).w;
-        float   roughness   = 0.01;//normalTex.Sample(ClampSampler,uv).w;
+        float   roughness   = normalTex.Sample(ClampSampler,uv).w;
+        float   ao          = albedoTex.Sample(ClampSampler,uv).w;
 
-        output = compute_lighting(normal,fragPos,normalize(-lightDir),lightColor,metallic,roughness);
+        output          = compute_lighting(normal,fragPos,normalize(-lightDir),lightColor,albedo,metallic,roughness);
+		output.diffuse += 0.03 * ao * float4(albedo,1.0);
+        output.diffuse  = pow(output.diffuse,0.45454545);
+        output.specular = pow(output.specular,0.45454545);
 
         return output;
     })");
@@ -108,6 +114,7 @@ void DirLightPass::Set(ID3D11Buffer** lightCBuffer)const
 
 void DirLightPass::Write(const DirLight& dirLight)
 {
+
     PS_DIRLIGHT_BUFFER buffer = { dirLight.dir,0.0f, dirLight.color,0.0f };
     Render::WriteCBuffer(&buffer, sizeof(PS_DIRLIGHT_BUFFER), 0, &CBuffer);
 }

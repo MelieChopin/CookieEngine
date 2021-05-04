@@ -5,7 +5,7 @@
 #include "Game.hpp"
 #include "Resources/Scene.hpp"
 #include "Render/Renderer.hpp"
-#include "imgui.h"
+#include "ImGui/imgui.h"
 
 
 using namespace Cookie::Render;
@@ -62,7 +62,7 @@ RendererRemote Renderer::InitDevice(Core::Window& window)
 
     // fill the swap chain description struct
     scd.BufferCount = 1;                                    // one back buffer
-    scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;     // use 32-bit color
+    scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;// use 32-bit color
     scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;      // how swap chain is to be used
     scd.OutputWindow = glfwGetWin32Window(window.window);   // the window to be used
     scd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
@@ -165,17 +165,18 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     ID3D11RenderTargetView* nullViews[] = { nullptr,nullptr,nullptr,nullptr };
     remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
 
-    Core::Math::Mat4 viewProj = cam->GetViewProj();
+    Core::Math::Mat4 proj = cam->GetProj();
+    Core::Math::Mat4 view = cam->GetView();
 
     gPass.Set();
 
-    game.scene->map.Draw(viewProj,&gPass.CBuffer);
+    game.scene->map.Draw(proj,view,&gPass.CBuffer);
 
-    gPass.Draw(viewProj,game.coordinator);
+    gPass.Draw(*cam,game.coordinator);
 
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
 
-    lPass.Set(gPass.posFBO,gPass.normalFBO,cam->pos);
+    lPass.Set(gPass.posFBO,gPass.normalFBO,gPass.albedoFBO,cam->pos);
     lPass.Draw();
 
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
@@ -208,7 +209,7 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     else
     {
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
-        cPass.Set(gPass.albedoFBO,lPass.diffuseFBO,lPass.specularFBO);
+        cPass.Set(lPass.diffuseFBO,lPass.specularFBO);
         cPass.Draw();
     }
 

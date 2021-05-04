@@ -32,7 +32,7 @@ namespace Cookie
 
             void ToDefault();
 
-            void Draw(const Core::Math::Mat4& viewProj, const Core::Math::Mat4& modelMat, ID3D11Buffer** CBuffer);
+            void Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view, const Core::Math::Mat4& modelMat, ID3D11Buffer** CBuffer);
         };
 
     }

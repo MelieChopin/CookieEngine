@@ -29,13 +29,20 @@ Texture::Texture(const std::string& texPath) :
 	}
 	else
 	{
-		HRESULT result = DirectX::CreateWICTextureFromFile(Render::RendererRemote::device, wString.c_str(), &texture, &shaderResourceView);
+		HRESULT result = DirectX::CreateWICTextureFromFile(Render::RendererRemote::device, wString.c_str(), &texture, &shaderResourceView);/*CreateWICTextureFromFileEx(Render::RendererRemote::device, Render::RendererRemote::context,
+			wString.c_str(),
+			0,
+			D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0,
+			0x1,
+			&texture, &shaderResourceView);*/
 		if (FAILED(result))
 		{
 			printf("Failing Loading Texture %s: %s\n", name.c_str(), std::system_category().message(result).c_str());
 			return;
 		}
 		shaderResourceView->GetDesc(&desc);
+
+
 	}
 		
 }

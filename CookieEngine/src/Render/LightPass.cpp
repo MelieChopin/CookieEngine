@@ -20,12 +20,12 @@ LightPass::LightPass(int width, int height) :
     diffuseFBO{ width, height, DXGI_FORMAT_R32G32B32A32_FLOAT },
     specularFBO {width, height, DXGI_FORMAT_R32G32B32A32_FLOAT}
 {
-    lights.dirLights[0] = { {0.0f,-1.0f,0.0f},{0.5f,0.8f,1.0f} };
+    lights.dirLights[0] = { {0.0f,-1.0f,1.0f},{1.0f,1.0f,1.0f} };
     lights.usedDir++;
-    lights.dirLights[1] = { {-1.0f,1.0f,0.0f},{1.0f,1.0f,1.0f} };
+    lights.dirLights[1] = { {0.0f,-1.0f,-1.0f},{1.0f,1.0f,1.0f} };
     lights.usedDir++;
-    lights.dirLights[2] = { {0.0f,-1.0f,1.0f},{1.0,1.0f,0.0f} };
-    lights.usedDir++;
+    //lights.dirLights[2] = { {0.0f,-1.0f,1.0f},{1.0,1.0f,1.0f} };
+    //lights.usedDir++;
     //lights.dirLights[3] = { {0.0f,-1.0f,-1.0f},{0.25f,0.25f,0.25f} };
     //lights.usedDir++;
     InitShader();
@@ -131,7 +131,7 @@ void LightPass::InitState()
 
 /*======================= REALTIME METHODS =======================*/
 
-void LightPass::Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, const Core::Math::Vec3& camPos)
+void LightPass::Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& albedoFBO, const Core::Math::Vec3& camPos)
 {
     // Now set the rasterizer state.
     Render::RendererRemote::context->RSSetState(rasterizerState);
@@ -148,9 +148,9 @@ void LightPass::Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, const Core::Mat
 
     Render::RendererRemote::context->OMSetRenderTargets(2, rtvs, nullptr);
 
-    ID3D11ShaderResourceView* fbos[2] = { posFBO.shaderResource,normalFBO.shaderResource};
+    ID3D11ShaderResourceView* fbos[3] = { posFBO.shaderResource,normalFBO.shaderResource, albedoFBO.shaderResource};
 
-    Render::RendererRemote::context->PSSetShaderResources(0, 2, fbos);
+    Render::RendererRemote::context->PSSetShaderResources(0, 3, fbos);
 }
 
 void LightPass::Draw()

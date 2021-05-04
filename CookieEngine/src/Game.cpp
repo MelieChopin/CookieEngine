@@ -9,7 +9,7 @@ using namespace Cookie;
 
 Game::Game():
     skyBox{resources},
-    frameBuffer{renderer.window.width,renderer.window.height}
+    frameBuffer{renderer.window.width,renderer.window.height }
 {
     Physics::PhysicsHandle::Init();
 }

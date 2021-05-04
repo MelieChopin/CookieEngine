@@ -18,6 +18,8 @@ namespace Cookie
 
 	namespace Render
 	{
+		class Camera;
+
 		class GeometryPass
 		{
 			private:
@@ -49,7 +51,7 @@ namespace Cookie
 				~GeometryPass();
 
 				void Set();
-				void Draw(const Core::Math::Mat4& viewProj, const ECS::Coordinator& coordinator);
+				void Draw(const Camera& cam, const ECS::Coordinator& coordinator);
 				void Clear();
 		};
 	}
