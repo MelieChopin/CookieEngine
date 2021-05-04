@@ -256,15 +256,25 @@ void Editor::Loop()
         {
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_G] && isRaycastingWithMap && game.coordinator.selectedEntities.size() != 0)
             {
+                
                 ECS::Entity* commander = game.coordinator.GetSelectedEntitiesCommander();
                 game.coordinator.SetSelectedEntitiesCommander(commander);
-
                 ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(commander->id);
+
                 if (game.scene->map.ApplyPathfinding(game.scene->map.GetTile(trs.pos), game.scene->map.tiles[indexOfSelectedTile]))
                     game.coordinator.componentHandler->GetComponentGameplay(commander->id).componentMove.SetPath(game.scene->map.tiles[indexOfSelectedTile], trs);
                 else
                     std::cout << "No Path Find\n";
-
+                
+                /*
+                for (int i = 0; i < game.coordinator.selectedEntities.size(); ++i)
+                {
+                    float selectedEntityId = game.coordinator.selectedEntities[i]->id;
+                    ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(selectedEntityId);
+                    if (game.scene->map.ApplyPathfinding(game.scene->map.GetTile(trs.pos), game.scene->map.tiles[indexOfSelectedTile]))
+                        game.coordinator.componentHandler->GetComponentGameplay(selectedEntityId).componentMove.SetPath(game.scene->map.tiles[indexOfSelectedTile], trs);
+                }
+                */
             }
         }
         //Bind Key to create new unit

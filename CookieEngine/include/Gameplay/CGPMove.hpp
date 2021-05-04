@@ -14,9 +14,10 @@ namespace Cookie
 	{
 		enum CGPMOVE_STATE
 		{
-			E_STATIC,
 			E_MOVING,
 			E_PUSHED,
+			E_STATIC,
+			E_REACH_GOAL,
 			E_WAITING
 		};
 
@@ -71,11 +72,9 @@ namespace Cookie
 					return;
 
 				pushedCooldownBeforeReturn -= Core::DeltaTime();
-				//std::cout << "pushedCooldown Reducing " << pushedCooldownBeforeReturn << "\n";
 
 				if (pushedCooldownBeforeReturn < 0 && map.ApplyPathfinding(map.GetTile(trs.pos), map.GetTile(posBeforePushed)))
 				{
-					//std::cout << "pushedCooldown FINISH\n";
 					pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
 					SetPath(map.GetTile(posBeforePushed), trs);
 				}
@@ -169,11 +168,13 @@ namespace Cookie
 			void ResolveColision(ECS::ComponentTransform& trsSelf, CGPMove& other, ECS::ComponentTransform& trsOther)
 			{
 				//Priority High
-				if ((state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_STATIC) ||
-					(state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_PUSHED) ||
-					(state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_STATIC))
+				if ((state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_PUSHED) ||
+					(state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_STATIC) ||
+					(state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_REACH_GOAL) ||
+					(state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_STATIC) ||
+					(state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_REACH_GOAL))
 				{
-					if (other.state != CGPMOVE_STATE::E_PUSHED)
+					if (other.state == CGPMOVE_STATE::E_STATIC)
 					{
 						other.state = CGPMOVE_STATE::E_PUSHED;
 						other.posBeforePushed = trsOther.pos;
@@ -215,11 +216,13 @@ namespace Cookie
 					
 				}
 				//Priority Low
-				else if ((state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_MOVING) ||
-						 (state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_MOVING) ||
-					     (state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_PUSHED))
+				else if ((state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_MOVING) ||
+						 (state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_MOVING) ||
+					     (state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_PUSHED) ||
+						 (state == CGPMOVE_STATE::E_REACH_GOAL && other.state == CGPMOVE_STATE::E_MOVING) ||
+						 (state == CGPMOVE_STATE::E_REACH_GOAL && other.state == CGPMOVE_STATE::E_PUSHED))
 				{
-					if (state != CGPMOVE_STATE::E_PUSHED)
+					if (state == CGPMOVE_STATE::E_STATIC)
 					{
 						state = CGPMOVE_STATE::E_PUSHED;
 						posBeforePushed = trsSelf.pos;
