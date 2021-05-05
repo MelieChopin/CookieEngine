@@ -41,6 +41,7 @@ namespace Cookie
 			void ApplySystemPhysics(float factor);
 			void ApplyDraw(const Core::Math::Mat4& viewProj);
 			void ApplyScriptUpdate();
+			void ApplyRemoveUnnecessaryEntities();
 
 
 			void ApplyGameplayUpdatePushedCooldown(Resources::Map& map);
@@ -50,6 +51,8 @@ namespace Cookie
 			void ApplyGameplayResolveCollision();
 			void ApplyGameplayDrawPath(Render::DebugRenderer& debug);
 
+			void ApplyGameplayCheckEnemyInRange();
+			void ApplyGameplayAttack();
 
 			void SelectEntities(Core::Math::Vec2& selectionQuadStart, Core::Math::Vec2& selectionQuadEnd);
 			Entity* GetSelectedEntitiesCommander();

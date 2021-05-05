@@ -18,6 +18,7 @@ namespace Cookie
 			E_PUSHED,
 			E_STATIC,
 			E_REACH_GOAL,
+
 			E_WAITING
 		};
 
@@ -133,7 +134,7 @@ namespace Cookie
 						state = CGPMOVE_STATE::E_STATIC;
 				}
 
-				if (waypoints.size() == 0)
+				if (waypoints.size() == 0 || state == CGPMOVE_STATE::E_WAITING)
 					return;
 
 
@@ -143,15 +144,16 @@ namespace Cookie
 			}
 			void MoveWithCommander(ECS::ComponentTransform& trs)
 			{
-				if (commanderPos == nullptr)
+				if (commanderPos == nullptr || state == CGPMOVE_STATE::E_WAITING)
 					return;
+
 
 				Core::Math::Vec3 previousPos = trs.pos;
 				trs.pos = *commanderPos + offsetFromCommander;
 				trs.ComputeTRS();
 
 				//check if commander is Static
-				if (previousPos == trs.pos)
+				if (commanderCGPMove->state != CGPMOVE_STATE::E_WAITING && previousPos == trs.pos)
 				{
 					commanderPos = nullptr;
 					commanderCGPMove = nullptr;

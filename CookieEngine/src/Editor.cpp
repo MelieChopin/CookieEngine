@@ -160,7 +160,6 @@ void Editor::Loop()
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
             Resources::Serialization::Save::SaveScene(*game.scene, game.resources);
 
-        ////TEMP
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_H) == GLFW_PRESS)
         {
             std::string duck = "Duck";
@@ -247,7 +246,7 @@ void Editor::Loop()
         }
         //Bind Keys to Set Obstacle Tiles
         {
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B] && isRaycastingWithMap)
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V] && isRaycastingWithMap)
             {
                 game.scene->map.tiles[indexOfSelectedTile].isObstacle = !game.scene->map.tiles[indexOfSelectedTile].isObstacle;
             }
@@ -284,14 +283,37 @@ void Editor::Loop()
                 game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL + SIGNATURE_GAMEPLAY, game.resources, "Unit " + std::to_string(nbOfUnits));
                 //should create constructor copy for each Component 
                 {
-                    ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(game.coordinator.entityHandler->livingEntities - 1);
-                    ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(game.coordinator.entityHandler->livingEntities - 1);
-                    game.coordinator.entityHandler->entities[game.coordinator.entityHandler->livingEntities - 1].signatureGameplay = SIGNATURE_CGP_ALL;
+                    ECS::Entity& entity = game.coordinator.entityHandler->entities[game.coordinator.entityHandler->livingEntities - 1];
+                    ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(entity.id);
+                    ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(entity.id);
+                    entity.tag = "good";
+                    entity.signatureGameplay = SIGNATURE_CGP_ALL;
 
                     trs.pos = {mousePos.x, 1, mousePos.y};
 
                     model.mesh = game.resources.meshes["Cube"];
                     model.texture = game.resources.textures["Green"];
+                    //model.shader = game.resources.shaders["Texture_Shader"];
+
+                }
+
+                nbOfUnits++;
+            }
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B] && isRaycastingWithMap)
+            {
+                game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL + SIGNATURE_GAMEPLAY, game.resources, "Unit " + std::to_string(nbOfUnits));
+                //should create constructor copy for each Component 
+                {
+                    ECS::Entity& entity = game.coordinator.entityHandler->entities[game.coordinator.entityHandler->livingEntities - 1];
+                    ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(entity.id);
+                    ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(entity.id);
+                    entity.signatureGameplay = SIGNATURE_CGP_ALL;
+                    entity.tag = "bad";
+
+                    trs.pos = { mousePos.x, 1, mousePos.y };
+
+                    model.mesh = game.resources.meshes["Cube"];
+                    model.texture = game.resources.textures["Red"];
                     //model.shader = game.resources.shaders["Texture_Shader"];
 
                 }
@@ -338,9 +360,13 @@ void Editor::Loop()
         game.coordinator.ApplyGameplayMoveWithCommander();
         game.coordinator.ApplyGameplayPosPrediction();
         game.coordinator.ApplyGameplayResolveCollision();
-        game.coordinator.ApplyGameplayDrawPath(dbgRenderer);
-        
 
+        game.coordinator.ApplyGameplayCheckEnemyInRange();
+        game.coordinator.ApplyGameplayAttack();
+
+
+
+        game.coordinator.ApplyGameplayDrawPath(dbgRenderer);
         game.renderer.Draw(&cam, game,editorFBO);
         //if (isRaycastingWithMap)
             //SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
@@ -354,6 +380,8 @@ void Editor::Loop()
         UIcore::EndFrame();
 
         game.renderer.Render();
+
+        game.coordinator.ApplyRemoveUnnecessaryEntities();
     }
 }
 

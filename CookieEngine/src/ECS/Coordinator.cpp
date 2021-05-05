@@ -55,7 +55,9 @@ void Coordinator::RemoveEntity(Entity& entity)
 
 	//Reset Entity
 	entity.signature = 0;
+	entity.signatureGameplay = 0;
 	entity.name = "No Name";
+	entity.tag = "No Tag";
 	entity.needToBeRemoved = false;
 
 	//for (unsigned int i = 0; i < entity.children.size(); ++i)
@@ -90,7 +92,16 @@ void Coordinator::ApplyScriptUpdate()
 		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_SCRIPT))
 			System::SystemScriptUpdate(componentHandler->GetComponentScript(entityHandler->entities[i].id));
 }
-
+void Coordinator::ApplyRemoveUnnecessaryEntities()
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (entityHandler->entities[i].needToBeRemoved ||
+			(CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_LIVE) && componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentLive.life <= 0))
+		{
+			RemoveEntity(entityHandler->entities[i]);
+			i = std::max(i - 1, 0);
+		}
+}
 
 void Coordinator::ApplyGameplayUpdatePushedCooldown(Resources::Map& map)
 {
@@ -188,6 +199,51 @@ void Coordinator::ApplyGameplayDrawPath(DebugRenderer& debug)
 			componentHandler->GetComponentGameplay(i).componentMove.DrawPath(debug, componentHandler->GetComponentTransform(i));
 }
 
+void Coordinator::ApplyGameplayCheckEnemyInRange()
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM) && 
+			CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_ATTACK))
+		{
+			CGPAttack& cgpAttack = componentHandler->GetComponentGameplay(i).componentAttack;
+			cgpAttack.target = nullptr;
+			float smallestDist = cgpAttack.attackRange;
+
+			for (int j = 0; j < entityHandler->livingEntities; ++j)
+				if (i != j &&
+					entityHandler->entities[i].tag != entityHandler->entities[j].tag &&
+					CheckSignature(entityHandler->entities[j].signature, SIGNATURE_TRANSFORM) && 
+					CheckSignature(entityHandler->entities[j].signatureGameplay, SIGNATURE_CGP_LIVE))
+				{
+					float possibleNewDist = (componentHandler->GetComponentTransform(i).pos - componentHandler->GetComponentTransform(j).pos).Length();
+
+					if (possibleNewDist < smallestDist)
+					{
+						smallestDist = possibleNewDist;
+						cgpAttack.target = &componentHandler->GetComponentGameplay(j).componentLive;
+					}
+				}
+
+			if (CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_MOVE))
+			{
+				CGPMove& cgpMove = componentHandler->GetComponentGameplay(i).componentMove;
+
+				//stop mvt
+				if (cgpMove.state == CGPMOVE_STATE::E_MOVING && cgpAttack.target != nullptr)
+					cgpMove.state = CGPMOVE_STATE::E_WAITING;
+
+				//resume mvt
+				if (cgpMove.state == CGPMOVE_STATE::E_WAITING && cgpAttack.target == nullptr)
+					cgpMove.state = CGPMOVE_STATE::E_MOVING;
+			}
+		}
+}
+void Coordinator::ApplyGameplayAttack()
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signatureGameplay, SIGNATURE_CGP_ATTACK))
+			componentHandler->GetComponentGameplay(i).componentAttack.Attack();
+}
 
 void Coordinator::SelectEntities(Vec2& selectionQuadStart, Vec2& selectionQuadEnd)
 {
