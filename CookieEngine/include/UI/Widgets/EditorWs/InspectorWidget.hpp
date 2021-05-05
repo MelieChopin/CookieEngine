@@ -37,7 +37,7 @@ namespace Cookie::UIwidget
 
 		/*
 			Advanced interface:
-				- Allows tp edit colliders after selected from the display list,
+				- Allows to edit colliders after selected from the display list,
 				- Allows to add/remove colliders,
 				- Provides many options to edit the rigibody/entity as well.
 
@@ -48,6 +48,9 @@ namespace Cookie::UIwidget
 		// Allows live/hot-swapping of the scripts in-use by the entity.
 		void ScriptInterface();
 		
+		// Allows to interface with three inner components corresponding to the entity's health and armor, movement capacities and attack abilities.
+		void GameplayInterface();
+
 		// Allows editing of different parameters used exclusively by map entities.
 		void MapInterface();
 
