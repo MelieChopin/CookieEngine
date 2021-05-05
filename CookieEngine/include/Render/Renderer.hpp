@@ -3,11 +3,13 @@
 
 
 #include "Core/Window.hpp"
+#include "Light.hpp"
 #include "Render/FBODrawer.hpp"
 #include "Render/RendererRemote.hpp"
-#include "Render/GeometryPass.hpp"
-#include "Render/LightPass.hpp"
-#include "Render/ComposePass.hpp"
+#include "Render/RenderPass/GeometryPass.hpp"
+#include "Render/RenderPass/ShadowPass.hpp"
+#include "Render/RenderPass/LightPass.hpp"
+#include "Render/RenderPass/ComposePass.hpp"
 
 namespace Cookie
 {
@@ -34,9 +36,13 @@ namespace Cookie
 				Core::Window	window;
 				RendererRemote	remote;
 				D3D11_VIEWPORT	viewport;
+
 				GeometryPass	gPass;
+				ShadowPass		sPass;
 				LightPass		lPass;
 				ComposePass		cPass;
+
+				LightsArray lights;
 
 			private:
 				Render::FBODrawer	fboDrawer;

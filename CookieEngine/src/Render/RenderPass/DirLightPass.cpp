@@ -1,7 +1,7 @@
 #include "D3D11Helper.hpp"
 #include "Vec3.hpp"
 #include "Light.hpp"
-#include "DirLightPass.hpp"
+#include "RenderPass/DirLightPass.hpp"
 
 using namespace Cookie::Core::Math;
 using namespace Cookie::Render;
@@ -85,7 +85,7 @@ void DirLightPass::InitShader()
         float   ao          = albedoTex.Sample(ClampSampler,uv).w;
 
         output          = compute_lighting(normal,fragPos,normalize(-lightDir),lightColor,albedo,metallic,roughness);
-		output.diffuse += 0.03 * ao * float4(albedo,1.0);
+		output.diffuse += (0.03 * ao + 0.01) *  float4(albedo,1.0);
         output.diffuse  = pow(output.diffuse,0.45454545);
         output.specular = pow(output.specular,0.45454545);
 

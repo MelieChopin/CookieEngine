@@ -4,7 +4,7 @@
 #include "ECS/ComponentHandler.hpp"
 #include "Resources/Texture.hpp"
 #include "Resources/Mesh.hpp"
-#include "Render/GeometryPass.hpp"
+#include "Render/RenderPass/GeometryPass.hpp"
 #include "Render/Camera.hpp"
 
 

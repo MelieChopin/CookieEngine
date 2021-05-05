@@ -1,23 +1,16 @@
 #ifndef __FRAME_BUFFER_HPP__
 #define __FRAME_BUFFER_HPP__
 
-#include <d3d11.h>
-#include <memory>
+#include <dxgiformat.h>
+
+struct ID3D11Texture2D;
+struct ID3D11ShaderResourceView;
+struct ID3D11RenderTargetView;
 
 namespace Cookie
 {
-	namespace Resources
-	{
-		class ResourcesManager;
-		class Shader;
-		class Mesh;
-	}
-
 	namespace Render
 	{
-		class Renderer;
-		struct RendererRemote;
-
 		class FrameBuffer
 		{
 			public:

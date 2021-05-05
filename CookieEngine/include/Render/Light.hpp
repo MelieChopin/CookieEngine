@@ -1,8 +1,8 @@
 #ifndef __LIGHT_HPP__
 #define __LIGHT_HPP__
 
-#include "Core/Math/Vec3.hpp"
-#include <vector>
+#include "Core/Math/Mat4.hpp"
+#include <memory>
 #include <array>
 
 namespace Cookie
@@ -137,12 +137,18 @@ namespace Cookie
 
 		)";
 
+		class ShadowBuffer;
+
 		#define DIR_LIGHT_MAX_NB 10
 
 		struct DirLight
 		{
 				Core::Math::Vec3 dir;
 				Core::Math::Vec3 color = {1.0f,1.0f,1.0f};
+				Core::Math::Mat4 lightViewProj;
+				bool castShadow = false;
+				std::unique_ptr<ShadowBuffer> shadowMap{nullptr};
+
 		};
 
 		#define SPHERE_LIGHT_MAX_NB 10
@@ -179,7 +185,9 @@ namespace Cookie
 
 			public:
 				LightsArray();
-				LightsArray(const LightsArray& _lights);
+
+				void Resize(int width, int height);
+				void Clear();
 		};
 	}
 }

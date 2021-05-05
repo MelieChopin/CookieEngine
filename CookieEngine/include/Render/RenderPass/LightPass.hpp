@@ -1,9 +1,8 @@
 #ifndef __LIGHT_PASS_HPP__
 #define __LIGHT_PASS_HPP__
 
-#include "Light.hpp"
 #include "FrameBuffer.hpp"
-#include "DirLightPass.hpp"
+#include "RenderPass/DirLightPass.hpp"
 
 namespace Cookie
 {
@@ -20,6 +19,7 @@ namespace Cookie
 
 	namespace Render
 	{
+		struct LightsArray;
 
 		class LightPass
 		{
@@ -36,7 +36,7 @@ namespace Cookie
 		public:
 			FrameBuffer diffuseFBO;
 			FrameBuffer specularFBO;
-			LightsArray lights;
+			
 
 		private:
 			void InitShader();
@@ -47,7 +47,8 @@ namespace Cookie
 			~LightPass();
 
 			void Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& albedoFBO, const Core::Math::Vec3& camPos);
-			void Draw();
+			void Draw(const LightsArray& lights);
+			void Clear();
 		};
 	}
 }

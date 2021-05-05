@@ -1,8 +1,5 @@
-
+#include "D3D11Helper.hpp"
 #include "Render/RendererRemote.hpp"
-#include "Resources/Mesh.hpp"
-#include "Resources/Texture.hpp"
-#include "Resources/ResourcesManager.hpp"
 #include "Render/FrameBuffer.hpp"
 
 using namespace Cookie::Render;

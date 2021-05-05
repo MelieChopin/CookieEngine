@@ -1,18 +1,10 @@
 #include "Render/D3D11Helper.hpp"
 #include "Core/Math/Vec4.hpp"
 #include "Light.hpp"
-#include "LightPass.hpp"
+#include "RenderPass/LightPass.hpp"
 
 using namespace Cookie::Core::Math;
 using namespace Cookie::Render;
-
-struct PS_DIRLIGHT_BUFFER
-{
-    Vec3 dir;
-    float padding = 0.0f;
-    Vec3 color = { 1.0f,1.0f,1.0f };
-    float padding2 = 0.0f;
-};
 
 /*======================= CONSTRUCTORS/DESTRUCTORS =======================*/
 
@@ -20,14 +12,6 @@ LightPass::LightPass(int width, int height) :
     diffuseFBO{ width, height, DXGI_FORMAT_R32G32B32A32_FLOAT },
     specularFBO {width, height, DXGI_FORMAT_R32G32B32A32_FLOAT}
 {
-    lights.dirLights[0] = { {0.0f,-1.0f,1.0f},{1.0f,1.0f,1.0f} };
-    lights.usedDir++;
-    lights.dirLights[1] = { {0.0f,-1.0f,-1.0f},{1.0f,1.0f,1.0f} };
-    lights.usedDir++;
-    //lights.dirLights[2] = { {0.0f,-1.0f,1.0f},{1.0,1.0f,1.0f} };
-    //lights.usedDir++;
-    //lights.dirLights[3] = { {0.0f,-1.0f,-1.0f},{0.25f,0.25f,0.25f} };
-    //lights.usedDir++;
     InitShader();
     InitState();
 }
@@ -42,6 +26,8 @@ LightPass::~LightPass()
         depthStencilState->Release();
     if (rasterizerState)
         rasterizerState->Release();
+    if (blendState)
+        blendState->Release();
 }
 
 /*======================= INIT METHODS =======================*/
@@ -153,7 +139,7 @@ void LightPass::Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& al
     Render::RendererRemote::context->PSSetShaderResources(0, 3, fbos);
 }
 
-void LightPass::Draw()
+void LightPass::Draw(const LightsArray& lights)
 {
     dirLight.Set(&lightCBuffer);
     for (int i = 0; i < lights.usedDir; i++)
@@ -161,4 +147,12 @@ void LightPass::Draw()
         dirLight.Write(lights.dirLights[i]);
         Render::RendererRemote::context->Draw(3, 0);
     }
+}
+
+void LightPass::Clear()
+{
+    Core::Math::Vec4 clearColor = { 0.0f,0.0f,0.0f,1.0f };
+
+     Render::RendererRemote::context->ClearRenderTargetView(diffuseFBO.renderTargetView, clearColor.e);
+     Render::RendererRemote::context->ClearRenderTargetView(specularFBO.renderTargetView, clearColor.e);
 }

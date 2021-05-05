@@ -200,33 +200,50 @@ namespace Cookie
 
                 return m;
             }
+            inline Mat4 Mat4::Ortho(float left, float right, float top, float bottom, float n, float f)
+            {
+                Mat4 m;
+                float r_min_l = right - left;
+                float t_min_b = top - bottom;
+                float f_min_n = f - n;
+
+                m.c[0].e[0] = 2/r_min_l;
+                m.c[0].e[1] = 0.f;
+                m.c[0].e[2] = 0.f;
+                m.c[0].e[3] = -(right + left) / (r_min_l);
+
+                m.c[1].e[0] = 0.f;
+                m.c[1].e[1] = 2/t_min_b;
+                m.c[1].e[2] = 0.f;
+                m.c[1].e[3] = -(top + bottom) / (t_min_b);
+
+                m.c[2].e[0] = 0.f;
+                m.c[2].e[1] = 0.f;
+                m.c[2].e[2] = -(2.0f/f_min_n);
+                m.c[2].e[3] = -(f + n)/ f_min_n;
+
+                m.c[3].e[0] = 0.f;
+                m.c[3].e[1] = 0.f;
+                m.c[3].e[2] = 0.0f;
+                m.c[3].e[3] = 1.0f;
+
+                return m;
+            }
             inline Mat4 Mat4::LookAt(const Vec3& eye, const Vec3& center, const Vec3& up)
             {
                 Mat4 m;
 
-                Core::Math::Vec3 z = (eye - center).Normalize();
+                Core::Math::Vec3 z = (center - eye).Normalize();
                 Core::Math::Vec3 y = up;
                 Core::Math::Vec3 x = y.Cross(z);
                 y = z.Cross(x);
                 x.Normalize();
                 y.Normalize();
 
-                m.c[0].e[0] = x.x;
-                m.c[1].e[0] = x.y;
-                m.c[2].e[0] = x.z;
-                m.c[3].e[0] = -x.Dot(eye);
-                m.c[0].e[1] = y.x;
-                m.c[1].e[1] = y.y;
-                m.c[2].e[1] = y.z;
-                m.c[3].e[1] = -y.Dot(eye);
-                m.c[0].e[2] = z.x;
-                m.c[1].e[2] = z.y;
-                m.c[2].e[2] = z.z;
-                m.c[3].e[2] = -z.Dot(eye);
-                m.c[0].e[3] = 0;
-                m.c[1].e[3] = 0;
-                m.c[2].e[3] = 0;
-                m.c[3].e[3] = 1.0f;
+                m.c[0] = { x ,0.0f};
+                m.c[1] = { y ,0.0f};
+                m.c[2] = { z, 0.0f};
+                m.c[3] = { 0.0f,0.0f,0.0f,1.0f };
 
                 return m;
             }

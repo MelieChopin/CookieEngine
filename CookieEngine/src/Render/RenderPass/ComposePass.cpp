@@ -1,6 +1,6 @@
 #include "D3D11Helper.hpp"
 #include "FrameBuffer.hpp"
-#include "ComposePass.hpp"
+#include "RenderPass/ComposePass.hpp"
 
 using namespace Cookie::Render;
 
