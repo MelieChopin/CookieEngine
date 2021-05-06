@@ -18,6 +18,8 @@ SoundManager::SoundManager()
         return;
     }
 
+    
+
    /* std::vector<std::string> filesPath;
     FMOD_RESULT result;
     FMOD_MODE mode = FMOD_DEFAULT;
@@ -33,7 +35,7 @@ SoundManager::SoundManager()
     FMOD_MODE mode = FMOD_DEFAULT;
     mode |= FMOD_LOOP_NORMAL;
     result = system->createSound("Assets/Music/Editor.mp3", mode, nullptr, &sound);
-
+    //FMOD::Geometry::
 }
 
 SoundManager::~SoundManager()

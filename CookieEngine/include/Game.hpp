@@ -20,11 +20,11 @@ namespace Cookie
 	{
 		private:
 		public:
-			Render::Renderer			renderer;
-			Resources::ResourcesManager resources;
-			Render::SkyBox				skyBox;
-			ECS::Coordinator			coordinator;
-			Render::FrameBuffer			frameBuffer;
+			Render::Renderer								renderer;
+			Resources::ResourcesManager						resources;
+			Render::SkyBox									skyBox;
+			ECS::Coordinator								coordinator;
+			Render::FrameBuffer								frameBuffer;
 			Resources::Particles::ParticlesSystem			particlesSystem;
 
 			std::shared_ptr<Resources::Scene>				scene{nullptr};

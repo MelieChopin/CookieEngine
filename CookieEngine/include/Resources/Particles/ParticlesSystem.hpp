@@ -4,6 +4,8 @@
 #include "ParticlesEmitter.hpp"
 #include "ParticlesData.hpp"
 #include "ComponentTransform.hpp"
+#include "ParticlesPass.hpp"
+#include "Resources/Mesh.hpp"
 
 namespace Cookie
 {
@@ -14,38 +16,64 @@ namespace Cookie
 			class ParticlesSystem
 			{
 			public :
-				ParticlesData data;
-				ParticlesEmitter particlesEmiter;
+				std::vector<ParticlesData> data;
+				std::vector<ParticlesEmitter> particlesEmiter;
 
 				ECS::ComponentTransform trs;
+
+				Cookie::Render::ParticlesPass shader;
 
 				ParticlesSystem() {}
 
 				ParticlesSystem(int size, int sizeFrame)
 				{
-					data.generate(size, sizeFrame);
+					shader.InitShader();
+					data.push_back(ParticlesData());
+					particlesEmiter.push_back(ParticlesEmitter());
+					data[0].generate(size, sizeFrame);
 				}
 				~ParticlesSystem() {}
 
 				void Update()
 				{
-					if (data.countAlive < data.countFrame)
+					for (int j = 0; j < data.size(); j++)
 					{
-						float countAlive = data.countAlive;
-						float countFrame = data.countFrame;
+						if (data[j].countAlive < data[j].countFrame)
+						{
+							float countAlive = data[j].countAlive;
+							float countFrame = data[j].countFrame;
 
-						data.wake(countAlive, countFrame);
+							data[j].wake(countAlive, countFrame);
 
-						for (int i = 0; i < particlesEmiter.generators.size(); i++)
-							particlesEmiter.generators[i]->generate(&data, countAlive, countFrame);
+							for (int i = 0; i < particlesEmiter[j].generators.size(); i++)
+								particlesEmiter[j].generators[i]->generate(&data[j], countAlive, countFrame);
+						}
+
+						for (int i = 0; i < data[j].countAlive; i++)
+						{
+							for (int k = 0; k < particlesEmiter[j].updates.size(); k++)
+								particlesEmiter[j].updates[k]->Update(&data[j], i);
+							if (data[j].time[i] < 0)
+								data[j].kill(i);
+						}
 					}
+				}
 
-					for (int i = 0; i < data.countAlive; i++)
+				void Draw(const Core::Math::Mat4& viewProj, Cookie::Resources::ResourcesManager& resources)
+				{
+					std::vector<Cookie::Render::InstancedData> newData;
+
+					for (int j = 0; j < data.size(); j++)
 					{
-						for (int j = 0; j < particlesEmiter.updates.size(); j++)
-							particlesEmiter.updates[j]->Update(&data, i);
-						if (data.time[i] < 0)
-							data.kill(i);
+						for (int i = 0; i < data[j].countAlive; i++)
+						{
+							Cookie::Render::InstancedData temp;
+							temp.World = (trs.TRS * Cookie::Core::Math::Mat4::Translate(data[j].pos[i]));
+							temp.Color = Cookie::Core::Math::Vec4(1, 0, 0, 1);
+							newData.push_back(temp);
+						}
+
+						shader.Draw(viewProj, resources.meshes["Quad"].get(), newData);
 					}
 				}
 			};

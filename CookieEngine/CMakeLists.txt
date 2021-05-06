@@ -78,6 +78,7 @@ set (SRC_FILES
     "${SRC_DIR}/Render/Light.cpp"
     "${SRC_DIR}/Render/GeometryPass.cpp"
     "${SRC_DIR}/Render/FBODrawer.cpp"
+    "${SRC_DIR}/Render/ParticlesPass.cpp"
     
     "${SRC_DIR}/Resources/Loader.cpp" 
     "${SRC_DIR}/Resources/Map.cpp" 
