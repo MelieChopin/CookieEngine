@@ -50,7 +50,8 @@ namespace Cookie
 				inline Core::Math::Mat4 GetViewProj() const		{ return projMat * viewMat;	}
 				
 				inline void SetProj(float yFov, float _width, float _height, float n, float f) { fov = yFov; width = _width; height = _height; camFar = f; projMat = Core::Math::Mat4::Perspective(yFov, width / height, n, f); }
-					    
+				inline void LookAt(const Core::Math::Vec3& toLook) { viewMat = Core::Math::Mat4::Inverse(Core::Math::Mat4::Translate(pos) * Core::Math::Mat4::LookAt(pos, toLook, { 0.0f,1.0f,0.0f }));}
+
 				inline virtual void Update() = 0;
 
 				inline void Activate() { activated = true; }

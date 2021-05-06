@@ -57,7 +57,7 @@ void FBODrawer::InitShader()
 
     float4 main(float4 position : SV_POSITION, float2 uv : UV) : SV_TARGET
     {
-        return float4(diffuseTex2D.Sample(WrapSampler,uv).xyz,1.0);        
+        return float4(diffuseTex2D.Sample(WrapSampler,uv).rgb,1.0);        
     })";
 
     Render::CompilePixel(source, &PShader);

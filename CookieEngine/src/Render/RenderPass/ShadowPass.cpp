@@ -3,6 +3,7 @@
 #include "ECS/Coordinator.hpp"
 #include "ECS/ComponentHandler.hpp"
 #include "Resources/Mesh.hpp"
+#include "Render/ShadowBuffer.hpp"
 #include "RenderPass/ShadowPass.hpp"
 
 using namespace Cookie::Core::Math;
@@ -16,8 +17,7 @@ struct VS_CONSTANT_BUFFER
 
 /*======================= CONSTRUCTORS/DESTRUCTORS =======================*/
 
-ShadowPass::ShadowPass():
-    viewport {0.0f,0.0f,20.0f,20.0f,0.0f,1.0f}
+ShadowPass::ShadowPass()
 {
     InitShader();
     InitState();
@@ -144,15 +144,14 @@ void ShadowPass::Set()
 
     Render::RendererRemote::context->OMSetRenderTargets(4, rtvs, nullptr);
 
-    ID3D11ShaderResourceView* fbos[3] = { nullptr,nullptr,nullptr};
+    ID3D11ShaderResourceView* fbos[4] = { nullptr,nullptr,nullptr};
 
-    Render::RendererRemote::context->PSSetShaderResources(0, 3, fbos);
+    Render::RendererRemote::context->PSSetShaderResources(0, 4, fbos);
 
     RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     RendererRemote::context->PSSetShader(nullptr, nullptr, 0);
 
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
-    //Render::RendererRemote::context->RSSetViewports(1,&viewport);
 }
 
 void ShadowPass::Draw(const ECS::Coordinator& coordinator, Resources::Map& map, LightsArray& lights)
@@ -161,7 +160,6 @@ void ShadowPass::Draw(const ECS::Coordinator& coordinator, Resources::Map& map, 
     const ECS::ComponentHandler& components = *coordinator.componentHandler;
 
     VS_CONSTANT_BUFFER buffer = {};
-    //ID3D11RenderTargetView* rtvs[4] = { nullptr,nullptr ,nullptr ,nullptr };
 
     size_t bufferSize = sizeof(buffer);
 
@@ -173,10 +171,8 @@ void ShadowPass::Draw(const ECS::Coordinator& coordinator, Resources::Map& map, 
         if (jLight.castShadow)
         {
             Render::RendererRemote::context->OMSetRenderTargets(0, nullptr, jLight.shadowMap->depthStencilView);
-            jLight.lightViewProj = proj * Core::Math::Mat4::LookAt({ 0.0f,0.0f,0.0f }, jLight.dir, { 0.0f,1.0f,0.0f });
+            jLight.lightViewProj = proj * Core::Math::Mat4::LookAt(jLight.dir.Normalize() * 10.0f, {0.0f,0.0f,0.0f}, { 0.0f,1.0f,0.0f });
             buffer.lightViewProj = jLight.lightViewProj;
-
-            map.Draw(proj, Core::Math::Mat4::LookAt({ 0.0f,0.0f,0.0f }, jLight.dir, { 0.0f,1.0f,0.0f }), &CBuffer);
 
             for (int i = 0; i < entityHandler.livingEntities; ++i)
             {

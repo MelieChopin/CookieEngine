@@ -44,9 +44,9 @@ void LightPass::InitShader()
     samDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
     samDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
     samDesc.MipLODBias = 0.0f;
-    samDesc.MaxAnisotropy = 1;
+    samDesc.MaxAnisotropy = 0.0f;
     samDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-    samDesc.BorderColor[0] = samDesc.BorderColor[1] = samDesc.BorderColor[2] = samDesc.BorderColor[3] = 0;
+    samDesc.BorderColor[0] = samDesc.BorderColor[1] = samDesc.BorderColor[2] = samDesc.BorderColor[3] = 1.0f;
     samDesc.MinLOD = 0;
     samDesc.MaxLOD = 0;
 
@@ -137,6 +137,8 @@ void LightPass::Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& al
     ID3D11ShaderResourceView* fbos[3] = { posFBO.shaderResource,normalFBO.shaderResource, albedoFBO.shaderResource};
 
     Render::RendererRemote::context->PSSetShaderResources(0, 3, fbos);
+
+    Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
 }
 
 void LightPass::Draw(const LightsArray& lights)

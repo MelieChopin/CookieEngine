@@ -145,8 +145,8 @@ namespace Cookie
 		{
 				Core::Math::Vec3 dir;
 				Core::Math::Vec3 color = {1.0f,1.0f,1.0f};
-				Core::Math::Mat4 lightViewProj;
 				bool castShadow = false;
+				Core::Math::Mat4 lightViewProj;
 				std::unique_ptr<ShadowBuffer> shadowMap{nullptr};
 
 		};

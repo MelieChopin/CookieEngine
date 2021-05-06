@@ -207,24 +207,24 @@ namespace Cookie
                 float t_min_b = top - bottom;
                 float f_min_n = f - n;
 
-                m.c[0].e[0] = 2/r_min_l;
+                m.c[0].e[0] = 2.0f/r_min_l;
                 m.c[0].e[1] = 0.f;
                 m.c[0].e[2] = 0.f;
-                m.c[0].e[3] = -(right + left) / (r_min_l);
+                m.c[0].e[3] = 0.0f;
 
                 m.c[1].e[0] = 0.f;
-                m.c[1].e[1] = 2/t_min_b;
+                m.c[1].e[1] = 2.0f/t_min_b;
                 m.c[1].e[2] = 0.f;
-                m.c[1].e[3] = -(top + bottom) / (t_min_b);
+                m.c[1].e[3] = 0.0f;
 
                 m.c[2].e[0] = 0.f;
                 m.c[2].e[1] = 0.f;
                 m.c[2].e[2] = -(2.0f/f_min_n);
-                m.c[2].e[3] = -(f + n)/ f_min_n;
+                m.c[2].e[3] = 0.0f;
 
-                m.c[3].e[0] = 0.f;
-                m.c[3].e[1] = 0.f;
-                m.c[3].e[2] = 0.0f;
+                m.c[3].e[0] = (-right - left) / (r_min_l);
+                m.c[3].e[1] = (-top - bottom) / (t_min_b);
+                m.c[3].e[2] = (-f - n) / f_min_n;
                 m.c[3].e[3] = 1.0f;
 
                 return m;
@@ -235,14 +235,15 @@ namespace Cookie
 
                 Core::Math::Vec3 z = (center - eye).Normalize();
                 Core::Math::Vec3 y = up;
-                Core::Math::Vec3 x = y.Cross(z);
-                y = z.Cross(x);
+                Core::Math::Vec3 x = z.Cross(y);
                 x.Normalize();
+                y = x.Cross(z);
                 y.Normalize();
 
-                m.c[0] = { x ,0.0f};
-                m.c[1] = { y ,0.0f};
-                m.c[2] = { z, 0.0f};
+                m.c[0] = { x.x, y.x, -z.x, eye.x };
+                m.c[1] = { x.y, y.y, -z.y, eye.y };
+                m.c[2] = { x.z, y.z, -z.z, eye.z };
+
                 m.c[3] = { 0.0f,0.0f,0.0f,1.0f };
 
                 return m;

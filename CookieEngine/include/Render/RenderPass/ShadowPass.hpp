@@ -8,7 +8,6 @@ struct ID3D11RasterizerState;
 struct ID3D11BlendState;
 
 #include <vector>
-#include "ShadowBuffer.hpp"
 
 namespace Cookie
 {
@@ -42,7 +41,6 @@ namespace Cookie
 			ID3D11DepthStencilState*	depthStencilState	= nullptr;
 			ID3D11RasterizerState*		rasterizerState		= nullptr;
 			ID3D11BlendState*			blendState			= nullptr;
-			D3D11_VIEWPORT				viewport;
 
 		private:
 			void InitShader();

@@ -1,6 +1,7 @@
 #include "Editor.hpp" 
 #include "UIallIn.hpp"
 #include "Serialization.hpp"
+#include "Primitives.hpp"
 #include "Physics/PhysicsHandle.hpp"
 #include "ECS/SystemHandler.hpp"
 #include "Resources/Scene.hpp"
@@ -267,6 +268,8 @@ void Editor::Loop()
                 game.coordinator.componentHandler->GetComponentGameplay(selectedEntityId).componentMove.SetPath(*game.scene->map.tileEnd);
             }
         }
+
+        dbgRenderer.AddDebugElement(Core::Primitives::CreateLine({ 0.0f,3.0f,3.0f }, { 0.0f, 3.0f - 1.0f, 3.0f + 1.0f },0xFF0F00, 0xFF0F00));
 
         if (selectedEntity.toChangeEntityId >= 0)
         {
