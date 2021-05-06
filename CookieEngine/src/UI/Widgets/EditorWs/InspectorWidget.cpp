@@ -592,39 +592,3 @@ void Inspector::GameplayInterface()
     ImGui::Separator();
 }
 
-
-/*void Inspector::SceneInspection()
-{
-    InputText("Scene name", &selectedScene->name);
-
-    ImGui::Separator();
-
-    if (TreeNode("Tiles"))
-    {
-        Text("Current tiles: %d in x, %d in z", selectedScene->tiles.widthTile, selectedScene->tiles.depthTile);
-
-        DragFloat2("##TILESNUM_EDIT", sceneTiles.e);
-
-        if (sceneTiles.x != (float)selectedScene->tiles.widthTile ||
-            sceneTiles.y != (float)selectedScene->tiles.depthTile)
-        {
-            if (sceneTiles.x > 0 && sceneTiles.y > 0)
-            {
-                if (Button("Save new dimensions"))
-                    selectedScene->ChangeNumberOfTiles(sceneTiles.x, sceneTiles.y); 
-            }
-            else
-            { TextColored({0.70f, 0.4f, 0.4f, 1}, "Invalid new values"); }
-
-            SameLine();
-
-            if (Button("Discard"))
-            {
-                sceneTiles.x = (float)selectedScene->tiles.widthTile,
-                sceneTiles.y = (float)selectedScene->tiles.depthTileProp;
-            }
-        }
-
-        TreePop();
-    }
-}*/

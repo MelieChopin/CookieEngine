@@ -14,6 +14,7 @@
 #include "Widgets/EditorWs/TextureEditorWidget.hpp"
 #include "Widgets/EditorWs/ToolbarWidget.hpp"
 #include "Widgets/EditorWs/ViewportWidget.hpp"
+#include "Widgets/EditorWs/WorldSettingsWidget.hpp"
 
 #include "Widgets/UIwidgets.hpp"
 
