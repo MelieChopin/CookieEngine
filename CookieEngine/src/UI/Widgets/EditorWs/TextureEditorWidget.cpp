@@ -39,10 +39,19 @@ void TextureEditor::WindowDisplay()
 				else Custom::TextSnip(textPtr->second->name.c_str(), 15);
 
 				EndGroup();
-
-				SameLine();
-				if (GetContentRegionAvail().x < 100.f) NewLine();
 			}
+
+			if (BeginPopupContextItem("Texture interaction popup"))
+			{
+				if (Selectable("Delete this texture!"))
+				{ resources.textures.erase(textPtr); }
+
+				EndPopup();
+			}
+
+
+			SameLine();
+			if (GetContentRegionAvail().x < 100.f) NewLine();
         }
 
 		EndGroup();

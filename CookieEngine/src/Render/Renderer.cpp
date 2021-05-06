@@ -241,7 +241,7 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
 
     gPass.Set(depthBuffer);
 
-    game.scene->map.Draw(viewProj,&gPass.CBuffer);
+    game.scene->map.Draw(viewProj, &gPass.CBuffer);
 
     gPass.Draw(viewProj,game.coordinator);
 

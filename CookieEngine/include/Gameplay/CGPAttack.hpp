@@ -17,6 +17,12 @@ namespace Cookie
 			~CGPAttack() {}
 
 			void Attack() {}
+			inline void ToDefault() noexcept
+			{
+				attackDamage = 0;
+				attackSpeed = 0;
+				attackRange = 0;
+			}
 		};
 
 

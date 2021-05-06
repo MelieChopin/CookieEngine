@@ -1,6 +1,7 @@
 #include "Resources/Scene.hpp"
 #include "Game.hpp"
 
+#include "UIcore.hpp"
 
 using namespace Cookie;
 
@@ -10,7 +11,7 @@ Game::Game():
     skyBox{resources},
     frameBuffer{renderer.window.width,renderer.window.height}
 {
-
+    Core::UIcore::FinishInit(renderer);
 }
 
 Game::~Game()
