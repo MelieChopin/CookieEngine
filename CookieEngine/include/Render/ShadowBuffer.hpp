@@ -5,6 +5,8 @@ struct ID3D11Texture2D;
 struct ID3D11ShaderResourceView;
 struct ID3D11DepthStencilView;
 
+#define SHADOW_MAP_RESOLUTION 2048
+
 namespace Cookie
 {
 	namespace Render
@@ -17,16 +19,16 @@ namespace Cookie
 			ID3D11DepthStencilView*		depthStencilView{ nullptr };
 
 		private:
-			bool CreateTexture(int width, int height);
+			bool CreateTexture();
 			bool CreateShaderResource();
 			bool CreateDepthStencilView();
 
 		public:
 			/* CONSTRUCTORS/DESTRUCTORS */
-			ShadowBuffer(int width, int height);
+			ShadowBuffer();
 			~ShadowBuffer();
 
-			void Resize(int width, int height);
+			void Clear();
 		};
 	}
 }

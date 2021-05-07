@@ -16,9 +16,9 @@ LightsArray::LightsArray()
 {
 };
 
-
-void LightsArray::Resize(int width, int height)
+void LightsArray::Clear()
 {
+
 	for (int i = 0; i < DIR_LIGHT_MAX_NB; i++)
 	{
 		DirLight& iLight = dirLights.at(i);
@@ -27,11 +27,11 @@ void LightsArray::Resize(int width, int height)
 		{
 			if (iLight.shadowMap)
 			{
-				iLight.shadowMap->Resize(width, height);
+				iLight.shadowMap->Clear();
 			}
 			else
 			{
-				iLight.shadowMap = std::make_unique<ShadowBuffer>(width, height);
+				iLight.shadowMap = std::make_unique<ShadowBuffer>();
 			}
 		}
 		else
@@ -40,22 +40,6 @@ void LightsArray::Resize(int width, int height)
 			{
 				iLight.shadowMap.reset();
 				iLight.shadowMap = nullptr;
-			}
-		}
-	}
-}
-
-void LightsArray::Clear()
-{
-	for (int i = 0; i < DIR_LIGHT_MAX_NB; i++)
-	{
-		DirLight& iLight = dirLights.at(i);
-
-		if (iLight.castShadow)
-		{
-			if (iLight.shadowMap)
-			{
-				Render::RendererRemote::context->ClearDepthStencilView(iLight.shadowMap->depthStencilView, D3D11_CLEAR_DEPTH , 1.0f, 0.0f); 
 			}
 		}
 	}

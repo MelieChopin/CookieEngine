@@ -200,7 +200,7 @@ namespace Cookie
 
                 return m;
             }
-            inline Mat4 Mat4::Ortho(float left, float right, float top, float bottom, float n, float f)
+            inline Mat4 Mat4::Ortho(float left, float right, float bottom, float top, float n, float f)
             {
                 Mat4 m;
                 float r_min_l = right - left;
@@ -233,17 +233,21 @@ namespace Cookie
             {
                 Mat4 m;
 
-                Core::Math::Vec3 z = (center - eye).Normalize();
+                Core::Math::Vec3 z = (eye - center).Normalize();
                 Core::Math::Vec3 y = up;
                 Core::Math::Vec3 x = z.Cross(y);
-                x.Normalize();
+                x = x.Normalize();
                 y = x.Cross(z);
-                y.Normalize();
+                y = y.Normalize();
 
                 m.c[0] = { x.x, y.x, -z.x, eye.x };
                 m.c[1] = { x.y, y.y, -z.y, eye.y };
                 m.c[2] = { x.z, y.z, -z.z, eye.z };
 
+                //m.c[0] = { x, eye.x };
+                //m.c[1] = { y, eye.y };
+                //m.c[2] = { -z, eye.z };
+                //
                 m.c[3] = { 0.0f,0.0f,0.0f,1.0f };
 
                 return m;

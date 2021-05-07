@@ -4,9 +4,9 @@
 
 using namespace Cookie::Render;
 
-ShadowBuffer::ShadowBuffer(int width, int height)
+ShadowBuffer::ShadowBuffer()
 {
-    if (CreateTexture(width, height))
+    if (CreateTexture())
     {
         CreateShaderResource();
         CreateDepthStencilView();
@@ -32,12 +32,12 @@ ShadowBuffer::~ShadowBuffer()
     }
 }
 
-bool ShadowBuffer::CreateTexture(int width, int height)
+bool ShadowBuffer::CreateTexture()
 {
     D3D11_TEXTURE2D_DESC desc = {};
 
-    desc.Width = width;
-    desc.Height = height;
+    desc.Width = SHADOW_MAP_RESOLUTION;
+    desc.Height = SHADOW_MAP_RESOLUTION;
     desc.MipLevels = 1;
     desc.ArraySize = 1;
     desc.Format = DXGI_FORMAT_R32_TYPELESS;
@@ -94,27 +94,7 @@ bool ShadowBuffer::CreateDepthStencilView()
     return true;
 }
 
-void ShadowBuffer::Resize(int width, int height)
+void ShadowBuffer::Clear()
 {
-    if (texBuffer)
-    {
-        texBuffer->Release();
-        texBuffer = nullptr;
-    }
-    if (shaderResource)
-    {
-        shaderResource->Release();
-        shaderResource = nullptr;
-    }
-    if (depthStencilView)
-    {
-        depthStencilView->Release();
-        depthStencilView = nullptr;
-    }
-
-    if (CreateTexture(width, height))
-    {
-        CreateShaderResource();
-        CreateDepthStencilView();
-    }
+    Render::RendererRemote::context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0.0f);
 }

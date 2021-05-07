@@ -186,7 +186,6 @@ namespace Cookie
 			public:
 				LightsArray();
 
-				void Resize(int width, int height);
 				void Clear();
 		};
 	}

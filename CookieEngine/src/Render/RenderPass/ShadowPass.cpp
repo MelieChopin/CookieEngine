@@ -17,7 +17,8 @@ struct VS_CONSTANT_BUFFER
 
 /*======================= CONSTRUCTORS/DESTRUCTORS =======================*/
 
-ShadowPass::ShadowPass()
+ShadowPass::ShadowPass():
+    shadowViewport{0.0f,0.0f,SHADOW_MAP_RESOLUTION,SHADOW_MAP_RESOLUTION,0.0f,1.0f}
 {
     InitShader();
     InitState();
@@ -163,7 +164,8 @@ void ShadowPass::Draw(const ECS::Coordinator& coordinator, Resources::Map& map, 
 
     size_t bufferSize = sizeof(buffer);
 
-    Core::Math::Mat4 proj = Core::Math::Mat4::Ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.01f, 1000.0f);
+    Render::RendererRemote::context->RSSetViewports(1, &shadowViewport);
+    Core::Math::Mat4 proj = Core::Math::Mat4::Ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 10.0f);
 
     for (int j = 0; j < lights.usedDir; j++)
     {
@@ -171,7 +173,8 @@ void ShadowPass::Draw(const ECS::Coordinator& coordinator, Resources::Map& map, 
         if (jLight.castShadow)
         {
             Render::RendererRemote::context->OMSetRenderTargets(0, nullptr, jLight.shadowMap->depthStencilView);
-            jLight.lightViewProj = proj * Core::Math::Mat4::LookAt(jLight.dir.Normalize() * 10.0f, {0.0f,0.0f,0.0f}, { 0.0f,1.0f,0.0f });
+            auto view = Core::Math::Mat4::RotateX(-Core::Math::TAU / 4.0);// Core::Math::Mat4::LookAt(-jLight.dir.Normalize() * 10.0f, { 0.0f,0.0f,0.0f }, { 0.0f,1.0f,0.0f });
+            jLight.lightViewProj = proj * view;
             buffer.lightViewProj = jLight.lightViewProj;
 
             for (int i = 0; i < entityHandler.livingEntities; ++i)

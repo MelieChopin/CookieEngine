@@ -28,7 +28,6 @@ Renderer::Renderer():
     lights.usedDir++;
     //lights.dirLights[2] = { {0.0f,-1.0f,0.0f},{0.0,0.0f,1.0f} };
     //lights.usedDir++;
-    lights.Resize(window.width, window.height);
 }
 
 Renderer::~Renderer()
@@ -156,7 +155,6 @@ void Renderer::ResizeBuffer(int width, int height)
     gPass.albedoFBO.Resize(width, height);
     lPass.diffuseFBO.Resize(width, height);
     lPass.specularFBO.Resize(width, height);
-    lights.Resize(window.width, window.height);
 
     remote.context->ClearState();
     remote.context->Flush();

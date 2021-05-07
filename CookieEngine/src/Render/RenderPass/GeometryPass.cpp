@@ -323,8 +323,9 @@ void GeometryPass::Draw(const Camera& cam, const ECS::Coordinator& coordinator)
     const ECS::ComponentHandler& components = *coordinator.componentHandler;
 
     VS_CONSTANT_BUFFER buffer = {};
-    buffer.proj = cam.GetProj();
-    buffer.view = cam.GetView();
+    buffer.proj = Core::Math::Mat4::Ortho(-20.0f, 20.0f, -20.0f, 20.0f, -20.0f, 20.0f);//cam.GetProj();
+    //cam.pos = 
+    buffer.view = Core::Math::Mat4::LookAt({ -3.0f,3.0f,0.f }, { 0.0f,0.0f,0.0f }, { 0.0f,1.0f,0.0f });//Core::Math::Mat4::RotateX(Core::Math::TAU / 4.0);// 
 
     size_t bufferSize = sizeof(buffer);
 

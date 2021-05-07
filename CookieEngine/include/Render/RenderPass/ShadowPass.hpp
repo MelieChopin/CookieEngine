@@ -6,6 +6,7 @@ struct ID3D11Buffer;
 struct ID3D11DepthStencilState;
 struct ID3D11RasterizerState;
 struct ID3D11BlendState;
+struct D3D11_VIEWPORT;
 
 #include <vector>
 
@@ -41,6 +42,8 @@ namespace Cookie
 			ID3D11DepthStencilState*	depthStencilState	= nullptr;
 			ID3D11RasterizerState*		rasterizerState		= nullptr;
 			ID3D11BlendState*			blendState			= nullptr;
+			D3D11_VIEWPORT				shadowViewport;
+			
 
 		private:
 			void InitShader();
