@@ -1,19 +1,12 @@
-
-#include <d3d11.h>
-#include "Coordinator.hpp"
-#include "Resources/Scene.hpp"
-#include "ECS/ComponentModel.hpp"
-#include "Resources/ResourcesManager.hpp" 
-#include "InspectorWidget.hpp"
 #include "Editor.hpp"
+#include <reactphysics3d.h>
+#include "InspectorWidget.hpp"
 
 #include <string>
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
 #include "CustomImWidget.hpp"
-
-#include <reactphysics3d.h>
 
 using namespace ImGui;
 using namespace Cookie::UIwidget;
@@ -41,6 +34,7 @@ void Inspector::WindowDisplay()
 void Inspector::EntityInspection()
 {
     InputText("Entity name", &selectedEntity.focusedEntity->name);
+    InputText("Entity tag",  &selectedEntity.focusedEntity->tag );
 
     ImGui::Separator();
 
@@ -48,39 +42,36 @@ void Inspector::EntityInspection()
     if (selectedEntity.focusedEntity->signature & SIGNATURE_MODEL)        ModelInterface();
     if (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS)      PhysicsInterface();
     if (selectedEntity.focusedEntity->signature & SIGNATURE_SCRIPT)       ScriptInterface();
-    //if (selectedEntity->signature & SIGNATURE_MAP)          MapInterface();
+    if (selectedEntity.focusedEntity->signature & SIGNATURE_GAMEPLAY)     GameplayInterface();
+
 
     if (Button("Add component...")) OpenPopup("Add component popup");
 
     if (BeginPopup("Add component popup"))
     {
-        if  (selectedEntity.focusedEntity->signature & SIGNATURE_TRANSFORM) TextDisabled("Component Transform already added");
-        else if (Button("Add component Transform"))
-        { 
-            coordinator.componentHandler->AddComponentTransform (*selectedEntity.focusedEntity);
-            CloseCurrentPopup();
-        }
+        if (selectedEntity.focusedEntity->signature & SIGNATURE_TRANSFORM)  TextDisabled("Component Transform already added");
+        else if (Selectable("Add component Transform"))
+            coordinator.componentHandler->  AddComponentTransform   (*selectedEntity.focusedEntity);
 
-        if (selectedEntity.focusedEntity->signature & SIGNATURE_MODEL) TextDisabled("Component Model already added");
-        else if (Button("Add component Model"))
-        {
-            coordinator.componentHandler->AddComponentModel     (*selectedEntity.focusedEntity);
-            CloseCurrentPopup();
-        }
+
+        if (selectedEntity.focusedEntity->signature & SIGNATURE_MODEL)      TextDisabled("Component Model already added");
+        else if (Selectable("Add component Model"))
+            coordinator.componentHandler->  AddComponentModel       (*selectedEntity.focusedEntity);
         
-        if (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS) TextDisabled("Component Physics already added");
-        else if (Button("Add component Physics"))
-        {
-            coordinator.componentHandler->AddComponentPhysics   (*selectedEntity.focusedEntity);
-            CloseCurrentPopup();
-        }
 
-        if (selectedEntity.focusedEntity->signature & SIGNATURE_SCRIPT) TextDisabled("Component Script already added");
-        else if (Button("Add component Script"))
-        {
-            coordinator.componentHandler->AddComponentScript    (*selectedEntity.focusedEntity);
-            CloseCurrentPopup();
-        }
+        if (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS)    TextDisabled("Component Physics already added");
+        else if (Selectable("Add component Physics"))
+            coordinator.componentHandler->  AddComponentPhysics     (*selectedEntity.focusedEntity);
+
+
+        if (selectedEntity.focusedEntity->signature & SIGNATURE_SCRIPT)     TextDisabled("Component Script already added");
+        else if (Selectable("Add component Script"))
+            coordinator.componentHandler->  AddComponentScript      (*selectedEntity.focusedEntity);
+
+
+        if (selectedEntity.focusedEntity->signature & SIGNATURE_GAMEPLAY)   TextDisabled("Component Gameplay already added");
+        else if (Selectable("Add component Gameplay"))
+            coordinator.componentHandler->  AddComponentGameplay    (*selectedEntity.focusedEntity);
 
         EndPopup();
     }
@@ -96,8 +87,9 @@ void Inspector::TransformInterface()
         Text("Rot:"); SameLine(65.f); DragFloat3("##ROT", trsf.rot.e);
         Text("Scl:"); SameLine(65.f); DragFloat3("##SCL", trsf.scale.e);
 
-        ImGui::NewLine();
-        if (Button("Remove component##TRSF"))
+        
+        NewLine();
+        if (Selectable("Remove component##TRSF"))
         {
             coordinator.componentHandler->RemoveComponentTransform(*selectedEntity.focusedEntity);
         }
@@ -206,8 +198,8 @@ void Inspector::ModelInterface()
 
 //===================//
 
-        ImGui::NewLine();
-        if (Button("Remove component##MODEL"))
+        NewLine();
+        if (Selectable("Remove component##MODEL"))
         {
             coordinator.componentHandler->RemoveComponentModel(*selectedEntity.focusedEntity);
         }
@@ -217,7 +209,6 @@ void Inspector::ModelInterface()
 
     ImGui::Separator();
 }
-
 
 void Inspector::PhysicsInterface()
 {
@@ -450,31 +441,33 @@ void Inspector::PhysicsInterface()
             TreePop();
         }
 
-        ImGui::NewLine();
-        if (Button("Remove component##COLLIDER"))
+
+        NewLine();
+        if (Selectable("Remove component##COLLIDER"))
         {
             coordinator.componentHandler->RemoveComponentPhysics(*selectedEntity.focusedEntity);
         }
 
         TreePop();
     }
-}
 
+    ImGui::Separator();
+}
 
 void Inspector::ScriptInterface()
 {
     if (TreeNode("Script"))
     {
-        ComponentScript& scriptC = coordinator.componentHandler->GetComponentScript(selectedEntity.focusedEntity->id);
+        ComponentScript& scriptComp = coordinator.componentHandler->GetComponentScript(selectedEntity.focusedEntity->id);
         
-        for (size_t i = 0; i < scriptC.scripts.size();)
+        for (size_t i = 0; i < scriptComp.scripts.size();)
         { 
-            Text("%s", scriptC.scripts[i].script->filename.c_str());
+            Text("%s", scriptComp.scripts[i].script->filename.c_str());
             Indent();
             
             if (Button( ("Remove##SCRIPT_" + std::to_string(i)).c_str() ))
             {
-                scriptC.scripts.erase(scriptC.scripts.begin() + i);
+                scriptComp.scripts.erase(scriptComp.scripts.begin() + i);
             }
             else ++i;
 
@@ -491,7 +484,7 @@ void Inspector::ScriptInterface()
             {
                 if (Button(scrIt->second->filename.c_str()))
                 {
-                    scriptC.scripts.push_back(scrIt->second->CreateObject(std::to_string(selectedEntity.focusedEntity->id)));
+                    scriptComp.scripts.push_back(scrIt->second->CreateObject(std::to_string(selectedEntity.focusedEntity->id)));
                     CloseCurrentPopup();
                 }
             }
@@ -501,7 +494,7 @@ void Inspector::ScriptInterface()
 
 
         NewLine();
-        if (Button("Remove component##SCRIPT"))
+        if (Selectable("Remove component##SCRIPT"))
         {
             coordinator.componentHandler->RemoveComponentScript(*selectedEntity.focusedEntity);
         }
@@ -512,16 +505,86 @@ void Inspector::ScriptInterface()
     ImGui::Separator();
 }
 
-void Inspector::MapInterface()
+void Inspector::GameplayInterface()
 {
-    if (TreeNode("Map transform"))
+    if (TreeNode("Gameplay properties"))
     {
-        ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id);
+        ComponentGameplay& gameplayComp = coordinator.componentHandler->GetComponentGameplay(selectedEntity.focusedEntity->id);
 
-        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.pos.e);
-        
-        Text("Scl:"); SameLine(65.f); 
-        if (DragFloat3("##SCL", trsf.scale.e)) CDebug.Log("Recoded an edit");
+        if (selectedEntity.focusedEntity->signatureGameplay & SIGNATURE_CGP_LIVE)
+        {
+            if (TreeNode("Life/Armor properties"))
+            {
+                DragFloat("##LIFE",  &gameplayComp.componentLive.life,  1.f, NULL, NULL, "Life: %.0f");
+                DragFloat("##ARMOR", &gameplayComp.componentLive.armor, 1.f, NULL, NULL, "Armor: %.0f");
+            
+
+                NewLine();
+                if (Selectable("Remove property##LIVE"))
+                {
+                    gameplayComp.componentLive.ToDefault();
+                    selectedEntity.focusedEntity->signatureGameplay -= SIGNATURE_CGP_LIVE;
+                }
+
+                TreePop();
+            }
+        }
+        else if (Selectable("Add life/Armor properties"))
+            selectedEntity.focusedEntity->signatureGameplay += SIGNATURE_CGP_LIVE;
+
+
+        if (selectedEntity.focusedEntity->signatureGameplay & SIGNATURE_CGP_MOVE)
+        {
+            if (TreeNode("Movement capacities"))
+            {
+                DragFloat("##SPEED", &gameplayComp.componentMove.moveSpeed, 0.25f, NULL, NULL, "Speed: %.2f");
+                Text("Flying:"); SameLine(); Checkbox("##CANFLY", &gameplayComp.componentMove.isFlying);
+
+                DragFloat("##RADIUS", &gameplayComp.componentMove.radius, 0.25f, NULL, NULL, "Radius: %.2f");
+
+
+                NewLine();
+                if (Selectable("Remove property##MOVE"))
+                {
+                    gameplayComp.componentMove.ToDefault();
+                    selectedEntity.focusedEntity->signatureGameplay -= SIGNATURE_CGP_MOVE;
+                }
+
+                TreePop();
+            }
+        }
+        else if (Selectable("Add movement capacities"))
+            selectedEntity.focusedEntity->signatureGameplay += SIGNATURE_CGP_MOVE;
+
+
+        if (selectedEntity.focusedEntity->signatureGameplay & SIGNATURE_CGP_ATTACK)
+        {
+            if (TreeNode("Attack abilities"))
+            {
+                DragFloat("##DAMAGE", &gameplayComp.componentAttack.attackDamage, 0.25f, NULL, NULL, "Damage: %.2f");
+                DragFloat("##RANGE",  &gameplayComp.componentAttack.attackRange,  0.25f, NULL, NULL, "Range: %.2f");
+                DragFloat("##SPEED",  &gameplayComp.componentAttack.attackSpeed,  0.25f, NULL, NULL, "Speed: %.2f");
+
+
+                NewLine();
+                if (Selectable("Remove property##ATTACK"))
+                {
+                    gameplayComp.componentMove.ToDefault();
+                    selectedEntity.focusedEntity->signatureGameplay -= SIGNATURE_CGP_ATTACK;
+                }
+
+                TreePop();
+            }
+        }
+        else if (Selectable("Add attack abilities"))
+            selectedEntity.focusedEntity->signatureGameplay += SIGNATURE_CGP_ATTACK;
+
+
+        NewLine();
+        if (Selectable("Remove component##GAMEPLAY"))
+        {
+            coordinator.componentHandler->RemoveComponentGameplay(*selectedEntity.focusedEntity);
+        }
 
         TreePop();
     }
@@ -529,39 +592,3 @@ void Inspector::MapInterface()
     ImGui::Separator();
 }
 
-
-/*void Inspector::SceneInspection()
-{
-    InputText("Scene name", &selectedScene->name);
-
-    ImGui::Separator();
-
-    if (TreeNode("Tiles"))
-    {
-        Text("Current tiles: %d in x, %d in z", selectedScene->tiles.widthTile, selectedScene->tiles.depthTile);
-
-        DragFloat2("##TILESNUM_EDIT", sceneTiles.e);
-
-        if (sceneTiles.x != (float)selectedScene->tiles.widthTile ||
-            sceneTiles.y != (float)selectedScene->tiles.depthTile)
-        {
-            if (sceneTiles.x > 0 && sceneTiles.y > 0)
-            {
-                if (Button("Save new dimensions"))
-                    selectedScene->ChangeNumberOfTiles(sceneTiles.x, sceneTiles.y); 
-            }
-            else
-            { TextColored({0.70f, 0.4f, 0.4f, 1}, "Invalid new values"); }
-
-            SameLine();
-
-            if (Button("Discard"))
-            {
-                sceneTiles.x = (float)selectedScene->tiles.widthTile,
-                sceneTiles.y = (float)selectedScene->tiles.depthTileProp;
-            }
-        }
-
-        TreePop();
-    }
-}*/
