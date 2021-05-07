@@ -29,6 +29,15 @@ namespace Cookie
 				virtual void Update(ParticlesData* p, int index) override;
 			};
 
+			class UpdateScale : public ParticlesUpdate
+			{
+			public:
+				UpdateScale() {}
+				~UpdateScale() {}
+
+				virtual void Update(ParticlesData* p, int index) override;
+			};
+
 			class EnabledGravity : public ParticlesUpdate
 			{
 			public:

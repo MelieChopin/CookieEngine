@@ -45,7 +45,8 @@ namespace Cookie
 			std::vector<InstancedData> mInstancedData;
 
 			void InitShader();
-			void Draw(const Core::Math::Mat4& viewProj, Resources::Mesh* mesh, std::vector<InstancedData> data);
+			void Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view, Resources::Mesh* mesh, std::vector<InstancedData> data);
+			void AllocateMoreSpace(int newSpace);
 
 
 			ParticlesPass();

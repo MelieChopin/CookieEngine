@@ -25,6 +25,11 @@ namespace Cookie
 
 				ParticlesSystem() {}
 
+				ParticlesSystem(const ParticlesSystem& other) : data(other.data), particlesEmiter(other.particlesEmiter)
+				{
+					shader.InitShader();
+				}
+
 				ParticlesSystem(int size, int sizeFrame)
 				{
 					shader.InitShader();
@@ -59,7 +64,7 @@ namespace Cookie
 					}
 				}
 
-				void Draw(const Core::Math::Mat4& viewProj, Cookie::Resources::ResourcesManager& resources)
+				void Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view, Cookie::Resources::ResourcesManager& resources)
 				{
 					std::vector<Cookie::Render::InstancedData> newData;
 
@@ -68,12 +73,12 @@ namespace Cookie
 						for (int i = 0; i < data[j].countAlive; i++)
 						{
 							Cookie::Render::InstancedData temp;
-							temp.World = (trs.TRS * Cookie::Core::Math::Mat4::Translate(data[j].pos[i]));
-							temp.Color = Cookie::Core::Math::Vec4(1, 0, 0, 1);
+							temp.World = (trs.TRS * data[j].trs[i]);
+							temp.Color = data[j].col[i];
 							newData.push_back(temp);
 						}
 
-						shader.Draw(viewProj, resources.meshes["Quad"].get(), newData);
+						shader.Draw(proj, view, resources.meshes["Quad"].get(), newData);
 					}
 				}
 			};

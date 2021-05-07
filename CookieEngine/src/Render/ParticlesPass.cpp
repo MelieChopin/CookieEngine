@@ -8,7 +8,8 @@ using namespace Cookie::Render;
 
 struct VS_CONSTANT_BUFFER
 {
-    Cookie::Core::Math::Mat4 viewproj = Cookie::Core::Math::Mat4::Identity();
+    Cookie::Core::Math::Mat4 proj = Cookie::Core::Math::Mat4::Identity();
+    Cookie::Core::Math::Mat4 view = Cookie::Core::Math::Mat4::Identity();
 };
 
 
@@ -38,7 +39,8 @@ void ParticlesPass::InitShader()
 	std::string source = (const char*)R"(#line 28
     cbuffer MatrixBuffer : register(b0)
     {
-	    float4x4 gViewProj;
+        float4x4 gProj;
+	    float4x4 gView;
     };
 
     struct VertexInputType
@@ -69,9 +71,13 @@ void ParticlesPass::InitShader()
 	    // Transform to world space space.
 	    vout.PosW    = temp.xyz;
 	    vout.NormalW = mul(vin.NormalL, (float3x3)vin.World);
-	    	
+	    
+        float3 cameraR = float3(gView[0][0], gView[1][0], gView[2][0]);
+        float3 cameraUp = float3(gView[0][1], gView[1][1], gView[2][1]);
+        float4x4 mat = mul(gView, gProj);
+
 	    // Transform to homogeneous clip space.
-	    vout.PosH = mul(temp, gViewProj);
+	    vout.PosH = mul(float4(temp + mul(cameraUp, temp.y) + mul(cameraR, temp.x), 1.0f), mat);
 	    
 	    // Output vertex attributes for interpolation across triangle.
 	    vout.Tex   = vin.Tex;
@@ -103,12 +109,6 @@ void ParticlesPass::InitShader()
 
 	Render::CompilePixel(source, &PShader);
 
-    struct Vertex
-    {
-        Core::Math::Vec3 position;
-        Core::Math::Vec4 color;
-    };
-
     D3D11_INPUT_ELEMENT_DESC ied[] =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -123,9 +123,7 @@ void ParticlesPass::InitShader()
      
     Render::CreateLayout(&blob, ied, 8, &ILayout);
 
-
-    const int n = 5;
-    mInstancedData.resize(n* n* n);
+    mInstancedData.resize(1);
 
     D3D11_BUFFER_DESC vbd;
     vbd.Usage = D3D11_USAGE_DYNAMIC;
@@ -149,23 +147,29 @@ void ParticlesPass::InitShader()
 
 /*=========================== REALTIME METHODS ===========================*/
 
-void ParticlesPass::Draw(const Core::Math::Mat4& viewProj, Resources::Mesh* mesh, std::vector<InstancedData> data)
+void ParticlesPass::AllocateMoreSpace(int newSpace)
+{
+    InstanceBuffer->Release();
+    D3D11_BUFFER_DESC vbd;
+    vbd.Usage = D3D11_USAGE_DYNAMIC;
+    vbd.ByteWidth = sizeof(InstancedData) * newSpace;
+    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    vbd.MiscFlags = 0;
+    vbd.StructureByteStride = 0;
+    Render::RendererRemote::device->CreateBuffer(&vbd, 0, &InstanceBuffer);
+    mInstancedData.resize(newSpace);
+}
+
+void ParticlesPass::Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view, Resources::Mesh* mesh, std::vector<InstancedData> data)
 {
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
 
+    if (mInstancedData.size() < data.size())
+        AllocateMoreSpace(data.size());
 
-   /* D3D11_MAPPED_SUBRESOURCE mappedData;
-    Render::RendererRemote::context->Map(instanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData);
-
-    /*InstancedData* dataView = reinterpret_cast<InstancedData*>(mappedData.pData);
-
-    for (int i = 0; i < mInstancedData.size(); i++)
-    {
-        dataView[i] = mInstancedData[i];
-    }
-
-    Render::RendererRemote::context->Unmap(instanceBuffer, 0);*/
+    mInstancedData = data;
 
     ID3D11Buffer* vbs[2] = { mesh->VBuffer, InstanceBuffer };
 
@@ -174,27 +178,28 @@ void ParticlesPass::Draw(const Core::Math::Mat4& viewProj, Resources::Mesh* mesh
 
     Render::RendererRemote::context->IASetInputLayout(ILayout);
     Render::RendererRemote::context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
 
     VS_CONSTANT_BUFFER buffer = {};
-    buffer.viewproj = viewProj;
+    buffer.proj = proj; //* view;
+    buffer.view = view;
     Render::WriteCBuffer(&buffer, sizeof(buffer), 0, &CBuffer);
-
  
     Render::RendererRemote::context->IASetVertexBuffers(0, 2, vbs, stride, offset);
     Render::RendererRemote::context->IASetIndexBuffer(mesh->IBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-
     D3D11_MAPPED_SUBRESOURCE ms;
-
     HRESULT result = Render::RendererRemote::context->Map(InstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
 
-    memcpy(ms.pData, data.data(), sizeof(Render::InstancedData) * data.size());
 
+    /*for (int i = 0; i < mInstancedData.size(); i++)
+    {
+        if ()
+        
+    }*/
+
+    memcpy(ms.pData, mInstancedData.data(), sizeof(Render::InstancedData) * mInstancedData.size());
     Render::RendererRemote::context->Unmap(InstanceBuffer, 0);
-   
 
-    Render::RendererRemote::context->DrawIndexedInstanced(6, data.size(), 0, 0, 0);
+    Render::RendererRemote::context->DrawIndexedInstanced(6, mInstancedData.size(), 0, 0, 0);
 }

@@ -10,7 +10,7 @@ namespace Cookie
 	namespace Core::Math
 	{
 		//in inline ?
-		static Cookie::Core::Math::Vec3 Random(Cookie::Core::Math::Vec3& min, Cookie::Core::Math::Vec3& max);
+		static Cookie::Core::Math::Vec4 Random(Cookie::Core::Math::Vec3& min, Cookie::Core::Math::Vec3& max);
 	}
 	
 	namespace Resources
@@ -107,6 +107,20 @@ namespace Cookie
 
 				TimeRandGenerate() {}
 				TimeRandGenerate(float timeMin, float timeMax) : timeMin(timeMin), timeMax(timeMax) {}
+			};
+
+		#undef min
+#undef max
+			class ColorRandGenerate : public ParticlesGenerator
+			{
+			public:
+				Cookie::Core::Math::Vec3 min;
+				Cookie::Core::Math::Vec3 max;
+
+				virtual void generate(ParticlesData* data, int start, int end) override;
+
+				ColorRandGenerate() {}
+				ColorRandGenerate(Cookie::Core::Math::Vec3 colorMin, Cookie::Core::Math::Vec3 colorMax) : min(colorMin), max(colorMax) {}
 			};
 		}
 	}

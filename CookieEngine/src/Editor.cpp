@@ -129,27 +129,29 @@ void Editor::Loop()
     /// Particles
     game.particlesSystem = Cookie::Resources::Particles::ParticlesSystem(40, 20);
     game.particlesSystem.shader.InitShader();
-    game.particlesSystem.trs.pos = Vec3(0, 20, 0);
+    game.particlesSystem.trs.pos = Vec3(0, 10, 0);
     game.particlesSystem.trs.rot = Vec3(0, 0, 0);
     game.particlesSystem.trs.scale = Vec3(1, 1, 1);
     game.particlesSystem.trs.ComputeTRS();
 
     Cookie::Resources::Particles::BoxPositionGenerate       box(Vec3(0, 0, 0), Vec3(2, 2, 2));
-    Cookie::Resources::Particles::CirclePositionGenerate    circle(Vec3(0, 0, 0), 5);
+    Cookie::Resources::Particles::CirclePositionGenerate    circle(Vec3(0, 0, 0), 2.0f);
     Cookie::Resources::Particles::VelocityConstGenerate     vel(Vec3(0, 10, 0));
-    Cookie::Resources::Particles::VelocityRandGenerate      velRand(Vec3(0, 7, 0), Vec3(0, 20, 0));
+    Cookie::Resources::Particles::VelocityRandGenerate      velRand(Vec3(0, 15, 0), Vec3(0, 35, 0));
     Cookie::Resources::Particles::MassConstGenerate         mass(2);
     Cookie::Resources::Particles::TimeGenerate              time(2);
-    Cookie::Resources::Particles::TimeRandGenerate          timeRand(1.5f, 3.5f);
+    Cookie::Resources::Particles::TimeRandGenerate          timeRand(0.25f, 0.55f);
+    Cookie::Resources::Particles::ColorRandGenerate         color(Vec3(0.5f, 0, 0), Vec3(1, 0, 0));
     game.particlesSystem.data[0].countAlive = 10;
     game.particlesSystem.particlesEmiter[0].generators.push_back(&circle);
     game.particlesSystem.particlesEmiter[0].generators.push_back(&velRand);
     //particlesSystem.particlesEmiter[0].generators.push_back(&mass);
     game.particlesSystem.particlesEmiter[0].generators.push_back(&timeRand);
+    game.particlesSystem.particlesEmiter[0].generators.push_back(&color);
     for (int i = 0; i < game.particlesSystem.particlesEmiter[0].generators.size(); i++)
         game.particlesSystem.particlesEmiter[0].generators[i]->generate(&game.particlesSystem.data[0], 0, 10);
 
-    game.particlesSystem.data.push_back(Cookie::Resources::Particles::ParticlesData());
+    /*game.particlesSystem.data.push_back(Cookie::Resources::Particles::ParticlesData());
     game.particlesSystem.particlesEmiter.push_back(Cookie::Resources::Particles::ParticlesEmitter());
     game.particlesSystem.data[1].generate(10, 3);
     game.particlesSystem.particlesEmiter[1].generators.push_back(&box);
@@ -157,20 +159,30 @@ void Editor::Loop()
     game.particlesSystem.particlesEmiter[1].generators.push_back(&mass);
     game.particlesSystem.particlesEmiter[1].generators.push_back(&timeRand);
     for (int i = 0; i < game.particlesSystem.particlesEmiter[1].generators.size(); i++)
-        game.particlesSystem.particlesEmiter[1].generators[i]->generate(&game.particlesSystem.data[1], 0, 5);
+        game.particlesSystem.particlesEmiter[1].generators[i]->generate(&game.particlesSystem.data[1], 0, 5);*/
 
 
 
     Cookie::Resources::Particles::UpdateVelocity    updateVel;
+    Cookie::Resources::Particles::UpdateScale       updateScale;
     Cookie::Resources::Particles::EnabledGravity    enabledGravity;
     Cookie::Resources::Particles::UpdateTime        updateTime;
    // particlesSystem.particlesEmiter.updates.push_back(&enabledGravity);
     game.particlesSystem.particlesEmiter[0].updates.push_back(&updateVel);
     game.particlesSystem.particlesEmiter[0].updates.push_back(&updateTime);
+    game.particlesSystem.particlesEmiter[0].updates.push_back(&updateScale);
 
-    game.particlesSystem.particlesEmiter[1].updates.push_back(&updateVel);
+   /* game.particlesSystem.particlesEmiter[1].updates.push_back(&updateVel);
     game.particlesSystem.particlesEmiter[1].updates.push_back(&updateTime);
-    game.particlesSystem.particlesEmiter[1].updates.push_back(&enabledGravity);
+    game.particlesSystem.particlesEmiter[1].updates.push_back(&enabledGravity);*/
+
+    std::vector<Cookie::Resources::Particles::ParticlesSystem> partsys;
+    for (int i = 0; i < 4; i++)
+        partsys.push_back(game.particlesSystem);
+    partsys[0].trs.TRS = Cookie::Core::Math::Mat4::Translate( Vec3(-10, 10, -10));
+    partsys[1].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(-10, 10, 10));
+    partsys[2].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(10, 10, -10));
+    partsys[3].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(10, 10, 10));
     ///
 
 
@@ -179,7 +191,12 @@ void Editor::Loop()
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
         if (isActive)
+        {
             game.particlesSystem.Update();
+            for (int i = 0; i < 4; i++)
+                partsys[i].Update();
+        }
+            
             
         
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
@@ -403,7 +420,9 @@ void Editor::Loop()
         //if (isRaycastingWithMap)
             //SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
         //game.scene->map.DrawSpecificTiles(cam.GetViewProj());
-        game.particlesSystem.Draw(cam.GetViewProj(), game.resources);
+        game.particlesSystem.Draw(cam.GetProj(), cam.GetView(), game.resources);
+        for (int i = 0; i < 4; i++)
+            partsys[i].Draw(cam.GetProj(), cam.GetView(), game.resources);
         dbgRenderer.Draw(cam.GetViewProj());
 
         game.renderer.SetBackBuffer();

@@ -371,6 +371,13 @@ namespace Cookie
                 } };
             }
 
+            inline Vec3 Mat4::GetTranslate()const
+            {
+                return Vec3{c[0].e[3],
+                            c[1].e[3],
+                            c[2].e[3]};
+            }
+
             inline float Mat4::Det()const
             {
                 return    e[0] * (e[5] * ((e[10] * e[15]) - (e[14] * e[11]))
