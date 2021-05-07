@@ -247,7 +247,7 @@ namespace Cookie
 				for (int i = 1; i < waypoints.size(); ++i)
 				{
 					//use 1 for Y so the debug will not be mix up with the map
-					debug.AddDebugElement(Core::Primitives::CreateLine({waypoints[i - 1].x, 1, waypoints[i - 1].z}, {waypoints[i].x, 1, waypoints[i].z}, 0x00FFFF, 0x00FFFF));
+					debug.AddDebugElement(Core::Primitives::CreateLine({waypoints[i - 1].x, 1, waypoints[i - 1].z}, {waypoints[i].x, 1, waypoints[i].z}, 0x00FFFF, 0xFF0000));
 				}
 			}
 		};

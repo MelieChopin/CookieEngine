@@ -65,12 +65,13 @@ void Map::InitTiles()
 void Map::ScaleHasChanged()
 {
 	trs.ComputeTRS();
-	tilesSize = { { trs.scale.x / tilesNb.x, trs.scale.z / tilesNb.y } };
 
+	TileNbHasChanged();
+	
+	physic.physBody->removeCollider(physic.physColliders[0]);
 	physic.physColliders.clear();
 	physic.AddCubeCollider(trs.scale / 2.f, trs.pos, trs.rot);
 
-	InitTiles();
 }
 void Map::TileNbHasChanged()
 {

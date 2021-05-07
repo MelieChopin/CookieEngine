@@ -17,6 +17,7 @@ using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
 
 
+//Entity
 void Coordinator::AddEntity(const int signature, const Resources::ResourcesManager& resources, std::string name)
 {
 	assert(entityHandler->livingEntities < MAX_ENTITIES && "Too many entities in existence.");
@@ -72,7 +73,7 @@ bool Coordinator::CheckSignature(const int entitySignature, const int signature)
 	return (entitySignature & signature) == signature;
 }
 
-
+//Primary Component
 void Coordinator::ApplySystemPhysics(float factor)
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
@@ -92,6 +93,20 @@ void Coordinator::ApplyScriptUpdate()
 		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_SCRIPT))
 			System::SystemScriptUpdate(componentHandler->GetComponentScript(entityHandler->entities[i].id));
 }
+void Coordinator::ApplyComputeTrs()
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM))
+		{
+			ComponentTransform& trs = componentHandler->GetComponentTransform(entityHandler->entities[i].id);
+			
+			if (trs.trsHasChanged)
+			{
+				trs.trsHasChanged = false;
+				trs.ComputeTRS();
+			}
+		}
+}
 void Coordinator::ApplyRemoveUnnecessaryEntities()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
@@ -103,6 +118,7 @@ void Coordinator::ApplyRemoveUnnecessaryEntities()
 		}
 }
 
+//CGP_Move
 void Coordinator::ApplyGameplayUpdatePushedCooldown(Resources::Map& map)
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
@@ -199,6 +215,7 @@ void Coordinator::ApplyGameplayDrawPath(DebugRenderer& debug)
 			componentHandler->GetComponentGameplay(i).componentMove.DrawPath(debug, componentHandler->GetComponentTransform(i));
 }
 
+//CGP_Attack
 void Coordinator::ApplyGameplayCheckEnemyInRange()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
@@ -245,6 +262,7 @@ void Coordinator::ApplyGameplayAttack()
 			componentHandler->GetComponentGameplay(i).componentAttack.Attack();
 }
 
+//Selection
 void Coordinator::SelectEntities(Vec2& selectionQuadStart, Vec2& selectionQuadEnd)
 {
 	selectedEntities.clear();

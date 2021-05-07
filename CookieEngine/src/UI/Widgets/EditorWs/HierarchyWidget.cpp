@@ -44,7 +44,7 @@ void Hierarchy::WindowDisplay()
 
             if (Button(entityNameTag.c_str()))
             {
-                selectedEntity.toChangeEntityId = i;
+                selectedEntity.toChangeEntityId = entityHandler.entities[i].id;
             }
 
             if (BeginPopupContextItem(entityNameTag.c_str()))

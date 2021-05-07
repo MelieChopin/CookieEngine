@@ -36,7 +36,7 @@ void ComponentPhysics::AddSphereCollider(float radius, const Vec3& localPos, con
 void ComponentPhysics::AddCubeCollider(const Vec3& halfExtent, const Vec3& localPos, const Vec3& eulerAngles)
 {
 	BoxShape* cube = Physics::PhysicsHandle().physCom->createBoxShape({ halfExtent.x,halfExtent.y,halfExtent.z });
-
+	
 	Transform trs;
 
 	trs.setPosition({ localPos.x,localPos.y,localPos.z });

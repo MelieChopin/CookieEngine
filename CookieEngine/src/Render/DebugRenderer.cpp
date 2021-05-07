@@ -6,6 +6,7 @@
 
 using namespace Cookie::Render;
 using namespace Cookie::Resources;
+using namespace Cookie::Core;
 using namespace Cookie::Core::Math;
 
 /*========== CONSTRUCTORS/DESTRUCTORS ==========*/
@@ -148,12 +149,39 @@ void DebugRenderer::UpdateVBuffer(size_t vBufferSize, void* data)
     Render::RendererRemote::context->Unmap(VBuffer, 0);
 }
 
-void DebugRenderer::AddDebugElement(const std::vector<Core::Primitives::DebugVertex>& dbgElement)
+void DebugRenderer::AddDebugElement(const std::vector<Primitives::DebugVertex>& dbgElement)
 {
     for (int i = 0; i < dbgElement.size(); i++)
     {
         debugElement.push_back(dbgElement.at(i));
     }
+}
+
+void DebugRenderer::AddLine(Vec3 a, Vec3 b, uint32_t color)
+{
+    AddDebugElement(Primitives::CreateLine(a, b, color, color));
+}
+void DebugRenderer::AddQuad(Vec3 a, Vec3 c, uint32_t color)
+{
+    Vec3 b = {c.x, a.y, a.z};
+    Vec3 d = {a.x, a.y, c.z};
+
+    AddDebugElement(Primitives::CreateLine(a, b, color, color));
+    AddDebugElement(Primitives::CreateLine(b, c, color, color));
+    AddDebugElement(Primitives::CreateLine(c, d, color, color));
+    AddDebugElement(Primitives::CreateLine(d, a, color, color));
+}
+void DebugRenderer::AddQuad(Vec3 center, float halfWidth, float halfDepth, uint32_t color)
+{
+    Vec3 a = center + Vec3{-halfWidth, 0, -halfDepth};
+    Vec3 b = center + Vec3{halfWidth,  0, -halfDepth};
+    Vec3 c = center + Vec3{halfWidth,  0,  halfDepth};
+    Vec3 d = center + Vec3{-halfWidth, 0,  halfDepth};
+
+    AddDebugElement(Primitives::CreateLine(a, b, color, color));
+    AddDebugElement(Primitives::CreateLine(b, c, color, color));
+    AddDebugElement(Primitives::CreateLine(c, d, color, color));
+    AddDebugElement(Primitives::CreateLine(d, a, color, color));
 }
 
 void DebugRenderer::Draw(const Mat4& viewProj)

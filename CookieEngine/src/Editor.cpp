@@ -37,7 +37,9 @@ Editor::Editor()
     Resources::Serialization::Load::LoadAllTextures(game.resources);
 
     //Load default Scene
-    std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/DefaultDuck.CAsset", game);
+    //std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/DefaultDuck.CAsset", game);
+    std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", game);
+
 
     game.SetScene(_scene);
 
@@ -106,26 +108,18 @@ void Editor::Loop()
         game.scene->map.model.mesh                 = game.resources.meshes["Cube"];
         game.scene->map.model.texture              = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"];
 
-
         //will be removed after testing phase
         game.scene->map.modelTileObstacle.mesh     = game.resources.meshes["Cube"];
         game.scene->map.modelTileObstacle.texture  = game.resources.textures["Grey"];
     }
-    ComponentTransform buildingTrs;
-    ComponentModel     buildingModel;
+    Vec3 buildingPos;
     Vec2 buildingTileSize {{1, 1}};
     int nbOfBuildings = 0;
     int nbOfUnits = 0;
     bool isRaycastingWithMap = false;
     int indexOfSelectedTile = 0;
-    {
-        buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x;
-        buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y;
-        buildingModel.mesh = game.resources.meshes["Cube"];
-        buildingModel.texture = game.resources.textures["Pink"];
-    }
-    Vec2 selectionQuadStart;
     bool makingASelectionQuad = false;
+    Vec2 selectionQuadStart;
 
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
@@ -158,8 +152,8 @@ void Editor::Loop()
             currentScene = game.scene.get();
         }
 
-        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
-            Resources::Serialization::Save::SaveScene(*game.scene, game.resources);
+        //if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
+        //    Resources::Serialization::Save::SaveScene(*game.scene, game.resources);
 
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_H) == GLFW_PRESS)
         {
@@ -191,31 +185,19 @@ void Editor::Loop()
                 indexOfSelectedTile = game.scene->map.GetTileIndex(mousePos);
                 Vec2 centerOfBuilding = game.scene->map.GetCenterOfBuilding(mousePos, buildingTileSize);
 
-                buildingTrs.pos = {centerOfBuilding.x, hitPoint.y, centerOfBuilding.y};
+                buildingPos = {centerOfBuilding.x, 1, centerOfBuilding.y};
             }
         }
         //Bind Keys to change Nb of Tiles of Building
         {
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_K])
-            {
                 buildingTileSize.x = std::fmax(1, buildingTileSize.x - 1);
-                buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x;
-            }
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
-            {
-                buildingTileSize.y = std::fmax(1, buildingTileSize.y - 1);
-                buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y;
-            }
+                buildingTileSize.y = std::fmax(1, buildingTileSize.y - 1);            
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
-            {
                 buildingTileSize.x = std::fmin(game.scene->map.tilesNb.x, buildingTileSize.x + 1);
-                buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x;
-            }
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_O])
-            {
                 buildingTileSize.y = std::fmin(game.scene->map.tilesNb.y, buildingTileSize.y + 1);
-                buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y;
-            }
         }
         //Bind Keys to activate/deactivate raycast with map 
         {
@@ -235,11 +217,12 @@ void Editor::Loop()
                     ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(game.coordinator.entityHandler->livingEntities - 1);
                     ComponentModel& model   = game.coordinator.componentHandler->GetComponentModel(game.coordinator.entityHandler->livingEntities - 1);
 
-                    trs.pos = buildingTrs.pos;
-                    trs.scale = buildingTrs.scale;
+                    trs.pos = buildingPos;
+                    trs.scale = {buildingTileSize.x * game.scene->map.tilesSize.x, 1, buildingTileSize.y * game.scene->map.tilesSize.y};
+                    trs.ComputeTRS();
 
-                    model.mesh = buildingModel.mesh;
-                    model.texture = game.resources.textures["Green"];
+                    model.mesh = game.resources.meshes["Cube"];
+                    model.texture = game.resources.textures["Blue"];
                 }
 
                 nbOfBuildings++;
@@ -291,6 +274,7 @@ void Editor::Loop()
                     entity.signatureGameplay = SIGNATURE_CGP_ALL;
 
                     trs.pos = {mousePos.x, 1, mousePos.y};
+                    trs.ComputeTRS();
 
                     model.mesh = game.resources.meshes["Cube"];
                     model.texture = game.resources.textures["Green"];
@@ -312,6 +296,7 @@ void Editor::Loop()
                     entity.tag = "bad";
 
                     trs.pos = { mousePos.x, 1, mousePos.y };
+                    trs.ComputeTRS();
 
                     model.mesh = game.resources.meshes["Cube"];
                     model.texture = game.resources.textures["Red"];
@@ -331,10 +316,8 @@ void Editor::Loop()
             }
             if (makingASelectionQuad)
             {
-                dbgRenderer.AddDebugElement(Core::Primitives::CreateLine({ selectionQuadStart.x, 1, selectionQuadStart.y }, { mousePos.x, 1, selectionQuadStart.y }, 0x00FF00, 0x00FF00));
-                dbgRenderer.AddDebugElement(Core::Primitives::CreateLine({ selectionQuadStart.x, 1, selectionQuadStart.y }, { selectionQuadStart.x, 1, mousePos.y }, 0x00FF00, 0x00FF00));
-                dbgRenderer.AddDebugElement(Core::Primitives::CreateLine({ mousePos.x, 1, selectionQuadStart.y }, { mousePos.x, 1, mousePos.y }, 0x00FF00, 0x00FF00));
-                dbgRenderer.AddDebugElement(Core::Primitives::CreateLine({ selectionQuadStart.x, 1, mousePos.y }, { mousePos.x, 1, mousePos.y }, 0x00FF00, 0x00FF00));
+                //use 1 for Y so the debug will not be mix up with the map
+                dbgRenderer.AddQuad({ selectionQuadStart.x, 1, selectionQuadStart.y }, { mousePos.x, 1, mousePos.y }, 0x00FF00);
             }
             if (ImGui::GetIO().MouseReleased[0] && isRaycastingWithMap)
             {
@@ -366,11 +349,10 @@ void Editor::Loop()
         game.coordinator.ApplyGameplayAttack();
 
 
-
         game.coordinator.ApplyGameplayDrawPath(dbgRenderer);
         game.renderer.Draw(&cam, game,editorFBO);
-        //if (isRaycastingWithMap)
-            //SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
+        if (isRaycastingWithMap)
+            dbgRenderer.AddQuad(buildingPos, buildingTileSize.x * game.scene->map.tilesSize.x / 2, buildingTileSize.y * game.scene->map.tilesSize.y / 2, 0xA030A0);
         //game.scene->map.DrawSpecificTiles(cam.GetViewProj());
         dbgRenderer.Draw(cam.GetViewProj());
 

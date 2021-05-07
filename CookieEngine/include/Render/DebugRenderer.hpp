@@ -48,6 +48,10 @@ namespace Cookie
 
 				void Draw(const Core::Math::Mat4& viewProj);
 				void AddDebugElement(const std::vector<Core::Primitives::DebugVertex>& dbgElement);
+				void AddLine(Core::Math::Vec3 a, Core::Math::Vec3 b, uint32_t color);
+				void AddQuad(Core::Math::Vec3 start, Core::Math::Vec3 end, uint32_t color);
+				void AddQuad(Core::Math::Vec3 center, float halfWidth, float halfDepth, uint32_t color);
+
 
 				inline void Reset()noexcept { physDbgRenderer.reset(); };
 
