@@ -2,11 +2,13 @@
 #include <reactphysics3d.h>
 #include "InspectorWidget.hpp"
 
-#include <string>
+#include "MapExplorerHelper.hpp"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
+
 #include "CustomImWidget.hpp"
+
 
 using namespace ImGui;
 using namespace Cookie::UIwidget;
@@ -110,93 +112,16 @@ void Inspector::ModelInterface()
 
         static std::string researchString;
 
-//===== MESH =====//
 
         Text("Mesh:"); SameLine(100);
 
-        if (BeginCombo("##MESHSELECT", modelComp.mesh != nullptr ? modelComp.mesh->name.c_str() : "No mesh applied", ImGuiComboFlags_HeightLarge))
-        {
-            InputText("Mesh search", &researchString, ImGuiInputTextFlags_AutoSelectAll);
-
-            NewLine();
-            
-            for (std::unordered_map<std::string, std::shared_ptr<Mesh>>::iterator meshIt = resources.meshes.begin(); meshIt != resources.meshes.end(); meshIt++)
-            {
-                const bool is_selected = (modelComp.mesh != nullptr && modelComp.mesh->name == meshIt->second->name);
-
-                if ((meshIt->second->name.find(researchString) != std::string::npos) && ImGui::Selectable(meshIt->second->name.c_str(), is_selected))
-                {
-                    modelComp.mesh = meshIt->second;
-                }
-
-                if (is_selected)
-                    ImGui::SetItemDefaultFocus();
-            }
-
-            NewLine();
-
-            if (modelComp.mesh != nullptr)
-            {
-                if (Button("Clear current mesh"))
-                    modelComp.mesh.reset();
-            }
-            else TextDisabled("Clear current mesh");
-
-            EndCombo();
-        }
-
-        if (ImGui::IsItemClicked())
-            researchString.clear();
+        ResourceMapExplorer<Mesh>("mesh", "##MESHSELECT", resources.meshes, modelComp.mesh);
         
-//===== SHADER =====//
-
-//===== TEXTURE =====//
-        
+       
         Text("Texture:"); SameLine(100);
 
-        if (BeginCombo("##TEXTSELECT", modelComp.texture != nullptr ? modelComp.texture->name.c_str() : "No texture applied", ImGuiComboFlags_HeightLarge))
-        {
-            InputText("Texture search", &researchString, ImGuiInputTextFlags_AutoSelectAll);
+        ResourceMapExplorer<Texture>("texture", "##TEXTSELECT", resources.textures, modelComp.texture);
 
-            NewLine();
-
-            for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator textIt = resources.textures.begin(); textIt != resources.textures.end(); textIt++)
-            {
-                const bool is_selected = (modelComp.texture != nullptr && textIt->second &&  modelComp.texture->name == textIt->second->name);
-
-                if (textIt->second && textIt->second->name.find(researchString) != std::string::npos)
-                {
-                    if (textIt->second->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
-                    {
-                        Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
-
-                        SameLine();
-
-                        if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
-                            modelComp.texture = textIt->second;
-                    }
-                }
-
-                if (is_selected)
-                    ImGui::SetItemDefaultFocus();
-            }
-
-            NewLine();
-
-            if (modelComp.texture != nullptr)
-            {
-                if (Button("Clear current texture"))
-                    modelComp.texture.reset();
-            }
-            else TextDisabled("Clear current texture");
-
-            EndCombo();
-        }
-
-        if (ImGui::IsItemClicked())
-            researchString.clear();
-
-//===================//
 
         NewLine();
         if (Selectable("Remove component##MODEL"))
@@ -465,7 +390,7 @@ void Inspector::ScriptInterface()
             Text("%s", scriptComp.scripts[i].script->filename.c_str());
             Indent();
             
-            if (Button( ("Remove##SCRIPT_" + std::to_string(i)).c_str() ))
+            if (Button( ("Remove##SCRIPT" + std::to_string(i)).c_str() ))
             {
                 scriptComp.scripts.erase(scriptComp.scripts.begin() + i);
             }
@@ -521,16 +446,13 @@ void Inspector::GameplayInterface()
 
                 NewLine();
                 if (Selectable("Remove property##LIVE"))
-                {
-                    gameplayComp.componentLive.ToDefault();
-                    selectedEntity.focusedEntity->signatureGameplay -= SIGNATURE_CGP_LIVE;
-                }
+                    gameplayComp.RemoveComponentLive(*selectedEntity.focusedEntity);
 
                 TreePop();
             }
         }
         else if (Selectable("Add life/Armor properties"))
-            selectedEntity.focusedEntity->signatureGameplay += SIGNATURE_CGP_LIVE;
+            gameplayComp.AddComponentLive(*selectedEntity.focusedEntity);
 
 
         if (selectedEntity.focusedEntity->signatureGameplay & SIGNATURE_CGP_MOVE)
@@ -545,16 +467,13 @@ void Inspector::GameplayInterface()
 
                 NewLine();
                 if (Selectable("Remove property##MOVE"))
-                {
-                    gameplayComp.componentMove.ToDefault();
-                    selectedEntity.focusedEntity->signatureGameplay -= SIGNATURE_CGP_MOVE;
-                }
+                    gameplayComp.RemoveComponentMove(*selectedEntity.focusedEntity);
 
                 TreePop();
             }
         }
         else if (Selectable("Add movement capacities"))
-            selectedEntity.focusedEntity->signatureGameplay += SIGNATURE_CGP_MOVE;
+            gameplayComp.AddComponentMove(*selectedEntity.focusedEntity);
 
 
         if (selectedEntity.focusedEntity->signatureGameplay & SIGNATURE_CGP_ATTACK)
@@ -568,16 +487,13 @@ void Inspector::GameplayInterface()
 
                 NewLine();
                 if (Selectable("Remove property##ATTACK"))
-                {
-                    gameplayComp.componentMove.ToDefault();
-                    selectedEntity.focusedEntity->signatureGameplay -= SIGNATURE_CGP_ATTACK;
-                }
+                    gameplayComp.RemoveComponentAttack(*selectedEntity.focusedEntity);
 
                 TreePop();
             }
         }
         else if (Selectable("Add attack abilities"))
-            selectedEntity.focusedEntity->signatureGameplay += SIGNATURE_CGP_ATTACK;
+            gameplayComp.AddComponentAttack(*selectedEntity.focusedEntity);
 
 
         NewLine();

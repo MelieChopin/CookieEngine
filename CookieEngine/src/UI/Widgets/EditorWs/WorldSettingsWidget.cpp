@@ -1,6 +1,8 @@
 #include "Scene.hpp"
 #include "WorldSettingsWidget.hpp"
 
+#include "MapExplorerHelper.hpp"
+
 #include <imgui.h>
 
 using namespace ImGui;
@@ -59,6 +61,12 @@ void WorldSettingsWidget::WindowDisplay()
 				TextWrapped("Please refrain from inputing very low/negative values.");
 				PopStyleColor();
 			}
+		}
+
+
+		// Model
+		{
+			resource
 		}
 	}
 

@@ -1,8 +1,8 @@
 #include "Resources/ResourcesManager.hpp"
 #include <string>
 #include "TextureEditorWidget.hpp"
+
 #include "Serialization.hpp"
-#include "Resources/Mesh.hpp"
 #include "Resources/Texture.hpp"
 
 #include <imgui.h>

@@ -1,10 +1,5 @@
 #include <GLFW/glfw3.h>
 #include "ToolbarWidget.hpp"
-#include "FrameBuffer.hpp"
-#include "Camera.hpp"
-#include "ECS/EntityHandler.hpp"
-#include "ECS/ComponentHandler.hpp"
-#include "ECS/SystemHandler.hpp"
 #include "Editor.hpp"
 #include "ViewportWidget.hpp"
 

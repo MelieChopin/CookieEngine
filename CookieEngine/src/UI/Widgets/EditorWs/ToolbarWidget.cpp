@@ -8,8 +8,9 @@ using namespace ImGui;
 using namespace Cookie::UIwidget;
 
 
-Toolbar::Toolbar(Cookie::Render::Renderer& _renderer)
-	: WindowBase	("##TOOLBAR")
+Toolbar::Toolbar(Cookie::Render::Renderer& _renderer, bool& _playing)
+	: WindowBase	("##TOOLBAR"),
+	  playing		(_playing)
 {
 	icons[(int)ToolbarIcons::Translator]	= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/translate.ico");
 	icons[(int)ToolbarIcons::Rotator]		= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/rotate.ico");

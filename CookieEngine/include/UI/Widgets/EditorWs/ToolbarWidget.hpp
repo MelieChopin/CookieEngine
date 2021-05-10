@@ -21,22 +21,19 @@ namespace Cookie::UIwidget
 		std::unique_ptr<Cookie::Resources::Texture> icons[(int)ToolbarIcons::ICOS_NUM];
 		
 		TransformTool	currentTrsfTool	= TransformTool::Translate;
-		bool			playing			= false;
+		bool&			playing;
 
 	protected:
 		bool BeginWindow(int windowFlags = 0) override;
 
 	public:
-		Toolbar(Cookie::Render::Renderer& _renderer);
+		Toolbar(Cookie::Render::Renderer& _renderer, bool& _playing);
 
 		void WindowDisplay() override;
 
 
 		inline const TransformTool& CurrentTrsfTool() const
 		{ return currentTrsfTool; }
-
-		inline const bool isPlaying() const
-		{ return playing; }
 	};
 }
 

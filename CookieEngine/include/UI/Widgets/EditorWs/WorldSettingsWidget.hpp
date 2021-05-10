@@ -3,7 +3,7 @@
 
 #include "UIwidgetBases.hpp"
 
-namespace Cookie::Resources { class Scene; }
+namespace Cookie::Resources { class Scene; class ResourceManager; }
 
 
 namespace Cookie::UIwidget
@@ -11,6 +11,7 @@ namespace Cookie::UIwidget
 	class WorldSettingsWidget final : public WItemBase
 	{
 		std::shared_ptr<Resources::Scene>& scene;
+		const ResourceManager& resources;
 
 	public:
 		inline WorldSettingsWidget(std::shared_ptr<Resources::Scene>& _scene)

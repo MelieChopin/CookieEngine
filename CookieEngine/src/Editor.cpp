@@ -47,7 +47,7 @@ Editor::Editor()
     editorUI.AddWItem(new UIwidget::TextureEditor(game.resources), 1);
     editorUI.AddWItem(new UIwidget::GameUIeditor(game.renderer.window, game.scene), 1);
 
-    editorUI.AddWItem(new UIwidget::GamePort(game), 2);
+    editorUI.AddWItem(new UIwidget::GamePort(isPlaying, game), 2);
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
     editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
     editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene), 2);
@@ -57,7 +57,7 @@ Editor::Editor()
     editorUI.AddWItem(new UIwidget::DemoWindow, 3);
 
 
-    UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.renderer);
+    UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.renderer, isPlaying);
     editorUI.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, editorFBO, &cam, game.coordinator, selectedEntity));
 
     InitEditComp();
