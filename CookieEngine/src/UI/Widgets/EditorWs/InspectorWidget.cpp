@@ -83,10 +83,12 @@ void Inspector::TransformInterface()
     {
         ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id);
 
-        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.pos.e);
-        Text("Rot:"); SameLine(65.f); DragFloat3("##ROT", trsf.rot.e);
-        Text("Scl:"); SameLine(65.f); DragFloat3("##SCL", trsf.scale.e);
+        Text("Pos:"); SameLine(65.f); bool posHasChanged =  DragFloat3("##POS", trsf.pos.e);
+        Text("Rot:"); SameLine(65.f); bool rotHasChanged =  DragFloat3("##ROT", trsf.rot.e);
+        Text("Scl:"); SameLine(65.f); bool sclHasChanged =  DragFloat3("##SCL", trsf.scale.e);
 
+        if (posHasChanged || rotHasChanged || sclHasChanged)
+            trsf.trsHasChanged = true;
         
         NewLine();
         if (Selectable("Remove component##TRSF"))
@@ -94,7 +96,6 @@ void Inspector::TransformInterface()
             coordinator.componentHandler->RemoveComponentTransform(*selectedEntity.focusedEntity);
         }
 
-        trsf.ComputeTRS();
 
         TreePop();
     }

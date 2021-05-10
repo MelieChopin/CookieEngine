@@ -311,7 +311,7 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 else if (entity.entities[i].namePrefab != "NONE")
 				 transform.scale = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->scale;
 			 
-			 transform.ComputeTRS();
+			 transform.trsHasChanged = true;
 			 component.componentTransforms[entity.entities[i].id] = transform;
 		 }
 		 if (entity.entities[i].signature & SIGNATURE_MODEL)

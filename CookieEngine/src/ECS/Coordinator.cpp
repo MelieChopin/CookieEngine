@@ -18,7 +18,7 @@ using namespace Cookie::ECS;
 
 
 //Entity
-void Coordinator::AddEntity(const int signature, const Resources::ResourcesManager& resources, std::string name)
+void Coordinator::AddEntity(const int signature, std::string name)
 {
 	assert(entityHandler->livingEntities < MAX_ENTITIES && "Too many entities in existence.");
 

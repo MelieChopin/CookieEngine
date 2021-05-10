@@ -34,7 +34,7 @@ namespace Cookie
 			~Coordinator() {};
 
 			//Entity
-			void AddEntity(const int signature, const Resources::ResourcesManager& resources, std::string name = std::string("No Name"));
+			void AddEntity(const int signature, std::string name = std::string("No Name"));
 			void RemoveEntity(Entity& entity);
 			bool CheckSignature(const int entitySignature, const int signature);
 			

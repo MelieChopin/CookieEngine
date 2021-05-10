@@ -211,7 +211,7 @@ void Editor::Loop()
         {
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P] && isRaycastingWithMap)
             {
-                game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL, game.resources, "Building " + std::to_string(nbOfBuildings) );
+                game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL, "Building " + std::to_string(nbOfBuildings) );
                 //should create constructor copy for each Component 
                 {
                     ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(game.coordinator.entityHandler->livingEntities - 1);
@@ -219,7 +219,7 @@ void Editor::Loop()
 
                     trs.pos = buildingPos;
                     trs.scale = {buildingTileSize.x * game.scene->map.tilesSize.x, 1, buildingTileSize.y * game.scene->map.tilesSize.y};
-                    trs.ComputeTRS();
+                    trs.trsHasChanged = true;
 
                     model.mesh = game.resources.meshes["Cube"];
                     model.texture = game.resources.textures["Blue"];
@@ -264,7 +264,7 @@ void Editor::Loop()
         {
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N] && isRaycastingWithMap)
             {
-                game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL + SIGNATURE_GAMEPLAY, game.resources, "Unit " + std::to_string(nbOfUnits));
+                game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL + SIGNATURE_GAMEPLAY, "Unit " + std::to_string(nbOfUnits));
                 //should create constructor copy for each Component 
                 {
                     ECS::Entity& entity = game.coordinator.entityHandler->entities[game.coordinator.entityHandler->livingEntities - 1];
@@ -274,7 +274,7 @@ void Editor::Loop()
                     entity.signatureGameplay = SIGNATURE_CGP_ALL;
 
                     trs.pos = {mousePos.x, 1, mousePos.y};
-                    trs.ComputeTRS();
+                    trs.trsHasChanged = true;
 
                     model.mesh = game.resources.meshes["Cube"];
                     model.texture = game.resources.textures["Green"];
@@ -286,7 +286,7 @@ void Editor::Loop()
             }
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B] && isRaycastingWithMap)
             {
-                game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL + SIGNATURE_GAMEPLAY, game.resources, "Unit " + std::to_string(nbOfUnits));
+                game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL + SIGNATURE_GAMEPLAY, "Unit " + std::to_string(nbOfUnits));
                 //should create constructor copy for each Component 
                 {
                     ECS::Entity& entity = game.coordinator.entityHandler->entities[game.coordinator.entityHandler->livingEntities - 1];
@@ -296,7 +296,7 @@ void Editor::Loop()
                     entity.tag = "bad";
 
                     trs.pos = { mousePos.x, 1, mousePos.y };
-                    trs.ComputeTRS();
+                    trs.trsHasChanged = true;
 
                     model.mesh = game.resources.meshes["Cube"];
                     model.texture = game.resources.textures["Red"];
@@ -349,6 +349,7 @@ void Editor::Loop()
         game.coordinator.ApplyGameplayAttack();
 
 
+        game.coordinator.ApplyComputeTrs();
         game.coordinator.ApplyGameplayDrawPath(dbgRenderer);
         game.renderer.Draw(&cam, game,editorFBO);
         if (isRaycastingWithMap)
