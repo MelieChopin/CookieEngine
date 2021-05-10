@@ -11,12 +11,13 @@ namespace Cookie::UIwidget
 	class WorldSettingsWidget final : public WItemBase
 	{
 		std::shared_ptr<Resources::Scene>& scene;
-		const ResourceManager& resources;
+		Cookie::Resources::ResourcesManager& resources;
 
 	public:
-		inline WorldSettingsWidget(std::shared_ptr<Resources::Scene>& _scene)
+		inline WorldSettingsWidget(std::shared_ptr<Resources::Scene>& _scene, Cookie::Resources::ResourcesManager& _resources)
 			: WItemBase	("World settings", false),
-			  scene		(_scene)
+			  scene		(_scene),
+			  resources (_resources)
 		{}
 
 		void WindowDisplay() override;

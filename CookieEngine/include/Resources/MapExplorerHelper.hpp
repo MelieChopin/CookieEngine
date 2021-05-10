@@ -15,7 +15,7 @@
 namespace Cookie::Resources
 {
 	template <class C>
-	void ResourceMapExplorer(const std::string&& typeName, const char* TAG, std::unordered_map<std::string, std::shared_ptr<C>>& resourceMap, std::shared_ptr<C>& currentR)
+	static void ResourceMapExplorer(const std::string&& typeName, const char* TAG, std::unordered_map<std::string, std::shared_ptr<C>>& resourceMap, std::shared_ptr<C>& currentR)
 	{
 		static std::string researchString;
 
@@ -25,7 +25,7 @@ namespace Cookie::Resources
 
 			ImGui::NewLine();
 
-			for (std::unordered_map<std::string, std::shared_ptr<C>>::iterator It = resourceMap.begin(); It != resourceMap.end(); It++)
+			for (typename std::unordered_map<std::string, std::shared_ptr<C>>::iterator It = resourceMap.begin(); It != resourceMap.end(); It++)
 			{
 				const bool is_selected = (currentR != nullptr && currentR->name == It->second->name);
 

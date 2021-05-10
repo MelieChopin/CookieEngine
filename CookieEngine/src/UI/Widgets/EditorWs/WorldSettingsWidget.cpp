@@ -1,4 +1,5 @@
 #include "Scene.hpp"
+#include "ResourcesManager.hpp"
 #include "WorldSettingsWidget.hpp"
 
 #include "MapExplorerHelper.hpp"
@@ -66,7 +67,9 @@ void WorldSettingsWidget::WindowDisplay()
 
 		// Model
 		{
-			resource
+			Text("Map texture:"); SameLine();
+
+			ResourceMapExplorer<Texture>("map texture", "##MAPTEXTSELECT", resources.textures, scene->map.model.texture);
 		}
 	}
 
