@@ -4,6 +4,7 @@
 #include "ECS/ComponentHandler.hpp"
 #include "Resources/Mesh.hpp"
 #include "Render/ShadowBuffer.hpp"
+#include "Render/DrawDataHandler.hpp"
 #include "RenderPass/ShadowPass.hpp"
 
 using namespace Cookie::Core::Math;
@@ -11,8 +12,7 @@ using namespace Cookie::Render;
 
 struct VS_CONSTANT_BUFFER
 {
-    Cookie::Core::Math::Mat4 lightViewProj  = Cookie::Core::Math::Mat4::Identity();
-    Cookie::Core::Math::Mat4 model          = Cookie::Core::Math::Mat4::Identity();
+    Mat4 lightViewProj  = Mat4::Identity();
 };
 
 /*======================= CONSTRUCTORS/DESTRUCTORS =======================*/
@@ -42,10 +42,14 @@ void ShadowPass::InitShader()
     ID3DBlob* blob = nullptr;
 
     std::string source = (const char*)R"(#line 35
-    cbuffer VS_CONSTANT_BUFFER : register(b0)
+    cbuffer MODEL_CONSTANT : register(b0)
+    {
+        float4x4  model;
+    };
+
+    cbuffer CAM_CONSTANT : register(b1)
     {
         float4x4  lightViewProj;
-        float4x4  model;
     };
     
     float4 main(float3 position : POSITION, float2 uv : UV, float3 normal : NORMAL) : SV_POSITION
@@ -152,20 +156,24 @@ void ShadowPass::Set()
     RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     RendererRemote::context->PSSetShader(nullptr, nullptr, 0);
 
-    Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
+    
 }
 
-void ShadowPass::Draw(const ECS::Coordinator& coordinator, Resources::Map& map, LightsArray& lights)
+void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
 {
-    const ECS::EntityHandler& entityHandler = *coordinator.entityHandler;
-    const ECS::ComponentHandler& components = *coordinator.componentHandler;
+    ID3D11Buffer* CBuffers[2] = { drawData.CBuffer, CBuffer };
+
+    Render::RendererRemote::context->VSSetConstantBuffers(0, 2, CBuffers);
 
     VS_CONSTANT_BUFFER buffer = {};
 
     size_t bufferSize = sizeof(buffer);
 
     Render::RendererRemote::context->RSSetViewports(1, &shadowViewport);
-    Core::Math::Mat4 proj = Core::Math::Mat4::Ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 10.0f);
+
+    Mat4 proj = Mat4::Ortho(-100.0f, 100.0f, -100.0f, 100.0f, -100.0f, 100.0f);
+
+    Vec3 center = (drawData.AABB[1] + drawData.AABB[0])*0.5f;
 
     for (int j = 0; j < lights.usedDir; j++)
     {
@@ -173,26 +181,16 @@ void ShadowPass::Draw(const ECS::Coordinator& coordinator, Resources::Map& map, 
         if (jLight.castShadow)
         {
             Render::RendererRemote::context->OMSetRenderTargets(0, nullptr, jLight.shadowMap->depthStencilView);
-            auto view = Core::Math::Mat4::RotateX(-Core::Math::TAU / 4.0);// Core::Math::Mat4::LookAt(-jLight.dir.Normalize() * 10.0f, { 0.0f,0.0f,0.0f }, { 0.0f,1.0f,0.0f });
+            Vec3 jDir = -jLight.dir.Normalize();
+            Mat4 view = Mat4::LookAt(center + jDir * 50.0f, center, { 0.0f,1.0f,0.0f });
+
+
             jLight.lightViewProj = proj * view;
             buffer.lightViewProj = jLight.lightViewProj;
 
-            for (int i = 0; i < entityHandler.livingEntities; ++i)
-            {
-                if (entityHandler.entities[i].signature & (SIGNATURE_TRANSFORM + SIGNATURE_MODEL))
-                {
-                    buffer.model = components.componentTransforms[entityHandler.entities[i].id].TRS;
-                    Render::WriteCBuffer(&buffer, bufferSize, 0, &CBuffer);
+            Render::WriteCBuffer(&buffer, bufferSize, 0, &CBuffer);
 
-                    const Resources::Mesh* mesh = components.componentModels[entityHandler.entities[i].id].mesh;
-
-                    if (mesh)
-                    {
-                        mesh->Set();
-                        mesh->Draw();
-                    }
-                }
-            }
+            drawData.Draw(1);
         }
     }
 }

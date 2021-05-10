@@ -31,6 +31,7 @@ namespace Cookie
 	namespace Render
 	{
 		struct LightsArray;
+		class DrawDataHandler;
 
 		class ShadowPass
 		{
@@ -54,7 +55,7 @@ namespace Cookie
 			~ShadowPass();
 
 			void Set();
-			void Draw(const ECS::Coordinator& coord, Resources::Map& map, LightsArray& lights);
+			void Draw(DrawDataHandler& drawData, LightsArray& lights);
 		};
 	}
 }

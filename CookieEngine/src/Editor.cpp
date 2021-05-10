@@ -269,8 +269,6 @@ void Editor::Loop()
             }
         }
 
-        dbgRenderer.AddDebugElement(Core::Primitives::CreateLine({ 0.0f,3.0f,3.0f }, { 0.0f, 3.0f - 1.0f, 3.0f + 1.0f },0xFF0F00, 0xFF0F00));
-
         if (selectedEntity.toChangeEntityId >= 0)
         {
             PopulateFocusedEntity();

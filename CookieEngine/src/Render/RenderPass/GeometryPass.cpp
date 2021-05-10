@@ -1,9 +1,6 @@
 #include "Core/Math/Mat4.hpp"
 #include "D3D11Helper.hpp"
-#include "ECS/Coordinator.hpp"
-#include "ECS/ComponentHandler.hpp"
-#include "Resources/Texture.hpp"
-#include "Resources/Mesh.hpp"
+#include "DrawDataHandler.hpp"
 #include "Render/RenderPass/GeometryPass.hpp"
 #include "Render/Camera.hpp"
 
@@ -14,7 +11,6 @@ struct VS_CONSTANT_BUFFER
 {
     Cookie::Core::Math::Mat4 proj = Cookie::Core::Math::Mat4::Identity();
     Cookie::Core::Math::Mat4 view = Cookie::Core::Math::Mat4::Identity();
-    Cookie::Core::Math::Mat4 model = Cookie::Core::Math::Mat4::Identity();
 };
 
 /*=========================== CONSTRUCTORS/DESTRUCTORS ===========================*/
@@ -65,12 +61,17 @@ void GeometryPass::InitShader()
         float4 view    : VIEW;
     };
     
-    cbuffer VS_CONSTANT_BUFFER : register(b0)
+    cbuffer MODEL_CONSTANT : register(b0)
+    {
+        float4x4  model;
+    };
+
+    cbuffer CAM_CONSTANT : register(b1)
     {
         float4x4  proj;
         float4x4  view;
-        float4x4  model;
     };
+
     
     VOut main(float3 position : POSITION, float2 uv : UV, float3 normal : NORMAL)
     {
@@ -144,7 +145,6 @@ void GeometryPass::InitShader()
         pOutput.position    = float4(fragPos,metallicRoughness.Sample(WrapSampler,uv).b);
         pOutput.normal      = lerp(float4(normal,metallicRoughness.Sample(WrapSampler,uv).g),float4(perturbNormal,metallicRoughness.Sample(WrapSampler,uv).g),step(0.1,dot(texNormal,texNormal)));
         pOutput.albedo      = float4(albedoTex.Sample(WrapSampler,uv).rgb,metallicRoughness.Sample(WrapSampler,uv).r);
-
 
         return pOutput;
     })";
@@ -235,7 +235,7 @@ void GeometryPass::InitState()
 
     D3D11_BLEND_DESC blenDesc = {  };
 
-    blenDesc.AlphaToCoverageEnable = false;
+    blenDesc.AlphaToCoverageEnable          = false;
     blenDesc.IndependentBlendEnable         = false;
     blenDesc.RenderTarget[0].BlendEnable    = false;
     blenDesc.RenderTarget[0].SrcBlend       = D3D11_BLEND_ONE;
@@ -309,7 +309,7 @@ void GeometryPass::Set()
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
 
     Render::RendererRemote::context->IASetInputLayout(ILayout);
-    Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
+
     Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
 
 	ID3D11RenderTargetView* fbos[3] = {posFBO.renderTargetView,normalFBO.renderTargetView,albedoFBO.renderTargetView};
@@ -317,46 +317,17 @@ void GeometryPass::Set()
 	Render::RendererRemote::context->OMSetRenderTargets(3, fbos, depthBuffer);
 }
 
-void GeometryPass::Draw(const Camera& cam, const ECS::Coordinator& coordinator)
+void GeometryPass::Draw(const Camera& cam, DrawDataHandler& drawData)
 {
-    const ECS::EntityHandler& entityHandler = *coordinator.entityHandler;
-    const ECS::ComponentHandler& components = *coordinator.componentHandler;
+    ID3D11Buffer* CBuffers[2] = { drawData.CBuffer, CBuffer};
 
-    VS_CONSTANT_BUFFER buffer = {};
-    buffer.proj = Core::Math::Mat4::Ortho(-20.0f, 20.0f, -20.0f, 20.0f, -20.0f, 20.0f);//cam.GetProj();
-    //cam.pos = 
-    buffer.view = Core::Math::Mat4::LookAt({ -3.0f,3.0f,0.f }, { 0.0f,0.0f,0.0f }, { 0.0f,1.0f,0.0f });//Core::Math::Mat4::RotateX(Core::Math::TAU / 4.0);// 
+    Render::RendererRemote::context->VSSetConstantBuffers(0, 2, CBuffers);
 
-    size_t bufferSize = sizeof(buffer);
+    VS_CONSTANT_BUFFER buffer = { cam.GetProj(), cam.GetView() };
 
-    ID3D11ShaderResourceView* fbos[3] = { nullptr, nullptr, nullptr};
+    Render::WriteCBuffer(&buffer,sizeof(buffer),0,&CBuffer);
 
-    
-
-    for (int i = 0; i < entityHandler.livingEntities; ++i)
-    {
-        if (entityHandler.entities[i].signature & (SIGNATURE_TRANSFORM + SIGNATURE_MODEL))
-        {
-            buffer.model = components.componentTransforms[entityHandler.entities[i].id].TRS;
-            Render::WriteCBuffer(&buffer, bufferSize, 0, &CBuffer);
-
-            const ECS::ComponentModel& model = components.componentModels[entityHandler.entities[i].id];
-
-            if (model.albedo)
-                model.albedo->Set(0);
-            if (model.normal)
-                model.normal->Set(1);
-            if (model.metallicRoughness)
-                model.metallicRoughness->Set(2);
-            if (model.mesh)
-            {
-                model.mesh->Set();
-                model.mesh->Draw();
-            }
-
-            Render::RendererRemote::context->PSSetShaderResources(0, 3, fbos);
-        }
-    }
+    drawData.Draw();
 }
 
 void GeometryPass::Clear()

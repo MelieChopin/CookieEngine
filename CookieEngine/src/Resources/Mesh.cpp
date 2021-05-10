@@ -17,8 +17,13 @@ Mesh::Mesh(std::string _name, aiMesh* mesh):
     AABBMax = { mesh->mAABB.mMax.x, mesh->mAABB.mMax.y, mesh->mAABB.mMax.z };
 }
 
+#undef min
+#undef max
+
 Mesh::Mesh(std::string meshName, std::vector<float>& vertices, std::vector<unsigned int>& indices, unsigned int inb):
-    name{meshName}
+    AABBMin{std::numeric_limits<float>().max(),std::numeric_limits<float>().max(),std::numeric_limits<float>().max() },
+    AABBMax{-std::numeric_limits<float>().max(),-std::numeric_limits<float>().max(),-std::numeric_limits<float>().max() },
+    name{ meshName }
 {
     INb = inb;
     InitVBuffer(vertices);
@@ -40,8 +45,9 @@ Mesh::~Mesh()
 
 void Mesh::ComputeAABB(const std::vector<float>& vertices)
 {
-    for (int i = 0; i < vertices.size()/8; i+=8)//position, uv, normal
+    for (int i = 0; i < vertices.size() - 1; i+=8)//position, uv, normal
     {
+
         if (vertices[i] > AABBMax.x)
         {
             AABBMax.x = vertices[i];

@@ -13,14 +13,14 @@ namespace Cookie
 		#define CAM_MOUSE_SENSITIVITY_Y 0.0007f
 
 		#define CAMERA_INITIAL_NEAR 0.01f
-		#define CAMERA_INITIAL_FAR  10000.f
+		#define CAMERA_INITIAL_FAR  1000.f
 
 		class Camera
 		{
 			private:
 				Core::Math::Mat4 projMat = Core::Math::Mat4::Identity();
 
-				float fov = 0.0f;
+				
 
 			protected:
 				Core::Math::Mat4 viewMat = Core::Math::Mat4::Identity();
@@ -31,7 +31,10 @@ namespace Cookie
 				float previousMouseY{ 0.0 };
 
 			public:
-				float camFar = 0.0f;
+				float camNear	= 0.0f;
+				float camFar	= 0.0f;
+				float fov		= 0.0f;
+				float aspectRatio = 0.0f;
 
 				float width = 0.0f;
 				float height = 0.0f;
@@ -49,7 +52,7 @@ namespace Cookie
 				inline const Core::Math::Mat4& GetProj() const	{ return projMat;			}
 				inline Core::Math::Mat4 GetViewProj() const		{ return projMat * viewMat;	}
 				
-				inline void SetProj(float yFov, float _width, float _height, float n, float f) { fov = yFov; width = _width; height = _height; camFar = f; projMat = Core::Math::Mat4::Perspective(yFov, width / height, n, f); }
+				inline void SetProj(float yFov, float _width, float _height, float n, float f) { fov = yFov; width = _width; height = _height; camFar = f; camNear = n;  aspectRatio = width / height; projMat = Core::Math::Mat4::Perspective(yFov, width / height, n, f); }
 				inline void LookAt(const Core::Math::Vec3& toLook) { viewMat = Core::Math::Mat4::Inverse(Core::Math::Mat4::Translate(pos) * Core::Math::Mat4::LookAt(pos, toLook, { 0.0f,1.0f,0.0f }));}
 
 				inline virtual void Update() = 0;

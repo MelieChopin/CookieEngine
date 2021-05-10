@@ -86,12 +86,26 @@ void DirLightPass::InitShader()
         lightFragPos.x = 0.5 + lightFragPos.x * 0.5;
         lightFragPos.y = 0.5 - lightFragPos.y * 0.5;
 
-        float closestDepth = shadowMap.Sample(ClampSampler,lightFragPos.xy).r;
+        
+
+        float shadow = 0.0f;
+        float texelSize = 1.0/4096;
+
+        for(int x = -1; x <= 1; ++x)
+        {
+            for(int y = -1; y <= 1; ++y)
+            {
+                float closestDepth = shadowMap.Sample(ClampSampler,lightFragPos.xy + float2(x,y)*texelSize).r;
+                shadow += step(lightFragPos.z - bias,closestDepth);        
+            }    
+        }
+
+        shadow /= 9.0;
 
         if(lightFragPos.z > 1.0)
             return 0.0;
 
-        return step(lightFragPos.z - bias,closestDepth);
+        return shadow;
 
     }
 

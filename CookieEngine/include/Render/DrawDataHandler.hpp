@@ -5,6 +5,8 @@
 #include <array>
 #include <vector>
 
+struct ID3D11Buffer;
+
 namespace Cookie
 {
 	class Game;
@@ -16,7 +18,7 @@ namespace Cookie
 
 	namespace Render
 	{
-		class Camera cam;
+		class Camera;
 
 		struct Frustrum
 		{
@@ -28,11 +30,14 @@ namespace Cookie
 		class DrawDataHandler
 		{
 			public:
+				ID3D11Buffer* CBuffer{nullptr};
 				Frustrum frustrum;
 				std::vector<ECS::ComponentModel>	models;
 				std::vector<Core::Math::Mat4>		matrices;
+				std::array<Core::Math::Vec3, 2>		AABB;
 
 			private:
+				void InitCBuffer();
 				void MakeFrustrum(const Camera& cam);
 
 			public:
@@ -40,7 +45,7 @@ namespace Cookie
 				~DrawDataHandler();
 
 				void SetDrawData(const Camera& cam, const Game& game);
-				void Draw();
+				void Draw(int _i = 0);
 				void Clear();
 		};
 	}

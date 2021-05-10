@@ -5,7 +5,7 @@ struct ID3D11Texture2D;
 struct ID3D11ShaderResourceView;
 struct ID3D11DepthStencilView;
 
-#define SHADOW_MAP_RESOLUTION 2048
+#define SHADOW_MAP_RESOLUTION 4096
 
 namespace Cookie
 {

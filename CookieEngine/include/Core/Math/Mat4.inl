@@ -233,22 +233,30 @@ namespace Cookie
             {
                 Mat4 m;
 
-                Core::Math::Vec3 z = (eye - center).Normalize();
+                Core::Math::Vec3 z = (center - eye).Normalize();
                 Core::Math::Vec3 y = up;
                 Core::Math::Vec3 x = z.Cross(y);
                 x = x.Normalize();
                 y = x.Cross(z);
                 y = y.Normalize();
 
-                m.c[0] = { x.x, y.x, -z.x, eye.x };
-                m.c[1] = { x.y, y.y, -z.y, eye.y };
-                m.c[2] = { x.z, y.z, -z.z, eye.z };
-
-                //m.c[0] = { x, eye.x };
-                //m.c[1] = { y, eye.y };
-                //m.c[2] = { -z, eye.z };
-                //
+                m.c[0] = { x, eye.x };
+                m.c[1] = { y, eye.y };
+                m.c[2] = { -z, eye.z };
+                
                 m.c[3] = { 0.0f,0.0f,0.0f,1.0f };
+
+                return m;
+            }
+
+            inline Mat4 Mat4::Dir(const Vec3& dirVec)
+            {
+                Mat4 m;
+
+                float theta = atanf(sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y) / dirVec.z);
+                float phi = atan2f(dirVec.y,dirVec.x);
+
+                m = Mat4::RotateY(phi) * Mat4::RotateX(theta);
 
                 return m;
             }

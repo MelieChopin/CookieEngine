@@ -172,19 +172,15 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     ID3D11RenderTargetView* nullViews[] = { nullptr,nullptr,nullptr,nullptr };
     remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
 
-    Core::Math::Mat4 proj = cam->GetProj();
-    Core::Math::Mat4 view = cam->GetView();
+    drawData.SetDrawData(*cam,game);
 
     gPass.Set();
-
-    game.scene->map.Draw(proj,view,&gPass.CBuffer);
-
-    gPass.Draw(*cam,game.coordinator);
+    gPass.Draw(*cam,drawData);
 
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
 
     sPass.Set();
-    sPass.Draw(game.coordinator, game.scene->map, lights);
+    sPass.Draw(drawData, lights);
     remote.context->RSSetViewports(1, &viewport);
 
     lPass.Set(gPass.posFBO,gPass.normalFBO,gPass.albedoFBO,cam->pos);
@@ -265,6 +261,7 @@ void Renderer::Clear()
 
     gPass.Clear();
     lPass.Clear();
+    drawData.Clear();
 }
 
 void Renderer::ClearFrameBuffer(FrameBuffer& fbo)

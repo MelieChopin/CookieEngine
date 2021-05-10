@@ -20,10 +20,11 @@ namespace Cookie
                 struct { float r; float g; float b; float a; };
                 float e[4];
 
-                inline Vec4  operator/(float other) const { return{ x / other, y / other, z / other, w/other }; }
+                inline Vec4  operator/(float other) const { return{ x / other, y / other, z / other, w/other}; }
 
-                inline float Length() const { return std::sqrt(x * x + y * y + z * z + w * w); }
+                inline float Length() const { return std::sqrt(x * x + y * y + z * z); }
                 inline Vec4 Normalize() const { return *this / Length(); }
+                inline float Dot(Vec4& other) { return (x * other.x + y * other.y + z * other.z ); }
 
                 inline void Debug() const { { std::cout << "{" << x << " ," << y << " ," << z << " ," << w << "}\n"; } }
             };

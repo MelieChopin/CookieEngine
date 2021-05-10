@@ -18,6 +18,7 @@ namespace Cookie
 
 	namespace Render
 	{
+		class DrawDataHandler;
 		class Camera;
 
 		class GeometryPass
@@ -51,7 +52,7 @@ namespace Cookie
 				~GeometryPass();
 
 				void Set();
-				void Draw(const Camera& cam, const ECS::Coordinator& coordinator);
+				void Draw(const Camera& cam, DrawDataHandler& drawData);
 				void Clear();
 		};
 	}

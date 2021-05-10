@@ -75,6 +75,7 @@ set (SRC_FILES
     "${SRC_DIR}/Render/FrameBuffer.cpp"
     "${SRC_DIR}/Render/SkyBox.cpp"
     "${SRC_DIR}/Render/Light.cpp"
+    "${SRC_DIR}/Render/DrawDataHandler.cpp"
     "${SRC_DIR}/Render/RenderPass/GeometryPass.cpp"
     "${SRC_DIR}/Render/RenderPass/LightPass.cpp"
     "${SRC_DIR}/Render/RenderPass/DirLightPass.cpp"
