@@ -32,6 +32,7 @@ namespace Cookie
 	{
 		struct LightsArray;
 		class DrawDataHandler;
+		class Camera;
 
 		class ShadowPass
 		{

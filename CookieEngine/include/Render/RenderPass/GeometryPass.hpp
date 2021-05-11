@@ -52,7 +52,7 @@ namespace Cookie
 				~GeometryPass();
 
 				void Set();
-				void Draw(const Camera& cam, DrawDataHandler& drawData);
+				void Draw(DrawDataHandler& drawData);
 				void Clear();
 		};
 	}

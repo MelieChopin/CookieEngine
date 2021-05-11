@@ -4,13 +4,13 @@
 #include "Render/RenderPass/GeometryPass.hpp"
 #include "Render/Camera.hpp"
 
-
+using namespace Cookie::Core::Math;
 using namespace Cookie::Render;
 
 struct VS_CONSTANT_BUFFER
 {
-    Cookie::Core::Math::Mat4 proj = Cookie::Core::Math::Mat4::Identity();
-    Cookie::Core::Math::Mat4 view = Cookie::Core::Math::Mat4::Identity();
+    Mat4 proj = Mat4::Identity();
+    Mat4 view = Mat4::Identity();
 };
 
 /*=========================== CONSTRUCTORS/DESTRUCTORS ===========================*/
@@ -317,8 +317,9 @@ void GeometryPass::Set()
 	Render::RendererRemote::context->OMSetRenderTargets(3, fbos, depthBuffer);
 }
 
-void GeometryPass::Draw(const Camera& cam, DrawDataHandler& drawData)
+void GeometryPass::Draw(DrawDataHandler& drawData)
 {
+    const Camera& cam = *drawData.currentCam;
     ID3D11Buffer* CBuffers[2] = { drawData.CBuffer, CBuffer};
 
     Render::RendererRemote::context->VSSetConstantBuffers(0, 2, CBuffers);

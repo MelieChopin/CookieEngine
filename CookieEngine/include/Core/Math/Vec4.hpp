@@ -18,6 +18,7 @@ namespace Cookie
 
                 struct { float x; float y; float z; float w; };
                 struct { float r; float g; float b; float a; };
+                struct { float xyz_[3]; float w_; };
                 float e[4];
 
                 inline Vec4  operator/(float other) const { return{ x / other, y / other, z / other, w/other}; }

@@ -222,9 +222,9 @@ namespace Cookie
                 m.c[2].e[2] = -(2.0f/f_min_n);
                 m.c[2].e[3] = 0.0f;
 
-                m.c[3].e[0] = (-right - left) / (r_min_l);
-                m.c[3].e[1] = (-top - bottom) / (t_min_b);
-                m.c[3].e[2] = (-f - n) / f_min_n;
+                m.c[3].e[0] = ((right + left) / (r_min_l))*-1.0f;
+                m.c[3].e[1] = ((top + bottom) / (t_min_b))*-1.0f;
+                m.c[3].e[2] = ((f + n) / f_min_n)*-1.0f;
                 m.c[3].e[3] = 1.0f;
 
                 return m;
@@ -256,7 +256,7 @@ namespace Cookie
                 float theta = atanf(sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y) / dirVec.z);
                 float phi = atan2f(dirVec.y,dirVec.x);
 
-                m = Mat4::RotateY(phi) * Mat4::RotateX(theta);
+                m = Mat4::RotateY(phi) * Mat4::RotateX(theta) * Mat4::RotateZ(PI);
 
                 return m;
             }

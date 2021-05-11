@@ -172,10 +172,10 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     ID3D11RenderTargetView* nullViews[] = { nullptr,nullptr,nullptr,nullptr };
     remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
 
-    drawData.SetDrawData(*cam,game);
+    drawData.SetDrawData(cam,game);
 
     gPass.Set();
-    gPass.Draw(*cam,drawData);
+    gPass.Draw(drawData);
 
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
 

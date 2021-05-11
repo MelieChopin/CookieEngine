@@ -120,7 +120,7 @@ void DirLightPass::InitShader()
         float   roughness   = normalTex.Sample(ClampSampler,uv).w;
         float   ao          = albedoTex.Sample(ClampSampler,uv).w;
 
-        float   bias        = max(0.05 * (1.0 - dot(normal, normalize(-lightDir))), 0.005);  
+        float   bias        = max(0.01 * (1.0 - dot(normal, normalize(-lightDir))), 0.005);  
         float   shadow      = lerp(1.0,compute_shadow(fragPos,bias),castShadow);
 
         output          = compute_lighting(normal,fragPos,normalize(-lightDir),lightColor,albedo,metallic,roughness);

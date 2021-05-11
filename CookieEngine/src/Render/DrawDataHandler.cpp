@@ -111,9 +111,10 @@ void DrawDataHandler::MakeFrustrum(const Camera& cam)
 
 }
 
-void DrawDataHandler::SetDrawData(const Camera& cam, const Game& game)
+void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 {
-	MakeFrustrum(cam);
+	currentCam = cam;
+	MakeFrustrum(*cam);
 
 	const ECS::EntityHandler& entityHandler = *game.coordinator.entityHandler;
 	const ECS::ComponentHandler& components = *game.coordinator.componentHandler;

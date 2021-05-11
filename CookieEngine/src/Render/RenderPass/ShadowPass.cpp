@@ -5,6 +5,7 @@
 #include "Resources/Mesh.hpp"
 #include "Render/ShadowBuffer.hpp"
 #include "Render/DrawDataHandler.hpp"
+#include "Camera.hpp"
 #include "RenderPass/ShadowPass.hpp"
 
 using namespace Cookie::Core::Math;
@@ -105,7 +106,7 @@ void ShadowPass::InitState()
 
     // Setup the raster description which will determine how and what polygons will be drawn.
     rasterDesc.AntialiasedLineEnable = false;
-    rasterDesc.CullMode = D3D11_CULL_BACK;
+    rasterDesc.CullMode = D3D11_CULL_NONE;
     rasterDesc.DepthBias = 0;
     rasterDesc.DepthBiasClamp = 0.0f;
     rasterDesc.DepthClipEnable = true;
@@ -161,6 +162,7 @@ void ShadowPass::Set()
 
 void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
 {
+    const Camera& cam = *drawData.currentCam;
     ID3D11Buffer* CBuffers[2] = { drawData.CBuffer, CBuffer };
 
     Render::RendererRemote::context->VSSetConstantBuffers(0, 2, CBuffers);
@@ -170,10 +172,10 @@ void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
     size_t bufferSize = sizeof(buffer);
 
     Render::RendererRemote::context->RSSetViewports(1, &shadowViewport);
+    
+    Mat4 proj = Mat4::Ortho(-50.0f, 50.0f, -50.0f, 50.0f, -50.0f, 50.0f);
 
-    Mat4 proj = Mat4::Ortho(-100.0f, 100.0f, -100.0f, 100.0f, -100.0f, 100.0f);
-
-    Vec3 center = (drawData.AABB[1] + drawData.AABB[0])*0.5f;
+    Vec3 pos = (drawData.AABB[0] + drawData.AABB[1])*0.5f;
 
     for (int j = 0; j < lights.usedDir; j++)
     {
@@ -182,10 +184,11 @@ void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
         {
             Render::RendererRemote::context->OMSetRenderTargets(0, nullptr, jLight.shadowMap->depthStencilView);
             Vec3 jDir = -jLight.dir.Normalize();
-            Mat4 view = Mat4::LookAt(center + jDir * 50.0f, center, { 0.0f,1.0f,0.0f });
+            Mat4 view = Mat4::LookAt(jDir, {0.0f,0.0f,0.0f}, { 0.0f,1.0f,0.0f });//Mat4::Translate(jDir * 10.0f) * Mat4::Dir(jDir);//
+            Vec4 AABB0 = view * Vec4(drawData.AABB[0],1.0f);
+            Vec4 AABB1 = view * Vec4(drawData.AABB[1], 1.0f);
 
-
-            jLight.lightViewProj = proj * view;
+            jLight.lightViewProj = proj * Mat4::Translate(pos + jDir * 24.0f) * view;
             buffer.lightViewProj = jLight.lightViewProj;
 
             Render::WriteCBuffer(&buffer, bufferSize, 0, &CBuffer);

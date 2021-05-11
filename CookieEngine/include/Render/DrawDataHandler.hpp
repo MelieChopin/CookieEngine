@@ -35,6 +35,7 @@ namespace Cookie
 				std::vector<ECS::ComponentModel>	models;
 				std::vector<Core::Math::Mat4>		matrices;
 				std::array<Core::Math::Vec3, 2>		AABB;
+				const Camera*						currentCam;
 
 			private:
 				void InitCBuffer();
@@ -44,7 +45,7 @@ namespace Cookie
 				DrawDataHandler();
 				~DrawDataHandler();
 
-				void SetDrawData(const Camera& cam, const Game& game);
+				void SetDrawData(const Camera* cam, const Game& game);
 				void Draw(int _i = 0);
 				void Clear();
 		};
