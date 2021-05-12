@@ -71,6 +71,13 @@ namespace Cookie
 
 		inline void ComponentGameplay::ToDefault(Entity& entity)noexcept
 		{
+			if (entity.signatureGameplay & SIGNATURE_CGP_LIVE)
+				componentLive.ToDefault();
+			if (entity.signatureGameplay & SIGNATURE_CGP_MOVE)
+				componentMove.ToDefault();
+			if (entity.signatureGameplay & SIGNATURE_CGP_ATTACK)
+				componentAttack.ToDefault();
+
 			entity.signatureGameplay = SIGNATURE_CGP_EMPTY;
 		}
 

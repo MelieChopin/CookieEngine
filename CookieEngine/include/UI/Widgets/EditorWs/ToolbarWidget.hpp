@@ -10,13 +10,13 @@ namespace Cookie::Render	{ class  Renderer;	}
 namespace Cookie::UIwidget
 {	
 	enum class TransformTool
-	{ Translate, Rotate, Scale, Quad };
+	{ Translate, Rotate, Scale };
 
 
 	class Toolbar final : public WindowBase
 	{
 		enum class ToolbarIcons
-		{ Translator, Rotator, Scaler, Quader, Play, Stop, Pause, Frame, ICOS_NUM };
+		{ Translator, Rotator, Scaler, Play, Stop, Pause, Frame, ICOS_NUM };
 
 		std::unique_ptr<Cookie::Resources::Texture> icons[(int)ToolbarIcons::ICOS_NUM];
 		

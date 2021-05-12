@@ -14,7 +14,6 @@ Toolbar::Toolbar(Cookie::Render::Renderer& _renderer)
 	icons[(int)ToolbarIcons::Translator]	= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/translate.ico");
 	icons[(int)ToolbarIcons::Rotator]		= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/rotate.ico");
 	icons[(int)ToolbarIcons::Scaler]		= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/zoom.ico");
-	icons[(int)ToolbarIcons::Quader]		= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/quad.ico");
 	icons[(int)ToolbarIcons::Play]			= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/play.ico");
 	icons[(int)ToolbarIcons::Stop]			= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/stop.ico");
 	icons[(int)ToolbarIcons::Pause]			= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/pause.ico");
@@ -40,20 +39,17 @@ bool Toolbar::BeginWindow(int windowFlags)
 
 void Toolbar::WindowDisplay()
 {
-	ImGuiStyle prev = GetStyle();
-
-
-	ImVec4(&ImColors)[55] = GetStyle().Colors;
-	ImColors[ImGuiCol_Button]			= { 0.70, 0.70, 0.70, 1 };
-	ImColors[ImGuiCol_ButtonActive]		= { 0.35, 0.35, 0.35, 1 };
-	ImColors[ImGuiCol_ButtonHovered]	= { 0.90, 0.90, 0.90, 1 };
+	PushStyleColor(ImGuiCol_Button,			{ 0.70, 0.70, 0.70, 1 });
+	PushStyleColor(ImGuiCol_ButtonActive,	{ 0.35, 0.35, 0.35, 1 });
+	PushStyleColor(ImGuiCol_ButtonHovered,	{ 0.90, 0.90, 0.90, 1 });
 
 
 	TryBeginWindow(ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar)
 	{
 		SameLine(15);
 
-		GetStyle().FrameRounding = 5.f;
+		PushStyleVar(ImGuiStyleVar_FrameRounding, 5.f);
+
 		if (ImageButton(icons[(int)ToolbarIcons::Translator]->GetResourceView(), { 25, 25 }, { 0, 0 }, { 1, 1 }, 5))
 		{ currentTrsfTool = TransformTool::Translate; } SameLine(15 +(35*1));
 
@@ -62,9 +58,6 @@ void Toolbar::WindowDisplay()
 
 		if (ImageButton(icons[(int)ToolbarIcons::Scaler]->GetResourceView(), { 25, 25 }, { 0, 0 }, { 1, 1 }, 5))
 		{ currentTrsfTool = TransformTool::Scale; }		SameLine(15 +(35*3));
-
-		if (ImageButton(icons[(int)ToolbarIcons::Quader]->GetResourceView(), { 25, 25 }, { 0, 0 }, { 1, 1 }, 5))
-		{ currentTrsfTool = TransformTool::Quad; } 
 		
 
 		SameLine(GetWindowWidth()/2);
@@ -88,10 +81,11 @@ void Toolbar::WindowDisplay()
 
 		if (ImageButton(icons[(int)ToolbarIcons::Frame]->GetResourceView(), { 25, 25 }, { 0, 0 }, { 1, 1 }, 5))
 		{/*TBD*/}
+		
+		PopStyleVar(1);
 	}
 
 	ImGui::EndChild();
 
-
-	GetStyle() = prev;
+	PopStyleColor(3);
 }

@@ -1,6 +1,7 @@
 #ifndef __PRIMITIVES_HPP__
 #define __PRIMITIVES_HPP__
 
+#include "Core/Math/Vec3.hpp"
 #include "Resources/Mesh.hpp"
 
 namespace Cookie

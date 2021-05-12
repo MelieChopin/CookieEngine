@@ -16,8 +16,8 @@ namespace Cookie
 		public:
 			unsigned int		id				  {0};
 			int                 signature		  {0}; 
-			int                 signatureGameplay { 0b111 };// for now, will be set to 0 when ui implemented
-			std::string			name			  {"No Name" };
+			int                 signatureGameplay {0};
+			std::string			name			  {"No Name"};
 			std::string			tag				  {"No Tag"};
 			bool				needToBeRemoved	  {false};
 			std::string			namePrefab		  {"NONE"};

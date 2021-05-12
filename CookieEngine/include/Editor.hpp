@@ -40,8 +40,8 @@ namespace Cookie
 		public:
 
 
+			UI::UIeditor			editorUI;
 			Game					game;
-			UI::UIeditor			ui;
 			Render::FreeFlyCam		cam;
 			Render::FrameBuffer		editorFBO;
 
@@ -104,3 +104,7 @@ namespace Cookie
 }
 
 #endif // !__EDITOR_HPP__
+
+#ifndef USING_EDITOR
+#define USING_EDITOR
+#endif // !USING_EDITOR

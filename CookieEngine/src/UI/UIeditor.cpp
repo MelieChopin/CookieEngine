@@ -1,24 +1,14 @@
-#include <d3d11.h>
-
 #include "UIeditor.hpp"
 
 #include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_dx11.h>
-
 #include <ImGuizmo.h>
-
-#include "Renderer.hpp"
-
 
 using namespace ImGui;
 using namespace Cookie::UI;
 
 
-UIeditor::UIeditor(const Cookie::Render::Renderer& _renderer)
+UIeditor::UIeditor()
 {
-	IMGUI_CHECKVERSION();
-	CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableSetMousePos;
@@ -28,17 +18,10 @@ UIeditor::UIeditor(const Cookie::Render::Renderer& _renderer)
 
 	io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
 	io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
-	
+
 	io.ConfigViewportsNoDefaultParent = true;
-
-	StyleColorsDark();
-
-	GetStyle().Colors[ImGuiCol_DockingEmptyBg]	= {0, 0, 0, 0};
-
-	ImGui_ImplGlfw_InitNoAPI(_renderer.window.window, true);
-	ImGui_ImplDX11_Init(Render::RendererRemote::device, _renderer.remote.context);
-	ImGui_ImplDX11_CreateDeviceObjects();
 }
+
 
 void UIeditor::ClearWidgets()
 {
@@ -59,37 +42,10 @@ void UIeditor::ClearWidgets()
 	}
 }
 
-void UIeditor::Terminate()
-{
-	ClearWidgets();
-
-	ImGui_ImplDX11_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	DestroyContext();
-	Render::RendererRemote::context->Flush();
-}
-
-
-void UIeditor::BeginFrame()
-{
-	ImGui_ImplDX11_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	NewFrame();
-	ImGuizmo::BeginFrame();
-}
-
-void UIeditor::EndFrame()
-{	
-	ImGui::Render();	
-	ImGui_ImplDX11_RenderDrawData(GetDrawData());
-
-	UpdatePlatformWindows();
-	RenderPlatformWindowsDefault();
-}
 
 void UIeditor::UpdateUI()
 {
-	BeginFrame();
+	ImGuizmo::BeginFrame();
 
 	DockSpaceOverViewport(GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
@@ -122,6 +78,4 @@ void UIeditor::UpdateUI()
 			cOW->WindowDisplay();
 		}
 	}
-
-	EndFrame();
 }
