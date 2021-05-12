@@ -45,7 +45,7 @@ Mesh::~Mesh()
 
 void Mesh::ComputeAABB(const std::vector<float>& vertices)
 {
-    for (int i = 0; i < vertices.size() - 1; i+=8)//position, uv, normal
+    for (int i = 0; i < vertices.size(); i+=8)//position, uv, normal
     {
 
         if (vertices[i] > AABBMax.x)
@@ -60,7 +60,7 @@ void Mesh::ComputeAABB(const std::vector<float>& vertices)
         {
             AABBMax.y = vertices[i+1];
         }
-        if (vertices[i + 1] > AABBMin.y)
+        if (vertices[i + 1] < AABBMin.y)
         {
             AABBMin.y = vertices[i + 1];
         }

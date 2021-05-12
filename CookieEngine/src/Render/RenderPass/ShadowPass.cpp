@@ -183,12 +183,10 @@ void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
         if (jLight.castShadow)
         {
             Render::RendererRemote::context->OMSetRenderTargets(0, nullptr, jLight.shadowMap->depthStencilView);
-            Vec3 jDir = -jLight.dir.Normalize();
-            Mat4 view = Mat4::LookAt(jDir, {0.0f,0.0f,0.0f}, { 0.0f,1.0f,0.0f });//Mat4::Translate(jDir * 10.0f) * Mat4::Dir(jDir);//
-            Vec4 AABB0 = view * Vec4(drawData.AABB[0],1.0f);
-            Vec4 AABB1 = view * Vec4(drawData.AABB[1], 1.0f);
+            Vec3 jDir = jLight.dir.Normalize();
+            Mat4 view = Mat4::LookAt({0.0f,0.0f,0.0f}, jDir, { 0.0f,1.0f,0.0f });//Mat4::Translate(jDir * 10.0f) * Mat4::Dir(jDir);//
 
-            jLight.lightViewProj = proj * Mat4::Translate(pos + jDir * 24.0f) * view;
+            jLight.lightViewProj = proj * Mat4::Translate(pos - jDir * 25.0f) * view;
             buffer.lightViewProj = jLight.lightViewProj;
 
             Render::WriteCBuffer(&buffer, bufferSize, 0, &CBuffer);

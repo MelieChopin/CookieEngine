@@ -107,8 +107,8 @@ void Editor::Loop()
 
     Vec2 mousePos;
     {
-        game.scene->map.model.mesh                 = game.resources.meshes["Cube"].get();
-        game.scene->map.model.albedo              = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
+        game.scene->map.model.mesh                  = game.resources.meshes["NormalCube"].get();
+        game.scene->map.model.albedo                = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
 
 
         //will be removed after testing phase

@@ -31,6 +31,8 @@ DirLightPass::~DirLightPass()
         PShader->Release();
     if (CBuffer)
         CBuffer->Release();
+    if (CSampler)
+        CSampler->Release();
 }
 
 /*======================= INIT METHODS =======================*/
@@ -68,6 +70,8 @@ void DirLightPass::InitShader()
     Texture2D   albedoTex   : register(t2);
     Texture2D   shadowMap   : register(t3);
 
+    static const float shadowTexelSize = 1.0/4096;
+
     cbuffer DirLight : register(b0)
     {
         float3      lightDir;
@@ -78,32 +82,31 @@ void DirLightPass::InitShader()
     };
 
     SamplerState ClampSampler : register(s0);
+    SamplerComparisonState ShadowSampler : register(s1);
 
-    float compute_shadow(float3 fragPos, float bias)
+    float compute_shadow(float3 fragPos, float dot)
     {
         float4 lightFragPos = mul(float4(fragPos,1.0),lightViewProj);
         lightFragPos /= lightFragPos.w;
+
+        if(lightFragPos.z > 1.0)
+            return 1.0;
+
         lightFragPos.x = 0.5 + lightFragPos.x * 0.5;
         lightFragPos.y = 0.5 - lightFragPos.y * 0.5;
 
-        
-
-        float shadow = 0.0f;
-        float texelSize = 1.0/4096;
+        float shadow = 1.0f;
+        float margin = clamp(0.005 / acos(saturate(dot)),0.0,0.01);
 
         for(int x = -1; x <= 1; ++x)
         {
             for(int y = -1; y <= 1; ++y)
             {
-                float closestDepth = shadowMap.Sample(ClampSampler,lightFragPos.xy + float2(x,y)*texelSize).r;
-                shadow += step(lightFragPos.z - bias,closestDepth);        
+                shadow += shadowMap.SampleCmpLevelZero(ShadowSampler,lightFragPos.xy + float2(x,y)*shadowTexelSize,lightFragPos.z - margin);       
             }    
         }
-
+        
         shadow /= 9.0;
-
-        if(lightFragPos.z > 1.0)
-            return 0.0;
 
         return shadow;
 
@@ -120,8 +123,7 @@ void DirLightPass::InitShader()
         float   roughness   = normalTex.Sample(ClampSampler,uv).w;
         float   ao          = albedoTex.Sample(ClampSampler,uv).w;
 
-        float   bias        = max(0.01 * (1.0 - dot(normal, normalize(-lightDir))), 0.005);  
-        float   shadow      = lerp(1.0,compute_shadow(fragPos,bias),castShadow);
+        float   shadow      = lerp(1.0,compute_shadow(fragPos,dot(normal, normalize(-lightDir))),castShadow);
 
         output          = compute_lighting(normal,fragPos,normalize(-lightDir),lightColor,albedo,metallic,roughness);
         output.diffuse  = output.diffuse * shadow + (0.03 * ao + 0.01) *  float4(albedo,1.0);
@@ -136,6 +138,20 @@ void DirLightPass::InitShader()
     PS_DIRLIGHT_BUFFER buffer = {};
 
     CreateBuffer(&buffer, sizeof(PS_DIRLIGHT_BUFFER), &CBuffer);
+
+    D3D11_SAMPLER_DESC samDesc = {};
+    samDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+    samDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+    samDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+    samDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+    samDesc.MipLODBias = 0.0f;
+    samDesc.MaxAnisotropy = 0.0f;
+    samDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+    samDesc.BorderColor[0] = samDesc.BorderColor[1] = samDesc.BorderColor[2] = samDesc.BorderColor[3] = 1.0f;
+    samDesc.MinLOD = 0;
+    samDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+    Render::CreateSampler(&samDesc, &CSampler);
 }
 
 /*======================= REALTIME METHODS =======================*/
@@ -151,6 +167,8 @@ void DirLightPass::Set(ID3D11Buffer** lightCBuffer)const
     ID3D11Buffer* buffer[] = { CBuffer, *lightCBuffer };
 
     Render::RendererRemote::context->PSSetConstantBuffers(0, 2, buffer);
+
+    Render::RendererRemote::context->PSSetSamplers(1, 1, &CSampler);
 }
 
 void DirLightPass::Write(const DirLight& dirLight)

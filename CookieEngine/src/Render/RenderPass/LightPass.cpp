@@ -46,7 +46,7 @@ void LightPass::InitShader()
     samDesc.MipLODBias = 0.0f;
     samDesc.MaxAnisotropy = 0.0f;
     samDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-    samDesc.BorderColor[0] = samDesc.BorderColor[1] = samDesc.BorderColor[2] = samDesc.BorderColor[3] = 1.0f;
+    samDesc.BorderColor[0] = samDesc.BorderColor[1] = samDesc.BorderColor[2] = samDesc.BorderColor[3] = 0.0f;
     samDesc.MinLOD = 0;
     samDesc.MaxLOD = 0;
 

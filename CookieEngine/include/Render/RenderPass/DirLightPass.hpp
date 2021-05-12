@@ -5,6 +5,7 @@
 struct ID3D11VertexShader;
 struct ID3D11PixelShader;
 struct ID3D11Buffer;
+struct ID3D11SamplerState;
 
 namespace Cookie
 {
@@ -28,7 +29,9 @@ namespace Cookie
 		private:
 			ID3D11VertexShader*	VShader{ nullptr };
 			ID3D11PixelShader*	PShader{ nullptr };
+
 			ID3D11Buffer*		CBuffer{ nullptr };
+			ID3D11SamplerState*	CSampler{nullptr};
 
 		private:
 			void InitShader();

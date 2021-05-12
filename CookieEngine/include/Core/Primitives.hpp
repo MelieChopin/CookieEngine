@@ -25,6 +25,8 @@ namespace Cookie
 
 			inline std::unique_ptr<Resources::Mesh> CreateCube();
 
+			inline std::unique_ptr<Resources::Mesh> CreateNormalCube();
+
 			inline std::unique_ptr<Resources::Mesh> CreateSphere();
 
 			inline std::unique_ptr<Resources::Mesh> CreateIcoSphere();

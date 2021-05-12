@@ -24,7 +24,7 @@ Renderer::Renderer():
     remote.context->RSSetViewports(1, &viewport);
     lights.dirLights[0] = { {0.0f,-1.0f,1.0f},{1.0f,1.0f,1.0f}, true};
     lights.usedDir++;
-    lights.dirLights[1] = { {0.0f,-1.0f,-1.0f},{0.0f,1.0f,0.0f}};
+    lights.dirLights[1] = { {0.0f,-1.0f,-1.0f},{0.2f,0.5f,0.3f}, true};
     lights.usedDir++;
     //lights.dirLights[2] = { {0.0f,-1.0f,0.0f},{0.0,0.0f,1.0f} };
     //lights.usedDir++;
@@ -217,7 +217,7 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     {
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
         fboDrawer.Set();
-        remote.context->PSSetShaderResources(0, 1, &lights.dirLights.at(0).shadowMap->shaderResource);
+        remote.context->PSSetShaderResources(0, 1, &lights.dirLights.at(1).shadowMap->shaderResource);
         remote.context->Draw(3, 0);
     }
     else
