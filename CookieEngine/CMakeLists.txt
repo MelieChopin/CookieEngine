@@ -78,7 +78,13 @@ set (SRC_FILES
     "${SRC_DIR}/Render/FrameBuffer.cpp"
     "${SRC_DIR}/Render/SkyBox.cpp"
     "${SRC_DIR}/Render/Light.cpp"
-    "${SRC_DIR}/Render/GeometryPass.cpp"
+    "${SRC_DIR}/Render/DrawDataHandler.cpp"
+    "${SRC_DIR}/Render/RenderPass/GeometryPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/LightPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/DirLightPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/ComposePass.cpp"
+    "${SRC_DIR}/Render/ShadowBuffer.cpp" 
+    "${SRC_DIR}/Render/RenderPass/ShadowPass.cpp"
     "${SRC_DIR}/Render/FBODrawer.cpp"
     "${SRC_DIR}/Render/ParticlesPass.cpp"
     
@@ -134,6 +140,8 @@ set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
         "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/fmodstudioL.dll")
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
+
+#add_compile_options(-O2)
 
 # Ajoutez une source à l'exécutable de ce projet.
 add_executable (CookieEngine ${SUB_SYS} ${SRC_FILES})

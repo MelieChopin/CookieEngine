@@ -53,6 +53,11 @@ namespace Cookie::UIwidget
 			  selectedEntity	(_selectedEntity)
 		{}
 
+		inline ~Viewport()
+		{
+			delete toolbar;
+		}
+
 		void WindowDisplay() override;
 	};
 }

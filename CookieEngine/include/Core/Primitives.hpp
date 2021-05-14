@@ -18,27 +18,29 @@ namespace Cookie
 				DebugVertex(const Math::Vec3& _vertex, uint32_t _color) :vertex{ _vertex }, color{_color} {}
 			};
 
-			inline std::shared_ptr<Resources::Mesh> CreateQuad();
+			inline std::unique_ptr<Resources::Mesh> CreateQuad();
 
 			inline std::vector<DebugVertex> CreateLine(const Math::Vec3& start, const Math::Vec3& end, uint32_t color1, uint32_t color2);
 
-			inline std::shared_ptr<Resources::Mesh> CreateTriangle();
+			inline std::unique_ptr<Resources::Mesh> CreateTriangle();
 
-			inline std::shared_ptr<Resources::Mesh> CreateCube();
+			inline std::unique_ptr<Resources::Mesh> CreateCube();
 
-			inline std::shared_ptr<Resources::Mesh> CreateSphere();
+			inline std::unique_ptr<Resources::Mesh> CreateNormalCube();
 
-			inline std::shared_ptr<Resources::Mesh> CreateIcoSphere();
+			inline std::unique_ptr<Resources::Mesh> CreateSphere();
 
-			inline std::shared_ptr<Resources::Mesh> CreatePyramid();
+			inline std::unique_ptr<Resources::Mesh> CreateIcoSphere();
 
-			inline std::shared_ptr<Resources::Mesh> CreateCylinder();
+			inline std::unique_ptr<Resources::Mesh> CreatePyramid();
 
-			inline std::shared_ptr<Resources::Mesh> CreateCone();
+			inline std::unique_ptr<Resources::Mesh> CreateCylinder();
 
-			inline std::shared_ptr<Resources::Mesh> CreateCircle();
+			inline std::unique_ptr<Resources::Mesh> CreateCone();
 
-			inline std::shared_ptr<Resources::Mesh> CreateCapsule();
+			inline std::unique_ptr<Resources::Mesh> CreateCircle();
+
+			inline std::unique_ptr<Resources::Mesh> CreateCapsule();
 		}
 	}
 }

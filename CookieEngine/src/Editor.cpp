@@ -1,6 +1,7 @@
 #include "Editor.hpp" 
 #include "UIallIn.hpp"
 #include "Serialization.hpp"
+#include "Primitives.hpp"
 #include "Physics/PhysicsHandle.hpp"
 #include "ECS/SystemHandler.hpp"
 #include "Resources/Scene.hpp"
@@ -18,8 +19,8 @@ Editor::Editor()
     : editorFBO{game.renderer.window.width,game.renderer.window.height}
 {
     game.resources.Load(game.renderer);
-    game.skyBox.texture = game.resources.textures["Assets/skybox.dds"];
-    cam.SetProj(Core::Math::ToRadians(60.f), game.renderer.state.viewport.Width, game.renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+    game.skyBox.texture = game.resources.textures["Assets/skybox.dds"].get();
+    cam.SetProj(Core::Math::ToRadians(60.f), game.renderer.viewport.Width, game.renderer.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
     cam.rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
 
@@ -102,13 +103,13 @@ void Editor::Loop()
 
     Vec2 mousePos;
     {
-        game.scene->map.model.mesh                 = game.resources.meshes["Cube"];
-        game.scene->map.model.texture              = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"];
+        game.scene->map.model.mesh                  = game.resources.meshes["NormalCube"].get();
+        game.scene->map.model.albedo                = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
 
 
         //will be removed after testing phase
-        game.scene->map.modelTileObstacle.mesh     = game.resources.meshes["Cube"];
-        game.scene->map.modelTileObstacle.texture  = game.resources.textures["Grey"];
+        game.scene->map.modelTileObstacle.mesh     = game.resources.meshes["Cube"].get();
+        game.scene->map.modelTileObstacle.albedo   = game.resources.textures["Grey"].get();
     }
     ComponentTransform buildingTrs;
     ComponentModel     buildingModel;
@@ -120,8 +121,8 @@ void Editor::Loop()
     {
         buildingTrs.scale.x = buildingTileSize.x * game.scene->map.tilesSize.x;
         buildingTrs.scale.z = buildingTileSize.y * game.scene->map.tilesSize.y;
-        buildingModel.mesh = game.resources.meshes["Cube"];
-        buildingModel.texture = game.resources.textures["Pink"];
+        buildingModel.mesh = game.resources.meshes["Cube"].get();
+        buildingModel.albedo = game.resources.textures["Pink"].get();
     }
     Vec2 selectionQuadStart;
     bool makingASelectionQuad = false;
@@ -212,7 +213,6 @@ void Editor::Loop()
        // if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
         //    Resources::Serialization::Save::SaveScene(*game.scene, game.resources);
 
-        ////TEMP
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_H) == GLFW_PRESS)
         {
             std::string duck = "Duck";
@@ -291,7 +291,7 @@ void Editor::Loop()
                     trs.scale = buildingTrs.scale;
 
                     model.mesh = buildingModel.mesh;
-                    model.texture = game.resources.textures["Green"];
+                    model.albedo = game.resources.textures["Green"].get();
                 }
 
                 nbOfBuildings++;
@@ -299,7 +299,7 @@ void Editor::Loop()
         }
         //Bind Keys to Set Obstacle Tiles
         {
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B] && isRaycastingWithMap)
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V] && isRaycastingWithMap)
             {
                 game.scene->map.tiles[indexOfSelectedTile].isObstacle = !game.scene->map.tiles[indexOfSelectedTile].isObstacle;
             }
@@ -336,14 +336,37 @@ void Editor::Loop()
                 game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL + SIGNATURE_GAMEPLAY, game.resources, "Unit " + std::to_string(nbOfUnits));
                 //should create constructor copy for each Component 
                 {
-                    ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(game.coordinator.entityHandler->livingEntities - 1);
-                    ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(game.coordinator.entityHandler->livingEntities - 1);
-                    game.coordinator.entityHandler->entities[game.coordinator.entityHandler->livingEntities - 1].signatureGameplay = SIGNATURE_CGP_ALL;
+                    ECS::Entity& entity = game.coordinator.entityHandler->entities[game.coordinator.entityHandler->livingEntities - 1];
+                    ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(entity.id);
+                    ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(entity.id);
+                    entity.tag = "good";
+                    entity.signatureGameplay = SIGNATURE_CGP_ALL;
 
                     trs.pos = {mousePos.x, 1, mousePos.y};
 
-                    model.mesh = game.resources.meshes["Cube"];
-                    model.texture = game.resources.textures["Green"];
+                    model.mesh = game.resources.meshes["Cube"].get();
+                    model.albedo = game.resources.textures["Green"].get();
+                    //model.shader = game.resources.shaders["Texture_Shader"];
+
+                }
+
+                nbOfUnits++;
+            }
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B] && isRaycastingWithMap)
+            {
+                game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL + SIGNATURE_GAMEPLAY, game.resources, "Unit " + std::to_string(nbOfUnits));
+                //should create constructor copy for each Component 
+                {
+                    ECS::Entity& entity = game.coordinator.entityHandler->entities[game.coordinator.entityHandler->livingEntities - 1];
+                    ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(entity.id);
+                    ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(entity.id);
+                    entity.signatureGameplay = SIGNATURE_CGP_ALL;
+                    entity.tag = "bad";
+
+                    trs.pos = { mousePos.x, 1, mousePos.y };
+
+                    model.mesh = game.resources.meshes["Cube"].get();
+                    model.albedo = game.resources.textures["Red"].get();
                     //model.shader = game.resources.shaders["Texture_Shader"];
 
                 }
@@ -390,16 +413,17 @@ void Editor::Loop()
         game.coordinator.ApplyGameplayMoveWithCommander();
         game.coordinator.ApplyGameplayPosPrediction();
         game.coordinator.ApplyGameplayResolveCollision();
-        game.coordinator.ApplyGameplayDrawPath(dbgRenderer);
 
+        game.coordinator.ApplyGameplayCheckEnemyInRange();
+        game.coordinator.ApplyGameplayAttack();
 
-        if (isActive)
+		if (isActive)
             game.particlesHandler.Update();
 
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
             isActive = true;
-        
 
+        game.coordinator.ApplyGameplayDrawPath(dbgRenderer);
         game.renderer.Draw(&cam, game,editorFBO);
         //if (isRaycastingWithMap)
             //SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
@@ -415,6 +439,8 @@ void Editor::Loop()
         UIcore::EndFrame();
 
         game.renderer.Render();
+
+        game.coordinator.ApplyRemoveUnnecessaryEntities();
     }
 }
 
@@ -430,8 +456,8 @@ void Editor::TryResizeWindow()
 
     if (game.renderer.window.width != width || game.renderer.window.height != height)
     {
-        Core::DebugMessageHandler::Summon().Log((std::to_string(width) + ' ' + std::to_string(height)).c_str());
-        printf("%d, %d\n", width, height);
+        //Core::DebugMessageHandler::Summon().Log((std::to_string(width) + ' ' + std::to_string(height)).c_str());
+        //printf("%d, %d\n", width, height);
         game.renderer.window.width = width;
         game.renderer.window.height = height;
 

@@ -20,6 +20,14 @@ Toolbar::Toolbar(Cookie::Render::Renderer& _renderer)
 	icons[(int)ToolbarIcons::Frame]			= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/frame.ico");
 }
 
+Toolbar::~Toolbar()
+{
+	for (int i = 0; i < (int)ToolbarIcons::ICOS_NUM; i++)
+	{
+		icons[i].reset();
+	}
+}
+
 bool Toolbar::BeginWindow(int windowFlags)
 {
 	if (!opened) return false;

@@ -1,7 +1,6 @@
 #ifndef __SERIALIZATION_HPP__
 #define __SERIALIZATION_HPP__
 
-
 #include <json.hpp>
 
 using json = nlohmann::json;
@@ -14,6 +13,7 @@ namespace Cookie
 	{
 		class Coordinator;
 		class ComponentPhysics;
+		class ComponentHandler;
 		class EntityHandler;
 	}
 

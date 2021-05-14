@@ -35,8 +35,8 @@ namespace Cookie
 		class ResourcesManager
 		{
 			public:
-				std::unordered_map<std::string, std::shared_ptr<Mesh>>			meshes;
-				std::unordered_map<std::string, std::shared_ptr<Texture>>		textures;
+				std::unordered_map<std::string, std::unique_ptr<Mesh>>			meshes;
+				std::unordered_map<std::string, std::unique_ptr<Texture>>		textures;
 				std::unordered_map<std::string, std::shared_ptr<Script>>		scripts;
 				std::unordered_map<std::string, std::shared_ptr<Prefab>>		prefabs;
 				

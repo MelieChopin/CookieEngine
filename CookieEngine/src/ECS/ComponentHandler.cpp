@@ -1,4 +1,6 @@
 #include "ECS/ComponentHandler.hpp"
+#include "Resources/Mesh.hpp"
+#include "Resources/Texture.hpp"
 #include "Resources/ResourcesManager.hpp"
 #include "Physics/PhysicsHandle.hpp"
 #include "Resources/Prefab.hpp"
@@ -35,8 +37,8 @@ void ComponentHandler::ModifyComponentOfEntityToPrefab(Entity& entity, Cookie::R
 	if (!(idEntity & SIGNATURE_MODEL))
 		AddComponentModel(entity);
 
-	componentModels[idEntity].mesh = resourcesManager.meshes[prefab->nameMesh];
-	componentModels[idEntity].texture = resourcesManager.textures[prefab->nameTexture];
+	componentModels[idEntity].mesh = resourcesManager.meshes[prefab->nameMesh].get();
+	componentModels[idEntity].albedo = resourcesManager.textures[prefab->nameTexture].get();
 	//componentModels[idEntity].shader = resourcesManager.shaders[prefab->nameShader]; 
 
 	//if (!(idEntity & SIGNATURE_SCRIPT))

@@ -43,10 +43,10 @@ namespace Cookie
 			UI::UIeditor			editorUI;
 			Game					game;
 			Render::FreeFlyCam		cam;
-			Render::DebugRenderer	dbgRenderer;
 			Render::FrameBuffer		editorFBO;
 
 			std::array<ECS::ComponentEditor, MAX_ENTITIES> editingComponent;
+			Render::DebugRenderer	dbgRenderer;
 
 			FocusEntity			selectedEntity	= {};
 			Resources::Scene*	currentScene	= nullptr;

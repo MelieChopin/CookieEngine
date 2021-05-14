@@ -57,7 +57,7 @@ void FBODrawer::InitShader()
 
     float4 main(float4 position : SV_POSITION, float2 uv : UV) : SV_TARGET
     {
-        return float4(diffuseTex2D.Sample(WrapSampler,uv).xyz,1.0);        
+        return float4(diffuseTex2D.Sample(WrapSampler,uv).rgb,1.0);        
     })";
 
     Render::CompilePixel(source, &PShader);
@@ -75,6 +75,8 @@ void FBODrawer::InitShader()
     samDesc.MaxLOD = 0;
 
     Render::CreateSampler(&samDesc, &PSampler);
+
+    blob->Release();
 }
 
 /*===================== REALTIME METHODS =====================*/
@@ -96,5 +98,6 @@ void FBODrawer::Set()
 
 void FBODrawer::Draw(FrameBuffer& fbo)
 {
+    Render::RendererRemote::context->OMSetRenderTargets(1, &fbo.renderTargetView, nullptr);
     Render::RendererRemote::context->Draw(3, 0);
 }

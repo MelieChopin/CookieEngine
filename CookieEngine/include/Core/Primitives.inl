@@ -7,17 +7,17 @@ namespace Cookie
 	{
 		namespace Primitives
 		{
-			inline std::shared_ptr<Resources::Mesh> CreateQuad()
+			inline std::unique_ptr<Resources::Mesh> CreateQuad()
 			{
-				std::vector<float> vertices = { -0.5, -0.5, 0, 0, 0, 0, 0, 1,
-												 0.5, -0.5, 0, 1, 0, 0, 0, 1,
-												 0.5,  0.5, 0, 1, 1, 0, 0, 1,
-												-0.5,  0.5, 0, 0, 1, 0, 0, 1 };
+				std::vector<float> vertices = { -0.5, -0.5, 0, 0, 0, 0, 0, -1,
+												 0.5, -0.5, 0, 1, 0, 0, 0, -1,
+												 0.5,  0.5, 0, 1, 1, 0, 0, -1,
+												-0.5,  0.5, 0, 0, 1, 0, 0, -1 };
 
 				std::vector<unsigned int> indices = { 1, 0, 3, 2, 1, 3 };
 
 
-				std::shared_ptr<Resources::Mesh> quad = std::make_shared<Resources::Mesh>("Quad", vertices, indices, 6);
+				std::unique_ptr<Resources::Mesh> quad = std::make_unique<Resources::Mesh>("Quad", vertices, indices, 6);
 				return quad;
 			}
 
@@ -27,7 +27,7 @@ namespace Cookie
 				return vertices;
 			}
 
-			inline std::shared_ptr<Resources::Mesh> CreateTriangle()
+			inline std::unique_ptr<Resources::Mesh> CreateTriangle()
 			{
 				std::vector<float> vertices = { -1, -1, 0, 0,   0, 0, 0, 1,
 												 1, -1, 0, 0,   1, 0, 0, 1,
@@ -35,11 +35,71 @@ namespace Cookie
 
 				std::vector<unsigned int> indices = { 0, 1, 2 };
 
-				std::shared_ptr<Resources::Mesh> triangle = std::make_shared<Resources::Mesh>("Triangle", vertices, indices, 3);
+				std::unique_ptr<Resources::Mesh> triangle = std::make_unique<Resources::Mesh>("Triangle", vertices, indices, 3);
 				return triangle;
 			}
 
-			inline std::shared_ptr<Resources::Mesh> CreateCube()
+			inline std::unique_ptr<Resources::Mesh> CreateNormalCube()
+			{
+				std::vector<float> vertices = {
+					 0.5f, -0.5f,  0.5f, 1.000000, 0.333333,  0.0f, -1.0f,  0.0f,//1
+					-0.5f, -0.5f,  0.5f, 1.000000, 0.666667,  0.0f, -1.0f,  0.0f,
+					-0.5f, -0.5f, -0.5f, 0.666667, 0.666667,  0.0f, -1.0f,  0.0f,
+					-0.5f,  0.5f, -0.5f, 1.000000, 0.333333,  0.0f,  1.0f,  0.0f,//2
+					-0.5f,  0.5f,  0.5f, 0.666667, 0.333333,  0.0f,  1.0f,  0.0f,
+					 0.5f,  0.5f,  0.5f, 0.666667, 0.000000,  0.0f,  1.0f,  0.0f,
+					 0.5f,  0.5f, -0.5f, 0.000000, 0.333333,  1.0f,  0.0f,  0.0f,//3
+					 0.5f,  0.5f,  0.5f, 0.000000, 0.000000,  1.0f,  0.0f,  0.0f,
+					 0.5f, -0.5f,  0.5f, 0.333333, 0.000000,  1.0f,  0.0f,  0.0f,
+					 0.5f,  0.5f,  0.5f, 0.333333, 0.000000,  0.0f,  0.0f,  1.0f,//4
+					-0.5f,  0.5f,  0.5f, 0.666667, 0.000000,  0.0f,  0.0f,  1.0f,
+					-0.5f, -0.5f,  0.5f, 0.666667, 0.333333,  0.0f,  0.0f,  1.0f,
+					-0.5f, -0.5f,  0.5f, 0.333333, 1.000000, -1.0f,  0.0f,  0.0f,//5
+					-0.5f,  0.5f,  0.5f, 0.000000, 1.000000, -1.0f,  0.0f,  0.0f,
+					-0.5f,  0.5f, -0.5f, 0.000000, 0.666667, -1.0f,  0.0f,  0.0f,
+					 0.5f, -0.5f, -0.5f, 0.333333, 0.333333,  0.0f,  0.0f, -1.0f,//6
+					-0.5f, -0.5f, -0.5f, 0.333333, 0.666667,  0.0f,  0.0f, -1.0f,
+					-0.5f,  0.5f, -0.5f, 0.000000, 0.666667,  0.0f,  0.0f, -1.0f,
+					 0.5f, -0.5f, -0.5f, 0.666667, 0.333333,  0.0f, -1.0f,  0.0f,//7
+					 0.5f, -0.5f,  0.5f, 1.000000, 0.333333,  0.0f, -1.0f,  0.0f,
+					-0.5f, -0.5f, -0.5f, 0.666667, 0.666667,  0.0f, -1.0f,  0.0f,
+					 0.5f,  0.5f, -0.5f, 1.000000, 0.000000,  0.0f,  1.0f,  0.0f,//8
+					-0.5f,  0.5f, -0.5f, 1.000000, 0.333333,  0.0f,  1.0f,  0.0f,
+					 0.5f,  0.5f,  0.5f, 0.666667, 0.000000,  0.0f,  1.0f,  0.0f,
+					 0.5f, -0.5f, -0.5f, 0.333333, 0.333333,  1.0f,  0.0f,  0.0f,//9
+					 0.5f,  0.5f, -0.5f, 0.000000, 0.333333,  1.0f,  0.0f,  0.0f,
+					 0.5f, -0.5f,  0.5f, 0.333333, 0.000000,  1.0f,  0.0f,  0.0f,
+					 0.5f, -0.5f,  0.5f, 0.333333, 0.333333,  0.0f,  0.0f,  1.0f,//10
+					 0.5f,  0.5f,  0.5f, 0.333333, 0.000000,  0.0f,  0.0f,  1.0f,
+					-0.5f, -0.5f,  0.5f, 0.666667, 0.333333,  0.0f,  0.0f,  1.0f,
+					-0.5f, -0.5f, -0.5f, 0.333333, 0.666667, -1.0f,  0.0f,  0.0f,//11
+					-0.5f, -0.5f,  0.5f, 0.333333, 1.000000, -1.0f,  0.0f,  0.0f,
+					-0.5f,  0.5f, -0.5f, 0.000000, 0.666667, -1.0f,  0.0f,  0.0f,
+					 0.5f,  0.5f, -0.5f, 0.000000, 0.333333,  0.0f,  0.0f, -1.0f,//12
+					 0.5f, -0.5f, -0.5f, 0.333333, 0.333333,  0.0f,  0.0f, -1.0f,
+					-0.5f,  0.5f, -0.5f, 0.000000, 0.666667,  0.0f,  0.0f, -1.0f
+				};
+				
+
+				std::vector<unsigned int> indices = {
+				0 , 1 , 2 ,
+				3 , 4 , 5 ,
+				6 , 7 , 8 ,
+				9 , 10 , 11 ,
+				12 , 13 , 14 ,
+				15 , 16 , 17 ,
+				18 , 19 , 20 ,
+				21 , 22 , 23 ,
+				24 , 25 , 26 ,
+				27 , 28 , 29 ,
+				30 , 31 , 32 ,
+				33 , 34 , 35 };
+
+				std::unique_ptr<Cookie::Resources::Mesh> cube = std::make_unique<Cookie::Resources::Mesh>("NormalCube", vertices, indices, 36);
+				return cube;
+			}
+
+			inline std::unique_ptr<Resources::Mesh> CreateCube()
 			{
 
 				std::vector<float> vertices = {
@@ -83,11 +143,11 @@ namespace Cookie
 				22 , 21 , 20 ,
 				23 , 22 , 20 };
 
-				std::shared_ptr<Cookie::Resources::Mesh> cube = std::make_shared<Cookie::Resources::Mesh>("Cube", vertices, indices, 36);
+				std::unique_ptr<Cookie::Resources::Mesh> cube = std::make_unique<Cookie::Resources::Mesh>("Cube", vertices, indices, 36);
 				return cube;
 			}
 
-			inline std::shared_ptr<Resources::Mesh> CreatePyramid()
+			inline std::unique_ptr<Resources::Mesh> CreatePyramid()
 			{
 				std::vector<float> vertices = {
 				0.000000, -1.000000, 1.000000, 0.500000, 0.000000, 0.000000, -1.000000, -0.000000,
@@ -117,11 +177,11 @@ namespace Cookie
 				15,14,13,
 				};
 
-				std::shared_ptr<Cookie::Resources::Mesh> pyramid = std::make_shared<Cookie::Resources::Mesh>("Pyramid", vertices, indices, indices.size());
+				std::unique_ptr<Cookie::Resources::Mesh> pyramid = std::make_unique<Cookie::Resources::Mesh>("Pyramid", vertices, indices, indices.size());
 				return pyramid;
 			}
 
-			inline std::shared_ptr<Resources::Mesh> CreateCylinder()
+			inline std::unique_ptr<Resources::Mesh> CreateCylinder()
 			{
 				std::vector<float> vertices = {
 				0.951057, -1.000000, 0.309017, 0.375000, 0.312500, 0.951057, 0.000000, 0.309016,
@@ -293,11 +353,11 @@ namespace Cookie
 				65,63,83,
 				};
 
-				std::shared_ptr<Cookie::Resources::Mesh> cylinder = std::make_shared<Cookie::Resources::Mesh>("Cylinder", vertices, indices, indices.size());
+				std::unique_ptr<Cookie::Resources::Mesh> cylinder = std::make_unique<Cookie::Resources::Mesh>("Cylinder", vertices, indices, indices.size());
 				return cylinder;
 			}
 
-			inline std::shared_ptr<Resources::Mesh> CreateCone()
+			inline std::unique_ptr<Resources::Mesh> CreateCone()
 			{
 				std::vector<float> vertices = {
 				0.951057, -1.000000, 0.309017, 0.737764, 0.172746, 0.000000, -1.000000, 0.000000,
@@ -391,11 +451,11 @@ namespace Cookie
 				46,47,45,
 				};
 
-				std::shared_ptr<Cookie::Resources::Mesh> cone = std::make_shared<Cookie::Resources::Mesh>("Cone", vertices, indices, indices.size());
+				std::unique_ptr<Cookie::Resources::Mesh> cone = std::make_unique<Cookie::Resources::Mesh>("Cone", vertices, indices, indices.size());
 				return cone;
 			}
 
-			inline std::shared_ptr<Resources::Mesh> CreateCircle()
+			inline std::unique_ptr<Resources::Mesh> CreateCircle()
 			{
 				std::vector<float> vertices = {
 				-0.078459, 0.000000, -0.996917, 0.460649, 0.000000, 0.000000, 1.000000, -0.000000,
@@ -484,11 +544,11 @@ namespace Cookie
 				2,0,40,
 				};
 
-				std::shared_ptr<Cookie::Resources::Mesh> circle = std::make_shared<Cookie::Resources::Mesh>("Circle", vertices, indices, indices.size());
+				std::unique_ptr<Cookie::Resources::Mesh> circle = std::make_unique<Cookie::Resources::Mesh>("Circle", vertices, indices, indices.size());
 				return circle;
 			}
 
-			inline std::shared_ptr<Resources::Mesh> CreateCapsule()
+			inline std::unique_ptr<Resources::Mesh> CreateCapsule()
 			{
 				std::vector<float> vertices = {
 				0.211630, -1.974928, 0.068763, 0.521229, 0.149352, 0.269980, -0.958862, 0.087722,
@@ -1382,7 +1442,7 @@ namespace Cookie
 				325,305,323,
 				};
 
-				std::shared_ptr<Cookie::Resources::Mesh> capsule = std::make_shared<Cookie::Resources::Mesh>("Capsule", vertices, indices, indices.size());
+				std::unique_ptr<Cookie::Resources::Mesh> capsule = std::make_unique<Cookie::Resources::Mesh>("Capsule", vertices, indices, indices.size());
 				return capsule;
 			}
 			 

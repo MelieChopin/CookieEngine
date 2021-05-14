@@ -14,11 +14,11 @@ Entity::Entity(const Entity& entity): id{ entity.id }, signature{ entity.signatu
 void Entity::operator= (const Entity& entity)
 {
 	id = entity.id;
+	name = entity.name;
+	tag = entity.tag;
 	signature = entity.signature;
 	signatureGameplay = entity.signatureGameplay;
-	name = entity.name;
 	needToBeRemoved = entity.needToBeRemoved;
-	tag = entity.tag;
 }
 void Entity::Swap(Entity& entity)
 {

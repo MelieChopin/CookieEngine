@@ -13,6 +13,7 @@ namespace Cookie
             {
                 Vec3() = default;
                 Vec3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+                Vec3(float _xyz[3]) : x(_xyz[0]), y(_xyz[1]), z(_xyz[2]) {}
                 Vec3(Vec2 _xy, float _z) : x(_xy.x), y(_xy.y), z(_z) {}
                 Vec3(const Vec3& other) : x{ other.x }, y{ other.y }, z{ other.z } {}
 

@@ -28,10 +28,10 @@ namespace Cookie
 
 
 			public:
-				std::shared_ptr<Cookie::Resources::Mesh>			cube			{ nullptr };
-				std::shared_ptr<Cookie::Resources::Texture>			texture			{ nullptr };
+				Cookie::Resources::Mesh*	cube			{ nullptr };
+				Cookie::Resources::Texture*	texture			{ nullptr };
 
-				ID3D11RasterizerState*								rasterizerState	{ nullptr };
+				ID3D11RasterizerState*		rasterizerState	{ nullptr };
 
 
 			private:

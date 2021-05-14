@@ -3,6 +3,8 @@
 #include "Coordinator.hpp"
 #include "Resources/Scene.hpp"
 #include "ECS/ComponentModel.hpp"
+#include "Resources/Mesh.hpp"
+#include "Resources/Texture.hpp"
 #include "Resources/ResourcesManager.hpp" 
 #include "InspectorWidget.hpp"
 #include "Editor.hpp"
@@ -128,13 +130,13 @@ void Inspector::ModelInterface()
 
             NewLine();
             
-            for (std::unordered_map<std::string, std::shared_ptr<Mesh>>::iterator meshIt = resources.meshes.begin(); meshIt != resources.meshes.end(); meshIt++)
+            for (std::unordered_map<std::string, std::unique_ptr<Mesh>>::iterator meshIt = resources.meshes.begin(); meshIt != resources.meshes.end(); meshIt++)
             {
                 const bool is_selected = (modelComp.mesh != nullptr && modelComp.mesh->name == meshIt->second->name);
 
                 if ((meshIt->second->name.find(researchString) != std::string::npos) && ImGui::Selectable(meshIt->second->name.c_str(), is_selected))
                 {
-                    modelComp.mesh = meshIt->second;
+                    modelComp.mesh = meshIt->second.get();
                 }
 
                 if (is_selected)
@@ -146,7 +148,7 @@ void Inspector::ModelInterface()
             if (modelComp.mesh != nullptr)
             {
                 if (Button("Clear current mesh"))
-                    modelComp.mesh.reset();
+                    modelComp.mesh = nullptr;
             }
             else TextDisabled("Clear current mesh");
 
@@ -160,17 +162,17 @@ void Inspector::ModelInterface()
 
 //===== TEXTURE =====//
         
-        Text("Texture:"); SameLine(100);
+        Text("Albedo:"); SameLine(100);
 
-        if (BeginCombo("##TEXTSELECT", modelComp.texture != nullptr ? modelComp.texture->name.c_str() : "No texture applied", ImGuiComboFlags_HeightLarge))
+        if (BeginCombo("##AlbedoSELECT", modelComp.albedo != nullptr ? modelComp.albedo->name.c_str() : "No texture applied", ImGuiComboFlags_HeightLarge))
         {
             InputText("Texture search", &researchString, ImGuiInputTextFlags_AutoSelectAll);
 
             NewLine();
 
-            for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator textIt = resources.textures.begin(); textIt != resources.textures.end(); textIt++)
+            for (std::unordered_map<std::string, std::unique_ptr<Texture>>::iterator textIt = resources.textures.begin(); textIt != resources.textures.end(); textIt++)
             {
-                const bool is_selected = (modelComp.texture != nullptr && textIt->second &&  modelComp.texture->name == textIt->second->name);
+                const bool is_selected = (modelComp.albedo != nullptr && textIt->second &&  modelComp.albedo->name == textIt->second->name);
 
                 if (textIt->second && textIt->second->name.find(researchString) != std::string::npos)
                 {
@@ -181,7 +183,7 @@ void Inspector::ModelInterface()
                         SameLine();
 
                         if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
-                            modelComp.texture = textIt->second;
+                            modelComp.albedo = textIt->second.get();
                     }
                 }
 
@@ -191,10 +193,92 @@ void Inspector::ModelInterface()
 
             NewLine();
 
-            if (modelComp.texture != nullptr)
+            if (modelComp.albedo != nullptr)
             {
                 if (Button("Clear current texture"))
-                    modelComp.texture.reset();
+                    modelComp.albedo = nullptr;
+            }
+            else TextDisabled("Clear current texture");
+
+            EndCombo();
+        }
+
+        Text("Normal:"); SameLine(100);
+
+        if (BeginCombo("##NormSELECT", modelComp.normal != nullptr ? modelComp.normal->name.c_str() : "No texture applied", ImGuiComboFlags_HeightLarge))
+        {
+            InputText("Texture search", &researchString, ImGuiInputTextFlags_AutoSelectAll);
+
+            NewLine();
+
+            for (std::unordered_map<std::string, std::unique_ptr<Texture>>::iterator textIt = resources.textures.begin(); textIt != resources.textures.end(); textIt++)
+            {
+                const bool is_selected = (modelComp.normal != nullptr && textIt->second && modelComp.normal->name == textIt->second->name);
+
+                if (textIt->second && textIt->second->name.find(researchString) != std::string::npos)
+                {
+                    if (textIt->second->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
+                    {
+                        Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
+
+                        SameLine();
+
+                        if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
+                            modelComp.normal = textIt->second.get();
+                    }
+                }
+
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+
+            NewLine();
+
+            if (modelComp.normal != nullptr)
+            {
+                if (Button("Clear current texture"))
+                    modelComp.normal = nullptr;
+            }
+            else TextDisabled("Clear current texture");
+
+            EndCombo();
+        }
+
+        Text("Metallic-Roughness:"); SameLine(100);
+
+        if (BeginCombo("##MRSELECT", modelComp.metallicRoughness != nullptr ? modelComp.metallicRoughness->name.c_str() : "No texture applied", ImGuiComboFlags_HeightLarge))
+        {
+            InputText("Texture search", &researchString, ImGuiInputTextFlags_AutoSelectAll);
+
+            NewLine();
+
+            for (std::unordered_map<std::string, std::unique_ptr<Texture>>::iterator textIt = resources.textures.begin(); textIt != resources.textures.end(); textIt++)
+            {
+                const bool is_selected = (modelComp.metallicRoughness != nullptr && textIt->second && modelComp.metallicRoughness->name == textIt->second->name);
+
+                if (textIt->second && textIt->second->name.find(researchString) != std::string::npos)
+                {
+                    if (textIt->second->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
+                    {
+                        Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
+
+                        SameLine();
+
+                        if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
+                            modelComp.metallicRoughness = textIt->second.get();
+                    }
+                }
+
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+
+            NewLine();
+
+            if (modelComp.metallicRoughness != nullptr)
+            {
+                if (Button("Clear current texture"))
+                    modelComp.metallicRoughness = nullptr;
             }
             else TextDisabled("Clear current texture");
 
