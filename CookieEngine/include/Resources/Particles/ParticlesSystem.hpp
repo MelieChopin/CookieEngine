@@ -50,10 +50,9 @@ namespace Cookie
 
 				void Draw(const Render::Camera& cam, Cookie::Resources::ResourcesManager& resources)
 				{
-					std::vector<Cookie::Render::InstancedData> newData;
-
 					for (int j = 0; j < data.size(); j++)
 					{
+						std::vector<Cookie::Render::InstancedData> newData;
 						for (int i = 0; i < data[j].countAlive; i++)
 						{
 							Cookie::Render::InstancedData temp;

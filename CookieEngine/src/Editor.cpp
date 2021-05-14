@@ -128,6 +128,7 @@ void Editor::Loop()
     bool makingASelectionQuad = false;
 
     /// Particles
+    //First Particles 
     Cookie::Resources::Particles::ParticlesSystem first = Cookie::Resources::Particles::ParticlesSystem(40, 20);
     first.shader.InitShader();
     first.trs.pos = Vec3(0, 10, 0);
@@ -146,30 +147,50 @@ void Editor::Loop()
     first.data[0].countAlive = 10;
     first.particlesEmiter[0].generators.push_back(&circle);
     first.particlesEmiter[0].generators.push_back(&velRand);
-    //particlesSystem.particlesEmiter[0].generators.push_back(&mass);
     first.particlesEmiter[0].generators.push_back(&timeRand);
     first.particlesEmiter[0].generators.push_back(&color);
     for (int i = 0; i < first.particlesEmiter[0].generators.size(); i++)
-        first.particlesEmiter[0].generators[i]->generate(&first.data[0], 0, 10);
+        first.particlesEmiter[0].generators[i]->generate(&first.data[0], 0, first.data[0].countAlive);
 
     Cookie::Resources::Particles::UpdateVelocity    updateVel;
     Cookie::Resources::Particles::UpdateScale       updateScale;
     Cookie::Resources::Particles::EnabledGravity    enabledGravity;
     Cookie::Resources::Particles::UpdateTime        updateTime;
     Cookie::Resources::Particles::Loop              loop(first.particlesEmiter[0].generators);
-   // particlesSystem.particlesEmiter.updates.push_back(&enabledGravity);
     first.particlesEmiter[0].updates.push_back(&updateVel);
     first.particlesEmiter[0].updates.push_back(&updateTime);
     first.particlesEmiter[0].updates.push_back(&updateScale);
     first.particlesEmiter[0].updates.push_back(&loop);
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 5; i++) // Create 5
         game.particlesHandler.particlesSystems.push_back(first);
     game.particlesHandler.particlesSystems[0].trs.TRS = Cookie::Core::Math::Mat4::Translate( Vec3(-10, 10, -10));
     game.particlesHandler.particlesSystems[1].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(-10, 10, 10));
     game.particlesHandler.particlesSystems[2].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(10, 10, -10));
     game.particlesHandler.particlesSystems[3].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(10, 10, 10));
     game.particlesHandler.particlesSystems[4].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(0, 10, 0));
+
+    //Second Particles in the center particles 
+    Cookie::Resources::Particles::ParticlesSystem second = Cookie::Resources::Particles::ParticlesSystem(40, 30);
+    second.data[0].countAlive = 10;
+    second.particlesEmiter[0].generators.push_back(&box);
+    second.particlesEmiter[0].generators.push_back(&vel);
+    second.particlesEmiter[0].generators.push_back(&mass);
+    second.particlesEmiter[0].generators.push_back(&timeRand);
+    Cookie::Resources::Particles::ColorRandGenerate         blue(Vec3(0, 0, 0.3f), Vec3(0, 0, 1.0f));
+    Cookie::Resources::Particles::Loop              loop2(second.particlesEmiter[0].generators);
+    second.particlesEmiter[0].generators.push_back(&blue);
+    for (int i = 0; i < second.particlesEmiter[0].generators.size(); i++)
+        second.particlesEmiter[0].generators[i]->generate(&second.data[0], 0, second.data[0].countAlive);
+
+    second.particlesEmiter[0].updates.push_back(&enabledGravity);
+    second.particlesEmiter[0].updates.push_back(&updateVel);
+    second.particlesEmiter[0].updates.push_back(&updateTime);
+    second.particlesEmiter[0].updates.push_back(&updateScale);
+    second.particlesEmiter[0].updates.push_back(&loop2);
+
+    game.particlesHandler.particlesSystems[4].data.push_back(second.data[0]);
+    game.particlesHandler.particlesSystems[4].particlesEmiter.push_back(second.particlesEmiter[0]);
     ///
 
 
@@ -177,12 +198,8 @@ void Editor::Loop()
 
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
-
-
-        
         // Present frame
         CDebug.UpdateTime();
-
 
         game.resources.UpdateScriptsContent();
         game.coordinator.ApplyScriptUpdate();
@@ -428,7 +445,7 @@ void Editor::Loop()
         //if (isRaycastingWithMap)
             //SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
         //game.scene->map.DrawSpecificTiles(cam.GetViewProj());
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < game.particlesHandler.particlesSystems.size(); i++)
             game.particlesHandler.particlesSystems[i].Draw(cam, game.resources);
         dbgRenderer.Draw(cam.GetViewProj());
 
