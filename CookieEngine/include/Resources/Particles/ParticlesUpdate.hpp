@@ -2,6 +2,7 @@
 #define __PARTICLESUPADATE_HPP__
 
 #include "Vec3.hpp"
+#include <vector>
 
 namespace Cookie
 {
@@ -10,11 +11,12 @@ namespace Cookie
 		namespace Particles
 		{
 			class ParticlesData;
+			class ParticlesGenerator;
 
 			class ParticlesUpdate
 			{
 			public :
-				virtual void Update(ParticlesData* p, int index) = 0;
+				virtual void Update(ParticlesData* p) = 0;
 
 				ParticlesUpdate() {}
 				~ParticlesUpdate() {}
@@ -26,7 +28,7 @@ namespace Cookie
 				UpdateVelocity() {}
 				~UpdateVelocity() {}
 
-				virtual void Update(ParticlesData* p, int index) override;
+				virtual void Update(ParticlesData* p) override;
 			};
 
 			class UpdateScale : public ParticlesUpdate
@@ -35,7 +37,7 @@ namespace Cookie
 				UpdateScale() {}
 				~UpdateScale() {}
 
-				virtual void Update(ParticlesData* p, int index) override;
+				virtual void Update(ParticlesData* p) override;
 			};
 
 			class EnabledGravity : public ParticlesUpdate
@@ -44,7 +46,7 @@ namespace Cookie
 				EnabledGravity() {}
 				~EnabledGravity() {}
 
-				virtual void Update(ParticlesData* p, int index) override;
+				virtual void Update(ParticlesData* p) override;
 			};
 
 			class UpdateTime : public ParticlesUpdate
@@ -53,7 +55,17 @@ namespace Cookie
 				UpdateTime() {}
 				~UpdateTime() {}
 
-				virtual void Update(ParticlesData* p, int index) override;
+				virtual void Update(ParticlesData* p) override;
+			};
+
+			class Loop : public ParticlesUpdate
+			{
+			public:
+				Loop(std::vector<ParticlesGenerator*>& _particlesGen) : particlesGen(_particlesGen) {}
+				~Loop() {}
+				std::vector<ParticlesGenerator*>& particlesGen;
+
+				virtual void Update(ParticlesData* p) override;
 			};
 		}
 	}

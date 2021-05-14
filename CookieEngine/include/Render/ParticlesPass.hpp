@@ -9,10 +9,9 @@
 
 namespace Cookie
 {
-	namespace Core::Math
+	namespace Render
 	{
-		//union Mat4;
-		//union Vec4;
+		class Camera;
 	}
 
 	namespace ECS
@@ -41,11 +40,12 @@ namespace Cookie
 			ID3D11PixelShader* PShader{ nullptr };
 			ID3D11Buffer* CBuffer{ nullptr };
 			ID3D11Buffer* InstanceBuffer{ nullptr };
+			ID3D11BlendState* blendState{ nullptr };
 
 			std::vector<InstancedData> mInstancedData;
 
 			void InitShader();
-			void Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view, Resources::Mesh* mesh, std::vector<InstancedData> data);
+			void Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mesh, std::vector<InstancedData> data);
 			void AllocateMoreSpace(int newSpace);
 
 

@@ -6,6 +6,8 @@
 #include "ComponentTransform.hpp"
 #include "ParticlesPass.hpp"
 #include "Resources/Mesh.hpp"
+#include "Camera.hpp"
+#include "ResourcesManager.hpp"
 
 namespace Cookie
 {
@@ -42,29 +44,11 @@ namespace Cookie
 				void Update()
 				{
 					for (int j = 0; j < data.size(); j++)
-					{
-						if (data[j].countAlive < data[j].countFrame)
-						{
-							float countAlive = data[j].countAlive;
-							float countFrame = data[j].countFrame;
-
-							data[j].wake(countAlive, countFrame);
-
-							for (int i = 0; i < particlesEmiter[j].generators.size(); i++)
-								particlesEmiter[j].generators[i]->generate(&data[j], countAlive, countFrame);
-						}
-
-						for (int i = 0; i < data[j].countAlive; i++)
-						{
-							for (int k = 0; k < particlesEmiter[j].updates.size(); k++)
-								particlesEmiter[j].updates[k]->Update(&data[j], i);
-							if (data[j].time[i] < 0)
-								data[j].kill(i);
-						}
-					}
+						for (int k = 0; k < particlesEmiter[j].updates.size(); k++)
+							particlesEmiter[j].updates[k]->Update(&data[j]);
 				}
 
-				void Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view, Cookie::Resources::ResourcesManager& resources)
+				void Draw(const Render::Camera& cam, Cookie::Resources::ResourcesManager& resources)
 				{
 					std::vector<Cookie::Render::InstancedData> newData;
 
@@ -74,11 +58,11 @@ namespace Cookie
 						{
 							Cookie::Render::InstancedData temp;
 							temp.World = (trs.TRS * data[j].trs[i]);
-							temp.Color = data[j].col[i];
+							temp.Color = Cookie::Core::Math::Vec4(data[j].col[i].ToVec3(), 0.25f);
 							newData.push_back(temp);
 						}
 
-						shader.Draw(proj, view, resources.meshes["Quad"].get(), newData);
+						shader.Draw(cam, resources.meshes["Quad"].get(), newData);
 					}
 				}
 			};

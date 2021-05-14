@@ -64,7 +64,7 @@ void MassConstGenerate::generate(ParticlesData* data, int start, int end)
 		data->mass[i] = mass;
 }
 
-void TimeGenerate::generate(ParticlesData* data, int start, int end)
+void TimeConstGenerate::generate(ParticlesData* data, int start, int end)
 {
 	for (int i = start; i < end; i++)
 		data->time[i] = time;
@@ -79,5 +79,5 @@ void TimeRandGenerate::generate(ParticlesData* data, int start, int end)
 void ColorRandGenerate::generate(ParticlesData* data, int start, int end)
 {
 	for (int i = start; i < end; i++)
-		data->col[i] = Cookie::Core::Math::Random(min, max);
+		data->col[i] = Cookie::Core::Math::Random(minCol, maxCol);
 }

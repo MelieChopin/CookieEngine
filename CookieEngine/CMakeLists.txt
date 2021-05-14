@@ -95,6 +95,7 @@ set (SRC_FILES
     "${SRC_DIR}/UI/UIcore.cpp"
     "${SRC_DIR}/Resources/Particles/ParticlesGenerator.cpp"
     "${SRC_DIR}/Resources/Particles/ParticlesUpdate.cpp"
+    "${SRC_DIR}/Resources/Particles/ParticlesHandler.cpp"
     "${SRC_DIR}/UI/UIeditor.cpp"
     "${SRC_DIR}/UI/UIscene.cpp"
     "${SRC_DIR}/UI/CustomImWidget.cpp"

@@ -23,6 +23,7 @@ namespace Cookie
 			{
 			public :
 				virtual void generate(ParticlesData* data, int start, int end) = 0;
+				std::string type;
 
 				ParticlesGenerator() {}
 				~ParticlesGenerator() {}
@@ -36,8 +37,8 @@ namespace Cookie
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
-				BoxPositionGenerate() {}
-				BoxPositionGenerate(Cookie::Core::Math::Vec3 _pos, Cookie::Core::Math::Vec3 _sizeBox) : pos(_pos), sizeBox(_sizeBox) {}
+				BoxPositionGenerate() { type = "BoxPositionGen"; }
+				BoxPositionGenerate(Cookie::Core::Math::Vec3 _pos, Cookie::Core::Math::Vec3 _sizeBox) : pos(_pos), sizeBox(_sizeBox) { type = "BoxPositionGen"; }
 			};
 
 			class CirclePositionGenerate : public ParticlesGenerator
@@ -48,8 +49,8 @@ namespace Cookie
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
-				CirclePositionGenerate() {}
-				CirclePositionGenerate(Cookie::Core::Math::Vec3 _pos, float radius) : pos(_pos), radius(radius) {}
+				CirclePositionGenerate() { type = "CirclePositionGen"; }
+				CirclePositionGenerate(Cookie::Core::Math::Vec3 _pos, float radius) : pos(_pos), radius(radius) { type = "CirclePositionGen"; }
 			};
 
 			class VelocityConstGenerate : public ParticlesGenerator
@@ -59,8 +60,8 @@ namespace Cookie
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
-				VelocityConstGenerate() {}
-				VelocityConstGenerate(Cookie::Core::Math::Vec3 vel) : vel(vel) {}
+				VelocityConstGenerate() { type = "VelConstGen"; }
+				VelocityConstGenerate(Cookie::Core::Math::Vec3 vel) : vel(vel) { type = "VelConstGen"; }
 				~VelocityConstGenerate() {}
 
 			};
@@ -73,8 +74,8 @@ namespace Cookie
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
-				VelocityRandGenerate() {}
-				VelocityRandGenerate(Cookie::Core::Math::Vec3 velMin, Cookie::Core::Math::Vec3 velMax) : velMin(velMin), velMax() {}
+				VelocityRandGenerate() { type = "VelRandGen"; }
+				VelocityRandGenerate(Cookie::Core::Math::Vec3 velMin, Cookie::Core::Math::Vec3 velMax) : velMin(velMin), velMax() { type = "VelRandGen"; }
 				~VelocityRandGenerate() {}
 			};
 
@@ -84,18 +85,18 @@ namespace Cookie
 				float mass;
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
-				MassConstGenerate() {}
-				MassConstGenerate(float mass) : mass(mass) {}
+				MassConstGenerate() { type = "MassConstGen"; }
+				MassConstGenerate(float mass) : mass(mass) { type = "MassConstGen"; }
 			};
 
-			class TimeGenerate : public ParticlesGenerator
+			class TimeConstGenerate : public ParticlesGenerator
 			{
 			public:
 				float time;
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
-				TimeGenerate() {}
-				TimeGenerate(float time) : time(time) {}
+				TimeConstGenerate() { type = "TimeConstGen"; }
+				TimeConstGenerate(float time) : time(time) { type = "TimeConstGen"; }
 			};
 
 			class TimeRandGenerate : public ParticlesGenerator
@@ -105,22 +106,21 @@ namespace Cookie
 				float timeMax;
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
-				TimeRandGenerate() {}
-				TimeRandGenerate(float timeMin, float timeMax) : timeMin(timeMin), timeMax(timeMax) {}
+				TimeRandGenerate() { type = "TimeRandGen"; }
+				TimeRandGenerate(float timeMin, float timeMax) : timeMin(timeMin), timeMax(timeMax) { type = "TimeRandGen"; }
 			};
 
-		#undef min
-#undef max
+
 			class ColorRandGenerate : public ParticlesGenerator
 			{
 			public:
-				Cookie::Core::Math::Vec3 min;
-				Cookie::Core::Math::Vec3 max;
+				Cookie::Core::Math::Vec3 minCol;
+				Cookie::Core::Math::Vec3 maxCol;
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
-				ColorRandGenerate() {}
-				ColorRandGenerate(Cookie::Core::Math::Vec3 colorMin, Cookie::Core::Math::Vec3 colorMax) : min(colorMin), max(colorMax) {}
+				ColorRandGenerate() { type = "ColorRandGen"; }
+				ColorRandGenerate(Cookie::Core::Math::Vec3 colorMin, Cookie::Core::Math::Vec3 colorMax) : minCol(colorMin), maxCol(colorMax) { type = "ColorRandGen"; }
 			};
 		}
 	}

@@ -2,6 +2,7 @@
 #include "Core/Math/Mat4.hpp"
 #include "Render/RendererRemote.hpp"
 #include "Resources/Mesh.hpp"
+#include "camera.hpp"
 
 using namespace Cookie;
 using namespace Cookie::Render;
@@ -10,6 +11,8 @@ struct VS_CONSTANT_BUFFER
 {
     Cookie::Core::Math::Mat4 proj = Cookie::Core::Math::Mat4::Identity();
     Cookie::Core::Math::Mat4 view = Cookie::Core::Math::Mat4::Identity();
+    Cookie::Core::Math::Vec3 pos;
+    float padding;
 };
 
 
@@ -41,6 +44,8 @@ void ParticlesPass::InitShader()
     {
         float4x4 gProj;
 	    float4x4 gView;
+        float3 gCamPos;
+        float padding;
     };
 
     struct VertexInputType
@@ -65,22 +70,35 @@ void ParticlesPass::InitShader()
     PixelInputType main(VertexInputType vin)
     {
     	PixelInputType vout;
-	
+
         float4 temp = mul(float4(vin.PosL, 1.0f), vin.World);
-        
+
+        float3 forward = float3(0, 0, 1);
+        float3 cameraObj = normalize(gCamPos - temp);
+        float angle = 1;
+        if (dot(float3(-1, 0, 0), cameraObj) > 0)
+            angle = 3.1415 * 2 - acos(dot(normalize(forward), normalize(cameraObj)));
+        else
+            angle = acos(dot(normalize(forward), normalize(cameraObj)));
+
+        float4x4 rot = float4x4(float4(cos(angle), 0, -sin(angle), 0),
+                                float4(0, 1, 0, 0),
+                                float4(sin(angle), 0, cos(angle), 0),
+                                float4(0, 0, 0, 1));
+
+        temp = mul(float4(vin.PosL, 1.0f), mul(rot, vin.World));
+
 	    // Transform to world space space.
 	    vout.PosW    = temp.xyz;
 	    vout.NormalW = mul(vin.NormalL, (float3x3)vin.World);
-	    
-        float3 cameraR = float3(gView[0][0], gView[1][0], gView[2][0]);
-        float3 cameraUp = float3(gView[0][1], gView[1][1], gView[2][1]);
+        
         float4x4 mat = mul(gView, gProj);
 
 	    // Transform to homogeneous clip space.
-	    vout.PosH = mul(float4(temp + mul(cameraUp, temp.y) + mul(cameraR, temp.x), 1.0f), mat);
+	    vout.PosH = mul(temp, mat);
 	    
 	    // Output vertex attributes for interpolation across triangle.
-	    vout.Tex   = vin.Tex;
+	    vout.Tex   = mul(float4(vin.Tex, 0.0f, 1.0f), vin.World).xy;
 	    vout.Color = vin.Color;
 
 	    return vout;
@@ -102,7 +120,6 @@ void ParticlesPass::InitShader()
 
     float4 main(PixelInputType input) : SV_TARGET
     {
-        //PSOut.Color = float4(1.0, 1.0, 1.0, 1.0); 
         return input.Color;
     }
 	)";
@@ -134,6 +151,10 @@ void ParticlesPass::InitShader()
     vbd.StructureByteStride = 0;
     Render::RendererRemote::device->CreateBuffer(&vbd, 0, &InstanceBuffer);
 
+    VS_CONSTANT_BUFFER buffer = {};
+    buffer.pos = Cookie::Core::Math::Vec3();
+    buffer.proj = Cookie::Core::Math::Mat4::Identity();
+    buffer.view = Cookie::Core::Math::Mat4::Identity();
 
     vbd.Usage = D3D11_USAGE_DYNAMIC;
     vbd.ByteWidth = sizeof(VS_CONSTANT_BUFFER);
@@ -141,8 +162,28 @@ void ParticlesPass::InitShader()
     vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     vbd.MiscFlags = 0;
     vbd.StructureByteStride = 0;
-    Render::RendererRemote::device->CreateBuffer(&vbd, 0, &CBuffer);
 
+    D3D11_SUBRESOURCE_DATA InitData;
+    InitData.pSysMem = &buffer;
+    InitData.SysMemPitch = 0;
+    InitData.SysMemSlicePitch = 0;
+
+    Render::RendererRemote::device->CreateBuffer(&vbd, &InitData, &CBuffer);
+
+    D3D11_BLEND_DESC blenDesc = {  };
+
+    blenDesc.AlphaToCoverageEnable = false;
+    blenDesc.IndependentBlendEnable = false;
+    blenDesc.RenderTarget[0].BlendEnable = true;
+    blenDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+    blenDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO; 
+    blenDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    blenDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA;
+    blenDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
+    blenDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    blenDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+    RendererRemote::device->CreateBlendState(&blenDesc, &blendState);
 }
 
 /*=========================== REALTIME METHODS ===========================*/
@@ -161,10 +202,13 @@ void ParticlesPass::AllocateMoreSpace(int newSpace)
     mInstancedData.resize(newSpace);
 }
 
-void ParticlesPass::Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view, Resources::Mesh* mesh, std::vector<InstancedData> data)
+void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mesh, std::vector<InstancedData> data)
 {
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
+
+    const float blendFactor[4] = { 1.0f,1.0f,1.0f, 1.0f };
+    Render::RendererRemote::context->OMSetBlendState(blendState, blendFactor, 0xffffffff);
 
     if (mInstancedData.size() < data.size())
         AllocateMoreSpace(data.size());
@@ -174,15 +218,16 @@ void ParticlesPass::Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& v
     ID3D11Buffer* vbs[2] = { mesh->VBuffer, InstanceBuffer };
 
     UINT stride[2] = { sizeof(Cookie::Core::Math::Vec3) + sizeof(Cookie::Core::Math::Vec2) + sizeof(Cookie::Core::Math::Vec3), sizeof(InstancedData) };
-    UINT offset[2] = { 0,0 };
+    UINT offset[2] = { 0, 0 };
 
     Render::RendererRemote::context->IASetInputLayout(ILayout);
     Render::RendererRemote::context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
 
     VS_CONSTANT_BUFFER buffer = {};
-    buffer.proj = proj; //* view;
-    buffer.view = view;
+    buffer.proj = cam.GetProj();
+    buffer.view = cam.GetView();
+    buffer.pos = cam.pos;
     Render::WriteCBuffer(&buffer, sizeof(buffer), 0, &CBuffer);
  
     Render::RendererRemote::context->IASetVertexBuffers(0, 2, vbs, stride, offset);

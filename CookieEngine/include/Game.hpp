@@ -5,7 +5,7 @@
 #include "Resources/ResourcesManager.hpp"
 #include "Render/Skybox.hpp"
 #include "ECS/Coordinator.hpp"
-#include "Resources/Particles/ParticlesSystem.hpp"
+#include "Resources/Particles/ParticlesHandler.hpp"
 
 #include <memory>
 
@@ -25,7 +25,7 @@ namespace Cookie
 			Render::SkyBox									skyBox;
 			ECS::Coordinator								coordinator;
 			Render::FrameBuffer								frameBuffer;
-			Resources::Particles::ParticlesSystem			particlesSystem;
+			Resources::Particles::ParticlesHandler			particlesHandler;
 
 			std::shared_ptr<Resources::Scene>				scene{nullptr};
 

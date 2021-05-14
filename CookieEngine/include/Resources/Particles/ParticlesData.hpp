@@ -36,7 +36,6 @@ namespace Cookie
 				int										count = 0;
 				int										countFrame = 0;
 				int										countAlive = 0;
-				int										signature = 0b0000;
 
 				ParticlesData() {}
 				~ParticlesData() {}

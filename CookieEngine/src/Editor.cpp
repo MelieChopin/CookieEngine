@@ -127,62 +127,48 @@ void Editor::Loop()
     bool makingASelectionQuad = false;
 
     /// Particles
-    game.particlesSystem = Cookie::Resources::Particles::ParticlesSystem(40, 20);
-    game.particlesSystem.shader.InitShader();
-    game.particlesSystem.trs.pos = Vec3(0, 10, 0);
-    game.particlesSystem.trs.rot = Vec3(0, 0, 0);
-    game.particlesSystem.trs.scale = Vec3(1, 1, 1);
-    game.particlesSystem.trs.ComputeTRS();
+    Cookie::Resources::Particles::ParticlesSystem first = Cookie::Resources::Particles::ParticlesSystem(40, 20);
+    first.shader.InitShader();
+    first.trs.pos = Vec3(0, 10, 0);
+    first.trs.rot = Vec3(0, 0, 0);
+    first.trs.scale = Vec3(1, 1, 1);
+    first.trs.ComputeTRS();
 
     Cookie::Resources::Particles::BoxPositionGenerate       box(Vec3(0, 0, 0), Vec3(2, 2, 2));
     Cookie::Resources::Particles::CirclePositionGenerate    circle(Vec3(0, 0, 0), 2.0f);
     Cookie::Resources::Particles::VelocityConstGenerate     vel(Vec3(0, 10, 0));
-    Cookie::Resources::Particles::VelocityRandGenerate      velRand(Vec3(0, 15, 0), Vec3(0, 35, 0));
+    Cookie::Resources::Particles::VelocityRandGenerate      velRand(Vec3(0, 10, 0), Vec3(0, 35, 0));
     Cookie::Resources::Particles::MassConstGenerate         mass(2);
-    Cookie::Resources::Particles::TimeGenerate              time(2);
+    Cookie::Resources::Particles::TimeConstGenerate         time(2);
     Cookie::Resources::Particles::TimeRandGenerate          timeRand(0.25f, 0.55f);
     Cookie::Resources::Particles::ColorRandGenerate         color(Vec3(0.5f, 0, 0), Vec3(1, 0, 0));
-    game.particlesSystem.data[0].countAlive = 10;
-    game.particlesSystem.particlesEmiter[0].generators.push_back(&circle);
-    game.particlesSystem.particlesEmiter[0].generators.push_back(&velRand);
+    first.data[0].countAlive = 10;
+    first.particlesEmiter[0].generators.push_back(&circle);
+    first.particlesEmiter[0].generators.push_back(&velRand);
     //particlesSystem.particlesEmiter[0].generators.push_back(&mass);
-    game.particlesSystem.particlesEmiter[0].generators.push_back(&timeRand);
-    game.particlesSystem.particlesEmiter[0].generators.push_back(&color);
-    for (int i = 0; i < game.particlesSystem.particlesEmiter[0].generators.size(); i++)
-        game.particlesSystem.particlesEmiter[0].generators[i]->generate(&game.particlesSystem.data[0], 0, 10);
-
-    /*game.particlesSystem.data.push_back(Cookie::Resources::Particles::ParticlesData());
-    game.particlesSystem.particlesEmiter.push_back(Cookie::Resources::Particles::ParticlesEmitter());
-    game.particlesSystem.data[1].generate(10, 3);
-    game.particlesSystem.particlesEmiter[1].generators.push_back(&box);
-    game.particlesSystem.particlesEmiter[1].generators.push_back(&vel);
-    game.particlesSystem.particlesEmiter[1].generators.push_back(&mass);
-    game.particlesSystem.particlesEmiter[1].generators.push_back(&timeRand);
-    for (int i = 0; i < game.particlesSystem.particlesEmiter[1].generators.size(); i++)
-        game.particlesSystem.particlesEmiter[1].generators[i]->generate(&game.particlesSystem.data[1], 0, 5);*/
-
-
+    first.particlesEmiter[0].generators.push_back(&timeRand);
+    first.particlesEmiter[0].generators.push_back(&color);
+    for (int i = 0; i < first.particlesEmiter[0].generators.size(); i++)
+        first.particlesEmiter[0].generators[i]->generate(&first.data[0], 0, 10);
 
     Cookie::Resources::Particles::UpdateVelocity    updateVel;
     Cookie::Resources::Particles::UpdateScale       updateScale;
     Cookie::Resources::Particles::EnabledGravity    enabledGravity;
     Cookie::Resources::Particles::UpdateTime        updateTime;
+    Cookie::Resources::Particles::Loop              loop(first.particlesEmiter[0].generators);
    // particlesSystem.particlesEmiter.updates.push_back(&enabledGravity);
-    game.particlesSystem.particlesEmiter[0].updates.push_back(&updateVel);
-    game.particlesSystem.particlesEmiter[0].updates.push_back(&updateTime);
-    game.particlesSystem.particlesEmiter[0].updates.push_back(&updateScale);
+    first.particlesEmiter[0].updates.push_back(&updateVel);
+    first.particlesEmiter[0].updates.push_back(&updateTime);
+    first.particlesEmiter[0].updates.push_back(&updateScale);
+    first.particlesEmiter[0].updates.push_back(&loop);
 
-   /* game.particlesSystem.particlesEmiter[1].updates.push_back(&updateVel);
-    game.particlesSystem.particlesEmiter[1].updates.push_back(&updateTime);
-    game.particlesSystem.particlesEmiter[1].updates.push_back(&enabledGravity);*/
-
-    std::vector<Cookie::Resources::Particles::ParticlesSystem> partsys;
-    for (int i = 0; i < 4; i++)
-        partsys.push_back(game.particlesSystem);
-    partsys[0].trs.TRS = Cookie::Core::Math::Mat4::Translate( Vec3(-10, 10, -10));
-    partsys[1].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(-10, 10, 10));
-    partsys[2].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(10, 10, -10));
-    partsys[3].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(10, 10, 10));
+    for (int i = 0; i < 5; i++)
+        game.particlesHandler.particlesSystems.push_back(first);
+    game.particlesHandler.particlesSystems[0].trs.TRS = Cookie::Core::Math::Mat4::Translate( Vec3(-10, 10, -10));
+    game.particlesHandler.particlesSystems[1].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(-10, 10, 10));
+    game.particlesHandler.particlesSystems[2].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(10, 10, -10));
+    game.particlesHandler.particlesSystems[3].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(10, 10, 10));
+    game.particlesHandler.particlesSystems[4].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(0, 10, 0));
     ///
 
 
@@ -190,21 +176,12 @@ void Editor::Loop()
 
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
-        if (isActive)
-        {
-            game.particlesSystem.Update();
-            for (int i = 0; i < 4; i++)
-                partsys[i].Update();
-        }
-            
-            
-        
-        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
-            isActive = true;
+
 
         
         // Present frame
         CDebug.UpdateTime();
+
 
         game.resources.UpdateScriptsContent();
         game.coordinator.ApplyScriptUpdate();
@@ -414,15 +391,21 @@ void Editor::Loop()
         game.coordinator.ApplyGameplayPosPrediction();
         game.coordinator.ApplyGameplayResolveCollision();
         game.coordinator.ApplyGameplayDrawPath(dbgRenderer);
+
+
+        if (isActive)
+            game.particlesHandler.Update();
+
+        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
+            isActive = true;
         
 
         game.renderer.Draw(&cam, game,editorFBO);
         //if (isRaycastingWithMap)
             //SystemDraw(buildingTrs, buildingModel, cam.GetViewProj());
         //game.scene->map.DrawSpecificTiles(cam.GetViewProj());
-        game.particlesSystem.Draw(cam.GetProj(), cam.GetView(), game.resources);
-        for (int i = 0; i < 4; i++)
-            partsys[i].Draw(cam.GetProj(), cam.GetView(), game.resources);
+        for (int i = 0; i < 5; i++)
+            game.particlesHandler.particlesSystems[i].Draw(cam, game.resources);
         dbgRenderer.Draw(cam.GetViewProj());
 
         game.renderer.SetBackBuffer();
