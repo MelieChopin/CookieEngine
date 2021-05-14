@@ -17,6 +17,7 @@ namespace Cookie
 			{
 			public :
 				virtual void Update(ParticlesData* p) = 0;
+				std::string type;
 
 				ParticlesUpdate() {}
 				~ParticlesUpdate() {}
@@ -25,7 +26,7 @@ namespace Cookie
 			class UpdateVelocity : public ParticlesUpdate
 			{
 			public :
-				UpdateVelocity() {}
+				UpdateVelocity() { type = "UpdateVel"; }
 				~UpdateVelocity() {}
 
 				virtual void Update(ParticlesData* p) override;
@@ -34,7 +35,7 @@ namespace Cookie
 			class UpdateScale : public ParticlesUpdate
 			{
 			public:
-				UpdateScale() {}
+				UpdateScale() { type = "UpdateScale"; }
 				~UpdateScale() {}
 
 				virtual void Update(ParticlesData* p) override;
@@ -43,7 +44,7 @@ namespace Cookie
 			class EnabledGravity : public ParticlesUpdate
 			{
 			public:
-				EnabledGravity() {}
+				EnabledGravity() { type = "EnabledGravity"; }
 				~EnabledGravity() {}
 
 				virtual void Update(ParticlesData* p) override;
@@ -52,7 +53,7 @@ namespace Cookie
 			class UpdateTime : public ParticlesUpdate
 			{
 			public :
-				UpdateTime() {}
+				UpdateTime() { type = "UpdateTime"; }
 				~UpdateTime() {}
 
 				virtual void Update(ParticlesData* p) override;
@@ -61,7 +62,7 @@ namespace Cookie
 			class Loop : public ParticlesUpdate
 			{
 			public:
-				Loop(std::vector<ParticlesGenerator*>& _particlesGen) : particlesGen(_particlesGen) {}
+				Loop(std::vector<ParticlesGenerator*>& _particlesGen) : particlesGen(_particlesGen) { type = "Loop"; }
 				~Loop() {}
 				std::vector<ParticlesGenerator*>& particlesGen;
 
