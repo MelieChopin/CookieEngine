@@ -11,7 +11,7 @@ using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
 using namespace Cookie::Render;
 
-constexpr float cullEpsilon = -2.5f;
+constexpr float cullEpsilon = -3.0f;
 
 struct VS_CONSTANT_BUFFER
 {
@@ -126,9 +126,15 @@ void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 
 	for (int i = 0; i < entityHandler.livingEntities; ++i)
 	{
-		if (entityHandler.entities[i].signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
+		if ((entityHandler.entities[i].signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL)) == (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
 		{
 			ECS::ComponentModel& model = components.GetComponentModel(entityHandler.entities[i].id);
+
+			if (model.mesh == nullptr)
+			{
+				continue;
+			}
+
 			Core::Math::Mat4& trs = components.GetComponentTransform(entityHandler.entities[i].id).TRS;
 
 			Vec4 modelMin = trs * Core::Math::Vec4(model.mesh->AABBMin, 1.0f);

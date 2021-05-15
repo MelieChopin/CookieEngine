@@ -31,7 +31,7 @@ void Viewport::WindowDisplay()
 			viewportDrawspace.width  = GetContentRegionAvail().x;
 			viewportDrawspace.height = GetContentRegionAvail().y;
 
-			camera->SetProj(Core::Math::ToRadians(60.f), viewportDrawspace.width, viewportDrawspace.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+			camera->SetProj(60.f, viewportDrawspace.width, viewportDrawspace.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
 		}
 
 		ImGui::Image(static_cast<ImTextureID>(frameBuffer.shaderResource), GetContentRegionAvail());
