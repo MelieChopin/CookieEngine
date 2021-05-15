@@ -7,6 +7,7 @@
 #include "Resources/Scene.hpp"
 #include "CGPMove.hpp"
 #include "CGPProducer.hpp"
+#include "SoundManager.hpp"
 
 using namespace Cookie;
 using namespace Cookie::Core;
@@ -37,6 +38,9 @@ Editor::Editor()
 
     //Load all Textures we have create in texture editor
     Resources::Serialization::Load::LoadAllTextures(game.resources);
+
+    Resources::SoundManager::InitSystem();
+    Resources::SoundManager::LoadAllMusic(game.resources);
 
     //Load default Scene
     //std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/DefaultDuck.CAsset", game);
@@ -72,7 +76,8 @@ Editor::Editor()
 Editor::~Editor()
 {
     //Save all prefabs in folder Prefabs
-    Resources::Serialization::Save::SaveAllPrefabs(game.resources);
+   // Resources::Serialization::Save::SaveAllPrefabs(game.resources);
+    Resources::SoundManager::Release();
 }
 
 
@@ -102,7 +107,14 @@ void Editor::ModifyEditComp()
 
 void Editor::Loop()
 {
-    //soundManager.system->playSound(soundManager.sound, nullptr, false, nullptr);
+    Cookie::Resources::SoundManager::SetVolume("Music.mp3", 0.25f);
+    Cookie::Resources::SoundManager::Loop("Music.mp3");
+    Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
+    
+    Cookie::Resources::SoundManager::SetVolume("Magic.mp3", 0.15f);
+    Cookie::Resources::SoundManager::Set3D("Magic.mp3", Cookie::Core::Math::Vec3(0, 10, 0));
+    
+
     Physics::PhysicsHandle physHandle;
 
     Vec2 mousePos;
@@ -120,13 +132,96 @@ void Editor::Loop()
     bool makingASelectionQuad = false;
     Vec2 selectionQuadStart;
 
+    /// Particles
+    //First Particles 
+    Cookie::Resources::Particles::ParticlesSystem first = Cookie::Resources::Particles::ParticlesSystem(40, 20);
+    first.shader.InitShader();
+    first.trs.pos = Vec3(0, 10, 0);
+    first.trs.rot = Vec3(0, 0, 0);
+    first.trs.scale = Vec3(1, 1, 1);
+    first.trs.ComputeTRS();
+
+    Cookie::Resources::Particles::BoxPositionGenerate       box(Vec3(0, 0, 0), Vec3(2, 2, 2));
+    Cookie::Resources::Particles::CirclePositionGenerate    circle(Vec3(0, 0, 0), 2.0f);
+    Cookie::Resources::Particles::VelocityConstGenerate     vel(Vec3(0, 10, 0));
+    Cookie::Resources::Particles::VelocityRandGenerate      velRand(Vec3(0, 10, 0), Vec3(0, 35, 0));
+    Cookie::Resources::Particles::MassConstGenerate         mass(2);
+    Cookie::Resources::Particles::TimeConstGenerate         time(2);
+    Cookie::Resources::Particles::TimeRandGenerate          timeRand(0.25f, 0.55f);
+    Cookie::Resources::Particles::ColorRandGenerate         color(Vec3(0.5f, 0, 0), Vec3(1, 0, 0));
+    first.data[0].countAlive = 10;
+    first.particlesEmiter[0].generators.push_back(&circle);
+    first.particlesEmiter[0].generators.push_back(&velRand);
+    first.particlesEmiter[0].generators.push_back(&timeRand);
+    first.particlesEmiter[0].generators.push_back(&color);
+    for (int i = 0; i < first.particlesEmiter[0].generators.size(); i++)
+        first.particlesEmiter[0].generators[i]->generate(&first.data[0], 0, first.data[0].countAlive);
+
+    Cookie::Resources::Particles::UpdateVelocity    updateVel;
+    Cookie::Resources::Particles::UpdateScale       updateScale;
+    Cookie::Resources::Particles::EnabledGravity    enabledGravity;
+    Cookie::Resources::Particles::UpdateTime        updateTime;
+    Cookie::Resources::Particles::Loop              loop(first.particlesEmiter[0].generators);
+    first.particlesEmiter[0].updates.push_back(&updateVel);
+    first.particlesEmiter[0].updates.push_back(&updateTime);
+    first.particlesEmiter[0].updates.push_back(&updateScale);
+    first.particlesEmiter[0].updates.push_back(&loop);
+
+    for (int i = 0; i < 5; i++) // Create 5
+        game.particlesHandler.particlesSystems.push_back(first);
+    game.particlesHandler.particlesSystems[0].trs.TRS = Cookie::Core::Math::Mat4::Translate( Vec3(-10, 10, -10));
+    game.particlesHandler.particlesSystems[1].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(-10, 10, 10));
+    game.particlesHandler.particlesSystems[2].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(10, 10, -10));
+    game.particlesHandler.particlesSystems[3].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(10, 10, 10));
+    game.particlesHandler.particlesSystems[4].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(0, 10, 0));
+
+    //Second Particles in the center particles 
+    Cookie::Resources::Particles::ParticlesSystem second = Cookie::Resources::Particles::ParticlesSystem(40, 30);
+    second.data[0].countAlive = 10;
+    second.particlesEmiter[0].generators.push_back(&box);
+    second.particlesEmiter[0].generators.push_back(&vel);
+    second.particlesEmiter[0].generators.push_back(&mass);
+    second.particlesEmiter[0].generators.push_back(&timeRand);
+    Cookie::Resources::Particles::ColorRandGenerate         blue(Vec3(0, 0, 0.3f), Vec3(0, 0, 1.0f));
+    Cookie::Resources::Particles::Loop              loop2(second.particlesEmiter[0].generators);
+    second.particlesEmiter[0].generators.push_back(&blue);
+    for (int i = 0; i < second.particlesEmiter[0].generators.size(); i++)
+        second.particlesEmiter[0].generators[i]->generate(&second.data[0], 0, second.data[0].countAlive);
+
+    second.particlesEmiter[0].updates.push_back(&enabledGravity);
+    second.particlesEmiter[0].updates.push_back(&updateVel);
+    second.particlesEmiter[0].updates.push_back(&updateTime);
+    second.particlesEmiter[0].updates.push_back(&updateScale);
+    second.particlesEmiter[0].updates.push_back(&loop2);
+
+    game.particlesHandler.particlesSystems[4].data.push_back(second.data[0]);
+    game.particlesHandler.particlesSystems[4].particlesEmiter.push_back(second.particlesEmiter[0]);
+    ///
+
+
+    bool isActive = false;
+
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
         // Present frame
         CDebug.UpdateTime();
-        
+
         game.resources.UpdateScriptsContent();
         game.coordinator.ApplyScriptUpdate();
+
+        //Update for 3D Music
+        FMOD_VECTOR temp = { cam.pos.x, cam.pos.y, cam.pos.z };
+        Cookie::Resources::SoundManager::system->set3DListenerAttributes(0, &temp, nullptr, nullptr, nullptr);
+        Cookie::Resources::SoundManager::system->update();
+
+        //TEMP : TEST FOR 3D
+        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
+            Cookie::Resources::SoundManager::PlayMusic("Magic.mp3");
+        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
+            Cookie::Resources::SoundManager::SetPaused("Music.mp3", true);
+        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_L) == GLFW_PRESS)
+            Cookie::Resources::SoundManager::SetPaused("Music.mp3", false);
+        //
 
         // Present frame
         if (isPlaying)
@@ -154,11 +249,6 @@ void Editor::Loop()
         //if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
         //    Resources::Serialization::Save::SaveScene(*game.scene, game.resources);
 
-        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_H) == GLFW_PRESS)
-        {
-            std::string duck = "Duck";
-            game.coordinator.componentHandler->ModifyComponentOfEntityToPrefab(game.coordinator.entityHandler->entities[1], game.resources, duck);
-        }
         if (!ImGui::GetIO().MouseDownDuration[0])
         {            
             Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
@@ -364,12 +454,18 @@ void Editor::Loop()
         game.coordinator.ApplyGameplayCheckEnemyInRange();
         game.coordinator.ApplyGameplayAttack();
 
+		if (isActive)
+            game.particlesHandler.Update();
+        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
+            isActive = true;
 
         game.coordinator.ApplyComputeTrs();
         game.coordinator.ApplyGameplayDrawPath(dbgRenderer);
         game.renderer.Draw(&cam, game,editorFBO);
         if (isRaycastingWithMap)
             dbgRenderer.AddQuad(buildingPos, buildingTileSize.x * game.scene->map.tilesSize.x / 2, buildingTileSize.y * game.scene->map.tilesSize.y / 2, (isBuildingValid) ? 0x00FF00 : 0xFF0000);
+		for (int i = 0; i < game.particlesHandler.particlesSystems.size(); i++)
+            game.particlesHandler.particlesSystems[i].Draw(cam, game.resources);
         dbgRenderer.Draw(cam.GetViewProj());
 
         game.renderer.SetBackBuffer();

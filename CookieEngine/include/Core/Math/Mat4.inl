@@ -401,6 +401,13 @@ namespace Cookie
                 } };
             }
 
+            inline Vec3 Mat4::GetTranslate()const
+            {
+                return Vec3{c[0].e[3],
+                            c[1].e[3],
+                            c[2].e[3]};
+            }
+
             inline float Mat4::Det()const
             {
                 return    e[0] * (e[5] * ((e[10] * e[15]) - (e[14] * e[11]))
@@ -434,6 +441,10 @@ namespace Cookie
                 r.z = other.x * c[2].e[0] + other.y * c[2].e[1] + other.z * c[2].e[2] + other.w * c[2].e[3];
                 r.w = other.x * c[3].e[0] + other.y * c[3].e[1] + other.z * c[3].e[2] + other.w * c[3].e[3];
                 return r;
+            }
+            inline Vec3 Mat4::operator*(const Vec3& other) const
+            {
+                return (*this * Vec4(other, 1)).ToVec3();
             }
             inline Mat4& Mat4::operator*=(const Mat4& other) { *this = *this * other; return *this; }
 

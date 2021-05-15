@@ -23,6 +23,7 @@ include_directories("${INC_DIR}/UI/Widgets/GameWs/")
 include_directories("${INC_DIR}/Render/")
 include_directories("${INC_DIR}/ECS/")
 include_directories("${INC_DIR}/Resources/")
+include_directories("${INC_DIR}/Resources/Particles")
 include_directories("${INC_DIR}/Gameplay/")
 include_directories("${DEPS_INC_DIR}/ImGui/")
 include_directories("${DEPS_INC_DIR}/ImGuizmo/")
@@ -85,6 +86,7 @@ set (SRC_FILES
     "${SRC_DIR}/Render/ShadowBuffer.cpp" 
     "${SRC_DIR}/Render/RenderPass/ShadowPass.cpp"
     "${SRC_DIR}/Render/FBODrawer.cpp"
+    "${SRC_DIR}/Render/ParticlesPass.cpp"
     
     "${SRC_DIR}/Resources/Loader.cpp" 
     "${SRC_DIR}/Resources/Map.cpp" 
@@ -97,6 +99,9 @@ set (SRC_FILES
 
 
     "${SRC_DIR}/UI/UIcore.cpp"
+    "${SRC_DIR}/Resources/Particles/ParticlesGenerator.cpp"
+    "${SRC_DIR}/Resources/Particles/ParticlesUpdate.cpp"
+    "${SRC_DIR}/Resources/Particles/ParticlesHandler.cpp"
     "${SRC_DIR}/UI/UIeditor.cpp"
     "${SRC_DIR}/UI/UIscene.cpp"
     "${SRC_DIR}/UI/CustomImWidget.cpp"

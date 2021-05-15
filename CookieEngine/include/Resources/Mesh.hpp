@@ -21,7 +21,7 @@ namespace Cookie
 	{
 		class Mesh
 		{
-			private:
+		public:
 				ID3D11Buffer* VBuffer	= nullptr;
 				ID3D11Buffer* IBuffer	= nullptr;
 				unsigned int  INb		= 0;

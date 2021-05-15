@@ -53,7 +53,6 @@ namespace Cookie
 
 
 			void InitComponentPhysic(Entity& entity);
-			void ModifyComponentOfEntityToPrefab(Entity& entity, Cookie::Resources::ResourcesManager& resourcesManager, std::string& namePrefab);
 
 
 			//template later on

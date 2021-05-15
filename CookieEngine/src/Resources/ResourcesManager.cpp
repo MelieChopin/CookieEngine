@@ -27,13 +27,11 @@ ResourcesManager::ResourcesManager()
 
 ResourcesManager::~ResourcesManager()
 {
-
 }
 
 
 void ResourcesManager::SearchForAssets(const fs::path& path, std::vector<std::string>& gltfFiles)
 {
-
 	if (fs::exists(path) && fs::is_directory(path))
 	{
 		for (const fs::directory_entry& entry : fs::directory_iterator(path))
@@ -130,17 +128,17 @@ void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandl
 	Prefab newPrefab;
 
 	newPrefab.name = entity.name;
-	newPrefab.nameMesh = component.GetComponentModel(entity.id).mesh->name;
-	newPrefab.nameTexture = component.GetComponentModel(entity.id).albedo->name;
+	newPrefab.model = component.GetComponentModel(entity.id);
 	newPrefab.signature = entity.id;
-	newPrefab.rotation = component.GetComponentTransform(entity.id).rot;
-	newPrefab.scale = component.GetComponentTransform(entity.id).scale;
+	newPrefab.transform = component.GetComponentTransform(entity.id);
 	newPrefab.filepath = "Assets/Prefabs/" + entity.name + ".PAsset";
-	newPrefab.rigidBody = component.GetComponentPhysics(entity.id).physBody;
-	newPrefab.colliders = component.GetComponentPhysics(entity.id).physColliders;
+	newPrefab.physics = component.GetComponentPhysics(entity.id);
 
 	entity.namePrefab = entity.name;
 
 	prefabs[newPrefab.name] = std::make_shared<Prefab>(newPrefab);
 }
+
+
+
 
