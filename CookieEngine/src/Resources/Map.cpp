@@ -208,7 +208,8 @@ bool Map::ApplyPathfinding(Tile& tileStart, Tile& tileEnd)
 	return true;
 }
 
-void Map::Draw(const Mat4& viewProj, ID3D11Buffer** CBuffer)
+void Map::Draw(const Mat4& proj, const Mat4& view, ID3D11Buffer** CBuffer)
 {
-	model.Draw(viewProj, trs.TRS, CBuffer);
+	model.Draw(proj,view,trs.TRS, CBuffer);
 }
+

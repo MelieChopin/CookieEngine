@@ -2,6 +2,8 @@
 #define __GAME_HPP__
 
 #include "Render/Renderer.hpp" 
+#include "Resources/Mesh.hpp"
+#include "Resources/Texture.hpp"
 #include "Resources/ResourcesManager.hpp"
 #include "Render/Skybox.hpp"
 #include "ECS/Coordinator.hpp"

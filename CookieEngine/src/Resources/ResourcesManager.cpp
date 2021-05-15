@@ -19,8 +19,8 @@ using namespace Cookie::Resources;
 
 ResourcesManager::ResourcesManager()
 {
-	scripts["test.lua"] = std::make_shared<Script>("Assets\\scripts\\test.lua");
-	scripts["test2.lua"] = std::make_shared<Script>("Assets\\scripts\\test2.lua");
+	//scripts["test.lua"] = std::make_shared<Script>("Assets\\scripts\\test.lua");
+	//scripts["test2.lua"] = std::make_shared<Script>("Assets\\scripts\\test2.lua");
 
 	InitPrimitives();
 }
@@ -70,6 +70,7 @@ void ResourcesManager::InitPrimitives()
 {
 	meshes["Quad"]		= Cookie::Core::Primitives::CreateQuad();
 	meshes["Triangle"]	= Cookie::Core::Primitives::CreateTriangle();
+	meshes["NormalCube"]= Cookie::Core::Primitives::CreateNormalCube();
 	meshes["Cube"]		= Cookie::Core::Primitives::CreateCube();
 	meshes["Sphere"]	= Cookie::Core::Primitives::CreateSphere();
 	meshes["Pyramid"]	= Cookie::Core::Primitives::CreatePyramid();
@@ -111,7 +112,7 @@ void ResourcesManager::Load(Render::Renderer& _renderer)
 		std::string iFile = assetsFiles.at(i);
 		if (textures.find(iFile) == textures.end())
 		{
-			textures[iFile] = std::make_shared<Texture>(iFile);
+			textures[iFile] = std::make_unique<Texture>(iFile);
 		}
 		//printf("%s\n", gltfFiles.at(i).c_str());
 	}
@@ -130,7 +131,7 @@ void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandl
 
 	newPrefab.name = entity.name;
 	newPrefab.nameMesh = component.GetComponentModel(entity.id).mesh->name;
-	newPrefab.nameTexture = component.GetComponentModel(entity.id).texture->name;
+	newPrefab.nameTexture = component.GetComponentModel(entity.id).albedo->name;
 	newPrefab.signature = entity.id;
 	newPrefab.rotation = component.GetComponentTransform(entity.id).rot;
 	newPrefab.scale = component.GetComponentTransform(entity.id).scale;

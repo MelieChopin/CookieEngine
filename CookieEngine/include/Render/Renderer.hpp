@@ -3,12 +3,14 @@
 
 
 #include "Core/Window.hpp"
+#include "Light.hpp"
 #include "Render/FBODrawer.hpp"
 #include "Render/RendererRemote.hpp"
-#include "Render/RendererState.hpp"
-#include "Render/GeometryPass.hpp"
-
-#include "Light.hpp"
+#include "Render/DrawDataHandler.hpp"
+#include "Render/RenderPass/GeometryPass.hpp"
+#include "Render/RenderPass/ShadowPass.hpp"
+#include "Render/RenderPass/LightPass.hpp"
+#include "Render/RenderPass/ComposePass.hpp"
 
 namespace Cookie
 {
@@ -27,17 +29,22 @@ namespace Cookie
 		class Renderer
 		{
 			private:
-				struct IDXGISwapChain*				swapchain		= nullptr;
-				struct ID3D11RenderTargetView*		backbuffer		= nullptr;
+				IDXGISwapChain*				swapchain		= nullptr;
+				ID3D11RenderTargetView*		backbuffer		= nullptr;
 					
 			public:
-				struct ID3D11DepthStencilView* depthBuffer = nullptr;
 
 				Core::Window	window;
 				RendererRemote	remote;
-				RendererState	state;
+				D3D11_VIEWPORT	viewport;
+				DrawDataHandler drawData;
+
 				GeometryPass	gPass;
-				LightsArray		lights;
+				ShadowPass		sPass;
+				LightPass		lPass;
+				ComposePass		cPass;
+
+				LightsArray lights;
 
 			private:
 				Render::FBODrawer	fboDrawer;
@@ -45,7 +52,6 @@ namespace Cookie
 			private:
 				RendererRemote InitDevice(Core::Window& window);
 				bool CreateDrawBuffer(int width, int height);
-				RendererState InitState(int width, int height);
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */

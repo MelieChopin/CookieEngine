@@ -1,6 +1,7 @@
 #include "Editor.hpp" 
 #include "UIallIn.hpp"
 #include "Serialization.hpp"
+#include "Primitives.hpp"
 #include "Physics/PhysicsHandle.hpp"
 #include "ECS/SystemHandler.hpp"
 #include "Resources/Scene.hpp"
@@ -19,8 +20,8 @@ Editor::Editor()
     : editorFBO{game.renderer.window.width,game.renderer.window.height}
 {
     game.resources.Load(game.renderer);
-    game.skyBox.texture = game.resources.textures["Assets/skybox.dds"];
-    cam.SetProj(Core::Math::ToRadians(60.f), game.renderer.state.viewport.Width, game.renderer.state.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+    game.skyBox.texture = game.resources.textures["Assets/skybox.dds"].get();
+    cam.SetProj(Core::Math::ToRadians(60.f), game.renderer.viewport.Width, game.renderer.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
     cam.rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
 
@@ -106,8 +107,8 @@ void Editor::Loop()
 
     Vec2 mousePos;
     {
-        game.scene->map.model.mesh                 = game.resources.meshes["Cube"];
-        game.scene->map.model.texture              = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"];
+        game.scene->map.model.mesh                  = game.resources.meshes["NormalCube"].get();
+        game.scene->map.model.albedo                = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
     }
     Vec3 buildingPos;
     Vec2 buildingTileSize {{1, 1}};
@@ -230,8 +231,8 @@ void Editor::Loop()
                     trs.scale = {buildingTileSize.x * game.scene->map.tilesSize.x, 1, buildingTileSize.y * game.scene->map.tilesSize.y};
                     trs.trsHasChanged = true;
 
-                    model.mesh = game.resources.meshes["Cube"];
-                    model.texture = game.resources.textures["Blue"];
+                    model.mesh = game.resources.meshes["Cube"].get();
+                    model.albedo = game.resources.textures["Blue"].get();
 
                     producer.tileSize = buildingTileSize;
                     Vec3 posTopLeft = trs.pos - trs.scale / 2;
@@ -290,8 +291,8 @@ void Editor::Loop()
                     trs.pos = { mousePos.x, 1, mousePos.y };
                     trs.trsHasChanged = true;
 
-                    model.mesh = game.resources.meshes["Cube"];
-                    model.texture = game.resources.textures["Green"];
+                    model.mesh = game.resources.meshes["Cube"].get();
+                    model.albedo = game.resources.textures["Green"].get();
                     //model.shader = game.resources.shaders["Texture_Shader"];
 
                 }
@@ -313,8 +314,8 @@ void Editor::Loop()
                     trs.pos = { mousePos.x, 1, mousePos.y };
                     trs.trsHasChanged = true;
 
-                    model.mesh = game.resources.meshes["Cube"];
-                    model.texture = game.resources.textures["Red"];
+                    model.mesh = game.resources.meshes["Cube"].get();
+                    model.albedo = game.resources.textures["Red"].get();
                     //model.shader = game.resources.shaders["Texture_Shader"];
 
                 }
@@ -395,8 +396,8 @@ void Editor::TryResizeWindow()
 
     if (game.renderer.window.width != width || game.renderer.window.height != height)
     {
-        Core::DebugMessageHandler::Summon().Log((std::to_string(width) + ' ' + std::to_string(height)).c_str());
-        printf("%d, %d\n", width, height);
+        //Core::DebugMessageHandler::Summon().Log((std::to_string(width) + ' ' + std::to_string(height)).c_str());
+        //printf("%d, %d\n", width, height);
         game.renderer.window.width = width;
         game.renderer.window.height = height;
 

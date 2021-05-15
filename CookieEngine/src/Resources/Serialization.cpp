@@ -7,6 +7,7 @@
 #include "Resources/Scene.hpp"
 #include "Resources/Prefab.hpp"
 #include "Resources/ResourcesManager.hpp"
+#include "ECS/ComponentHandler.hpp"
 #include "Resources/Serialization.hpp"
 
 #include <reactphysics3d/reactphysics3d.h>
@@ -55,19 +56,19 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 			Cookie::ECS::ComponentModel model = component.GetComponentModel(entity.entities[i].id);
 			if (entity.entities[i].namePrefab != "NONE")
 			{
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameMesh != model.mesh.get()->name)
-					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size()]["model"] = model.mesh.get()->name;
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameMesh != model.mesh->name)
+					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size()]["model"] = model.mesh->name;
 				else
 					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size()]["model"] = 0;
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameTexture != model.texture.get()->name)
-					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["texture"] = model.texture.get()->name;
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameTexture != model.albedo->name)
+					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["texture"] = model.albedo->name;
 				else
 					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["texture"] = 0;
 			}
 			else
 			{
-				js["ComponentHandler"]["Model"] += json{ { "model", model.mesh != nullptr ? model.mesh.get()->name : "NO MESH" },
-												{ "texture", model.texture != nullptr ? model.texture.get()->name : "NO TEXTURE" } };
+				js["ComponentHandler"]["Model"] += json{ { "model", model.mesh != nullptr ? model.mesh->name : "NO MESH" },
+												{ "texture", model.albedo != nullptr ? model.albedo->name : "NO TEXTURE" } };
 			}
 		}
 		if (entity.entities[i].signature & C_SIGNATURE::PHYSICS)
@@ -318,16 +319,16 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 		 {
 			 json model = js["ComponentHandler"]["Model"][i];
 			 if (model.at("model").is_string())
-				component.GetComponentModel(entity.entities[i].id).mesh = resourcesManager.meshes[(model.at("model").get<std::string>())];
+				component.GetComponentModel(entity.entities[i].id).mesh = resourcesManager.meshes[(model.at("model").get<std::string>())].get();
 			 else if (entity.entities[i].namePrefab != "NONE")
-					component.GetComponentModel(entity.entities[i].id).mesh =
-						resourcesManager.meshes[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameMesh];
+				 component.GetComponentModel(entity.entities[i].id).mesh =
+						resourcesManager.meshes[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameMesh].get();
 
 			 if (model.at("texture").is_string())
-				 component.GetComponentModel(entity.entities[i].id).texture = resourcesManager.textures[(model.at("texture").get<std::string>())];
+				component.GetComponentModel(entity.entities[i].id).albedo = resourcesManager.textures[(model.at("texture").get<std::string>())].get();
 			 else if (entity.entities[i].namePrefab != "NONE")
-					 component.GetComponentModel(entity.entities[i].id).texture =
-									resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameTexture];
+				 component.GetComponentModel(entity.entities[i].id).albedo =
+									resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameTexture].get();
 		 }
 		 if (entity.entities[i].signature & C_SIGNATURE::PHYSICS)
 		 {
@@ -476,6 +477,8 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 		 newPrefab.filepath = filesPath[i];
 
 		 resourcesManager.prefabs[newPrefab.name] = std::make_shared<Prefab>(newPrefab);
+
+		 file.close();
 	 }
  }
 
@@ -514,7 +517,7 @@ void Cookie::Resources::Serialization::Load::LoadAllTextures(Cookie::Resources::
 		 js["color"].get_to(color.e);
 		 js["name"].get_to(name);
 
-		 resourcesManager.textures[name] = std::make_shared<Texture>(name, color);
+		 resourcesManager.textures[name] = std::make_unique<Texture>(name, color);
 	 }
  }
 

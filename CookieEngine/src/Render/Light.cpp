@@ -1,3 +1,5 @@
+#include "Render/RendererRemote.hpp"
+#include "ShadowBuffer.hpp"
 #include "Light.hpp"
 
 using namespace Cookie::Render;
@@ -14,9 +16,31 @@ LightsArray::LightsArray()
 {
 };
 
-LightsArray::LightsArray(const LightsArray& _lights):
-	dirLights		{_lights.dirLights},
-	sphereLights	{_lights.sphereLights},
-	spotLights		{_lights.spotLights}
+void LightsArray::Clear()
 {
-};
+
+	for (int i = 0; i < DIR_LIGHT_MAX_NB; i++)
+	{
+		DirLight& iLight = dirLights.at(i);
+
+		if (iLight.castShadow)
+		{
+			if (iLight.shadowMap)
+			{
+				iLight.shadowMap->Clear();
+			}
+			else
+			{
+				iLight.shadowMap = std::make_unique<ShadowBuffer>();
+			}
+		}
+		else
+		{
+			if (iLight.shadowMap)
+			{
+				iLight.shadowMap.reset();
+				iLight.shadowMap = nullptr;
+			}
+		}
+	}
+}

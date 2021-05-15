@@ -59,6 +59,11 @@ void ComponentPhysics::AddCapsuleCollider(const Vec2& capsuleInfo, const Vec3& l
 	physColliders.push_back(physBody->addCollider(capsule, trs));
 }
 
+void ComponentPhysics::RemoveCollider(::reactphysics3d::Collider* collider)
+{
+	physBody->removeCollider(collider);
+}
+
 /*============================ REALTIME METHODS ============================*/
 
 void ComponentPhysics::Set(const ComponentTransform& trs)

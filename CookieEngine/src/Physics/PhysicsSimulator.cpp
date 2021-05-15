@@ -22,7 +22,7 @@ PhysicsSimulator::~PhysicsSimulator()
 		worldSim->destroyRigidBody(worldSim->getRigidBody(0));
 	}
 
-	PhysicsHandle().physCom->destroyPhysicsWorld(worldSim);
+	PhysicsHandle::physCom->destroyPhysicsWorld(worldSim);
 }
 
 /*================ REALTIME METHODS ================*/
