@@ -22,7 +22,7 @@ Editor::Editor()
 {
     game.resources.Load(game.renderer);
     game.skyBox.texture = game.resources.textures["Assets/skybox.dds"].get();
-    cam.SetProj(Core::Math::ToRadians(60.f), game.renderer.viewport.Width, game.renderer.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+    cam.SetProj(60.f, game.renderer.viewport.Width, game.renderer.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
     cam.rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
 
@@ -256,7 +256,14 @@ void Editor::Loop()
             physHandle.editWorld->raycast(ray,this);
         }
 
-        
+        //Bind Keys to activate/deactivate raycast with map 
+        {
+            //Key M on Azerty Keyboard
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_SEMICOLON])
+            {
+                isRaycastingWithMap = !isRaycastingWithMap;
+            }
+        }
         //Raycast with Map
         if(isRaycastingWithMap)
         {
@@ -268,7 +275,7 @@ void Editor::Loop()
             if (game.scene->map.physic.physBody->raycast(ray, raycastInfo))
             {
                 Vec3 hitPoint{ raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z };
-                //hitPoint.Debug();
+                hitPoint.Debug();
 
                 mousePos =  {{hitPoint.x, hitPoint.z}};
                 indexOfSelectedTile = game.scene->map.GetTileIndex(mousePos);
@@ -288,14 +295,7 @@ void Editor::Loop()
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_O])
                 buildingTileSize.y = std::fmin(game.scene->map.tilesNb.y, buildingTileSize.y + 1);
         }
-        //Bind Keys to activate/deactivate raycast with map 
-        {
-            //Key M on Azerty Keyboard
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_SEMICOLON])
-            {
-                isRaycastingWithMap = !isRaycastingWithMap;
-            }
-        }
+
         //Bind Keys to check if building is valid and to create Building
         {
            
