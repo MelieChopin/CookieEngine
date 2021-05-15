@@ -174,6 +174,7 @@ void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
     Render::RendererRemote::context->RSSetViewports(1, &shadowViewport);
     
     Mat4 proj = Mat4::Ortho(-50.0f, 50.0f, -50.0f, 50.0f, -50.0f, 50.0f);
+    //Mat4 proj = Mat4::Ortho(drawData.AABB[0].x, drawData.AABB[1].x, drawData.AABB[0].y, drawData.AABB[1].y, drawData.AABB[0].z, drawData.AABB[1].z);
 
     Vec3 pos = (drawData.AABB[0] + drawData.AABB[1])*0.5f;
 
