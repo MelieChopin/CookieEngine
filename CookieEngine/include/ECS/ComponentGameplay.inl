@@ -7,78 +7,47 @@ namespace Cookie
 {
 	namespace ECS
 	{
-		inline void ComponentGameplay::AddComponentLive(Entity& entity)noexcept
+
+		inline void ComponentGameplay::AddComponent(int ComponentSignature) noexcept
 		{
-			if (entity.signatureGameplay & SIGNATURE_CGP_LIVE)
+			if (signatureGameplay & ComponentSignature)
 			{
-				CDebug.Warning("Component Gameplay Live already present");
+				CDebug.Warning("Try to Add a Component already present");
 				return;
 			}
 
-			entity.signatureGameplay += SIGNATURE_CGP_LIVE;
+			signatureGameplay += ComponentSignature;
 		}
-		inline void ComponentGameplay::AddComponentMove(Entity& entity)noexcept
+		inline void ComponentGameplay::RemoveComponent(int ComponentSignature)noexcept
 		{
-			if (entity.signatureGameplay & SIGNATURE_CGP_MOVE)
+			if (signatureGameplay & ComponentSignature)
 			{
-				CDebug.Warning("Component Gameplay Move already present");
+				SubComponentToDefault(ComponentSignature);
+				signatureGameplay -= ComponentSignature;
 				return;
 			}
 
-			entity.signatureGameplay += SIGNATURE_CGP_MOVE;
-		}
-		inline void ComponentGameplay::AddComponentAttack(Entity& entity)noexcept
-		{
-			if (entity.signatureGameplay & SIGNATURE_CGP_ATTACK)
-			{
-				CDebug.Warning("Component Gameplay Attack already present");
-				return;
-			}
-
-			entity.signatureGameplay += SIGNATURE_CGP_ATTACK;
+			CDebug.Warning("Try to Remove a Component not present");
 		}
 
-		inline void ComponentGameplay::RemoveComponentLive(Entity& entity)noexcept
+		inline void ComponentGameplay::ToDefault()noexcept
 		{
-			if (entity.signatureGameplay & SIGNATURE_CGP_LIVE)
-			{
-				entity.signatureGameplay -= SIGNATURE_CGP_LIVE;
-				return;
-			}
-
-			CDebug.Warning("No Component Gameplay Live present");
-		}
-		inline void ComponentGameplay::RemoveComponentMove(Entity& entity)noexcept
-		{
-			if (entity.signatureGameplay & SIGNATURE_CGP_MOVE)
-			{
-				entity.signatureGameplay -= SIGNATURE_CGP_MOVE;
-				return;
-			}
-
-			CDebug.Warning("No Component Gameplay Move present");
-		}
-		inline void ComponentGameplay::RemoveComponentAttack(Entity& entity)noexcept
-		{
-			if (entity.signatureGameplay & SIGNATURE_CGP_ATTACK)
-			{
-				entity.signatureGameplay -= SIGNATURE_CGP_ATTACK;
-				return;
-			}
-
-			CDebug.Warning("No Component Gameplay Attack present");
+			SubComponentToDefault(signatureGameplay);
+			signatureGameplay = CGP_SIGNATURE::EMPTY_CGP;
 		}
 
-		inline void ComponentGameplay::ToDefault(Entity& entity)noexcept
+		inline void ComponentGameplay::SubComponentToDefault(int ComponentSignature)noexcept
 		{
-			if (entity.signatureGameplay & SIGNATURE_CGP_LIVE)
+			if (ComponentSignature & CGP_SIGNATURE::LIVE)
 				componentLive.ToDefault();
-			if (entity.signatureGameplay & SIGNATURE_CGP_MOVE)
+			if (ComponentSignature & CGP_SIGNATURE::MOVE)
 				componentMove.ToDefault();
-			if (entity.signatureGameplay & SIGNATURE_CGP_ATTACK)
+			if (ComponentSignature & CGP_SIGNATURE::ATTACK)
 				componentAttack.ToDefault();
-
-			entity.signatureGameplay = SIGNATURE_CGP_EMPTY;
+			if (ComponentSignature & CGP_SIGNATURE::PRODUCER)
+				componentProducer.ToDefault();
+			if (ComponentSignature & CGP_SIGNATURE::WORKER)
+				componentWorker.ToDefault();
 		}
 
 	}

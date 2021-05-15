@@ -5,6 +5,7 @@
 #include "ECS/SystemHandler.hpp"
 #include "Resources/Scene.hpp"
 #include "CGPMove.hpp"
+#include "CGPProducer.hpp"
 
 using namespace Cookie;
 using namespace Cookie::Core;
@@ -87,7 +88,7 @@ void Editor::ModifyEditComp()
     for (int i = 0; i < MAX_ENTITIES; i++)
     {
         editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i);
-        if ((game.coordinator.entityHandler->entities[i].signature & SIGNATURE_MODEL) && game.coordinator.componentHandler->GetComponentModel(i).mesh != nullptr)
+        if ((game.coordinator.entityHandler->entities[i].signature & C_SIGNATURE::MODEL) && game.coordinator.componentHandler->GetComponentModel(i).mesh != nullptr)
         {
             editingComponent[i].AABBMin = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBMin;
             editingComponent[i].AABBMax = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBMax;
@@ -107,13 +108,10 @@ void Editor::Loop()
     {
         game.scene->map.model.mesh                 = game.resources.meshes["Cube"];
         game.scene->map.model.texture              = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"];
-
-        //will be removed after testing phase
-        game.scene->map.modelTileObstacle.mesh     = game.resources.meshes["Cube"];
-        game.scene->map.modelTileObstacle.texture  = game.resources.textures["Grey"];
     }
     Vec3 buildingPos;
     Vec2 buildingTileSize {{1, 1}};
+    bool isBuildingValid = false;
     int nbOfBuildings = 0;
     int nbOfUnits = 0;
     bool isRaycastingWithMap = false;
@@ -207,15 +205,26 @@ void Editor::Loop()
                 isRaycastingWithMap = !isRaycastingWithMap;
             }
         }
-        //Bind Keys to create Building
+        //Bind Keys to check if building is valid and to create Building
         {
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P] && isRaycastingWithMap)
+           
+            if (isRaycastingWithMap)
             {
-                game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL, "Building " + std::to_string(nbOfBuildings) );
+                Vec2 posTopLeft = {{buildingPos.x - buildingTileSize.x * game.scene->map.tilesSize.x / 2,
+                                    buildingPos.z - buildingTileSize.y * game.scene->map.tilesSize.y / 2}};
+                isBuildingValid = game.scene->map.isBuildingValid(game.scene->map.GetTileIndex(posTopLeft), buildingTileSize);
+            }
+            
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P] && isRaycastingWithMap && isBuildingValid)
+            {
+                game.coordinator.AddEntity(C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL + C_SIGNATURE::GAMEPLAY, "Building " + std::to_string(nbOfBuildings) );
                 //should create constructor copy for each Component 
                 {
                     ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(game.coordinator.entityHandler->livingEntities - 1);
                     ComponentModel& model   = game.coordinator.componentHandler->GetComponentModel(game.coordinator.entityHandler->livingEntities - 1);
+                    ComponentGameplay& gameplay = game.coordinator.componentHandler->GetComponentGameplay(game.coordinator.entityHandler->livingEntities - 1);
+                    gameplay.AddComponent(CGP_SIGNATURE::PRODUCER);
+                    CGPProducer& producer = gameplay.componentProducer;
 
                     trs.pos = buildingPos;
                     trs.scale = {buildingTileSize.x * game.scene->map.tilesSize.x, 1, buildingTileSize.y * game.scene->map.tilesSize.y};
@@ -223,6 +232,10 @@ void Editor::Loop()
 
                     model.mesh = game.resources.meshes["Cube"];
                     model.texture = game.resources.textures["Blue"];
+
+                    producer.tileSize = buildingTileSize;
+                    Vec3 posTopLeft = trs.pos - trs.scale / 2;
+                    game.scene->map.GiveTilesToBuilding(game.scene->map.GetTileIndex(posTopLeft), producer);
                 }
 
                 nbOfBuildings++;
@@ -264,16 +277,17 @@ void Editor::Loop()
         {
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N] && isRaycastingWithMap)
             {
-                game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL + SIGNATURE_GAMEPLAY, "Unit " + std::to_string(nbOfUnits));
+                game.coordinator.AddEntity(C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL + C_SIGNATURE::GAMEPLAY, "Unit " + std::to_string(nbOfUnits));
                 //should create constructor copy for each Component 
                 {
                     ECS::Entity& entity = game.coordinator.entityHandler->entities[game.coordinator.entityHandler->livingEntities - 1];
                     ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(entity.id);
                     ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(entity.id);
+                    ComponentGameplay& gameplay = game.coordinator.componentHandler->GetComponentGameplay(entity.id);
                     entity.tag = "good";
-                    entity.signatureGameplay = SIGNATURE_CGP_ALL;
+                    gameplay.signatureGameplay = CGP_SIGNATURE::ALL_CGP;
 
-                    trs.pos = {mousePos.x, 1, mousePos.y};
+                    trs.pos = { mousePos.x, 1, mousePos.y };
                     trs.trsHasChanged = true;
 
                     model.mesh = game.resources.meshes["Cube"];
@@ -286,14 +300,15 @@ void Editor::Loop()
             }
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B] && isRaycastingWithMap)
             {
-                game.coordinator.AddEntity(SIGNATURE_TRANSFORM + SIGNATURE_MODEL + SIGNATURE_GAMEPLAY, "Unit " + std::to_string(nbOfUnits));
+                game.coordinator.AddEntity(C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL + C_SIGNATURE::GAMEPLAY, "Unit " + std::to_string(nbOfUnits));
                 //should create constructor copy for each Component 
                 {
                     ECS::Entity& entity = game.coordinator.entityHandler->entities[game.coordinator.entityHandler->livingEntities - 1];
                     ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(entity.id);
                     ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(entity.id);
-                    entity.signatureGameplay = SIGNATURE_CGP_ALL;
+                    ComponentGameplay& gameplay = game.coordinator.componentHandler->GetComponentGameplay(entity.id);
                     entity.tag = "bad";
+                    gameplay.signatureGameplay = CGP_SIGNATURE::ALL_CGP;
 
                     trs.pos = { mousePos.x, 1, mousePos.y };
                     trs.trsHasChanged = true;
@@ -330,9 +345,9 @@ void Editor::Loop()
         {
             PopulateFocusedEntity();
         }
-        if (selectedEntity.focusedEntity && (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS))
+        if (selectedEntity.focusedEntity && (selectedEntity.focusedEntity->signature & C_SIGNATURE::PHYSICS))
         {
-            selectedEntity.componentHandler->componentPhysics[selectedEntity.focusedEntity->id].Set(selectedEntity.componentHandler->componentTransforms[selectedEntity.focusedEntity->id]);
+            selectedEntity.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id).Set(selectedEntity.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id));
         }
            
 
@@ -353,8 +368,7 @@ void Editor::Loop()
         game.coordinator.ApplyGameplayDrawPath(dbgRenderer);
         game.renderer.Draw(&cam, game,editorFBO);
         if (isRaycastingWithMap)
-            dbgRenderer.AddQuad(buildingPos, buildingTileSize.x * game.scene->map.tilesSize.x / 2, buildingTileSize.y * game.scene->map.tilesSize.y / 2, 0xA030A0);
-        //game.scene->map.DrawSpecificTiles(cam.GetViewProj());
+            dbgRenderer.AddQuad(buildingPos, buildingTileSize.x * game.scene->map.tilesSize.x / 2, buildingTileSize.y * game.scene->map.tilesSize.y / 2, (isBuildingValid) ? 0x00FF00 : 0xFF0000);
         dbgRenderer.Draw(cam.GetViewProj());
 
         game.renderer.SetBackBuffer();

@@ -38,40 +38,40 @@ void Inspector::EntityInspection()
 
     ImGui::Separator();
 
-    if (selectedEntity.focusedEntity->signature & SIGNATURE_TRANSFORM)    TransformInterface();
-    if (selectedEntity.focusedEntity->signature & SIGNATURE_MODEL)        ModelInterface();
-    if (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS)      PhysicsInterface();
-    if (selectedEntity.focusedEntity->signature & SIGNATURE_SCRIPT)       ScriptInterface();
-    if (selectedEntity.focusedEntity->signature & SIGNATURE_GAMEPLAY)     GameplayInterface();
+    if (selectedEntity.focusedEntity->signature & C_SIGNATURE::TRANSFORM)    TransformInterface();
+    if (selectedEntity.focusedEntity->signature & C_SIGNATURE::MODEL)        ModelInterface();
+    if (selectedEntity.focusedEntity->signature & C_SIGNATURE::PHYSICS)      PhysicsInterface();
+    if (selectedEntity.focusedEntity->signature & C_SIGNATURE::SCRIPT)       ScriptInterface();
+    if (selectedEntity.focusedEntity->signature & C_SIGNATURE::GAMEPLAY)     GameplayInterface();
 
 
     if (Button("Add component...")) OpenPopup("Add component popup");
 
     if (BeginPopup("Add component popup"))
     {
-        if (selectedEntity.focusedEntity->signature & SIGNATURE_TRANSFORM)  TextDisabled("Component Transform already added");
+        if (selectedEntity.focusedEntity->signature & C_SIGNATURE::TRANSFORM)  TextDisabled("Component Transform already added");
         else if (Selectable("Add component Transform"))
-            coordinator.componentHandler->  AddComponentTransform   (*selectedEntity.focusedEntity);
+            coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::TRANSFORM);
 
 
-        if (selectedEntity.focusedEntity->signature & SIGNATURE_MODEL)      TextDisabled("Component Model already added");
+        if (selectedEntity.focusedEntity->signature & C_SIGNATURE::MODEL)      TextDisabled("Component Model already added");
         else if (Selectable("Add component Model"))
-            coordinator.componentHandler->  AddComponentModel       (*selectedEntity.focusedEntity);
-        
+            coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::MODEL);
 
-        if (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS)    TextDisabled("Component Physics already added");
+
+        if (selectedEntity.focusedEntity->signature & C_SIGNATURE::PHYSICS)    TextDisabled("Component Physics already added");
         else if (Selectable("Add component Physics"))
-            coordinator.componentHandler->  AddComponentPhysics     (*selectedEntity.focusedEntity);
+            coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::PHYSICS);
 
 
-        if (selectedEntity.focusedEntity->signature & SIGNATURE_SCRIPT)     TextDisabled("Component Script already added");
+        if (selectedEntity.focusedEntity->signature & C_SIGNATURE::SCRIPT)     TextDisabled("Component Script already added");
         else if (Selectable("Add component Script"))
-            coordinator.componentHandler->  AddComponentScript      (*selectedEntity.focusedEntity);
+            coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::SCRIPT);
 
 
-        if (selectedEntity.focusedEntity->signature & SIGNATURE_GAMEPLAY)   TextDisabled("Component Gameplay already added");
+        if (selectedEntity.focusedEntity->signature & C_SIGNATURE::GAMEPLAY)   TextDisabled("Component Gameplay already added");
         else if (Selectable("Add component Gameplay"))
-            coordinator.componentHandler->  AddComponentGameplay    (*selectedEntity.focusedEntity);
+            coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::GAMEPLAY);
 
         EndPopup();
     }
@@ -93,7 +93,7 @@ void Inspector::TransformInterface()
         NewLine();
         if (Selectable("Remove component##TRSF"))
         {
-            coordinator.componentHandler->RemoveComponentTransform(*selectedEntity.focusedEntity);
+            coordinator.componentHandler->RemoveComponent(*selectedEntity.focusedEntity, C_SIGNATURE::TRANSFORM);
         }
 
 
@@ -111,7 +111,7 @@ void Inspector::ModelInterface()
 
         static std::string researchString;
 
-//===== MESH =====//
+        //===== MESH =====//
 
         Text("Mesh:"); SameLine(100);
 
@@ -120,7 +120,7 @@ void Inspector::ModelInterface()
             InputText("Mesh search", &researchString, ImGuiInputTextFlags_AutoSelectAll);
 
             NewLine();
-            
+
             for (std::unordered_map<std::string, std::shared_ptr<Mesh>>::iterator meshIt = resources.meshes.begin(); meshIt != resources.meshes.end(); meshIt++)
             {
                 const bool is_selected = (modelComp.mesh != nullptr && modelComp.mesh->name == meshIt->second->name);
@@ -148,11 +148,11 @@ void Inspector::ModelInterface()
 
         if (ImGui::IsItemClicked())
             researchString.clear();
-        
-//===== SHADER =====//
 
-//===== TEXTURE =====//
-        
+        //===== SHADER =====//
+
+        //===== TEXTURE =====//
+
         Text("Texture:"); SameLine(100);
 
         if (BeginCombo("##TEXTSELECT", modelComp.texture != nullptr ? modelComp.texture->name.c_str() : "No texture applied", ImGuiComboFlags_HeightLarge))
@@ -163,7 +163,7 @@ void Inspector::ModelInterface()
 
             for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator textIt = resources.textures.begin(); textIt != resources.textures.end(); textIt++)
             {
-                const bool is_selected = (modelComp.texture != nullptr && textIt->second &&  modelComp.texture->name == textIt->second->name);
+                const bool is_selected = (modelComp.texture != nullptr && textIt->second && modelComp.texture->name == textIt->second->name);
 
                 if (textIt->second && textIt->second->name.find(researchString) != std::string::npos)
                 {
@@ -197,12 +197,12 @@ void Inspector::ModelInterface()
         if (ImGui::IsItemClicked())
             researchString.clear();
 
-//===================//
+        //===================//
 
         NewLine();
         if (Selectable("Remove component##MODEL"))
         {
-            coordinator.componentHandler->RemoveComponentModel(*selectedEntity.focusedEntity);
+            coordinator.componentHandler->RemoveComponent(*selectedEntity.focusedEntity, C_SIGNATURE::MODEL);
         }
 
         TreePop();
@@ -216,7 +216,7 @@ void Inspector::PhysicsInterface()
     if (TreeNode("Physics"))
     {
         ComponentPhysics& physicComp = coordinator.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id);
-        
+
         // due to the nature of how we can access and set variables in react physic 3D, this variable are used numerous times to ease the manipulations with ImGui and save memory.
         static float multiUseFloat = 0; static bool multiUseBool = false;
 
@@ -227,16 +227,16 @@ void Inspector::PhysicsInterface()
             Indent(15.f);
 
             std::vector<reactphysics3d::Collider*>& colliders = physicComp.physColliders;
-            
-//====== COLLIDERS - beginning list of current colliders ======//
+
+            //====== COLLIDERS - beginning list of current colliders ======//
 
             for (size_t i = 0; i < colliders.size(); i++)
             {
                 std::string nameTag;
-            
+
                 if (selectedCollider == colliders[i])
                     nameTag += '[';
-            
+
                 switch (colliders[i]->getCollisionShape()->getName())
                 {
                 case reactphysics3d::CollisionShapeName::SPHERE:    nameTag += "Sphere";    break;
@@ -259,8 +259,8 @@ void Inspector::PhysicsInterface()
 
             Unindent(15.f);
 
-//====== COLLIDERS - sub-window for editing ======//
-            
+            //====== COLLIDERS - sub-window for editing ======//
+
             if (BeginChild(windowName, { GetContentRegionAvail().x, 150 }, true) && (selectedCollider != nullptr))
             {
                 multiUseBool = selectedCollider->getIsTrigger();
@@ -285,7 +285,7 @@ void Inspector::PhysicsInterface()
                     NewLine();
                     Text("Characteristics:");
 
-                    if      (selectedCollider->getCollisionShape()->getName() == reactphysics3d::CollisionShapeName::SPHERE)
+                    if (selectedCollider->getCollisionShape()->getName() == reactphysics3d::CollisionShapeName::SPHERE)
                     {
                         reactphysics3d::SphereShape* sphereCol = static_cast<reactphysics3d::SphereShape*>(selectedCollider->getCollisionShape());
 
@@ -315,7 +315,7 @@ void Inspector::PhysicsInterface()
                         reactphysics3d::Vector3&& halfExtents = boxCol->getHalfExtents();
                         Text("Half extents:"); SameLine();
                         if (DragFloat3("##BSIZE", &halfExtents[0], 0.25))
-                            boxCol->setHalfExtents(reactphysics3d::Vector3::max({0.001, 0.001, 0.001}, halfExtents));
+                            boxCol->setHalfExtents(reactphysics3d::Vector3::max({ 0.001, 0.001, 0.001 }, halfExtents));
                     }
 
                     TreePop();
@@ -344,34 +344,34 @@ void Inspector::PhysicsInterface()
                     TreePop();
                 }
             }
-            
+
             EndChild();
 
-//====== COLLIDERS - options to add new colliders ======//
+            //====== COLLIDERS - options to add new colliders ======//
 
             if (Button("Add a collider")) OpenPopup("Collider adder popup");
             if (BeginPopup("Collider adder popup"))
             {
                 if (Button("Add a sphere collider"))
-                { 
-                    physicComp.AddSphereCollider(1, {0, 0, 0}, {0, 0, 0});
-                
+                {
+                    physicComp.AddSphereCollider(1, { 0, 0, 0 }, { 0, 0, 0 });
+
                     selectedCollider = colliders.back();
                     CloseCurrentPopup();
                 }
 
                 if (Button("Add a box collider"))
                 {
-                    physicComp.AddCubeCollider({1, 1, 1}, { 0, 0, 0 }, { 0, 0, 0 });
-                
+                    physicComp.AddCubeCollider({ 1, 1, 1 }, { 0, 0, 0 }, { 0, 0, 0 });
+
                     selectedCollider = colliders.back();
                     CloseCurrentPopup();
                 }
 
                 if (Button("Add a capsule collider"))
                 {
-                    physicComp.AddCapsuleCollider({{1, 1}}, { 0, 0, 0 }, { 0, 0, 0 });
-                
+                    physicComp.AddCapsuleCollider({ {1, 1} }, { 0, 0, 0 }, { 0, 0, 0 });
+
                     selectedCollider = colliders.back();
                     CloseCurrentPopup();
                 }
@@ -382,7 +382,7 @@ void Inspector::PhysicsInterface()
 
             TreePop();
         }
-        
+
 
         if (TreeNode("Rigibody"))
         {
@@ -446,7 +446,7 @@ void Inspector::PhysicsInterface()
         NewLine();
         if (Selectable("Remove component##COLLIDER"))
         {
-            coordinator.componentHandler->RemoveComponentPhysics(*selectedEntity.focusedEntity);
+            coordinator.componentHandler->RemoveComponent(*selectedEntity.focusedEntity, C_SIGNATURE::PHYSICS);
         }
 
         TreePop();
@@ -497,7 +497,7 @@ void Inspector::ScriptInterface()
         NewLine();
         if (Selectable("Remove component##SCRIPT"))
         {
-            coordinator.componentHandler->RemoveComponentScript(*selectedEntity.focusedEntity);
+            coordinator.componentHandler->RemoveComponent(*selectedEntity.focusedEntity, C_SIGNATURE::SCRIPT);
         }
 
         TreePop();
@@ -512,29 +512,29 @@ void Inspector::GameplayInterface()
     {
         ComponentGameplay& gameplayComp = coordinator.componentHandler->GetComponentGameplay(selectedEntity.focusedEntity->id);
 
-        if (selectedEntity.focusedEntity->signatureGameplay & SIGNATURE_CGP_LIVE)
+        if (gameplayComp.signatureGameplay & CGP_SIGNATURE::LIVE)
         {
             if (TreeNode("Life/Armor properties"))
             {
-                DragFloat("##LIFE",  &gameplayComp.componentLive.life,  1.f, NULL, NULL, "Life: %.0f");
+                DragFloat("##LIFE", &gameplayComp.componentLive.life, 1.f, NULL, NULL, "Life: %.0f");
                 DragFloat("##ARMOR", &gameplayComp.componentLive.armor, 1.f, NULL, NULL, "Armor: %.0f");
-            
+
 
                 NewLine();
                 if (Selectable("Remove property##LIVE"))
                 {
                     gameplayComp.componentLive.ToDefault();
-                    selectedEntity.focusedEntity->signatureGameplay -= SIGNATURE_CGP_LIVE;
+                    gameplayComp.signatureGameplay -= CGP_SIGNATURE::LIVE;
                 }
 
                 TreePop();
             }
         }
         else if (Selectable("Add life/Armor properties"))
-            selectedEntity.focusedEntity->signatureGameplay += SIGNATURE_CGP_LIVE;
+            gameplayComp.signatureGameplay += CGP_SIGNATURE::LIVE;
 
 
-        if (selectedEntity.focusedEntity->signatureGameplay & SIGNATURE_CGP_MOVE)
+        if (gameplayComp.signatureGameplay & CGP_SIGNATURE::MOVE)
         {
             if (TreeNode("Movement capacities"))
             {
@@ -548,43 +548,43 @@ void Inspector::GameplayInterface()
                 if (Selectable("Remove property##MOVE"))
                 {
                     gameplayComp.componentMove.ToDefault();
-                    selectedEntity.focusedEntity->signatureGameplay -= SIGNATURE_CGP_MOVE;
+                    gameplayComp.signatureGameplay -= CGP_SIGNATURE::MOVE;
                 }
 
                 TreePop();
             }
         }
         else if (Selectable("Add movement capacities"))
-            selectedEntity.focusedEntity->signatureGameplay += SIGNATURE_CGP_MOVE;
+            gameplayComp.signatureGameplay += CGP_SIGNATURE::MOVE;
 
 
-        if (selectedEntity.focusedEntity->signatureGameplay & SIGNATURE_CGP_ATTACK)
+        if (gameplayComp.signatureGameplay & CGP_SIGNATURE::ATTACK)
         {
             if (TreeNode("Attack abilities"))
             {
                 DragFloat("##DAMAGE", &gameplayComp.componentAttack.attackDamage, 0.25f, NULL, NULL, "Damage: %.2f");
-                DragFloat("##RANGE",  &gameplayComp.componentAttack.attackRange,  0.25f, NULL, NULL, "Range: %.2f");
-                DragFloat("##SPEED",  &gameplayComp.componentAttack.attackSpeed,  0.25f, NULL, NULL, "Speed: %.2f");
+                DragFloat("##RANGE", &gameplayComp.componentAttack.attackRange, 0.25f, NULL, NULL, "Range: %.2f");
+                DragFloat("##SPEED", &gameplayComp.componentAttack.attackSpeed, 0.25f, NULL, NULL, "Speed: %.2f");
 
 
                 NewLine();
                 if (Selectable("Remove property##ATTACK"))
                 {
                     gameplayComp.componentMove.ToDefault();
-                    selectedEntity.focusedEntity->signatureGameplay -= SIGNATURE_CGP_ATTACK;
+                    gameplayComp.signatureGameplay -= CGP_SIGNATURE::ATTACK;
                 }
 
                 TreePop();
             }
         }
         else if (Selectable("Add attack abilities"))
-            selectedEntity.focusedEntity->signatureGameplay += SIGNATURE_CGP_ATTACK;
+            gameplayComp.signatureGameplay += CGP_SIGNATURE::ATTACK;
 
 
         NewLine();
         if (Selectable("Remove component##GAMEPLAY"))
         {
-            coordinator.componentHandler->RemoveComponentGameplay(*selectedEntity.focusedEntity);
+            coordinator.componentHandler->RemoveComponent(*selectedEntity.focusedEntity, C_SIGNATURE::GAMEPLAY);
         }
 
         TreePop();

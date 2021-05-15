@@ -9,7 +9,7 @@ using namespace Cookie::ECS;
 
 void ComponentHandler::InitComponentPhysic(Entity& entity)
 {
-	if (entity.signature & SIGNATURE_TRANSFORM)
+	if (entity.signature & C_SIGNATURE::TRANSFORM)
 		componentPhysics[entity.id].Set(componentTransforms[entity.id]);
 
 	componentPhysics[entity.id].physBody = Physics::PhysicsHandle::physSim->createRigidBody(componentPhysics[entity.id].physTransform);
@@ -25,21 +25,21 @@ void ComponentHandler::ModifyComponentOfEntityToPrefab(Entity& entity, Cookie::R
 	Resources::Prefab* prefab = resourcesManager.prefabs[namePrefab].get();
 
 	int idEntity = entity.id;
-	
-	if (!(idEntity & SIGNATURE_TRANSFORM))
-		AddComponentTransform(entity);
+
+	if (!(idEntity & C_SIGNATURE::TRANSFORM))
+		AddComponent(entity, C_SIGNATURE::TRANSFORM);
 
 	componentTransforms[idEntity].rot = prefab->rotation;
 	componentTransforms[idEntity].scale = prefab->scale;
 
-	if (!(idEntity & SIGNATURE_MODEL))
-		AddComponentModel(entity);
+	if (!(idEntity & C_SIGNATURE::MODEL))
+		AddComponent(entity, C_SIGNATURE::MODEL);
 
 	componentModels[idEntity].mesh = resourcesManager.meshes[prefab->nameMesh];
 	componentModels[idEntity].texture = resourcesManager.textures[prefab->nameTexture];
 	//componentModels[idEntity].shader = resourcesManager.shaders[prefab->nameShader]; 
 
-	//if (!(idEntity & SIGNATURE_SCRIPT))
+	//if (!(idEntity & C_SIGNATURE::SCRIPT))
 	//	AddComponentScript(entity);
 
 	//componentScripts[idEntity] = Cookie::Resources::Script();

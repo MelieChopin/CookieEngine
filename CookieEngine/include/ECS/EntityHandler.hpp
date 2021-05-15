@@ -16,7 +16,6 @@ namespace Cookie
 		public:
 			unsigned int		id				  {0};
 			int                 signature		  {0}; 
-			int                 signatureGameplay {0};
 			std::string			name			  {"No Name"};
 			std::string			tag				  {"No Tag"};
 			bool				needToBeRemoved	  {false};
@@ -29,6 +28,8 @@ namespace Cookie
 
 			void operator= (const Entity& entity);
 			void Swap(Entity& entity);
+
+			void ToDefault();
 		};
 
 		class EntityHandler

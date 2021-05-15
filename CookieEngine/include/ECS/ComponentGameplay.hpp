@@ -5,35 +5,52 @@
 #include "Gameplay/CGPLive.hpp"
 #include "Gameplay/CGPMove.hpp"
 #include "Gameplay/CGPAttack.hpp"
+#include "Gameplay/CGPProducer.hpp"
+#include "Gameplay/CGPWorker.hpp"
+
 
 namespace Cookie
 {
 	namespace ECS
 	{
-		#define SIGNATURE_CGP_EMPTY         0b000
-		#define SIGNATURE_CGP_LIVE          0b001
-		#define SIGNATURE_CGP_MOVE          0b010
-		#define SIGNATURE_CGP_ATTACK		0b100
-		#define SIGNATURE_CGP_ALL           0b111
+		enum CGP_SIGNATURE
+		{
+			EMPTY_CGP     = 0b00000,
+			LIVE          = 0b00001,
+			MOVE          = 0b00010,
+			ATTACK	      = 0b00100,
+			PRODUCER      = 0b01000,
+			WORKER        = 0b10000,
+			ALL_CGP       = 0b11111
+		};
+
+		struct Cost
+		{
+			float timeToProduce {0};
+			float costPrimary   {0};
+			float costSecondary {0};
+			float costSupply    {0};
+		};
 
 		class ComponentGameplay
 		{
 
 		public:
-			Gameplay::CGPLive   componentLive;
-			Gameplay::CGPMove   componentMove;
-			Gameplay::CGPAttack componentAttack;
+			std::string           teamName {"No Team"};
+			int                   signatureGameplay{ 0 };
 
+			Gameplay::CGPLive     componentLive;
+			Gameplay::CGPMove     componentMove;
+			Gameplay::CGPAttack   componentAttack;
+			Gameplay::CGPProducer componentProducer;
+			Gameplay::CGPWorker   componentWorker;
+			Cost                  cost;
 
-			inline void AddComponentLive(Entity& entity) noexcept;
-			inline void AddComponentMove(Entity& entity) noexcept;
-			inline void AddComponentAttack(Entity& entity) noexcept;
+			inline void AddComponent(int ComponentSignature) noexcept;
+			inline void RemoveComponent(int ComponentSignature)noexcept;
 
-			inline void RemoveComponentLive(Entity& entity) noexcept;
-			inline void RemoveComponentMove(Entity& entity) noexcept;
-			inline void RemoveComponentAttack(Entity& entity) noexcept;
-				
-			inline void ToDefault(Entity& entity) noexcept;
+			inline void ToDefault() noexcept;
+			inline void SubComponentToDefault(int ComponentSignature)noexcept;
 
 		};
 	}

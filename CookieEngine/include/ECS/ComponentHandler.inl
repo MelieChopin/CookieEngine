@@ -8,115 +8,41 @@ namespace Cookie
 	namespace ECS
 	{
 
-		inline void ComponentHandler::AddComponentTransform(Entity& entity)noexcept
+		inline void ComponentHandler::AddComponent(Entity& entity, int signature) noexcept
 		{
-			if (entity.signature & SIGNATURE_TRANSFORM)
+			if (entity.signature & signature)
 			{
-				CDebug.Warning("Component Transform already present");
+				CDebug.Warning("Try to Add Component already present");
 				return;
 			}
 
-			entity.signature += SIGNATURE_TRANSFORM;
+			entity.signature += signature;
 		}
-		inline void ComponentHandler::AddComponentModel(Entity& entity)noexcept
+		inline void ComponentHandler::RemoveComponent(Entity& entity, int signature) noexcept
 		{
-			if (entity.signature & SIGNATURE_MODEL)
+			if (entity.signature & signature)
 			{
-				CDebug.Warning("Component Model already present");
+				SubComponentToDefault(signature, entity.id);
+				entity.signature -= signature;
 				return;
 			}
 
-			entity.signature += SIGNATURE_MODEL;
+			CDebug.Warning("Try to Remove a Component not present");
 		}
-		inline void ComponentHandler::AddComponentPhysics(Entity& entity)noexcept
+		inline void ComponentHandler::SubComponentToDefault(int signature, int entityId)noexcept
 		{
-			if (entity.signature & SIGNATURE_PHYSICS)
-			{
-				CDebug.Warning("Component Collider already present");
-				return;
-			}
-
-			entity.signature += SIGNATURE_PHYSICS;
-
-
-			InitComponentPhysic(entity);
-		}
-		inline void ComponentHandler::AddComponentScript(Entity& entity)noexcept
-		{
-			if (entity.signature & SIGNATURE_SCRIPT)
-			{
-				CDebug.Warning("Component Script already present");
-				return;
-			}
-
-			entity.signature += SIGNATURE_SCRIPT;
-		}
-		inline void ComponentHandler::AddComponentGameplay(Entity& entity)noexcept
-		{
-			if (entity.signature & SIGNATURE_GAMEPLAY)
-			{
-				CDebug.Warning("Component Gameplay already present");
-				return;
-			}
-
-			entity.signature += SIGNATURE_GAMEPLAY;
+			if (signature & C_SIGNATURE::TRANSFORM)
+				GetComponentTransform(entityId).ToDefault();
+			if (signature & C_SIGNATURE::MODEL)
+				GetComponentModel(entityId).ToDefault();
+			if (signature & C_SIGNATURE::PHYSICS)
+				GetComponentPhysics(entityId).ToDefault();
+			if (signature & C_SIGNATURE::SCRIPT)
+				GetComponentScript(entityId).ToDefault();
+			if (signature & C_SIGNATURE::GAMEPLAY)
+				GetComponentGameplay(entityId).ToDefault();
 		}
 
-		inline void ComponentHandler::RemoveComponentTransform(Entity& entity)noexcept
-		{
-			if (entity.signature & SIGNATURE_TRANSFORM)
-			{
-				GetComponentTransform(entity.id).ToDefault();
-				entity.signature -= SIGNATURE_TRANSFORM;
-				return;
-			}
-
-			CDebug.Warning("No Component Transform present");
-		}
-		inline void ComponentHandler::RemoveComponentModel(Entity& entity)noexcept
-		{
-			if (entity.signature & SIGNATURE_MODEL)
-			{
-				GetComponentModel(entity.id).ToDefault();
-				entity.signature -= SIGNATURE_MODEL;
-				return;
-			}
-
-			CDebug.Warning("No Component Model present");
-		}
-		inline void ComponentHandler::RemoveComponentPhysics(Entity& entity)noexcept
-		{
-			if (entity.signature & SIGNATURE_PHYSICS)
-			{
-				GetComponentPhysics(entity.id).ToDefault();
-				entity.signature -= SIGNATURE_PHYSICS;
-				return;
-			}
-
-			CDebug.Warning("No Component RigidBody present");
-		}
-		inline void ComponentHandler::RemoveComponentScript(Entity& entity)noexcept
-		{
-			if (entity.signature & SIGNATURE_SCRIPT)
-			{
-				GetComponentScript(entity.id).ToDefault();
-				entity.signature -= SIGNATURE_SCRIPT;
-				return;
-			}
-
-			CDebug.Warning("No Component Script present");
-		}
-		inline void ComponentHandler::RemoveComponentGameplay(Entity& entity)noexcept
-		{
-			if (entity.signature & SIGNATURE_GAMEPLAY)
-			{
-				GetComponentGameplay(entity.id).ToDefault(entity);
-				entity.signature -= SIGNATURE_GAMEPLAY;
-				return;
-			}
-
-			CDebug.Warning("No Component Gameplay present");
-		}
 
 		inline ComponentTransform& ComponentHandler::GetComponentTransform(const unsigned int id) noexcept 
 		{

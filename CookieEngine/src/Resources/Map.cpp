@@ -3,11 +3,13 @@
 #include "Core/Primitives.hpp"
 #include "Render/DebugRenderer.hpp"
 #include "Resources/Map.hpp"
+#include "Gameplay/CGPProducer.hpp"
 
 #include <list>
 
 using namespace Cookie::Resources;
 using namespace Cookie::Core::Math;
+using namespace Cookie::Gameplay;
 
 Map::Map()
 {
@@ -113,6 +115,26 @@ Vec2 Map::GetCenterOfBuilding(Vec2& mousePos, Vec2& buildingNbOfTiles)
 			 std::clamp(tilePos.y, -trs.scale.z / 2 + buildingNbOfTiles.y * tilesSize.y / 2, trs.scale.z / 2 - buildingNbOfTiles.y * tilesSize.y / 2)} };
 
 }
+bool Map::isBuildingValid(int indexTopLeft, Vec2& tileSize)
+{
+
+	for (int i = 0; i < tileSize.x; ++i)
+		for (int j = 0; j < tileSize.y; ++j)
+			if (tiles[indexTopLeft + i + tilesNb.x * j].isObstacle)
+				return false;
+
+	return true;
+}
+void Map::GiveTilesToBuilding(int indexTopLeft, CGPProducer& building)
+{
+	for(int i = 0; i < building.tileSize.x; ++i)
+		for (int j = 0; j < building.tileSize.y; ++j)
+		{
+			Tile* currentTile = &tiles[indexTopLeft + i + tilesNb.x * j];
+			currentTile->isObstacle = true;
+			building.occupiedTiles.push_back(currentTile);
+		}
+}
 
 bool Map::ApplyPathfinding(Tile& tileStart, Tile& tileEnd)
 {
@@ -189,16 +211,4 @@ bool Map::ApplyPathfinding(Tile& tileStart, Tile& tileEnd)
 void Map::Draw(const Mat4& viewProj, ID3D11Buffer** CBuffer)
 {
 	model.Draw(viewProj, trs.TRS, CBuffer);
-}
-void Map::DrawSpecificTiles(const Mat4& viewProj, ID3D11Buffer** CBuffer)
-{
-	for (int x = 0; x < tilesNb.x; x++)
-		for (int y = 0; y < tilesNb.y; y++)
-		{
-			Tile& currentTile = tiles[x + y * tilesNb.x];
-
-			if (currentTile.isObstacle)
-				modelTileObstacle.Draw(viewProj, Mat4::TRS({ currentTile.pos.x, 1, currentTile.pos.y }, { 0, 0, 0 }, { tilesSize.x, 1, tilesSize.y }),CBuffer);
-		}
-
 }

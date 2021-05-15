@@ -11,6 +11,8 @@ namespace Cookie
 		{
 		public:
 			bool needToAttack    {false};
+
+			float powerLevel     {0}; //used for AI analysis
 			float attackDamage   {1};
 			float attackSpeed    {5}; //attack per sec, so maxCooldown = 1 / attackSpeed
 			float attackCooldown {0};

@@ -24,7 +24,7 @@ void Hierarchy::WindowDisplay()
         {
             if (Button("Create empty"))
             { 
-                coordinator.AddEntity(SIGNATURE_EMPTY);
+                coordinator.AddEntity(C_SIGNATURE::EMPTY_C);
                 CloseCurrentPopup();
             }
         

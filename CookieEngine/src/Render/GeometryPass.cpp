@@ -8,6 +8,7 @@
 
 
 using namespace Cookie::Render;
+using namespace Cookie::ECS;
 
 struct VS_CONSTANT_BUFFER
 {
@@ -158,7 +159,7 @@ void GeometryPass::Set(ID3D11DepthStencilView* depthStencilView)
 void GeometryPass::Draw(const Core::Math::Mat4& viewProj, const ECS::Coordinator& coordinator)
 {
     const ECS::EntityHandler& entityHandler = *coordinator.entityHandler;
-    const ECS::ComponentHandler& components = *coordinator.componentHandler;
+    ECS::ComponentHandler& components = *coordinator.componentHandler;
 
     VS_CONSTANT_BUFFER buffer = {};
     buffer.viewproj = viewProj;
@@ -167,12 +168,12 @@ void GeometryPass::Draw(const Core::Math::Mat4& viewProj, const ECS::Coordinator
 
     for (int i = 0; i < entityHandler.livingEntities; ++i)
     {
-        if (entityHandler.entities[i].signature & (SIGNATURE_TRANSFORM + SIGNATURE_MODEL))
+        if (entityHandler.entities[i].signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
         {
-            buffer.model = components.componentTransforms[entityHandler.entities[i].id].TRS;
+            buffer.model = components.GetComponentTransform(entityHandler.entities[i].id).TRS;
             Render::WriteCBuffer(&buffer, bufferSize, 0, &CBuffer);
 
-            const ECS::ComponentModel& model = components.componentModels[entityHandler.entities[i].id];
+            ECS::ComponentModel& model = components.GetComponentModel(entityHandler.entities[i].id);
 
             if (model.texture)
                 model.texture->Set();
