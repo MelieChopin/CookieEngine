@@ -323,13 +323,13 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 if (model.at("model").is_string())
 				component.GetComponentModel(entity.entities[i].id).mesh = resourcesManager.meshes[(model.at("model").get<std::string>())].get();
 			 else if (entity.entities[i].namePrefab != "NONE")
-				 component.componentModels[entity.entities[i].id].mesh =
+				 component.GetComponentModel(entity.entities[i].id).mesh =
 						resourcesManager.meshes[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name].get();
 
 			 if (model.at("texture").is_string())
 				component.GetComponentModel(entity.entities[i].id).albedo = resourcesManager.textures[(model.at("texture").get<std::string>())].get();
 			 else if (entity.entities[i].namePrefab != "NONE")
-				 component.componentModels[entity.entities[i].id].albedo =
+				 component.GetComponentModel(entity.entities[i].id).albedo =
 									resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name].get();
 		 }
 		 if (entity.entities[i].signature & C_SIGNATURE::PHYSICS)

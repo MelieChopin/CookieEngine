@@ -128,11 +128,11 @@ void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandl
 	Prefab newPrefab;
 
 	newPrefab.name = entity.name;
-	newPrefab.model = component.componentModels[entity.id];
+	newPrefab.model = component.GetComponentModel(entity.id);
 	newPrefab.signature = entity.id;
-	newPrefab.transform = component.componentTransforms[entity.id];
+	newPrefab.transform = component.GetComponentTransform(entity.id);
 	newPrefab.filepath = "Assets/Prefabs/" + entity.name + ".PAsset";
-	newPrefab.physics = component.componentPhysics[entity.id];
+	newPrefab.physics = component.GetComponentPhysics(entity.id);
 
 	entity.namePrefab = entity.name;
 
