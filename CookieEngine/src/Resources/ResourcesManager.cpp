@@ -27,13 +27,11 @@ ResourcesManager::ResourcesManager()
 
 ResourcesManager::~ResourcesManager()
 {
-
 }
 
 
 void ResourcesManager::SearchForAssets(const fs::path& path, std::vector<std::string>& gltfFiles)
 {
-
 	if (fs::exists(path) && fs::is_directory(path))
 	{
 		for (const fs::directory_entry& entry : fs::directory_iterator(path))
@@ -143,4 +141,7 @@ void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandl
 
 	prefabs[newPrefab.name] = std::make_shared<Prefab>(newPrefab);
 }
+
+
+
 

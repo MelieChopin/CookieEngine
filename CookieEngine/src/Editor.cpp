@@ -6,6 +6,7 @@
 #include "ECS/SystemHandler.hpp"
 #include "Resources/Scene.hpp"
 #include "CGPMove.hpp"
+#include "fmod.hpp"
 
 using namespace Cookie;
 using namespace Cookie::Core;
@@ -36,6 +37,8 @@ Editor::Editor()
 
     //Load all Textures we have create in texture editor
     Resources::Serialization::Load::LoadAllTextures(game.resources);
+
+    soundManager.LoadAllMusic(game.resources);
 
     //Load default Scene
     std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", game);
@@ -98,7 +101,14 @@ void Editor::ModifyEditComp()
 
 void Editor::Loop()
 {
-    //soundManager.system->playSound(soundManager.sound, nullptr, false, nullptr);
+    Cookie::Resources::SoundManager::SetVolume("Music.mp3", 0.25f);
+    Cookie::Resources::SoundManager::Loop("Music.mp3");
+    Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
+    
+    Cookie::Resources::SoundManager::SetVolume("Magic.mp3", 0.15f);
+    Cookie::Resources::SoundManager::Set3D("Magic.mp3", Cookie::Core::Math::Vec3(0, 10, 0));
+    
+
     Physics::PhysicsHandle physHandle;
 
     Vec2 mousePos;
@@ -203,6 +213,16 @@ void Editor::Loop()
 
         game.resources.UpdateScriptsContent();
         game.coordinator.ApplyScriptUpdate();
+
+        //Update for 3D Music
+        FMOD_VECTOR temp = { cam.pos.x, cam.pos.y, cam.pos.z };
+        Cookie::Resources::SoundManager::system->set3DListenerAttributes(0, &temp, nullptr, nullptr, nullptr);
+        soundManager.system->update();
+
+        //TEMP : TEST FOR 3D
+        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
+            Cookie::Resources::SoundManager::PlayMusic("Magic.mp3");
+        //
 
         // Present frame
         if (isPlaying)
