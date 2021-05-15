@@ -25,16 +25,13 @@ namespace Cookie
 		{
 		public:
 			std::string									name		= "No Name";
-			std::string									nameMesh	= "Null";
-			std::string									nameTexture = "Null";
-			std::string									nameShader	= "Null";
-			std::string									nameScript	= "Null";
-			std::string									filepath	= "Null";
-			Core::Math::Vec3							rotation;
-			Core::Math::Vec3							scale;
-			::reactphysics3d::RigidBody*				rigidBody = nullptr;
-			std::vector<::reactphysics3d::Collider*>	colliders;
 			int											signature = 0;
+
+			Cookie::ECS::ComponentTransform				transform;
+			Cookie::ECS::ComponentModel					model;
+			Cookie::ECS::ComponentPhysics				physics;
+
+			std::string									filepath	= "Null";
 
 			Prefab() {}
 			Prefab(const std::string& _name) : name{ _name }  {}

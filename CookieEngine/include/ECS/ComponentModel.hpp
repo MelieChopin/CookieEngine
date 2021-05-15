@@ -18,10 +18,10 @@ namespace Cookie
         class ComponentModel
         {
         public:
-            Resources::Mesh*    mesh    {nullptr};
-            Resources::Texture* albedo {nullptr};
-            Resources::Texture* normal{ nullptr };
-            Resources::Texture* metallicRoughness{ nullptr };
+            Resources::Mesh*    mesh    { nullptr };
+            Resources::Texture* albedo  { nullptr };
+            Resources::Texture* normal  { nullptr };
+            Resources::Texture* metallicRoughness { nullptr };
 
 
             //Material material;

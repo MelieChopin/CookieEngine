@@ -42,7 +42,7 @@ Editor::Editor()
     Resources::SoundManager::LoadAllMusic(game.resources);
 
     //Load default Scene
-    std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", game);
+    std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/DefaultDuck.CAsset", game);
 
     game.SetScene(_scene);
 
@@ -72,7 +72,7 @@ Editor::Editor()
 Editor::~Editor()
 {
     //Save all prefabs in folder Prefabs
-    Resources::Serialization::Save::SaveAllPrefabs(game.resources);
+   // Resources::Serialization::Save::SaveAllPrefabs(game.resources);
     Resources::SoundManager::Release();
 }
 
@@ -256,11 +256,6 @@ void Editor::Loop()
        // if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
         //    Resources::Serialization::Save::SaveScene(*game.scene, game.resources);
 
-        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_H) == GLFW_PRESS)
-        {
-            std::string duck = "Duck";
-            game.coordinator.componentHandler->ModifyComponentOfEntityToPrefab(game.coordinator.entityHandler->entities[1], game.resources, duck);
-        }
         if (!ImGui::GetIO().MouseDownDuration[0])
         {            
             Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;

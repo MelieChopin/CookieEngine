@@ -39,9 +39,9 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 			if (entity.entities[i].namePrefab != "NONE")
 			{
 				js["ComponentHandler"]["Transform"] += json{ { "localTRS", { { "translate", transform.pos.e } } } };
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->rotation != transform.rot)
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->transform.rot != transform.rot)
 					js["ComponentHandler"]["Transform"].at(js["ComponentHandler"]["Transform"].size() - 1).at("localTRS")["rotation"] = transform.rot.e;
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->scale != transform.scale)
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->transform.scale != transform.scale)
 					js["ComponentHandler"]["Transform"].at(js["ComponentHandler"]["Transform"].size() - 1).at("localTRS")["scale"] = transform.scale.e;
 			}
 			else
@@ -56,11 +56,11 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 			Cookie::ECS::ComponentModel model = component.GetComponentModel(entity.entities[i].id);
 			if (entity.entities[i].namePrefab != "NONE")
 			{
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameMesh != model.mesh->name)
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name != model.mesh->name)
 					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size()]["model"] = model.mesh->name;
 				else
 					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size()]["model"] = 0;
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameTexture != model.albedo->name)
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name != model.albedo->name)
 					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["texture"] = model.albedo->name;
 				else
 					js["ComponentHandler"]["Model"][js["ComponentHandler"]["Model"].size() - 1]["texture"] = 0;
@@ -131,38 +131,40 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const std::shared_ptr<Pr
  {
 	 std::ofstream file(prefab->filepath);
 
-	 //std::cout << prefab->filepath << "\n";
-
 	 json js;
 
-	 js["Mesh"] = prefab->nameMesh;
-	 js["Signature"] = prefab->signature;
-	 js["Name"] = prefab->name;
-	 js["Rotation"] = prefab->rotation.e;
-	 js["Scale"] = prefab->scale.e;
-	 js["Script"] = prefab->nameScript;
-	 js["Shader"] = prefab->nameShader;
-	 js["Texture"] = prefab->nameTexture;
+	 Prefab* pref = prefab.get();
 
-	 if (prefab->rigidBody != nullptr)
+	 js["Signature"] = pref->signature;
+	 js["Name"] = pref->name;
+	 
+	 //Transform
+	 js["Transform"]["Rotation"] = pref->transform.rot.e;
+	 js["Transform"]["Scale"] = pref->transform.scale.e;
+
+	 //Model
+	 js["Mesh"] = pref->model.mesh->name;
+	 js["Texture"] = pref->model.albedo->name;
+
+	 if (pref->physics.physBody != nullptr)
 	 {
-		 js["Rigidbody"]["type"] = prefab->rigidBody->getType();
-		 js["Rigidbody"]["angularDamping"] = prefab->rigidBody->getAngularDamping();
-		 js["Rigidbody"]["linearDamping"] = prefab->rigidBody->getLinearDamping();
-		 js["Rigidbody"]["mass"] = prefab->rigidBody->getMass();
-		 js["Rigidbody"]["active"] = prefab->rigidBody->isActive();
-		 js["Rigidbody"]["allowedToSleep"] = prefab->rigidBody->isAllowedToSleep();
-		 js["Rigidbody"]["sleeping"] = prefab->rigidBody->isSleeping();
-		 js["Rigidbody"]["gravityEnabled"] = prefab->rigidBody->isGravityEnabled();
+		 js["Rigidbody"]["type"] = pref->physics.physBody->getType();
+		 js["Rigidbody"]["angularDamping"] = pref->physics.physBody->getAngularDamping();
+		 js["Rigidbody"]["linearDamping"] = pref->physics.physBody->getLinearDamping();
+		 js["Rigidbody"]["mass"] = pref->physics.physBody->getMass();
+		 js["Rigidbody"]["active"] = pref->physics.physBody->isActive();
+		 js["Rigidbody"]["allowedToSleep"] = pref->physics.physBody->isAllowedToSleep();
+		 js["Rigidbody"]["sleeping"] = pref->physics.physBody->isSleeping();
+		 js["Rigidbody"]["gravityEnabled"] = pref->physics.physBody->isGravityEnabled();
 	 }
 	 else
 		 js["Rigidbody"] = "nullptr";
 
-	 if (prefab->colliders.size() != 0)
+	 if (prefab->physics.physColliders.size() != 0)
 	 {
-		 for (int i = 0; i < prefab->colliders.size(); i++)
+		 for (int i = 0; i < prefab->physics.physColliders.size(); i++)
 		 {
-			 ::reactphysics3d::Collider* actCollider = prefab->colliders[i];
+			 ::reactphysics3d::Collider* actCollider = prefab->physics.physColliders[i];
 			 if (actCollider->getCollisionShape()->getName() == ::reactphysics3d::CollisionShapeName::SPHERE)
 			 {
 				 float radius = static_cast<::reactphysics3d::SphereShape*>(actCollider->getCollisionShape())->getRadius();
@@ -305,12 +307,12 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 if (TRS.contains("rotation"))
 				 TRS.at("rotation").get_to(transform.rot.e);
 			 else if (entity.entities[i].namePrefab != "NONE")
-				 transform.rot = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->rotation;
+				 transform.rot = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->transform.rot;
 			 
 			 if (TRS.contains("scale"))
 				TRS.at("scale").get_to(transform.scale.e);
 			 else if (entity.entities[i].namePrefab != "NONE")
-				 transform.scale = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->scale;
+				 transform.scale = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->transform.scale;
 			 
 			 transform.ComputeTRS();
 			 component.componentTransforms[entity.entities[i].id] = transform;
@@ -322,13 +324,13 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 				component.componentModels[entity.entities[i].id].mesh = resourcesManager.meshes[(model.at("model").get<std::string>())].get();
 			 else if (entity.entities[i].namePrefab != "NONE")
 				 component.componentModels[entity.entities[i].id].mesh =
-						resourcesManager.meshes[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameMesh].get();
+						resourcesManager.meshes[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name].get();
 
 			 if (model.at("texture").is_string())
 				component.componentModels[entity.entities[i].id].albedo = resourcesManager.textures[(model.at("texture").get<std::string>())].get();
 			 else if (entity.entities[i].namePrefab != "NONE")
 				 component.componentModels[entity.entities[i].id].albedo =
-									resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->nameTexture].get();
+									resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name].get();
 		 }
 		 if (entity.entities[i].signature & SIGNATURE_PHYSICS)
 		 {
@@ -450,7 +452,7 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 
 		 Cookie::Resources::Prefab newPrefab;
 
-		 if (js.contains("Name"))
+		/* if (js.contains("Name"))
 			 newPrefab.name = js["Name"];
 
 		 if (js.contains("Mesh"))
@@ -473,7 +475,7 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 
 		 if (js.contains("Signature"))
 			 newPrefab.signature = js["Signature"];
-
+		 */
 		 newPrefab.filepath = filesPath[i];
 
 		 resourcesManager.prefabs[newPrefab.name] = std::make_shared<Prefab>(newPrefab);

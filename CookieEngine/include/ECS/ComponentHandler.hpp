@@ -52,7 +52,6 @@ namespace Cookie
 			inline void AddComponentGameplay  (Entity& entity) noexcept;
 
 			void InitComponentPhysic(Entity& entity);
-			void ModifyComponentOfEntityToPrefab(Entity& entity, Cookie::Resources::ResourcesManager& resourcesManager, std::string& namePrefab);
 
 			inline void RemoveComponentTransform (Entity& entity) noexcept;
 			inline void RemoveComponentModel     (Entity& entity) noexcept;
