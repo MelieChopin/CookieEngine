@@ -26,7 +26,7 @@ void Hierarchy::WindowDisplay()
         {
             if (Button("Create empty"))
             { 
-                coordinator.AddEntity(SIGNATURE_EMPTY, resources);
+                coordinator.AddEntity(C_SIGNATURE::EMPTY_C);
                 CloseCurrentPopup();
             }
         
@@ -46,7 +46,7 @@ void Hierarchy::WindowDisplay()
 
             if (Button(entityNameTag.c_str()))
             {
-                selectedEntity.toChangeEntityId = i;
+                selectedEntity.toChangeEntityId = entityHandler.entities[i].id;
             }
 
             if (BeginPopupContextItem(entityNameTag.c_str()))

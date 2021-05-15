@@ -88,5 +88,5 @@ void Viewport::GizmoManipulator()
 		ImGuizmo::DecomposeMatrixToComponents(trsfTMat.e, trsf.pos.e, trsf.rot.e, trsf.scale.e);
 	}
 
-	trsf.ComputeTRS();
+	trsf.trsHasChanged = true;
 }

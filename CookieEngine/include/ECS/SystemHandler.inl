@@ -14,8 +14,7 @@ namespace Cookie
 			}
 			inline void SystemDraw(ComponentTransform& trs, ComponentModel& model, const Core::Math::Mat4& proj, const Core::Math::Mat4& view, ID3D11Buffer** CBuffer)
 			{
-				trs.ComputeTRS();
-				model.Draw(proj,view, trs.TRS, CBuffer);
+				model.Draw(proj, view, trs.TRS, CBuffer);
 			}
 			inline void SystemScriptStart(const ComponentScript& script)
 			{

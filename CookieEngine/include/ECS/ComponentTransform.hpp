@@ -16,6 +16,7 @@ namespace Cookie
 			Core::Math::Vec3 rot{ 0,0,0 };
 			Core::Math::Vec3 scale{ 1,1,1 };
 
+			bool trsHasChanged = {false};
 
 			inline ComponentTransform();
 			inline ComponentTransform(const Core::Math::Vec3& _translation, const Core::Math::Vec3& _rotation, const Core::Math::Vec3& _scale);

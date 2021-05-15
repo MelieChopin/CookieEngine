@@ -8,14 +8,14 @@
 #include "Resources/ResourcesManager.hpp" 
 #include "InspectorWidget.hpp"
 #include "Editor.hpp"
+#include <reactphysics3d.h>
+#include "InspectorWidget.hpp"
 
 #include <string>
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
 #include "CustomImWidget.hpp"
-
-#include <reactphysics3d.h>
 
 using namespace ImGui;
 using namespace Cookie::UIwidget;
@@ -43,46 +43,44 @@ void Inspector::WindowDisplay()
 void Inspector::EntityInspection()
 {
     InputText("Entity name", &selectedEntity.focusedEntity->name);
+    InputText("Entity tag",  &selectedEntity.focusedEntity->tag );
 
     ImGui::Separator();
 
-    if (selectedEntity.focusedEntity->signature & SIGNATURE_TRANSFORM)    TransformInterface();
-    if (selectedEntity.focusedEntity->signature & SIGNATURE_MODEL)        ModelInterface();
-    if (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS)      PhysicsInterface();
-    if (selectedEntity.focusedEntity->signature & SIGNATURE_SCRIPT)       ScriptInterface();
-    //if (selectedEntity->signature & SIGNATURE_MAP)          MapInterface();
+    if (selectedEntity.focusedEntity->signature & C_SIGNATURE::TRANSFORM)    TransformInterface();
+    if (selectedEntity.focusedEntity->signature & C_SIGNATURE::MODEL)        ModelInterface();
+    if (selectedEntity.focusedEntity->signature & C_SIGNATURE::PHYSICS)      PhysicsInterface();
+    if (selectedEntity.focusedEntity->signature & C_SIGNATURE::SCRIPT)       ScriptInterface();
+    if (selectedEntity.focusedEntity->signature & C_SIGNATURE::GAMEPLAY)     GameplayInterface();
+
 
     if (Button("Add component...")) OpenPopup("Add component popup");
 
     if (BeginPopup("Add component popup"))
     {
-        if  (selectedEntity.focusedEntity->signature & SIGNATURE_TRANSFORM) TextDisabled("Component Transform already added");
-        else if (Button("Add component Transform"))
-        { 
-            coordinator.componentHandler->AddComponentTransform (*selectedEntity.focusedEntity);
-            CloseCurrentPopup();
-        }
+        if (selectedEntity.focusedEntity->signature & C_SIGNATURE::TRANSFORM)  TextDisabled("Component Transform already added");
+        else if (Selectable("Add component Transform"))
+            coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::TRANSFORM);
 
-        if (selectedEntity.focusedEntity->signature & SIGNATURE_MODEL) TextDisabled("Component Model already added");
-        else if (Button("Add component Model"))
-        {
-            coordinator.componentHandler->AddComponentModel     (*selectedEntity.focusedEntity);
-            CloseCurrentPopup();
-        }
-        
-        if (selectedEntity.focusedEntity->signature & SIGNATURE_PHYSICS) TextDisabled("Component Physics already added");
-        else if (Button("Add component Physics"))
-        {
-            coordinator.componentHandler->AddComponentPhysics   (*selectedEntity.focusedEntity);
-            CloseCurrentPopup();
-        }
 
-        if (selectedEntity.focusedEntity->signature & SIGNATURE_SCRIPT) TextDisabled("Component Script already added");
-        else if (Button("Add component Script"))
-        {
-            coordinator.componentHandler->AddComponentScript    (*selectedEntity.focusedEntity);
-            CloseCurrentPopup();
-        }
+        if (selectedEntity.focusedEntity->signature & C_SIGNATURE::MODEL)      TextDisabled("Component Model already added");
+        else if (Selectable("Add component Model"))
+            coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::MODEL);
+
+
+        if (selectedEntity.focusedEntity->signature & C_SIGNATURE::PHYSICS)    TextDisabled("Component Physics already added");
+        else if (Selectable("Add component Physics"))
+            coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::PHYSICS);
+
+
+        if (selectedEntity.focusedEntity->signature & C_SIGNATURE::SCRIPT)     TextDisabled("Component Script already added");
+        else if (Selectable("Add component Script"))
+            coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::SCRIPT);
+
+
+        if (selectedEntity.focusedEntity->signature & C_SIGNATURE::GAMEPLAY)   TextDisabled("Component Gameplay already added");
+        else if (Selectable("Add component Gameplay"))
+            coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::GAMEPLAY);
 
         EndPopup();
     }
@@ -94,17 +92,19 @@ void Inspector::TransformInterface()
     {
         ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id);
 
-        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.pos.e);
-        Text("Rot:"); SameLine(65.f); DragFloat3("##ROT", trsf.rot.e);
-        Text("Scl:"); SameLine(65.f); DragFloat3("##SCL", trsf.scale.e);
+        Text("Pos:"); SameLine(65.f); bool posHasChanged =  DragFloat3("##POS", trsf.pos.e);
+        Text("Rot:"); SameLine(65.f); bool rotHasChanged =  DragFloat3("##ROT", trsf.rot.e);
+        Text("Scl:"); SameLine(65.f); bool sclHasChanged =  DragFloat3("##SCL", trsf.scale.e);
 
-        ImGui::NewLine();
-        if (Button("Remove component##TRSF"))
+        if (posHasChanged || rotHasChanged || sclHasChanged)
+            trsf.trsHasChanged = true;
+        
+        NewLine();
+        if (Selectable("Remove component##TRSF"))
         {
-            coordinator.componentHandler->RemoveComponentTransform(*selectedEntity.focusedEntity);
+            coordinator.componentHandler->RemoveComponent(*selectedEntity.focusedEntity, C_SIGNATURE::TRANSFORM);
         }
 
-        trsf.ComputeTRS();
 
         TreePop();
     }
@@ -120,7 +120,7 @@ void Inspector::ModelInterface()
 
         static std::string researchString;
 
-//===== MESH =====//
+        //===== MESH =====//
 
         Text("Mesh:"); SameLine(100);
 
@@ -157,8 +157,6 @@ void Inspector::ModelInterface()
 
         if (ImGui::IsItemClicked())
             researchString.clear();
-        
-//===== SHADER =====//
 
 //===== TEXTURE =====//
         
@@ -288,12 +286,12 @@ void Inspector::ModelInterface()
         if (ImGui::IsItemClicked())
             researchString.clear();
 
-//===================//
+        //===================//
 
-        ImGui::NewLine();
-        if (Button("Remove component##MODEL"))
+        NewLine();
+        if (Selectable("Remove component##MODEL"))
         {
-            coordinator.componentHandler->RemoveComponentModel(*selectedEntity.focusedEntity);
+            coordinator.componentHandler->RemoveComponent(*selectedEntity.focusedEntity, C_SIGNATURE::MODEL);
         }
 
         TreePop();
@@ -302,13 +300,12 @@ void Inspector::ModelInterface()
     ImGui::Separator();
 }
 
-
 void Inspector::PhysicsInterface()
 {
     if (TreeNode("Physics"))
     {
         ComponentPhysics& physicComp = coordinator.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id);
-        
+
         // due to the nature of how we can access and set variables in react physic 3D, this variable are used numerous times to ease the manipulations with ImGui and save memory.
         static float multiUseFloat = 0; static bool multiUseBool = false;
 
@@ -319,16 +316,16 @@ void Inspector::PhysicsInterface()
             Indent(15.f);
 
             std::vector<reactphysics3d::Collider*>& colliders = physicComp.physColliders;
-            
-//====== COLLIDERS - beginning list of current colliders ======//
+
+            //====== COLLIDERS - beginning list of current colliders ======//
 
             for (size_t i = 0; i < colliders.size(); i++)
             {
                 std::string nameTag;
-            
+
                 if (selectedCollider == colliders[i])
                     nameTag += '[';
-            
+
                 switch (colliders[i]->getCollisionShape()->getName())
                 {
                 case reactphysics3d::CollisionShapeName::SPHERE:    nameTag += "Sphere";    break;
@@ -351,8 +348,8 @@ void Inspector::PhysicsInterface()
 
             Unindent(15.f);
 
-//====== COLLIDERS - sub-window for editing ======//
-            
+            //====== COLLIDERS - sub-window for editing ======//
+
             if (BeginChild(windowName, { GetContentRegionAvail().x, 150 }, true) && (selectedCollider != nullptr))
             {
                 multiUseBool = selectedCollider->getIsTrigger();
@@ -377,7 +374,7 @@ void Inspector::PhysicsInterface()
                     NewLine();
                     Text("Characteristics:");
 
-                    if      (selectedCollider->getCollisionShape()->getName() == reactphysics3d::CollisionShapeName::SPHERE)
+                    if (selectedCollider->getCollisionShape()->getName() == reactphysics3d::CollisionShapeName::SPHERE)
                     {
                         reactphysics3d::SphereShape* sphereCol = static_cast<reactphysics3d::SphereShape*>(selectedCollider->getCollisionShape());
 
@@ -407,7 +404,7 @@ void Inspector::PhysicsInterface()
                         reactphysics3d::Vector3&& halfExtents = boxCol->getHalfExtents();
                         Text("Half extents:"); SameLine();
                         if (DragFloat3("##BSIZE", &halfExtents[0], 0.25))
-                            boxCol->setHalfExtents(reactphysics3d::Vector3::max({0.001, 0.001, 0.001}, halfExtents));
+                            boxCol->setHalfExtents(reactphysics3d::Vector3::max({ 0.001, 0.001, 0.001 }, halfExtents));
                     }
 
                     TreePop();
@@ -436,34 +433,34 @@ void Inspector::PhysicsInterface()
                     TreePop();
                 }
             }
-            
+
             EndChild();
 
-//====== COLLIDERS - options to add new colliders ======//
+            //====== COLLIDERS - options to add new colliders ======//
 
             if (Button("Add a collider")) OpenPopup("Collider adder popup");
             if (BeginPopup("Collider adder popup"))
             {
                 if (Button("Add a sphere collider"))
-                { 
-                    physicComp.AddSphereCollider(1, {0, 0, 0}, {0, 0, 0});
-                
+                {
+                    physicComp.AddSphereCollider(1, { 0, 0, 0 }, { 0, 0, 0 });
+
                     selectedCollider = colliders.back();
                     CloseCurrentPopup();
                 }
 
                 if (Button("Add a box collider"))
                 {
-                    physicComp.AddCubeCollider({1, 1, 1}, { 0, 0, 0 }, { 0, 0, 0 });
-                
+                    physicComp.AddCubeCollider({ 1, 1, 1 }, { 0, 0, 0 }, { 0, 0, 0 });
+
                     selectedCollider = colliders.back();
                     CloseCurrentPopup();
                 }
 
                 if (Button("Add a capsule collider"))
                 {
-                    physicComp.AddCapsuleCollider({{1, 1}}, { 0, 0, 0 }, { 0, 0, 0 });
-                
+                    physicComp.AddCapsuleCollider({ {1, 1} }, { 0, 0, 0 }, { 0, 0, 0 });
+
                     selectedCollider = colliders.back();
                     CloseCurrentPopup();
                 }
@@ -474,7 +471,7 @@ void Inspector::PhysicsInterface()
 
             TreePop();
         }
-        
+
 
         if (TreeNode("Rigibody"))
         {
@@ -534,31 +531,33 @@ void Inspector::PhysicsInterface()
             TreePop();
         }
 
-        ImGui::NewLine();
-        if (Button("Remove component##COLLIDER"))
+
+        NewLine();
+        if (Selectable("Remove component##COLLIDER"))
         {
-            coordinator.componentHandler->RemoveComponentPhysics(*selectedEntity.focusedEntity);
+            coordinator.componentHandler->RemoveComponent(*selectedEntity.focusedEntity, C_SIGNATURE::PHYSICS);
         }
 
         TreePop();
     }
-}
 
+    ImGui::Separator();
+}
 
 void Inspector::ScriptInterface()
 {
     if (TreeNode("Script"))
     {
-        ComponentScript& scriptC = coordinator.componentHandler->GetComponentScript(selectedEntity.focusedEntity->id);
+        ComponentScript& scriptComp = coordinator.componentHandler->GetComponentScript(selectedEntity.focusedEntity->id);
         
-        for (size_t i = 0; i < scriptC.scripts.size();)
+        for (size_t i = 0; i < scriptComp.scripts.size();)
         { 
-            Text("%s", scriptC.scripts[i].script->filename.c_str());
+            Text("%s", scriptComp.scripts[i].script->filename.c_str());
             Indent();
             
             if (Button( ("Remove##SCRIPT_" + std::to_string(i)).c_str() ))
             {
-                scriptC.scripts.erase(scriptC.scripts.begin() + i);
+                scriptComp.scripts.erase(scriptComp.scripts.begin() + i);
             }
             else ++i;
 
@@ -575,7 +574,7 @@ void Inspector::ScriptInterface()
             {
                 if (Button(scrIt->second->filename.c_str()))
                 {
-                    scriptC.scripts.push_back(scrIt->second->CreateObject(std::to_string(selectedEntity.focusedEntity->id)));
+                    scriptComp.scripts.push_back(scrIt->second->CreateObject(std::to_string(selectedEntity.focusedEntity->id)));
                     CloseCurrentPopup();
                 }
             }
@@ -585,9 +584,9 @@ void Inspector::ScriptInterface()
 
 
         NewLine();
-        if (Button("Remove component##SCRIPT"))
+        if (Selectable("Remove component##SCRIPT"))
         {
-            coordinator.componentHandler->RemoveComponentScript(*selectedEntity.focusedEntity);
+            coordinator.componentHandler->RemoveComponent(*selectedEntity.focusedEntity, C_SIGNATURE::SCRIPT);
         }
 
         TreePop();
@@ -596,16 +595,86 @@ void Inspector::ScriptInterface()
     ImGui::Separator();
 }
 
-void Inspector::MapInterface()
+void Inspector::GameplayInterface()
 {
-    if (TreeNode("Map transform"))
+    if (TreeNode("Gameplay properties"))
     {
-        ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id);
+        ComponentGameplay& gameplayComp = coordinator.componentHandler->GetComponentGameplay(selectedEntity.focusedEntity->id);
 
-        Text("Pos:"); SameLine(65.f); DragFloat3("##POS", trsf.pos.e);
-        
-        Text("Scl:"); SameLine(65.f); 
-        if (DragFloat3("##SCL", trsf.scale.e)) CDebug.Log("Recoded an edit");
+        if (gameplayComp.signatureGameplay & CGP_SIGNATURE::LIVE)
+        {
+            if (TreeNode("Life/Armor properties"))
+            {
+                DragFloat("##LIFE", &gameplayComp.componentLive.life, 1.f, NULL, NULL, "Life: %.0f");
+                DragFloat("##ARMOR", &gameplayComp.componentLive.armor, 1.f, NULL, NULL, "Armor: %.0f");
+
+
+                NewLine();
+                if (Selectable("Remove property##LIVE"))
+                {
+                    gameplayComp.componentLive.ToDefault();
+                    gameplayComp.signatureGameplay -= CGP_SIGNATURE::LIVE;
+                }
+
+                TreePop();
+            }
+        }
+        else if (Selectable("Add life/Armor properties"))
+            gameplayComp.signatureGameplay += CGP_SIGNATURE::LIVE;
+
+
+        if (gameplayComp.signatureGameplay & CGP_SIGNATURE::MOVE)
+        {
+            if (TreeNode("Movement capacities"))
+            {
+                DragFloat("##SPEED", &gameplayComp.componentMove.moveSpeed, 0.25f, NULL, NULL, "Speed: %.2f");
+                Text("Flying:"); SameLine(); Checkbox("##CANFLY", &gameplayComp.componentMove.isFlying);
+
+                DragFloat("##RADIUS", &gameplayComp.componentMove.radius, 0.25f, NULL, NULL, "Radius: %.2f");
+
+
+                NewLine();
+                if (Selectable("Remove property##MOVE"))
+                {
+                    gameplayComp.componentMove.ToDefault();
+                    gameplayComp.signatureGameplay -= CGP_SIGNATURE::MOVE;
+                }
+
+                TreePop();
+            }
+        }
+        else if (Selectable("Add movement capacities"))
+            gameplayComp.signatureGameplay += CGP_SIGNATURE::MOVE;
+
+
+        if (gameplayComp.signatureGameplay & CGP_SIGNATURE::ATTACK)
+        {
+            if (TreeNode("Attack abilities"))
+            {
+                DragFloat("##DAMAGE", &gameplayComp.componentAttack.attackDamage, 0.25f, NULL, NULL, "Damage: %.2f");
+                DragFloat("##RANGE", &gameplayComp.componentAttack.attackRange, 0.25f, NULL, NULL, "Range: %.2f");
+                DragFloat("##SPEED", &gameplayComp.componentAttack.attackSpeed, 0.25f, NULL, NULL, "Speed: %.2f");
+
+
+                NewLine();
+                if (Selectable("Remove property##ATTACK"))
+                {
+                    gameplayComp.componentMove.ToDefault();
+                    gameplayComp.signatureGameplay -= CGP_SIGNATURE::ATTACK;
+                }
+
+                TreePop();
+            }
+        }
+        else if (Selectable("Add attack abilities"))
+            gameplayComp.signatureGameplay += CGP_SIGNATURE::ATTACK;
+
+
+        NewLine();
+        if (Selectable("Remove component##GAMEPLAY"))
+        {
+            coordinator.componentHandler->RemoveComponent(*selectedEntity.focusedEntity, C_SIGNATURE::GAMEPLAY);
+        }
 
         TreePop();
     }
@@ -613,39 +682,3 @@ void Inspector::MapInterface()
     ImGui::Separator();
 }
 
-
-/*void Inspector::SceneInspection()
-{
-    InputText("Scene name", &selectedScene->name);
-
-    ImGui::Separator();
-
-    if (TreeNode("Tiles"))
-    {
-        Text("Current tiles: %d in x, %d in z", selectedScene->tiles.widthTile, selectedScene->tiles.depthTile);
-
-        DragFloat2("##TILESNUM_EDIT", sceneTiles.e);
-
-        if (sceneTiles.x != (float)selectedScene->tiles.widthTile ||
-            sceneTiles.y != (float)selectedScene->tiles.depthTile)
-        {
-            if (sceneTiles.x > 0 && sceneTiles.y > 0)
-            {
-                if (Button("Save new dimensions"))
-                    selectedScene->ChangeNumberOfTiles(sceneTiles.x, sceneTiles.y); 
-            }
-            else
-            { TextColored({0.70f, 0.4f, 0.4f, 1}, "Invalid new values"); }
-
-            SameLine();
-
-            if (Button("Discard"))
-            {
-                sceneTiles.x = (float)selectedScene->tiles.widthTile,
-                sceneTiles.y = (float)selectedScene->tiles.depthTileProp;
-            }
-        }
-
-        TreePop();
-    }
-}*/

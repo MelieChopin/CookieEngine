@@ -32,7 +32,7 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 {
 	for (int i = 0; i < entity.livingEntities; i++)
 	{
-		if (entity.entities[i].signature & SIGNATURE_TRANSFORM)
+		if (entity.entities[i].signature & C_SIGNATURE::TRANSFORM)
 		{
 			Cookie::ECS::ComponentTransform transform = component.GetComponentTransform(entity.entities[i].id);
 
@@ -51,7 +51,7 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 													{ "scale", transform.scale.e } } } };
 			}
 		}
-		if (entity.entities[i].signature & SIGNATURE_MODEL)
+		if (entity.entities[i].signature & C_SIGNATURE::MODEL)
 		{
 			Cookie::ECS::ComponentModel model = component.GetComponentModel(entity.entities[i].id);
 			if (entity.entities[i].namePrefab != "NONE")
@@ -71,7 +71,7 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 												{ "texture", model.albedo != nullptr ? model.albedo->name : "NO TEXTURE" } };
 			}
 		}
-		if (entity.entities[i].signature & SIGNATURE_PHYSICS)
+		if (entity.entities[i].signature & C_SIGNATURE::PHYSICS)
 		{
 			int index = js["PhysicHandler"].size();
 			SavePhysic(js["PhysicHandler"][index], component.GetComponentPhysics(entity.entities[i].id));
@@ -298,7 +298,7 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 	 int indexOfPhysic = 0;
 	 for (int i = 0; i < entity.livingEntities; i++)
 	 {
-		 if (entity.entities[i].signature & SIGNATURE_TRANSFORM)
+		 if (entity.entities[i].signature & C_SIGNATURE::TRANSFORM)
 		 {
 			 Cookie::ECS::ComponentTransform transform;
 			 json TRS = js["ComponentHandler"]["Transform"][i].at("localTRS");
@@ -314,29 +314,29 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 else if (entity.entities[i].namePrefab != "NONE")
 				 transform.scale = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->transform.scale;
 			 
-			 transform.ComputeTRS();
-			 component.componentTransforms[entity.entities[i].id] = transform;
+			 transform.trsHasChanged = true;
+			 component.GetComponentTransform(entity.entities[i].id) = transform;
 		 }
-		 if (entity.entities[i].signature & SIGNATURE_MODEL)
+		 if (entity.entities[i].signature & C_SIGNATURE::MODEL)
 		 {
 			 json model = js["ComponentHandler"]["Model"][i];
 			 if (model.at("model").is_string())
-				component.componentModels[entity.entities[i].id].mesh = resourcesManager.meshes[(model.at("model").get<std::string>())].get();
+				component.GetComponentModel(entity.entities[i].id).mesh = resourcesManager.meshes[(model.at("model").get<std::string>())].get();
 			 else if (entity.entities[i].namePrefab != "NONE")
 				 component.componentModels[entity.entities[i].id].mesh =
 						resourcesManager.meshes[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name].get();
 
 			 if (model.at("texture").is_string())
-				component.componentModels[entity.entities[i].id].albedo = resourcesManager.textures[(model.at("texture").get<std::string>())].get();
+				component.GetComponentModel(entity.entities[i].id).albedo = resourcesManager.textures[(model.at("texture").get<std::string>())].get();
 			 else if (entity.entities[i].namePrefab != "NONE")
 				 component.componentModels[entity.entities[i].id].albedo =
 									resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name].get();
 		 }
-		 if (entity.entities[i].signature & SIGNATURE_PHYSICS)
+		 if (entity.entities[i].signature & C_SIGNATURE::PHYSICS)
 		 {
 			 json physic = js["PhysicHandler"][indexOfPhysic];
 
-			 LoadPhysic(physic, component.componentPhysics[entity.entities[i].id]);
+			 LoadPhysic(physic, component.GetComponentPhysics(entity.entities[i].id));
 			 
 			 indexOfPhysic += 1;
 		 }
@@ -394,12 +394,12 @@ std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const c
 		 int newSizeEntities = js["EntityHandler"].size();
 		 for (int i = newSizeEntities; i < newSizeEntities + newScene->entityHandler.livingEntities - newSizeEntities; i++)
 		 {
-			 if (newScene->entityHandler.entities[i].signature & SIGNATURE_TRANSFORM)
-				 newScene->componentHandler.componentTransforms[newScene->entityHandler.entities[i].id].ToDefault();
-			 if (newScene->entityHandler.entities[i].signature & SIGNATURE_MODEL)
-				 newScene->componentHandler.componentModels[newScene->entityHandler.entities[i].id].ToDefault();
-			 if (newScene->entityHandler.entities[i].signature & SIGNATURE_PHYSICS)
-				 newScene->componentHandler.componentPhysics[newScene->entityHandler.entities[i].id].ToDefault();
+			 if (newScene->entityHandler.entities[i].signature & C_SIGNATURE::TRANSFORM)
+				 newScene->componentHandler.GetComponentTransform(newScene->entityHandler.entities[i].id).ToDefault();
+			 if (newScene->entityHandler.entities[i].signature & C_SIGNATURE::MODEL)
+				 newScene->componentHandler.GetComponentModel(newScene->entityHandler.entities[i].id).ToDefault();
+			 if (newScene->entityHandler.entities[i].signature & C_SIGNATURE::PHYSICS)
+				 newScene->componentHandler.GetComponentPhysics(newScene->entityHandler.entities[i].id).ToDefault();
 			 newScene->entityHandler.entities[i] = Cookie::ECS::Entity(i);
 		 }
 

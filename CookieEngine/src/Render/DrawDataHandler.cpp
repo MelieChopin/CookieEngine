@@ -8,6 +8,7 @@
 #include "DrawDataHandler.hpp"
 
 using namespace Cookie::Core::Math;
+using namespace Cookie::ECS;
 using namespace Cookie::Render;
 
 constexpr float cullEpsilon = -2.5f;
@@ -117,7 +118,7 @@ void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 	MakeFrustrum(*cam);
 
 	const ECS::EntityHandler& entityHandler = *game.coordinator.entityHandler;
-	const ECS::ComponentHandler& components = *game.coordinator.componentHandler;
+	ECS::ComponentHandler& components = *game.coordinator.componentHandler;
 	bool cull = false;
 
 	models.push_back(game.scene->map.model);
@@ -125,10 +126,10 @@ void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 
 	for (int i = 0; i < entityHandler.livingEntities; ++i)
 	{
-		if (entityHandler.entities[i].signature & (SIGNATURE_TRANSFORM + SIGNATURE_MODEL))
+		if (entityHandler.entities[i].signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
 		{
-			const ECS::ComponentModel& model = components.componentModels[entityHandler.entities[i].id];
-			const Core::Math::Mat4& trs = components.componentTransforms[entityHandler.entities[i].id].TRS;
+			ECS::ComponentModel& model = components.GetComponentModel(entityHandler.entities[i].id);
+			Core::Math::Mat4& trs = components.GetComponentTransform(entityHandler.entities[i].id).TRS;
 
 			Vec4 modelMin = trs * Core::Math::Vec4(model.mesh->AABBMin, 1.0f);
 			Vec4 modelMax = trs * Core::Math::Vec4(model.mesh->AABBMax, 1.0f);

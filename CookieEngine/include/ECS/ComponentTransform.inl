@@ -8,7 +8,6 @@ namespace Cookie
 	{
 		inline ComponentTransform::ComponentTransform() 
 		{
-			ToDefault();
 		}
 		inline ComponentTransform::ComponentTransform(const Core::Math::Vec3& _translation, const Core::Math::Vec3& _rotation, const Core::Math::Vec3& _scale): pos{ _translation }, rot{ _rotation }, scale{ _scale } {}
 

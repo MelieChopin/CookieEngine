@@ -11,7 +11,7 @@ using namespace Cookie::ECS;
 
 void ComponentHandler::InitComponentPhysic(Entity& entity)
 {
-	if (entity.signature & SIGNATURE_TRANSFORM)
+	if (entity.signature & C_SIGNATURE::TRANSFORM)
 		componentPhysics[entity.id].Set(componentTransforms[entity.id]);
 
 	componentPhysics[entity.id].physBody = Physics::PhysicsHandle::physSim->createRigidBody(componentPhysics[entity.id].physTransform);

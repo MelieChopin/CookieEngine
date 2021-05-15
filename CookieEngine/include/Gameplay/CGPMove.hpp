@@ -140,7 +140,7 @@ namespace Cookie
 
 				Core::Math::Vec3 direction = (waypoints[0] - trs.pos).Normalize();
 				trs.pos += direction * (moveSpeed * Core::DeltaTime());
-				trs.ComputeTRS();
+				trs.trsHasChanged = true;
 			}
 			void MoveWithCommander(ECS::ComponentTransform& trs)
 			{
@@ -150,7 +150,7 @@ namespace Cookie
 
 				Core::Math::Vec3 previousPos = trs.pos;
 				trs.pos = *commanderPos + offsetFromCommander;
-				trs.ComputeTRS();
+				trs.trsHasChanged = true;
 
 				//check if commander is Static
 				if (commanderCGPMove->state != CGPMOVE_STATE::E_WAITING && previousPos == trs.pos)
@@ -185,7 +185,7 @@ namespace Cookie
 
 					Core::Math::Vec3 direction = (trsOther.pos - trsSelf.pos).Normalize();
 					trsOther.pos = trsSelf.pos + direction * (radius + other.radius);
-					trsOther.ComputeTRS();
+					trsOther.trsHasChanged = true;
 				}
 				//Priority Medium need some fixes
 				else if (state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_MOVING)
@@ -213,8 +213,8 @@ namespace Cookie
 					if (other.commanderCGPMove)
 						other.offsetFromCommander = trsOther.pos - *other.commanderPos;
 
-					trsSelf.ComputeTRS();
-					trsOther.ComputeTRS();
+					trsSelf.trsHasChanged = true;
+					trsOther.trsHasChanged = true;
 					
 				}
 				//Priority Low
@@ -233,7 +233,7 @@ namespace Cookie
 
 					Core::Math::Vec3 direction = (trsSelf.pos - trsOther.pos).Normalize();
 					trsSelf.pos = trsOther.pos + direction * (radius + other.radius);
-					trsSelf.ComputeTRS();
+					trsSelf.trsHasChanged = true;
 				}
 
 
@@ -247,7 +247,7 @@ namespace Cookie
 				for (int i = 1; i < waypoints.size(); ++i)
 				{
 					//use 1 for Y so the debug will not be mix up with the map
-					debug.AddDebugElement(Core::Primitives::CreateLine({waypoints[i - 1].x, 1, waypoints[i - 1].z}, {waypoints[i].x, 1, waypoints[i].z}, 0x00FFFF, 0x00FFFF));
+					debug.AddDebugElement(Core::Primitives::CreateLine({waypoints[i - 1].x, 1, waypoints[i - 1].z}, {waypoints[i].x, 1, waypoints[i].z}, 0x00FFFF, 0xFF0000));
 				}
 			}
 		};
