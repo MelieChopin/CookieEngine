@@ -6,7 +6,7 @@
 #include "ECS/SystemHandler.hpp"
 #include "Resources/Scene.hpp"
 #include "CGPMove.hpp"
-#include "fmod.hpp"
+#include "SoundManager.hpp"
 
 using namespace Cookie;
 using namespace Cookie::Core;
@@ -38,7 +38,8 @@ Editor::Editor()
     //Load all Textures we have create in texture editor
     Resources::Serialization::Load::LoadAllTextures(game.resources);
 
-    soundManager.LoadAllMusic(game.resources);
+    Resources::SoundManager::InitSystem();
+    Resources::SoundManager::LoadAllMusic(game.resources);
 
     //Load default Scene
     std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", game);
@@ -72,6 +73,7 @@ Editor::~Editor()
 {
     //Save all prefabs in folder Prefabs
     Resources::Serialization::Save::SaveAllPrefabs(game.resources);
+    Resources::SoundManager::Release();
 }
 
 
@@ -217,11 +219,15 @@ void Editor::Loop()
         //Update for 3D Music
         FMOD_VECTOR temp = { cam.pos.x, cam.pos.y, cam.pos.z };
         Cookie::Resources::SoundManager::system->set3DListenerAttributes(0, &temp, nullptr, nullptr, nullptr);
-        soundManager.system->update();
+        Cookie::Resources::SoundManager::system->update();
 
         //TEMP : TEST FOR 3D
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
             Cookie::Resources::SoundManager::PlayMusic("Magic.mp3");
+        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
+            Cookie::Resources::SoundManager::SetPaused("Music.mp3", true);
+        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_L) == GLFW_PRESS)
+            Cookie::Resources::SoundManager::SetPaused("Music.mp3", false);
         //
 
         // Present frame

@@ -6,7 +6,6 @@
 #include "Render/Camera.hpp"
 #include "DebugRenderer.hpp"
 
-#include "Resources/SoundManager.hpp"
 #include "ECS/ComponentEditor.hpp"
 #include "ECS/ComponentHandler.hpp"
 
@@ -50,9 +49,6 @@ namespace Cookie
 
 			FocusEntity			selectedEntity	= {};
 			Resources::Scene*	currentScene	= nullptr;
-
-
-			Resources::SoundManager soundManager;
 
 			bool				isPlaying = false;
 			

@@ -17,12 +17,12 @@ namespace Cookie
 			static FMOD::System* system;
 			static std::unordered_map<std::string, std::shared_ptr<Cookie::Resources::Sound>>* sounds;
 
-			SoundManager();
-			~SoundManager();
-
-			void LoadAllMusic(ResourcesManager& resourcesManager);
+			static void InitSystem();
+			static void Release();
+			static void LoadAllMusic(ResourcesManager& resourcesManager);
 			static void PlayMusic(std::string key);
 			static void SetVolume(std::string key, float vol);
+			static void SetPaused(std::string key, bool isPaused);
 			static void Loop(std::string key);
 			static void Normal(std::string key);
 			static void Set3D(std::string key, const Cookie::Core::Math::Vec3& pos);
