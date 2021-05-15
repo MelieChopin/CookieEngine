@@ -166,7 +166,14 @@ void Editor::Loop()
             physHandle.editWorld->raycast(ray,this);
         }
 
-        
+        //Bind Keys to activate/deactivate raycast with map 
+        {
+            //Key M on Azerty Keyboard
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_SEMICOLON])
+            {
+                isRaycastingWithMap = !isRaycastingWithMap;
+            }
+        }
         //Raycast with Map
         if(isRaycastingWithMap)
         {
@@ -178,7 +185,7 @@ void Editor::Loop()
             if (game.scene->map.physic.physBody->raycast(ray, raycastInfo))
             {
                 Vec3 hitPoint{ raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z };
-                //hitPoint.Debug();
+                hitPoint.Debug();
 
                 mousePos =  {{hitPoint.x, hitPoint.z}};
                 indexOfSelectedTile = game.scene->map.GetTileIndex(mousePos);
@@ -198,14 +205,7 @@ void Editor::Loop()
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_O])
                 buildingTileSize.y = std::fmin(game.scene->map.tilesNb.y, buildingTileSize.y + 1);
         }
-        //Bind Keys to activate/deactivate raycast with map 
-        {
-            //Key M on Azerty Keyboard
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_SEMICOLON])
-            {
-                isRaycastingWithMap = !isRaycastingWithMap;
-            }
-        }
+
         //Bind Keys to check if building is valid and to create Building
         {
            
