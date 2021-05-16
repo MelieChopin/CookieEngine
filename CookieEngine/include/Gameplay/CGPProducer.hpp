@@ -3,11 +3,16 @@
 
 #include <vector>
 #include "Core/Time.hpp"
-#include "Resources/Prefab.hpp"
+//#include "Resources/Prefab.hpp"
 #include "Resources/Map.hpp"
 
 namespace Cookie
 {
+	namespace Resources
+	{
+		class Prefab;
+	}
+
 	namespace Gameplay
 	{
 		
@@ -66,6 +71,7 @@ namespace Cookie
 				}
 				*/
 			}
+
 			bool AddUnitToQueue(Resources::Prefab* unitToAdd, Income& income)
 			{/*
 				//later on add Debug.Log depending on what is blocking the process to give player Feedback

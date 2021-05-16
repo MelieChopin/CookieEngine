@@ -295,7 +295,6 @@ void Editor::Loop()
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_O])
                 buildingTileSize.y = std::fmin(game.scene->map.tilesNb.y, buildingTileSize.y + 1);
         }
-
         //Bind Keys to check if building is valid and to create Building
         {
            
@@ -330,13 +329,6 @@ void Editor::Loop()
                 }
 
                 nbOfBuildings++;
-            }
-        }
-        //Bind Keys to Set Obstacle Tiles
-        {
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V] && isRaycastingWithMap)
-            {
-                game.scene->map.tiles[indexOfSelectedTile].isObstacle = !game.scene->map.tiles[indexOfSelectedTile].isObstacle;
             }
         }
         //Bind Keys to give orders to Units
@@ -445,14 +437,14 @@ void Editor::Loop()
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
 
-        game.coordinator.ApplyGameplayUpdatePushedCooldown(game.scene->map);
-        game.coordinator.ApplyGameplayMoveTowardWaypoint();
-        game.coordinator.ApplyGameplayMoveWithCommander();
-        game.coordinator.ApplyGameplayPosPrediction();
-        game.coordinator.ApplyGameplayResolveCollision();
 
-        game.coordinator.ApplyGameplayCheckEnemyInRange();
-        game.coordinator.ApplyGameplayAttack();
+        game.coordinator.UpdateCGPProducer();
+        game.coordinator.UpdateCGPWorker();
+        game.coordinator.UpdateCGPMove(game.scene->map);
+        game.coordinator.UpdateCGPAttack();
+
+        game.coordinator.ApplyRemoveUnnecessaryEntities();
+
 
 		if (isActive)
             game.particlesHandler.Update();
@@ -476,7 +468,6 @@ void Editor::Loop()
 
         game.renderer.Render();
 
-        game.coordinator.ApplyRemoveUnnecessaryEntities();
     }
 }
 
