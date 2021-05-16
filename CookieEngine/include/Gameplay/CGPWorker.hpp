@@ -9,12 +9,14 @@ namespace Cookie
 {
 	namespace Gameplay
 	{
+		#define PRIMARY_PER_RECOLT 5
+		#define SECONDARY_PER_RECOLT 4
+
 		class CGPWorker
 		{
 		public:
 
 			//will be replace by the CPGMove later on
-			ECS::ComponentTransform* trs     {nullptr};
 			float moveSpeed                  {5};
 
 			Core::Math::Vec3 posBase         {0, 0, 0};
@@ -31,8 +33,16 @@ namespace Cookie
 			CGPWorker() {}
 			~CGPWorker() {}
 
-			inline void Update()
+			inline void ToDefault() noexcept
 			{
+				posBase                     = {0, 0, 0};
+				posResource                 = {0, 0, 0};
+				isCarryingResource          = false;
+				isResourcePrimary           = false;
+			}
+
+			inline void Update(ECS::ComponentTransform& trs)
+			{/*
 				if (currentCooldown > 0)
 				{
 					currentCooldown -= Core::DeltaTime();
@@ -42,21 +52,28 @@ namespace Cookie
 					return;
 				}
 
+				Core::Math::Vec3 destination = (isCarryingResource) ? posBase : posResource;
+				Core::Math::Vec3 direction = (destination - trs.pos).Normalize();
+				trs.pos += direction * (moveSpeed * Core::DeltaTime());
+				trs.trsHasChanged = true;
 
-				//add movement
+				//if reach Destination
+				if ((destination - trs.pos).Length() < 0.1)
+				{
+					if (isCarryingResource)
+					{
+						isCarryingResource = false;
+						(isResourcePrimary ? income->primary : income->secondary) += (isResourcePrimary ? PRIMARY_PER_RECOLT : SECONDARY_PER_RECOLT);
+					}
+					else
+						currentCooldown = timeToRecolt;
+				}
 
-
+				*/
 			}
 
-			inline void ToDefault() noexcept
-			{
-				posBase                     = {0, 0, 0};
-				posResource                 = {0, 0, 0};
-				isCarryingResource          = false;
-				isResourcePrimary           = false;
-			}
+
 		};
-
 
 	}
 }
