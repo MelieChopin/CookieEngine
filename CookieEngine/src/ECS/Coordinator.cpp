@@ -30,8 +30,8 @@ void Coordinator::AddEntity(const int signature, std::string name)
 		componentHandler->AddComponent(newEntity, C_SIGNATURE::TRANSFORM);
 	if (CheckSignature(signature, C_SIGNATURE::MODEL))
 		componentHandler->AddComponent(newEntity, C_SIGNATURE::MODEL);
-	//if (CheckSignature(signature, C_SIGNATURE::PHYSICS))
-	//	componentHandler->AddComponent(newEntity, C_SIGNATURE::PHYSICS);
+	if (CheckSignature(signature, C_SIGNATURE::PHYSICS))
+		componentHandler->AddComponent(newEntity, C_SIGNATURE::PHYSICS);
 	if (CheckSignature(signature, C_SIGNATURE::SCRIPT))
 		componentHandler->AddComponent(newEntity, C_SIGNATURE::SCRIPT);
 	if (CheckSignature(signature, C_SIGNATURE::GAMEPLAY))

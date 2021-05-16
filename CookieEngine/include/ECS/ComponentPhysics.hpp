@@ -1,7 +1,7 @@
 #ifndef __COMPONENT_PHYSICS_HPP__
 #define __COMPONENT_PHYSICS_HPP__
 
-#include <reactphysics3d/mathematics/Transform.h>
+#include "Physics/PhysicsHandle.hpp"
 
 namespace reactphysics3d
 {
@@ -49,10 +49,19 @@ namespace Cookie
 				{
 					RemoveCollider(physColliders[i]);
 				}
+				if (physBody)
+				{
+					Physics::PhysicsHandle::physSim->destroyRigidBody(physBody);
+				}
 
-				physBody = nullptr;
+				physBody = Physics::PhysicsHandle::physSim->createRigidBody(physTransform);
+
+				physBody->setIsActive(false);
+
 				std::vector<reactphysics3d::Collider*>().swap(physColliders);
 			}
+
+			inline void Activate()const  { physBody->setIsActive(true); }
 		};
 
     }

@@ -10,7 +10,7 @@ using namespace Cookie::ECS;
 
 ComponentPhysics::ComponentPhysics()
 {
-
+	ToDefault();
 }
 
 ComponentPhysics::~ComponentPhysics()
@@ -68,16 +68,19 @@ void ComponentPhysics::RemoveCollider(::reactphysics3d::Collider* collider)
 
 void ComponentPhysics::Set(const ComponentTransform& trs)
 {
+	if (!physBody->isActive())
+		physBody->setIsActive(true);
+
 	physTransform.setPosition({ trs.pos.x,trs.pos.y,trs.pos.z });
 	Core::Math::Quat quat = Core::Math::Quat::ToQuat(trs.rot);
 	physTransform.setOrientation({ quat.x,quat.y,quat.z,quat.w });	
-
-	if (physBody)
-		physBody->setTransform(physTransform);
 }
 
 void ComponentPhysics::Update(float factor)noexcept
 {
+	if (!physBody->isActive())
+		physBody->setIsActive(true);
+
 	physTransform = physBody->getTransform();
 	physTransform = reactphysics3d::Transform::interpolateTransforms(oldTransform, physTransform, factor);
 

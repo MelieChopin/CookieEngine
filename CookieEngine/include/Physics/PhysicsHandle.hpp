@@ -17,11 +17,18 @@ namespace Cookie
 				static void Init()
 				{
 					physCom = std::make_unique<rp3d::PhysicsCommon>();
+					physSim = PhysicsHandle::physCom->createPhysicsWorld();
 				}
 
 				static void Terminate()
 				{
-					//physCom.reset();
+					int max = physSim->getNbRigidBodies();
+					for (int i = 0; i < max; i++)
+					{
+						physSim->destroyRigidBody(physSim->getRigidBody(0));
+					}
+
+					PhysicsHandle::physCom->destroyPhysicsWorld(physSim);
 				}
 
 		};
