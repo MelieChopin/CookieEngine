@@ -19,12 +19,13 @@ namespace Cookie
 
 	namespace Render
 	{
-		struct LightsArray;
+		struct	LightsArray;
+		class	ShadowBuffer;
 
 		class LightPass
 		{
 		private:
-			DirLightPass				dirLight;
+			DirLightPass				dirPass;
 
 			ID3D11Buffer*				lightCBuffer		{ nullptr };
 			ID3D11SamplerState*			PSampler			{ nullptr };
@@ -47,7 +48,7 @@ namespace Cookie
 			~LightPass();
 
 			void Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& albedoFBO, const Core::Math::Vec3& camPos);
-			void Draw(const LightsArray& lights);
+			void Draw(const LightsArray& lights, const ShadowBuffer& shadowMap);
 			void Clear();
 		};
 	}

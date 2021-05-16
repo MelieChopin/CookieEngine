@@ -9,6 +9,7 @@ struct ID3D11BlendState;
 struct D3D11_VIEWPORT;
 
 #include <vector>
+#include <ShadowBuffer.hpp>
 
 namespace Cookie
 {
@@ -46,6 +47,8 @@ namespace Cookie
 			ID3D11BlendState*			blendState			= nullptr;
 			D3D11_VIEWPORT				shadowViewport;
 			
+		public:
+			ShadowBuffer				shadowMap;
 
 		private:
 			void InitShader();
@@ -57,6 +60,7 @@ namespace Cookie
 
 			void Set();
 			void Draw(DrawDataHandler& drawData, LightsArray& lights);
+			void Clear();
 		};
 	}
 }

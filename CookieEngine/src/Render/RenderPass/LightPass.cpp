@@ -2,6 +2,7 @@
 #include "Core/Math/Vec4.hpp"
 #include "Light.hpp"
 #include "RenderPass/LightPass.hpp"
+#include "ShadowBuffer.hpp"
 
 using namespace Cookie::Core::Math;
 using namespace Cookie::Render;
@@ -141,12 +142,12 @@ void LightPass::Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& al
     Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
 }
 
-void LightPass::Draw(const LightsArray& lights)
+void LightPass::Draw(const LightsArray& lights, const ShadowBuffer& shadowMap)
 {
-    dirLight.Set(&lightCBuffer);
-    for (int i = 0; i < lights.usedDir; i++)
+    
+    if (lights.useDir)
     {
-        dirLight.Write(lights.dirLights[i]);
+        dirPass.Set(lights.dirLight,shadowMap,&lightCBuffer);
         Render::RendererRemote::context->Draw(3, 0);
     }
 }

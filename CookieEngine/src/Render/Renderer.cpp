@@ -22,12 +22,7 @@ Renderer::Renderer():
 {
     CreateDrawBuffer(window.width,window.height);
     remote.context->RSSetViewports(1, &viewport);
-    lights.dirLights[0] = { {0.0f,-1.0f,1.0f},{1.0f,1.0f,1.0f}, true};
-    lights.usedDir++;
-    lights.dirLights[1] = { {0.0f,-1.0f,-1.0f},{0.2f,0.5f,0.3f}, true};
-    lights.usedDir++;
-    //lights.dirLights[2] = { {0.0f,-1.0f,0.0f},{0.0,0.0f,1.0f} };
-    //lights.usedDir++;
+    lights.dirLight = { {0.0f,-1.0f,1.0f},{1.0f,1.0f,1.0f}, true};
 }
 
 Renderer::~Renderer()
@@ -184,7 +179,7 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     remote.context->RSSetViewports(1, &viewport);
 
     lPass.Set(gPass.posFBO,gPass.normalFBO,gPass.albedoFBO,cam->pos);
-    lPass.Draw(lights);
+    lPass.Draw(lights,sPass.shadowMap);
 
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
 
@@ -212,13 +207,6 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     {
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
         DrawFrameBuffer(lPass.specularFBO);
-    }
-    else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F6] >= 0.0f)
-    {
-        remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
-        fboDrawer.Set();
-        remote.context->PSSetShaderResources(0, 1, &lights.dirLights.at(1).shadowMap->shaderResource);
-        remote.context->Draw(3, 0);
     }
     else
     {
@@ -253,7 +241,7 @@ void Renderer::Clear()
 
     remote.context->ClearRenderTargetView(backbuffer, clearColor.e);
     remote.context->ClearDepthStencilView(gPass.depthBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0.0f);
-    lights.Clear();
+    sPass.Clear();
 
     ID3D11ShaderResourceView* null = nullptr;
 

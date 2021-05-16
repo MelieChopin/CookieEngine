@@ -178,21 +178,23 @@ void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
 
     Vec3 pos = (drawData.AABB[0] + drawData.AABB[1])*0.5f;
 
-    for (int j = 0; j < lights.usedDir; j++)
+    if  (lights.useDir && lights.dirLight.castShadow)
     {
-        DirLight& jLight = lights.dirLights.at(j);
-        if (jLight.castShadow)
-        {
-            Render::RendererRemote::context->OMSetRenderTargets(0, nullptr, jLight.shadowMap->depthStencilView);
-            Vec3 jDir = jLight.dir.Normalize();
-            Mat4 view = Mat4::LookAt({0.0f,0.0f,0.0f}, jDir, { 0.0f,1.0f,0.0f });//Mat4::Translate(jDir * 10.0f) * Mat4::Dir(jDir);//
+        Render::RendererRemote::context->OMSetRenderTargets(0, nullptr, shadowMap.depthStencilView);
+        Vec3 jDir = lights.dirLight.dir.Normalize();
+        Mat4 view = Mat4::LookAt({0.0f,0.0f,0.0f}, jDir, { 0.0f,1.0f,0.0f });//Mat4::Translate(jDir * 10.0f) * Mat4::Dir(jDir);//
 
-            jLight.lightViewProj = proj * Mat4::Translate(pos - jDir * 25.0f) * view;
-            buffer.lightViewProj = jLight.lightViewProj;
+        lights.dirLight.lightViewProj = proj * Mat4::Translate(pos - jDir * 25.0f) * view;
+        buffer.lightViewProj = lights.dirLight.lightViewProj;
 
-            Render::WriteCBuffer(&buffer, bufferSize, 0, &CBuffer);
+        Render::WriteCBuffer(&buffer, bufferSize, 0, &CBuffer);
 
-            drawData.Draw(1);
-        }
+        drawData.Draw(1);
+        
     }
+}
+
+void ShadowPass::Clear()
+{
+    shadowMap.Clear();
 }

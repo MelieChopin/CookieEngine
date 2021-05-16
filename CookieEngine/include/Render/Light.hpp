@@ -137,18 +137,12 @@ namespace Cookie
 
 		)";
 
-		class ShadowBuffer;
-
-		#define DIR_LIGHT_MAX_NB 10
-
 		struct DirLight
 		{
 				Core::Math::Vec3 dir;
 				Core::Math::Vec3 color = {1.0f,1.0f,1.0f};
 				bool castShadow = false;
 				Core::Math::Mat4 lightViewProj;
-				std::unique_ptr<ShadowBuffer> shadowMap{nullptr};
-
 		};
 
 		#define SPHERE_LIGHT_MAX_NB 10
@@ -177,16 +171,14 @@ namespace Cookie
 		struct LightsArray
 		{
 			public:
-				std::array<DirLight, DIR_LIGHT_MAX_NB>	dirLights;
-				unsigned int							usedDir = 0;
+				DirLight dirLight;
+				bool useDir = true;
 				//std::vector<SphereLight>				sphereLights;
 				//std::vector<SpotLight>					spotLights;
 
 
 			public:
 				LightsArray();
-
-				void Clear();
 		};
 	}
 }
