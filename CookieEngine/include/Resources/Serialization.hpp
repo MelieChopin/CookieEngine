@@ -14,6 +14,7 @@ namespace Cookie
 		class Coordinator;
 		class ComponentPhysics;
 		class ComponentHandler;
+		class ComponentGameplay;
 		class EntityHandler;
 	}
 
@@ -65,6 +66,7 @@ namespace Cookie
 				void LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
 				void LoadAllTextures(Cookie::Resources::ResourcesManager& resourcesManager);
 				void LoadPhysic(json& physic, Cookie::ECS::ComponentPhysics& physics);
+				void LoadGameplay(json& game, Cookie::ECS::ComponentGameplay& gameplay, Cookie::Resources::ResourcesManager& resourcesManager);
 			}
 		}
 	}
