@@ -30,8 +30,8 @@ void Coordinator::AddEntity(const int signature, std::string name)
 		componentHandler->AddComponent(newEntity, C_SIGNATURE::TRANSFORM);
 	if (CheckSignature(signature, C_SIGNATURE::MODEL))
 		componentHandler->AddComponent(newEntity, C_SIGNATURE::MODEL);
-	//if (CheckSignature(signature, C_SIGNATURE::PHYSICS))
-	//	componentHandler->AddComponent(newEntity, C_SIGNATURE::PHYSICS);
+	if (CheckSignature(signature, C_SIGNATURE::PHYSICS))
+		componentHandler->AddComponent(newEntity, C_SIGNATURE::PHYSICS);
 	if (CheckSignature(signature, C_SIGNATURE::SCRIPT))
 		componentHandler->AddComponent(newEntity, C_SIGNATURE::SCRIPT);
 	if (CheckSignature(signature, C_SIGNATURE::GAMEPLAY))
@@ -55,6 +55,65 @@ bool Coordinator::CheckSignature(const int entitySignature, const int signature)
 {
 	return (entitySignature & signature) == signature;
 }
+
+//Selection
+void Coordinator::SelectEntities(Vec2& selectionQuadStart, Vec2& selectionQuadEnd)
+{
+	selectedEntities.clear();
+	float minX = (selectionQuadStart.x < selectionQuadEnd.x) ? selectionQuadStart.x : selectionQuadEnd.x;
+	float maxX = (selectionQuadStart.x < selectionQuadEnd.x) ? selectionQuadEnd.x : selectionQuadStart.x;
+	float minZ = (selectionQuadStart.y < selectionQuadEnd.y) ? selectionQuadStart.y : selectionQuadEnd.y;
+	float maxZ = (selectionQuadStart.y < selectionQuadEnd.y) ? selectionQuadEnd.y : selectionQuadStart.y;
+
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM))
+		{
+			Vec3& entityPos = componentHandler->GetComponentTransform(i).pos;
+			if (minX <= entityPos.x && entityPos.x <= maxX &&
+				minZ <= entityPos.z && entityPos.z <= maxZ)
+				selectedEntities.push_back(&entityHandler->entities[i]);
+		}
+}
+Entity* Coordinator::GetSelectedEntitiesCommander()
+{
+	float selectedEntitiesSize = selectedEntities.size();
+
+	//get Centroid
+	Vec3 centroid = { 0, 0, 0 };
+	for (int i = 0; i < selectedEntitiesSize; ++i)
+	{
+		//divide by selectedEntitiesSize in for loop, so we're sure we can't divide by 0
+		centroid += componentHandler->GetComponentTransform(selectedEntities[i]->id).pos / selectedEntitiesSize;
+	}
+
+	//get Commander
+	Entity* commander = nullptr;
+	float distFromCentroid = INFINITY;
+	for (int i = 0; i < selectedEntitiesSize; ++i)
+	{
+		float possibleNewDist = (centroid - componentHandler->GetComponentTransform(selectedEntities[i]->id).pos).Length();
+		if (possibleNewDist < distFromCentroid)
+		{
+			distFromCentroid = possibleNewDist;
+			commander = selectedEntities[i];
+		}
+	}
+
+	return commander;
+}
+void Coordinator::SetSelectedEntitiesCommander(Entity* commander)
+{
+	for (int i = 0; i < selectedEntities.size(); ++i)
+	{
+		if (CheckSignature(selectedEntities[i]->signature, C_SIGNATURE::GAMEPLAY) &&
+			CheckSignature(componentHandler->GetComponentGameplay(selectedEntities[i]->id).signatureGameplay, CGP_SIGNATURE::MOVE) &&
+			selectedEntities[i] != commander)
+			componentHandler->GetComponentGameplay(selectedEntities[i]->id).componentMove.SetCommander(componentHandler->GetComponentGameplay(commander->id).componentMove, componentHandler->GetComponentTransform(commander->id), componentHandler->GetComponentTransform(selectedEntities[i]->id));
+	}
+
+}
+
+
 
 //Primary Component
 void Coordinator::ApplySystemPhysics(float factor)
@@ -101,32 +160,67 @@ void Coordinator::ApplyRemoveUnnecessaryEntities()
 		}
 }
 
+
+//CGP_Producer
+void Coordinator::UpdateCGPProducer()
+{
+	ApplyGameplayUpdateCooldownProducer();
+}
+void Coordinator::ApplyGameplayUpdateCooldownProducer()
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::GAMEPLAY) &&
+			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::PRODUCER))
+			componentHandler->GetComponentGameplay(i).componentProducer.UpdateCooldown();
+}
+
+//CGP_Worker
+void Coordinator::UpdateCGPWorker()
+{
+	ApplyGameplayUpdateWorker();
+}
+void Coordinator::ApplyGameplayUpdateWorker()
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
+			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::WORKER))
+			componentHandler->GetComponentGameplay(i).componentWorker.Update(componentHandler->GetComponentTransform(i));
+}
+
 //CGP_Move
+void Coordinator::UpdateCGPMove(Resources::Map& map)
+{
+	ApplyGameplayUpdatePushedCooldown(map);
+	ApplyGameplayMoveTowardWaypoint();
+	ApplyGameplayMoveWithCommander();
+	ApplyGameplayPosPrediction();
+	ApplyGameplayResolveCollision();
+}
 void Coordinator::ApplyGameplayUpdatePushedCooldown(Resources::Map& map)
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM) &&
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
 			componentHandler->GetComponentGameplay(i).componentMove.UpdatePushedCooldown(map, componentHandler->GetComponentTransform(i));
 }
 void Coordinator::ApplyGameplayMoveTowardWaypoint()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM) &&
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
 			componentHandler->GetComponentGameplay(i).componentMove.MoveTowardWaypoint(componentHandler->GetComponentTransform(i));
 }
 void Coordinator::ApplyGameplayMoveWithCommander()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM) &&
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
 			componentHandler->GetComponentGameplay(i).componentMove.MoveWithCommander(componentHandler->GetComponentTransform(i));
 }
 void Coordinator::ApplyGameplayPosPrediction()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM) &&
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
 			componentHandler->GetComponentGameplay(i).componentMove.PositionPrediction();
 }
@@ -193,16 +287,21 @@ void Coordinator::ApplyGameplayResolveCollision()
 void Coordinator::ApplyGameplayDrawPath(DebugRenderer& debug)
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM) &&
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
 			componentHandler->GetComponentGameplay(i).componentMove.DrawPath(debug, componentHandler->GetComponentTransform(i));
 }
 
 //CGP_Attack
+void Coordinator::UpdateCGPAttack()
+{
+	ApplyGameplayCheckEnemyInRange();
+	ApplyGameplayAttack();
+}
 void Coordinator::ApplyGameplayCheckEnemyInRange()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM) &&
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::ATTACK))
 		{
 			CGPAttack& cgpAttack = componentHandler->GetComponentGameplay(i).componentAttack;
@@ -241,63 +340,8 @@ void Coordinator::ApplyGameplayCheckEnemyInRange()
 void Coordinator::ApplyGameplayAttack()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::ATTACK))
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::GAMEPLAY) && 
+			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::ATTACK))
 			componentHandler->GetComponentGameplay(i).componentAttack.Attack();
 }
 
-//Selection
-void Coordinator::SelectEntities(Vec2& selectionQuadStart, Vec2& selectionQuadEnd)
-{
-	selectedEntities.clear();
-	float minX = (selectionQuadStart.x < selectionQuadEnd.x) ? selectionQuadStart.x : selectionQuadEnd.x;
-	float maxX = (selectionQuadStart.x < selectionQuadEnd.x) ? selectionQuadEnd.x : selectionQuadStart.x;
-	float minZ = (selectionQuadStart.y < selectionQuadEnd.y) ? selectionQuadStart.y : selectionQuadEnd.y;
-	float maxZ = (selectionQuadStart.y < selectionQuadEnd.y) ? selectionQuadEnd.y : selectionQuadStart.y;
-
-	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM))
-		{
-			Vec3& entityPos = componentHandler->GetComponentTransform(i).pos;
-			if (minX <= entityPos.x && entityPos.x <= maxX &&
-				minZ <= entityPos.z && entityPos.z <= maxZ)
-				selectedEntities.push_back(&entityHandler->entities[i]);
-		}
-}
-Entity* Coordinator::GetSelectedEntitiesCommander()
-{
-	float selectedEntitiesSize = selectedEntities.size();
-
-	//get Centroid
-	Vec3 centroid = { 0, 0, 0 };
-	for (int i = 0; i < selectedEntitiesSize; ++i)
-	{
-		//divide by selectedEntitiesSize in for loop, so we're sure we can't divide by 0
-		centroid += componentHandler->GetComponentTransform(selectedEntities[i]->id).pos / selectedEntitiesSize;
-	}
-
-	//get Commander
-	Entity* commander = nullptr;
-	float distFromCentroid = INFINITY;
-	for (int i = 0; i < selectedEntitiesSize; ++i)
-	{
-		float possibleNewDist = (centroid - componentHandler->GetComponentTransform(selectedEntities[i]->id).pos).Length();
-		if (possibleNewDist < distFromCentroid)
-		{
-			distFromCentroid = possibleNewDist;
-			commander = selectedEntities[i];
-		}
-	}
-
-	return commander;
-}
-void Coordinator::SetSelectedEntitiesCommander(Entity* commander)
-{
-	for (int i = 0; i < selectedEntities.size(); ++i)
-	{
-		if (CheckSignature(selectedEntities[i]->signature, C_SIGNATURE::GAMEPLAY) &&
-			CheckSignature(componentHandler->GetComponentGameplay(selectedEntities[i]->id).signatureGameplay, CGP_SIGNATURE::MOVE) &&
-			selectedEntities[i] != commander)
-			componentHandler->GetComponentGameplay(selectedEntities[i]->id).componentMove.SetCommander(componentHandler->GetComponentGameplay(commander->id).componentMove, componentHandler->GetComponentTransform(commander->id), componentHandler->GetComponentTransform(selectedEntities[i]->id));
-	}
-
-}

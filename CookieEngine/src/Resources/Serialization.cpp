@@ -450,7 +450,6 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Game& game)
  {
 	 std::shared_ptr<Resources::Scene> newScene = std::make_shared<Resources::Scene>();
-	 Physics::PhysicsHandle::physSim = newScene->physSim.worldSim;
 	 std::ifstream file(filepath);
 
 	 if (!file.is_open())
