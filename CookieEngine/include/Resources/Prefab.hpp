@@ -30,6 +30,7 @@ namespace Cookie
 			Cookie::ECS::ComponentTransform				transform;
 			Cookie::ECS::ComponentModel					model;
 			Cookie::ECS::ComponentPhysics				physics;
+			Cookie::ECS::ComponentGameplay				gameplay;
 
 			std::string									filepath	= "Null";
 

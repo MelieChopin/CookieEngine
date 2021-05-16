@@ -3,11 +3,16 @@
 
 #include <vector>
 #include "Core/Time.hpp"
-#include "Resources/Prefab.hpp"
+//#include "Resources/Prefab.hpp"
 #include "Resources/Map.hpp"
 
 namespace Cookie
 {
+	namespace Resources
+	{
+		class Prefab;
+	}
+
 	namespace Gameplay
 	{
 		
