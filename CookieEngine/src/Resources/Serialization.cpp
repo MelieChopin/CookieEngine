@@ -5,11 +5,11 @@
 #include "Resources/Mesh.hpp"
 #include "Resources/Texture.hpp"
 #include "Resources/Scene.hpp"
-#include "Resources/Prefab.hpp"
+
 #include "Resources/ResourcesManager.hpp"
 #include "ECS/ComponentHandler.hpp"
 #include "Resources/Serialization.hpp"
-
+#include "Resources/Prefab.hpp"
 #include <reactphysics3d/reactphysics3d.h>
 #include <iostream>
 #include <fstream>
@@ -76,6 +76,37 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 			int index = js["PhysicHandler"].size();
 			SavePhysic(js["PhysicHandler"][index], component.GetComponentPhysics(entity.entities[i].id));
 		}
+		if (entity.entities[i].signature & C_SIGNATURE::GAMEPLAY)
+		{
+			ComponentGameplay gameplay = component.GetComponentGameplay(entity.entities[i].id);
+			int index = js["Gameplay"].size();
+			js["Gameplay"][index]["TeamName"] = gameplay.teamName;
+			js["Gameplay"][index]["SignatureGameplay"] = gameplay.signatureGameplay;
+			js["Gameplay"][index]["Cost"]["CostPrimary"] = gameplay.cost.costPrimary;
+			js["Gameplay"][index]["Cost"]["CostSecondary"] = gameplay.cost.costSecondary;
+			js["Gameplay"][index]["Cost"]["CostSupply"] = gameplay.cost.costSupply;
+			js["Gameplay"][index]["Cost"]["TimeToProduce"] = gameplay.cost.timeToProduce;
+
+			js["Gameplay"][index]["CGPLive"]["Life"] = gameplay.componentLive.life;
+			js["Gameplay"][index]["CGPLive"]["Armor"] = gameplay.componentLive.armor;
+
+			js["Gameplay"][index]["CGPAttack"]["NeedToAttack"] = gameplay.componentAttack.needToAttack;
+			js["Gameplay"][index]["CGPAttack"]["AttackDamage"] = gameplay.componentAttack.attackDamage;
+			js["Gameplay"][index]["CGPAttack"]["AttackSpeed"] = gameplay.componentAttack.attackSpeed;
+			js["Gameplay"][index]["CGPAttack"]["AttackCooldown"] = gameplay.componentAttack.attackCooldown;
+			js["Gameplay"][index]["CGPAttack"]["AttackRange"] = gameplay.componentAttack.attackRange;
+
+			js["Gameplay"][index]["CGPMove"]["MoveSpeed"] = gameplay.componentMove.moveSpeed;
+			js["Gameplay"][index]["CGPMove"]["isFlying"] = gameplay.componentMove.isFlying;
+
+			for (int i = 0; i < gameplay.componentProducer.possibleUnits.size(); i++)
+				js["Gameplay"][index]["CGPProducer"]["name"] += gameplay.componentProducer.possibleUnits[i]->name;
+
+			js["Gameplay"][index]["CGPProducer"]["TileSize"] = gameplay.componentProducer.tileSize.e;
+
+			for (int i = 0; i < gameplay.componentWorker.possibleBuildings.size(); i++)
+				js["Gameplay"][index]["CGPWorker"]["name"] += gameplay.componentWorker.possibleBuildings[i]->name;
+		}
 	}
 }
 
@@ -138,67 +169,116 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const std::shared_ptr<Pr
 	 js["Signature"] = pref->signature;
 	 js["Name"] = pref->name;
 	 
-	 //Transform
-	 js["Transform"]["Rotation"] = pref->transform.rot.e;
-	 js["Transform"]["Scale"] = pref->transform.scale.e;
-
-	 //Model
-	 js["Mesh"] = pref->model.mesh->name;
-	 js["Texture"] = pref->model.albedo->name;
-
-	 if (pref->physics.physBody != nullptr)
+	 if (pref->signature & C_SIGNATURE::TRANSFORM)
 	 {
-		 js["Rigidbody"]["type"] = pref->physics.physBody->getType();
-		 js["Rigidbody"]["angularDamping"] = pref->physics.physBody->getAngularDamping();
-		 js["Rigidbody"]["linearDamping"] = pref->physics.physBody->getLinearDamping();
-		 js["Rigidbody"]["mass"] = pref->physics.physBody->getMass();
-		 js["Rigidbody"]["active"] = pref->physics.physBody->isActive();
-		 js["Rigidbody"]["allowedToSleep"] = pref->physics.physBody->isAllowedToSleep();
-		 js["Rigidbody"]["sleeping"] = pref->physics.physBody->isSleeping();
-		 js["Rigidbody"]["gravityEnabled"] = pref->physics.physBody->isGravityEnabled();
+		 //Transform
+		 js["Transform"]["Rotation"] = pref->transform.rot.e;
+		 js["Transform"]["Scale"] = pref->transform.scale.e;
+	 }
+	 
+	 if (pref->signature & C_SIGNATURE::MODEL)
+	 {
+		 //Model
+		 if (pref->model.mesh != nullptr)
+			js["Model"]["Mesh"] = pref->model.mesh->name;
+		 else
+			js["Model"]["Mesh"] = 0;
+		 if (pref->model.albedo != nullptr)
+			js["Model"]["Texture"] = pref->model.albedo->name;
+		 else
+			js["Model"]["Texture"] = 0;
+	 }
+
+	 if (pref->signature & C_SIGNATURE::PHYSICS)
+	 {
+		 if (pref->physics.physBody != nullptr)
+		 {
+			 js["Rigidbody"]["type"] = pref->physics.physBody->getType();
+			 js["Rigidbody"]["angularDamping"] = pref->physics.physBody->getAngularDamping();
+			 js["Rigidbody"]["linearDamping"] = pref->physics.physBody->getLinearDamping();
+			 js["Rigidbody"]["mass"] = pref->physics.physBody->getMass();
+			 js["Rigidbody"]["active"] = pref->physics.physBody->isActive();
+			 js["Rigidbody"]["allowedToSleep"] = pref->physics.physBody->isAllowedToSleep();
+			 js["Rigidbody"]["sleeping"] = pref->physics.physBody->isSleeping();
+			 js["Rigidbody"]["gravityEnabled"] = pref->physics.physBody->isGravityEnabled();
+		 }
 	 }
 	 else
 		 js["Rigidbody"] = "nullptr";
 
-	 if (prefab->physics.physColliders.size() != 0)
+	 if (pref->signature & C_SIGNATURE::PHYSICS)
 	 {
-		 for (int i = 0; i < prefab->physics.physColliders.size(); i++)
+		 if (prefab->physics.physColliders.size() != 0)
 		 {
-			 ::reactphysics3d::Collider* actCollider = prefab->physics.physColliders[i];
-			 if (actCollider->getCollisionShape()->getName() == ::reactphysics3d::CollisionShapeName::SPHERE)
+			 for (int i = 0; i < prefab->physics.physColliders.size(); i++)
 			 {
-				 float radius = static_cast<::reactphysics3d::SphereShape*>(actCollider->getCollisionShape())->getRadius();
-				 js["Colliders"][i]["type"] = "Sphere";
-				 js["Colliders"][i]["radius"] = radius;
-			 }
-			 else if (actCollider->getCollisionShape()->getName() == ::reactphysics3d::CollisionShapeName::CAPSULE)
-			 {
-				 ::reactphysics3d::CapsuleShape* capsule = static_cast<::reactphysics3d::CapsuleShape*>(actCollider->getCollisionShape());
-				 js["Colliders"][i]["type"] = "Capsule";
-				 js["Colliders"][i]["radius"] = capsule->getRadius();
-				 js["Colliders"][i]["height"] = capsule->getHeight();
-			 }
-			 else if (actCollider->getCollisionShape()->getName() == ::reactphysics3d::CollisionShapeName::BOX)
-			 {
-				 ::reactphysics3d::Vector3 box = static_cast<::reactphysics3d::BoxShape*>(actCollider->getCollisionShape())->getHalfExtents();
-				 js["Colliders"][i]["type"] = "Box";
-				 js["Colliders"][i]["HalfExtents"] = { box.x, box.y, box.z };
-			 }
+				 ::reactphysics3d::Collider* actCollider = prefab->physics.physColliders[i];
+				 if (actCollider->getCollisionShape()->getName() == ::reactphysics3d::CollisionShapeName::SPHERE)
+				 {
+					 float radius = static_cast<::reactphysics3d::SphereShape*>(actCollider->getCollisionShape())->getRadius();
+					 js["Colliders"][i]["type"] = "Sphere";
+					 js["Colliders"][i]["radius"] = radius;
+				 }
+				 else if (actCollider->getCollisionShape()->getName() == ::reactphysics3d::CollisionShapeName::CAPSULE)
+				 {
+					 ::reactphysics3d::CapsuleShape* capsule = static_cast<::reactphysics3d::CapsuleShape*>(actCollider->getCollisionShape());
+					 js["Colliders"][i]["type"] = "Capsule";
+					 js["Colliders"][i]["radius"] = capsule->getRadius();
+					 js["Colliders"][i]["height"] = capsule->getHeight();
+				 }
+				 else if (actCollider->getCollisionShape()->getName() == ::reactphysics3d::CollisionShapeName::BOX)
+				 {
+					 ::reactphysics3d::Vector3 box = static_cast<::reactphysics3d::BoxShape*>(actCollider->getCollisionShape())->getHalfExtents();
+					 js["Colliders"][i]["type"] = "Box";
+					 js["Colliders"][i]["HalfExtents"] = { box.x, box.y, box.z };
+				 }
 
-			 ::reactphysics3d::Material& mat = actCollider->getMaterial();
+				 ::reactphysics3d::Material& mat = actCollider->getMaterial();
 
-			 ::reactphysics3d::Vector3		vec = actCollider->getLocalToBodyTransform().getPosition();
-			 ::reactphysics3d::Quaternion	quat = actCollider->getLocalToBodyTransform().getOrientation();
-			 js["Colliders"][i]["transform"]["pos"] = { vec.x, vec.y, vec.z };
-			 js["Colliders"][i]["transform"]["quaternion"] = { quat.w, quat.x, quat.y, quat.z };
-			 js["Colliders"][i]["bounciness"] = mat.getBounciness();
-			 js["Colliders"][i]["frictionCoeff"] = mat.getFrictionCoefficient();
-			 js["Colliders"][i]["density"] = mat.getMassDensity();
-			 js["Colliders"][i]["rollingResistance"] = mat.getRollingResistance();
+				 ::reactphysics3d::Vector3		vec = actCollider->getLocalToBodyTransform().getPosition();
+				 ::reactphysics3d::Quaternion	quat = actCollider->getLocalToBodyTransform().getOrientation();
+				 js["Colliders"][i]["transform"]["pos"] = { vec.x, vec.y, vec.z };
+				 js["Colliders"][i]["transform"]["quaternion"] = { quat.w, quat.x, quat.y, quat.z };
+				 js["Colliders"][i]["bounciness"] = mat.getBounciness();
+				 js["Colliders"][i]["frictionCoeff"] = mat.getFrictionCoefficient();
+				 js["Colliders"][i]["density"] = mat.getMassDensity();
+				 js["Colliders"][i]["rollingResistance"] = mat.getRollingResistance();
+			 }
 		 }
 	 }
 	 else
 		 js["Colliders"] = "nullptr";
+
+	 if (pref->signature & C_SIGNATURE::GAMEPLAY)
+	 {
+		 ComponentGameplay gameplay = prefab->gameplay;
+		 js["Gameplay"]["TeamName"] = gameplay.teamName;
+		 js["Gameplay"]["SignatureGameplay"] = gameplay.signatureGameplay;
+		 js["Gameplay"]["Cost"]["CostPrimary"] = gameplay.cost.costPrimary;
+		 js["Gameplay"]["Cost"]["CostSecondary"] = gameplay.cost.costSecondary;
+		 js["Gameplay"]["Cost"]["CostSupply"] = gameplay.cost.costSupply;
+		 js["Gameplay"]["Cost"]["TimeToProduce"] = gameplay.cost.timeToProduce;
+
+		 js["Gameplay"]["CGPLive"]["Life"] = gameplay.componentLive.life;
+		 js["Gameplay"]["CGPLive"]["Armor"] = gameplay.componentLive.armor;
+
+		 js["Gameplay"]["CGPAttack"]["NeedToAttack"] = gameplay.componentAttack.needToAttack;
+		 js["Gameplay"]["CGPAttack"]["AttackDamage"] = gameplay.componentAttack.attackDamage;
+		 js["Gameplay"]["CGPAttack"]["AttackSpeed"] = gameplay.componentAttack.attackSpeed;
+		 js["Gameplay"]["CGPAttack"]["AttackCooldown"] = gameplay.componentAttack.attackCooldown;
+		 js["Gameplay"]["CGPAttack"]["AttackRange"] = gameplay.componentAttack.attackRange;
+
+		 js["Gameplay"]["CGPMove"]["MoveSpeed"] = gameplay.componentMove.moveSpeed;
+		 js["Gameplay"]["CGPMove"]["isFlying"] = gameplay.componentMove.isFlying;
+
+		 for (int i = 0; i < gameplay.componentProducer.possibleUnits.size(); i++)
+			 js["Gameplay"]["CGPProducer"]["name"] += gameplay.componentProducer.possibleUnits[i]->name;
+
+		 js["Gameplay"]["CGPProducer"]["TileSize"] = gameplay.componentProducer.tileSize.e;
+
+		 for (int i = 0; i < gameplay.componentWorker.possibleBuildings.size(); i++)
+			 js["Gameplay"]["CGPWorker"]["name"] += gameplay.componentWorker.possibleBuildings[i]->name;
+	 }
 
 	 file << std::setw(4) << js << std::endl;
  }
@@ -296,6 +376,7 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 	 Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager)
  {
 	 int indexOfPhysic = 0;
+	 int indexOfGameplay = 0;
 	 for (int i = 0; i < entity.livingEntities; i++)
 	 {
 		 if (entity.entities[i].signature & C_SIGNATURE::TRANSFORM)
@@ -340,6 +421,58 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 
 			 indexOfPhysic += 1;
 		 }
+		 if (entity.entities[i].signature & C_SIGNATURE::GAMEPLAY)
+		 {
+			 ComponentGameplay GPComponent;
+			 json gameplay = js["Gameplay"][indexOfGameplay];
+
+			 GPComponent.teamName = gameplay["TeamName"];
+			 GPComponent.signatureGameplay = gameplay["SignatureGameplay"];
+			
+			 GPComponent.cost.costPrimary = gameplay["Cost"]["CostPrimary"].get<float>();
+			 GPComponent.cost.costSecondary = gameplay["Cost"]["CostSecondary"].get<float>();
+			 GPComponent.cost.costSupply = gameplay["Cost"]["CostSupply"].get<float>();
+			 GPComponent.cost.timeToProduce = gameplay["Cost"]["TimeToProduce"].get<float>();
+
+			 GPComponent.componentLive.life = gameplay["CGPLive"]["Life"].get<float>();
+			 GPComponent.componentLive.armor = gameplay["CGPLive"]["Armor"].get<float>();
+
+			 GPComponent.componentAttack.needToAttack = gameplay["CGPAttack"]["NeedToAttack"].get<bool>();
+			 GPComponent.componentAttack.attackDamage = gameplay["CGPAttack"]["AttackDamage"].get<float>();
+			 GPComponent.componentAttack.attackSpeed = gameplay["CGPAttack"]["AttackSpeed"].get<float>();
+			 GPComponent.componentAttack.attackCooldown = gameplay["CGPAttack"]["AttackCooldown"].get<float>();
+			 GPComponent.componentAttack.attackRange = gameplay["CGPAttack"]["AttackRange"].get<float>();
+
+			 GPComponent.componentMove.moveSpeed = gameplay["CGPMove"]["MoveSpeed"].get<float>();
+			 GPComponent.componentMove.isFlying = gameplay["CGPMove"]["isFlying"].get<bool>();
+
+			 gameplay["CGPProducer"]["TileSize"].get_to(GPComponent.componentProducer.tileSize.e);
+
+			 if (gameplay["CGPProducer"].contains("name"))
+			 {
+				 for (int i = 0; i < gameplay["CGPProducer"]["name"].size(); i++)
+				 {
+					 std::string name = gameplay["CGPProducer"]["name"][i].get<std::string>();
+					 if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end())
+						GPComponent.componentProducer.possibleUnits.push_back(resourcesManager.prefabs[name].get());
+				 }
+			 }
+
+			 if (gameplay.contains("CGPWorker"))
+			 {
+				 if (gameplay["CGPWorker"].contains("name"))
+				 {
+					 for (int i = 0; i < gameplay["CGPWorker"]["name"].size(); i++)
+					 {
+						 std::string name = gameplay["CGPWorker"]["name"][i].get<std::string>();
+						 if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end())
+							 GPComponent.componentWorker.possibleBuildings.push_back(resourcesManager.prefabs[name].get());
+					 }
+				 }
+			 }
+
+			 component.GetComponentGameplay(entity.entities[i].id) = GPComponent;
+		 }
 	 }
  }
 
@@ -354,8 +487,6 @@ std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const c
 		 std::cout << "DON'T FIND THE FILE\n";
 		 return nullptr;
 	 }
-	 
-	 //std::cout << filepath << "\n";
 
 	 json js;
 	 file >> js;
@@ -452,30 +583,87 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 
 		 Cookie::Resources::Prefab newPrefab;
 
-		/* if (js.contains("Name"))
+		 if (js.contains("Name"))
 			 newPrefab.name = js["Name"];
 
-		 if (js.contains("Mesh"))
-			 newPrefab.nameMesh = js["Mesh"];
+		 if (js.contains("Model"))
+		 {
+			 if (js["Model"]["Mesh"].is_string())
+				newPrefab.model.mesh = resourcesManager.meshes[js["Model"]["Mesh"]].get();
+			 if (js["Model"]["Texture"].is_string())
+				 newPrefab.model.albedo = resourcesManager.textures[js["Model"]["Texture"]].get();
+		 }
 
-		 if (js.contains("Texture"))
-			 newPrefab.nameTexture = js["Texture"];
-
-		 if (js.contains("Shader"))
-			 newPrefab.nameShader = js["Shader"];
-
-		 if (js.contains("Rotation"))
-			 js["Rotation"].get_to(newPrefab.rotation.e);
-
-		 if (js.contains("Scale"))
-			 js["Scale"].get_to(newPrefab.scale.e);
-
-		 if (js.contains("Script"))
-			 newPrefab.nameScript = js["Script"];
+		 if (js.contains("Transform"))
+		 {
+			 if (js["Transform"]["Rotation"].is_array())
+				 js["Transform"]["Rotation"].get_to(newPrefab.transform.rot.e); 
+			 if (js["Transform"]["Scale"].is_string())
+				 js["Transform"]["Scale"].get_to(newPrefab.transform.scale.e);
+		 }
 
 		 if (js.contains("Signature"))
 			 newPrefab.signature = js["Signature"];
-		 */
+		 
+		 if (js.contains("physicTRS"))
+		 {
+			 json physic = js;
+
+			 LoadPhysic(physic, newPrefab.physics);
+		 }
+
+		 if (js.contains("Gameplay"))
+		 {
+			 ComponentGameplay GPComponent;
+			 json gameplay = js["Gameplay"];
+
+			 GPComponent.teamName = gameplay["TeamName"];
+			 GPComponent.signatureGameplay = gameplay["SignatureGameplay"];
+
+			 GPComponent.cost.costPrimary = gameplay["Cost"]["CostPrimary"].get<float>();
+			 GPComponent.cost.costSecondary = gameplay["Cost"]["CostSecondary"].get<float>();
+			 GPComponent.cost.costSupply = gameplay["Cost"]["CostSupply"].get<float>();
+			 GPComponent.cost.timeToProduce = gameplay["Cost"]["TimeToProduce"].get<float>();
+
+			 GPComponent.componentLive.life = gameplay["CGPLive"]["Life"].get<float>();
+			 GPComponent.componentLive.armor = gameplay["CGPLive"]["Armor"].get<float>();
+
+			 GPComponent.componentAttack.needToAttack = gameplay["CGPAttack"]["NeedToAttack"].get<bool>();
+			 GPComponent.componentAttack.attackDamage = gameplay["CGPAttack"]["AttackDamage"].get<float>();
+			 GPComponent.componentAttack.attackSpeed = gameplay["CGPAttack"]["AttackSpeed"].get<float>();
+			 GPComponent.componentAttack.attackCooldown = gameplay["CGPAttack"]["AttackCooldown"].get<float>();
+			 GPComponent.componentAttack.attackRange = gameplay["CGPAttack"]["AttackRange"].get<float>();
+
+			 GPComponent.componentMove.moveSpeed = gameplay["CGPMove"]["MoveSpeed"].get<float>();
+			 GPComponent.componentMove.isFlying = gameplay["CGPMove"]["isFlying"].get<bool>();
+
+			 gameplay["CGPProducer"]["TileSize"].get_to(GPComponent.componentProducer.tileSize.e);
+
+			 if (gameplay["CGPProducer"].contains("name"))
+			 {
+				 for (int i = 0; i < gameplay["CGPProducer"]["name"].size(); i++)
+				 {
+					 std::string name = gameplay["CGPProducer"]["name"][i].get<std::string>();
+					 if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end())
+						 GPComponent.componentProducer.possibleUnits.push_back(resourcesManager.prefabs[name].get());
+				 }
+			 }
+
+			 if (gameplay.contains("CGPWorker"))
+			 {
+				 if (gameplay["CGPWorker"].contains("name"))
+				 {
+					 for (int i = 0; i < gameplay["CGPWorker"]["name"].size(); i++)
+					 {
+						 std::string name = gameplay["CGPWorker"]["name"][i].get<std::string>();
+						 if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end())
+							 GPComponent.componentWorker.possibleBuildings.push_back(resourcesManager.prefabs[name].get());
+					 }
+				 }
+			 }
+			 newPrefab.gameplay = GPComponent;
+		 }
+
 		 newPrefab.filepath = filesPath[i];
 
 		 resourcesManager.prefabs[newPrefab.name] = std::make_shared<Prefab>(newPrefab);
