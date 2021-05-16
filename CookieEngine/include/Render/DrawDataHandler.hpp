@@ -6,6 +6,7 @@
 #include <vector>
 
 struct ID3D11Buffer;
+struct ID3D11DepthStencilView;
 
 namespace Cookie
 {
@@ -36,6 +37,9 @@ namespace Cookie
 				std::vector<Core::Math::Mat4>		matrices;
 				std::array<Core::Math::Vec3, 2>		AABB;
 				const Camera*						currentCam;
+
+				ID3D11DepthStencilView*				depthStencilView;
+				ID3D11Buffer*						CamCBuffer;
 
 			private:
 				void InitCBuffer();

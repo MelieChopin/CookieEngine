@@ -2,6 +2,7 @@
 #include "Core/Math/Vec4.hpp"
 #include "Light.hpp"
 #include "RenderPass/LightPass.hpp"
+#include "Render/DrawDataHandler.hpp"
 #include "ShadowBuffer.hpp"
 
 using namespace Cookie::Core::Math;
@@ -64,7 +65,7 @@ void LightPass::InitState()
     // Set up the description of the stencil state.
     depthStencilDesc.DepthEnable = true;
     depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-    depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+    depthStencilDesc.DepthFunc = D3D11_COMPARISON_GREATER_EQUAL;
 
     depthStencilDesc.StencilEnable = true;
     depthStencilDesc.StencilReadMask = 0xFF;
@@ -88,7 +89,7 @@ void LightPass::InitState()
 
     // Setup the raster description which will determine how and what polygons will be drawn.
     rasterDesc.AntialiasedLineEnable = false;
-    rasterDesc.CullMode = D3D11_CULL_FRONT;
+    rasterDesc.CullMode = D3D11_CULL_BACK;
     rasterDesc.DepthBias = 0;
     rasterDesc.DepthBiasClamp = 0.0f;
     rasterDesc.DepthClipEnable = true;
@@ -131,9 +132,7 @@ void LightPass::Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& al
     Vec4 cam = {camPos.x,camPos.y ,camPos.z ,0.0f };
     Render::WriteCBuffer(&cam, sizeof(Vec4), 0, &lightCBuffer);
 
-    ID3D11RenderTargetView* rtvs[2] = { diffuseFBO.renderTargetView,specularFBO.renderTargetView};
-
-    Render::RendererRemote::context->OMSetRenderTargets(2, rtvs, nullptr);
+    
 
     ID3D11ShaderResourceView* fbos[3] = { posFBO.shaderResource,normalFBO.shaderResource, albedoFBO.shaderResource};
 
@@ -142,14 +141,23 @@ void LightPass::Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& al
     Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
 }
 
-void LightPass::Draw(const LightsArray& lights, const ShadowBuffer& shadowMap)
+void LightPass::Draw(const LightsArray& lights, const ShadowBuffer& shadowMap, const DrawDataHandler& drawData)
 {
-    
+    ID3D11RenderTargetView* rtvs[2] = { diffuseFBO.renderTargetView,specularFBO.renderTargetView };
+
     if (lights.useDir)
     {
-        dirPass.Set(lights.dirLight,shadowMap,&lightCBuffer);
+        Render::RendererRemote::context->OMSetRenderTargets(2, rtvs, nullptr);
+        dirPass.Set(lights.dirLight, shadowMap, &lightCBuffer);
         Render::RendererRemote::context->Draw(3, 0);
     }
+    if (lights.usedPoints > 0)
+    {
+        Render::RendererRemote::context->OMSetRenderTargets(2, rtvs, drawData.depthStencilView);
+        pointPass.Set(&lightCBuffer, drawData);
+        pointPass.Draw(lights);
+    }
+    
 }
 
 void LightPass::Clear()

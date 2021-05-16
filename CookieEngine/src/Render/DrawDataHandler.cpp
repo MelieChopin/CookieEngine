@@ -116,6 +116,8 @@ void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 {
 	currentCam = cam;
 	MakeFrustrum(*cam);
+	depthStencilView	= game.renderer.gPass.depthBuffer;
+	CamCBuffer			= game.renderer.gPass.CBuffer;
 
 	const ECS::EntityHandler& entityHandler = *game.coordinator.entityHandler;
 	ECS::ComponentHandler& components = *game.coordinator.componentHandler;

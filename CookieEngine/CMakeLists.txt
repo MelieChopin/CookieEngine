@@ -82,6 +82,7 @@ set (SRC_FILES
     "${SRC_DIR}/Render/RenderPass/GeometryPass.cpp"
     "${SRC_DIR}/Render/RenderPass/LightPass.cpp"
     "${SRC_DIR}/Render/RenderPass/DirLightPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/PointLightPass.cpp"
     "${SRC_DIR}/Render/RenderPass/ComposePass.cpp"
     "${SRC_DIR}/Render/ShadowBuffer.cpp" 
     "${SRC_DIR}/Render/RenderPass/ShadowPass.cpp"

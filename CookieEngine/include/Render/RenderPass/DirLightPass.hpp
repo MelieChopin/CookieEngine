@@ -9,17 +9,6 @@ struct ID3D11SamplerState;
 
 namespace Cookie
 {
-	namespace Core::Math
-	{
-		union Vec4;
-		union Mat4;
-	}
-
-	namespace ECS
-	{
-		class Coordinator;
-	}
-
 	namespace Render
 	{
 		struct DirLight;

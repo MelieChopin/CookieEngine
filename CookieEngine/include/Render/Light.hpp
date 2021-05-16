@@ -145,14 +145,14 @@ namespace Cookie
 				Core::Math::Mat4 lightViewProj;
 		};
 
-		#define SPHERE_LIGHT_MAX_NB 10
+		#define POINT_LIGHT_MAX_NB 10
 
-		struct SphereLight
+		struct PointLight
 		{
 				Core::Math::Vec3 pos	= { 0.0f,0.0f,0.0f };
+				float radius			= 0.0f;
 				Core::Math::Vec3 color  = { 1.0f,1.0f,1.0f };
 
-				float radius = 0.0f;
 		};
 
 		#define SPOT_LIGHT_MAX_NB 10
@@ -173,7 +173,8 @@ namespace Cookie
 			public:
 				DirLight dirLight;
 				bool useDir = true;
-				//std::vector<SphereLight>				sphereLights;
+				std::array<PointLight,POINT_LIGHT_MAX_NB> pointLights;
+				unsigned int usedPoints = 0;
 				//std::vector<SpotLight>					spotLights;
 
 

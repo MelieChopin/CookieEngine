@@ -39,8 +39,8 @@ void FBODrawer::InitShader()
         VOut output;
     
         float2 uv = float2((vI << 1) & 2, vI & 2);
-        output.uv = float2(1-uv.x,uv.y);
-        output.position = float4(-uv.x * 2 + 1, -uv.y * 2 + 1, 0, 1);
+        output.uv = float2(uv.x,uv.y);
+        output.position = float4(uv.x * 2 - 1, -uv.y * 2 + 1, 0, 1);
     
         return output;
 

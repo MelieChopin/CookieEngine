@@ -3,29 +3,21 @@
 
 #include "FrameBuffer.hpp"
 #include "RenderPass/DirLightPass.hpp"
+#include "RenderPass/PointLightPass.hpp"
 
 namespace Cookie
 {
-	namespace Core::Math
-	{
-		union Vec4;
-		union Mat4;
-	}
-
-	namespace ECS
-	{
-		class Coordinator;
-	}
-
 	namespace Render
 	{
 		struct	LightsArray;
 		class	ShadowBuffer;
+		class	DrawDataHandler;
 
 		class LightPass
 		{
 		private:
 			DirLightPass				dirPass;
+			PointLightPass				pointPass;
 
 			ID3D11Buffer*				lightCBuffer		{ nullptr };
 			ID3D11SamplerState*			PSampler			{ nullptr };
@@ -48,7 +40,7 @@ namespace Cookie
 			~LightPass();
 
 			void Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& albedoFBO, const Core::Math::Vec3& camPos);
-			void Draw(const LightsArray& lights, const ShadowBuffer& shadowMap);
+			void Draw(const LightsArray& lights, const ShadowBuffer& shadowMap, const DrawDataHandler& drawData);
 			void Clear();
 		};
 	}

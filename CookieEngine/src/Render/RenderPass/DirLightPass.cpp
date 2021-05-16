@@ -53,8 +53,8 @@ void DirLightPass::InitShader()
         VOut output;
     
         float2 uv = float2((vI << 1) & 2, vI & 2);
-        output.uv = float2(1-uv.x,uv.y);
-        output.position = float4(-uv.x * 2 + 1, -uv.y * 2 + 1, 0, 1);
+        output.uv = float2(uv.x,uv.y);
+        output.position = float4(uv.x * 2 - 1, -uv.y * 2 + 1, 0, 1);
     
         return output;
 
@@ -97,7 +97,7 @@ void DirLightPass::InitShader()
 
         float shadow = 1.0f;
         //float margin = max(0.05 * (1.0 - dot), 0.00);
-        float margin = clamp(0.005 / acos(saturate(dot)),0.005,0.05); 
+        float margin = clamp(0.005 / acos(saturate(dot)),0.0,0.05); 
 
         for(int x = -1; x <= 1; ++x)
         {

@@ -23,6 +23,8 @@ Renderer::Renderer():
     CreateDrawBuffer(window.width,window.height);
     remote.context->RSSetViewports(1, &viewport);
     lights.dirLight = { {0.0f,-1.0f,1.0f},{1.0f,1.0f,1.0f}, true};
+    lights.pointLights[0] = { {0.0f,1.0f,0.0f},1.0f,{1.0f,0.0f,0.0f} };
+    lights.usedPoints++;
 }
 
 Renderer::~Renderer()
@@ -179,7 +181,7 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     remote.context->RSSetViewports(1, &viewport);
 
     lPass.Set(gPass.posFBO,gPass.normalFBO,gPass.albedoFBO,cam->pos);
-    lPass.Draw(lights,sPass.shadowMap);
+    lPass.Draw(lights,sPass.shadowMap,drawData);
 
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
 
@@ -210,6 +212,7 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     }
     else
     {
+
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
         cPass.Set(lPass.diffuseFBO,lPass.specularFBO);
         cPass.Draw();
