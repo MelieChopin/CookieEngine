@@ -23,5 +23,6 @@ void Scene::InitCoordinator(Cookie::ECS::Coordinator& coordinator)
 {
 	coordinator.entityHandler = &entityHandler;
 	coordinator.componentHandler = &componentHandler;
+	coordinator.armyHandler = &armyHandler;
 }
 

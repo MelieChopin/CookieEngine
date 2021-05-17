@@ -2,6 +2,10 @@
 #define __PREFAB_HPP__
 
 #include <string>
+#include "ECS/ComponentTransform.hpp"
+#include "ECS/ComponentModel.hpp"
+#include "ECS/ComponentPhysics.hpp"
+#include "ECS/ComponentGameplay.hpp"
 
 namespace reactphysics3d
 {
