@@ -135,7 +135,7 @@ void Inspector::ModelInterface()
         ResourceMapExplorer<Texture>("normal texture", "##NORMSELECT", resources.textures, modelComp.normal);
 
 
-        ImGui::Custom::TextSnip("metallic-Roughness", 7); SameLine(); Text(":"); SameLine(100);
+        ImGui::Custom::TextSnip("metallic-Roughness", 9); SameLine(); Text(":"); SameLine(100);
 
         ResourceMapExplorer<Texture>("metallic-rough texture", "##MRSELECT", resources.textures, modelComp.metallicRoughness);
 
