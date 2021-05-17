@@ -18,9 +18,10 @@ namespace Cookie
 		    float4 specular : SV_TARGET1; 
 		};
 
-		cbuffer Cam : register(b1)
+		cbuffer Cam : register(b0)
 		{
 		    float3 camPos;
+			float2 screenSize;
 		};
 		
 		float	compute_diffuse		(float3 lightDir, float3 normal)
@@ -65,9 +66,11 @@ namespace Cookie
 		    float4 specular : SV_TARGET1; 
 		};
 
-		cbuffer Cam : register(b1)
+		cbuffer Cam : register(b0)
 		{
-		    float3 camPos;
+		    float3	camPos;
+			float2	screenSize;
+			float	farPlane;
 		};
 		
 		float DistributionGGX(float3 normal, float3 halfAngleVec, float roughness)
@@ -145,7 +148,7 @@ namespace Cookie
 				Core::Math::Mat4 lightViewProj;
 		};
 
-		#define POINT_LIGHT_MAX_NB 10
+		#define POINT_LIGHT_MAX_NB 64
 
 		struct PointLight
 		{

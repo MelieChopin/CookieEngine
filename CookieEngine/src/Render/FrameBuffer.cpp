@@ -4,10 +4,10 @@
 
 using namespace Cookie::Render;
 
-FrameBuffer::FrameBuffer(int width, int height, DXGI_FORMAT _format):
-    format {_format}
+FrameBuffer::FrameBuffer(int _width, int _height, DXGI_FORMAT _format):
+    format {_format}, width { _width }, height {_height}
 {
-    if (CreateTexture(width,height))
+    if (CreateTexture())
     {
         CreateShaderResource();
         CreateRenderTargetView();
@@ -33,7 +33,7 @@ FrameBuffer::~FrameBuffer()
     }
 }
 
-bool FrameBuffer::CreateTexture(int width, int height)
+bool FrameBuffer::CreateTexture()
 {
     D3D11_TEXTURE2D_DESC desc = {};
 
@@ -95,8 +95,10 @@ bool FrameBuffer::CreateRenderTargetView()
     return true;
 }
 
-void FrameBuffer::Resize(int width, int height)
+void FrameBuffer::Resize(int _width, int _height)
 {
+    width = _width;
+    height = _height;
     if (texBuffer)
     {
         texBuffer->Release();
@@ -113,7 +115,7 @@ void FrameBuffer::Resize(int width, int height)
         renderTargetView = nullptr;
     }
 
-    if (CreateTexture(width,height))
+    if (CreateTexture())
     {
         CreateShaderResource();
         CreateRenderTargetView();

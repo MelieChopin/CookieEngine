@@ -23,8 +23,11 @@ namespace Cookie
 			ID3D11SamplerState*			PSampler			{ nullptr };
 
 			ID3D11DepthStencilState*	depthStencilState	= nullptr;
+
 			ID3D11RasterizerState*		rasterizerState		= nullptr;
 			ID3D11BlendState*			blendState			= nullptr;
+
+			ID3D11RasterizerState*		volumeRasterState	= nullptr;
 
 		public:
 			FrameBuffer diffuseFBO;
@@ -39,7 +42,7 @@ namespace Cookie
 			LightPass(int width, int height);
 			~LightPass();
 
-			void Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& albedoFBO, const Core::Math::Vec3& camPos);
+			void Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& albedoFBO);
 			void Draw(const LightsArray& lights, const ShadowBuffer& shadowMap, const DrawDataHandler& drawData);
 			void Clear();
 		};

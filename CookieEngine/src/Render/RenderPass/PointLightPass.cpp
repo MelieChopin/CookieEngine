@@ -47,7 +47,6 @@ void PointLightPass::InitShader()
     struct VOut
     {
         float4  position    : SV_POSITION;
-        float2  uv          : UV;
         float3  lightPos    : LIGHTPOS;
         float   radius      : RADIUS;
         float3  color       : COLOR;
@@ -84,7 +83,6 @@ void PointLightPass::InitShader()
         model[3][3] = 1.0;
 
         output.position = mul(mul(mul(model,float4(input.position,1.0)),view),proj);
-        output.uv       = input.uv;
         output.lightPos = input.lightPos;
         output.radius   = input.radius;
         output.color    = input.lightColor;
@@ -105,7 +103,6 @@ void PointLightPass::InitShader()
     struct VOut
     {
         float4 position     : SV_POSITION;
-        float2 uv           : UV;
         float3 lightPos     : LIGHTPOS;
         float radius        : RADIUS;
         float3 color        : COLOR;
@@ -113,23 +110,44 @@ void PointLightPass::InitShader()
     };
 
     SamplerState ClampSampler : register(s0);
+    static const float clipEpsilon = 0.001;
+
+    //from https://gamedev.net/forums/topic/664177-quadratic-attenuation-for-radius/5200635/
+    float Falloff(float distance, float radius ) 
+    {
+    	float distOverRadius = distance / radius;
+    	float distOverRadius2 = distOverRadius * distOverRadius;
+    	float distOverRadius4 = distOverRadius2 * distOverRadius2;
+    	float falloff = saturate( 1.0 - distOverRadius4 );
+        falloff *= falloff;
+    	falloff /=  (distance *distance) + 1.0;
+        
+        clip(falloff - clipEpsilon);
+
+    	return falloff;
+    }
 
     POut main(VOut vertexOutput)
     {
         POut output;
-            
-        float3  fragPos     = positionTex.Sample(ClampSampler,vertexOutput.uv).xyz;
-        float3  normal      = normalize(normalTex.Sample(ClampSampler,vertexOutput.uv).xyz);
-        float3  albedo      = pow(albedoTex.Sample(ClampSampler,vertexOutput.uv).xyz,2.2);
-        float   metallic    = positionTex.Sample(ClampSampler,vertexOutput.uv).w;
-        float   roughness   = normalTex.Sample(ClampSampler,vertexOutput.uv).w;
-        float   ao          = albedoTex.Sample(ClampSampler,vertexOutput.uv).w;
-        float3  lightDir    = (fragPos - vertexOutput.lightPos);
+        
+        float2 uv = vertexOutput.position.xy;
+        uv.x = (uv.x/screenSize.x);
+        uv.y = (uv.y/screenSize.y);
 
-        output          = compute_lighting(normal,fragPos,normalize(-lightDir),vertexOutput.color,albedo,metallic,roughness);
-        output.diffuse  = output.diffuse + (0.03 * ao + 0.01) *  float4(albedo,1.0);
+        float3  fragPos     = positionTex.Sample(ClampSampler,uv).xyz;
+        float3  normal      = normalize(normalTex.Sample(ClampSampler,uv).xyz);
+        float3  albedo      = pow(albedoTex.Sample(ClampSampler,uv).xyz,2.2);
+        float   metallic    = positionTex.Sample(ClampSampler,uv).w;
+        float   roughness   = normalTex.Sample(ClampSampler,uv).w;
+        float   ao          = albedoTex.Sample(ClampSampler,uv).w;
+        float3  lightDir    = (vertexOutput.lightPos - fragPos);
+        float   dist        = length(lightDir);
+
+        output          = compute_lighting(normal,fragPos,normalize(lightDir),vertexOutput.color,albedo,metallic,roughness);
+        output.diffuse  = output.diffuse * Falloff(dist,vertexOutput.radius) + (0.03 * ao) *  float4(albedo,1.0);
         output.diffuse  = pow(output.diffuse,0.45454545);
-        output.specular = pow(output.specular,0.45454545);
+        output.specular = pow(output.specular * Falloff(dist,vertexOutput.radius),0.45454545);//
 
         return output;
     })");
@@ -163,20 +181,15 @@ void PointLightPass::InitShader()
 
 /*======================= REALTIME METHODS =======================*/
 
-void PointLightPass::Set(ID3D11Buffer** lightCBuffer, const DrawDataHandler& drawData)
+void PointLightPass::Set(ID3D11Buffer** lightCBuffer, const LightsArray& lights, const DrawDataHandler& drawData)
 {
-    
     RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     RendererRemote::context->PSSetShader(PShader, nullptr, 0);
-
+    Render::RendererRemote::context->PSSetConstantBuffers(0, 1, lightCBuffer);
     RendererRemote::context->IASetInputLayout(ILayout);
-
-    Render::RendererRemote::context->PSSetConstantBuffers(1, 1, lightCBuffer);
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &drawData.CamCBuffer);
-}
 
-void PointLightPass::Draw(const LightsArray& lights)
-{
+
     WriteCBuffer(lights.pointLights.data(), sizeof(INSTANCE_POINT_LIGHT) * lights.usedPoints, 0, &IBuffer);
 
     UINT stride[2] = { ((2 * sizeof(Core::Math::Vec3)) + sizeof(Core::Math::Vec2)), sizeof(INSTANCE_POINT_LIGHT) };
@@ -185,6 +198,9 @@ void PointLightPass::Draw(const LightsArray& lights)
 
     RendererRemote::context->IASetIndexBuffer(sphereMesh->IBuffer, DXGI_FORMAT_R32_UINT, 0);
     RendererRemote::context->IASetVertexBuffers(0, 2, VBuffers, stride, offset);
- 
-    RendererRemote::context->DrawIndexedInstanced(sphereMesh->INb, lights.usedPoints, 0, 0, 0);
+}
+
+void PointLightPass::Draw(const unsigned int instanceNb)
+{
+    RendererRemote::context->DrawIndexedInstanced(sphereMesh->INb, instanceNb, 0, 0, 0);
 }

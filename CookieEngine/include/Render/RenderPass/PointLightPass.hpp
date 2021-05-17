@@ -36,8 +36,8 @@ namespace Cookie
 			PointLightPass();
 			~PointLightPass();
 
-			void Set(ID3D11Buffer** lightCBuffer, const DrawDataHandler& drawData);
-			void Draw(const LightsArray& lights);
+			void Set(ID3D11Buffer** lightCBuffer, const LightsArray& lights, const DrawDataHandler& drawData);
+			void Draw(const unsigned int instanceNb);
 		};
 	}
 }

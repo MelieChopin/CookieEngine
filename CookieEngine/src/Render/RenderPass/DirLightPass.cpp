@@ -53,8 +53,8 @@ void DirLightPass::InitShader()
         VOut output;
     
         float2 uv = float2((vI << 1) & 2, vI & 2);
-        output.uv = float2(uv.x,uv.y);
-        output.position = float4(uv.x * 2 - 1, -uv.y * 2 + 1, 0, 1);
+        output.uv = float2(1 - uv.x, uv.y);
+        output.position = float4(-uv.x * 2 + 1, -uv.y * 2 + 1, 0, 1);
     
         return output;
 
@@ -72,7 +72,7 @@ void DirLightPass::InitShader()
 
     static const float shadowTexelSize = 1.0/4096.0;
 
-    cbuffer DirLight : register(b0)
+    cbuffer DirLight : register(b1)
     {
         float3      lightDir;
         float       castShadow;
@@ -165,7 +165,7 @@ void DirLightPass::Set(const DirLight& dirLight, const ShadowBuffer& shadowMap, 
 
     RendererRemote::context->IASetInputLayout(nullptr);
 
-    ID3D11Buffer* buffer[] = { CBuffer, *lightCBuffer };
+    ID3D11Buffer* buffer[] = { *lightCBuffer , CBuffer };
 
     Render::RendererRemote::context->PSSetConstantBuffers(0, 2, buffer);
 

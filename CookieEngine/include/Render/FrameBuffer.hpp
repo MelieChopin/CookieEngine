@@ -18,10 +18,12 @@ namespace Cookie
 				ID3D11ShaderResourceView*	shaderResource		{ nullptr };
 				ID3D11RenderTargetView*		renderTargetView	{ nullptr };
 				DXGI_FORMAT					format				{ DXGI_FORMAT_UNKNOWN };
+				int							width				= 0;
+				int							height				= 0;
 
 
 			private:
-				bool CreateTexture(int width, int height);
+				bool CreateTexture();
 				bool CreateShaderResource();
 				bool CreateRenderTargetView();
 

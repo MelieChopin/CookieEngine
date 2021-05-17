@@ -22,9 +22,16 @@ Renderer::Renderer():
 {
     CreateDrawBuffer(window.width,window.height);
     remote.context->RSSetViewports(1, &viewport);
-    lights.dirLight = { {0.0f,-1.0f,1.0f},{1.0f,1.0f,1.0f}, true};
-    lights.pointLights[0] = { {0.0f,1.0f,0.0f},1.0f,{1.0f,0.0f,0.0f} };
-    lights.usedPoints++;
+    lights.dirLight = { {0.0f,-1.0f,1.0f},{0.5f,0.5f,0.5f}, true};
+
+    for (int i = -4; i < 4; i++)
+    {
+        for (int j = -4; j < 4; j++)
+        {
+            float k = lights.usedPoints++;
+            lights.pointLights[k] = { {i * 10.0f ,1.0f, j * 10.0f }, 20.0f,{((float)i+4.0f)/8.0f,((float)j + 4.0f) / 8.0f ,0.0f} };
+        }
+    }
 }
 
 Renderer::~Renderer()
@@ -180,10 +187,12 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     sPass.Draw(drawData, lights);
     remote.context->RSSetViewports(1, &viewport);
 
-    lPass.Set(gPass.posFBO,gPass.normalFBO,gPass.albedoFBO,cam->pos);
+    lPass.Set(gPass.posFBO,gPass.normalFBO,gPass.albedoFBO);
     lPass.Draw(lights,sPass.shadowMap,drawData);
 
+    //remote.context->ClearState();
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
+    sPass.Set();
 
     if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F1] >= 0.0f)
     {
@@ -243,7 +252,7 @@ void Renderer::Clear()
     Core::Math::Vec4 clearColor = {0.0f,0.0f,0.0f,1.0f};
 
     remote.context->ClearRenderTargetView(backbuffer, clearColor.e);
-    remote.context->ClearDepthStencilView(gPass.depthBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0.0f);
+    remote.context->ClearDepthStencilView(gPass.depthBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     sPass.Clear();
 
     ID3D11ShaderResourceView* null = nullptr;
