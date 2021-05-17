@@ -1,5 +1,8 @@
 #include "Scene.hpp"
+#include "ResourcesManager.hpp"
 #include "WorldSettingsWidget.hpp"
+
+#include "MapExplorerHelper.hpp"
 
 #include <imgui.h>
 
@@ -59,6 +62,24 @@ void WorldSettingsWidget::WindowDisplay()
 				TextWrapped("Please refrain from inputing very low/negative values.");
 				PopStyleColor();
 			}
+		}
+
+
+		// Model
+		{
+			Text("Map albedo:"); SameLine(100);
+
+			ResourceMapExplorer<Texture>("texture", "##MAPTEXTSELECT", resources.textures, scene->map.model.albedo);
+
+
+			Text("Map normal:"); SameLine(100);
+
+			ResourceMapExplorer<Texture>("normal texture", "##MAPNORMSELECT", resources.textures, scene->map.model.normal);
+
+
+			ImGui::Custom::TextSnip("Map metallic-Roughness", 9); SameLine(); Text(":"); SameLine(100);
+
+			ResourceMapExplorer<Texture>("metallic-rough texture", "##MAPMRSELECT", resources.textures, scene->map.model.metallicRoughness);
 		}
 	}
 

@@ -6,6 +6,9 @@
 
 namespace Cookie::UIwidget
 {
+	namespace GameWidgetID
+	{ constexpr int TestBoiID = 1 << 20; }
+
 	class TestBoi final : public GameWindowBase
 	{
 	public:
@@ -14,6 +17,8 @@ namespace Cookie::UIwidget
 		{}
 
 		void WindowDisplay() override;
+
+		inline int GetID() override {return GameWidgetID::TestBoiID;};
 	};
 }
 

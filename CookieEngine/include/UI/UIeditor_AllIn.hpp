@@ -1,7 +1,5 @@
-#ifndef __UI_ALL_IN_HPP_
-#define __UI_ALL_IN_HPP_
-
-#include "UIcore.hpp"
+#ifndef __UI_EDITOR_ALL_IN_HPP__
+#define __UI_EDITOR_ALL_IN_HPP__
 
 #include "UIeditor.hpp"
 

@@ -24,19 +24,6 @@ namespace Cookie
 			CGPAttack() {}
 			~CGPAttack() {}
 
-			void Attack() 
-			{
-				//add Check so attackCooldown will not have high negative value if unit stand still long enough
-				if(attackCooldown > 0)
-					attackCooldown -= Core::DeltaTime();
-
-				if (target && attackCooldown <= 0)
-				{
-					attackCooldown = 1.f / attackSpeed;
-					target->TakeHit(attackDamage);
-				}
-			}
-
 			inline void ToDefault() noexcept
 			{
 				needToAttack = false;
@@ -45,6 +32,9 @@ namespace Cookie
 				attackRange = 0;
 				target = nullptr;
 			}
+
+			void Attack();
+
 		};
 
 

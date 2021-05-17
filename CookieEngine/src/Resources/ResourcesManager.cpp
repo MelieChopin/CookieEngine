@@ -130,10 +130,10 @@ void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandl
 	newPrefab.name = entity.name;
 	newPrefab.signature = entity.signature;
 	newPrefab.filepath = "Assets/Prefabs/" + entity.name + ".PAsset";
-	if (entity.signature & Cookie::ECS::C_SIGNATURE::MODEL)
-		newPrefab.model = component.GetComponentModel(entity.id);
 	if (entity.signature & Cookie::ECS::C_SIGNATURE::TRANSFORM)
 		newPrefab.transform = component.GetComponentTransform(entity.id);
+	if (entity.signature & Cookie::ECS::C_SIGNATURE::MODEL)
+		newPrefab.model = component.GetComponentModel(entity.id);
 	if (entity.signature & Cookie::ECS::C_SIGNATURE::PHYSICS)
 		newPrefab.physics = component.GetComponentPhysics(entity.id);
 	if (entity.signature & Cookie::ECS::C_SIGNATURE::GAMEPLAY)

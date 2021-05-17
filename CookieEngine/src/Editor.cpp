@@ -1,5 +1,6 @@
 #include "Editor.hpp" 
-#include "UIallIn.hpp"
+#include "UIcore.hpp"
+#include "UIeditor_AllIn.hpp"
 #include "Serialization.hpp"
 #include "Primitives.hpp"
 #include "Physics/PhysicsHandle.hpp"
@@ -15,6 +16,7 @@ using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
 using namespace Cookie::ECS::System;
 using namespace Cookie::Gameplay;
+using namespace Cookie::Resources;
 using namespace rp3d;
 
 Editor::Editor()
@@ -55,17 +57,17 @@ Editor::Editor()
     editorUI.AddWItem(new UIwidget::TextureEditor(game.resources), 1);
     editorUI.AddWItem(new UIwidget::GameUIeditor(game.renderer.window, game.scene), 1);
 
-    editorUI.AddWItem(new UIwidget::GamePort(game), 2);
+    editorUI.AddWItem(new UIwidget::GamePort(isPlaying, game), 2);
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
     editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
-    editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene), 2);
+    editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.resources), 2);
     editorUI.AddWItem(new UIwidget::Console(CDebug, game.renderer), 2);
     editorUI.AddWItem(new UIwidget::FileExplorer(game.renderer, game), 2);
 
     editorUI.AddWItem(new UIwidget::DemoWindow, 3);
 
 
-    UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.renderer);
+    UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.renderer, isPlaying);
     editorUI.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, editorFBO, &cam, game.coordinator, selectedEntity));
 
     InitEditComp();
@@ -107,13 +109,7 @@ void Editor::ModifyEditComp()
 
 void Editor::Loop()
 {
-    Cookie::Resources::SoundManager::SetVolume("Music.mp3", 0.25f);
-    Cookie::Resources::SoundManager::Loop("Music.mp3");
     Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
-    
-    Cookie::Resources::SoundManager::SetVolume("Magic.mp3", 0.15f);
-    Cookie::Resources::SoundManager::Set3D("Magic.mp3", Cookie::Core::Math::Vec3(0, 10, 0));
-    
 
     Physics::PhysicsHandle physHandle;
 
@@ -221,7 +217,7 @@ void Editor::Loop()
             Cookie::Resources::SoundManager::SetPaused("Music.mp3", true);
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_L) == GLFW_PRESS)
             Cookie::Resources::SoundManager::SetPaused("Music.mp3", false);
-        //
+        
 
         // Present frame
         if (isPlaying)
@@ -275,7 +271,7 @@ void Editor::Loop()
             if (game.scene->map.physic.physBody->raycast(ray, raycastInfo))
             {
                 Vec3 hitPoint{ raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z };
-                hitPoint.Debug();
+                //hitPoint.Debug();
 
                 mousePos =  {{hitPoint.x, hitPoint.z}};
                 indexOfSelectedTile = game.scene->map.GetTileIndex(mousePos);
@@ -352,54 +348,52 @@ void Editor::Loop()
                     ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(selectedEntityId);
                     if (game.scene->map.ApplyPathfinding(game.scene->map.GetTile(trs.pos), game.scene->map.tiles[indexOfSelectedTile]))
                         game.coordinator.componentHandler->GetComponentGameplay(selectedEntityId).componentMove.SetPath(game.scene->map.tiles[indexOfSelectedTile], trs);
-                }
-                */
+                }*/
+                
             }
         }
         //Bind Key to create new unit
         {
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N] && isRaycastingWithMap)
             {
-                game.coordinator.AddEntity(C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL + C_SIGNATURE::GAMEPLAY, "Unit " + std::to_string(nbOfUnits));
-                //should create constructor copy for each Component 
+                ECS::Entity& entity =  game.coordinator.AddEntity(C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL + C_SIGNATURE::GAMEPLAY, "Unit " + std::to_string(nbOfUnits));
                 {
-                    ECS::Entity& entity = game.coordinator.entityHandler->entities[game.coordinator.entityHandler->livingEntities - 1];
                     ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(entity.id);
                     ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(entity.id);
                     ComponentGameplay& gameplay = game.coordinator.componentHandler->GetComponentGameplay(entity.id);
-                    entity.tag = "good";
-                    gameplay.signatureGameplay = CGP_SIGNATURE::ALL_CGP;
+                    gameplay.teamName = "good";
+                    gameplay.signatureGameplay = CGP_SIGNATURE::ALL_CGP - CGP_SIGNATURE::ATTACK;
+                    gameplay.type = E_ARMY_TYPE::E_WORKER;
 
                     trs.pos = { mousePos.x, 1, mousePos.y };
                     trs.trsHasChanged = true;
 
                     model.mesh = game.resources.meshes["Cube"].get();
                     model.albedo = game.resources.textures["Green"].get();
-                    //model.shader = game.resources.shaders["Texture_Shader"];
 
+                    game.coordinator.armyHandler->AddElementToArmy(&gameplay);
                 }
 
                 nbOfUnits++;
             }
             if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B] && isRaycastingWithMap)
             {
-                game.coordinator.AddEntity(C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL + C_SIGNATURE::GAMEPLAY, "Unit " + std::to_string(nbOfUnits));
-                //should create constructor copy for each Component 
+                ECS::Entity& entity = game.coordinator.AddEntity(C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL + C_SIGNATURE::GAMEPLAY, "Unit " + std::to_string(nbOfUnits));
                 {
-                    ECS::Entity& entity = game.coordinator.entityHandler->entities[game.coordinator.entityHandler->livingEntities - 1];
                     ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(entity.id);
                     ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(entity.id);
                     ComponentGameplay& gameplay = game.coordinator.componentHandler->GetComponentGameplay(entity.id);
-                    entity.tag = "bad";
-                    gameplay.signatureGameplay = CGP_SIGNATURE::ALL_CGP;
+                    gameplay.teamName = "bad";
+                    gameplay.signatureGameplay = CGP_SIGNATURE::ALL_CGP - CGP_SIGNATURE::ATTACK;
+                    gameplay.type = E_ARMY_TYPE::E_WORKER;
 
                     trs.pos = { mousePos.x, 1, mousePos.y };
                     trs.trsHasChanged = true;
 
                     model.mesh = game.resources.meshes["Cube"].get();
                     model.albedo = game.resources.textures["Red"].get();
-                    //model.shader = game.resources.shaders["Texture_Shader"];
 
+                    game.coordinator.armyHandler->AddElementToArmy(&gameplay);
                 }
 
                 nbOfUnits++;
@@ -438,9 +432,14 @@ void Editor::Loop()
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
 
 
+        for (int i = 0; i < game.coordinator.armyHandler->livingArmies; ++i)
+            std::cout << "Army name : " << game.coordinator.armyHandler->armies[i].name <<
+                        " Army Primary Income : " << game.coordinator.armyHandler->armies[i].income.primary << "\n";
+
+
         game.coordinator.UpdateCGPProducer();
         game.coordinator.UpdateCGPWorker();
-        game.coordinator.UpdateCGPMove(game.scene->map);
+        game.coordinator.UpdateCGPMove(game.scene->map, dbgRenderer);
         game.coordinator.UpdateCGPAttack();
 
         game.coordinator.ApplyRemoveUnnecessaryEntities();
@@ -450,9 +449,10 @@ void Editor::Loop()
             game.particlesHandler.Update();
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
             isActive = true;
-
         game.coordinator.ApplyComputeTrs();
-        game.coordinator.ApplyGameplayDrawPath(dbgRenderer);
+
+
+        //Draw
         game.renderer.Draw(&cam, game,editorFBO);
         if (isRaycastingWithMap)
             dbgRenderer.AddQuad(buildingPos, buildingTileSize.x * game.scene->map.tilesSize.x / 2, buildingTileSize.y * game.scene->map.tilesSize.y / 2, (isBuildingValid) ? 0x00FF00 : 0xFF0000);
@@ -460,12 +460,11 @@ void Editor::Loop()
             game.particlesHandler.particlesSystems[i].Draw(cam, game.resources);
         dbgRenderer.Draw(cam.GetViewProj());
 
-        game.renderer.SetBackBuffer();
 
+        game.renderer.SetBackBuffer();
         UIcore::BeginFrame();
         editorUI.UpdateUI();
         UIcore::EndFrame();
-
         game.renderer.Render();
 
     }

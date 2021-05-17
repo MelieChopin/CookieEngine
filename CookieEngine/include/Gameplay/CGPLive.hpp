@@ -16,15 +16,13 @@ namespace Cookie
 			CGPLive() {}
 			~CGPLive() {}
 
-			void TakeHit(const float damage) 
-			{ 
-				life -= std::fmax(damage - armor, 0); 
-			}
 			inline void ToDefault() noexcept
 			{
 				life = 10;
 				armor = 0;
 			}
+
+			void TakeHit(const float damage);
 		};
 
 

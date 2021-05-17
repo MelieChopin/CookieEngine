@@ -123,12 +123,21 @@ set (SRC_FILES
     
     "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
     
+
     "${SRC_DIR}/ECS/ComponentEditor.cpp"
     "${SRC_DIR}/ECS/ComponentHandler.cpp"
     "${SRC_DIR}/ECS/ComponentModel.cpp" 
     "${SRC_DIR}/ECS/ComponentPhysics.cpp"
     "${SRC_DIR}/ECS/Coordinator.cpp"
     "${SRC_DIR}/ECS/EntityHandler.cpp"
+
+
+    "${SRC_DIR}/Gameplay/ArmyHandler.cpp"
+    "${SRC_DIR}/Gameplay/CGPAttack.cpp"
+    "${SRC_DIR}/Gameplay/CGPLive.cpp"
+    "${SRC_DIR}/Gameplay/CGPMove.cpp"
+    "${SRC_DIR}/Gameplay/CGPProducer.cpp"
+    "${SRC_DIR}/Gameplay/CGPWorker.cpp"
     
 
     "${SRC_DIR}/Editor.cpp" 

@@ -1,21 +1,14 @@
-
-#include <d3d11.h>
-#include "Coordinator.hpp"
-#include "Resources/Scene.hpp"
-#include "ECS/ComponentModel.hpp"
-#include "Resources/Mesh.hpp"
-#include "Resources/Texture.hpp"
-#include "Resources/ResourcesManager.hpp" 
-#include "InspectorWidget.hpp"
 #include "Editor.hpp"
 #include <reactphysics3d.h>
 #include "InspectorWidget.hpp"
 
-#include <string>
+#include "MapExplorerHelper.hpp"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
+
 #include "CustomImWidget.hpp"
+
 
 using namespace ImGui;
 using namespace Cookie::UIwidget;
@@ -127,169 +120,26 @@ void Inspector::ModelInterface()
 
         Text("Mesh:"); SameLine(100);
 
-        if (BeginCombo("##MESHSELECT", modelComp.mesh != nullptr ? modelComp.mesh->name.c_str() : "No mesh applied", ImGuiComboFlags_HeightLarge))
-        {
-            InputText("Mesh search", &researchString, ImGuiInputTextFlags_AutoSelectAll);
+        ResourceMapExplorer<Mesh>("mesh", "##MESHSELECT", resources.meshes, modelComp.mesh);
 
-            NewLine();
-            
-            for (std::unordered_map<std::string, std::unique_ptr<Mesh>>::iterator meshIt = resources.meshes.begin(); meshIt != resources.meshes.end(); meshIt++)
-            {
-                const bool is_selected = (modelComp.mesh != nullptr && modelComp.mesh->name == meshIt->second->name);
 
-                if ((meshIt->second->name.find(researchString) != std::string::npos) && ImGui::Selectable(meshIt->second->name.c_str(), is_selected))
-                {
-                    modelComp.mesh = meshIt->second.get();
-                }
-
-                if (is_selected)
-                    ImGui::SetItemDefaultFocus();
-            }
-
-            NewLine();
-
-            if (modelComp.mesh != nullptr)
-            {
-                if (Button("Clear current mesh"))
-                    modelComp.mesh = nullptr;
-            }
-            else TextDisabled("Clear current mesh");
-
-            EndCombo();
-        }
-
-        if (ImGui::IsItemClicked())
-            researchString.clear();
-
-//===== TEXTURE =====//
+//===== TEXTURES =====//
         
         Text("Albedo:"); SameLine(100);
 
-        if (BeginCombo("##AlbedoSELECT", modelComp.albedo != nullptr ? modelComp.albedo->name.c_str() : "No texture applied", ImGuiComboFlags_HeightLarge))
-        {
-            InputText("Texture search", &researchString, ImGuiInputTextFlags_AutoSelectAll);
+        ResourceMapExplorer<Texture>("texture", "##ALDEBOSELECT", resources.textures, modelComp.albedo);
 
-            NewLine();
-
-            for (std::unordered_map<std::string, std::unique_ptr<Texture>>::iterator textIt = resources.textures.begin(); textIt != resources.textures.end(); textIt++)
-            {
-                const bool is_selected = (modelComp.albedo != nullptr && textIt->second &&  modelComp.albedo->name == textIt->second->name);
-
-                if (textIt->second && textIt->second->name.find(researchString) != std::string::npos)
-                {
-                    if (textIt->second->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
-                    {
-                        Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
-
-                        SameLine();
-
-                        if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
-                            modelComp.albedo = textIt->second.get();
-                    }
-                }
-
-                if (is_selected)
-                    ImGui::SetItemDefaultFocus();
-            }
-
-            NewLine();
-
-            if (modelComp.albedo != nullptr)
-            {
-                if (Button("Clear current texture"))
-                    modelComp.albedo = nullptr;
-            }
-            else TextDisabled("Clear current texture");
-
-            EndCombo();
-        }
 
         Text("Normal:"); SameLine(100);
 
-        if (BeginCombo("##NormSELECT", modelComp.normal != nullptr ? modelComp.normal->name.c_str() : "No texture applied", ImGuiComboFlags_HeightLarge))
-        {
-            InputText("Texture search", &researchString, ImGuiInputTextFlags_AutoSelectAll);
+        ResourceMapExplorer<Texture>("normal texture", "##NORMSELECT", resources.textures, modelComp.normal);
 
-            NewLine();
 
-            for (std::unordered_map<std::string, std::unique_ptr<Texture>>::iterator textIt = resources.textures.begin(); textIt != resources.textures.end(); textIt++)
-            {
-                const bool is_selected = (modelComp.normal != nullptr && textIt->second && modelComp.normal->name == textIt->second->name);
+        ImGui::Custom::TextSnip("metallic-Roughness", 7); SameLine(); Text(":"); SameLine(100);
 
-                if (textIt->second && textIt->second->name.find(researchString) != std::string::npos)
-                {
-                    if (textIt->second->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
-                    {
-                        Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
+        ResourceMapExplorer<Texture>("metallic-rough texture", "##MRSELECT", resources.textures, modelComp.metallicRoughness);
 
-                        SameLine();
-
-                        if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
-                            modelComp.normal = textIt->second.get();
-                    }
-                }
-
-                if (is_selected)
-                    ImGui::SetItemDefaultFocus();
-            }
-
-            NewLine();
-
-            if (modelComp.normal != nullptr)
-            {
-                if (Button("Clear current texture"))
-                    modelComp.normal = nullptr;
-            }
-            else TextDisabled("Clear current texture");
-
-            EndCombo();
-        }
-
-        Text("Metallic-Roughness:"); SameLine(100);
-
-        if (BeginCombo("##MRSELECT", modelComp.metallicRoughness != nullptr ? modelComp.metallicRoughness->name.c_str() : "No texture applied", ImGuiComboFlags_HeightLarge))
-        {
-            InputText("Texture search", &researchString, ImGuiInputTextFlags_AutoSelectAll);
-
-            NewLine();
-
-            for (std::unordered_map<std::string, std::unique_ptr<Texture>>::iterator textIt = resources.textures.begin(); textIt != resources.textures.end(); textIt++)
-            {
-                const bool is_selected = (modelComp.metallicRoughness != nullptr && textIt->second && modelComp.metallicRoughness->name == textIt->second->name);
-
-                if (textIt->second && textIt->second->name.find(researchString) != std::string::npos)
-                {
-                    if (textIt->second->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
-                    {
-                        Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
-
-                        SameLine();
-
-                        if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
-                            modelComp.metallicRoughness = textIt->second.get();
-                    }
-                }
-
-                if (is_selected)
-                    ImGui::SetItemDefaultFocus();
-            }
-
-            NewLine();
-
-            if (modelComp.metallicRoughness != nullptr)
-            {
-                if (Button("Clear current texture"))
-                    modelComp.metallicRoughness = nullptr;
-            }
-            else TextDisabled("Clear current texture");
-
-            EndCombo();
-        }
-
-        if (ImGui::IsItemClicked())
-            researchString.clear();
-
-        //===================//
+//====================//
 
         NewLine();
         if (Selectable("Remove component##MODEL"))
@@ -558,7 +408,7 @@ void Inspector::ScriptInterface()
             Text("%s", scriptComp.scripts[i].script->filename.c_str());
             Indent();
             
-            if (Button( ("Remove##SCRIPT_" + std::to_string(i)).c_str() ))
+            if (Button( ("Remove##SCRIPT" + std::to_string(i)).c_str() ))
             {
                 scriptComp.scripts.erase(scriptComp.scripts.begin() + i);
             }
@@ -614,16 +464,13 @@ void Inspector::GameplayInterface()
 
                 NewLine();
                 if (Selectable("Remove property##LIVE"))
-                {
-                    gameplayComp.componentLive.ToDefault();
-                    gameplayComp.signatureGameplay -= CGP_SIGNATURE::LIVE;
-                }
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::LIVE);
 
                 TreePop();
             }
         }
         else if (Selectable("Add life/Armor properties"))
-            gameplayComp.signatureGameplay += CGP_SIGNATURE::LIVE;
+            gameplayComp.AddComponent(CGP_SIGNATURE::LIVE);
 
 
         if (gameplayComp.signatureGameplay & CGP_SIGNATURE::MOVE)
@@ -638,16 +485,13 @@ void Inspector::GameplayInterface()
 
                 NewLine();
                 if (Selectable("Remove property##MOVE"))
-                {
-                    gameplayComp.componentMove.ToDefault();
-                    gameplayComp.signatureGameplay -= CGP_SIGNATURE::MOVE;
-                }
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::MOVE);
 
                 TreePop();
             }
         }
         else if (Selectable("Add movement capacities"))
-            gameplayComp.signatureGameplay += CGP_SIGNATURE::MOVE;
+            gameplayComp.AddComponent(CGP_SIGNATURE::MOVE);
 
 
         if (gameplayComp.signatureGameplay & CGP_SIGNATURE::ATTACK)
@@ -661,16 +505,13 @@ void Inspector::GameplayInterface()
 
                 NewLine();
                 if (Selectable("Remove property##ATTACK"))
-                {
-                    gameplayComp.componentMove.ToDefault();
-                    gameplayComp.signatureGameplay -= CGP_SIGNATURE::ATTACK;
-                }
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::ATTACK);
 
                 TreePop();
             }
         }
         else if (Selectable("Add attack abilities"))
-            gameplayComp.signatureGameplay += CGP_SIGNATURE::ATTACK;
+            gameplayComp.AddComponent(CGP_SIGNATURE::ATTACK);
 
 
         NewLine();

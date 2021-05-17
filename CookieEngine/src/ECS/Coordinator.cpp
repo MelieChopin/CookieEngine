@@ -1,4 +1,5 @@
 #include "ResourcesManager.hpp"
+#include "Resources/Prefab.hpp"
 #include "Resources/Map.hpp"
 #include "Core/Primitives.hpp"
 #include "Render/DebugRenderer.hpp"
@@ -18,13 +19,13 @@ using namespace Cookie::ECS;
 
 
 //Entity
-void Coordinator::AddEntity(const int signature, std::string name)
+Entity& Coordinator::AddEntity(const int signature, std::string name)
 {
 	assert(entityHandler->livingEntities < MAX_ENTITIES && "Too many entities in existence.");
 
 	Entity& newEntity = entityHandler->entities[entityHandler->livingEntities];
-	newEntity.name = name;
 	entityHandler->livingEntities++;
+	newEntity.name = name;
 
 	if (CheckSignature(signature, C_SIGNATURE::TRANSFORM))
 		componentHandler->AddComponent(newEntity, C_SIGNATURE::TRANSFORM);
@@ -37,6 +38,29 @@ void Coordinator::AddEntity(const int signature, std::string name)
 	if (CheckSignature(signature, C_SIGNATURE::GAMEPLAY))
 		componentHandler->AddComponent(newEntity, C_SIGNATURE::GAMEPLAY);
 
+	return newEntity;
+}
+Entity& Coordinator::AddEntity(std::shared_ptr<Resources::Prefab> prefab)
+{
+	assert(entityHandler->livingEntities < MAX_ENTITIES && "Too many entities in existence." && prefab != nullptr);
+
+	Entity& newEntity = entityHandler->entities[entityHandler->livingEntities];
+	entityHandler->livingEntities++;
+	newEntity.name = prefab->name;
+	newEntity.signature = prefab->signature;
+
+	if (CheckSignature(newEntity.signature, C_SIGNATURE::TRANSFORM))
+		componentHandler->GetComponentTransform(newEntity.id) = prefab->transform;
+	if (CheckSignature(newEntity.signature, C_SIGNATURE::MODEL))
+		componentHandler->GetComponentModel(newEntity.id) = prefab->model;
+	if (CheckSignature(newEntity.signature, C_SIGNATURE::PHYSICS))
+		componentHandler->GetComponentPhysics(newEntity.id) = prefab->physics;
+	//if (CheckSignature(signature, C_SIGNATURE::SCRIPT))
+		//componentHandler->GetComponentScript(newEntity.id) = prefab->script;
+	if (CheckSignature(newEntity.signature, C_SIGNATURE::GAMEPLAY))
+		componentHandler->GetComponentGameplay(newEntity.id) = prefab->gameplay;
+
+	return newEntity;
 }
 void Coordinator::RemoveEntity(Entity& entity)
 {
@@ -66,7 +90,7 @@ void Coordinator::SelectEntities(Vec2& selectionQuadStart, Vec2& selectionQuadEn
 	float maxZ = (selectionQuadStart.y < selectionQuadEnd.y) ? selectionQuadEnd.y : selectionQuadStart.y;
 
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM))
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY))
 		{
 			Vec3& entityPos = componentHandler->GetComponentTransform(i).pos;
 			if (minX <= entityPos.x && entityPos.x <= maxX &&
@@ -135,6 +159,16 @@ void Coordinator::ApplyScriptUpdate()
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::SCRIPT))
 			System::SystemScriptUpdate(componentHandler->GetComponentScript(entityHandler->entities[i].id));
 }
+void Coordinator::ApplyRemoveUnnecessaryEntities()
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (entityHandler->entities[i].needToBeRemoved ||
+			(CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::LIVE) && componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentLive.life <= 0))
+		{
+			RemoveEntity(entityHandler->entities[i]);
+			i = std::max(i - 1, 0);
+		}
+}
 void Coordinator::ApplyComputeTrs()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
@@ -149,29 +183,19 @@ void Coordinator::ApplyComputeTrs()
 			}
 		}
 }
-void Coordinator::ApplyRemoveUnnecessaryEntities()
-{
-	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (entityHandler->entities[i].needToBeRemoved ||
-			(CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::LIVE) && componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentLive.life <= 0))
-		{
-			RemoveEntity(entityHandler->entities[i]);
-			i = std::max(i - 1, 0);
-		}
-}
 
 
 //CGP_Producer
 void Coordinator::UpdateCGPProducer()
 {
-	ApplyGameplayUpdateCooldownProducer();
+	ApplyGameplayUpdateCountdownProducer();
 }
-void Coordinator::ApplyGameplayUpdateCooldownProducer()
+void Coordinator::ApplyGameplayUpdateCountdownProducer()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::PRODUCER))
-			componentHandler->GetComponentGameplay(i).componentProducer.UpdateCooldown();
+			componentHandler->GetComponentGameplay(i).componentProducer.UpdateCountdown(*this);
 }
 
 //CGP_Worker
@@ -184,17 +208,18 @@ void Coordinator::ApplyGameplayUpdateWorker()
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::WORKER))
-			componentHandler->GetComponentGameplay(i).componentWorker.Update(componentHandler->GetComponentTransform(i));
+			componentHandler->GetComponentGameplay(i).componentWorker.Update(componentHandler->GetComponentTransform(i), *this);
 }
 
 //CGP_Move
-void Coordinator::UpdateCGPMove(Resources::Map& map)
+void Coordinator::UpdateCGPMove(Resources::Map& map, Render::DebugRenderer& debug)
 {
 	ApplyGameplayUpdatePushedCooldown(map);
 	ApplyGameplayMoveTowardWaypoint();
 	ApplyGameplayMoveWithCommander();
 	ApplyGameplayPosPrediction();
 	ApplyGameplayResolveCollision();
+	ApplyGameplayDrawPath(debug);
 }
 void Coordinator::ApplyGameplayUpdatePushedCooldown(Resources::Map& map)
 {
@@ -310,8 +335,8 @@ void Coordinator::ApplyGameplayCheckEnemyInRange()
 
 			for (int j = 0; j < entityHandler->livingEntities; ++j)
 				if (i != j &&
-					entityHandler->entities[i].tag != entityHandler->entities[j].tag &&
-					CheckSignature(entityHandler->entities[j].signature, C_SIGNATURE::TRANSFORM) &&
+					CheckSignature(entityHandler->entities[j].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
+					componentHandler->GetComponentGameplay(entityHandler->entities[i].id).teamName != componentHandler->GetComponentGameplay(entityHandler->entities[j].id).teamName &&
 					CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[j].id).signatureGameplay, CGP_SIGNATURE::LIVE))
 				{
 					float possibleNewDist = (componentHandler->GetComponentTransform(i).pos - componentHandler->GetComponentTransform(j).pos).Length();

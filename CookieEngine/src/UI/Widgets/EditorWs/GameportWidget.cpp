@@ -6,23 +6,23 @@
 using namespace ImGui;
 using namespace Cookie::UIwidget;
 
-bool gameruntest = false;
-
 
 bool GamePort::BeginWindow(int windowFlags)
 {
-	if (!opened) 
-		if (!gameruntest)	return false;
-		else				Flip();
+	if (!opened)
+	{
+		if (!isPlaying)	return false;
+		else			Flip();
+	}
 
-	if (gameruntest)
+	if (isPlaying)
 	{
 		windowFlags |= ImGuiWindowFlags_NoDocking;
 		windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
 		windowFlags |= ImGuiWindowFlags_NoDecoration;
 	}
 	
-	contentVisible = ImGui::Begin(windowName, (gameruntest ? nullptr : &opened), windowFlags);
+	contentVisible = ImGui::Begin(windowName, (isPlaying ? nullptr : &opened), windowFlags);
 
 	if (!opened) visible = true;
 
@@ -32,17 +32,15 @@ bool GamePort::BeginWindow(int windowFlags)
 
 void GamePort::WindowDisplay()
 {
-	if (IsKeyPressed(GLFW_KEY_O))
-		gameruntest ^= 1;
-
-
 	TryBeginWindow()
 	{
-		if (!gameruntest)
+		if (!isPlaying)
 		{ Text("[Game not running]"); }
 
 		else
-		{ Text("[HA]"); }
+		{
+			ImGui::Image(static_cast<ImTextureID>(game.frameBuffer.shaderResource), {(float)game.renderer.window.width, (float)game.renderer.window.height});
+		}
 	}
 
 	ImGui::End();
