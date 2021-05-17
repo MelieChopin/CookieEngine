@@ -735,7 +735,7 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 {
 	GPComponent.teamName = gameplay["TeamName"];
 	GPComponent.signatureGameplay = gameplay["SignatureGameplay"];
-	GPComponent.type = gameplay["type"];
+	GPComponent.type = gameplay["Type"];
 
 	json temp = gameplay["Cost"];
 	GPComponent.cost.costPrimary = temp["CostPrimary"].get<float>();
