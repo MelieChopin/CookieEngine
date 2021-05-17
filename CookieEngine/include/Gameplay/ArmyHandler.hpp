@@ -2,6 +2,7 @@
 #define _ARMY_HANDLER_HPP__
 
 #include "ECS/ComponentGameplay.hpp"
+#include "Gameplay/ArmyCoordinator.hpp"
 #include "Gameplay/Income.hpp"
 
 namespace Cookie
@@ -31,9 +32,13 @@ namespace Cookie
 		public:
 			int               livingArmies {0};
 			std::array<Army, MAX_ARMIES> armies;
+			std::vector<ArmyCoordinator> armiesCoordinator;
 
 			ArmyHandler() {}
 			~ArmyHandler() {}
+
+			void AddArmyCoordinator(int index);
+			void AddArmyCoordinator(std::string name);
 
 			void AddElementToArmy(ECS::ComponentGameplay* element);
 			void AddElementToArmy(Army& army, ECS::ComponentGameplay* element);

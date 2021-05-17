@@ -15,32 +15,3 @@ using namespace Cookie::Render;
 LightsArray::LightsArray()
 {
 };
-
-void LightsArray::Clear()
-{
-
-	for (int i = 0; i < DIR_LIGHT_MAX_NB; i++)
-	{
-		DirLight& iLight = dirLights.at(i);
-
-		if (iLight.castShadow)
-		{
-			if (iLight.shadowMap)
-			{
-				iLight.shadowMap->Clear();
-			}
-			else
-			{
-				iLight.shadowMap = std::make_unique<ShadowBuffer>();
-			}
-		}
-		else
-		{
-			if (iLight.shadowMap)
-			{
-				iLight.shadowMap.reset();
-				iLight.shadowMap = nullptr;
-			}
-		}
-	}
-}

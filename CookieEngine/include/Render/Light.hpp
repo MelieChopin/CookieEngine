@@ -18,9 +18,10 @@ namespace Cookie
 		    float4 specular : SV_TARGET1; 
 		};
 
-		cbuffer Cam : register(b1)
+		cbuffer Cam : register(b0)
 		{
 		    float3 camPos;
+			float2 screenSize;
 		};
 		
 		float	compute_diffuse		(float3 lightDir, float3 normal)
@@ -65,9 +66,11 @@ namespace Cookie
 		    float4 specular : SV_TARGET1; 
 		};
 
-		cbuffer Cam : register(b1)
+		cbuffer Cam : register(b0)
 		{
-		    float3 camPos;
+		    float3	camPos;
+			float2	screenSize;
+			float	farPlane;
 		};
 		
 		float DistributionGGX(float3 normal, float3 halfAngleVec, float roughness)
@@ -137,28 +140,22 @@ namespace Cookie
 
 		)";
 
-		class ShadowBuffer;
-
-		#define DIR_LIGHT_MAX_NB 10
-
 		struct DirLight
 		{
 				Core::Math::Vec3 dir;
 				Core::Math::Vec3 color = {1.0f,1.0f,1.0f};
 				bool castShadow = false;
 				Core::Math::Mat4 lightViewProj;
-				std::unique_ptr<ShadowBuffer> shadowMap{nullptr};
-
 		};
 
-		#define SPHERE_LIGHT_MAX_NB 10
+		#define POINT_LIGHT_MAX_NB 64
 
-		struct SphereLight
+		struct PointLight
 		{
 				Core::Math::Vec3 pos	= { 0.0f,0.0f,0.0f };
+				float radius			= 0.0f;
 				Core::Math::Vec3 color  = { 1.0f,1.0f,1.0f };
 
-				float radius = 0.0f;
 		};
 
 		#define SPOT_LIGHT_MAX_NB 10
@@ -177,16 +174,15 @@ namespace Cookie
 		struct LightsArray
 		{
 			public:
-				std::array<DirLight, DIR_LIGHT_MAX_NB>	dirLights;
-				unsigned int							usedDir = 0;
-				//std::vector<SphereLight>				sphereLights;
+				DirLight dirLight;
+				bool useDir = true;
+				std::array<PointLight,POINT_LIGHT_MAX_NB> pointLights;
+				unsigned int usedPoints = 0;
 				//std::vector<SpotLight>					spotLights;
 
 
 			public:
 				LightsArray();
-
-				void Clear();
 		};
 	}
 }

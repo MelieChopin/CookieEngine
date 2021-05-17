@@ -9,20 +9,10 @@ struct ID3D11SamplerState;
 
 namespace Cookie
 {
-	namespace Core::Math
-	{
-		union Vec4;
-		union Mat4;
-	}
-
-	namespace ECS
-	{
-		class Coordinator;
-	}
-
 	namespace Render
 	{
 		struct DirLight;
+		class ShadowBuffer;
 
 		class DirLightPass
 		{
@@ -40,8 +30,7 @@ namespace Cookie
 			DirLightPass();
 			~DirLightPass();
 
-			void Set(ID3D11Buffer** lightCBuffer)const;
-			void Write(const DirLight& dirLight);
+			void Set(const DirLight& dirLight, const ShadowBuffer& shadowMap, ID3D11Buffer** lightCBuffer);
 		};
 	}
 }

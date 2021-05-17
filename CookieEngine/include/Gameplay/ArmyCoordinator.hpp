@@ -1,13 +1,15 @@
 #ifndef _ARMY_COORDINATOR_HPP__
 #define _ARMY_COORDINATOR_HPP__
 
-#include "ArmyHandler.hpp"
+#include <vector>
 
 namespace Cookie
 {
 	namespace Gameplay
 	{
-		enum E_GOAL
+		class Army;
+
+		enum E_GOALS
 		{
 			//Economic
 			E_DEVELOP_BASE,
@@ -25,14 +27,23 @@ namespace Cookie
 
 		class ArmyCoordinator
 		{
-			Army* army {nullptr};
+		public :
 
-			ArmyCoordinator() {}
+			Army*                army {nullptr};
+			std::vector<E_GOALS> goals;
+
+			ArmyCoordinator(Army* _army) : army{_army}  {}
 			~ArmyCoordinator() {}
 
+
 			//void Tactical(); done by the CGPAttack
-			void Analysis() {}
-			void ResourceAllocation() {}
+			void Analysis();
+			void ResourceAllocation();
+
+			void DevelopBase();
+			void DevelopArmy();
+			void Attack();
+
 		};
 
 
