@@ -1,5 +1,6 @@
 #include "Editor.hpp" 
-#include "UIallIn.hpp"
+#include "UIcore.hpp"
+#include "UIeditor_AllIn.hpp"
 #include "Serialization.hpp"
 #include "Primitives.hpp"
 #include "Physics/PhysicsHandle.hpp"
@@ -56,17 +57,17 @@ Editor::Editor()
     editorUI.AddWItem(new UIwidget::TextureEditor(game.resources), 1);
     editorUI.AddWItem(new UIwidget::GameUIeditor(game.renderer.window, game.scene), 1);
 
-    editorUI.AddWItem(new UIwidget::GamePort(game), 2);
+    editorUI.AddWItem(new UIwidget::GamePort(isPlaying, game), 2);
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
     editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
-    editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene), 2);
+    editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.resources), 2);
     editorUI.AddWItem(new UIwidget::Console(CDebug, game.renderer), 2);
     editorUI.AddWItem(new UIwidget::FileExplorer(game.renderer, game), 2);
 
     editorUI.AddWItem(new UIwidget::DemoWindow, 3);
 
 
-    UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.renderer);
+    UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.renderer, isPlaying);
     editorUI.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, editorFBO, &cam, game.coordinator, selectedEntity));
 
     InitEditComp();
@@ -108,13 +109,7 @@ void Editor::ModifyEditComp()
 
 void Editor::Loop()
 {
-    Cookie::Resources::SoundManager::SetVolume("Music.mp3", 0.25f);
-    Cookie::Resources::SoundManager::Loop("Music.mp3");
     Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
-    
-    Cookie::Resources::SoundManager::SetVolume("Magic.mp3", 0.15f);
-    Cookie::Resources::SoundManager::Set3D("Magic.mp3", Cookie::Core::Math::Vec3(0, 10, 0));
-    
 
     Physics::PhysicsHandle physHandle;
 

@@ -60,6 +60,15 @@ void Game::SetScene(const std::shared_ptr<Resources::Scene>& _scene)
 {
     scene = _scene;
     scene->InitCoordinator(coordinator);
+
+    scene->camera = std::make_shared<Render::GameCam>();
+
+    scene->camera->SetProj(Core::Math::ToRadians(60.f), renderer.window.width, renderer.window.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+    scene->camera->pos = { 0.f , 20.0f,30.0f };
+    scene->camera->rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
+    scene->camera->ResetPreviousMousePos();
+    scene->camera->Update();
+    scene->camera->Deactivate();
 }
 
 void Game::TryResizeWindow()

@@ -24,10 +24,9 @@ void Hierarchy::WindowDisplay()
     {
         if (BeginPopupContextWindow("Out-object hierarchy menu"))
         {
-            if (Button("Create empty"))
+            if (Selectable("Create empty"))
             { 
                 coordinator.AddEntity(C_SIGNATURE::EMPTY_C);
-                CloseCurrentPopup();
             }
         
             EndPopup();
@@ -44,24 +43,20 @@ void Hierarchy::WindowDisplay()
         {
             std::string entityNameTag = entityHandler.entities[i].name + "##" + std::to_string(i);
 
-            if (Button(entityNameTag.c_str()))
+            if (Selectable(entityNameTag.c_str()))
             {
                 selectedEntity.toChangeEntityId = entityHandler.entities[i].id;
             }
 
             if (BeginPopupContextItem(entityNameTag.c_str()))
             {
-                if (Button("Delete entity"))
-                {
+                if (Selectable("Delete entity"))
                     coordinator.RemoveEntity(entityHandler.entities[i]);
-                    CloseCurrentPopup();
-                }
 
-                if (Button("Save as prefab"))
+                if (Selectable("Save as prefab"))
                 {
                     resources.CreateNewPrefabs(entityHandler.entities[i], *coordinator.componentHandler);
                     Cookie::Resources::Serialization::Save::SavePrefab(resources.prefabs[entityHandler.entities[i].namePrefab]);
-                    CloseCurrentPopup();
                 }
                 
             

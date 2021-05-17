@@ -21,13 +21,26 @@ namespace Cookie::UIwidget
 		std::unique_ptr<Cookie::Resources::Texture> icons[(int)ToolbarIcons::ICOS_NUM];
 		
 		TransformTool	currentTrsfTool	= TransformTool::Translate;
-		bool			playing			= false;
+
+		
+		bool& isPlaying;
+
+		bool playing	= false;
+		bool paused		= false;
+		bool frame		= false;
+
+	private:
+		// Displays all the available tools and playflow options, can be interacted with at all times of course.
+		void ButtonsDisplay();
+
+		// Based on the 3 playflow booleans, the return determines the frame value of "isPlaying".
+		bool ProcessPlayFlow();
 
 	protected:
 		bool BeginWindow(int windowFlags = 0) override;
 
 	public:
-		Toolbar(Cookie::Render::Renderer& _renderer);
+		Toolbar(Cookie::Render::Renderer& _renderer, bool& _isPlaying);
 		~Toolbar();
 
 		void WindowDisplay() override;
@@ -35,9 +48,6 @@ namespace Cookie::UIwidget
 
 		inline const TransformTool& CurrentTrsfTool() const
 		{ return currentTrsfTool; }
-
-		inline const bool isPlaying() const
-		{ return playing; }
 	};
 }
 

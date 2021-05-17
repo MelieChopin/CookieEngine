@@ -15,7 +15,7 @@ namespace Cookie
 			FMOD_MODE					mode = FMOD_DEFAULT;
 			Cookie::Core::Math::Vec3	pos;
 			std::string					filepath;
-			float						vol;
+			float						vol = 1;
 		};
 	}
 }

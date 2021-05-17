@@ -6,6 +6,7 @@
 #include "Resources/Texture.hpp"
 #include "Resources/Scene.hpp"
 
+#include "SoundManager.hpp"
 #include "Resources/ResourcesManager.hpp"
 #include "ECS/ComponentHandler.hpp"
 #include "Resources/Serialization.hpp"
@@ -375,6 +376,29 @@ void Cookie::Resources::Serialization::Save::SavePhysic(json& js, Cookie::ECS::C
 	 js["physicTRS"]["quaternion"] = { quat.w, quat.x, quat.y, quat.z };
  }
 
+void Cookie::Resources::Serialization::Save::SaveVolumAndModeMusic(std::string key)
+{
+	Cookie::Resources::Sound sound = *(*(Cookie::Resources::SoundManager::sounds))[key].get();
+
+	std::string filepath = sound.filepath;
+
+	std::size_t pos = filepath.find(".mp3");
+	std::size_t end = filepath.length();
+
+	filepath.replace(pos, end, ".MAsset");
+
+	std::ofstream file(filepath);
+
+	json js;
+
+	std::cout << sound.vol;
+	js["Volume"] = sound.vol;
+	js["Mode"] = sound.mode;
+	js["Pos"] = sound.pos.e;
+
+	file << std::setw(4) << js << std::endl;
+}
+
  //------------------------------------------------------------------------------------------------------------------
 
 void Cookie::Resources::Serialization::Load::FromJson(json& js, Cookie::ECS::EntityHandler& entity)
@@ -711,7 +735,7 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 {
 	GPComponent.teamName = gameplay["TeamName"];
 	GPComponent.signatureGameplay = gameplay["SignatureGameplay"];
-	GPComponent.type = gameplay["type"];
+	GPComponent.type = gameplay["Type"];
 
 	json temp = gameplay["Cost"];
 	GPComponent.cost.costPrimary = temp["CostPrimary"].get<float>();
@@ -759,4 +783,26 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 			}
 		}
 	}
+}
+
+void Cookie::Resources::Serialization::Load::LoadVolumAndModeMusic(std::string path, std::string key)
+{
+	std::ifstream file(path);
+
+	if (!file.is_open())
+	{
+		std::cout << "DON'T FIND THE FILE\n";
+		return;
+	}
+
+	json js;
+	file >> js;
+
+	Cookie::Resources::SoundManager::SetVolume(key, js["Volume"].get<float>());
+
+	Cookie::Core::Math::Vec3 pos;
+	js["Pos"].get_to(pos.e);
+	Cookie::Resources::SoundManager::SetPosition(key, pos);
+
+	Cookie::Resources::SoundManager::SetMode(key, js["Mode"].get<int>());
 }

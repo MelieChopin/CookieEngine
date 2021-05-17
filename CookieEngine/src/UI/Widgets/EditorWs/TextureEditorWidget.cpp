@@ -1,7 +1,7 @@
 #include <string>
 #include "TextureEditorWidget.hpp"
+
 #include "Serialization.hpp"
-#include "Resources/Mesh.hpp"
 #include "Resources/Texture.hpp"
 #include "Resources/ResourcesManager.hpp"
 
