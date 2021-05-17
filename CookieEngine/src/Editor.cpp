@@ -1,5 +1,6 @@
 #include "Editor.hpp" 
-#include "UIallIn.hpp"
+#include "UIcore.hpp"
+#include "UIeditor_AllIn.hpp"
 #include "Serialization.hpp"
 #include "Physics/PhysicsHandle.hpp"
 #include "ECS/SystemHandler.hpp"
