@@ -28,6 +28,7 @@ namespace Cookie
 			static void Set3D(std::string key, const Cookie::Core::Math::Vec3& pos);
 			static void SetPosition(std::string key, const Cookie::Core::Math::Vec3& pos);
 			static void Set2D(std::string key);
+			static void SetMode(std::string key, FMOD_MODE mode);
 		};
 	}
 }
