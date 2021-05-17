@@ -84,6 +84,7 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 			json& game = js["Gameplay"][index];
 			game["TeamName"] = gameplay.teamName;
 			game["SignatureGameplay"] = gameplay.signatureGameplay;
+			game["Type"] = gameplay.type;
 			game["Cost"]["CostPrimary"] = gameplay.cost.costPrimary;
 			game["Cost"]["CostSecondary"] = gameplay.cost.costSecondary;
 			game["Cost"]["CostSupply"] = gameplay.cost.costSupply;
@@ -259,6 +260,7 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const std::shared_ptr<Pr
 		 ComponentGameplay gameplay = prefab->gameplay;
 		 json& gp = js["Gameplay"];
 		 gp["TeamName"] = gameplay.teamName;
+		 gp["Type"] = gameplay.type;
 		 gp["SignatureGameplay"] = gameplay.signatureGameplay;
 
 		 json& cost = js["Gameplay"]["Cost"];
@@ -709,6 +711,7 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 {
 	GPComponent.teamName = gameplay["TeamName"];
 	GPComponent.signatureGameplay = gameplay["SignatureGameplay"];
+	GPComponent.type = gameplay["type"];
 
 	json temp = gameplay["Cost"];
 	GPComponent.cost.costPrimary = temp["CostPrimary"].get<float>();
