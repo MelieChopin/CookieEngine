@@ -9,10 +9,10 @@ using namespace Cookie::UI;
 using namespace Cookie::UIwidget;
 
 
-UIscene::UIscene(const std::vector<GameWindowInfo>& GameWindows)
+UIscene::UIscene(const std::vector<GameWindowInfo>& _gameWindows)
 {
-	if (!GameWindows.empty())
-		LoadLayout(GameWindows);
+	if (!_gameWindows.empty())
+		LoadLayout(_gameWindows);
 }
 
 
@@ -20,11 +20,11 @@ void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows)
 {
 	for (const GameWindowInfo& info : GameWindows)
 	{ 
-		std::unique_ptr<GameWindowBase> convertedWidget;
+		GameWindowBase* convertedWidget = nullptr;
 
 		switch (info.ID)
 		{
-		case GameWidgetID::TestBoiID: convertedWidget = std::make_unique<TestBoi>(TestBoi()); break;
+		case GameWidgetID::TestBoiID: convertedWidget = new TestBoi; break;
 
 		default: break;
 		}
@@ -35,7 +35,7 @@ void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows)
 		convertedWidget->height = info.height;
 
 
-		sceneWidgets.push_back(convertedWidget);
+		sceneWidgets.push_back(std::move(convertedWidget));
 	}
 }
 
@@ -43,7 +43,7 @@ const std::vector<UIscene::GameWindowInfo> UIscene::SaveLayout(bool clean)
 {
 	std::vector<GameWindowInfo> infos;
 	
-	for (std::unique_ptr<GameWindowBase>& widget : sceneWidgets)
+	for (GameWindowBase*& widget : sceneWidgets)
 	{
 		GameWindowInfo widgetInfo;
 
@@ -67,8 +67,8 @@ const std::vector<UIscene::GameWindowInfo> UIscene::SaveLayout(bool clean)
 
 void UIscene::CleanLayout()
 {
-	for (std::unique_ptr<GameWindowBase>& widget : sceneWidgets)
-	{ widget.reset(); }
+	for (GameWindowBase*& widget : sceneWidgets)
+	{ delete widget; }
 
-	std::vector<std::unique_ptr<UIwidget::GameWindowBase>>().swap(sceneWidgets);
+	std::vector<GameWindowBase*>().swap(sceneWidgets);
 }

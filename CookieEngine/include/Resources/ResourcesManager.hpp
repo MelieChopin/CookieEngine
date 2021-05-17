@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include <memory>
 #include <filesystem>
-#include <fmod.hpp>
 #include <d3d11.h>
 
 namespace fs = std::filesystem;
@@ -31,14 +30,16 @@ namespace Cookie
 		class Texture;
 		class Script;
 		class Prefab;
+		class Sound;
 
 		class ResourcesManager
 		{
 			public:
-				std::unordered_map<std::string, std::shared_ptr<Mesh>>			meshes;
-				std::unordered_map<std::string, std::shared_ptr<Texture>>		textures;
-				std::unordered_map<std::string, std::shared_ptr<Script>>		scripts;
-				std::unordered_map<std::string, std::shared_ptr<Prefab>>		prefabs;
+				std::unordered_map<std::string, std::unique_ptr<Mesh>>						meshes;
+				std::unordered_map<std::string, std::unique_ptr<Texture>>					textures;
+				std::unordered_map<std::string, std::shared_ptr<Script>>					scripts;
+				std::unordered_map<std::string, std::shared_ptr<Prefab>>					prefabs;
+				std::unordered_map<std::string, std::shared_ptr<Cookie::Resources::Sound>>  sounds;
 				
 			private:
 				void SearchForAssets(const fs::path& path, std::vector<std::string>& gltfFiles);

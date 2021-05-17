@@ -18,8 +18,10 @@ namespace Cookie
         class ComponentModel
         {
         public:
-            std::shared_ptr<Resources::Mesh>    mesh    {nullptr};
-            std::shared_ptr<Resources::Texture> texture {nullptr};
+            Resources::Mesh*    mesh    { nullptr };
+            Resources::Texture* albedo  { nullptr };
+            Resources::Texture* normal  { nullptr };
+            Resources::Texture* metallicRoughness { nullptr };
 
 
             //Material material;
@@ -30,7 +32,7 @@ namespace Cookie
 
             void ToDefault();
 
-            void Draw(const Core::Math::Mat4& viewProj, const Core::Math::Mat4& modelMat, ID3D11Buffer** CBuffer);
+            void Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view, const Core::Math::Mat4& modelMat, ID3D11Buffer** CBuffer);
         };
 
     }

@@ -1,3 +1,4 @@
+#include "Physics/PhysicsHandle.hpp"
 #include "Resources/Scene.hpp"
 #include "Game.hpp"
 
@@ -9,13 +10,16 @@ using namespace Cookie;
 
 Game::Game():
     skyBox{resources},
-    frameBuffer{renderer.window.width,renderer.window.height}
+    frameBuffer{renderer.window.width,renderer.window.height }
 {
+
+    Physics::PhysicsHandle::Init();
     Core::UIcore::FinishInit(renderer);
 }
 
 Game::~Game()
 {
+    Physics::PhysicsHandle::Terminate();
 }
 
 /*================== LOOP ==================*/

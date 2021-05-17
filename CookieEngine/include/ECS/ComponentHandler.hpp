@@ -20,19 +20,21 @@ namespace Cookie
 
 	namespace ECS
 	{
-		#define SIGNATURE_EMPTY         0b00000
-		#define SIGNATURE_TRANSFORM     0b00001
-		#define SIGNATURE_MODEL         0b00010
-		#define SIGNATURE_PHYSICS		0b00100
-		#define SIGNATURE_SCRIPT        0b01000
-		#define SIGNATURE_GAMEPLAY      0b10000
-		#define SIGNATURE_ALL_COMPONENT 0b11111
-
+		enum  C_SIGNATURE
+		{
+			EMPTY_C       = 0b00000,
+			TRANSFORM     = 0b00001,
+			MODEL         = 0b00010,
+			PHYSICS	      = 0b00100,
+			SCRIPT        = 0b01000,
+			GAMEPLAY      = 0b10000,
+			ALL_C         = 0b11111
+		};
 
 
 		class ComponentHandler
 		{
-		public:
+		private:
 
 			std::array<ComponentTransform,	MAX_ENTITIES> componentTransforms;
 			std::array<ComponentModel,		MAX_ENTITIES> componentModels;
@@ -41,25 +43,19 @@ namespace Cookie
 			std::array<ComponentGameplay,   MAX_ENTITIES> componentGameplays;
 
 
-
+		public:
 			ComponentHandler() {}
 			~ComponentHandler() {}
 
-			inline void AddComponentTransform (Entity& entity) noexcept;
-			inline void AddComponentModel     (Entity& entity) noexcept;
-			inline void AddComponentPhysics   (Entity& entity) noexcept;
-			inline void AddComponentScript    (Entity& entity) noexcept;
-			inline void AddComponentGameplay  (Entity& entity) noexcept;
+			inline void AddComponent(Entity& entity, int signature) noexcept;
+			inline void RemoveComponent(Entity& entity, int signature) noexcept;
+			inline void SubComponentToDefault(int signature, int entityId)noexcept;
+
 
 			void InitComponentPhysic(Entity& entity);
-			void ModifyComponentOfEntityToPrefab(Entity& entity, Cookie::Resources::ResourcesManager& resourcesManager, std::string& namePrefab);
 
-			inline void RemoveComponentTransform (Entity& entity) noexcept;
-			inline void RemoveComponentModel     (Entity& entity) noexcept;
-			inline void RemoveComponentPhysics   (Entity& entity) noexcept;
-			inline void RemoveComponentScript    (Entity& entity) noexcept;
-			inline void RemoveComponentGameplay  (Entity& entity) noexcept;
 
+			//template later on
 			inline ComponentTransform& GetComponentTransform (const unsigned int id) noexcept;
 			inline ComponentModel&     GetComponentModel     (const unsigned int id) noexcept;
 			inline ComponentPhysics&   GetComponentPhysics   (const unsigned int id) noexcept;

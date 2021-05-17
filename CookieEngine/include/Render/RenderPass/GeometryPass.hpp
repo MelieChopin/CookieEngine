@@ -18,6 +18,9 @@ namespace Cookie
 
 	namespace Render
 	{
+		class DrawDataHandler;
+		class Camera;
+
 		class GeometryPass
 		{
 			private:
@@ -26,7 +29,12 @@ namespace Cookie
 				ID3D11PixelShader*	PShader{ nullptr };
 				ID3D11SamplerState*	PSampler{ nullptr };
 
+				ID3D11DepthStencilState*	depthStencilState	= nullptr;
+				ID3D11RasterizerState*		rasterizerState		= nullptr;
+				ID3D11BlendState*			blendState			= nullptr;
+
 			public:
+				ID3D11DepthStencilView* depthBuffer = nullptr;
 				ID3D11Buffer* CBuffer{ nullptr };
 
 				FrameBuffer	posFBO;
@@ -35,14 +43,17 @@ namespace Cookie
 
 			private:
 				void InitShader();
+				void InitState();
 
 			public:
+				void CreateDepth(int width, int height);
+
 				GeometryPass(int width, int height);
 				~GeometryPass();
 
-				void Set(ID3D11DepthStencilView* depthStencilView);
-				void Draw(const Core::Math::Mat4& viewProj, const ECS::Coordinator& coordinator);
-				void Clear(const Core::Math::Vec4& clearColor);
+				void Set();
+				void Draw(DrawDataHandler& drawData);
+				void Clear();
 		};
 	}
 }

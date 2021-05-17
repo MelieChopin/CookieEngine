@@ -6,12 +6,13 @@
 
 using namespace Cookie::Render;
 using namespace Cookie::Resources;
+using namespace Cookie::Core;
 using namespace Cookie::Core::Math;
 
 /*========== CONSTRUCTORS/DESTRUCTORS ==========*/
 
 DebugRenderer::DebugRenderer():
-    physDbgRenderer{Physics::PhysicsHandle::editWorld->getDebugRenderer()}
+    physDbgRenderer{InitEdit()}
 {
 
     AllocateVBuffer(1);
@@ -26,6 +27,14 @@ DebugRenderer::DebugRenderer():
 
 DebugRenderer::~DebugRenderer()
 {
+    int max = Physics::PhysicsHandle::editWorld->getNbRigidBodies();
+    for (int i = 0; i < max; i++)
+    {
+        Physics::PhysicsHandle::editWorld->destroyRigidBody(Physics::PhysicsHandle::editWorld->getRigidBody(0));
+    }
+
+    Physics::PhysicsHandle::physCom->destroyPhysicsWorld(Physics::PhysicsHandle::editWorld);
+
     if (VBuffer)
         VBuffer->Release();
     if (rasterState)
@@ -42,6 +51,12 @@ DebugRenderer::~DebugRenderer()
 
 
 /*========== INIT METHODS ==========*/
+
+rp3d::DebugRenderer& DebugRenderer::InitEdit()
+{
+    Physics::PhysicsHandle::editWorld = Physics::PhysicsHandle::physCom->createPhysicsWorld();
+    return Physics::PhysicsHandle::editWorld->getDebugRenderer();
+}
 
 void DebugRenderer::AllocateVBuffer(size_t vBufferSize)
 {
@@ -129,6 +144,8 @@ void DebugRenderer::InitShader()
     Render::CreateLayout(&blob,ied,2,&ILayout);
 
     Render::CreateBuffer(Core::Math::Mat4::Identity().e,sizeof(Core::Math::Mat4),&CBuffer);
+
+    blob->Release();
 }
 
 /*========== RUNTIME METHODS ==========*/
@@ -148,12 +165,39 @@ void DebugRenderer::UpdateVBuffer(size_t vBufferSize, void* data)
     Render::RendererRemote::context->Unmap(VBuffer, 0);
 }
 
-void DebugRenderer::AddDebugElement(const std::vector<Core::Primitives::DebugVertex>& dbgElement)
+void DebugRenderer::AddDebugElement(const std::vector<Primitives::DebugVertex>& dbgElement)
 {
     for (int i = 0; i < dbgElement.size(); i++)
     {
         debugElement.push_back(dbgElement.at(i));
     }
+}
+
+void DebugRenderer::AddLine(Vec3 a, Vec3 b, uint32_t color)
+{
+    AddDebugElement(Primitives::CreateLine(a, b, color, color));
+}
+void DebugRenderer::AddQuad(Vec3 a, Vec3 c, uint32_t color)
+{
+    Vec3 b = {c.x, a.y, a.z};
+    Vec3 d = {a.x, a.y, c.z};
+
+    AddDebugElement(Primitives::CreateLine(a, b, color, color));
+    AddDebugElement(Primitives::CreateLine(b, c, color, color));
+    AddDebugElement(Primitives::CreateLine(c, d, color, color));
+    AddDebugElement(Primitives::CreateLine(d, a, color, color));
+}
+void DebugRenderer::AddQuad(Vec3 center, float halfWidth, float halfDepth, uint32_t color)
+{
+    Vec3 a = center + Vec3{-halfWidth, 0, -halfDepth};
+    Vec3 b = center + Vec3{halfWidth,  0, -halfDepth};
+    Vec3 c = center + Vec3{halfWidth,  0,  halfDepth};
+    Vec3 d = center + Vec3{-halfWidth, 0,  halfDepth};
+
+    AddDebugElement(Primitives::CreateLine(a, b, color, color));
+    AddDebugElement(Primitives::CreateLine(b, c, color, color));
+    AddDebugElement(Primitives::CreateLine(c, d, color, color));
+    AddDebugElement(Primitives::CreateLine(d, a, color, color));
 }
 
 void DebugRenderer::Draw(const Mat4& viewProj)

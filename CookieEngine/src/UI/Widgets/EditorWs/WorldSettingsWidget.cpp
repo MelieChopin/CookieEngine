@@ -67,9 +67,19 @@ void WorldSettingsWidget::WindowDisplay()
 
 		// Model
 		{
-			Text("Map texture:"); SameLine();
+			Text("Map albedo:"); SameLine(100);
 
-			ResourceMapExplorer<Texture>("map texture", "##MAPTEXTSELECT", resources.textures, scene->map.model.texture);
+			ResourceMapExplorer<Texture>("texture", "##MAPTEXTSELECT", resources.textures, scene->map.model.albedo);
+
+
+			Text("Map normal:"); SameLine(100);
+
+			ResourceMapExplorer<Texture>("normal texture", "##MAPNORMSELECT", resources.textures, scene->map.model.normal);
+
+
+			ImGui::Custom::TextSnip("Map metallic-Roughness", 9); SameLine(); Text(":"); SameLine(100);
+
+			ResourceMapExplorer<Texture>("metallic-rough texture", "##MAPMRSELECT", resources.textures, scene->map.model.metallicRoughness);
 		}
 	}
 

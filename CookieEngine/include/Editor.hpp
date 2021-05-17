@@ -6,7 +6,6 @@
 #include "Render/Camera.hpp"
 #include "DebugRenderer.hpp"
 
-#include "Resources/SoundManager.hpp"
 #include "ECS/ComponentEditor.hpp"
 #include "ECS/ComponentHandler.hpp"
 
@@ -43,16 +42,13 @@ namespace Cookie
 			UI::UIeditor			editorUI;
 			Game					game;
 			Render::FreeFlyCam		cam;
-			Render::DebugRenderer	dbgRenderer;
 			Render::FrameBuffer		editorFBO;
 
 			std::array<ECS::ComponentEditor, MAX_ENTITIES> editingComponent;
+			Render::DebugRenderer	dbgRenderer;
 
 			FocusEntity			selectedEntity	= {};
 			Resources::Scene*	currentScene	= nullptr;
-
-
-			Resources::SoundManager soundManager;
 
 			bool				isPlaying = false;
 			
@@ -70,7 +66,7 @@ namespace Cookie
 			{
 				if (selectedEntity.editComp && selectedEntity.editComp->body)
 				{
-					if ((selectedEntity.focusedEntity->signature & SIGNATURE_MODEL) && game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh != nullptr)
+					if ((selectedEntity.focusedEntity->signature & ECS::C_SIGNATURE::MODEL) && game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh != nullptr)
 					{
 						selectedEntity.editComp->AABBMin = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBMin;
 						selectedEntity.editComp->AABBMax = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBMax;

@@ -19,21 +19,19 @@ using namespace Cookie::Resources;
 
 ResourcesManager::ResourcesManager()
 {
-	scripts["test.lua"] = std::make_shared<Script>("Assets\\scripts\\test.lua");
-	scripts["test2.lua"] = std::make_shared<Script>("Assets\\scripts\\test2.lua");
+	//scripts["test.lua"] = std::make_shared<Script>("Assets\\scripts\\test.lua");
+	//scripts["test2.lua"] = std::make_shared<Script>("Assets\\scripts\\test2.lua");
 
 	InitPrimitives();
 }
 
 ResourcesManager::~ResourcesManager()
 {
-
 }
 
 
 void ResourcesManager::SearchForAssets(const fs::path& path, std::vector<std::string>& gltfFiles)
 {
-
 	if (fs::exists(path) && fs::is_directory(path))
 	{
 		for (const fs::directory_entry& entry : fs::directory_iterator(path))
@@ -70,6 +68,7 @@ void ResourcesManager::InitPrimitives()
 {
 	meshes["Quad"]		= Cookie::Core::Primitives::CreateQuad();
 	meshes["Triangle"]	= Cookie::Core::Primitives::CreateTriangle();
+	meshes["NormalCube"]= Cookie::Core::Primitives::CreateNormalCube();
 	meshes["Cube"]		= Cookie::Core::Primitives::CreateCube();
 	meshes["Sphere"]	= Cookie::Core::Primitives::CreateSphere();
 	meshes["Pyramid"]	= Cookie::Core::Primitives::CreatePyramid();
@@ -111,7 +110,7 @@ void ResourcesManager::Load(Render::Renderer& _renderer)
 		std::string iFile = assetsFiles.at(i);
 		if (textures.find(iFile) == textures.end())
 		{
-			textures[iFile] = std::make_shared<Texture>(iFile);
+			textures[iFile] = std::make_unique<Texture>(iFile);
 		}
 		//printf("%s\n", gltfFiles.at(i).c_str());
 	}
@@ -129,17 +128,22 @@ void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandl
 	Prefab newPrefab;
 
 	newPrefab.name = entity.name;
-	newPrefab.nameMesh = component.componentModels[entity.id].mesh->name;
-	newPrefab.nameTexture = component.componentModels[entity.id].texture->name;
-	newPrefab.signature = entity.id;
-	newPrefab.rotation = component.componentTransforms[entity.id].rot;
-	newPrefab.scale = component.componentTransforms[entity.id].scale;
+	newPrefab.signature = entity.signature;
 	newPrefab.filepath = "Assets/Prefabs/" + entity.name + ".PAsset";
-	newPrefab.rigidBody = component.componentPhysics[entity.id].physBody;
-	newPrefab.colliders = component.componentPhysics[entity.id].physColliders;
+	if (entity.signature & Cookie::ECS::C_SIGNATURE::TRANSFORM)
+		newPrefab.transform = component.GetComponentTransform(entity.id);
+	if (entity.signature & Cookie::ECS::C_SIGNATURE::MODEL)
+		newPrefab.model = component.GetComponentModel(entity.id);
+	if (entity.signature & Cookie::ECS::C_SIGNATURE::PHYSICS)
+		newPrefab.physics = component.GetComponentPhysics(entity.id);
+	if (entity.signature & Cookie::ECS::C_SIGNATURE::GAMEPLAY)
+		newPrefab.gameplay = component.GetComponentGameplay(entity.id);
 
 	entity.namePrefab = entity.name;
 
 	prefabs[newPrefab.name] = std::make_shared<Prefab>(newPrefab);
 }
+
+
+
 

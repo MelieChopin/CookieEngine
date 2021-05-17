@@ -13,9 +13,14 @@ struct ID3D11Buffer;
 
 namespace Cookie
 {
-	namespace Resources
+
+	namespace Gameplay
 	{
-		
+		class CGPProducer;
+	}
+
+	namespace Resources
+	{		
 
 		struct Tile
 		{
@@ -47,9 +52,6 @@ namespace Cookie
 			ECS::ComponentModel	    model;
 			ECS::ComponentPhysics	physic;
 
-			//will be removed
-			ECS::ComponentModel	    modelTileObstacle;
-
 
 			Map();
 			~Map() {}
@@ -58,17 +60,18 @@ namespace Cookie
 			void ScaleHasChanged();
 			void TileNbHasChanged();
 
-			void ResetTilesTempObstacles();
 			int GetTileIndex(Core::Math::Vec2& mousePos);
 			int GetTileIndex(Core::Math::Vec3& pos);
 			Tile& GetTile(Core::Math::Vec2& mousePos);
 			Tile& GetTile(Core::Math::Vec3& pos);
+
 			Core::Math::Vec2 GetCenterOfBuilding(Core::Math::Vec2& mousePos, Core::Math::Vec2& buildingNbOfTiles);
+			bool isBuildingValid(int indexTopLeft, Core::Math::Vec2& tileSize);
+			void GiveTilesToBuilding(int indexTopLeft, Gameplay::CGPProducer& building);
 
 			bool ApplyPathfinding(Tile& tileStart, Tile& tileEnd);
 
-			void Draw(const Core::Math::Mat4& viewProj, ID3D11Buffer** CBuffer);
-			void DrawSpecificTiles(const Core::Math::Mat4& viewProj, ID3D11Buffer** CBuffer);
+			void Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view, ID3D11Buffer** CBuffer);
 
 
 		};

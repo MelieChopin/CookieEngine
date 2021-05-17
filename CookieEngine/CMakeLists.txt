@@ -23,6 +23,7 @@ include_directories("${INC_DIR}/UI/Widgets/GameWs/")
 include_directories("${INC_DIR}/Render/")
 include_directories("${INC_DIR}/ECS/")
 include_directories("${INC_DIR}/Resources/")
+include_directories("${INC_DIR}/Resources/Particles")
 include_directories("${INC_DIR}/Gameplay/")
 include_directories("${DEPS_INC_DIR}/ImGui/")
 include_directories("${DEPS_INC_DIR}/ImGuizmo/")
@@ -77,8 +78,15 @@ set (SRC_FILES
     "${SRC_DIR}/Render/FrameBuffer.cpp"
     "${SRC_DIR}/Render/SkyBox.cpp"
     "${SRC_DIR}/Render/Light.cpp"
-    "${SRC_DIR}/Render/GeometryPass.cpp"
+    "${SRC_DIR}/Render/DrawDataHandler.cpp"
+    "${SRC_DIR}/Render/RenderPass/GeometryPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/LightPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/DirLightPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/ComposePass.cpp"
+    "${SRC_DIR}/Render/ShadowBuffer.cpp" 
+    "${SRC_DIR}/Render/RenderPass/ShadowPass.cpp"
     "${SRC_DIR}/Render/FBODrawer.cpp"
+    "${SRC_DIR}/Render/ParticlesPass.cpp"
     
     "${SRC_DIR}/Resources/Loader.cpp" 
     "${SRC_DIR}/Resources/Map.cpp" 
@@ -91,6 +99,9 @@ set (SRC_FILES
 
 
     "${SRC_DIR}/UI/UIcore.cpp"
+    "${SRC_DIR}/Resources/Particles/ParticlesGenerator.cpp"
+    "${SRC_DIR}/Resources/Particles/ParticlesUpdate.cpp"
+    "${SRC_DIR}/Resources/Particles/ParticlesHandler.cpp"
     "${SRC_DIR}/UI/UIeditor.cpp"
     "${SRC_DIR}/UI/UIscene.cpp"
     "${SRC_DIR}/UI/CustomImWidget.cpp"
@@ -111,12 +122,21 @@ set (SRC_FILES
     
     "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
     
+
     "${SRC_DIR}/ECS/ComponentEditor.cpp"
     "${SRC_DIR}/ECS/ComponentHandler.cpp"
     "${SRC_DIR}/ECS/ComponentModel.cpp" 
     "${SRC_DIR}/ECS/ComponentPhysics.cpp"
     "${SRC_DIR}/ECS/Coordinator.cpp"
     "${SRC_DIR}/ECS/EntityHandler.cpp"
+
+
+    "${SRC_DIR}/Gameplay/ArmyHandler.cpp"
+    "${SRC_DIR}/Gameplay/CGPAttack.cpp"
+    "${SRC_DIR}/Gameplay/CGPLive.cpp"
+    "${SRC_DIR}/Gameplay/CGPMove.cpp"
+    "${SRC_DIR}/Gameplay/CGPProducer.cpp"
+    "${SRC_DIR}/Gameplay/CGPWorker.cpp"
     
 
     "${SRC_DIR}/Editor.cpp" 
@@ -130,6 +150,8 @@ set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
         "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/fmodstudioL.dll")
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
+
+#add_compile_options(-O2)
 
 # Ajoutez une source à l'exécutable de ce projet.
 add_executable (CookieEngine ${SUB_SYS} ${SRC_FILES})

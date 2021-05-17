@@ -3,6 +3,8 @@
 #include "Coordinator.hpp"
 #include "InspectorWidget.hpp"
 #include "HierarchyWidget.hpp"
+#include "Resources/Mesh.hpp"
+#include "Resources/Texture.hpp"
 #include "Resources/ResourcesManager.hpp"
 #include "Editor.hpp"
 #include "Renderer.hpp"
@@ -24,7 +26,7 @@ void Hierarchy::WindowDisplay()
         {
             if (Selectable("Create empty"))
             { 
-                coordinator.AddEntity(SIGNATURE_EMPTY, resources);
+                coordinator.AddEntity(C_SIGNATURE::EMPTY_C);
             }
         
             EndPopup();
@@ -43,7 +45,7 @@ void Hierarchy::WindowDisplay()
 
             if (Selectable(entityNameTag.c_str()))
             {
-                selectedEntity.toChangeEntityId = i;
+                selectedEntity.toChangeEntityId = entityHandler.entities[i].id;
             }
 
             if (BeginPopupContextItem(entityNameTag.c_str()))

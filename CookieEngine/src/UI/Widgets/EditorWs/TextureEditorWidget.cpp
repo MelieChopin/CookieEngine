@@ -1,9 +1,9 @@
-#include "Resources/ResourcesManager.hpp"
 #include <string>
 #include "TextureEditorWidget.hpp"
 
 #include "Serialization.hpp"
 #include "Resources/Texture.hpp"
+#include "Resources/ResourcesManager.hpp"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -24,7 +24,7 @@ void TextureEditor::WindowDisplay()
 		
 		BeginGroup();
 
-        for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator textPtr = resources.textures.begin(); textPtr != resources.textures.end(); textPtr++)
+        for (std::unordered_map<std::string, std::unique_ptr<Texture>>::iterator textPtr = resources.textures.begin(); textPtr != resources.textures.end(); textPtr++)
         {
 			if (textPtr->second && textPtr->second->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
 			{
@@ -93,7 +93,7 @@ void TextureEditor::WindowDisplay()
 			}
 			else if (Button("Confirm and save"))
 			{				
-				resources.textures[newTexture.name] = (std::make_shared<Texture>(newTexture.name, newTexture.color));
+				resources.textures[newTexture.name] = (std::make_unique<Texture>(newTexture.name, newTexture.color));
 				Cookie::Resources::Serialization::Save::SaveTexture(newTexture.name, newTexture.color);
 
 				newTexture.creating = false;

@@ -1,7 +1,7 @@
 #ifndef __COMPONENT_PHYSICS_HPP__
 #define __COMPONENT_PHYSICS_HPP__
 
-#include <reactphysics3d/mathematics/Transform.h>
+#include "Physics/PhysicsHandle.hpp"
 
 namespace reactphysics3d
 {
@@ -38,15 +38,30 @@ namespace Cookie
 			void AddSphereCollider(float radius, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles);
 			void AddCubeCollider(const Core::Math::Vec3& halfExtent, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles);
 			void AddCapsuleCollider(const Core::Math::Vec2& capsuleInfo, const Core::Math::Vec3& localPos, const Core::Math::Vec3& eulerAngles);
+			void RemoveCollider(::reactphysics3d::Collider* collider);
 
 			void Update(float factor)noexcept;
 			void Set(const ComponentTransform& trs);
 
 			inline void ToDefault()
 			{
-				physBody = nullptr;
+				for (int i = 0; i < physColliders.size(); i++)
+				{
+					RemoveCollider(physColliders[i]);
+				}
+				if (physBody)
+				{
+					Physics::PhysicsHandle::physSim->destroyRigidBody(physBody);
+				}
+
+				physBody = Physics::PhysicsHandle::physSim->createRigidBody(physTransform);
+
+				physBody->setIsActive(false);
+
 				std::vector<reactphysics3d::Collider*>().swap(physColliders);
 			}
+
+			inline void Activate()const  { physBody->setIsActive(true); }
 		};
 
     }

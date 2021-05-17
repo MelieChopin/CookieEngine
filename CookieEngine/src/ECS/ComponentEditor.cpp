@@ -12,6 +12,8 @@ ComponentEditor::ComponentEditor()
 
 ComponentEditor::~ComponentEditor()
 {
+	//if (body)
+
 }
 
 

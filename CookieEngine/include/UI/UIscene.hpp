@@ -11,7 +11,7 @@ namespace Cookie::UI
 {
 	class UIscene
 	{
-		std::vector<std::unique_ptr<UIwidget::GameWindowBase>> sceneWidgets;
+		std::vector<UIwidget::GameWindowBase*> sceneWidgets;
 
 		
 		// Simple struct to facilitate UI scene load/save.
@@ -24,18 +24,17 @@ namespace Cookie::UI
 		};
 
 	public:
-		UIscene(const std::vector<GameWindowInfo>& GameWindows = {});
+		UIscene() = default;
+		UIscene(const std::vector<GameWindowInfo>& _gameWindows);
 
 		void								LoadLayout	(const std::vector<GameWindowInfo>& GameWindows);
 		const std::vector<GameWindowInfo>	SaveLayout	(bool clean = false);
 
 		void CleanLayout();
 		
-		inline std::vector<std::unique_ptr<UIwidget::GameWindowBase>>& GetWidgets()
+		inline std::vector<UIwidget::GameWindowBase*>& GetWidgets()
 		{ return sceneWidgets; }
 	};
 }
-
-
 
 #endif // !__UI_SCENE_HPP__

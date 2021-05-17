@@ -200,33 +200,63 @@ namespace Cookie
 
                 return m;
             }
+            inline Mat4 Mat4::Ortho(float left, float right, float bottom, float top, float n, float f)
+            {
+                Mat4 m;
+                float r_min_l = right - left;
+                float t_min_b = top - bottom;
+                float f_min_n = f - n;
+
+                m.c[0].e[0] = 2.0f/r_min_l;
+                m.c[0].e[1] = 0.f;
+                m.c[0].e[2] = 0.f;
+                m.c[0].e[3] = 0.0f;
+
+                m.c[1].e[0] = 0.f;
+                m.c[1].e[1] = 2.0f/t_min_b;
+                m.c[1].e[2] = 0.f;
+                m.c[1].e[3] = 0.0f;
+
+                m.c[2].e[0] = 0.f;
+                m.c[2].e[1] = 0.f;
+                m.c[2].e[2] = -(2.0f/f_min_n);
+                m.c[2].e[3] = 0.0f;
+
+                m.c[3].e[0] = ((right + left) / (r_min_l))*-1.0f;
+                m.c[3].e[1] = ((top + bottom) / (t_min_b))*-1.0f;
+                m.c[3].e[2] = ((f + n) / f_min_n)*-1.0f;
+                m.c[3].e[3] = 1.0f;
+
+                return m;
+            }
             inline Mat4 Mat4::LookAt(const Vec3& eye, const Vec3& center, const Vec3& up)
             {
                 Mat4 m;
 
-                Core::Math::Vec3 z = (eye - center).Normalize();
+                Core::Math::Vec3 z = (center - eye).Normalize();
                 Core::Math::Vec3 y = up;
-                Core::Math::Vec3 x = y.Cross(z);
-                y = z.Cross(x);
-                x.Normalize();
-                y.Normalize();
+                Core::Math::Vec3 x = z.Cross(y);
+                x = x.Normalize();
+                y = x.Cross(z);
+                y = y.Normalize();
 
-                m.c[0].e[0] = x.x;
-                m.c[1].e[0] = x.y;
-                m.c[2].e[0] = x.z;
-                m.c[3].e[0] = -x.Dot(eye);
-                m.c[0].e[1] = y.x;
-                m.c[1].e[1] = y.y;
-                m.c[2].e[1] = y.z;
-                m.c[3].e[1] = -y.Dot(eye);
-                m.c[0].e[2] = z.x;
-                m.c[1].e[2] = z.y;
-                m.c[2].e[2] = z.z;
-                m.c[3].e[2] = -z.Dot(eye);
-                m.c[0].e[3] = 0;
-                m.c[1].e[3] = 0;
-                m.c[2].e[3] = 0;
-                m.c[3].e[3] = 1.0f;
+                m.c[0] = { x, eye.x };
+                m.c[1] = { y, eye.y };
+                m.c[2] = { -z, eye.z };
+                
+                m.c[3] = { 0.0f,0.0f,0.0f,1.0f };
+
+                return m;
+            }
+
+            inline Mat4 Mat4::Dir(const Vec3& dirVec)
+            {
+                Mat4 m;
+
+                float theta = atanf(sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y) / dirVec.z);
+                float phi = atan2f(dirVec.y,dirVec.x);
+
+                m = Mat4::RotateY(phi) * Mat4::RotateX(theta) * Mat4::RotateZ(PI);
 
                 return m;
             }
@@ -371,6 +401,13 @@ namespace Cookie
                 } };
             }
 
+            inline Vec3 Mat4::GetTranslate()const
+            {
+                return Vec3{c[0].e[3],
+                            c[1].e[3],
+                            c[2].e[3]};
+            }
+
             inline float Mat4::Det()const
             {
                 return    e[0] * (e[5] * ((e[10] * e[15]) - (e[14] * e[11]))
@@ -404,6 +441,10 @@ namespace Cookie
                 r.z = other.x * c[2].e[0] + other.y * c[2].e[1] + other.z * c[2].e[2] + other.w * c[2].e[3];
                 r.w = other.x * c[3].e[0] + other.y * c[3].e[1] + other.z * c[3].e[2] + other.w * c[3].e[3];
                 return r;
+            }
+            inline Vec3 Mat4::operator*(const Vec3& other) const
+            {
+                return (*this * Vec4(other, 1)).ToVec3();
             }
             inline Mat4& Mat4::operator*=(const Mat4& other) { *this = *this * other; return *this; }
 

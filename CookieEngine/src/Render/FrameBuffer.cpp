@@ -1,10 +1,5 @@
-#include <system_error>
-#include <string>
-#include <memory>
-
+#include "D3D11Helper.hpp"
 #include "Render/RendererRemote.hpp"
-#include "Resources/Mesh.hpp"
-#include "Resources/ResourcesManager.hpp"
 #include "Render/FrameBuffer.hpp"
 
 using namespace Cookie::Render;

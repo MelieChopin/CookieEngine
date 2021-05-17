@@ -15,7 +15,7 @@
 namespace Cookie::Resources
 {
 	template <class C>
-	static void ResourceMapExplorer(const std::string&& typeName, const char* TAG, std::unordered_map<std::string, std::shared_ptr<C>>& resourceMap, std::shared_ptr<C>& currentR)
+	static void ResourceMapExplorer(const std::string&& typeName, const char* TAG, std::unordered_map<std::string, std::unique_ptr<C>>& resourceMap, C*& currentR)
 	{
 		static std::string researchString;
 
@@ -25,13 +25,13 @@ namespace Cookie::Resources
 
 			ImGui::NewLine();
 
-			for (typename std::unordered_map<std::string, std::shared_ptr<C>>::iterator It = resourceMap.begin(); It != resourceMap.end(); It++)
+			for (typename std::unordered_map<std::string, std::unique_ptr<C>>::iterator It = resourceMap.begin(); It != resourceMap.end(); It++)
 			{
 				const bool is_selected = (currentR != nullptr && currentR->name == It->second->name);
 
 				if ((It->second->name.find(researchString) != std::string::npos) && ImGui::Selectable(It->second->name.c_str(), is_selected))
 				{
-					currentR = It->second;
+					currentR = It->second.get();
 				}
 
 				if (is_selected)
@@ -43,7 +43,7 @@ namespace Cookie::Resources
 			if (currentR != nullptr)
 			{
 				if (ImGui::Selectable(("Clear current " + typeName).c_str()))
-					currentR.reset();
+					currentR = nullptr;
 			}
 			else ImGui::TextDisabled("Clear current %s", typeName.c_str());
 
@@ -55,7 +55,7 @@ namespace Cookie::Resources
 	}
 
 	template <>
-	void ResourceMapExplorer<Texture>(const std::string&& typeName, const char* TAG, std::unordered_map<std::string, std::shared_ptr<Texture>>& resourceMap, std::shared_ptr<Texture>& currentR)
+	void ResourceMapExplorer<Texture>(const std::string&& typeName, const char* TAG, std::unordered_map<std::string, std::unique_ptr<Texture>>& resourceMap, Texture*& currentR)
 	{
 		static std::string researchString;
 
@@ -65,7 +65,7 @@ namespace Cookie::Resources
 
 			ImGui::NewLine();
 
-			for (std::unordered_map<std::string, std::shared_ptr<Texture>>::iterator textIt = resourceMap.begin(); textIt != resourceMap.end(); textIt++)
+			for (std::unordered_map<std::string, std::unique_ptr<Texture>>::iterator textIt = resourceMap.begin(); textIt != resourceMap.end(); textIt++)
 			{
 				const bool is_selected = (currentR != nullptr && textIt->second && currentR->name == textIt->second->name);
 
@@ -78,7 +78,7 @@ namespace Cookie::Resources
 						ImGui::SameLine();
 
 						if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
-							currentR = textIt->second;
+							currentR = textIt->second.get();
 					}
 				}
 
@@ -91,7 +91,7 @@ namespace Cookie::Resources
 			if (currentR != nullptr)
 			{
 				if (ImGui::Selectable( ("Clear current " + typeName).c_str() ))
-					currentR.reset();
+					currentR = nullptr;
 			}
 			else ImGui::TextDisabled("Clear current %s", typeName.c_str());
 

@@ -41,6 +41,7 @@ namespace Cookie::UIwidget
 
 	public:
 		Toolbar(Cookie::Render::Renderer& _renderer, bool& _isPlaying);
+		~Toolbar();
 
 		void WindowDisplay() override;
 

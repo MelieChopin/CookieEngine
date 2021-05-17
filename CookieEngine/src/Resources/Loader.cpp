@@ -1,6 +1,6 @@
-#include "Resources/ResourcesManager.hpp"
 #include "Resources/Mesh.hpp"
 #include "Resources/Texture.hpp"
+#include "Resources/ResourcesManager.hpp"
 #include "Resources/Loader.hpp"
 
 #include <assimp/scene.h>
@@ -46,7 +46,7 @@ void Loader::InitMeshes(const char* fileName, aiMesh** meshes, unsigned int nMes
 	{
 		aiMesh* iMesh = meshes[i];
 		std::string iName = std::string(fileName) + " - " + std::string(iMesh->mName.C_Str());
-		_resources.meshes[iName] = std::make_shared<Mesh>(iName,iMesh);
+		_resources.meshes[iName] = std::make_unique<Mesh>(iName,iMesh);
 
 	}
 
@@ -62,7 +62,7 @@ void Loader::InitTextures(const char* pathName, aiMaterial** materials, unsigned
 		{
 			std::string fullpath = (std::string(pathName) + '/' + std::string(path.C_Str())).c_str();
 
-			_resources.textures[fullpath] = std::make_shared<Texture>(fullpath.c_str());
+			_resources.textures[fullpath] = std::make_unique<Texture>(fullpath.c_str());
 		}
 	}
 }
