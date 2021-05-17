@@ -27,6 +27,9 @@ namespace Cookie::UI
 		UIscene() = default;
 		UIscene(const std::vector<GameWindowInfo>& _gameWindows);
 
+		~UIscene();
+
+
 		void								LoadLayout	(const std::vector<GameWindowInfo>& GameWindows);
 		const std::vector<GameWindowInfo>	SaveLayout	(bool clean = false);
 
