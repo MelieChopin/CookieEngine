@@ -11,6 +11,17 @@
 
 namespace Cookie
 {
+	namespace Gameplay
+	{
+		enum E_ARMY_TYPE
+		{
+			E_DEFAULT,
+			E_WORKER,
+			E_UNIT,
+			E_BUILDING
+		};
+	}
+
 	namespace ECS
 	{
 		enum CGP_SIGNATURE
@@ -36,15 +47,16 @@ namespace Cookie
 		{
 
 		public:
-			std::string           teamName {"No Team"};
-			int                   signatureGameplay{ 0 };
+			std::string            teamName {"No Team"};
+			int                    signatureGameplay{ 0 };
 
-			Gameplay::CGPLive     componentLive;
-			Gameplay::CGPMove     componentMove;
-			Gameplay::CGPAttack   componentAttack;
-			Gameplay::CGPProducer componentProducer;
-			Gameplay::CGPWorker   componentWorker;
-			Cost                  cost;
+			Gameplay::CGPLive      componentLive;
+			Gameplay::CGPMove      componentMove;
+			Gameplay::CGPAttack    componentAttack;
+			Gameplay::CGPProducer  componentProducer;
+			Gameplay::CGPWorker    componentWorker;
+			Cost                   cost;
+			Gameplay::E_ARMY_TYPE  type {Gameplay::E_ARMY_TYPE::E_DEFAULT};
 
 			inline void AddComponent(int ComponentSignature) noexcept;
 			inline void RemoveComponent(int ComponentSignature)noexcept;

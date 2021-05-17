@@ -6,10 +6,16 @@
 
 namespace Cookie
 {
+	namespace Gameplay
+	{
+		class ArmyHandler;
+	}
+
 	namespace Resources
 	{
 		class ResourcesManager;
 		class Map;
+		class Prefab;
 	}
 	namespace Render
 	{
@@ -26,15 +32,17 @@ namespace Cookie
 		class Coordinator
 		{
 		public:
-			EntityHandler*     entityHandler    {nullptr};
-			ComponentHandler*  componentHandler {nullptr};
-			std::vector<Entity*> selectedEntities;
+			EntityHandler*         entityHandler    {nullptr};
+			ComponentHandler*      componentHandler {nullptr};
+			Gameplay::ArmyHandler* armyHandler      {nullptr};
+			std::vector<Entity*>   selectedEntities;
 
 			Coordinator() {};
 			~Coordinator() {};
 
 			//Entity
-			void AddEntity(const int signature, std::string name = std::string("No Name"));
+			Entity& AddEntity(const int signature, std::string name = std::string("No Name"));
+			Entity& AddEntity(std::shared_ptr<Resources::Prefab> prefab);
 			void RemoveEntity(Entity& entity);
 			bool CheckSignature(const int entitySignature, const int signature);
 			
@@ -49,20 +57,20 @@ namespace Cookie
 			void ApplySystemPhysics(float factor);
 			//void ApplyDraw(const Core::Math::Mat4& viewProj);
 			void ApplyScriptUpdate();
-			void ApplyComputeTrs();
 			void ApplyRemoveUnnecessaryEntities();
+			void ApplyComputeTrs();
 
 
 			//CGP_Producer
 			void UpdateCGPProducer();
-			void ApplyGameplayUpdateCooldownProducer();
+			void ApplyGameplayUpdateCountdownProducer();
 
 			//CGP_Worker
 			void UpdateCGPWorker();
 			void ApplyGameplayUpdateWorker();
 
 			//CGP_Move
-			void UpdateCGPMove(Resources::Map& map);
+			void UpdateCGPMove(Resources::Map& map, Render::DebugRenderer& debug);
 			void ApplyGameplayUpdatePushedCooldown(Resources::Map& map);
 			void ApplyGameplayMoveTowardWaypoint();
 			void ApplyGameplayMoveWithCommander();

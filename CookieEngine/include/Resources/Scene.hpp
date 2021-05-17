@@ -3,6 +3,7 @@
 
 #include "ECS/EntityHandler.hpp"
 #include "ECS/ComponentHandler.hpp"
+#include "Gameplay/ArmyHandler.hpp"
 #include "Physics/PhysicsSimulator.hpp"
 #include "UI/UIscene.hpp"
 #include "Camera.hpp"
@@ -31,6 +32,7 @@ namespace Cookie
 
 			ECS::EntityHandler						entityHandler;
 			ECS::ComponentHandler					componentHandler;
+			Gameplay::ArmyHandler					armyHandler;
 			Physics::PhysicsSimulator				physSim;
 			Map										map;
 			UI::UIscene								uiScene;
@@ -41,7 +43,6 @@ namespace Cookie
 			~Scene();
 
 			void InitCoordinator(Cookie::ECS::Coordinator& coordinator);
-			void ChangeNumberOfTiles(int newSizeWidthTile, int newSizeLengthTile);
 			void ChangeName(const char* newName) { name = newName; }
 		};
 	}

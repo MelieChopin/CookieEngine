@@ -95,7 +95,6 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 			game["CGPAttack"]["NeedToAttack"] = gameplay.componentAttack.needToAttack;
 			game["CGPAttack"]["AttackDamage"] = gameplay.componentAttack.attackDamage;
 			game["CGPAttack"]["AttackSpeed"] = gameplay.componentAttack.attackSpeed;
-			game["CGPAttack"]["AttackCooldown"] = gameplay.componentAttack.attackCooldown;
 			game["CGPAttack"]["AttackRange"] = gameplay.componentAttack.attackRange;
 
 			game["CGPMove"]["MoveSpeed"] = gameplay.componentMove.moveSpeed;
@@ -725,7 +724,6 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 	GPComponent.componentAttack.needToAttack = temp["NeedToAttack"].get<bool>();
 	GPComponent.componentAttack.attackDamage = temp["AttackDamage"].get<float>();
 	GPComponent.componentAttack.attackSpeed = temp["AttackSpeed"].get<float>();
-	GPComponent.componentAttack.attackCooldown = temp["AttackCooldown"].get<float>();
 	GPComponent.componentAttack.attackRange = temp["AttackRange"].get<float>();
 
 	temp = gameplay["CGPMove"];
@@ -741,7 +739,7 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 		{
 			std::string name = temp["name"][i].get<std::string>();
 			if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end())
-				GPComponent.componentProducer.possibleUnits.push_back(resourcesManager.prefabs[name].get());
+				GPComponent.componentProducer.possibleUnits.push_back(resourcesManager.prefabs[name]);
 		}
 	}
 
@@ -754,7 +752,7 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 			{
 				std::string name = temp[i].get<std::string>();
 				if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end())
-					GPComponent.componentWorker.possibleBuildings.push_back(resourcesManager.prefabs[name].get());
+					GPComponent.componentWorker.possibleBuildings.push_back(resourcesManager.prefabs[name]);
 			}
 		}
 	}
