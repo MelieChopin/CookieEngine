@@ -3,6 +3,21 @@
 
 using namespace Cookie::Gameplay;
 
+void ArmyHandler::AddArmyCoordinator(int index)
+{
+	assert(index < MAX_ARMIES);
+
+	armiesCoordinator.push_back( ArmyCoordinator{&armies[index]} );
+}
+void ArmyHandler::AddArmyCoordinator(std::string name)
+{
+	for (int i = 0; i < livingArmies; ++i)
+		if (armies[i].name == name)
+		{
+			armiesCoordinator.push_back(ArmyCoordinator{ &armies[i] });
+			return;
+		}
+}
 
 void ArmyHandler::AddElementToArmy(ECS::ComponentGameplay* element)
 {
