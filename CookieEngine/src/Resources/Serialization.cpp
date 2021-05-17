@@ -261,35 +261,36 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const std::shared_ptr<Pr
 		 gp["TeamName"] = gameplay.teamName;
 		 gp["SignatureGameplay"] = gameplay.signatureGameplay;
 
-		 gp = js["Gameplay"]["Cost"];
-		 gp["CostPrimary"] = gameplay.cost.costPrimary;
-		 gp["CostSecondary"] = gameplay.cost.costSecondary;
-		 gp["CostSupply"] = gameplay.cost.costSupply;
-		 gp["TimeToProduce"] = gameplay.cost.timeToProduce;
+		 json& cost = js["Gameplay"]["Cost"];
+		 cost["CostPrimary"] = gameplay.cost.costPrimary;
+		 cost["CostSecondary"] = gameplay.cost.costSecondary;
+		 cost["CostSupply"] = gameplay.cost.costSupply;
+		 cost["TimeToProduce"] = gameplay.cost.timeToProduce;
 
-		 gp = js["Gameplay"]["CGPLive"];
-		 gp["Life"] = gameplay.componentLive.life;
-		 gp["Armor"] = gameplay.componentLive.armor;
+		 json& live = js["Gameplay"]["CGPLive"];
+		 live["Life"] = gameplay.componentLive.life;
+		 live["Armor"] = gameplay.componentLive.armor;
 
-		 gp = js["Gameplay"]["CGPAttack"];
-		 gp["NeedToAttack"] = gameplay.componentAttack.needToAttack;
-		 gp["AttackDamage"] = gameplay.componentAttack.attackDamage;
-		 gp["AttackSpeed"] = gameplay.componentAttack.attackSpeed;
-		 gp["AttackRange"] = gameplay.componentAttack.attackRange;
+		 json& attack = js["Gameplay"]["CGPAttack"];
+		 attack["NeedToAttack"] = gameplay.componentAttack.needToAttack;
+		 attack["AttackDamage"] = gameplay.componentAttack.attackDamage;
+		 attack["AttackSpeed"] = gameplay.componentAttack.attackSpeed;
+		 attack["AttackCooldown"] = gameplay.componentAttack.attackCooldown;
+		 attack["AttackRange"] = gameplay.componentAttack.attackRange;
 
-		 gp = js["Gameplay"]["CGPMove"];
-		 gp["MoveSpeed"] = gameplay.componentMove.moveSpeed;
-		 gp["isFlying"] = gameplay.componentMove.isFlying;
+		 json& move = js["Gameplay"]["CGPMove"];
+		 move["MoveSpeed"] = gameplay.componentMove.moveSpeed;
+		 move["isFlying"] = gameplay.componentMove.isFlying;
 
-		 gp = js["Gameplay"]["CGPProducer"];
+		 json& produ = js["Gameplay"]["CGPProducer"];
 		 for (int i = 0; i < gameplay.componentProducer.possibleUnits.size(); i++)
-			 gp["name"] += gameplay.componentProducer.possibleUnits[i]->name;
+			 produ["name"] += gameplay.componentProducer.possibleUnits[i]->name;
 
-		 gp["TileSize"] = gameplay.componentProducer.tileSize.e;
+		 produ["TileSize"] = gameplay.componentProducer.tileSize.e;
 
-		 gp = js["Gameplay"]["CGPWorker"];
+		 json& worker = js["Gameplay"]["CGPWorker"];
 		 for (int i = 0; i < gameplay.componentWorker.possibleBuildings.size(); i++)
-			 gp["name"] += gameplay.componentWorker.possibleBuildings[i]->name;
+			 worker["name"] += gameplay.componentWorker.possibleBuildings[i]->name;
 	 }
 
 	 file << std::setw(4) << js << std::endl;
