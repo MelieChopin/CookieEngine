@@ -131,7 +131,8 @@ set (SRC_FILES
     "${SRC_DIR}/ECS/Coordinator.cpp"
     "${SRC_DIR}/ECS/EntityHandler.cpp"
 
-
+    
+    "${SRC_DIR}/Gameplay/ArmyCoordinator.cpp"
     "${SRC_DIR}/Gameplay/ArmyHandler.cpp"
     "${SRC_DIR}/Gameplay/CGPAttack.cpp"
     "${SRC_DIR}/Gameplay/CGPLive.cpp"
