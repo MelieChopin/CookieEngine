@@ -69,7 +69,7 @@ void SoundManager::LoadAllMusic(ResourcesManager& resourcesManager)
 
 		Cookie::Resources::Sound newSound;
 		newSound.filepath = filesPath[i];
-		FMOD::Channel* chan;
+		FMOD::Channel* chan = nullptr;
 		newSound.chan = chan;
 		newSound.mode = mode;
 

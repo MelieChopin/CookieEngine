@@ -21,9 +21,10 @@ Quentin Bleuse
 
 ## To Compile:
 
-The project has been compiled using Visual Studio's support for CMake with Ninja, and clang-cl on windows.
+The project has been compiled using Visual Studio's support for CMake mainly with Ninja, and clang-cl on windows, 
+we garantee at least that it will compile using this method.
 The CMakeSettings.json is available to compile,
-you can change the compiler and the generator if you do not want to use clang and Ninja.
+you can change the compiler and the generator if you do not want to use clang and Ninja, nor msvc and Ninja.
 Assets For the Project are available in the Following Google Drive : https://drive.google.com/drive/folders/1MkweOgCSBc_fAu7KRT-KTbGxjArFwXry?usp=sharing
 ... And need to be put in the Assets Folder.
 
@@ -42,6 +43,7 @@ You can:
   - Click Left Mouse Button on an object to select it
   - change its component through the inspector
   - change scene by going in the file explorer, going into the save folder and double clicking on a save
+  - change the world settings via the window for it
 
 ## Architecture & Features:
 
