@@ -106,9 +106,26 @@ void DrawDataHandler::MakeFrustrum(const Camera& cam)
 	Core::Math::Vec3 farCenter	= cam.pos + camFwd * cam.camFar;
 	frustrum.centroid = cam.pos + camFwd * ((cam.camNear + cam.camFar) / 2.0f);
 
-	//the near bottom left corner and top far right corner of the frustrum
-	frustrum.AABB[0] = nearCenter - (camUp * (heightNear / 2.0f)) - (camRight * (widthNear / 2.0f));
-	frustrum.AABB[1] = farCenter + (camUp * (heightFar / 2.0f)) + (camRight * (widthFar / 2.0f));
+	//the corners of the frustrum
+	frustrum.corners[0] = nearCenter - (camUp * (heightNear / 2.0f)) - (camRight * (widthNear / 2.0f));
+	frustrum.corners[1] = nearCenter - (camUp * (heightNear / 2.0f)) + (camRight * (widthNear / 2.0f));
+	frustrum.corners[2] = nearCenter + (camUp * (heightNear / 2.0f)) - (camRight * (widthNear / 2.0f));
+	frustrum.corners[3] = nearCenter + (camUp * (heightNear / 2.0f)) + (camRight * (widthNear / 2.0f));
+	frustrum.corners[4] = farCenter - (camUp * (heightFar / 2.0f)) - (camRight * (widthFar / 2.0f));
+	frustrum.corners[5] = farCenter - (camUp * (heightFar / 2.0f)) + (camRight * (widthFar / 2.0f));
+	frustrum.corners[6] = farCenter + (camUp * (heightFar / 2.0f)) - (camRight * (widthFar / 2.0f));
+	frustrum.corners[7] = farCenter + (camUp * (heightFar / 2.0f)) + (camRight * (widthFar / 2.0f));
+
+	for (int i = 0; i < frustrum.corners.size(); i++)
+	{
+		frustrum.AABB[0].x = std::min(frustrum.corners[i].x, frustrum.AABB[0].x);
+		frustrum.AABB[0].y = std::min(frustrum.corners[i].y, frustrum.AABB[0].y);
+		frustrum.AABB[0].z = std::min(frustrum.corners[i].z, frustrum.AABB[0].z);
+
+		frustrum.AABB[1].x = std::max(frustrum.corners[i].x, frustrum.AABB[1].x);
+		frustrum.AABB[1].y = std::max(frustrum.corners[i].y, frustrum.AABB[1].y);
+		frustrum.AABB[1].z = std::max(frustrum.corners[i].z, frustrum.AABB[1].z);
+	}
 
 }
 
@@ -210,4 +227,6 @@ void DrawDataHandler::Clear()
 	matrices.clear();
 	AABB[0] = { std::numeric_limits<float>().max(),std::numeric_limits<float>().max() ,std::numeric_limits<float>().max() };
 	AABB[1] = { -std::numeric_limits<float>().max(), -std::numeric_limits<float>().max() , -std::numeric_limits<float>().max() };
+	frustrum.AABB[0] = { std::numeric_limits<float>().max(),std::numeric_limits<float>().max() ,std::numeric_limits<float>().max() };
+	frustrum.AABB[1] = { -std::numeric_limits<float>().max(),-std::numeric_limits<float>().max() ,-std::numeric_limits<float>().max() };
 }

@@ -109,7 +109,7 @@ void Editor::ModifyEditComp()
 
 void Editor::Loop()
 {
-    Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
+    //Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
     Cookie::Resources::SoundManager::SetVolume("Music.mp3", 0.25f);
     Cookie::Resources::SoundManager::SetVolume("Magic.mp3", 0.05f);
     Physics::PhysicsHandle physHandle;
@@ -459,6 +459,8 @@ void Editor::Loop()
             dbgRenderer.AddQuad(buildingPos, buildingTileSize.x * game.scene->map.tilesSize.x / 2, buildingTileSize.y * game.scene->map.tilesSize.y / 2, (isBuildingValid) ? 0x00FF00 : 0xFF0000);
 		for (int i = 0; i < game.particlesHandler.particlesSystems.size(); i++)
             game.particlesHandler.particlesSystems[i].Draw(cam, game.resources);
+
+
         dbgRenderer.Draw(cam.GetViewProj());
 
 
