@@ -38,9 +38,9 @@ namespace Cookie
 			bool isCarryingResource          {false};
 			bool isResourcePrimary           {true};
 
-			std::vector<std::shared_ptr<Resources::Prefab>> possibleBuildings;
-			std::shared_ptr<Resources::Prefab>              BuildingInConstruction {nullptr};
-			float                                           constructionCountdown  {0};
+			std::vector<Resources::Prefab*>	possibleBuildings;
+			Resources::Prefab*				BuildingInConstruction {nullptr};
+			float                           constructionCountdown  {0};
 
 			CGPWorker() {}
 			~CGPWorker() {}

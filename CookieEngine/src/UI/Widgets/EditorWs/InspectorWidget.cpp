@@ -2,6 +2,8 @@
 #include <reactphysics3d.h>
 #include "InspectorWidget.hpp"
 
+#include "Prefab.hpp"
+
 #include "MapExplorerHelper.hpp"
 
 #include <imgui.h>
@@ -423,7 +425,7 @@ void Inspector::ScriptInterface()
         
         if (BeginPopup("Script selector popup"))
         {
-            for (std::unordered_map<std::string, std::shared_ptr<Script>>::iterator scrIt = resources.scripts.begin(); scrIt != resources.scripts.end(); scrIt++)
+            for (std::unordered_map<std::string, std::unique_ptr<Script>>::iterator scrIt = resources.scripts.begin(); scrIt != resources.scripts.end(); scrIt++)
             {
                 if (Button(scrIt->second->filename.c_str()))
                 {
@@ -546,16 +548,58 @@ void Inspector::GameplayInterface()
             {
                 DragFloat2("Tile size (in x and z)", gameplayComp.componentProducer.tileSize.e, 0.5f, 0.5f, 100.f, "%.1f");
                 
+                NewLine();
+                Text("Can produce the following:");
+                for (auto it = gameplayComp.componentProducer.possibleUnits.begin(); it != gameplayComp.componentProducer.possibleUnits.end(); it++)
+                {
+                    if (SmallButton("No it can't"))
+                        it = gameplayComp.componentProducer.possibleUnits.erase(it);
+
+                    SameLine();
+                    Text("%s", (*it)->name.c_str());
+                }
+                
+                if (Button("Add a prefab##PRODUCTABLE")) OpenPopup("##NEWPRODUCTABLE");
+
+                if (BeginPopup("##NEWPRODUCTABLE"))
+                {
+                    Prefab* newProductable = nullptr;
+                    ResourceMapExplorer<Prefab>("prefab", "##TEST", resources.prefabs, newProductable);
+
+                    if (newProductable != nullptr)
+                        gameplayComp.componentProducer.possibleUnits.push_back(newProductable);
+
+                    EndPopup();
+                }
+
 
                 NewLine();
                 if (Selectable("Remove the property##PRODUCER"))
-                    gameplayComp.RemoveComponent(CGP_SIGNATURE::ATTACK);
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::PRODUCER);
 
                 TreePop();
             }
         }
         else if (Selectable("Make this entity a producer"))
             gameplayComp.AddComponent(CGP_SIGNATURE::PRODUCER);
+
+
+        if (gameplayComp.signatureGameplay & CGP_SIGNATURE::WORKER)
+        {
+            if (TreeNode("Worker property"))
+            {
+                DragFloat2("Tile size (in x and z)", gameplayComp.componentProducer.tileSize.e, 0.5f, 0.5f, 100.f, "%.1f");
+
+
+                NewLine();
+                if (Selectable("Remove the property##WORKER"))
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::WORKER);
+
+                TreePop();
+            }
+        }
+        else if (Selectable("Make this entity a worker"))
+            gameplayComp.AddComponent(CGP_SIGNATURE::WORKER);
 
 
         NewLine();

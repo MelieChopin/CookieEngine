@@ -32,7 +32,7 @@ void CGPProducer::UpdateCountdown(Coordinator& coordinator)
 
 bool CGPProducer::AddUnitToQueue(int indexInPossible)
 {
-	std::shared_ptr<Resources::Prefab> unitToAdd = possibleUnits[indexInPossible];
+	Resources::Prefab* const & unitToAdd = possibleUnits[indexInPossible];
 
 	//later on add Debug.Log depending on what is blocking the process to give player Feedback
 	if (queueOfUnits.size() == CGP_PRODUCER_MAX_IN_QUEUE ||

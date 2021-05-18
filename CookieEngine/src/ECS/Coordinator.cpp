@@ -40,7 +40,7 @@ Entity& Coordinator::AddEntity(const int signature, std::string name)
 
 	return newEntity;
 }
-Entity& Coordinator::AddEntity(std::shared_ptr<Resources::Prefab> prefab)
+Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab)
 {
 	assert(entityHandler->livingEntities < MAX_ENTITIES && "Too many entities in existence." && prefab != nullptr);
 
