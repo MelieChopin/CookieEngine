@@ -72,6 +72,7 @@ namespace Cookie
 			//CGP_Move
 			void UpdateCGPMove(Resources::Map& map, Render::DebugRenderer& debug);
 			void ApplyGameplayUpdatePushedCooldown(Resources::Map& map);
+			void ApplyGameplayUpdateReachGoalCooldown();
 			void ApplyGameplayMoveTowardWaypoint();
 			void ApplyGameplayMoveWithCommander();
 			void ApplyGameplayPosPrediction();

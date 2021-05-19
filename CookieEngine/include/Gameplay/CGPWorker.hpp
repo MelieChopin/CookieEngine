@@ -32,6 +32,7 @@ namespace Cookie
 
 			Core::Math::Vec3 posBase         {0,  1, 0};
 			Core::Math::Vec3 posResource     {25, 1, 0};
+			Core::Math::Vec3 posBuilding     {0, 0, 0 }; // = mousePos when start construction
 			Income* income                   {nullptr};
 
 			float harvestCountdown           {0};
@@ -41,6 +42,7 @@ namespace Cookie
 			std::vector<std::shared_ptr<Resources::Prefab>> possibleBuildings;
 			std::shared_ptr<Resources::Prefab>              BuildingInConstruction {nullptr};
 			float                                           constructionCountdown  {0};
+			bool											needTostartBuilding {false};
 
 			CGPWorker() {}
 			~CGPWorker() {}
@@ -59,7 +61,8 @@ namespace Cookie
 
 			void Update(ECS::ComponentTransform& trs, ECS::Coordinator& coordinator);
 
-
+			void StartDisplayBuilding();
+			void StartBuilding();
 		};
 
 	}

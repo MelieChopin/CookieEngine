@@ -347,8 +347,11 @@ void Editor::Loop()
                 {
                     float selectedEntityId = game.coordinator.selectedEntities[i]->id;
                     ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(selectedEntityId);
+
                     if (game.scene->map.ApplyPathfinding(game.scene->map.GetTile(trs.pos), game.scene->map.tiles[indexOfSelectedTile]))
                         game.coordinator.componentHandler->GetComponentGameplay(selectedEntityId).componentMove.SetPath(game.scene->map.tiles[indexOfSelectedTile], trs);
+                    else
+                        std::cout << "No Path Find\n";
                 }*/
                 
             }
