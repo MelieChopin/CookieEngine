@@ -42,7 +42,7 @@ namespace Cookie
 
 			//Entity
 			Entity& AddEntity(const int signature, std::string name = std::string("No Name"));
-			Entity& AddEntity(std::shared_ptr<Resources::Prefab> prefab);
+			Entity& AddEntity(const Resources::Prefab* const & prefab);
 			void RemoveEntity(Entity& entity);
 			bool CheckSignature(const int entitySignature, const int signature);
 			

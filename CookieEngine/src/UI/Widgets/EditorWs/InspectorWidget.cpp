@@ -2,6 +2,8 @@
 #include <reactphysics3d.h>
 #include "InspectorWidget.hpp"
 
+#include "Prefab.hpp"
+
 #include "MapExplorerHelper.hpp"
 
 #include <imgui.h>
@@ -423,7 +425,7 @@ void Inspector::ScriptInterface()
         
         if (BeginPopup("Script selector popup"))
         {
-            for (std::unordered_map<std::string, std::shared_ptr<Script>>::iterator scrIt = resources.scripts.begin(); scrIt != resources.scripts.end(); scrIt++)
+            for (std::unordered_map<std::string, std::unique_ptr<Script>>::iterator scrIt = resources.scripts.begin(); scrIt != resources.scripts.end(); scrIt++)
             {
                 if (Button(scrIt->second->filename.c_str()))
                 {
@@ -457,8 +459,8 @@ void Inspector::GameplayInterface()
         InputText("##TEAMNAME", &gameplayComp.teamName);
 
         NewLine();
-        DragFloat("##FIRSTCOST",  &gameplayComp.cost.costPrimary,   1.f, NULL, NULL, "Initial cost: %.0f");
-        DragFloat("##SECONDCOST", &gameplayComp.cost.costSecondary, 1.f, NULL, NULL, "Upgrade cost: %.0f");
+        DragFloat("##FIRSTCOST",  &gameplayComp.cost.costPrimary,   1.f, NULL, NULL, "Primary cost: %.0f");
+        DragFloat("##SECONDCOST", &gameplayComp.cost.costSecondary, 1.f, NULL, NULL, "Secondary cost: %.0f");
         DragFloat("##SUPPLYCOST", &gameplayComp.cost.costSupply,    1.f, NULL, NULL, "Supply cost: %.0f" );
 
         DragFloat("##PRODUCTIONTIME", &gameplayComp.cost.timeToProduce, 0.25f, NULL, NULL, "Production time: %.2f");
@@ -546,16 +548,82 @@ void Inspector::GameplayInterface()
             {
                 DragFloat2("Tile size (in x and z)", gameplayComp.componentProducer.tileSize.e, 0.5f, 0.5f, 100.f, "%.1f");
                 
+                NewLine();
+                Text("Can produce the following units:");
+
+                int i = 0;
+                for (auto it = gameplayComp.componentProducer.possibleUnits.begin(); it != gameplayComp.componentProducer.possibleUnits.end();)
+                {
+                    i++;
+
+                    Text("%s", (*it)->name.c_str());
+                    
+                    SameLine();
+
+                    std::string tinyDeleterTag = "X##" + std::to_string(i);
+                    if (SmallButton(tinyDeleterTag.c_str()))
+                    {
+                        it = gameplayComp.componentProducer.possibleUnits.erase(it);
+                    }
+                    else it++;
+                }
+                {
+                    Prefab* newProductable = ResourceMapSelector<Prefab>("prefab", "##PRDUNIT_SELECTOR", resources.prefabs);
+
+                    if (newProductable != nullptr)
+                        gameplayComp.componentProducer.possibleUnits.push_back(newProductable);
+                }
+
 
                 NewLine();
                 if (Selectable("Remove the property##PRODUCER"))
-                    gameplayComp.RemoveComponent(CGP_SIGNATURE::ATTACK);
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::PRODUCER);
 
                 TreePop();
             }
         }
         else if (Selectable("Make this entity a producer"))
             gameplayComp.AddComponent(CGP_SIGNATURE::PRODUCER);
+
+
+        if (gameplayComp.signatureGameplay & CGP_SIGNATURE::WORKER)
+        {
+            if (TreeNode("Worker property"))
+            {
+                Text("Can produce the following buildings:");
+
+                int i = 0;
+                for (auto it = gameplayComp.componentWorker.possibleBuildings.begin(); it != gameplayComp.componentWorker.possibleBuildings.end();)
+                {
+                    i++;
+
+                    Text("%s", (*it)->name.c_str());
+
+                    SameLine();
+
+                    std::string tinyDeleterTag = "X##" + std::to_string(i);
+                    if (SmallButton(tinyDeleterTag.c_str()))
+                    {
+                        it = gameplayComp.componentProducer.possibleUnits.erase(it);
+                    }
+                    else it++;
+                }
+                {
+                    Prefab* newProductable = ResourceMapSelector<Prefab>("prefab", "##PRDUNIT_SELECTOR", resources.prefabs);
+
+                    if (newProductable != nullptr)
+                        gameplayComp.componentWorker.possibleBuildings.push_back(newProductable);
+                }
+
+                NewLine();
+                if (Selectable("Remove the property##WORKER"))
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::WORKER);
+
+                TreePop();
+            }
+        }
+        else if (Selectable("Make this entity a worker"))
+            gameplayComp.AddComponent(CGP_SIGNATURE::WORKER);
 
 
         NewLine();

@@ -49,7 +49,7 @@ namespace Cookie
 					Cookie::Resources::ResourcesManager& resourcesManager);
 
 				void SaveScene(Cookie::Resources::Scene& actScene, Cookie::Resources::ResourcesManager& resourcesManager);
-				void SavePrefab(const std::shared_ptr<Prefab>& prefab);
+				void SavePrefab(const Prefab* const & prefab);
 				void SavePhysic(json& js, Cookie::ECS::ComponentPhysics& physics);
 
 				void SaveAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);

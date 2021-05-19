@@ -37,8 +37,8 @@ namespace Cookie
 			public:
 				std::unordered_map<std::string, std::unique_ptr<Mesh>>						meshes;
 				std::unordered_map<std::string, std::unique_ptr<Texture>>					textures;
-				std::unordered_map<std::string, std::shared_ptr<Script>>					scripts;
-				std::unordered_map<std::string, std::shared_ptr<Prefab>>					prefabs;
+				std::unordered_map<std::string, std::unique_ptr<Script>>					scripts;
+				std::unordered_map<std::string, std::unique_ptr<Prefab>>					prefabs;
 				std::unordered_map<std::string, std::shared_ptr<Cookie::Resources::Sound>>  sounds;
 				
 			private:
