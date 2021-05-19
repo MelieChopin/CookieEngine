@@ -459,8 +459,8 @@ void Inspector::GameplayInterface()
         InputText("##TEAMNAME", &gameplayComp.teamName);
 
         NewLine();
-        DragFloat("##FIRSTCOST",  &gameplayComp.cost.costPrimary,   1.f, NULL, NULL, "Initial cost: %.0f");
-        DragFloat("##SECONDCOST", &gameplayComp.cost.costSecondary, 1.f, NULL, NULL, "Upgrade cost: %.0f");
+        DragFloat("##FIRSTCOST",  &gameplayComp.cost.costPrimary,   1.f, NULL, NULL, "Primary cost: %.0f");
+        DragFloat("##SECONDCOST", &gameplayComp.cost.costSecondary, 1.f, NULL, NULL, "Secondary cost: %.0f");
         DragFloat("##SUPPLYCOST", &gameplayComp.cost.costSupply,    1.f, NULL, NULL, "Supply cost: %.0f" );
 
         DragFloat("##PRODUCTIONTIME", &gameplayComp.cost.timeToProduce, 0.25f, NULL, NULL, "Production time: %.2f");
@@ -549,27 +549,29 @@ void Inspector::GameplayInterface()
                 DragFloat2("Tile size (in x and z)", gameplayComp.componentProducer.tileSize.e, 0.5f, 0.5f, 100.f, "%.1f");
                 
                 NewLine();
-                Text("Can produce the following:");
-                for (auto it = gameplayComp.componentProducer.possibleUnits.begin(); it != gameplayComp.componentProducer.possibleUnits.end(); it++)
-                {
-                    if (SmallButton("No it can't"))
-                        it = gameplayComp.componentProducer.possibleUnits.erase(it);
+                Text("Can produce the following units:");
 
-                    SameLine();
+                int i = 0;
+                for (auto it = gameplayComp.componentProducer.possibleUnits.begin(); it != gameplayComp.componentProducer.possibleUnits.end();)
+                {
+                    i++;
+
                     Text("%s", (*it)->name.c_str());
-                }
-                
-                if (Button("Add a prefab##PRODUCTABLE")) OpenPopup("##NEWPRODUCTABLE");
+                    
+                    SameLine();
 
-                if (BeginPopup("##NEWPRODUCTABLE"))
+                    std::string tinyDeleterTag = "X##" + std::to_string(i);
+                    if (SmallButton(tinyDeleterTag.c_str()))
+                    {
+                        it = gameplayComp.componentProducer.possibleUnits.erase(it);
+                    }
+                    else it++;
+                }
                 {
-                    Prefab* newProductable = nullptr;
-                    ResourceMapExplorer<Prefab>("prefab", "##TEST", resources.prefabs, newProductable);
+                    Prefab* newProductable = ResourceMapSelector<Prefab>("prefab", "##PRDUNIT_SELECTOR", resources.prefabs);
 
                     if (newProductable != nullptr)
                         gameplayComp.componentProducer.possibleUnits.push_back(newProductable);
-
-                    EndPopup();
                 }
 
 
@@ -588,8 +590,30 @@ void Inspector::GameplayInterface()
         {
             if (TreeNode("Worker property"))
             {
-                DragFloat2("Tile size (in x and z)", gameplayComp.componentProducer.tileSize.e, 0.5f, 0.5f, 100.f, "%.1f");
+                Text("Can produce the following buildings:");
 
+                int i = 0;
+                for (auto it = gameplayComp.componentWorker.possibleBuildings.begin(); it != gameplayComp.componentWorker.possibleBuildings.end();)
+                {
+                    i++;
+
+                    Text("%s", (*it)->name.c_str());
+
+                    SameLine();
+
+                    std::string tinyDeleterTag = "X##" + std::to_string(i);
+                    if (SmallButton(tinyDeleterTag.c_str()))
+                    {
+                        it = gameplayComp.componentProducer.possibleUnits.erase(it);
+                    }
+                    else it++;
+                }
+                {
+                    Prefab* newProductable = ResourceMapSelector<Prefab>("prefab", "##PRDUNIT_SELECTOR", resources.prefabs);
+
+                    if (newProductable != nullptr)
+                        gameplayComp.componentWorker.possibleBuildings.push_back(newProductable);
+                }
 
                 NewLine();
                 if (Selectable("Remove the property##WORKER"))
