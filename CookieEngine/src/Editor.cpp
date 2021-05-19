@@ -109,7 +109,7 @@ void Editor::ModifyEditComp()
 
 void Editor::Loop()
 {
-    Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
+    //Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
     Cookie::Resources::SoundManager::SetVolume("Music.mp3", 0.25f);
     Cookie::Resources::SoundManager::SetVolume("Magic.mp3", 0.05f);
     Physics::PhysicsHandle physHandle;

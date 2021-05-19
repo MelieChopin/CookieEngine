@@ -2,6 +2,7 @@
 #include "Core/Math/Mat4.hpp"
 #include "Render/RendererRemote.hpp"
 #include "Resources/Mesh.hpp"
+#include "Resources/Texture.hpp"
 #include "camera.hpp"
 
 using namespace Cookie;
@@ -98,7 +99,7 @@ void ParticlesPass::InitShader()
 	    vout.PosH = mul(temp, mat);
 	    
 	    // Output vertex attributes for interpolation across triangle.
-	    vout.Tex   = mul(float4(vin.Tex, 0.0f, 1.0f), vin.World).xy;
+	    vout.Tex   = vin.Tex;
 	    vout.Color = vin.Color;
 
 	    return vout;
@@ -108,6 +109,9 @@ void ParticlesPass::InitShader()
 	Render::CompileVertex(source, &blob, &VShader);
 
 	source = (const char*)R"(#line 53
+
+    Texture2D	text : register(t0);    
+    SamplerState WrapSampler : register(s0);
 
     struct PixelInputType
     {
@@ -120,7 +124,9 @@ void ParticlesPass::InitShader()
 
     float4 main(PixelInputType input) : SV_TARGET
     {
-        return input.Color;
+        float4 color = float4(input.Color.rgb, 1);//input.Color;
+        float4 finalColor = text.Sample(WrapSampler, input.Tex) * color;
+        return finalColor; // input.Color;
     }
 	)";
 
@@ -135,7 +141,7 @@ void ParticlesPass::InitShader()
         { "WORLD", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
         { "WORLD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
         { "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 64,  D3D11_INPUT_PER_INSTANCE_DATA, 1 }
+        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 64, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
     };
      
     Render::CreateLayout(&blob, ied, 8, &ILayout);
@@ -172,11 +178,11 @@ void ParticlesPass::InitShader()
 
     D3D11_BLEND_DESC blenDesc = {  };
 
-    blenDesc.AlphaToCoverageEnable = false;
+    blenDesc.AlphaToCoverageEnable = true;
     blenDesc.IndependentBlendEnable = false;
     blenDesc.RenderTarget[0].BlendEnable = true;
     blenDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-    blenDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO; 
+    blenDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
     blenDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
     blenDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA;
     blenDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
@@ -184,6 +190,21 @@ void ParticlesPass::InitShader()
     blenDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
     RendererRemote::device->CreateBlendState(&blenDesc, &blendState);
+
+    D3D11_SAMPLER_DESC samDesc = {};
+    samDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    samDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    samDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    samDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    samDesc.MipLODBias = 0.0f;
+    samDesc.MaxAnisotropy = 1;
+    samDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+    samDesc.BorderColor[0] = samDesc.BorderColor[1] = samDesc.BorderColor[2] = samDesc.BorderColor[3] = 0;
+    samDesc.MinLOD = 0;
+    samDesc.MaxLOD = 0;
+
+    Render::CreateSampler(&samDesc, &PSampler);
+    blob->Release();
 }
 
 /*=========================== REALTIME METHODS ===========================*/
@@ -202,7 +223,7 @@ void ParticlesPass::AllocateMoreSpace(int newSpace)
     mInstancedData.resize(newSpace);
 }
 
-void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mesh, std::vector<InstancedData> data)
+void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mesh, Resources::Texture* texture, std::vector<InstancedData> data)
 {
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
@@ -223,6 +244,8 @@ void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mes
     Render::RendererRemote::context->IASetInputLayout(ILayout);
     Render::RendererRemote::context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
+    Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
+    texture->Set(0);
 
     VS_CONSTANT_BUFFER buffer = {};
     buffer.proj = cam.GetProj();
@@ -235,13 +258,6 @@ void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mes
 
     D3D11_MAPPED_SUBRESOURCE ms;
     HRESULT result = Render::RendererRemote::context->Map(InstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
-
-
-    /*for (int i = 0; i < mInstancedData.size(); i++)
-    {
-        if ()
-        
-    }*/
 
     memcpy(ms.pData, mInstancedData.data(), sizeof(Render::InstancedData) * mInstancedData.size());
     Render::RendererRemote::context->Unmap(InstanceBuffer, 0);

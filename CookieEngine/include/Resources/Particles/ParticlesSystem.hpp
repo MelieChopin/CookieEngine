@@ -6,6 +6,7 @@
 #include "ComponentTransform.hpp"
 #include "ParticlesPass.hpp"
 #include "Resources/Mesh.hpp"
+#include "Resources/Texture.hpp"
 #include "Camera.hpp"
 #include "ResourcesManager.hpp"
 
@@ -61,7 +62,7 @@ namespace Cookie
 							newData.push_back(temp);
 						}
 
-						shader.Draw(cam, resources.meshes["Quad"].get(), newData);
+						shader.Draw(cam, resources.meshes["Quad"].get(), resources.textures["Assets/C.png"].get(), newData);
 					}
 				}
 			};
