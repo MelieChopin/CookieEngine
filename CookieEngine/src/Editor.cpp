@@ -148,7 +148,7 @@ void Editor::Loop()
     Cookie::Resources::Particles::ColorRandGenerate         color(Vec3(1, 1, 1), Vec3(1, 1, 1));
     first.data[0].countAlive = 10;
     first.data[0].mesh = game.resources.meshes["Quad"].get();
-    first.data[0].texture = game.resources.textures["Assets/Ligth.png"].get();
+    first.data[0].texture = game.resources.textures["Assets/Light.png"].get();
     first.particlesEmiter[0].generators.push_back(&circle);
     first.particlesEmiter[0].generators.push_back(&velRand);
     first.particlesEmiter[0].generators.push_back(&timeRand);
@@ -360,53 +360,6 @@ void Editor::Loop()
                 
             }
         }
-        //Bind Key to create new unit
-        {
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N] && isRaycastingWithMap)
-            {
-                ECS::Entity& entity =  game.coordinator.AddEntity(C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL + C_SIGNATURE::GAMEPLAY, "Unit " + std::to_string(nbOfUnits));
-                {
-                    ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(entity.id);
-                    ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(entity.id);
-                    ComponentGameplay& gameplay = game.coordinator.componentHandler->GetComponentGameplay(entity.id);
-                    gameplay.teamName = "good";
-                    gameplay.signatureGameplay = CGP_SIGNATURE::ALL_CGP - CGP_SIGNATURE::WORKER;
-                    gameplay.type = E_ARMY_TYPE::E_WORKER;
-
-                    trs.pos = { mousePos.x, 1, mousePos.y };
-                    trs.trsHasChanged = true;
-
-                    model.mesh = game.resources.meshes["Cube"].get();
-                    model.albedo = game.resources.textures["Green"].get();
-
-                    game.coordinator.armyHandler->AddElementToArmy(&gameplay);
-                }
-
-                nbOfUnits++;
-            }
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B] && isRaycastingWithMap)
-            {
-                ECS::Entity& entity = game.coordinator.AddEntity(C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL + C_SIGNATURE::GAMEPLAY, "Unit " + std::to_string(nbOfUnits));
-                {
-                    ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(entity.id);
-                    ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(entity.id);
-                    ComponentGameplay& gameplay = game.coordinator.componentHandler->GetComponentGameplay(entity.id);
-                    gameplay.teamName = "bad";
-                    gameplay.signatureGameplay = CGP_SIGNATURE::ALL_CGP - CGP_SIGNATURE::WORKER;
-                    gameplay.type = E_ARMY_TYPE::E_WORKER;
-
-                    trs.pos = { mousePos.x, 1, mousePos.y };
-                    trs.trsHasChanged = true;
-
-                    model.mesh = game.resources.meshes["Cube"].get();
-                    model.albedo = game.resources.textures["Red"].get();
-
-                    game.coordinator.armyHandler->AddElementToArmy(&gameplay);
-                }
-
-                nbOfUnits++;
-            }
-        }
         //Selection Quad
         {
             if (ImGui::GetIO().MouseClicked[0] && isRaycastingWithMap)
@@ -438,12 +391,20 @@ void Editor::Loop()
 
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
+        /*
+        Prefab* prefab = game.resources.prefabs["02Building"].get();
 
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
+            game.coordinator.AddEntity(prefab, "good");
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B])
+            game.coordinator.AddEntity(prefab, "bad");
 
-        for (int i = 0; i < game.coordinator.armyHandler->livingArmies; ++i)
-            std::cout << "Army name : " << game.coordinator.armyHandler->armies[i].name <<
-                        " Army Primary Income : " << game.coordinator.armyHandler->armies[i].income.primary << "\n";
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_T])
+            game.coordinator.componentHandler->GetComponentGameplay(0).componentProducer.AddUnitToQueue(0);
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_Y])
+            game.coordinator.componentHandler->GetComponentGameplay(1).componentProducer.AddUnitToQueue(0);
 
+            */
 
         game.coordinator.UpdateCGPProducer();
         game.coordinator.UpdateCGPWorker();
@@ -451,7 +412,6 @@ void Editor::Loop()
         game.coordinator.UpdateCGPAttack();
 
         game.coordinator.ApplyRemoveUnnecessaryEntities();
-
 
 		if (isActive)
             game.particlesHandler.Update();
@@ -475,6 +435,7 @@ void Editor::Loop()
         editorUI.UpdateUI();
         UIcore::EndFrame();
         game.renderer.Render();
+
 
     }
 }
