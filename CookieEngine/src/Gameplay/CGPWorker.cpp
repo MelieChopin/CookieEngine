@@ -10,19 +10,17 @@ using namespace Cookie::Gameplay;
 using namespace Cookie::ECS;
 
 
-void CGPWorker::Update(ECS::ComponentTransform& trs, Coordinator& coordinator)
+void CGPWorker::Update(ECS::Coordinator& coordinator, int selfId)
 {
 
 	//isBuilding
 	if (constructionCountdown)
 	{
 		constructionCountdown -= Core::DeltaTime();
+
 		if (constructionCountdown <= 0)
-		{
-			//add to ECS and ArmyHandler
-			Entity& newEntity = coordinator.AddEntity(BuildingInConstruction);
-			coordinator.armyHandler->AddElementToArmy(&coordinator.componentHandler->GetComponentGameplay(newEntity.id));
-		}
+			coordinator.AddEntity(BuildingInConstruction);
+		
 
 		return;
 	}
@@ -38,7 +36,8 @@ void CGPWorker::Update(ECS::ComponentTransform& trs, Coordinator& coordinator)
 	}
 
 	//isMoving
-	Core::Math::Vec3 destination = (isCarryingResource) ? posBase : posResource;
+	ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(selfId);
+	Core::Math::Vec3 destination = (isCarryingResource) ? *posBase : posResource;
 	Core::Math::Vec3 direction = (destination - trs.pos).Normalize();
 	trs.pos += direction * (moveSpeed * Core::DeltaTime());
 	trs.trsHasChanged = true;
@@ -50,7 +49,7 @@ void CGPWorker::Update(ECS::ComponentTransform& trs, Coordinator& coordinator)
 		{
 			isCarryingResource = false;
 			(isResourcePrimary ? income->primary : income->secondary) += (isResourcePrimary ? PRIMARY_PER_RECOLT : SECONDARY_PER_RECOLT);
-			std::cout << income->primary << "\n";
+			std::cout << coordinator.componentHandler->GetComponentGameplay(selfId).teamName << " : " << income->primary << "\n";
 		}
 		else
 			harvestCountdown = TIME_TO_HARVEST;
