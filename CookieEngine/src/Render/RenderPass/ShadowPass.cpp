@@ -179,14 +179,6 @@ void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
     if (lights.useDir && lights.dirLight.castShadow)
     {
         Render::RendererRemote::context->OMSetRenderTargets(0, nullptr, shadowMap.depthStencilView);
-        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_H])
-        {
-            lights.dirLight.dir = { 0.0f,-1.0f,1.0f };
-        }
-        else if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_G])
-        {
-            lights.dirLight.dir = { 0.0f,-1.0f,-1.0f };
-        }
 
         Vec3 jDir = lights.dirLight.dir.Normalize();
         Vec3 pos = (drawData.AABB[0] + drawData.AABB[1]) * 0.5f;
