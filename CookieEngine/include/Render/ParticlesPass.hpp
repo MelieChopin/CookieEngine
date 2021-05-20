@@ -43,6 +43,7 @@ namespace Cookie
 			ID3D11Buffer* InstanceBuffer{ nullptr };
 			ID3D11BlendState* blendState{ nullptr };
 			ID3D11SamplerState* PSampler{ nullptr };
+			ID3D11RasterizerState* rasterizerState{ nullptr };
 
 			std::vector<InstancedData> mInstancedData;
 

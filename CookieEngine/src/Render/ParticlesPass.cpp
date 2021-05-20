@@ -13,7 +13,7 @@ struct VS_CONSTANT_BUFFER
     Cookie::Core::Math::Mat4 proj = Cookie::Core::Math::Mat4::Identity();
     Cookie::Core::Math::Mat4 view = Cookie::Core::Math::Mat4::Identity();
     Cookie::Core::Math::Vec3 pos;
-    float padding;
+    bool isBillboard;
 };
 
 
@@ -46,7 +46,7 @@ void ParticlesPass::InitShader()
         float4x4 gProj;
 	    float4x4 gView;
         float3 gCamPos;
-        float padding;
+        bool isBillboard;
     };
 
     struct VertexInputType
@@ -74,20 +74,23 @@ void ParticlesPass::InitShader()
 
         float4 temp = mul(float4(vin.PosL, 1.0f), vin.World);
 
-        float3 forward = float3(0, 0, 1);
-        float3 cameraObj = normalize(gCamPos - temp);
-        float angle = 1;
-        if (dot(float3(-1, 0, 0), cameraObj) > 0)
-            angle = 3.1415 * 2 - acos(dot(normalize(forward), normalize(cameraObj)));
-        else
-            angle = acos(dot(normalize(forward), normalize(cameraObj)));
+        if (isBillboard)
+        {
+            float3 forward = float3(0, 0, 1);
+            float3 cameraObj = normalize(gCamPos - temp);
+            float angle = 1;
+            if (dot(float3(-1, 0, 0), cameraObj) > 0)
+                angle = 3.1415 * 2 - acos(dot(normalize(forward), normalize(cameraObj)));
+            else
+                angle = acos(dot(normalize(forward), normalize(cameraObj)));
 
-        float4x4 rot = float4x4(float4(cos(angle), 0, -sin(angle), 0),
-                                float4(0, 1, 0, 0),
-                                float4(sin(angle), 0, cos(angle), 0),
-                                float4(0, 0, 0, 1));
+            float4x4 rot = float4x4(float4(cos(angle), 0, -sin(angle), 0),
+                                    float4(0, 1, 0, 0),
+                                    float4(sin(angle), 0, cos(angle), 0),
+                                    float4(0, 0, 0, 1));
 
-        temp = mul(float4(vin.PosL, 1.0f), mul(rot, vin.World));
+            temp = mul(float4(vin.PosL, 1.0f), mul(rot, vin.World));
+        }
 
 	    // Transform to world space space.
 	    vout.PosW    = temp.xyz;
@@ -124,9 +127,10 @@ void ParticlesPass::InitShader()
 
     float4 main(PixelInputType input) : SV_TARGET
     {
-        float4 color = float4(input.Color.rgb, 1);//input.Color;
-        float4 finalColor = text.Sample(WrapSampler, input.Tex) * color;
-        return finalColor; // input.Color;
+        float4 color = float4(input.Color.rgb, 1);
+        float4 finalColor = text.Sample(WrapSampler, input.Tex);// * color;
+        finalColor = float4(finalColor.rgb, finalColor.a);// * finalColor.a;
+        return finalColor; 
     }
 	)";
 
@@ -180,7 +184,7 @@ void ParticlesPass::InitShader()
 
     blenDesc.AlphaToCoverageEnable = true;
     blenDesc.IndependentBlendEnable = false;
-    blenDesc.RenderTarget[0].BlendEnable = true;
+    blenDesc.RenderTarget[0].BlendEnable = false;
     blenDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
     blenDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
     blenDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
@@ -204,6 +208,29 @@ void ParticlesPass::InitShader()
     samDesc.MaxLOD = 0;
 
     Render::CreateSampler(&samDesc, &PSampler);
+
+    D3D11_RASTERIZER_DESC rasterDesc = {};
+
+    // Setup the raster description which will determine how and what polygons will be drawn.
+    rasterDesc.AntialiasedLineEnable = false;
+    rasterDesc.CullMode = D3D11_CULL_FRONT;
+    rasterDesc.DepthBias = 0;
+    rasterDesc.DepthBiasClamp = 0.0f;
+    rasterDesc.DepthClipEnable = false;
+    rasterDesc.FillMode = D3D11_FILL_SOLID;
+    rasterDesc.FrontCounterClockwise = false;
+    rasterDesc.MultisampleEnable = false;
+    rasterDesc.ScissorEnable = false;
+    rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+    HRESULT result = RendererRemote::device->CreateRasterizerState(&rasterDesc, &rasterizerState);
+
+    if (FAILED(result))
+    {
+        printf("Failed Creating Rasterizer State: %s\n", std::system_category().message(result).c_str());
+    }
+
+
     blob->Release();
 }
 
@@ -228,8 +255,10 @@ void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mes
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
 
-    const float blendFactor[4] = { 1.0f,1.0f,1.0f, 1.0f };
+    const float blendFactor[4] = { 1, 1, 1, 1 };
     Render::RendererRemote::context->OMSetBlendState(blendState, blendFactor, 0xffffffff);
+
+    Render::RendererRemote::context->RSSetState(rasterizerState);
 
     if (mInstancedData.size() < data.size())
         AllocateMoreSpace(data.size());
@@ -251,6 +280,7 @@ void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mes
     buffer.proj = cam.GetProj();
     buffer.view = cam.GetView();
     buffer.pos = cam.pos;
+    buffer.isBillboard = false;
     Render::WriteCBuffer(&buffer, sizeof(buffer), 0, &CBuffer);
  
     Render::RendererRemote::context->IASetVertexBuffers(0, 2, vbs, stride, offset);
@@ -262,5 +292,5 @@ void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mes
     memcpy(ms.pData, mInstancedData.data(), sizeof(Render::InstancedData) * mInstancedData.size());
     Render::RendererRemote::context->Unmap(InstanceBuffer, 0);
 
-    Render::RendererRemote::context->DrawIndexedInstanced(6, mInstancedData.size(), 0, 0, 0);
+    Render::RendererRemote::context->DrawIndexedInstanced(mesh->GetIndicesNb(), mInstancedData.size(), 0, 0, 0);
 }

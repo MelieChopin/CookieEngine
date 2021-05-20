@@ -230,6 +230,8 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, gPass.depthBuffer);
 
     game.skyBox.Draw(cam->GetProj(), cam->GetView());
+
+    
 }
 
 void Renderer::DrawFrameBuffer(FrameBuffer& fbo)

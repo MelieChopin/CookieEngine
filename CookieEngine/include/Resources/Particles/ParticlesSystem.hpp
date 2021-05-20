@@ -62,7 +62,7 @@ namespace Cookie
 							newData.push_back(temp);
 						}
 
-						shader.Draw(cam, resources.meshes["Quad"].get(), resources.textures["Assets/C.png"].get(), newData);
+						shader.Draw(cam, data[j].mesh, data[j].texture, newData);
 					}
 				}
 			};
