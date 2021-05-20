@@ -148,7 +148,7 @@ void Editor::Loop()
     Cookie::Resources::Particles::ColorRandGenerate         color(Vec3(1, 1, 1), Vec3(1, 1, 1));
     first.data[0].countAlive = 10;
     first.data[0].mesh = game.resources.meshes["Quad"].get();
-    first.data[0].texture = game.resources.textures["Assets/Ligth.png"].get();
+    first.data[0].texture = game.resources.textures["Assets/Light.png"].get();
     first.particlesEmiter[0].generators.push_back(&circle);
     first.particlesEmiter[0].generators.push_back(&velRand);
     first.particlesEmiter[0].generators.push_back(&timeRand);
@@ -391,7 +391,7 @@ void Editor::Loop()
 
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
-
+        /*
         Prefab* prefab = game.resources.prefabs["02Building"].get();
 
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
@@ -399,12 +399,12 @@ void Editor::Loop()
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B])
             game.coordinator.AddEntity(prefab, "bad");
 
-
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_T])
             game.coordinator.componentHandler->GetComponentGameplay(0).componentProducer.AddUnitToQueue(0);
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_Y])
             game.coordinator.componentHandler->GetComponentGameplay(1).componentProducer.AddUnitToQueue(0);
 
+            */
 
         game.coordinator.UpdateCGPProducer();
         game.coordinator.UpdateCGPWorker();
