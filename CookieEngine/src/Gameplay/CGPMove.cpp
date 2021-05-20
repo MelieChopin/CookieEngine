@@ -13,9 +13,24 @@ void CGPMove::UpdatePushedCooldown(Resources::Map& map, ECS::ComponentTransform&
 
 	if (pushedCooldownBeforeReturn < 0 && map.ApplyPathfinding(map.GetTile(trs.pos), map.GetTile(posBeforePushed)))
 	{
-		pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
+		//reset of timer should be remove after test
+		pushedCooldownBeforeReturn = CGPMOVE_CD_BEFORE_RETURN;
 		SetPath(map.GetTile(posBeforePushed), trs);
 	}
+}
+void CGPMove::UpdateReachGoalCooldown()
+{
+	if (state != CGPMOVE_STATE::E_REACH_GOAL)
+		return;
+
+	reachGoalCountdown -= Core::DeltaTime();
+
+	if (reachGoalCountdown <= 0)
+	{
+		reachGoalCountdown = CGPMOVE_CD_BEFORE_STATIC;
+		state = CGPMOVE_STATE::E_STATIC;
+	}
+
 }
 
 void CGPMove::SetPath(Resources::Tile& lastWaypoint, ECS::ComponentTransform& trs)
@@ -68,7 +83,7 @@ void CGPMove::MoveTowardWaypoint(ECS::ComponentTransform& trs)
 
 		//check if reach goal here to avoid to set the state each frame
 		if (waypoints.size() == 0)
-			state = CGPMOVE_STATE::E_STATIC;
+			state = CGPMOVE_STATE::E_REACH_GOAL;
 	}
 
 	if (waypoints.size() == 0 || state == CGPMOVE_STATE::E_WAITING)
@@ -111,14 +126,15 @@ void CGPMove::ResolveColision(ECS::ComponentTransform& trsSelf, CGPMove& other, 
 		(state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_STATIC) ||
 		(state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_REACH_GOAL) ||
 		(state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_STATIC) ||
-		(state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_REACH_GOAL))
+		(state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_REACH_GOAL) ||
+		(state == CGPMOVE_STATE::E_REACH_GOAL && other.state == CGPMOVE_STATE::E_REACH_GOAL && reachGoalCountdown >= other.reachGoalCountdown))
 	{
 		if (other.state == CGPMOVE_STATE::E_STATIC)
 		{
 			other.state = CGPMOVE_STATE::E_PUSHED;
 			other.posBeforePushed = trsOther.pos;
 		}
-		other.pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
+		other.pushedCooldownBeforeReturn = CGPMOVE_CD_BEFORE_RETURN;
 
 		Core::Math::Vec3 direction = (trsOther.pos - trsSelf.pos).Normalize();
 		trsOther.pos = trsSelf.pos + direction * (radius + other.radius);
@@ -159,20 +175,20 @@ void CGPMove::ResolveColision(ECS::ComponentTransform& trsSelf, CGPMove& other, 
 		(state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_MOVING) ||
 		(state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_PUSHED) ||
 		(state == CGPMOVE_STATE::E_REACH_GOAL && other.state == CGPMOVE_STATE::E_MOVING) ||
-		(state == CGPMOVE_STATE::E_REACH_GOAL && other.state == CGPMOVE_STATE::E_PUSHED))
+		(state == CGPMOVE_STATE::E_REACH_GOAL && other.state == CGPMOVE_STATE::E_PUSHED) ||
+		(state == CGPMOVE_STATE::E_REACH_GOAL && other.state == CGPMOVE_STATE::E_REACH_GOAL && reachGoalCountdown < other.reachGoalCountdown))
 	{
 		if (state == CGPMOVE_STATE::E_STATIC)
 		{
 			state = CGPMOVE_STATE::E_PUSHED;
 			posBeforePushed = trsSelf.pos;
 		}
-		pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
+		pushedCooldownBeforeReturn = CGPMOVE_CD_BEFORE_RETURN;
 
 		Core::Math::Vec3 direction = (trsSelf.pos - trsOther.pos).Normalize();
 		trsSelf.pos = trsOther.pos + direction * (radius + other.radius);
 		trsSelf.trsHasChanged = true;
 	}
-
 
 }
 

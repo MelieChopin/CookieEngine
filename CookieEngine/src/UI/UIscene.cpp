@@ -15,6 +15,9 @@ UIscene::UIscene(const std::vector<GameWindowInfo>& _gameWindows)
 		LoadLayout(_gameWindows);
 }
 
+UIscene::~UIscene()
+{ CleanLayout(); }
+
 
 void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows)
 {

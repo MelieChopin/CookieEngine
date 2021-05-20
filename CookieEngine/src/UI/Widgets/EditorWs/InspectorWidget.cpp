@@ -2,6 +2,8 @@
 #include <reactphysics3d.h>
 #include "InspectorWidget.hpp"
 
+#include "Prefab.hpp"
+
 #include "MapExplorerHelper.hpp"
 
 #include <imgui.h>
@@ -135,7 +137,7 @@ void Inspector::ModelInterface()
         ResourceMapExplorer<Texture>("normal texture", "##NORMSELECT", resources.textures, modelComp.normal);
 
 
-        ImGui::Custom::TextSnip("metallic-Roughness", 7); SameLine(); Text(":"); SameLine(100);
+        ImGui::Custom::TextSnip("metallic-Roughness", 9); SameLine(); Text(":"); SameLine(100);
 
         ResourceMapExplorer<Texture>("metallic-rough texture", "##MRSELECT", resources.textures, modelComp.metallicRoughness);
 
@@ -423,7 +425,7 @@ void Inspector::ScriptInterface()
         
         if (BeginPopup("Script selector popup"))
         {
-            for (std::unordered_map<std::string, std::shared_ptr<Script>>::iterator scrIt = resources.scripts.begin(); scrIt != resources.scripts.end(); scrIt++)
+            for (std::unordered_map<std::string, std::unique_ptr<Script>>::iterator scrIt = resources.scripts.begin(); scrIt != resources.scripts.end(); scrIt++)
             {
                 if (Button(scrIt->second->filename.c_str()))
                 {
@@ -454,16 +456,41 @@ void Inspector::GameplayInterface()
     {
         ComponentGameplay& gameplayComp = coordinator.componentHandler->GetComponentGameplay(selectedEntity.focusedEntity->id);
 
+        InputText("##TEAMNAME", &gameplayComp.teamName);
+
+        NewLine();
+        DragFloat("##FIRSTCOST",  &gameplayComp.cost.costPrimary,   1.f, NULL, NULL, "Primary cost: %.0f");
+        DragFloat("##SECONDCOST", &gameplayComp.cost.costSecondary, 1.f, NULL, NULL, "Secondary cost: %.0f");
+        DragFloat("##SUPPLYCOST", &gameplayComp.cost.costSupply,    1.f, NULL, NULL, "Supply cost: %.0f" );
+
+        DragFloat("##PRODUCTIONTIME", &gameplayComp.cost.timeToProduce, 0.25f, NULL, NULL, "Production time: %.2f");
+
+        NewLine();
+
+        static const char* _typesName[] = { "Default", "Worker", "Unit", "Building" };
+        if (BeginCombo("##ENTITYTYPE", _typesName[gameplayComp.type]))
+        {
+            if (Selectable(_typesName[0], gameplayComp.type == 0)) gameplayComp.type = Gameplay::E_ARMY_TYPE::E_DEFAULT;
+            if (Selectable(_typesName[1], gameplayComp.type == 1)) gameplayComp.type = Gameplay::E_ARMY_TYPE::E_WORKER;
+            if (Selectable(_typesName[2], gameplayComp.type == 2)) gameplayComp.type = Gameplay::E_ARMY_TYPE::E_UNIT;
+            if (Selectable(_typesName[3], gameplayComp.type == 3)) gameplayComp.type = Gameplay::E_ARMY_TYPE::E_BUILDING;
+
+            EndCombo();
+        }
+
+        NewLine();
+
+
         if (gameplayComp.signatureGameplay & CGP_SIGNATURE::LIVE)
         {
             if (TreeNode("Life/Armor properties"))
             {
-                DragFloat("##LIFE", &gameplayComp.componentLive.life, 1.f, NULL, NULL, "Life: %.0f");
+                DragFloat("##LIFE",  &gameplayComp.componentLive.life,  1.f, NULL, NULL, "Life: %.0f" );
                 DragFloat("##ARMOR", &gameplayComp.componentLive.armor, 1.f, NULL, NULL, "Armor: %.0f");
 
 
                 NewLine();
-                if (Selectable("Remove property##LIVE"))
+                if (Selectable("Remove the property##LIVE"))
                     gameplayComp.RemoveComponent(CGP_SIGNATURE::LIVE);
 
                 TreePop();
@@ -484,7 +511,7 @@ void Inspector::GameplayInterface()
 
 
                 NewLine();
-                if (Selectable("Remove property##MOVE"))
+                if (Selectable("Remove the property##MOVE"))
                     gameplayComp.RemoveComponent(CGP_SIGNATURE::MOVE);
 
                 TreePop();
@@ -498,13 +525,14 @@ void Inspector::GameplayInterface()
         {
             if (TreeNode("Attack abilities"))
             {
-                DragFloat("##DAMAGE", &gameplayComp.componentAttack.attackDamage, 0.25f, NULL, NULL, "Damage: %.2f");
-                DragFloat("##RANGE", &gameplayComp.componentAttack.attackRange, 0.25f, NULL, NULL, "Range: %.2f");
-                DragFloat("##SPEED", &gameplayComp.componentAttack.attackSpeed, 0.25f, NULL, NULL, "Speed: %.2f");
+                DragFloat("##POWER",  &gameplayComp.componentAttack.powerLevel,   1.00f, NULL, NULL, "Power Lv: %.2f");
+                DragFloat("##DAMAGE", &gameplayComp.componentAttack.attackDamage, 0.25f, NULL, NULL, "Damage: %.2f"  );
+                DragFloat("##RANGE",  &gameplayComp.componentAttack.attackRange,  0.25f, NULL, NULL, "Range: %.2f"   );
+                DragFloat("##SPEED",  &gameplayComp.componentAttack.attackSpeed,  0.25f, NULL, NULL, "Speed: %.2f"   );
 
 
                 NewLine();
-                if (Selectable("Remove property##ATTACK"))
+                if (Selectable("Remove the property##ATTACK"))
                     gameplayComp.RemoveComponent(CGP_SIGNATURE::ATTACK);
 
                 TreePop();
@@ -512,6 +540,90 @@ void Inspector::GameplayInterface()
         }
         else if (Selectable("Add attack abilities"))
             gameplayComp.AddComponent(CGP_SIGNATURE::ATTACK);
+
+
+        if (gameplayComp.signatureGameplay & CGP_SIGNATURE::PRODUCER)
+        {
+            if (TreeNode("Production property"))
+            {
+                DragFloat2("Tile size (in x and z)", gameplayComp.componentProducer.tileSize.e, 0.5f, 0.5f, 100.f, "%.1f");
+                
+                NewLine();
+                Text("Can produce the following units:");
+
+                int i = 0;
+                for (auto it = gameplayComp.componentProducer.possibleUnits.begin(); it != gameplayComp.componentProducer.possibleUnits.end();)
+                {
+                    i++;
+
+                    Text("%s", (*it)->name.c_str());
+                    
+                    SameLine();
+
+                    std::string tinyDeleterTag = "X##" + std::to_string(i);
+                    if (SmallButton(tinyDeleterTag.c_str()))
+                    {
+                        it = gameplayComp.componentProducer.possibleUnits.erase(it);
+                    }
+                    else it++;
+                }
+                {
+                    Prefab* newProductable = ResourceMapSelector<Prefab>("prefab", "##PRDUNIT_SELECTOR", resources.prefabs);
+
+                    if (newProductable != nullptr)
+                        gameplayComp.componentProducer.possibleUnits.push_back(newProductable);
+                }
+
+
+                NewLine();
+                if (Selectable("Remove the property##PRODUCER"))
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::PRODUCER);
+
+                TreePop();
+            }
+        }
+        else if (Selectable("Make this entity a producer"))
+            gameplayComp.AddComponent(CGP_SIGNATURE::PRODUCER);
+
+
+        if (gameplayComp.signatureGameplay & CGP_SIGNATURE::WORKER)
+        {
+            if (TreeNode("Worker property"))
+            {
+                Text("Can produce the following buildings:");
+
+                int i = 0;
+                for (auto it = gameplayComp.componentWorker.possibleBuildings.begin(); it != gameplayComp.componentWorker.possibleBuildings.end();)
+                {
+                    i++;
+
+                    Text("%s", (*it)->name.c_str());
+
+                    SameLine();
+
+                    std::string tinyDeleterTag = "X##" + std::to_string(i);
+                    if (SmallButton(tinyDeleterTag.c_str()))
+                    {
+                        it = gameplayComp.componentProducer.possibleUnits.erase(it);
+                    }
+                    else it++;
+                }
+                {
+                    Prefab* newProductable = ResourceMapSelector<Prefab>("prefab", "##PRDUNIT_SELECTOR", resources.prefabs);
+
+                    if (newProductable != nullptr)
+                        gameplayComp.componentWorker.possibleBuildings.push_back(newProductable);
+                }
+
+                NewLine();
+                if (Selectable("Remove the property##WORKER"))
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::WORKER);
+
+                TreePop();
+            }
+        }
+        else if (Selectable("Make this entity a worker"))
+            gameplayComp.AddComponent(CGP_SIGNATURE::WORKER);
 
 
         NewLine();

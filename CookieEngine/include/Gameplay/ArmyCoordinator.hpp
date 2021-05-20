@@ -43,6 +43,7 @@ namespace Cookie
 			void DevelopBase();
 			void DevelopArmy();
 			void Attack();
+			void Retreat();
 
 		};
 

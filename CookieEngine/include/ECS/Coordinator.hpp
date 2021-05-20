@@ -42,7 +42,7 @@ namespace Cookie
 
 			//Entity
 			Entity& AddEntity(const int signature, std::string name = std::string("No Name"));
-			Entity& AddEntity(std::shared_ptr<Resources::Prefab> prefab);
+			Entity& AddEntity(const Resources::Prefab* const & prefab);
 			void RemoveEntity(Entity& entity);
 			bool CheckSignature(const int entitySignature, const int signature);
 			
@@ -72,6 +72,7 @@ namespace Cookie
 			//CGP_Move
 			void UpdateCGPMove(Resources::Map& map, Render::DebugRenderer& debug);
 			void ApplyGameplayUpdatePushedCooldown(Resources::Map& map);
+			void ApplyGameplayUpdateReachGoalCooldown();
 			void ApplyGameplayMoveTowardWaypoint();
 			void ApplyGameplayMoveWithCommander();
 			void ApplyGameplayPosPrediction();

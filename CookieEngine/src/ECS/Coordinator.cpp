@@ -40,7 +40,7 @@ Entity& Coordinator::AddEntity(const int signature, std::string name)
 
 	return newEntity;
 }
-Entity& Coordinator::AddEntity(std::shared_ptr<Resources::Prefab> prefab)
+Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab)
 {
 	assert(entityHandler->livingEntities < MAX_ENTITIES && "Too many entities in existence." && prefab != nullptr);
 
@@ -215,10 +215,14 @@ void Coordinator::ApplyGameplayUpdateWorker()
 void Coordinator::UpdateCGPMove(Resources::Map& map, Render::DebugRenderer& debug)
 {
 	ApplyGameplayUpdatePushedCooldown(map);
+	ApplyGameplayUpdateReachGoalCooldown();
+
 	ApplyGameplayMoveTowardWaypoint();
 	ApplyGameplayMoveWithCommander();
+	
 	ApplyGameplayPosPrediction();
 	ApplyGameplayResolveCollision();
+	
 	ApplyGameplayDrawPath(debug);
 }
 void Coordinator::ApplyGameplayUpdatePushedCooldown(Resources::Map& map)
@@ -227,6 +231,13 @@ void Coordinator::ApplyGameplayUpdatePushedCooldown(Resources::Map& map)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
 			componentHandler->GetComponentGameplay(i).componentMove.UpdatePushedCooldown(map, componentHandler->GetComponentTransform(i));
+}
+void Coordinator::ApplyGameplayUpdateReachGoalCooldown()
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
+			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
+			componentHandler->GetComponentGameplay(i).componentMove.UpdateReachGoalCooldown();
 }
 void Coordinator::ApplyGameplayMoveTowardWaypoint()
 {

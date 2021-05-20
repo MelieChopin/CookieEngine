@@ -11,7 +11,7 @@ namespace Cookie
 			float primary       {0};
 			float secondary     {0};
 			float supplyCurrent {0};
-			float supplyMax     {0};
+			float supplyMax     {200};
 		};
 	}
 }

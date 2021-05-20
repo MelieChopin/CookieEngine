@@ -302,7 +302,7 @@ void Editor::Loop()
                 isBuildingValid = game.scene->map.isBuildingValid(game.scene->map.GetTileIndex(posTopLeft), buildingTileSize);
             }
             
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P] && isRaycastingWithMap && isBuildingValid)
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_LEFT_BRACKET] && isRaycastingWithMap && isBuildingValid)
             {
                 game.coordinator.AddEntity(C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL + C_SIGNATURE::GAMEPLAY, "Building " + std::to_string(nbOfBuildings) );
                 //should create constructor copy for each Component 
@@ -347,8 +347,11 @@ void Editor::Loop()
                 {
                     float selectedEntityId = game.coordinator.selectedEntities[i]->id;
                     ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(selectedEntityId);
+
                     if (game.scene->map.ApplyPathfinding(game.scene->map.GetTile(trs.pos), game.scene->map.tiles[indexOfSelectedTile]))
                         game.coordinator.componentHandler->GetComponentGameplay(selectedEntityId).componentMove.SetPath(game.scene->map.tiles[indexOfSelectedTile], trs);
+                    else
+                        std::cout << "No Path Find\n";
                 }*/
                 
             }
@@ -363,7 +366,7 @@ void Editor::Loop()
                     ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(entity.id);
                     ComponentGameplay& gameplay = game.coordinator.componentHandler->GetComponentGameplay(entity.id);
                     gameplay.teamName = "good";
-                    gameplay.signatureGameplay = CGP_SIGNATURE::ALL_CGP - CGP_SIGNATURE::ATTACK;
+                    gameplay.signatureGameplay = CGP_SIGNATURE::ALL_CGP - CGP_SIGNATURE::WORKER;
                     gameplay.type = E_ARMY_TYPE::E_WORKER;
 
                     trs.pos = { mousePos.x, 1, mousePos.y };
@@ -385,7 +388,7 @@ void Editor::Loop()
                     ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(entity.id);
                     ComponentGameplay& gameplay = game.coordinator.componentHandler->GetComponentGameplay(entity.id);
                     gameplay.teamName = "bad";
-                    gameplay.signatureGameplay = CGP_SIGNATURE::ALL_CGP - CGP_SIGNATURE::ATTACK;
+                    gameplay.signatureGameplay = CGP_SIGNATURE::ALL_CGP - CGP_SIGNATURE::WORKER;
                     gameplay.type = E_ARMY_TYPE::E_WORKER;
 
                     trs.pos = { mousePos.x, 1, mousePos.y };

@@ -56,7 +56,7 @@ void Hierarchy::WindowDisplay()
                 if (Selectable("Save as prefab"))
                 {
                     resources.CreateNewPrefabs(entityHandler.entities[i], *coordinator.componentHandler);
-                    Cookie::Resources::Serialization::Save::SavePrefab(resources.prefabs[entityHandler.entities[i].namePrefab]);
+                    Cookie::Resources::Serialization::Save::SavePrefab(resources.prefabs[entityHandler.entities[i].namePrefab].get());
                 }
                 
             

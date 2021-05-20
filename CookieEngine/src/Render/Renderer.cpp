@@ -29,7 +29,7 @@ Renderer::Renderer():
         for (int j = -4; j < 4; j++)
         {
             float k = lights.usedPoints++;
-            lights.pointLights[k] = { {i * 10.0f ,1.0f, j * 10.0f }, 20.0f,{((float)i+4.0f)/8.0f,((float)j + 4.0f) / 8.0f ,0.0f} };
+            lights.pointLights[k] = { {i * 10.0f ,1.0f, j * 10.0f }, 5.0f,{((float)i+4.0f)/8.0f,((float)j + 4.0f) / 8.0f ,0.0f} };
         }
     }
 }
