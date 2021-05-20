@@ -105,6 +105,21 @@ void SoundManager::PlayMusic(std::string key)
 	}
 }
 
+void SoundManager::Play3DMusic(std::string key, const Cookie::Core::Math::Vec3& pos)
+{
+	if ((*(sounds))[key].get()->sound == nullptr)
+		FMOD_RESULT result = system->createSound((*(sounds))[key].get()->filepath.c_str(),
+			(*(sounds))[key].get()->mode, nullptr, &(*(sounds))[key].get()->sound);
+
+	system->playSound((*(sounds))[key].get()->sound, nullptr, false, &(*(sounds))[key].get()->chan);
+	(*(sounds))[key].get()->chan->setVolume((*(sounds))[key].get()->vol);
+	if ((*(sounds))[key].get()->mode & FMOD_3D)
+	{
+		FMOD_VECTOR posSound = { pos.x, pos.y, pos.z };
+		(*(sounds))[key].get()->chan->set3DAttributes(&posSound, nullptr);
+	}
+}
+
 void SoundManager::SetVolume(std::string key, float vol)
 {
 	(*(sounds))[key].get()->vol = vol;

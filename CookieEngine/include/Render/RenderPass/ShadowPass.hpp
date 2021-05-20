@@ -46,6 +46,7 @@ namespace Cookie
 			ID3D11RasterizerState*		rasterizerState		= nullptr;
 			ID3D11BlendState*			blendState			= nullptr;
 			D3D11_VIEWPORT				shadowViewport;
+			Core::Math::Mat4			proj;
 			
 		public:
 			ShadowBuffer				shadowMap;

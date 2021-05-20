@@ -109,7 +109,7 @@ void Editor::ModifyEditComp()
 
 void Editor::Loop()
 {
-    Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
+    //Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
     Cookie::Resources::SoundManager::SetVolume("Music.mp3", 0.25f);
     Cookie::Resources::SoundManager::SetVolume("Magic.mp3", 0.05f);
     Physics::PhysicsHandle physHandle;
@@ -145,8 +145,10 @@ void Editor::Loop()
     Cookie::Resources::Particles::MassConstGenerate         mass(2);
     Cookie::Resources::Particles::TimeConstGenerate         time(2);
     Cookie::Resources::Particles::TimeRandGenerate          timeRand(0.25f, 0.55f);
-    Cookie::Resources::Particles::ColorRandGenerate         color(Vec3(0.5f, 0, 0), Vec3(1, 0, 0));
+    Cookie::Resources::Particles::ColorRandGenerate         color(Vec3(1, 1, 1), Vec3(1, 1, 1));
     first.data[0].countAlive = 10;
+    first.data[0].mesh = game.resources.meshes["Quad"].get();
+    first.data[0].texture = game.resources.textures["Assets/Ligth.png"].get();
     first.particlesEmiter[0].generators.push_back(&circle);
     first.particlesEmiter[0].generators.push_back(&velRand);
     first.particlesEmiter[0].generators.push_back(&timeRand);
@@ -175,11 +177,13 @@ void Editor::Loop()
     //Second Particles in the center particles 
     Cookie::Resources::Particles::ParticlesSystem second = Cookie::Resources::Particles::ParticlesSystem(40, 30);
     second.data[0].countAlive = 10;
+    second.data[0].mesh = game.resources.meshes["Quad"].get();
+    second.data[0].texture = game.resources.textures["Assets/Etoile.png"].get();
     second.particlesEmiter[0].generators.push_back(&box);
     second.particlesEmiter[0].generators.push_back(&vel);
     second.particlesEmiter[0].generators.push_back(&mass);
     second.particlesEmiter[0].generators.push_back(&timeRand);
-    Cookie::Resources::Particles::ColorRandGenerate         blue(Vec3(0, 0, 0.3f), Vec3(0, 0, 1.0f));
+    Cookie::Resources::Particles::ColorRandGenerate         blue(Vec3(1, 1, 1), Vec3(1, 1, 1));
     Cookie::Resources::Particles::Loop              loop2(second.particlesEmiter[0].generators);
     second.particlesEmiter[0].generators.push_back(&blue);
     for (int i = 0; i < second.particlesEmiter[0].generators.size(); i++)
@@ -415,13 +419,14 @@ void Editor::Loop()
             isActive = true;
         game.coordinator.ApplyComputeTrs();
 
-
         //Draw
         game.renderer.Draw(&cam, game,editorFBO);
         if (isRaycastingWithMap)
             dbgRenderer.AddQuad(buildingPos, buildingTileSize.x * game.scene->map.tilesSize.x / 2, buildingTileSize.y * game.scene->map.tilesSize.y / 2, (isBuildingValid) ? 0x00FF00 : 0xFF0000);
 		for (int i = 0; i < game.particlesHandler.particlesSystems.size(); i++)
             game.particlesHandler.particlesSystems[i].Draw(cam, game.resources);
+
+
         dbgRenderer.Draw(cam.GetViewProj());
 
 

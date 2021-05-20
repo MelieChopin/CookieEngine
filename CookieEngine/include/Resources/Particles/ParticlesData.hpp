@@ -33,6 +33,8 @@ namespace Cookie
 				std::vector<float>						mass;
 				std::vector<bool>						alive;
 
+				Cookie::Resources::Mesh*				mesh;
+				Cookie::Resources::Texture*				texture;
 				int										count = 0;
 				int										countFrame = 0;
 				int										countAlive = 0;

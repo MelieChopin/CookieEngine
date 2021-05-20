@@ -140,12 +140,11 @@ void PointLightPass::InitShader()
         float3  albedo      = pow(albedoTex.Sample(ClampSampler,uv).xyz,2.2);
         float   metallic    = positionTex.Sample(ClampSampler,uv).w;
         float   roughness   = normalTex.Sample(ClampSampler,uv).w;
-        float   ao          = albedoTex.Sample(ClampSampler,uv).w;
         float3  lightDir    = (vertexOutput.lightPos - fragPos);
         float   dist        = length(lightDir);
 
         output          = compute_lighting(normal,fragPos,normalize(lightDir),vertexOutput.color,albedo,metallic,roughness);
-        output.diffuse  = output.diffuse * Falloff(dist,vertexOutput.radius) + (0.03 * ao) *  float4(albedo,1.0);
+        output.diffuse  = output.diffuse * Falloff(dist,vertexOutput.radius);
         output.diffuse  = pow(output.diffuse,0.45454545);
         output.specular = pow(output.specular * Falloff(dist,vertexOutput.radius),0.45454545);//
 
