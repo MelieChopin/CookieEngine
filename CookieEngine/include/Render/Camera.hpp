@@ -22,7 +22,7 @@ namespace Cookie
 
 				
 
-			protected:
+			public:
 				Core::Math::Mat4 viewMat = Core::Math::Mat4::Identity();
 
 				bool activated = true;
@@ -50,9 +50,9 @@ namespace Cookie
 
 				inline const Core::Math::Mat4& GetView() const	{ return viewMat;			}
 				inline const Core::Math::Mat4& GetProj() const	{ return projMat;			}
-				inline Core::Math::Mat4 GetViewProj() const		{ return projMat * viewMat;	}
+				inline Core::Math::Mat4 GetViewProj() const		{ return viewMat * projMat;	}
 				
-				inline void SetProj(float yFov, float _width, float _height, float n, float f) { fov = Core::Math::ToRadians(yFov); width = _width; height = _height; camFar = f; camNear = n;  aspectRatio = width / height; projMat = Core::Math::Mat4::Perspective(Core::Math::ToRadians(yFov), width / height, n, f); }
+				inline void SetProj(float yFov, float _width, float _height, float n, float f) { fov = yFov; width = _width; height = _height; camFar = f; camNear = n;  aspectRatio = width / height; projMat = Core::Math::Mat4::Perspective(Core::Math::ToRadians(yFov), width / height, n, f); }
 				inline void LookAt(const Core::Math::Vec3& toLook) { viewMat = Core::Math::Mat4::Inverse(Core::Math::Mat4::Translate(pos) * Core::Math::Mat4::LookAt(pos, toLook, { 0.0f,1.0f,0.0f }));}
 
 				inline virtual void Update() = 0;

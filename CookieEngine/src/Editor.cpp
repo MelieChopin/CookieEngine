@@ -452,7 +452,6 @@ void Editor::Loop()
             isActive = true;
         game.coordinator.ApplyComputeTrs();
 
-
         //Draw
         game.renderer.Draw(&cam, game,editorFBO);
         if (isRaycastingWithMap)

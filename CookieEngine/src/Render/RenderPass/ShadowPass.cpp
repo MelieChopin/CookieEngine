@@ -16,6 +16,8 @@ struct VS_CONSTANT_BUFFER
     Mat4 lightViewProj  = Mat4::Identity();
 };
 
+constexpr float shadowProjEpsilon = 100.0f;
+
 /*======================= CONSTRUCTORS/DESTRUCTORS =======================*/
 
 ShadowPass::ShadowPass():
@@ -23,6 +25,7 @@ ShadowPass::ShadowPass():
 {
     InitShader();
     InitState();
+    proj = Mat4::Ortho(-shadowProjEpsilon, shadowProjEpsilon, -shadowProjEpsilon, shadowProjEpsilon, -shadowProjEpsilon, shadowProjEpsilon);
 }
 
 ShadowPass::~ShadowPass()
@@ -111,7 +114,7 @@ void ShadowPass::InitState()
     rasterDesc.DepthBiasClamp = 0.0f;
     rasterDesc.DepthClipEnable = true;
     rasterDesc.FillMode = D3D11_FILL_SOLID;
-    rasterDesc.FrontCounterClockwise = true;
+    rasterDesc.FrontCounterClockwise = false;
     rasterDesc.MultisampleEnable = false;
     rasterDesc.ScissorEnable = false;
     rasterDesc.SlopeScaledDepthBias = 0.0f;
@@ -172,45 +175,26 @@ void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
     size_t bufferSize = sizeof(buffer);
 
     Render::RendererRemote::context->RSSetViewports(1, &shadowViewport);
-    
-    //Mat4 proj = Mat4::Ortho(-100.0f, 100.0f, -100.0f, 100.0f, -10.0f, 100.0f);
-    //Mat4 proj = Mat4::Ortho(drawData.AABB[0].x, drawData.AABB[1].x, drawData.AABB[0].y, drawData.AABB[1].y, drawData.AABB[0].z, drawData.AABB[1].z);
 
-    //Vec3 pos = (drawData.AABB[0] + drawData.AABB[1])*0.5f;
-
-    if  (lights.useDir && lights.dirLight.castShadow)
+    if (lights.useDir && lights.dirLight.castShadow)
     {
         Render::RendererRemote::context->OMSetRenderTargets(0, nullptr, shadowMap.depthStencilView);
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_H])
+        {
+            lights.dirLight.dir = { 0.0f,-1.0f,1.0f };
+        }
+        else if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_G])
+        {
+            lights.dirLight.dir = { 0.0f,-1.0f,-1.0f };
+        }
+
         Vec3 jDir = lights.dirLight.dir.Normalize();
-        Mat4 view = Mat4::LookAt({0.0f,0.0f,0.0f}, jDir, { 0.0f,1.0f,0.0f });//Mat4::Translate(jDir * 10.0f) * Mat4::Dir(jDir);//
+        Vec3 pos = (drawData.AABB[0] + drawData.AABB[1]) * 0.5f;
+        Mat4 view = Mat4::LookAt({ 0.0f,0.0f,0.0f }, jDir, { 0.0f,1.0f,0.0f });
 
-        std::array<Vec4, 8> corners;
+        view = Mat4::Translate(-(pos - jDir * shadowProjEpsilon * 0.5f)) * view;
 
-        for (int i = 0; i < corners.size(); i++)
-        {
-            corners[i] = view * Vec4(drawData.frustrum.corners[i].x, drawData.frustrum.corners[i].y, drawData.frustrum.corners[i].z,1.0f);
-        }
-
-        std::array<Vec3, 2> AABB = { Vec3(std::numeric_limits<float>().max(),std::numeric_limits<float>().max() ,std::numeric_limits<float>().max()), Vec3(-std::numeric_limits<float>().max(),-std::numeric_limits<float>().max() ,-std::numeric_limits<float>().max()) };
-
-        for (int i = 0; i < corners.size(); i++)
-        {
-            AABB[0].x = std::min(corners[i].x, AABB[0].x);
-            AABB[0].y = std::min(corners[i].y, AABB[0].y);
-            AABB[0].z = std::min(corners[i].z, AABB[0].z);
-
-            AABB[1].x = std::max(corners[i].x, AABB[1].x);
-            AABB[1].y = std::max(corners[i].y, AABB[1].y);
-            AABB[1].z = std::max(corners[i].z, AABB[1].z);
-        }
-
-        Vec4 pos = view * drawData.frustrum.centroid;
-
-        //Vec3 pos_ = Mat4
-
-        Mat4 proj = Mat4::Ortho(AABB[0].x, AABB[1].x, AABB[0].y, AABB[1].y, AABB[0].z, AABB[1].z);
-
-        lights.dirLight.lightViewProj = proj * (Mat4::Translate(cam.pos - jDir * 50.0f) * view);
+        lights.dirLight.lightViewProj = view * proj;
         buffer.lightViewProj = lights.dirLight.lightViewProj;
         Render::WriteCBuffer(&buffer, bufferSize, 0, &CBuffer);
 

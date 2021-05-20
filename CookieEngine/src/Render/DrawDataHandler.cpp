@@ -94,11 +94,11 @@ void DrawDataHandler::MakeFrustrum(const Camera& cam)
 	camUp		= camUp.Normalize();
 
 	//height and width of far plane
-	float heightFar = 2.0f * tanf(cam.fov / 2.0f)*cam.camFar;
+	float heightFar = 2.0f * tanf(Core::Math::ToRadians(cam.fov) / 2.0f)*cam.camFar;
 	float widthFar = heightFar * cam.aspectRatio;
 
 	//height and width of near plane
-	float heightNear = 2.0f * tanf(cam.fov / 2.0f) * cam.camNear;
+	float heightNear = 2.0f * tanf(Core::Math::ToRadians(cam.fov) / 2.0f) * cam.camNear;
 	float widthNear = heightNear * cam.aspectRatio;
 
 	//Center of each plane
