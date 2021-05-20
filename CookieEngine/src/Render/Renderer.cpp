@@ -22,7 +22,7 @@ Renderer::Renderer():
 {
     CreateDrawBuffer(window.width,window.height);
     remote.context->RSSetViewports(1, &viewport);
-    lights.dirLight = { {0.0f,-1.0f,1.0f},{0.5f,0.5f,0.5f}, true};
+    lights.dirLight = { {0.0f,-1.0f,-1.0f},{0.5f,0.5f,0.5f}, true};
 
     for (int i = -4; i < 4; i++)
     {

@@ -118,7 +118,7 @@ void ResourcesManager::Load(Render::Renderer& _renderer)
 
 void ResourcesManager::UpdateScriptsContent()
 {
-	for (std::unordered_map<std::string, std::shared_ptr<Script>>::iterator scrIt = scripts.begin(); scrIt != scripts.end(); scrIt++)
+	for (std::unordered_map<std::string, std::unique_ptr<Script>>::iterator scrIt = scripts.begin(); scrIt != scripts.end(); scrIt++)
 		if (!(scrIt->second->isUpToDate()))
 			scrIt->second->UpdateContent();
 }
@@ -141,7 +141,7 @@ void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandl
 
 	entity.namePrefab = entity.name;
 
-	prefabs[newPrefab.name] = std::make_shared<Prefab>(newPrefab);
+	prefabs[newPrefab.name] = std::make_unique<Prefab>(newPrefab);
 }
 
 

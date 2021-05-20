@@ -9,8 +9,6 @@
 #include "ECS/ComponentEditor.hpp"
 #include "ECS/ComponentHandler.hpp"
 
-#include "Resources/Mesh.hpp"
-#include "Resources/Texture.hpp"
 
 namespace Cookie
 {

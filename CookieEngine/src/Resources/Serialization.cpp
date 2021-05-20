@@ -161,58 +161,56 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 	file << std::setw(4) << js << std::endl;
 }
 
-void Cookie::Resources::Serialization::Save::SavePrefab(const std::shared_ptr<Prefab>& prefab)
+void Cookie::Resources::Serialization::Save::SavePrefab(const Prefab* const & prefab)
  {
 	 std::ofstream file(prefab->filepath);
 
 	 json js;
 
-	 Prefab* pref = prefab.get();
-
-	 js["Signature"] = pref->signature;
-	 js["Name"] = pref->name;
+	 js["Signature"] = prefab->signature;
+	 js["Name"] = prefab->name;
 	 
-	 if (pref->signature & C_SIGNATURE::TRANSFORM)
+	 if (prefab->signature & C_SIGNATURE::TRANSFORM)
 	 {
 		 //Transform
 		 json& trans = js["Transform"];
-		 trans["Rotation"] = pref->transform.rot.e;
-		 trans["Scale"] = pref->transform.scale.e;
+		 trans["Rotation"] = prefab->transform.rot.e;
+		 trans["Scale"] = prefab->transform.scale.e;
 	 }
 	 
-	 if (pref->signature & C_SIGNATURE::MODEL)
+	 if (prefab->signature & C_SIGNATURE::MODEL)
 	 {
 		 //Model
 		 json& model = js["Model"];
-		 if (pref->model.mesh != nullptr)
-			 model["Mesh"] = pref->model.mesh->name;
+		 if (prefab->model.mesh != nullptr)
+			 model["Mesh"] = prefab->model.mesh->name;
 		 else
 			 model["Mesh"] = 0;
-		 if (pref->model.albedo != nullptr)
-			 model["Texture"] = pref->model.albedo->name;
+		 if (prefab->model.albedo != nullptr)
+			 model["Texture"] = prefab->model.albedo->name;
 		 else
 			 model["Texture"] = 0;
 	 }
 
-	 if (pref->signature & C_SIGNATURE::PHYSICS)
+	 if (prefab->signature & C_SIGNATURE::PHYSICS)
 	 {
-		 if (pref->physics.physBody != nullptr)
+		 if (prefab->physics.physBody != nullptr)
 		 {
 			 json& rigid = js["Rigidbody"];
-			 rigid["type"] = pref->physics.physBody->getType();
-			 rigid["angularDamping"] = pref->physics.physBody->getAngularDamping();
-			 rigid["linearDamping"] = pref->physics.physBody->getLinearDamping();
-			 rigid["mass"] = pref->physics.physBody->getMass();
-			 rigid["active"] = pref->physics.physBody->isActive();
-			 rigid["allowedToSleep"] = pref->physics.physBody->isAllowedToSleep();
-			 rigid["sleeping"] = pref->physics.physBody->isSleeping();
-			 rigid["gravityEnabled"] = pref->physics.physBody->isGravityEnabled();
+			 rigid["type"] = prefab->physics.physBody->getType();
+			 rigid["angularDamping"] = prefab->physics.physBody->getAngularDamping();
+			 rigid["linearDamping"] = prefab->physics.physBody->getLinearDamping();
+			 rigid["mass"] = prefab->physics.physBody->getMass();
+			 rigid["active"] = prefab->physics.physBody->isActive();
+			 rigid["allowedToSleep"] = prefab->physics.physBody->isAllowedToSleep();
+			 rigid["sleeping"] = prefab->physics.physBody->isSleeping();
+			 rigid["gravityEnabled"] = prefab->physics.physBody->isGravityEnabled();
 		 }
 	 }
 	 else
 		 js["Rigidbody"] = "nullptr";
 
-	 if (pref->signature & C_SIGNATURE::PHYSICS)
+	 if (prefab->signature & C_SIGNATURE::PHYSICS)
 	 {
 		 if (prefab->physics.physColliders.size() != 0)
 		 {
@@ -256,7 +254,7 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const std::shared_ptr<Pr
 	 else
 		 js["Colliders"] = "nullptr";
 
-	 if (pref->signature & C_SIGNATURE::GAMEPLAY)
+	 if (prefab->signature & C_SIGNATURE::GAMEPLAY)
 	 {
 		 ComponentGameplay gameplay = prefab->gameplay;
 		 json& gp = js["Gameplay"];
@@ -301,8 +299,8 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const std::shared_ptr<Pr
 
 void Cookie::Resources::Serialization::Save::SaveAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager)
  {
-	 for (std::unordered_map<std::string, std::shared_ptr<Prefab>>::iterator prefab = resourcesManager.prefabs.begin(); prefab != resourcesManager.prefabs.end(); prefab++)
-		 Resources::Serialization::Save::SavePrefab(prefab->second);
+	 for (std::unordered_map<std::string, std::unique_ptr<Prefab>>::iterator prefab = resourcesManager.prefabs.begin(); prefab != resourcesManager.prefabs.end(); prefab++)
+		 Resources::Serialization::Save::SavePrefab(prefab->second.get());
  }
 
 void Cookie::Resources::Serialization::Save::SaveTexture(std::string& name, Cookie::Core::Math::Vec4& color)
@@ -620,8 +618,7 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 
 		 newPrefab.filepath = filesPath[i];
 
-		 std::cout << newPrefab.name << "\n";
-		 resourcesManager.prefabs[newPrefab.name] = std::make_shared<Prefab>(newPrefab);
+		 resourcesManager.prefabs[newPrefab.name] = std::make_unique<Prefab>(newPrefab);
 
 		 file.close();
 	 }
@@ -771,7 +768,7 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 		{
 			std::string name = temp["name"][i].get<std::string>();
 			if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end())
-				GPComponent.componentProducer.possibleUnits.push_back(resourcesManager.prefabs[name]);
+				GPComponent.componentProducer.possibleUnits.push_back(resourcesManager.prefabs[name].get());
 		}
 	}
 
@@ -784,7 +781,7 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 			{
 				std::string name = temp[i].get<std::string>();
 				if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end())
-					GPComponent.componentWorker.possibleBuildings.push_back(resourcesManager.prefabs[name]);
+					GPComponent.componentWorker.possibleBuildings.push_back(resourcesManager.prefabs[name].get());
 			}
 		}
 	}

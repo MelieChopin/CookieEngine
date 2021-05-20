@@ -25,6 +25,7 @@ namespace Cookie
 		{
 			std::array<Core::Math::Vec4, 6> planes;
 			Core::Math::Vec3				centroid;
+			std::array<Core::Math::Vec3, 8> corners;
 			std::array<Core::Math::Vec3, 2> AABB;
 		};
 		

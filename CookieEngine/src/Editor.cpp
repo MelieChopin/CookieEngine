@@ -351,8 +351,11 @@ void Editor::Loop()
                 {
                     float selectedEntityId = game.coordinator.selectedEntities[i]->id;
                     ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(selectedEntityId);
+
                     if (game.scene->map.ApplyPathfinding(game.scene->map.GetTile(trs.pos), game.scene->map.tiles[indexOfSelectedTile]))
                         game.coordinator.componentHandler->GetComponentGameplay(selectedEntityId).componentMove.SetPath(game.scene->map.tiles[indexOfSelectedTile], trs);
+                    else
+                        std::cout << "No Path Find\n";
                 }*/
                 
             }
@@ -456,13 +459,14 @@ void Editor::Loop()
             isActive = true;
         game.coordinator.ApplyComputeTrs();
 
-
         //Draw
         game.renderer.Draw(&cam, game,editorFBO);
         if (isRaycastingWithMap)
             dbgRenderer.AddQuad(buildingPos, buildingTileSize.x * game.scene->map.tilesSize.x / 2, buildingTileSize.y * game.scene->map.tilesSize.y / 2, (isBuildingValid) ? 0x00FF00 : 0xFF0000);
 		for (int i = 0; i < game.particlesHandler.particlesSystems.size(); i++)
             game.particlesHandler.particlesSystems[i].Draw(cam, game.resources);
+
+
         dbgRenderer.Draw(cam.GetViewProj());
 
 
