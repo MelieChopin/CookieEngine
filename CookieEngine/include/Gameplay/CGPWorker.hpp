@@ -31,7 +31,7 @@ namespace Cookie
 			float moveSpeed                  {5};
 
 			Core::Math::Vec3* posBase         {nullptr};
-			Core::Math::Vec3  posResource     {25, 1, 0};
+			Core::Math::Vec3  posResource     {25, 0, 0};
 			Core::Math::Vec3  posBuilding     {0, 0, 0 }; // = mousePos when start construction
 			Income* income                   {nullptr};
 

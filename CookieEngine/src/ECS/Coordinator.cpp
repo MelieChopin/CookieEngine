@@ -101,7 +101,7 @@ void Coordinator::SelectEntities(Vec2& selectionQuadStart, Vec2& selectionQuadEn
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY))
 		{
-			Vec3& entityPos = componentHandler->GetComponentTransform(i).pos;
+			Vec3& entityPos = componentHandler->GetComponentTransform(entityHandler->entities[i].id).pos;
 			if (minX <= entityPos.x && entityPos.x <= maxX &&
 				minZ <= entityPos.z && entityPos.z <= maxZ)
 				selectedEntities.push_back(&entityHandler->entities[i]);
