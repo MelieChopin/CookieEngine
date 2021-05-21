@@ -31,6 +31,7 @@ namespace Cookie
 		{
 			Cookie::Core::Math::Mat4 World;
 			Cookie::Core::Math::Vec4 Color;
+			UINT isBillboard;
 		};
 
 		class ParticlesPass
@@ -44,6 +45,7 @@ namespace Cookie
 			ID3D11BlendState* blendState{ nullptr };
 			ID3D11SamplerState* PSampler{ nullptr };
 			ID3D11RasterizerState* rasterizerState{ nullptr };
+			ID3D11DepthStencilState* depthStencilState{ nullptr };
 
 			std::vector<InstancedData> mInstancedData;
 

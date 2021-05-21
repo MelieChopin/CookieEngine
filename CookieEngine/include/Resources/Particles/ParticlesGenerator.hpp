@@ -10,7 +10,9 @@ namespace Cookie
 	namespace Core::Math
 	{
 		//in inline ?
-		static Cookie::Core::Math::Vec4 Random(Cookie::Core::Math::Vec3& min, Cookie::Core::Math::Vec3& max);
+		static Cookie::Core::Math::Vec4 Random(Cookie::Core::Math::Vec4& min, Cookie::Core::Math::Vec4& max);
+		static Cookie::Core::Math::Vec3 Random(Cookie::Core::Math::Vec3& min, Cookie::Core::Math::Vec3& max);
+		union Mat4;
 	}
 	
 	namespace Resources
@@ -29,28 +31,46 @@ namespace Cookie
 				~ParticlesGenerator() {}
 			};
 
+			class IsBillboard : public ParticlesGenerator
+			{
+			public:
+				virtual void generate(ParticlesData* data, int start, int end) override;
+
+				IsBillboard() { type = "IsBillboard"; }
+			};
+
+			class NotBillboard : public ParticlesGenerator
+			{
+			public:
+				virtual void generate(ParticlesData* data, int start, int end) override;
+
+				NotBillboard() { type = "NotBillboard"; }
+			};
+
 			class BoxPositionGenerate : public ParticlesGenerator
 			{
 			public :
 				Cookie::Core::Math::Vec3 pos;
 				Cookie::Core::Math::Vec3 sizeBox;
+				Cookie::Core::Math::Mat4* trs;
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
 				BoxPositionGenerate() { type = "BoxPositionGen"; }
-				BoxPositionGenerate(Cookie::Core::Math::Vec3 _pos, Cookie::Core::Math::Vec3 _sizeBox) : pos(_pos), sizeBox(_sizeBox) { type = "BoxPositionGen"; }
+				BoxPositionGenerate(Cookie::Core::Math::Vec3 _pos, Cookie::Core::Math::Vec3 _sizeBox, Cookie::Core::Math::Mat4* mat) : pos(_pos), sizeBox(_sizeBox), trs(mat) { type = "BoxPositionGen"; }
 			};
 
-			class CirclePositionGenerate : public ParticlesGenerator
+			class SpherePositionGenerate : public ParticlesGenerator
 			{
 			public:
 				Cookie::Core::Math::Vec3 pos; 
+				Cookie::Core::Math::Mat4* trs;
 				float radius;
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
-				CirclePositionGenerate() { type = "CirclePositionGen"; }
-				CirclePositionGenerate(Cookie::Core::Math::Vec3 _pos, float radius) : pos(_pos), radius(radius) { type = "CirclePositionGen"; }
+				SpherePositionGenerate() { type = "CirclePositionGen"; }
+				SpherePositionGenerate(Cookie::Core::Math::Vec3 _pos, float radius, Cookie::Core::Math::Mat4* mat) : pos(_pos), radius(radius), trs(mat) { type = "CirclePositionGen"; }
 			};
 
 			class VelocityConstGenerate : public ParticlesGenerator
@@ -114,13 +134,13 @@ namespace Cookie
 			class ColorRandGenerate : public ParticlesGenerator
 			{
 			public:
-				Cookie::Core::Math::Vec3 minCol;
-				Cookie::Core::Math::Vec3 maxCol;
+				Cookie::Core::Math::Vec4 minCol;
+				Cookie::Core::Math::Vec4 maxCol;
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
 				ColorRandGenerate() { type = "ColorRandGen"; }
-				ColorRandGenerate(Cookie::Core::Math::Vec3 colorMin, Cookie::Core::Math::Vec3 colorMax) : minCol(colorMin), maxCol(colorMax) { type = "ColorRandGen"; }
+				ColorRandGenerate(Cookie::Core::Math::Vec4 colorMin, Cookie::Core::Math::Vec4 colorMax) : minCol(colorMin), maxCol(colorMax) { type = "ColorRandGen"; }
 			};
 		}
 	}

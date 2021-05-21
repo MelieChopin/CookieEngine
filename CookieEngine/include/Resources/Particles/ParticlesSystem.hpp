@@ -57,8 +57,9 @@ namespace Cookie
 						for (int i = 0; i < data[j].countAlive; i++)
 						{
 							Cookie::Render::InstancedData temp;
-							temp.World = (trs.TRS * data[j].trs[i]);
-							temp.Color = Cookie::Core::Math::Vec4(data[j].col[i].ToVec3(), 0.25f);
+							temp.World = data[j].trs[i];
+							temp.Color = data[j].col[i];
+							temp.isBillboard = data[j].isBillboard[i];
 							newData.push_back(temp);
 						}
 

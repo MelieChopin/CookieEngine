@@ -31,6 +31,7 @@ namespace Cookie
 				std::vector<Cookie::Core::Math::Vec4>	acc;
 				std::vector<float>						time;
 				std::vector<float>						mass;
+				std::vector<bool>						isBillboard;
 				std::vector<bool>						alive;
 
 				Cookie::Resources::Mesh*				mesh;
@@ -57,6 +58,13 @@ namespace Cookie
 					time.resize(size);
 					alive.resize(size);
 					mass.resize(size);
+					isBillboard.resize(size);
+				}
+
+				void SetIsBIllboard(bool value)
+				{
+					for (int i = 0; i < count; i++)
+						isBillboard[i] = value;
 				}
 
 				void kill(int index) 

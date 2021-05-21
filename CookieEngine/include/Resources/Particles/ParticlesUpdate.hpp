@@ -41,6 +41,15 @@ namespace Cookie
 				virtual void Update(ParticlesData* p) override;
 			};
 
+			class UpdateAlpha : public ParticlesUpdate
+			{
+			public:
+				UpdateAlpha() { type = "UpdateAlpha"; }
+				~UpdateAlpha() {}
+
+				virtual void Update(ParticlesData* p) override;
+			};
+
 			class EnabledGravity : public ParticlesUpdate
 			{
 			public:
@@ -65,6 +74,18 @@ namespace Cookie
 				Loop(std::vector<ParticlesGenerator*>& _particlesGen) : particlesGen(_particlesGen) { type = "Loop"; }
 				~Loop() {}
 				std::vector<ParticlesGenerator*>& particlesGen;
+
+				virtual void Update(ParticlesData* p) override;
+			};
+
+			class CollisionWithPlane : public ParticlesUpdate
+			{
+			public:
+				CollisionWithPlane(Cookie::Core::Math::Vec3 normal = {0, 1, 0}, float distance = 0) : n(normal), dis(distance) { type = "CollisionWithPlane"; }
+				~CollisionWithPlane() {}
+
+				float dis;
+				Cookie::Core::Math::Vec3 n;
 
 				virtual void Update(ParticlesData* p) override;
 			};

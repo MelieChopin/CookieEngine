@@ -34,6 +34,14 @@ ParticlesPass::~ParticlesPass()
         ILayout->Release();
     if (InstanceBuffer)
         InstanceBuffer->Release();
+    if (blendState)
+        blendState->Release();
+    if (PSampler)
+        PSampler->Release();
+    if (rasterizerState)
+        rasterizerState->Release();
+    if (depthStencilState)
+        depthStencilState->Release();
 }
 
 void ParticlesPass::InitShader()
@@ -46,7 +54,7 @@ void ParticlesPass::InitShader()
         float4x4 gProj;
 	    float4x4 gView;
         float3 gCamPos;
-        bool isBillboard;
+        float padding;
     };
 
     struct VertexInputType
@@ -56,7 +64,7 @@ void ParticlesPass::InitShader()
         float3 NormalL  : NORMAL;
         float4x4 World  : WORLD;
 	    float4 Color    : COLOR;
-	    uint InstanceId : SV_InstanceID;
+        uint isBillBoard : ISBILLBOARD;
     };
     
     struct PixelInputType
@@ -74,7 +82,7 @@ void ParticlesPass::InitShader()
 
         float4 temp = mul(float4(vin.PosL, 1.0f), vin.World);
 
-        if (isBillboard)
+        if (vin.isBillBoard == 1)
         {
             float3 forward = float3(0, 0, 1);
             float3 cameraObj = normalize(gCamPos - temp);
@@ -127,9 +135,8 @@ void ParticlesPass::InitShader()
 
     float4 main(PixelInputType input) : SV_TARGET
     {
-        float4 color = float4(input.Color.rgb, 1);
-        float4 finalColor = text.Sample(WrapSampler, input.Tex);// * color;
-        finalColor = float4(finalColor.rgb, finalColor.a);// * finalColor.a;
+        float4 finalColor = text.Sample(WrapSampler, input.Tex);
+        finalColor = float4(finalColor.rgb * input.Color.rgb, finalColor.a * input.Color.a);
         return finalColor; 
     }
 	)";
@@ -145,10 +152,11 @@ void ParticlesPass::InitShader()
         { "WORLD", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
         { "WORLD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
         { "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 64, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
+        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 64, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+        { "ISBILLBOARD", 0, DXGI_FORMAT_R32_UINT, 1, 80, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
     };
      
-    Render::CreateLayout(&blob, ied, 8, &ILayout);
+    Render::CreateLayout(&blob, ied, 9, &ILayout);
 
     mInstancedData.resize(1);
 
@@ -182,11 +190,11 @@ void ParticlesPass::InitShader()
 
     D3D11_BLEND_DESC blenDesc = {  };
 
-    blenDesc.AlphaToCoverageEnable = true;
+    blenDesc.AlphaToCoverageEnable = false;
     blenDesc.IndependentBlendEnable = false;
-    blenDesc.RenderTarget[0].BlendEnable = false;
-    blenDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-    blenDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
+    blenDesc.RenderTarget[0].BlendEnable = true;
+    blenDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    blenDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
     blenDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
     blenDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA;
     blenDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
@@ -209,10 +217,36 @@ void ParticlesPass::InitShader()
 
     Render::CreateSampler(&samDesc, &PSampler);
 
+    // Initialize the description of the stencil state.
+    D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
+
+    // Set up the description of the stencil state.
+    depthStencilDesc.DepthEnable = true;
+    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+    depthStencilDesc.StencilEnable = false;
+    depthStencilDesc.StencilReadMask = 0xFF;
+    depthStencilDesc.StencilWriteMask = 0xFF;
+
+    // Stencil operations if pixel is front-facing.
+    depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+    // Stencil operations if pixel is back-facing.
+    depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+    RendererRemote::device->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
+
     D3D11_RASTERIZER_DESC rasterDesc = {};
 
     // Setup the raster description which will determine how and what polygons will be drawn.
-    rasterDesc.AntialiasedLineEnable = false;
+    rasterDesc.AntialiasedLineEnable = true;
     rasterDesc.CullMode = D3D11_CULL_FRONT;
     rasterDesc.DepthBias = 0;
     rasterDesc.DepthBiasClamp = 0.0f;
@@ -252,6 +286,7 @@ void ParticlesPass::AllocateMoreSpace(int newSpace)
 
 void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mesh, Resources::Texture* texture, std::vector<InstancedData> data)
 {
+    Render::RendererRemote::context->OMSetDepthStencilState(depthStencilState, 0);
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
 
@@ -280,7 +315,7 @@ void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mes
     buffer.proj = cam.GetProj();
     buffer.view = cam.GetView();
     buffer.pos = cam.pos;
-    buffer.isBillboard = false;
+    buffer.isBillboard = true;
     Render::WriteCBuffer(&buffer, sizeof(buffer), 0, &CBuffer);
  
     Render::RendererRemote::context->IASetVertexBuffers(0, 2, vbs, stride, offset);
