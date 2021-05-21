@@ -39,7 +39,7 @@ namespace Cookie
 				std::unordered_map<std::string, std::unique_ptr<Texture>>					textures;
 				std::unordered_map<std::string, std::unique_ptr<Script>>					scripts;
 				std::unordered_map<std::string, std::unique_ptr<Prefab>>					prefabs;
-				std::unordered_map<std::string, std::shared_ptr<Cookie::Resources::Sound>>  sounds;
+				std::unordered_map<std::string, std::unique_ptr<Sound>>  sounds;
 				
 			private:
 				void SearchForAssets(const fs::path& path, std::vector<std::string>& gltfFiles);
