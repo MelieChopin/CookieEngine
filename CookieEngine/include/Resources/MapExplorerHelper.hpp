@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <memory>
+#include <algorithm>
 
 #include "Texture.hpp"
 
@@ -28,6 +29,7 @@ namespace Cookie::Resources
 			return data.find(toSearch, pos);
 		}
 	}
+
 
 	template <class C>
 	static void SelectableResourceDisplay(const typename std::unordered_map<std::string, std::unique_ptr<C>>::iterator& It, const std::string& researchString, C*& currentR, const bool is_selected = false)

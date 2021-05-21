@@ -3,7 +3,7 @@
 #include "Render/RendererRemote.hpp"
 #include "Resources/Mesh.hpp"
 #include "Resources/Texture.hpp"
-#include "camera.hpp"
+#include "Camera.hpp"
 
 using namespace Cookie;
 using namespace Cookie::Render;

@@ -1,14 +1,9 @@
-#include <vector>
-#include "Resources/Scene.hpp"
-#include "Coordinator.hpp"
-#include "InspectorWidget.hpp"
-#include "HierarchyWidget.hpp"
-#include "Resources/Mesh.hpp"
-#include "Resources/Texture.hpp"
-#include "Resources/ResourcesManager.hpp"
 #include "Editor.hpp"
-#include "Renderer.hpp"
-#include "Resources/MapExplorerHelper.hpp"
+#include "InspectorWidget.hpp"
+#include "Scene.hpp"
+#include "HierarchyWidget.hpp"
+
+#include "MapExplorerHelper.hpp"
 
 #include <imgui.h>
 
@@ -32,7 +27,7 @@ void Hierarchy::WindowDisplay()
             }
 
             {
-                Prefab* prefab = ResourceMapSelector<Prefab>("prefab", "##PRDUNIT_SELECTOR", resources.prefabs);
+                Prefab* prefab = ResourceMapSelector<Prefab>("prefab", "##PREFABEDSELECTOR", resources.prefabs);
                 if(prefab)
                     coordinator.AddEntity(prefab);
             }
