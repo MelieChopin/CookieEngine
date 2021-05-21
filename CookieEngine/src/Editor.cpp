@@ -116,8 +116,8 @@ void Editor::Loop()
 
     Vec2 mousePos;
     {
-        game.scene->map.model.mesh                  = game.resources.meshes["NormalCube"].get();
-        game.scene->map.model.albedo                = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
+        game.scene->map.model.mesh                  = game.resources.meshes["Cube"].get();
+        game.scene->map.model.albedo                = game.resources.textures["Assets/Grass_Tex.png"].get();
     }
     Vec3 buildingPos;
     Vec2 buildingTileSize {{1, 1}};
@@ -197,8 +197,6 @@ void Editor::Loop()
 
     game.particlesHandler.particlesSystems[4].data.push_back(second.data[0]);
     game.particlesHandler.particlesSystems[4].particlesEmiter.push_back(second.particlesEmiter[0]);
-    ///
-
 
     bool isActive = false;
 

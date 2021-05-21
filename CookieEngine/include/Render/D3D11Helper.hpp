@@ -13,7 +13,7 @@ namespace Cookie
 		{
             ID3DBlob* VSErr;
 
-            if (FAILED(D3DCompile(VSSource.c_str(), VSSource.length(), nullptr, nullptr, nullptr, "main", "vs_5_0", 0, 0, VS, &VSErr)))
+            if (FAILED(D3DCompile(VSSource.c_str(), VSSource.length(), nullptr, nullptr, nullptr, "main", "vs_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, VS, &VSErr)))
             {
                 printf("Failed To Compile Vertex Shader %s\n", (const char*)(VSErr->GetBufferPointer()));
                 return false;
@@ -36,7 +36,7 @@ namespace Cookie
             ID3DBlob* PS;
             ID3DBlob* PSErr;
 
-            if (FAILED(D3DCompile(PSSource.c_str(), PSSource.length(), nullptr, nullptr, nullptr, "main", "ps_5_0", 0, 0, &PS, &PSErr)))
+            if (FAILED(D3DCompile(PSSource.c_str(), PSSource.length(), nullptr, nullptr, nullptr, "main", "ps_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, &PS, &PSErr)))
             {
                 printf("Failed To Compile Pixel Shader: %s\n", (const char*)(PSErr->GetBufferPointer()));
                 return false;
