@@ -17,6 +17,12 @@ namespace Cookie
 		class ComponentModel;
 	}
 
+	namespace Resources
+	{
+		class Texture;
+		class Mesh;
+	}
+
 	namespace Render
 	{
 		class Camera;
@@ -38,6 +44,18 @@ namespace Cookie
 				std::vector<Core::Math::Mat4>		matrices;
 				std::array<Core::Math::Vec3, 2>		AABB;
 				const Camera*						currentCam;
+
+				struct MapInfo
+				{
+					std::unique_ptr<Resources::Mesh> mapMesh;
+					Resources::Texture* albedo{ nullptr };
+					Resources::Texture* normal{ nullptr };
+					Resources::Texture* metallicRoughness{ nullptr };
+
+					Core::Math::Mat4 TRS;
+				};
+
+				MapInfo mapInfo;
 
 				ID3D11DepthStencilView*				depthStencilView;
 				ID3D11Buffer*						CamCBuffer;

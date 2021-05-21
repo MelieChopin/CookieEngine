@@ -43,14 +43,14 @@ namespace Cookie
 			return  spec;
 		}
 
-		POut compute_lighting(float3 normal, float3 position, float3 lightDir, float3 lightColor, float3 albedo, float metallic, float roughness)
+		POut compute_lighting(float3 normal, float3 position, float3 lightDir, float3 lightColor, float metallic, float roughness)
 		{
 			POut output;
 
 			float a			= roughness * roughness;
 			float shininess = (2/max(a*a,0.0000000001)) - 1;
-			output.specular	= float4(compute_specular(lightDir,normal,position,shininess) * lightColor * albedo,1.0);
-			output.diffuse	= float4((compute_diffuse(lightDir,normal)) * lightColor * albedo,1.0);
+			output.specular	= float4(compute_specular(lightDir,normal,position,shininess) * lightColor,1.0);
+			output.diffuse	= float4((compute_diffuse(lightDir,normal)) * lightColor,1.0);
 
 			return output;
 		}
@@ -59,6 +59,7 @@ namespace Cookie
 
 		constexpr const char* PBR = R"(#line 48
 		static const float PI = 3.14159265359;
+		static const float3 basic = float3(1.0,1.0,1.0); 		
 
 		struct POut
 		{
@@ -111,7 +112,7 @@ namespace Cookie
 		    return F0 + (1.0 - F0) * pow(max(1.0 - cosTheta, 0.0), 5.0);
 		} 
 
-		POut compute_lighting(float3 normal, float3 position, float3 lightDir, float3 lightColor, float3 albedo, float metallic, float roughness)
+		POut compute_lighting(float3 normal, float3 position, float3 lightDir, float3 lightColor, float metallic, float roughness)
 		{
 			POut output;
 
@@ -119,7 +120,7 @@ namespace Cookie
 			float3 halfAngleVec	= normalize(lightDir + viewDir);
 
 			float3 F0			= 0.04;
-			F0					= lerp(F0,albedo,metallic);
+			F0					= lerp(F0,basic,metallic);
 
 			float NDF	= DistributionGGX(normal, halfAngleVec, roughness);        
 			float G		= GeometrySmith(normal, viewDir, lightDir, roughness);      
@@ -132,7 +133,7 @@ namespace Cookie
 			float denominator	=  4.0 * max(dot(normal, viewDir), 0.0) * max(dot(normal, lightDir), 0.0);
 
 			float NdotL			= max(dot(normal, lightDir), 0.0);
-			output.diffuse		= float4((kD* albedo)*NdotL*lightColor,1.0);
+			output.diffuse		= float4((kD* basic)*NdotL*lightColor,1.0);
 			output.specular     = float4((numerator / max(denominator, 0.001))*NdotL*lightColor,1.0);   
 			
 			return output;

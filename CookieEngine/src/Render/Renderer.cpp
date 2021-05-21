@@ -223,7 +223,7 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     {
 
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
-        cPass.Set(lPass.diffuseFBO,lPass.specularFBO);
+        cPass.Set(lPass.diffuseFBO,lPass.specularFBO,gPass.albedoFBO);
         cPass.Draw();
     }
 

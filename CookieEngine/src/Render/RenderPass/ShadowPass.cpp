@@ -190,7 +190,7 @@ void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
         buffer.lightViewProj = lights.dirLight.lightViewProj;
         Render::WriteCBuffer(&buffer, bufferSize, 0, &CBuffer);
 
-        drawData.Draw(1);
+        drawData.Draw();
         
     }
 }

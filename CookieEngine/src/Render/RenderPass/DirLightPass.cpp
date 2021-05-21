@@ -119,15 +119,14 @@ void DirLightPass::InitShader()
             
         float3  fragPos     = positionTex.Sample(ClampSampler,uv).xyz;
         float3  normal      = normalize(normalTex.Sample(ClampSampler,uv).xyz);
-        float3  albedo      = pow(albedoTex.Sample(ClampSampler,uv).xyz,2.2);
         float   metallic    = positionTex.Sample(ClampSampler,uv).w;
         float   roughness   = normalTex.Sample(ClampSampler,uv).w;
         float   ao          = albedoTex.Sample(ClampSampler,uv).w;
 
         float   shadow      = lerp(1.0,compute_shadow(fragPos,dot(normal, normalize(-lightDir))),castShadow);
 
-        output          = compute_lighting(normal,fragPos,normalize(-lightDir),lightColor,albedo,metallic,roughness);
-        output.diffuse  = output.diffuse * shadow + (0.03 * ao + 0.01) *  float4(albedo,1.0);
+        output          = compute_lighting(normal,fragPos,normalize(-lightDir),lightColor,metallic,roughness);
+        output.diffuse  = output.diffuse * shadow + (0.03 * ao + 0.01);
         output.diffuse  = pow(output.diffuse,0.45454545);
         output.specular = pow(output.specular * shadow,0.45454545);
 
