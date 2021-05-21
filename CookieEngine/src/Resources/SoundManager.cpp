@@ -10,7 +10,7 @@ namespace fs = std::filesystem;
 using namespace Cookie::Resources;
 
 FMOD::System* SoundManager::system;
-std::unordered_map<std::string, std::shared_ptr<Cookie::Resources::Sound>>* SoundManager::sounds;
+std::unordered_map<std::string, std::unique_ptr<Cookie::Resources::Sound>>* SoundManager::sounds;
 
 void SoundManager::InitSystem()
 {
@@ -69,11 +69,12 @@ void SoundManager::LoadAllMusic(ResourcesManager& resourcesManager)
 
 		Cookie::Resources::Sound newSound;
 		newSound.filepath = filesPath[i];
+		newSound.name = name;
 		FMOD::Channel* chan = nullptr;
 		newSound.chan = chan;
 		newSound.mode = mode;
 
-		resourcesManager.sounds[name] = std::make_shared<Cookie::Resources::Sound>(newSound);
+		resourcesManager.sounds[name] = std::make_unique<Cookie::Resources::Sound>(newSound);
 	}
 
 	sounds = &resourcesManager.sounds;
@@ -144,4 +145,22 @@ void SoundManager::Set2D(std::string key)
 void SoundManager::SetMode(std::string key, FMOD_MODE mode)
 {
 	(*(sounds))[key].get()->mode = mode;
+}
+
+
+void SoundManager::PlayMusic(Sound* const& sound)
+{
+	if (sound->sound == nullptr)
+		FMOD_RESULT result = system->createSound(sound->filepath.c_str(),
+												 sound->mode, nullptr, &sound->sound);
+
+	system->playSound(sound->sound, nullptr, false, &sound->chan);
+	sound->chan->setVolume(sound->vol);
+
+	if (sound->mode & FMOD_3D)
+	{
+		Cookie::Core::Math::Vec3 posSound = sound->pos;
+		FMOD_VECTOR pos = { posSound.x, posSound.y, posSound.z };
+		sound->chan->set3DAttributes(&pos, nullptr);
+	}
 }

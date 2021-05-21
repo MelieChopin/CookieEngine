@@ -1,4 +1,5 @@
 #ifndef __SOUND_HPP__
+#define __SOUND_HPP__
 
 #include "fmod.hpp"
 #include "Vec3.hpp"
@@ -15,6 +16,7 @@ namespace Cookie
 			FMOD_MODE					mode = FMOD_DEFAULT;
 			Cookie::Core::Math::Vec3	pos;
 			std::string					filepath;
+			std::string					name;
 			float						vol = 1;
 		};
 	}
