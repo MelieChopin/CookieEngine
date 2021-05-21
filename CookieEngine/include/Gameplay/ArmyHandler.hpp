@@ -21,7 +21,7 @@ namespace Cookie
 			std::vector<ECS::ComponentGameplay*> workers;
 			std::vector<ECS::ComponentGameplay*> units;
 			std::vector<ECS::ComponentGameplay*> buildings;
-			
+
 			Army() {}
 			~Army() {}
 
@@ -37,7 +37,12 @@ namespace Cookie
 			ArmyHandler() {}
 			~ArmyHandler() {}
 
-			void AddArmyCoordinator(int index);
+
+			void UpdateArmyCoordinators();
+
+			Army*			 GetArmy(std::string name);
+			ArmyCoordinator* GetArmyCoordinator(std::string name);
+
 			void AddArmyCoordinator(std::string name);
 
 			void AddElementToArmy(ECS::ComponentGameplay* element);

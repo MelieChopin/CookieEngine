@@ -41,9 +41,6 @@ bool CGPProducer::AddUnitToQueue(int indexInPossible)
 	//should be impossible when UI implemented
 	assert(indexInPossible < possibleUnits.size());
 
-	std::cout << "Add to queue of Producer\n";
-
-
 	Resources::Prefab* const & unitToAdd = possibleUnits[indexInPossible];
 
 	//later on add Debug.Log depending on what is blocking the process to give player Feedback
@@ -55,6 +52,9 @@ bool CGPProducer::AddUnitToQueue(int indexInPossible)
 		std::cout << "not enough Resources to Produce\n";
 		return false;
 	}
+
+	std::cout << "Add to queue of Producer\n";
+
 
 	income->primary -= unitToAdd->gameplay.cost.costPrimary;
 	income->secondary -= unitToAdd->gameplay.cost.costSecondary;

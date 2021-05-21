@@ -85,7 +85,7 @@ int  Map::GetTileIndex(Vec2& mousePos)
 {
 	Vec2 unsignedMousePos{ {mousePos.x + trs.scale.x / 2, mousePos.y + trs.scale.z / 2} };
 
-	return int(unsignedMousePos.x / tilesSize.x) + tilesNb.x * int(unsignedMousePos.y / tilesSize.x);
+	return int(unsignedMousePos.x / tilesSize.x) + tilesNb.x * int(unsignedMousePos.y / tilesSize.y);
 }
 int  Map::GetTileIndex(Vec3& pos)
 {
@@ -93,7 +93,7 @@ int  Map::GetTileIndex(Vec3& pos)
 
 	Vec2 unsignedPos{ {pos.x + trs.scale.x / 2, pos.z + trs.scale.z / 2} };
 
-	return int(unsignedPos.x / tilesSize.x) + tilesNb.x * int(unsignedPos.y / tilesSize.x);
+	return int(unsignedPos.x / tilesSize.x) + tilesNb.x * int(unsignedPos.y / tilesSize.y);
 }
 Tile& Map::GetTile(Core::Math::Vec2& mousePos)
 {

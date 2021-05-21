@@ -31,6 +31,9 @@ namespace Cookie
 
 			Army*                army {nullptr};
 			std::vector<E_GOALS> goals;
+			int nbOfWorkerInProduction {0};
+			int nbOfUnitInProduction   {0};
+
 
 			ArmyCoordinator(Army* _army) : army{_army}  {}
 			~ArmyCoordinator() {}
@@ -40,9 +43,11 @@ namespace Cookie
 			void Analysis();
 			void ResourceAllocation();
 
+		private:
 			void DevelopBase();
 			void DevelopArmy();
 			void Attack();
+			void Defense();
 			void Retreat();
 
 		};

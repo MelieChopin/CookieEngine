@@ -114,12 +114,12 @@ void Editor::Loop()
     Cookie::Resources::SoundManager::SetVolume("Magic.mp3", 0.05f);
     Physics::PhysicsHandle physHandle;
 
-    Vec2 mousePos;
+    Vec2 mousePos {0, 0};
     {
         game.scene->map.model.mesh                  = game.resources.meshes["NormalCube"].get();
         game.scene->map.model.albedo                = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
     }
-    Vec3 buildingPos;
+    Vec3 buildingPos {0, 0, 0};
     bool isBuildingValid = false;
     int indexOfSelectedTile = 0;
     bool makingASelectionQuad = false;
@@ -201,7 +201,6 @@ void Editor::Loop()
     CGPProducer* buildingToBuild {nullptr};
     CGPWorker*   workerWhoBuild  {nullptr};
     int          indexOfBuildingInWorker = 0;
-    int          idOfWorker = 0;
 
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
@@ -275,11 +274,7 @@ void Editor::Loop()
                 mousePos =  {{hitPoint.x, hitPoint.z}};
                 indexOfSelectedTile = game.scene->map.GetTileIndex(mousePos);
 
-                if(buildingToBuild)
-                {
-                    Vec2 centerOfBuilding = game.scene->map.GetCenterOfBuilding(mousePos, buildingToBuild->tileSize);
-                    buildingPos = { centerOfBuilding.x, 1, centerOfBuilding.y };
-                }
+
             }
         }
         //Bind Keys to give orders to Units
@@ -345,9 +340,12 @@ void Editor::Loop()
 
         //Add Base
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
-            game.coordinator.AddEntity(game.resources.prefabs["02Building"].get(), "good");
+            game.coordinator.AddEntity(game.resources.prefabs["04Base"].get(), "good");
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B])
-            game.coordinator.AddEntity(game.resources.prefabs["02Building"].get(), "bad");
+            game.coordinator.AddEntity(game.resources.prefabs["04Base"].get(), "bad");
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
+            game.coordinator.armyHandler->AddArmyCoordinator("bad");
+
 
         //Add Unit
         for (int i = 0; i < game.coordinator.selectedEntities.size(); ++i)
@@ -367,55 +365,55 @@ void Editor::Loop()
             buildingToBuild = nullptr;
             workerWhoBuild = nullptr;
             indexOfBuildingInWorker = 0;
-            idOfWorker = 0;
         }
-        if (buildingToBuild == nullptr)
+
+        if (!buildingToBuild)
         {
             for (int i = 0; i < game.coordinator.selectedEntities.size(); ++i)
             {
                 if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_Y])
                 {
+      
                     ComponentGameplay& gameplay = game.coordinator.componentHandler->GetComponentGameplay(game.coordinator.selectedEntities[i]->id);
 
-                    if (gameplay.signatureGameplay & CGP_SIGNATURE::WORKER)
+                    if (gameplay.signatureGameplay & CGP_SIGNATURE::WORKER &&
+                        !gameplay.componentWorker.BuildingInConstruction)
                     {
 
                         buildingToBuild = &gameplay.componentWorker.possibleBuildings[0]->gameplay.componentProducer;
                         workerWhoBuild = &gameplay.componentWorker;
                         indexOfBuildingInWorker = 0;
-                        idOfWorker = game.coordinator.selectedEntities[i]->id;
                         break;
                     }
                 }
             }
         }  
+
         if (buildingToBuild)
         {
-            Vec2 posTopLeft = { {buildingPos.x - buildingToBuild->tileSize.x * game.scene->map.tilesSize.x / 2,
-                                buildingPos.z - buildingToBuild->tileSize.y * game.scene->map.tilesSize.y / 2} };
+            Vec2 centerOfBuilding = game.scene->map.GetCenterOfBuilding(mousePos, buildingToBuild->tileSize);
+            buildingPos = { centerOfBuilding.x, 1, centerOfBuilding.y };
+
+            Vec2 posTopLeft = {{buildingPos.x - buildingToBuild->tileSize.x * game.scene->map.tilesSize.x / 2,
+                                buildingPos.z - buildingToBuild->tileSize.y * game.scene->map.tilesSize.y / 2}};
+
             isBuildingValid = game.scene->map.isBuildingValid(game.scene->map.GetTileIndex(posTopLeft), buildingToBuild->tileSize);
-        }
+        }  
+
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_U] && buildingToBuild && isBuildingValid)
         {
-            ECS::Entity& newEntity = game.coordinator.AddEntity(workerWhoBuild->possibleBuildings[indexOfBuildingInWorker], game.coordinator.componentHandler->GetComponentGameplay(idOfWorker).teamName);
-            ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(newEntity.id);
-            CGPProducer& producer = game.coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer;
-
-            trs.pos = buildingPos;
-            Vec3 posTopLeft = trs.pos - trs.scale / 2;
-            game.scene->map.GiveTilesToBuilding(game.scene->map.GetTileIndex(posTopLeft), producer);
+            workerWhoBuild->StartBuilding(buildingPos, indexOfBuildingInWorker);
 
             buildingToBuild = nullptr;
             workerWhoBuild = nullptr;
             indexOfBuildingInWorker = 0;
-            idOfWorker = 0;
         }
 
 
 
-
+        game.coordinator.armyHandler->UpdateArmyCoordinators();
         game.coordinator.UpdateCGPProducer();
-        game.coordinator.UpdateCGPWorker();
+        game.coordinator.UpdateCGPWorker(game.scene->map);
         game.coordinator.UpdateCGPMove(game.scene->map, dbgRenderer);
         game.coordinator.UpdateCGPAttack();
 
