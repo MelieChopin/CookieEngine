@@ -66,8 +66,8 @@ namespace Cookie
 			void ApplyGameplayUpdateCountdownProducer();
 
 			//CGP_Worker
-			void UpdateCGPWorker();
-			void ApplyGameplayUpdateWorker();
+			void UpdateCGPWorker(Resources::Map& map);
+			void ApplyGameplayUpdateWorker(Resources::Map& map);
 
 			//CGP_Move
 			void UpdateCGPMove(Resources::Map& map, Render::DebugRenderer& debug);

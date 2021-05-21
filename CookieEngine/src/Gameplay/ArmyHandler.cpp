@@ -3,12 +3,34 @@
 
 using namespace Cookie::Gameplay;
 
-void ArmyHandler::AddArmyCoordinator(int index)
-{
-	assert(index < MAX_ARMIES);
 
-	armiesCoordinator.push_back( ArmyCoordinator{&armies[index]} );
+void ArmyHandler::UpdateArmyCoordinators()
+{
+	for (int i = 0; i < armiesCoordinator.size(); ++i)
+	{
+		armiesCoordinator[i].Analysis();
+		armiesCoordinator[i].ResourceAllocation();
+	}
 }
+
+
+Army* ArmyHandler::GetArmy(std::string name)
+{
+	for (int i = 0; i < livingArmies; ++i)
+		if (armies[i].name == name)
+			return &armies[i];
+
+	return nullptr;
+}
+ArmyCoordinator* ArmyHandler::GetArmyCoordinator(std::string name)
+{
+	for (int i = 0; i < armiesCoordinator.size(); ++i)
+		if (armiesCoordinator[i].army->name == name)
+			return &armiesCoordinator[i];
+
+	return nullptr;
+}
+
 void ArmyHandler::AddArmyCoordinator(std::string name)
 {
 	for (int i = 0; i < livingArmies; ++i)
@@ -37,15 +59,21 @@ void ArmyHandler::AddElementToArmy(ECS::ComponentGameplay* element)
 }
 void ArmyHandler::AddElementToArmy(Army& army, ECS::ComponentGameplay* element)
 {
+	ArmyCoordinator* armyCoordinator = GetArmyCoordinator(army.name);
+
 	switch (element->type)
 	{
 	case E_ARMY_TYPE::E_WORKER:
 		element->componentWorker.income = &(army.income);
 		army.workers.push_back(element);
+		if (armyCoordinator)
+			armyCoordinator->nbOfWorkerInProduction--;
 		break;
 
 	case E_ARMY_TYPE::E_UNIT:
 		army.units.push_back(element);
+		if (armyCoordinator)
+			armyCoordinator->nbOfUnitInProduction--;
 		break;
 
 	case E_ARMY_TYPE::E_BUILDING:

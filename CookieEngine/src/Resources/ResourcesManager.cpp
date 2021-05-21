@@ -6,6 +6,7 @@
 #include "Resources/Script.hpp"
 #include "Resources/Scene.hpp"
 #include "Resources/Prefab.hpp"
+#include "Resources/Sound.hpp"
 #include "Resources/Loader.hpp"
 #include "Resources/ResourcesManager.hpp"
 

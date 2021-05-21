@@ -11,10 +11,10 @@ using namespace Cookie::ECS;
 void ArmyCoordinator::Analysis()
 {
 	//Economic
-	goals.push_back((army->workers.size() < 6) ? E_GOALS::E_DEVELOP_BASE : E_GOALS::E_DEVELOP_ARMY);
+	goals.push_back((army->workers.size() + nbOfWorkerInProduction < 6) ? E_GOALS::E_DEVELOP_BASE : E_GOALS::E_DEVELOP_ARMY);
 
 	//Military
-	goals.push_back((army->units.size() < 5) ? E_GOALS::E_RETREAT : E_GOALS::E_ATTACK);
+	goals.push_back((army->units.size() + nbOfUnitInProduction < 5) ? E_GOALS::E_DEFENSE : E_GOALS::E_ATTACK);
 
 }
 
@@ -30,6 +30,10 @@ void ArmyCoordinator::ResourceAllocation()
 
 		case E_GOALS::E_DEVELOP_ARMY:
 			DevelopArmy();
+			break;
+
+		case E_GOALS::E_DEFENSE:
+			Defense();
 			break;
 
 		case E_GOALS::E_ATTACK:
@@ -50,6 +54,8 @@ void ArmyCoordinator::ResourceAllocation()
 
 void ArmyCoordinator::DevelopBase()
 {
+	std::cout << "AI DevelopBase\n";
+
 	for (int i = 0; i < army->buildings.size(); ++i)
 	{
 		CGPProducer& producer = army->buildings[i]->componentProducer;
@@ -58,14 +64,18 @@ void ArmyCoordinator::DevelopBase()
 		{
 			if (producer.possibleUnits[j]->gameplay.signatureGameplay & CGP_SIGNATURE::WORKER &&
 				producer.AddUnitToQueue(j))
+			{
+				nbOfWorkerInProduction++;
 				return;
+			}
 		}
 	}
 
-	std::cout << "AI DevelopBase\n";
 }
 void ArmyCoordinator::DevelopArmy()
 {
+	std::cout << "AI DevelopArmy\n";
+
 	for (int i = 0; i < army->buildings.size(); ++i)
 	{
 		CGPProducer& producer = army->buildings[i]->componentProducer;
@@ -74,16 +84,21 @@ void ArmyCoordinator::DevelopArmy()
 		{
 			if (producer.possibleUnits[j]->gameplay.signatureGameplay & CGP_SIGNATURE::ATTACK &&
 				producer.AddUnitToQueue(j))
+			{
+				nbOfUnitInProduction++;
 				return;
+			}
 		}
 	}
 
-
-	std::cout << "AI DevelopArmy\n";
 }
 void ArmyCoordinator::Attack()
 {
 	std::cout << "AI Attack\n";
+}
+void ArmyCoordinator::Defense()
+{
+	std::cout << "AI Defend\n";
 }
 void ArmyCoordinator::Retreat()
 {

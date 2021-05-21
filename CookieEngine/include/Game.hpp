@@ -6,6 +6,7 @@
 #include "Resources/Mesh.hpp"
 #include "Resources/Texture.hpp"
 #include "Resources/Prefab.hpp"
+#include "Resources/Sound.hpp"
 
 #include "Resources/ResourcesManager.hpp"
 #include "Render/Skybox.hpp"

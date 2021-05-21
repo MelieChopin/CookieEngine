@@ -15,6 +15,7 @@ namespace Cookie
 	namespace Resources
 	{
 		class Prefab;
+		class Map;
 	}
 
 	namespace Gameplay
@@ -30,19 +31,20 @@ namespace Cookie
 			//will be replace by the CPGMove with flying later on
 			float moveSpeed                  {5};
 
-			Core::Math::Vec3* posBase         {nullptr};
-			Core::Math::Vec3  posResource     {25, 1, 0};
-			Core::Math::Vec3  posBuilding     {0, 0, 0 }; // = mousePos when start construction
+			//Harvest
 			Income* income                   {nullptr};
-
+			Core::Math::Vec3* posBase        {nullptr};
+			Core::Math::Vec3  posResource    {25, 0, 0};
 			float harvestCountdown           {0};
 			bool isCarryingResource          {false};
 			bool isResourcePrimary           {true};
 
+			//Building
 			std::vector<Resources::Prefab*>	possibleBuildings;
 			Resources::Prefab*				BuildingInConstruction {nullptr};
+			Core::Math::Vec3				posBuilding            {0,  0, 0}; // = mousePos when start construction
+			bool							needTostartBuilding    {false};
 			float                           constructionCountdown  {0};
-			bool											needTostartBuilding {false};
 
 			CGPWorker() {}
 			~CGPWorker() {}
@@ -59,10 +61,9 @@ namespace Cookie
 				constructionCountdown       = 0;
 			}
 
-			void Update(ECS::Coordinator& coordinator, int selfId);
+			void Update(Resources::Map& map, ECS::Coordinator& coordinator, int selfId);
 
-			void StartDisplayBuilding();
-			void StartBuilding();
+			void StartBuilding(Core::Math::Vec3& _posBuilding, int indexInPossibleBuildings);
 		};
 
 	}

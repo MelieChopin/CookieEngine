@@ -114,6 +114,8 @@ set (SRC_FILES
     "${SRC_DIR}/UI/Widgets/EditorWs/GameUIeditorWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/HierarchyWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/InspectorWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/ParticleEditorWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/SoundOrchestratorWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/TextureEditorWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/ToolbarWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/ViewportWidget.cpp"

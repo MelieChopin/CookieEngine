@@ -56,6 +56,7 @@ Editor::Editor()
 
     editorUI.AddWItem(new UIwidget::TextureEditor(game.resources), 1);
     editorUI.AddWItem(new UIwidget::GameUIeditor(game.renderer.window, game.scene), 1);
+    editorUI.AddWItem(new UIwidget::SoundOrchestrator(), 1);
 
     editorUI.AddWItem(new UIwidget::GamePort(isPlaying, game), 2);
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
@@ -114,17 +115,13 @@ void Editor::Loop()
     Cookie::Resources::SoundManager::SetVolume("Magic.mp3", 0.05f);
     Physics::PhysicsHandle physHandle;
 
-    Vec2 mousePos;
+    Vec2 mousePos {0, 0};
     {
         game.scene->map.model.mesh                  = game.resources.meshes["NormalCube"].get();
         game.scene->map.model.albedo                = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
     }
-    Vec3 buildingPos;
-    Vec2 buildingTileSize {{1, 1}};
+    Vec3 buildingPos {0, 0, 0};
     bool isBuildingValid = false;
-    int nbOfBuildings = 0;
-    int nbOfUnits = 0;
-    bool isRaycastingWithMap = false;
     int indexOfSelectedTile = 0;
     bool makingASelectionQuad = false;
     Vec2 selectionQuadStart;
@@ -256,6 +253,10 @@ void Editor::Loop()
 
     bool isActive = false;
 
+    CGPProducer* buildingToBuild {nullptr};
+    CGPWorker*   workerWhoBuild  {nullptr};
+    int          indexOfBuildingInWorker = 0;
+
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
         // Present frame
@@ -311,16 +312,9 @@ void Editor::Loop()
             physHandle.editWorld->raycast(ray,this);
         }
 
-        //Bind Keys to activate/deactivate raycast with map 
-        {
-            //Key M on Azerty Keyboard
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_SEMICOLON])
-            {
-                isRaycastingWithMap = !isRaycastingWithMap;
-            }
-        }
+
+
         //Raycast with Map
-        if(isRaycastingWithMap)
         {
             Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
             rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, { fwdRay.x,fwdRay.y,fwdRay.z });  
@@ -334,61 +328,13 @@ void Editor::Loop()
 
                 mousePos =  {{hitPoint.x, hitPoint.z}};
                 indexOfSelectedTile = game.scene->map.GetTileIndex(mousePos);
-                Vec2 centerOfBuilding = game.scene->map.GetCenterOfBuilding(mousePos, buildingTileSize);
 
-                buildingPos = {centerOfBuilding.x, 1, centerOfBuilding.y};
-            }
-        }
-        //Bind Keys to change Nb of Tiles of Building
-        {
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_K])
-                buildingTileSize.x = std::fmax(1, buildingTileSize.x - 1);
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
-                buildingTileSize.y = std::fmax(1, buildingTileSize.y - 1);            
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
-                buildingTileSize.x = std::fmin(game.scene->map.tilesNb.x, buildingTileSize.x + 1);
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_O])
-                buildingTileSize.y = std::fmin(game.scene->map.tilesNb.y, buildingTileSize.y + 1);
-        }
-        //Bind Keys to check if building is valid and to create Building
-        {
-           
-            if (isRaycastingWithMap)
-            {
-                Vec2 posTopLeft = {{buildingPos.x - buildingTileSize.x * game.scene->map.tilesSize.x / 2,
-                                    buildingPos.z - buildingTileSize.y * game.scene->map.tilesSize.y / 2}};
-                isBuildingValid = game.scene->map.isBuildingValid(game.scene->map.GetTileIndex(posTopLeft), buildingTileSize);
-            }
-            
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_LEFT_BRACKET] && isRaycastingWithMap && isBuildingValid)
-            {
-                game.coordinator.AddEntity(C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL + C_SIGNATURE::GAMEPLAY, "Building " + std::to_string(nbOfBuildings) );
-                //should create constructor copy for each Component 
-                {
-                    ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(game.coordinator.entityHandler->livingEntities - 1);
-                    ComponentModel& model   = game.coordinator.componentHandler->GetComponentModel(game.coordinator.entityHandler->livingEntities - 1);
-                    ComponentGameplay& gameplay = game.coordinator.componentHandler->GetComponentGameplay(game.coordinator.entityHandler->livingEntities - 1);
-                    gameplay.AddComponent(CGP_SIGNATURE::PRODUCER);
-                    CGPProducer& producer = gameplay.componentProducer;
 
-                    trs.pos = buildingPos;
-                    trs.scale = {buildingTileSize.x * game.scene->map.tilesSize.x, 1, buildingTileSize.y * game.scene->map.tilesSize.y};
-                    trs.trsHasChanged = true;
-
-                    model.mesh = game.resources.meshes["Cube"].get();
-                    model.albedo = game.resources.textures["Blue"].get();
-
-                    producer.tileSize = buildingTileSize;
-                    Vec3 posTopLeft = trs.pos - trs.scale / 2;
-                    game.scene->map.GiveTilesToBuilding(game.scene->map.GetTileIndex(posTopLeft), producer);
-                }
-
-                nbOfBuildings++;
             }
         }
         //Bind Keys to give orders to Units
         {
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_G] && isRaycastingWithMap && game.coordinator.selectedEntities.size() != 0)
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_G] && game.coordinator.selectedEntities.size() != 0)
             {
                 
                 ECS::Entity* commander = game.coordinator.GetSelectedEntitiesCommander();
@@ -416,7 +362,7 @@ void Editor::Loop()
         }
         //Selection Quad
         {
-            if (ImGui::GetIO().MouseClicked[0] && isRaycastingWithMap)
+            if (ImGui::GetIO().MouseClicked[0])
             {
                 makingASelectionQuad = true;
                 selectionQuadStart = mousePos;
@@ -426,7 +372,7 @@ void Editor::Loop()
                 //use 1 for Y so the debug will not be mix up with the map
                 dbgRenderer.AddQuad({ selectionQuadStart.x, 1, selectionQuadStart.y }, { mousePos.x, 1, mousePos.y }, 0x00FF00);
             }
-            if (ImGui::GetIO().MouseReleased[0] && isRaycastingWithMap)
+            if (ImGui::GetIO().MouseReleased[0])
             {
                 makingASelectionQuad = false;
                 game.coordinator.SelectEntities(selectionQuadStart, mousePos);
@@ -445,23 +391,84 @@ void Editor::Loop()
 
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
-        /*
-        Prefab* prefab = game.resources.prefabs["02Building"].get();
+        
 
+        //Add Base
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
-            game.coordinator.AddEntity(prefab, "good");
+            game.coordinator.AddEntity(game.resources.prefabs["04Base"].get(), "good");
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B])
-            game.coordinator.AddEntity(prefab, "bad");
+            game.coordinator.AddEntity(game.resources.prefabs["04Base"].get(), "bad");
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
+            game.coordinator.armyHandler->AddArmyCoordinator("bad");
 
-        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_T])
-            game.coordinator.componentHandler->GetComponentGameplay(0).componentProducer.AddUnitToQueue(0);
-        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_Y])
-            game.coordinator.componentHandler->GetComponentGameplay(1).componentProducer.AddUnitToQueue(0);
 
-            */
+        //Add Unit
+        for (int i = 0; i < game.coordinator.selectedEntities.size(); ++i)
+        {
+            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V])
+            {
+                ComponentGameplay& gameplay = game.coordinator.componentHandler->GetComponentGameplay(game.coordinator.selectedEntities[i]->id);
+            
+                if(gameplay.signatureGameplay & CGP_SIGNATURE::PRODUCER)
+                    gameplay.componentProducer.AddUnitToQueue(0);
+            }
+        }
 
+        //Add Producer
+        if(!ImGui::GetIO().KeysDownDuration[GLFW_KEY_T])
+        {
+            buildingToBuild = nullptr;
+            workerWhoBuild = nullptr;
+            indexOfBuildingInWorker = 0;
+        }
+
+        if (!buildingToBuild)
+        {
+            for (int i = 0; i < game.coordinator.selectedEntities.size(); ++i)
+            {
+                if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_Y])
+                {
+      
+                    ComponentGameplay& gameplay = game.coordinator.componentHandler->GetComponentGameplay(game.coordinator.selectedEntities[i]->id);
+
+                    if (gameplay.signatureGameplay & CGP_SIGNATURE::WORKER &&
+                        !gameplay.componentWorker.BuildingInConstruction)
+                    {
+
+                        buildingToBuild = &gameplay.componentWorker.possibleBuildings[0]->gameplay.componentProducer;
+                        workerWhoBuild = &gameplay.componentWorker;
+                        indexOfBuildingInWorker = 0;
+                        break;
+                    }
+                }
+            }
+        }  
+
+        if (buildingToBuild)
+        {
+            Vec2 centerOfBuilding = game.scene->map.GetCenterOfBuilding(mousePos, buildingToBuild->tileSize);
+            buildingPos = { centerOfBuilding.x, 1, centerOfBuilding.y };
+
+            Vec2 posTopLeft = {{buildingPos.x - buildingToBuild->tileSize.x * game.scene->map.tilesSize.x / 2,
+                                buildingPos.z - buildingToBuild->tileSize.y * game.scene->map.tilesSize.y / 2}};
+
+            isBuildingValid = game.scene->map.isBuildingValid(game.scene->map.GetTileIndex(posTopLeft), buildingToBuild->tileSize);
+        }  
+
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_U] && buildingToBuild && isBuildingValid)
+        {
+            workerWhoBuild->StartBuilding(buildingPos, indexOfBuildingInWorker);
+
+            buildingToBuild = nullptr;
+            workerWhoBuild = nullptr;
+            indexOfBuildingInWorker = 0;
+        }
+
+
+
+        game.coordinator.armyHandler->UpdateArmyCoordinators();
         game.coordinator.UpdateCGPProducer();
-        game.coordinator.UpdateCGPWorker();
+        game.coordinator.UpdateCGPWorker(game.scene->map);
         game.coordinator.UpdateCGPMove(game.scene->map, dbgRenderer);
         game.coordinator.UpdateCGPAttack();
 
@@ -475,8 +482,8 @@ void Editor::Loop()
 
         //Draw
         game.renderer.Draw(&cam, game,editorFBO);
-        if (isRaycastingWithMap)
-            dbgRenderer.AddQuad(buildingPos, buildingTileSize.x * game.scene->map.tilesSize.x / 2, buildingTileSize.y * game.scene->map.tilesSize.y / 2, (isBuildingValid) ? 0x00FF00 : 0xFF0000);
+        if (buildingToBuild)
+            dbgRenderer.AddQuad(buildingPos, buildingToBuild->tileSize.x * game.scene->map.tilesSize.x / 2, buildingToBuild->tileSize.y * game.scene->map.tilesSize.y / 2, (isBuildingValid) ? 0x00FF00 : 0xFF0000);
 		for (int i = 0; i < game.particlesHandler.particlesSystems.size(); i++)
             game.particlesHandler.particlesSystems[i].Draw(cam, game.resources);
 
