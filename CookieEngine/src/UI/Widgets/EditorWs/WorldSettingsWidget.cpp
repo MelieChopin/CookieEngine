@@ -51,7 +51,7 @@ void WorldSettingsWidget::WindowDisplay()
 			{
 				if (xzMapTilesNb[0] > 1 && xzMapTilesNb[1] > 1)
 				{
-					mapTilesNb = { xzMapTilesNb[0], xzMapTilesNb[1] };
+					mapTilesNb = {{ xzMapTilesNb[0], xzMapTilesNb[1] }};
 					scene->map.TileNbHasChanged();
 				}
 			}

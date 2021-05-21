@@ -110,7 +110,7 @@ void Editor::ModifyEditComp()
 
 void Editor::Loop()
 {
-    Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
+    //Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
     Cookie::Resources::SoundManager::SetVolume("Music.mp3", 0.25f);
     Cookie::Resources::SoundManager::SetVolume("Magic.mp3", 0.05f);
     Physics::PhysicsHandle physHandle;
@@ -146,8 +146,10 @@ void Editor::Loop()
     Cookie::Resources::Particles::MassConstGenerate         mass(2);
     Cookie::Resources::Particles::TimeConstGenerate         time(2);
     Cookie::Resources::Particles::TimeRandGenerate          timeRand(0.25f, 0.55f);
-    Cookie::Resources::Particles::ColorRandGenerate         color(Vec3(0.5f, 0, 0), Vec3(1, 0, 0));
+    Cookie::Resources::Particles::ColorRandGenerate         color(Vec3(1, 1, 1), Vec3(1, 1, 1));
     first.data[0].countAlive = 10;
+    first.data[0].mesh = game.resources.meshes["Quad"].get();
+    first.data[0].texture = game.resources.textures["Assets/Light.png"].get();
     first.particlesEmiter[0].generators.push_back(&circle);
     first.particlesEmiter[0].generators.push_back(&velRand);
     first.particlesEmiter[0].generators.push_back(&timeRand);
@@ -176,11 +178,13 @@ void Editor::Loop()
     //Second Particles in the center particles 
     Cookie::Resources::Particles::ParticlesSystem second = Cookie::Resources::Particles::ParticlesSystem(40, 30);
     second.data[0].countAlive = 10;
+    second.data[0].mesh = game.resources.meshes["Quad"].get();
+    second.data[0].texture = game.resources.textures["Assets/Etoile.png"].get();
     second.particlesEmiter[0].generators.push_back(&box);
     second.particlesEmiter[0].generators.push_back(&vel);
     second.particlesEmiter[0].generators.push_back(&mass);
     second.particlesEmiter[0].generators.push_back(&timeRand);
-    Cookie::Resources::Particles::ColorRandGenerate         blue(Vec3(0, 0, 0.3f), Vec3(0, 0, 1.0f));
+    Cookie::Resources::Particles::ColorRandGenerate         blue(Vec3(1, 1, 1), Vec3(1, 1, 1));
     Cookie::Resources::Particles::Loop              loop2(second.particlesEmiter[0].generators);
     second.particlesEmiter[0].generators.push_back(&blue);
     for (int i = 0; i < second.particlesEmiter[0].generators.size(); i++)
@@ -348,57 +352,13 @@ void Editor::Loop()
                 {
                     float selectedEntityId = game.coordinator.selectedEntities[i]->id;
                     ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(selectedEntityId);
+
                     if (game.scene->map.ApplyPathfinding(game.scene->map.GetTile(trs.pos), game.scene->map.tiles[indexOfSelectedTile]))
                         game.coordinator.componentHandler->GetComponentGameplay(selectedEntityId).componentMove.SetPath(game.scene->map.tiles[indexOfSelectedTile], trs);
+                    else
+                        std::cout << "No Path Find\n";
                 }*/
                 
-            }
-        }
-        //Bind Key to create new unit
-        {
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N] && isRaycastingWithMap)
-            {
-                ECS::Entity& entity =  game.coordinator.AddEntity(C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL + C_SIGNATURE::GAMEPLAY, "Unit " + std::to_string(nbOfUnits));
-                {
-                    ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(entity.id);
-                    ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(entity.id);
-                    ComponentGameplay& gameplay = game.coordinator.componentHandler->GetComponentGameplay(entity.id);
-                    gameplay.teamName = "good";
-                    gameplay.signatureGameplay = CGP_SIGNATURE::ALL_CGP - CGP_SIGNATURE::WORKER;
-                    gameplay.type = E_ARMY_TYPE::E_WORKER;
-
-                    trs.pos = { mousePos.x, 1, mousePos.y };
-                    trs.trsHasChanged = true;
-
-                    model.mesh = game.resources.meshes["Cube"].get();
-                    model.albedo = game.resources.textures["Green"].get();
-
-                    game.coordinator.armyHandler->AddElementToArmy(&gameplay);
-                }
-
-                nbOfUnits++;
-            }
-            if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B] && isRaycastingWithMap)
-            {
-                ECS::Entity& entity = game.coordinator.AddEntity(C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL + C_SIGNATURE::GAMEPLAY, "Unit " + std::to_string(nbOfUnits));
-                {
-                    ComponentTransform& trs = game.coordinator.componentHandler->GetComponentTransform(entity.id);
-                    ComponentModel& model = game.coordinator.componentHandler->GetComponentModel(entity.id);
-                    ComponentGameplay& gameplay = game.coordinator.componentHandler->GetComponentGameplay(entity.id);
-                    gameplay.teamName = "bad";
-                    gameplay.signatureGameplay = CGP_SIGNATURE::ALL_CGP - CGP_SIGNATURE::WORKER;
-                    gameplay.type = E_ARMY_TYPE::E_WORKER;
-
-                    trs.pos = { mousePos.x, 1, mousePos.y };
-                    trs.trsHasChanged = true;
-
-                    model.mesh = game.resources.meshes["Cube"].get();
-                    model.albedo = game.resources.textures["Red"].get();
-
-                    game.coordinator.armyHandler->AddElementToArmy(&gameplay);
-                }
-
-                nbOfUnits++;
             }
         }
         //Selection Quad
@@ -432,12 +392,20 @@ void Editor::Loop()
 
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
+        /*
+        Prefab* prefab = game.resources.prefabs["02Building"].get();
 
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
+            game.coordinator.AddEntity(prefab, "good");
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B])
+            game.coordinator.AddEntity(prefab, "bad");
 
-        for (int i = 0; i < game.coordinator.armyHandler->livingArmies; ++i)
-            std::cout << "Army name : " << game.coordinator.armyHandler->armies[i].name <<
-                        " Army Primary Income : " << game.coordinator.armyHandler->armies[i].income.primary << "\n";
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_T])
+            game.coordinator.componentHandler->GetComponentGameplay(0).componentProducer.AddUnitToQueue(0);
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_Y])
+            game.coordinator.componentHandler->GetComponentGameplay(1).componentProducer.AddUnitToQueue(0);
 
+            */
 
         game.coordinator.UpdateCGPProducer();
         game.coordinator.UpdateCGPWorker();
@@ -446,13 +414,11 @@ void Editor::Loop()
 
         game.coordinator.ApplyRemoveUnnecessaryEntities();
 
-
 		if (isActive)
             game.particlesHandler.Update();
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
             isActive = true;
         game.coordinator.ApplyComputeTrs();
-
 
         //Draw
         game.renderer.Draw(&cam, game,editorFBO);
@@ -460,6 +426,8 @@ void Editor::Loop()
             dbgRenderer.AddQuad(buildingPos, buildingTileSize.x * game.scene->map.tilesSize.x / 2, buildingTileSize.y * game.scene->map.tilesSize.y / 2, (isBuildingValid) ? 0x00FF00 : 0xFF0000);
 		for (int i = 0; i < game.particlesHandler.particlesSystems.size(); i++)
             game.particlesHandler.particlesSystems[i].Draw(cam, game.resources);
+
+
         dbgRenderer.Draw(cam.GetViewProj());
 
 
@@ -468,6 +436,7 @@ void Editor::Loop()
         editorUI.UpdateUI();
         UIcore::EndFrame();
         game.renderer.Render();
+
 
     }
 }

@@ -16,6 +16,8 @@ struct VS_CONSTANT_BUFFER
     Mat4 lightViewProj  = Mat4::Identity();
 };
 
+constexpr float shadowProjEpsilon = 100.0f;
+
 /*======================= CONSTRUCTORS/DESTRUCTORS =======================*/
 
 ShadowPass::ShadowPass():
@@ -23,6 +25,7 @@ ShadowPass::ShadowPass():
 {
     InitShader();
     InitState();
+    proj = Mat4::Ortho(-shadowProjEpsilon, shadowProjEpsilon, -shadowProjEpsilon, shadowProjEpsilon, -shadowProjEpsilon, shadowProjEpsilon);
 }
 
 ShadowPass::~ShadowPass()
@@ -111,7 +114,7 @@ void ShadowPass::InitState()
     rasterDesc.DepthBiasClamp = 0.0f;
     rasterDesc.DepthClipEnable = true;
     rasterDesc.FillMode = D3D11_FILL_SOLID;
-    rasterDesc.FrontCounterClockwise = true;
+    rasterDesc.FrontCounterClockwise = false;
     rasterDesc.MultisampleEnable = false;
     rasterDesc.ScissorEnable = false;
     rasterDesc.SlopeScaledDepthBias = 0.0f;
@@ -172,21 +175,19 @@ void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
     size_t bufferSize = sizeof(buffer);
 
     Render::RendererRemote::context->RSSetViewports(1, &shadowViewport);
-    
-    Mat4 proj = Mat4::Ortho(-50.0f, 50.0f, -50.0f, 50.0f, -50.0f, 50.0f);
-    //Mat4 proj = Mat4::Ortho(drawData.AABB[0].x, drawData.AABB[1].x, drawData.AABB[0].y, drawData.AABB[1].y, drawData.AABB[0].z, drawData.AABB[1].z);
 
-    Vec3 pos = (drawData.AABB[0] + drawData.AABB[1])*0.5f;
-
-    if  (lights.useDir && lights.dirLight.castShadow)
+    if (lights.useDir && lights.dirLight.castShadow)
     {
         Render::RendererRemote::context->OMSetRenderTargets(0, nullptr, shadowMap.depthStencilView);
+
         Vec3 jDir = lights.dirLight.dir.Normalize();
-        Mat4 view = Mat4::LookAt({0.0f,0.0f,0.0f}, jDir, { 0.0f,1.0f,0.0f });//Mat4::Translate(jDir * 10.0f) * Mat4::Dir(jDir);//
+        Vec3 pos = (drawData.AABB[0] + drawData.AABB[1]) * 0.5f;
+        Mat4 view = Mat4::LookAt({ 0.0f,0.0f,0.0f }, jDir, { 0.0f,1.0f,0.0f });
 
-        lights.dirLight.lightViewProj = proj * Mat4::Translate(pos - jDir * 25.0f) * view;
+        view = Mat4::Translate(-(pos - jDir * shadowProjEpsilon * 0.5f)) * view;
+
+        lights.dirLight.lightViewProj = view * proj;
         buffer.lightViewProj = lights.dirLight.lightViewProj;
-
         Render::WriteCBuffer(&buffer, bufferSize, 0, &CBuffer);
 
         drawData.Draw(1);

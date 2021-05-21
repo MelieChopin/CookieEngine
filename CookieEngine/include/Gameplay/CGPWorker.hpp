@@ -30,8 +30,9 @@ namespace Cookie
 			//will be replace by the CPGMove with flying later on
 			float moveSpeed                  {5};
 
-			Core::Math::Vec3 posBase         {0,  1, 0};
-			Core::Math::Vec3 posResource     {25, 1, 0};
+			Core::Math::Vec3* posBase         {nullptr};
+			Core::Math::Vec3  posResource     {25, 1, 0};
+			Core::Math::Vec3  posBuilding     {0, 0, 0 }; // = mousePos when start construction
 			Income* income                   {nullptr};
 
 			float harvestCountdown           {0};
@@ -41,6 +42,7 @@ namespace Cookie
 			std::vector<Resources::Prefab*>	possibleBuildings;
 			Resources::Prefab*				BuildingInConstruction {nullptr};
 			float                           constructionCountdown  {0};
+			bool											needTostartBuilding {false};
 
 			CGPWorker() {}
 			~CGPWorker() {}
@@ -48,7 +50,7 @@ namespace Cookie
 			inline void ToDefault() noexcept
 			{
 				income						= nullptr;
-				posBase                     = {0, 0, 0};
+				posBase                     = nullptr;
 				posResource                 = {0, 0, 0};
 				harvestCountdown            = 0;
 				isCarryingResource          = false;
@@ -57,9 +59,10 @@ namespace Cookie
 				constructionCountdown       = 0;
 			}
 
-			void Update(ECS::ComponentTransform& trs, ECS::Coordinator& coordinator);
+			void Update(ECS::Coordinator& coordinator, int selfId);
 
-
+			void StartDisplayBuilding();
+			void StartBuilding();
 		};
 
 	}

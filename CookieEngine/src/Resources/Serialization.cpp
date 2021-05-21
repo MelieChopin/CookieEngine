@@ -431,7 +431,11 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 if (TRS.contains("scale"))
 				TRS.at("scale").get_to(transform.scale.e);
 			 else if (entity.entities[i].namePrefab != "NONE")
+			 {
+				 
 				 transform.scale = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->transform.scale;
+				  transform.scale.Debug();
+			 }
 			 
 			 transform.trsHasChanged = true;
 			 component.GetComponentTransform(entity.entities[i].id) = transform;
@@ -591,7 +595,7 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 		 {
 			 if (js["Transform"]["Rotation"].is_array())
 				 js["Transform"]["Rotation"].get_to(newPrefab.transform.rot.e); 
-			 if (js["Transform"]["Scale"].is_string())
+			 if (js["Transform"]["Scale"].is_array())
 				 js["Transform"]["Scale"].get_to(newPrefab.transform.scale.e);
 		 }
 

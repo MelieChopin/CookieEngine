@@ -15,7 +15,7 @@ namespace Cookie
 
 		inline void Camera::Update()
 		{
-			viewMat = Core::Math::Mat4::Inverse(Core::Math::Mat4::Translate(pos) * Core::Math::Mat4::RotateY(-rot.y)  * Core::Math::Mat4::RotateX(-rot.x));
+			viewMat = Core::Math::Mat4::Translate(-pos) * Core::Math::Mat4::RotateY(rot.y)  * Core::Math::Mat4::RotateX(rot.x);
 		}
 
 		inline void Camera::ResetPreviousMousePos()
@@ -30,7 +30,7 @@ namespace Cookie
 
 			Core::Math::Vec2 ratio = { { (mousePos.x / (width * 0.5f)) - 1.0f,  (-mousePos.y / (height * 0.5f)) + 1.0f} };
 
-			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(projMat * viewMat) * Core::Math::Vec4(ratio.x,ratio.y, 1.0f,1.0f);
+			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(viewMat * projMat) * Core::Math::Vec4(ratio.x,ratio.y, 1.0f,1.0f);
 
 			return Core::Math::Vec3({ r.x / r.a,r.y / r.a,r.z / r.a }).Normalize();
 		}

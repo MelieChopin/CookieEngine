@@ -22,6 +22,7 @@ namespace Cookie
 			static void LoadAllMusic(ResourcesManager& resourcesManager);
 
 			static void PlayMusic	(std::string key);
+			static void Play3DMusic	(std::string key, const Cookie::Core::Math::Vec3& pos);
 			static void SetVolume	(std::string key, float vol);
 			static void SetPaused	(std::string key, bool isPaused);
 			static void Loop		(std::string key);

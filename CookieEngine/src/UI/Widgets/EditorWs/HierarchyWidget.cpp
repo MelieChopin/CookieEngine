@@ -3,6 +3,8 @@
 #include "Scene.hpp"
 #include "HierarchyWidget.hpp"
 
+#include "MapExplorerHelper.hpp"
+
 #include <imgui.h>
 
 #include "Serialization.hpp"
@@ -10,6 +12,7 @@
 using namespace ImGui;
 using namespace Cookie::UIwidget;
 using namespace Cookie::ECS;
+using namespace Cookie::Resources;
 
 
 void Hierarchy::WindowDisplay()
@@ -19,10 +22,16 @@ void Hierarchy::WindowDisplay()
         if (BeginPopupContextWindow("Out-object hierarchy menu"))
         {
             if (Selectable("Create empty"))
-            { 
+            {
                 coordinator.AddEntity(C_SIGNATURE::EMPTY_C);
             }
-        
+
+            {
+                Prefab* prefab = ResourceMapSelector<Prefab>("prefab", "##PREFABEDSELECTOR", resources.prefabs);
+                if(prefab)
+                    coordinator.AddEntity(prefab);
+            }
+
             EndPopup();
         }
 

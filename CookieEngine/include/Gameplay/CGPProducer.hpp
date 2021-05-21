@@ -50,7 +50,7 @@ namespace Cookie
 				
 			}
 		
-			void UpdateCountdown(ECS::Coordinator& coordinator);
+			void UpdateCountdown(ECS::Coordinator& coordinator, int selfId);
 
 			bool AddUnitToQueue(int indexInPossible);
 			void RemoveUnitFromQueue(int indexInQueue);

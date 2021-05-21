@@ -21,6 +21,7 @@ namespace Cookie
                 float e[4];
 
                 inline Vec4  operator/(float other) const { return{ x / other, y / other, z / other, w/other}; }
+                inline Vec4& operator/=(float other) { x /= other; y /= other; z /= other; w /= other; return *this;}
 
                 inline float Length() const { return std::sqrt(x * x + y * y + z * z); }
                 inline Vec4 Normalize() const { return *this / Length(); }

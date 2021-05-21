@@ -20,8 +20,8 @@ namespace Cookie
 		};
 
 		//use constexpr, for now it bug
-		#define CPGMOVE_CD_BEFORE_RETURN 0.5f
-
+		#define CGPMOVE_CD_BEFORE_RETURN 0.5f
+		#define CGPMOVE_CD_BEFORE_STATIC 5.f
 
 		class CGPMove
 		{
@@ -44,7 +44,8 @@ namespace Cookie
 			CGPMove*		  commanderCGPMove = nullptr;
 			Core::Math::Vec3  offsetFromCommander;
 
-			float pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
+			float pushedCooldownBeforeReturn = CGPMOVE_CD_BEFORE_RETURN;
+			float reachGoalCountdown = CGPMOVE_CD_BEFORE_STATIC;
 			Core::Math::Vec3 posBeforePushed;
 
 			CGPMove() {}
@@ -61,10 +62,12 @@ namespace Cookie
 				commanderPos = nullptr;
 				commanderCGPMove = nullptr;
 				offsetFromCommander = { 0, 0, 0 };
-				pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
+				pushedCooldownBeforeReturn = CGPMOVE_CD_BEFORE_RETURN;
+				reachGoalCountdown = CGPMOVE_CD_BEFORE_STATIC;
 			}
 
 			void UpdatePushedCooldown(Resources::Map& map, ECS::ComponentTransform& trs);
+			void UpdateReachGoalCooldown();
 
 			void SetPath(Resources::Tile& lastWaypoint, ECS::ComponentTransform& trs);
 			void SetCommander(CGPMove& _commanderCGPMove, ECS::ComponentTransform& commanderTrs, ECS::ComponentTransform& selfTrs);

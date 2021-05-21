@@ -8,18 +8,24 @@
 using namespace Cookie::Gameplay;
 using namespace Cookie::ECS;
 
-void CGPProducer::UpdateCountdown(Coordinator& coordinator)
+void CGPProducer::UpdateCountdown(Coordinator& coordinator, int selfId)
 {
-	if (queueOfUnits.empty())
+
+	if (queueOfUnits.size() == 0)
 		return;
 
+	std::cout << "producer updating " << currentCountdown << "\n";
 	currentCountdown -= Core::DeltaTime();
 
 	if (currentCountdown <= 0)
 	{
-		//add to ECS and ArmyHandler
-		Entity& newEntity = coordinator.AddEntity(queueOfUnits[0]);
-		coordinator.armyHandler->AddElementToArmy(&coordinator.componentHandler->GetComponentGameplay(newEntity.id) );
+		Entity& newEntity = coordinator.AddEntity(queueOfUnits[0], coordinator.componentHandler->GetComponentGameplay(selfId).teamName);
+
+		coordinator.componentHandler->GetComponentTransform(newEntity.id).pos = coordinator.componentHandler->GetComponentTransform(selfId).pos;
+
+		if (newEntity.signature & C_SIGNATURE::GAMEPLAY && coordinator.componentHandler->GetComponentGameplay(newEntity.id).signatureGameplay & CGP_SIGNATURE::WORKER)
+			coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentWorker.posBase = &coordinator.componentHandler->GetComponentTransform(selfId).pos;
+
 
 		queueOfUnits.erase(queueOfUnits.begin());
 
@@ -32,6 +38,12 @@ void CGPProducer::UpdateCountdown(Coordinator& coordinator)
 
 bool CGPProducer::AddUnitToQueue(int indexInPossible)
 {
+	//should be impossible when UI implemented
+	assert(indexInPossible < possibleUnits.size());
+
+	std::cout << "Add to queue of Producer\n";
+
+
 	Resources::Prefab* const & unitToAdd = possibleUnits[indexInPossible];
 
 	//later on add Debug.Log depending on what is blocking the process to give player Feedback
@@ -47,14 +59,19 @@ bool CGPProducer::AddUnitToQueue(int indexInPossible)
 	income->primary -= unitToAdd->gameplay.cost.costPrimary;
 	income->secondary -= unitToAdd->gameplay.cost.costSecondary;
 	income->supplyCurrent += unitToAdd->gameplay.cost.costSupply;
+	if (queueOfUnits.size() == 0)
+		currentCountdown = unitToAdd->gameplay.cost.timeToProduce;
 	queueOfUnits.push_back(unitToAdd);
+
 	return true;
 }
 void CGPProducer::RemoveUnitFromQueue(int indexInQueue)
 {
 	//should be impossible when UI implemented
-	if (indexInQueue > queueOfUnits.size())
-		return;
+	assert(indexInQueue < queueOfUnits.size());
+
+	std::cout << "remove from queue of Producer\n";
+
 
 	income->primary   += queueOfUnits[indexInQueue]->gameplay.cost.costPrimary;
 	income->secondary += queueOfUnits[indexInQueue]->gameplay.cost.costSecondary;

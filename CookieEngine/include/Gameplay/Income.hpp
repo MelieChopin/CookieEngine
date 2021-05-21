@@ -1,6 +1,7 @@
 #ifndef _INCOME_HPP__
 #define _INCOME_HPP__
 
+#include <string>
 
 namespace Cookie
 {
@@ -8,10 +9,10 @@ namespace Cookie
 	{
 		struct Income
 		{
-			float primary       {0};
-			float secondary     {0};
-			float supplyCurrent {0};
-			float supplyMax     {0};
+			float primary        {1000};
+			float secondary      {0};
+			float supplyCurrent  {0};
+			float supplyMax      {200};
 		};
 	}
 }
