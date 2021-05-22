@@ -4,6 +4,7 @@
 #include <Mat4.hpp>
 #include <array>
 #include <vector>
+#include "MapDrawer.hpp"
 
 struct ID3D11Buffer;
 struct ID3D11DepthStencilView;
@@ -45,20 +46,11 @@ namespace Cookie
 				std::array<Core::Math::Vec3, 2>		AABB;
 				const Camera*						currentCam;
 
-				struct MapInfo
-				{
-					std::unique_ptr<Resources::Mesh> mapMesh;
-					Resources::Texture* albedo{ nullptr };
-					Resources::Texture* normal{ nullptr };
-					Resources::Texture* metallicRoughness{ nullptr };
-
-					Core::Math::Mat4 TRS;
-				};
-
-				MapInfo mapInfo;
-
 				ID3D11DepthStencilView*				depthStencilView;
 				ID3D11Buffer*						CamCBuffer;
+				
+
+				MapDrawer							mapDrawer;
 
 			private:
 				void InitCBuffer();

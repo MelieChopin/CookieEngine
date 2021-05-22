@@ -5,7 +5,6 @@
 #include "Game.hpp"
 #include "Scene.hpp"
 #include "Resources/Mesh.hpp"
-#include "Primitives.hpp"
 #include "DrawDataHandler.hpp"
 
 using namespace Cookie::Core::Math;
@@ -21,8 +20,7 @@ struct VS_CONSTANT_BUFFER
 
 /*======================= CONSTRUCTORS/DESTRUCTORS =======================*/
 
-DrawDataHandler::DrawDataHandler():
-	mapInfo{ Core::Primitives::CreateCube()}
+DrawDataHandler::DrawDataHandler()
 {
 	InitCBuffer();
 }
@@ -142,11 +140,7 @@ void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 	ECS::ComponentHandler& components = *game.coordinator.componentHandler;
 	bool cull = false;
 
-	const Resources::Map& map = game.scene->map;
-	mapInfo.albedo				= map.model.albedo;
-	mapInfo.normal				= map.model.normal;
-	mapInfo.metallicRoughness	= map.model.metallicRoughness;
-	mapInfo.TRS					= map.trs.TRS;
+	mapDrawer.Set(game.scene->map);
 
 	for (int i = 0; i < entityHandler.livingEntities; ++i)
 	{
@@ -224,18 +218,6 @@ void DrawDataHandler::Draw(int _i)
 
 		Render::RendererRemote::context->PSSetShaderResources(0, 3, fbos);
 	}
-
-	buffer.model = mapInfo.TRS;
-	Render::WriteCBuffer(&buffer, bufferSize, 0, &CBuffer);
-
-	mapInfo.mapMesh->Set();
-	if (mapInfo.albedo)
-		mapInfo.albedo->Set(0);
-	if (mapInfo.normal)
-		mapInfo.normal->Set(1);
-	if (mapInfo.metallicRoughness)
-		mapInfo.metallicRoughness->Set(2);
-	mapInfo.mapMesh->Draw();
 }
 
 void DrawDataHandler::Clear()
