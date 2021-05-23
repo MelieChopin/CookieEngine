@@ -34,6 +34,7 @@ namespace Cookie
 		class Scene;
 		class Prefab;
 		class Texture;
+		class Sound;
 	}
 
 
@@ -55,6 +56,7 @@ namespace Cookie
 				void SaveAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
 				void SaveTexture(std::string& name, Cookie::Core::Math::Vec4& color);
 				void SaveVolumAndModeMusic(std::string key);
+				void SaveVolumAndModeMusic(Sound* const & sound);
 			}
 
 			namespace Load
