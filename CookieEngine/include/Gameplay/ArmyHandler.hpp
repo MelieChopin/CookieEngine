@@ -44,14 +44,13 @@ namespace Cookie
 			ArmyCoordinator* GetArmyCoordinator(std::string name);
 
 			void AddArmyCoordinator(std::string name);
-
 			void AddElementToArmy(ECS::ComponentGameplay* element);
-			void AddElementToArmy(Army& army, ECS::ComponentGameplay* element);
-
 			void RemoveElementFromArmy(ECS::ComponentGameplay* element);
+
+		private:
+			void AddElementToArmy(Army& army, ECS::ComponentGameplay* element);
 			void RemoveElementFromArmy(Army& army, ECS::ComponentGameplay* element);
 			void RemoveElementFromVector(std::vector<ECS::ComponentGameplay*>& vector, ECS::ComponentGameplay* element);
-
 		};
 
 	}

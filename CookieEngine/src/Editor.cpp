@@ -408,6 +408,15 @@ void Editor::Loop()
             indexOfBuildingInWorker = 0;
         }
 
+        //display armies infos
+        for (int i = 0; i < game.coordinator.armyHandler->livingArmies; ++i)
+        {
+            std::cout << " name : " << game.coordinator.armyHandler->armies[i].name << "\n"
+                      << " income primary : " << game.coordinator.armyHandler->armies[i].income.primary << "\n"
+                      << " nb of workers : " << game.coordinator.armyHandler->armies[i].workers.size() << "\n"
+                      << " nb of units : " << game.coordinator.armyHandler->armies[i].units.size() << "\n"
+                      << " nb of buildings : " << game.coordinator.armyHandler->armies[i].buildings.size() << "\n\n";
+        }
 
 
         game.coordinator.armyHandler->UpdateArmyCoordinators();

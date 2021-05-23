@@ -92,7 +92,6 @@ void ArmyHandler::RemoveElementFromArmy(ECS::ComponentGameplay* element)
 		if (armies[i].name == element->teamName)
 		{
 			RemoveElementFromArmy(armies[i], element);
-
 			return;
 		}
 }

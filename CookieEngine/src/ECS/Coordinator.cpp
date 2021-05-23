@@ -57,13 +57,14 @@ Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab, std::str
 		componentHandler->GetComponentModel(newEntity.id) = prefab->model;
 	if (CheckSignature(newEntity.signature, C_SIGNATURE::PHYSICS))
 		componentHandler->GetComponentPhysics(newEntity.id) = prefab->physics;
-	//if (CheckSignature(signature, C_SIGNATURE::SCRIPT))
+	//if (CheckSignature(newEntity.signature, C_SIGNATURE::SCRIPT))
 		//componentHandler->GetComponentScript(newEntity.id) = prefab->script;
 	if (CheckSignature(newEntity.signature, C_SIGNATURE::GAMEPLAY))
 	{
-		componentHandler->GetComponentGameplay(newEntity.id) = prefab->gameplay;
-		componentHandler->GetComponentGameplay(newEntity.id).teamName = teamName;
-		armyHandler->AddElementToArmy(&componentHandler->GetComponentGameplay(newEntity.id));
+		ComponentGameplay& gameplay = componentHandler->GetComponentGameplay(newEntity.id);
+		gameplay = prefab->gameplay;
+		gameplay.teamName = teamName;
+		armyHandler->AddElementToArmy(&gameplay);
 	}
 
 
@@ -73,6 +74,9 @@ Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab, std::str
 void Coordinator::RemoveEntity(Entity& entity)
 {
 	assert(entityHandler->livingEntities > 0 && "No Entity to remove");
+
+	if (entity.signature & C_SIGNATURE::GAMEPLAY)
+		armyHandler->RemoveElementFromArmy(&componentHandler->GetComponentGameplay(entity.id));
 
 	//Reset Components
 	componentHandler->SubComponentToDefault(entity.signature, entity.id);
