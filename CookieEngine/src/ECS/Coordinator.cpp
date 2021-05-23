@@ -6,7 +6,6 @@
 
 #include "ECS/EntityHandler.hpp"
 #include "ECS/ComponentHandler.hpp"
-#include "ECS/SystemHandler.hpp"
 #include "ECS/Coordinator.hpp"
 
 #include "Gameplay/ArmyHandler.hpp"
@@ -149,12 +148,13 @@ void Coordinator::SetSelectedEntitiesCommander(Entity* commander)
 
 
 //Primary Component
+/*
 void Coordinator::ApplySystemPhysics(float factor)
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::PHYSICS))
 			System::SystemPhysics(componentHandler->GetComponentPhysics(entityHandler->entities[i].id), factor);
-}
+}*/
 //void Coordinator::ApplyDraw(const Core::Math::Mat4& viewProj, ID3D11Buffer* CBuffer)
 //{
 //	for (int i = 0; i < entityHandler->livingEntities; ++i)
@@ -162,11 +162,17 @@ void Coordinator::ApplySystemPhysics(float factor)
 //			System::SystemDraw(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
 //				componentHandler->GetComponentModel(entityHandler->entities[i].id), viewProj, CBuffer);
 //}
+void Coordinator::ApplyScriptStart()
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::SCRIPT))
+			componentHandler->GetComponentScript(entityHandler->entities[i].id).Start();
+}
 void Coordinator::ApplyScriptUpdate()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::SCRIPT))
-			System::SystemScriptUpdate(componentHandler->GetComponentScript(entityHandler->entities[i].id));
+			componentHandler->GetComponentScript(entityHandler->entities[i].id).Update();
 }
 void Coordinator::ApplyRemoveUnnecessaryEntities()
 {

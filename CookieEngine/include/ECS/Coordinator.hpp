@@ -54,8 +54,9 @@ namespace Cookie
 
 
 			//Primary Component
-			void ApplySystemPhysics(float factor);
+			//void ApplySystemPhysics(float factor);
 			//void ApplyDraw(const Core::Math::Mat4& viewProj);
+			void ApplyScriptStart();
 			void ApplyScriptUpdate();
 			void ApplyRemoveUnnecessaryEntities();
 			void ApplyComputeTrs();

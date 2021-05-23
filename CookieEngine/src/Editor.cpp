@@ -4,7 +4,6 @@
 #include "Serialization.hpp"
 #include "Primitives.hpp"
 #include "Physics/PhysicsHandle.hpp"
-#include "ECS/SystemHandler.hpp"
 #include "Resources/Scene.hpp"
 #include "CGPMove.hpp"
 #include "CGPProducer.hpp"
@@ -14,7 +13,6 @@ using namespace Cookie;
 using namespace Cookie::Core;
 using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
-using namespace Cookie::ECS::System;
 using namespace Cookie::Gameplay;
 using namespace Cookie::Resources;
 using namespace rp3d;
