@@ -4,6 +4,8 @@
 
 #include "MapExplorerHelper.hpp"
 
+#include "Serialization.hpp"
+
 #include <imgui.h>
 
 using namespace Cookie::UIwidget;
@@ -65,6 +67,11 @@ void SoundOrchestrator::WindowDisplay()
 				Text("Position:"); SameLine(100);
 				DragFloat3("##MP3POS", selectedSound->pos.e, 0.25f, NULL, NULL, "%.2f");
 			}
+
+
+			NewLine(); NewLine();
+			if (Selectable("Overwrite existing parameters"))
+			{ Serialization::Save::SaveVolumAndModeMusic(selectedSound); }
 		}
 	}
 

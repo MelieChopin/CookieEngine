@@ -59,7 +59,7 @@ Editor::Editor()
     editorUI.AddWItem(new UIwidget::GamePort(isPlaying, game), 2);
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
     editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
-    editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.resources), 2);
+    editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.resources, game.renderer.lights), 2);
     editorUI.AddWItem(new UIwidget::Console(CDebug, game.renderer), 2);
     editorUI.AddWItem(new UIwidget::FileExplorer(game.renderer, game), 2);
 
