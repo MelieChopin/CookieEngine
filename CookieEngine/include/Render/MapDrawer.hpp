@@ -24,7 +24,9 @@ namespace Cookie
 		{
 			private:
 				ID3D11VertexShader* VShader{ nullptr };
-				ID3D11Buffer*		CBuffer{ nullptr };
+				ID3D11PixelShader*	PShader{ nullptr };
+				ID3D11Buffer*		VCBuffer{ nullptr };
+				ID3D11Buffer*		PCBuffer{ nullptr };
 
 			public:
 				struct MapInfo
@@ -36,6 +38,9 @@ namespace Cookie
 
 					Core::Math::Mat4					model;
 					Core::Math::Vec2					tileSize;
+
+					Core::Math::Vec3					limitColor;
+					Core::Math::Vec2					tileLimits{ {0.02f,0.98f} };
 				};
 
 				MapInfo mapInfo;
