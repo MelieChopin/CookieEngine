@@ -65,6 +65,7 @@ void Viewport::GizmoManipulator()
 	ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id);
 	Mat4 trsfTMat = trsf.TRS.Transpose();
 
+	ImGuizmo::SetDrawlist();
 	ImGuizmo::SetRect(viewportDrawspace.posx, viewportDrawspace.posy, viewportDrawspace.width, viewportDrawspace.height);
 
 	static ImGuizmo::OPERATION transformTool;
