@@ -131,6 +131,7 @@ set (SRC_FILES
     "${SRC_DIR}/ECS/ComponentHandler.cpp"
     "${SRC_DIR}/ECS/ComponentModel.cpp" 
     "${SRC_DIR}/ECS/ComponentPhysics.cpp"
+    "${SRC_DIR}/ECS/ComponentScript.cpp"
     "${SRC_DIR}/ECS/Coordinator.cpp"
     "${SRC_DIR}/ECS/EntityHandler.cpp"
 

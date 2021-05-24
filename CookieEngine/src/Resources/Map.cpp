@@ -85,7 +85,7 @@ int  Map::GetTileIndex(Vec2& mousePos)
 {
 	Vec2 unsignedMousePos{ {mousePos.x + trs.scale.x / 2, mousePos.y + trs.scale.z / 2} };
 
-	return int(unsignedMousePos.x / tilesSize.x) + tilesNb.x * int(unsignedMousePos.y / tilesSize.x);
+	return int(unsignedMousePos.x / tilesSize.x) + tilesNb.x * int(unsignedMousePos.y / tilesSize.y);
 }
 int  Map::GetTileIndex(Vec3& pos)
 {
@@ -93,7 +93,7 @@ int  Map::GetTileIndex(Vec3& pos)
 
 	Vec2 unsignedPos{ {pos.x + trs.scale.x / 2, pos.z + trs.scale.z / 2} };
 
-	return int(unsignedPos.x / tilesSize.x) + tilesNb.x * int(unsignedPos.y / tilesSize.x);
+	return int(unsignedPos.x / tilesSize.x) + tilesNb.x * int(unsignedPos.y / tilesSize.y);
 }
 Tile& Map::GetTile(Core::Math::Vec2& mousePos)
 {
@@ -115,6 +115,19 @@ Vec2 Map::GetCenterOfBuilding(Vec2& mousePos, Vec2& buildingNbOfTiles)
 			 std::clamp(tilePos.y, -trs.scale.z / 2 + buildingNbOfTiles.y * tilesSize.y / 2, trs.scale.z / 2 - buildingNbOfTiles.y * tilesSize.y / 2)} };
 
 }
+Vec3 Map::GetCenterOfBuilding(Vec3& mousePos, Vec2& buildingNbOfTiles)
+{
+	Vec2 tilePos = tiles[GetTileIndex(mousePos)].pos;
+
+	//if buildingNbOfTiles has peer values add half tileSize for each
+	tilePos += { {(int)(buildingNbOfTiles.x + 1) % 2 * tilesSize.x / 2, (int)(buildingNbOfTiles.y + 1) % 2 * tilesSize.y / 2}};
+
+	return  {std::clamp(tilePos.x, -trs.scale.x / 2 + buildingNbOfTiles.x * tilesSize.x / 2, trs.scale.x / 2 - buildingNbOfTiles.x * tilesSize.x / 2),
+			 mousePos.y,
+			 std::clamp(tilePos.y, -trs.scale.z / 2 + buildingNbOfTiles.y * tilesSize.y / 2, trs.scale.z / 2 - buildingNbOfTiles.y * tilesSize.y / 2)};
+
+}
+
 bool Map::isBuildingValid(int indexTopLeft, Vec2& tileSize)
 {
 

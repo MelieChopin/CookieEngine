@@ -397,6 +397,27 @@ void Cookie::Resources::Serialization::Save::SaveVolumAndModeMusic(std::string k
 	file << std::setw(4) << js << std::endl;
 }
 
+void Cookie::Resources::Serialization::Save::SaveVolumAndModeMusic(Sound* const & sound)
+{
+	std::string filepath = sound->filepath;
+
+	std::size_t pos = filepath.find(".mp3");
+	std::size_t end = filepath.length();
+
+	filepath.replace(pos, end, ".MAsset");
+
+	std::ofstream file(filepath);
+
+	json js;
+
+	std::cout << sound->vol;
+	js["Volume"] = sound->vol;
+	js["Mode"] = sound->mode;
+	js["Pos"] = sound->pos.e;
+
+	file << std::setw(4) << js << std::endl;
+}
+
  //------------------------------------------------------------------------------------------------------------------
 
 void Cookie::Resources::Serialization::Load::FromJson(json& js, Cookie::ECS::EntityHandler& entity)
