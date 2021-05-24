@@ -4,6 +4,18 @@
 using namespace Cookie::Gameplay;
 
 
+void ArmyHandler::Debug()
+{
+	for (int i = 0; i < livingArmies; ++i)
+	{
+		std::cout << " name : "            << armies[i].name             << "\n"
+			      << " income primary : "  << armies[i].income.primary   << "\n"
+			      << " nb of workers : "   << armies[i].workers.size()   << "\n"
+			      << " nb of units : "     << armies[i].units.size()     << "\n"
+			      << " nb of buildings : " << armies[i].buildings.size() << "\n\n";
+	}
+}
+
 void ArmyHandler::UpdateArmyCoordinators()
 {
 	for (int i = 0; i < armiesCoordinator.size(); ++i)
@@ -12,7 +24,6 @@ void ArmyHandler::UpdateArmyCoordinators()
 		armiesCoordinator[i].ResourceAllocation();
 	}
 }
-
 
 Army* ArmyHandler::GetArmy(std::string name)
 {

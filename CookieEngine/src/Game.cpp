@@ -1,10 +1,14 @@
 #include "Physics/PhysicsHandle.hpp"
 #include "Resources/Scene.hpp"
 #include "Game.hpp"
+#include "ECS/ComponentGameplay.hpp"
 
 #include "UIcore.hpp"
 
 using namespace Cookie;
+using namespace Cookie::Core::Math;
+using namespace Cookie::ECS;
+using namespace rp3d;
 
 /*================== CONSTRUCTORS/DESTRUCTORS ==================*/
 
@@ -47,12 +51,171 @@ void Game::Update()
     renderer.ClearFrameBuffer(frameBuffer);
 
     scene->camera->Update();
-    coordinator.ApplyScriptUpdate();
 
     renderer.Draw(scene->camera.get(), *this,frameBuffer);
     renderer.SetBackBuffer();
 }
 
+void Game::CalculateMousePosInWorld(Render::FreeFlyCam& cam)
+{
+    Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
+    rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, { fwdRay.x,fwdRay.y,fwdRay.z });
+    RaycastInfo raycastInfo;
+
+    //if raycast hit
+    if (scene->map.physic.physBody->raycast(ray, raycastInfo))
+        playerData.mousePosInWorld = {raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z};
+
+}
+void Game::HandleGameplayInputs(Render::DebugRenderer& dbg)
+{
+    if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
+        coordinator.AddEntity(resources.prefabs["04Base"].get(), "good");
+    if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B])
+        coordinator.AddEntity(resources.prefabs["04Base"].get(), "bad");
+    if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
+        coordinator.armyHandler->AddArmyCoordinator("bad");
+
+    if (playerData.buildingToBuild)
+    {
+        CheckIfBuildingValid();
+
+        if (!ImGui::GetIO().MouseDownDuration[0] && playerData.isBuildingValid)
+            InputValidateBuilding();
+        if (!ImGui::GetIO().MouseDownDuration[1])
+            InputCancelBuilding();
+    }
+    else
+    {
+        if (ImGui::GetIO().MouseClicked[0])
+            InputStartSelectionQuad();
+
+        if (ImGui::GetIO().MouseReleased[0])
+            InputEndSelectionQuad();
+
+        if (!ImGui::GetIO().MouseDownDuration[1])
+            InputMoveSelected();
+
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_C])
+            InputStartBuilding(0);
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V])
+            InputAddUnit(0);
+
+
+        if (playerData.makingASelectionQuad)
+            DisplaySelectionQuad(dbg);
+    }
+}
+
+void Game::CheckIfBuildingValid()
+{
+    playerData.buildingPos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, playerData.buildingToBuild->tileSize);
+        
+    Vec3 posTopLeft =  {playerData.buildingPos.x - playerData.buildingToBuild->tileSize.x * scene->map.tilesSize.x / 2,
+                        playerData.buildingPos.y,
+                        playerData.buildingPos.z - playerData.buildingToBuild->tileSize.y * scene->map.tilesSize.y / 2};
+
+    playerData.isBuildingValid = scene->map.isBuildingValid(scene->map.GetTileIndex(posTopLeft), playerData.buildingToBuild->tileSize);
+}
+void Game::InputCancelBuilding()
+{
+    playerData.buildingToBuild = nullptr;
+    playerData.workerWhoBuild = nullptr;
+    playerData.indexOfBuildingInWorker = 0;
+    playerData.isBuildingValid = false;
+}
+void Game::InputValidateBuilding()
+{
+    playerData.workerWhoBuild->StartBuilding(playerData.buildingPos, playerData.indexOfBuildingInWorker);
+
+    playerData.buildingToBuild = nullptr;
+    playerData.workerWhoBuild = nullptr;
+    playerData.indexOfBuildingInWorker = 0;
+}
+void Game::InputStartSelectionQuad()
+{
+    playerData.makingASelectionQuad = true;
+    playerData.selectionQuadStart = playerData.mousePosInWorld;
+}
+void Game::InputEndSelectionQuad()
+{
+    playerData.makingASelectionQuad = false;
+    coordinator.SelectEntities(playerData.selectionQuadStart, playerData.mousePosInWorld);
+}
+void Game::InputMoveSelected()
+{
+    std::vector<ECS::Entity*> movableEntity;
+    for (int i = 0; i < coordinator.selectedEntities.size(); ++i)
+    {
+        float selectedEntityId = coordinator.selectedEntities[i]->id;
+        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(selectedEntityId);
+
+        if (gameplay.signatureGameplay & CGP_SIGNATURE::MOVE)
+            movableEntity.push_back(coordinator.selectedEntities[i]);
+    }
+
+    Vec3 centroid{ 0, 0, 0 };
+    for (int i = 0; i < movableEntity.size(); ++i)
+    {
+        //divide by movableEntity.size in for loop, so we're sure we can't divide by 0 if we don't use a if
+        centroid += coordinator.componentHandler->GetComponentTransform(movableEntity[i]->id).pos / movableEntity.size();
+    }
+
+    for (int i = 0; i < movableEntity.size(); ++i)
+    {
+        float movableEntityId = movableEntity[i]->id;
+        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(movableEntityId);
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(movableEntityId);
+
+        Vec3 offsetFromCentroid = trs.pos - centroid;
+        Vec3 finalPos = playerData.mousePosInWorld + offsetFromCentroid;
+        if (scene->map.ApplyPathfinding(scene->map.GetTile(trs.pos), scene->map.tiles[scene->map.GetTileIndex(finalPos)]))
+            gameplay.componentMove.SetPath(scene->map.tiles[scene->map.GetTileIndex(finalPos)], trs);
+        else
+            std::cout << "No Path Find\n";
+    }
+
+}
+void Game::InputStartBuilding(int index)
+{
+    for (int i = 0; i < coordinator.selectedEntities.size(); ++i)
+    {
+        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(coordinator.selectedEntities[i]->id);
+
+        if (gameplay.signatureGameplay & CGP_SIGNATURE::WORKER && !gameplay.componentWorker.BuildingInConstruction)
+        {
+            playerData.buildingToBuild = &gameplay.componentWorker.possibleBuildings[0]->gameplay.componentProducer;
+            playerData.workerWhoBuild = &gameplay.componentWorker;
+            playerData.indexOfBuildingInWorker = index;
+            break;
+        }
+    }
+}
+void Game::InputAddUnit(int index)
+{
+    for (int i = 0; i < coordinator.selectedEntities.size(); ++i)
+    {
+        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(coordinator.selectedEntities[i]->id);
+
+        if (gameplay.signatureGameplay & CGP_SIGNATURE::PRODUCER)
+            gameplay.componentProducer.AddUnitToQueue(index);
+    }
+}
+void Game::DisplaySelectionQuad(Render::DebugRenderer& dbg)
+{
+    dbg.AddQuad(playerData.selectionQuadStart, playerData.mousePosInWorld, 0x00FF00);
+}
+void Game::ECSCalls(Render::DebugRenderer& dbg)
+{
+    coordinator.armyHandler->UpdateArmyCoordinators();
+    resources.UpdateScriptsContent();
+    coordinator.ApplyScriptUpdate();
+    coordinator.UpdateCGPProducer();
+    coordinator.UpdateCGPWorker(scene->map);
+    coordinator.UpdateCGPMove(scene->map, dbg);
+    coordinator.UpdateCGPAttack();
+    coordinator.ApplyRemoveUnnecessaryEntities();
+}
 
 /*================== SETTER/GETTER ==================*/
 

@@ -115,6 +115,19 @@ Vec2 Map::GetCenterOfBuilding(Vec2& mousePos, Vec2& buildingNbOfTiles)
 			 std::clamp(tilePos.y, -trs.scale.z / 2 + buildingNbOfTiles.y * tilesSize.y / 2, trs.scale.z / 2 - buildingNbOfTiles.y * tilesSize.y / 2)} };
 
 }
+Vec3 Map::GetCenterOfBuilding(Vec3& mousePos, Vec2& buildingNbOfTiles)
+{
+	Vec2 tilePos = tiles[GetTileIndex(mousePos)].pos;
+
+	//if buildingNbOfTiles has peer values add half tileSize for each
+	tilePos += { {(int)(buildingNbOfTiles.x + 1) % 2 * tilesSize.x / 2, (int)(buildingNbOfTiles.y + 1) % 2 * tilesSize.y / 2}};
+
+	return  {std::clamp(tilePos.x, -trs.scale.x / 2 + buildingNbOfTiles.x * tilesSize.x / 2, trs.scale.x / 2 - buildingNbOfTiles.x * tilesSize.x / 2),
+			 mousePos.y,
+			 std::clamp(tilePos.y, -trs.scale.z / 2 + buildingNbOfTiles.y * tilesSize.y / 2, trs.scale.z / 2 - buildingNbOfTiles.y * tilesSize.y / 2)};
+
+}
+
 bool Map::isBuildingValid(int indexTopLeft, Vec2& tileSize)
 {
 

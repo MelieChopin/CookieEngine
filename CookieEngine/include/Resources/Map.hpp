@@ -66,6 +66,8 @@ namespace Cookie
 			Tile& GetTile(Core::Math::Vec3& pos);
 
 			Core::Math::Vec2 GetCenterOfBuilding(Core::Math::Vec2& mousePos, Core::Math::Vec2& buildingNbOfTiles);
+			Core::Math::Vec3 GetCenterOfBuilding(Core::Math::Vec3& mousePos, Core::Math::Vec2& buildingNbOfTiles);
+
 			bool isBuildingValid(int indexTopLeft, Core::Math::Vec2& tileSize);
 			void GiveTilesToBuilding(int indexTopLeft, Gameplay::CGPProducer& building);
 

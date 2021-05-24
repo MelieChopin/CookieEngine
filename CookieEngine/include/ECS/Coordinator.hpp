@@ -47,10 +47,7 @@ namespace Cookie
 			bool CheckSignature(const int entitySignature, const int signature);
 			
 			//Selection
-			void SelectEntities(Core::Math::Vec2& selectionQuadStart, Core::Math::Vec2& selectionQuadEnd);
-			Entity* GetSelectedEntitiesCommander();
-			void SetSelectedEntitiesCommander(Entity* commander);
-
+			void SelectEntities(Core::Math::Vec3& selectionQuadStart, Core::Math::Vec3& selectionQuadEnd);
 
 
 			//Primary Component
@@ -75,7 +72,6 @@ namespace Cookie
 			void ApplyGameplayUpdatePushedCooldown(Resources::Map& map);
 			void ApplyGameplayUpdateReachGoalCooldown();
 			void ApplyGameplayMoveTowardWaypoint();
-			void ApplyGameplayMoveWithCommander();
 			void ApplyGameplayPosPrediction();
 			void ApplyGameplayResolveCollision();
 			void ApplyGameplayDrawPath(Render::DebugRenderer& debug);

@@ -14,7 +14,7 @@ void ArmyCoordinator::Analysis()
 	goals.push_back((army->workers.size() + nbOfWorkerInProduction < 6) ? E_GOALS::E_DEVELOP_BASE : E_GOALS::E_DEVELOP_ARMY);
 
 	//Military
-	goals.push_back((army->units.size() + nbOfUnitInProduction < 5) ? E_GOALS::E_DEFENSE : E_GOALS::E_ATTACK);
+	goals.push_back((army->units.size() < 5) ? E_GOALS::E_DEFENSE : E_GOALS::E_ATTACK);
 
 }
 

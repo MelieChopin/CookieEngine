@@ -37,7 +37,7 @@ namespace Cookie
 			ArmyHandler() {}
 			~ArmyHandler() {}
 
-
+			void Debug();
 			void UpdateArmyCoordinators();
 
 			Army*			 GetArmy(std::string name);
