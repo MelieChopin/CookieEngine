@@ -31,7 +31,7 @@ ResourcesManager::~ResourcesManager()
 }
 
 
-void ResourcesManager::SearchForAssets(const fs::path& path, std::vector<fs::path>& gltfFiles)
+void ResourcesManager::SearchForAssets(const fs::path& path, std::vector<std::string>& assetsFiles)
 {
 	if (fs::exists(path) && fs::is_directory(path))
 	{
@@ -40,29 +40,27 @@ void ResourcesManager::SearchForAssets(const fs::path& path, std::vector<fs::pat
 			const fs::path& filename = entry.path().c_str();
 			if (fs::is_directory(entry.status()))
 			{
-				SearchForAssets(filename, gltfFiles);
+				SearchForAssets(filename, assetsFiles);
 			}
 		}
 
 		for (const fs::directory_entry& entry : fs::directory_iterator(path))
 		{
-			const fs::path& filepath = entry.path();
+			const fs::path& filepath = entry.path().c_str();
 			if (fs::is_regular_file(entry.status()))
 			{
-				if		(filepath.string().find(".gltf") != std::string::npos)
-					gltfFiles.push_back(filepath);
-
+				if (filepath.string().find(".gltf") != std::string::npos)
+					assetsFiles.push_back(filepath.string());
 				else if (filepath.string().find(".png") != std::string::npos)
-					gltfFiles.push_back(filepath);
-				
+					assetsFiles.push_back(filepath.string());
 				else if (filepath.string().find(".dds") != std::string::npos)
-					gltfFiles.push_back(filepath);
-				
+					assetsFiles.push_back(filepath.string());
 				else if (filepath.string().find(".jpg") != std::string::npos)
-					gltfFiles.push_back(filepath);
-				
+					assetsFiles.push_back(filepath.string());
 				else if (filepath.string().find(".ico") != std::string::npos)
-					gltfFiles.push_back(filepath);
+					assetsFiles.push_back(filepath.string());
+				else if (filepath.string().find(".tga") != std::string::npos)
+					assetsFiles.push_back(filepath.string());
 			}
 
 		}
@@ -85,21 +83,22 @@ void ResourcesManager::InitPrimitives()
 
 void ResourcesManager::Load(Render::Renderer& _renderer)
 {
-	std::vector<fs::path> assetsFiles;
+	std::vector<std::string> assetsFiles;
 	SearchForAssets(std::string("Assets/"), assetsFiles);
 
 	Loader loader;
 
 	for (unsigned int i = 0; i < assetsFiles.size(); i++)
 	{
-		std::string&& iFile = assetsFiles.at(i).string();
+		std::string& iFile = assetsFiles.at(i);
 		std::replace(iFile.begin(),iFile.end(),'\\','/');
 		//printf("%s\n", gltfFiles.at(i).c_str());
 	}
 	
+	/* load models */
 	for (unsigned int i = 0; i < assetsFiles.size(); i++)
 	{
-		std::string&& iFile = assetsFiles.at(i).string();
+		std::string& iFile = assetsFiles.at(i);
 		//printf("%s\n", iFile.c_str());
 		if (iFile.find(".gltf") != std::string::npos)
 		{
@@ -112,28 +111,25 @@ void ResourcesManager::Load(Render::Renderer& _renderer)
 
 	for (unsigned int i = 0; i < assetsFiles.size(); i++)
 	{
-		fs::path& aTexturePath = assetsFiles.at(i);
-		std::string&& iFile = assetsFiles.at(i).string();
-
-		if		((aTexturePath.extension().compare(".ico") == 0) && (icons.find(iFile) == icons.end()))
+		std::string& iFile = assetsFiles.at(i);
+		if (textures2D.find(iFile) == textures2D.end() && icons.find(iFile) == icons.end() && skyboxes.find(iFile) == skyboxes.end())
 		{
-			icons[iFile] = std::make_unique<Texture>(iFile);
-		}
+			std::unique_ptr<Texture> iTexture = std::make_unique<Texture>(iFile);
 
-		else
-		{
-			std::unique_ptr<Texture> aTexture = std::make_unique<Texture>(iFile);
-
-			if (aTexture->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
+			if (iFile.find(".ico") != std::string::npos)
 			{
-				textures2D[iFile]	= std::move(aTexture);
-				std::cout << iFile << "\n";
+				icons[iFile] = std::move(iTexture);
 			}
-			else if (aTexture->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURECUBE)
+			else if (iTexture->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
 			{
-				skyboxes[iFile]			= std::move(aTexture);
+				textures2D[iFile] = std::move(iTexture);
+			}
+			else if (iTexture->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURECUBE)
+			{
+				skyboxes[iFile] = std::move(iTexture);
 			}
 		}
+		printf("%s\n", iFile.c_str());
 	}
 }
 
