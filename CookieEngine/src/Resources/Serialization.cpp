@@ -607,9 +607,26 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 		 if (js.contains("Model"))
 		 {
 			 if (js["Model"]["Mesh"].is_string())
-				newPrefab.model.mesh = resourcesManager.meshes[js["Model"]["Mesh"]].get();
+			 {
+				 if (resourcesManager.meshes.find(js["Model"]["Mesh"]) != resourcesManager.meshes.end())
+					newPrefab.model.mesh = resourcesManager.meshes[js["Model"]["Mesh"]].get();
+				 else
+				 {
+					 std::string name = js["Model"]["Mesh"];
+					 CDebug.Error(std::string("Mesh " + name + " not found!").c_str());
+				 }
+				 
+			 }
 			 if (js["Model"]["Texture"].is_string())
-				 newPrefab.model.albedo = resourcesManager.textures2D[js["Model"]["Texture"]].get();
+			 {
+				 if (resourcesManager.textures2D.find(js["Model"]["Texture"]) != resourcesManager.textures2D.end())
+					newPrefab.model.albedo = resourcesManager.textures2D[js["Model"]["Texture"]].get();
+				 else
+				 {
+					 std::string name = js["Model"]["Texture"];
+					 CDebug.Error(std::string("Albedo " + name + " not found!").c_str());
+				 }
+			 }
 		 }
 
 		 if (js.contains("Transform"))

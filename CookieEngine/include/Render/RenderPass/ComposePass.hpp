@@ -26,7 +26,7 @@ namespace Cookie
 				ComposePass();
 				~ComposePass();
 
-				void Set(FrameBuffer& diffuse, FrameBuffer& specular);
+				void Set(FrameBuffer& diffuse, FrameBuffer& specular, FrameBuffer& albedo);
 				void Draw();
 		};
 	}

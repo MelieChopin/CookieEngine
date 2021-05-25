@@ -6,9 +6,10 @@
 #include "Resources/Prefab.hpp"
 
 using namespace Cookie::Gameplay;
+using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
 
-void CGPProducer::UpdateCountdown(Coordinator& coordinator, int selfId)
+void CGPProducer::UpdateCountdown(Resources::Map& map, Coordinator& coordinator, int selfId)
 {
 
 	if (queueOfUnits.size() == 0)
@@ -21,11 +22,30 @@ void CGPProducer::UpdateCountdown(Coordinator& coordinator, int selfId)
 	{
 		Entity& newEntity = coordinator.AddEntity(queueOfUnits[0], coordinator.componentHandler->GetComponentGameplay(selfId).teamName);
 
-		coordinator.componentHandler->GetComponentTransform(newEntity.id).pos = coordinator.componentHandler->GetComponentTransform(selfId).pos;
+		ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(selfId);
+		ComponentTransform& newEntityTrs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
+		newEntityTrs.pos = trs.pos;
 
-		if (newEntity.signature & C_SIGNATURE::GAMEPLAY && coordinator.componentHandler->GetComponentGameplay(newEntity.id).signatureGameplay & CGP_SIGNATURE::WORKER)
-			coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentWorker.posBase = &coordinator.componentHandler->GetComponentTransform(selfId).pos;
+		//Need to set additionnal behavior if newEntity has a ComponentGameplay
+		if (newEntity.signature & C_SIGNATURE::GAMEPLAY)
+		{
+			ComponentGameplay& newEntityGameplay = coordinator.componentHandler->GetComponentGameplay(newEntity.id);
 
+			if (newEntityGameplay.signatureGameplay & CGP_SIGNATURE::MOVE)
+			{
+				for (int i = 0; i < occupiedTiles.size(); ++i)
+					occupiedTiles[i]->isObstacle = false;
+
+				if (map.ApplyPathfinding(map.GetTile(newEntityTrs.pos), map.GetTile(newUnitDestination)) )
+					newEntityGameplay.componentMove.SetPath(map.GetTile(newUnitDestination), newEntityTrs);
+
+				for (int i = 0; i < occupiedTiles.size(); ++i)
+					occupiedTiles[i]->isObstacle = true;
+			}
+
+			if (newEntityGameplay.signatureGameplay & CGP_SIGNATURE::WORKER)
+				newEntityGameplay.componentWorker.posBase = &trs.pos;
+		}
 
 		queueOfUnits.erase(queueOfUnits.begin());
 

@@ -48,13 +48,15 @@ void ComposePass::InitShader()
 
     Texture2D	diffuseTex  : register(t0);    
     Texture2D	specularTex : register(t1);  
+    Texture2D	albedoTex   : register(t2);  
 
     SamplerState ClampSampler : register(s0);
 
     float4 main(float4 position : SV_POSITION, float2 uv : UV) : SV_TARGET0
     {
-        float3  finalColor    = pow(diffuseTex.Sample(ClampSampler,uv).xyz + specularTex.Sample(ClampSampler,uv).xyz,2.2);
-
+        float3  finalColor    = diffuseTex.Sample(ClampSampler,uv).xyz + specularTex.Sample(ClampSampler,uv).xyz;
+        finalColor *= pow(albedoTex.Sample(ClampSampler,uv).rgb,2.2);
+        
         float3 denominator = (finalColor + 1.0);
 
         float3 mapped = finalColor/denominator;
@@ -144,7 +146,7 @@ void ComposePass::InitState()
 /*======================= REALTIME METHODS =======================*/
 
 
-void ComposePass::Set(FrameBuffer& diffuse, FrameBuffer& specular)
+void ComposePass::Set(FrameBuffer& diffuse, FrameBuffer& specular, FrameBuffer& albedo)
 {
     // Now set the rasterizer state.
     Render::RendererRemote::context->RSSetState(rasterizerState);
@@ -161,9 +163,9 @@ void ComposePass::Set(FrameBuffer& diffuse, FrameBuffer& specular)
     Render::RendererRemote::context->IASetInputLayout(nullptr);
     Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
 
-    ID3D11ShaderResourceView* fbos[2] = {diffuse.shaderResource, specular.shaderResource };
+    ID3D11ShaderResourceView* fbos[3] = {diffuse.shaderResource, specular.shaderResource, albedo.shaderResource };
 
-    Render::RendererRemote::context->PSSetShaderResources(0, 2, fbos);
+    Render::RendererRemote::context->PSSetShaderResources(0, 3, fbos);
 }
 
 void ComposePass::Draw()

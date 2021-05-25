@@ -37,9 +37,6 @@ void CGPMove::SetPath(Resources::Tile& lastWaypoint, ECS::ComponentTransform& tr
 {
 	waypoints.clear();
 	state = CGPMOVE_STATE::E_MOVING;
-	commanderPos = nullptr;
-	commanderCGPMove = nullptr;
-	lastTile = &lastWaypoint;
 	Resources::Tile* currentTile = &lastWaypoint;
 
 	//Whatever happen always had the lastWaypoint
@@ -66,14 +63,6 @@ void CGPMove::SetPath(Resources::Tile& lastWaypoint, ECS::ComponentTransform& tr
 	}
 
 }
-void CGPMove::SetCommander(CGPMove& _commanderCGPMove, ECS::ComponentTransform& commanderTrs, ECS::ComponentTransform& selfTrs)
-{
-	waypoints.clear();
-	state = CGPMOVE_STATE::E_MOVING;
-	commanderPos = &(commanderTrs.pos);
-	commanderCGPMove = &(_commanderCGPMove);
-	offsetFromCommander = selfTrs.pos - commanderTrs.pos;
-}
 
 void CGPMove::MoveTowardWaypoint(ECS::ComponentTransform& trs)
 {
@@ -93,26 +82,6 @@ void CGPMove::MoveTowardWaypoint(ECS::ComponentTransform& trs)
 	Core::Math::Vec3 direction = (waypoints[0] - trs.pos).Normalize();
 	trs.pos += direction * (moveSpeed * Core::DeltaTime());
 	trs.trsHasChanged = true;
-}
-void CGPMove::MoveWithCommander(ECS::ComponentTransform& trs)
-{
-	if (commanderPos == nullptr || state == CGPMOVE_STATE::E_WAITING)
-		return;
-
-
-	Core::Math::Vec3 previousPos = trs.pos;
-	trs.pos = *commanderPos + offsetFromCommander;
-	trs.trsHasChanged = true;
-
-	//check if commander is Static
-	if (commanderCGPMove->state != CGPMOVE_STATE::E_WAITING && previousPos == trs.pos)
-	{
-		commanderPos = nullptr;
-		commanderCGPMove = nullptr;
-		state = CGPMOVE_STATE::E_STATIC;
-	}
-
-
 }
 
 void CGPMove::PositionPrediction()
@@ -146,25 +115,25 @@ void CGPMove::ResolveColision(ECS::ComponentTransform& trsSelf, CGPMove& other, 
 		float overlapLength = (radius + other.radius) - (trsSelf.pos - trsOther.pos).Length();
 
 		Core::Math::Vec3 directionSelfToOther = (trsOther.pos - trsSelf.pos).Normalize();
-		Core::Math::Vec3 directionSelf = (commanderCGPMove ? commanderCGPMove->waypoints[0] - *commanderPos : waypoints[0] - trsSelf.pos).Normalize();
-		Core::Math::Vec3 directionOther = (other.commanderCGPMove ? other.commanderCGPMove->waypoints[0] - *other.commanderPos : other.waypoints[0] - trsOther.pos).Normalize();
+		Core::Math::Vec3 directionSelf = (waypoints[0] - trsSelf.pos).Normalize();
+		Core::Math::Vec3 directionOther = (other.waypoints[0] - trsOther.pos).Normalize();
+
 
 		if (directionSelfToOther.Dot(directionSelf) > 0.9) // if they face each other
 		{
+			std::cout << "Colision face each other\n";
 			trsSelf.pos += Core::Math::Vec3{ directionSelf.z, directionSelf.y, -directionSelf.x } *(overlapLength / 2);
 			trsOther.pos += Core::Math::Vec3{ directionOther.z, directionOther.y, -directionOther.x } *(overlapLength / 2);
 
 		}
 		else // they colidde side by side
 		{
-			trsSelf.pos += -directionSelfToOther * (overlapLength / 2);
-			trsOther.pos += directionSelfToOther * (overlapLength / 2);
+			std::cout << "Colision Side by Side\n";
+			//fix strange behavior for now
+			//trsSelf.pos += -directionSelfToOther * (overlapLength / 2);
+			//trsOther.pos += directionSelfToOther * (overlapLength / 2);
+			trsOther.pos += directionSelfToOther * (overlapLength);
 		}
-
-		if (commanderCGPMove)
-			offsetFromCommander = trsSelf.pos - *commanderPos;
-		if (other.commanderCGPMove)
-			other.offsetFromCommander = trsOther.pos - *other.commanderPos;
 
 		trsSelf.trsHasChanged = true;
 		trsOther.trsHasChanged = true;
@@ -198,8 +167,5 @@ void CGPMove::DrawPath(Render::DebugRenderer& debug, ECS::ComponentTransform& tr
 		debug.AddDebugElement(Core::Primitives::CreateLine({ trs.pos.x, 1, trs.pos.z }, { waypoints[0].x, 1, waypoints[0].z }, 0x00FFFF, 0x00FFFF));
 
 	for (int i = 1; i < waypoints.size(); ++i)
-	{
-		//use 1 for Y so the debug will not be mix up with the map
-		debug.AddDebugElement(Core::Primitives::CreateLine({ waypoints[i - 1].x, 1, waypoints[i - 1].z }, { waypoints[i].x, 1, waypoints[i].z }, 0x00FFFF, 0xFF0000));
-	}
+		debug.AddDebugElement(Core::Primitives::CreateLine(waypoints[i - 1], waypoints[i], 0x00FFFF, 0x00FFFF));
 }

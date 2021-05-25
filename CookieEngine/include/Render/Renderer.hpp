@@ -4,7 +4,7 @@
 
 #include "Core/Window.hpp"
 #include "Light.hpp"
-#include "Render/FBODrawer.hpp"
+#include "Drawers/FBODrawer.hpp"
 #include "Render/RendererRemote.hpp"
 #include "Render/DrawDataHandler.hpp"
 #include "Render/RenderPass/GeometryPass.hpp"
@@ -37,6 +37,7 @@ namespace Cookie
 				Core::Window	window;
 				RendererRemote	remote;
 				D3D11_VIEWPORT	viewport;
+				D3D11_PRIMITIVE_TOPOLOGY topo{ D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST };
 				DrawDataHandler drawData;
 
 				GeometryPass	gPass;
