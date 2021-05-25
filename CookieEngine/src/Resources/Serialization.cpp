@@ -577,12 +577,12 @@ std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const c
 		 js["Map"]["trs"]["rot"].get_to(scene->map.trs.rot.e);
 		 //js["Map"]["trs"]["scale"].get_to(scene->map.trs.scale.e);
 
-		 if (js["Map"]["model"].contains("albedo"))
-			scene->map.model.albedo = resources.textures2D[js["Map"]["model"]["albedo"].get<std::string>()].get();
-		 if (js["Map"]["model"].contains("normal"))
-			 scene->map.model.normal = resources.textures2D[js["Map"]["model"]["normal"].get<std::string>()].get();
-		 if (js["Map"]["model"].contains("metallic"))
-			 scene->map.model.metallicRoughness = resources.textures2D[js["Map"]["model"]["metallic"].get<std::string>()].get();
+		 if (js["Map"]["model"]["texture"].contains("albedo"))
+			 scene->map.model.albedo = resources.textures2D[js["Map"]["model"]["texture"]["albedo"].get<std::string>()].get();
+		 if (js["Map"]["model"]["texture"].contains("normal"))
+			 scene->map.model.normal = resources.textures2D[js["Map"]["model"]["texture"]["normal"].get<std::string>()].get();
+		 if (js["Map"]["model"]["texture"].contains("metallic"))
+			 scene->map.model.metallicRoughness = resources.textures2D[js["Map"]["model"]["texture"]["metallic"].get<std::string>()].get();
 
 		 LoadPhysic(js["Map"]["physic"], scene->map.physic);
 		 scene->map.InitTiles();

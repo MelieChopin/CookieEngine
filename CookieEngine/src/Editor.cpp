@@ -132,8 +132,6 @@ void Editor::Loop()
     first.data[0].SetIsBIllboard(true);
     first.data[0].mesh = game.resources.meshes["Quad"].get();
     first.data[0].texture = game.resources.textures2D["Assets/Particles/Smoke.png"].get();
-    if (first.data[0].texture != nullptr)
-        std::cout << "fefse\n";
     first.particlesEmiter[0].generators.push_back(&velRand);
     first.particlesEmiter[0].generators.push_back(&timeRand);
     first.particlesEmiter[0].generators.push_back(&color);
@@ -224,8 +222,6 @@ void Editor::Loop()
     second.data[0].SetIsBIllboard(true);
     second.data[0].mesh = game.resources.meshes["Quad"].get();
     second.data[0].texture = game.resources.textures2D["Assets/Particles/Light.png"].get();
-    if (second.data[0].texture != nullptr)
-        std::cout << "fefse\n";
     Cookie::Resources::Particles::VelocityRandGenerate      velRand2(Vec3(-5, 5, -5), Vec3(5, 15, 5));
     Cookie::Resources::Particles::ScaleRandGenerate      scaleRand(Vec3(0.5, 0.5, 0.5), Vec3(1, 1, 1));
     second.particlesEmiter[0].generators.push_back(&box);
