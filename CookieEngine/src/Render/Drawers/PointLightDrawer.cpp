@@ -174,6 +174,7 @@ void PointLightDrawer::InitShader()
 
     Render::RendererRemote::device->CreateBuffer(&instanceBufferDesc, 0, &IBuffer);
 
+    blob->Release();
 }
 
 /*======================= REALTIME METHODS =======================*/

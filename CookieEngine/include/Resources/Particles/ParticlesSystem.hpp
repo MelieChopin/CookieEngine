@@ -30,12 +30,12 @@ namespace Cookie
 
 				ParticlesSystem(const ParticlesSystem& other) : data(other.data), particlesEmiter(other.particlesEmiter)
 				{
-					shader.InitShader();
+					//shader.InitShader();
 				}
 
 				ParticlesSystem(int size, int sizeFrame)
 				{
-					shader.InitShader();
+					//shader.InitShader();
 					data.push_back(ParticlesData());
 					particlesEmiter.push_back(ParticlesEmitter());
 					data[0].generate(size, sizeFrame);

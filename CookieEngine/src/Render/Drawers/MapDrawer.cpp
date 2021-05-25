@@ -175,6 +175,8 @@ void MapDrawer::InitShader()
     PS_CONSTANT_BUFFER pbuffer = {};
 
     Render::CreateBuffer(&pbuffer, sizeof(PS_CONSTANT_BUFFER), &PCBuffer);
+
+    blob->Release();
 }
 
 /*============================= REALTIME METHODS =============================*/

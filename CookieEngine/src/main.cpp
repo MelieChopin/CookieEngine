@@ -13,14 +13,23 @@ int main()
 	{
 		Core::UIcore::PreInitContext();
 		Editor editor;
-		
+
 		editor.Loop();
+
+		Core::UIcore::Terminate();
 
 	}
 	{
-		ID3D11Debug* debug;
-		Render::RendererRemote::device->QueryInterface(IID_PPV_ARGS(&debug));
-		debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+		//if (Render::RendererRemote::device)
+		//{
+		//	//ID3D11Debug* debug = nullptr;
+		//	//Render::RendererRemote::device->QueryInterface(IID_PPV_ARGS(&debug));
+		//	//if (debug)
+		//	//{
+		//	//	debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+		//	//	debug->Release();
+		//	//}
+		//}
 	}
 
 	return 0;

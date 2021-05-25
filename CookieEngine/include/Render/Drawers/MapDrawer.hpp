@@ -29,7 +29,7 @@ namespace Cookie
 				ID3D11Buffer*		PCBuffer{ nullptr };
 
 			public:
-				struct MapInfo
+				struct MapDrawInfo
 				{
 					std::unique_ptr<Resources::Mesh>	mapMesh;
 					Resources::Texture*					albedoTex = nullptr;
@@ -43,7 +43,7 @@ namespace Cookie
 					Core::Math::Vec2					tileLimits{ {0.02f,0.98f} };
 				};
 
-				MapInfo mapInfo;
+				MapDrawInfo mapInfo;
 
 			private:
 				void InitShader();

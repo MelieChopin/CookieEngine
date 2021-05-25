@@ -1,36 +1,39 @@
 #ifndef __GAMEPLAY_PASS_HPP__
 #define __GAMEPLAY_PASS_HPP__
 
+#include "Render/Drawers/PlayerDrawer.hpp"
 
-struct ID3D11VertexShader;
-struct ID3D11PixelShader;
-struct ID3D11Buffer;
+struct ID3D11BlendState;
+struct ID3D11DepthStencilState;
+struct ID3D11RasterizerState;
 struct ID3D11SamplerState;
 
 namespace Cookie
 {
 	namespace Render
 	{
-		struct DirLight;
-		class ShadowBuffer;
+		class DrawDataHandler;
 
 		class GameplayPass
 		{
-		private:
-			ID3D11VertexShader* VShader{ nullptr };
-			ID3D11PixelShader* PShader{ nullptr };
+			private:
+				ID3D11RasterizerState*		rasterizerState		{ nullptr };
+				ID3D11DepthStencilState*	depthStencilState	{ nullptr };
+				ID3D11BlendState*			blendState			{ nullptr };
+				ID3D11SamplerState*			PSampler			{ nullptr };
 
-			ID3D11Buffer* CBuffer{ nullptr };
-			ID3D11SamplerState* CSampler{ nullptr };
+			public:
+				PlayerDrawer				playerDrawer;
 
-		private:
-			void InitShader();
+			private:
+				void InitState();
 
-		public:
-			GameplayPass();
-			~GameplayPass();
+			public:
+				GameplayPass();
+				~GameplayPass();
 
-			void Set(const DirLight& dirLight, const ShadowBuffer& shadowMap, ID3D11Buffer** lightCBuffer);
+				void Set();
+				void Draw(const DrawDataHandler& drawData);
 		};
 	}
 }

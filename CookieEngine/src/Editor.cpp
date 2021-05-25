@@ -51,21 +51,21 @@ Editor::Editor()
 
     editorUI.AddItem(new UIwidget::SaveButton(game.scene, game.resources), 0);
     editorUI.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
-
+    
     editorUI.AddWItem(new UIwidget::TextureEditor(game.resources), 1);
     editorUI.AddWItem(new UIwidget::GameUIeditor(game.renderer.window, game.scene), 1);
     editorUI.AddWItem(new UIwidget::SoundOrchestrator(), 1);
-
+    
     editorUI.AddWItem(new UIwidget::GamePort(isPlaying, game), 2);
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
     editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
     editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.resources, game.renderer.lights), 2);
     editorUI.AddWItem(new UIwidget::Console(CDebug, game.renderer), 2);
     editorUI.AddWItem(new UIwidget::FileExplorer(game.renderer, game), 2);
-
+    
     editorUI.AddWItem(new UIwidget::DemoWindow, 3);
-
-
+    
+    
     UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.renderer, isPlaying);
     editorUI.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, editorFBO, &cam, game.coordinator, selectedEntity));
 
@@ -117,12 +117,12 @@ void Editor::Loop()
     /// Particles
     //First Particles 
     Cookie::Resources::Particles::ParticlesSystem first = Cookie::Resources::Particles::ParticlesSystem(40, 20);
-    first.shader.InitShader();
+    //first.shader.InitShader();
     first.trs.pos = Vec3(0, 10, 0);
     first.trs.rot = Vec3(0, 0, 0);
     first.trs.scale = Vec3(1, 1, 1);
     first.trs.ComputeTRS();
-
+    
     Cookie::Resources::Particles::BoxPositionGenerate       box(Vec3(0, 0, 0), Vec3(2, 2, 2));
     Cookie::Resources::Particles::CirclePositionGenerate    circle(Vec3(0, 0, 0), 2.0f);
     Cookie::Resources::Particles::VelocityConstGenerate     vel(Vec3(0, 10, 0));
@@ -140,7 +140,7 @@ void Editor::Loop()
     first.particlesEmiter[0].generators.push_back(&color);
     for (int i = 0; i < first.particlesEmiter[0].generators.size(); i++)
         first.particlesEmiter[0].generators[i]->generate(&first.data[0], 0, first.data[0].countAlive);
-
+    
     Cookie::Resources::Particles::UpdateVelocity    updateVel;
     Cookie::Resources::Particles::UpdateScale       updateScale;
     Cookie::Resources::Particles::EnabledGravity    enabledGravity;
@@ -173,7 +173,7 @@ void Editor::Loop()
     second.particlesEmiter[0].generators.push_back(&blue);
     for (int i = 0; i < second.particlesEmiter[0].generators.size(); i++)
         second.particlesEmiter[0].generators[i]->generate(&second.data[0], 0, second.data[0].countAlive);
-
+    
     second.particlesEmiter[0].updates.push_back(&enabledGravity);
     second.particlesEmiter[0].updates.push_back(&updateVel);
     second.particlesEmiter[0].updates.push_back(&updateTime);
@@ -279,7 +279,7 @@ void Editor::Loop()
         //Draw
         game.renderer.Draw(&cam, game,editorFBO);
         if (game.playerData.buildingToBuild)
-            dbgRenderer.AddQuad(game.playerData.buildingPos, game.playerData.buildingToBuild->tileSize.x * game.scene->map.tilesSize.x / 2, game.playerData.buildingToBuild->tileSize.y * game.scene->map.tilesSize.y / 2, (game.playerData.isBuildingValid) ? 0x00FF00 : 0xFF0000);
+          dbgRenderer.AddQuad(game.playerData.buildingPos, game.playerData.buildingToBuild->tileSize.x * game.scene->map.tilesSize.x / 2, game.playerData.buildingToBuild->tileSize.y * game.scene->map.tilesSize.y / 2, (game.playerData.isBuildingValid) ? 0x00FF00 : 0xFF0000);
 		for (int i = 0; i < game.particlesHandler.particlesSystems.size(); i++)
             game.particlesHandler.particlesSystems[i].Draw(cam, game.resources);
 

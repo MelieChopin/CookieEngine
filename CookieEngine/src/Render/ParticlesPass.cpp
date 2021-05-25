@@ -34,6 +34,12 @@ ParticlesPass::~ParticlesPass()
         ILayout->Release();
     if (InstanceBuffer)
         InstanceBuffer->Release();
+    if (blendState)
+        blendState->Release();
+    if (PSampler)
+        PSampler->Release();
+    if (rasterizerState)
+        rasterizerState->Release();
 }
 
 void ParticlesPass::InitShader()

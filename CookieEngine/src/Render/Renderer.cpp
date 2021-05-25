@@ -39,17 +39,6 @@ Renderer::~Renderer()
 {
     remote.context->ClearState();
 
-    ID3D11RenderTargetView* nullViews[] = { nullptr,nullptr,nullptr,nullptr };
-
-    remote.context->OMSetRenderTargets(4, nullViews, nullptr);
-
-    ID3D11SamplerState* null[] = { nullptr};
-
-    remote.context->PSSetSamplers(0, 1, null);
-
-    remote.context->VSSetShader(nullptr,0,0);
-    remote.context->PSSetShader(nullptr,0,0);
-
     if (swapchain)
         swapchain->Release();
     if (backbuffer)
@@ -73,7 +62,7 @@ RendererRemote Renderer::InitDevice(Core::Window& window)
     DXGI_SWAP_CHAIN_DESC scd = {};
 
     // fill the swap chain description struct
-    scd.BufferCount = 1;                                    // one back buffer
+    scd.BufferCount = 2;                                    // two back buffer
     scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;// use 32-bit color
     scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;      // how swap chain is to be used
     scd.OutputWindow = glfwGetWin32Window(window.window);   // the window to be used
@@ -82,7 +71,7 @@ RendererRemote Renderer::InitDevice(Core::Window& window)
     scd.SampleDesc.Count = 1;                               // how many multisamples
     scd.SampleDesc.Quality = 0;
     scd.Windowed = TRUE;                                    // windowed/full-screen mode
-    scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+    scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
     // create a device, device context and swap chain using the information in the scd struct
     HRESULT result = D3D11CreateDeviceAndSwapChain(
@@ -116,7 +105,6 @@ bool Renderer::CreateDrawBuffer(int width, int height)
 {
     // get the address of the back buffer
     ID3D11Texture2D* pBackBuffer = nullptr;
-    
 
     if (FAILED(swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer)))
         return false;
@@ -191,7 +179,6 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     lPass.Set(gPass.posFBO,gPass.normalFBO,gPass.albedoFBO);
     lPass.Draw(lights,sPass.shadowMap,drawData);
 
-    //remote.context->ClearState();
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
     sPass.Set();
 

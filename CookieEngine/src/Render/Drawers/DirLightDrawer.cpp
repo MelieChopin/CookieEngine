@@ -152,6 +152,8 @@ void DirLightDrawer::InitShader()
     samDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
     Render::CreateSampler(&samDesc, &CSampler);
+
+    blob->Release();
 }
 
 /*======================= REALTIME METHODS =======================*/
