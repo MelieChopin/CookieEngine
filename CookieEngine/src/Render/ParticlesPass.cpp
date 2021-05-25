@@ -280,7 +280,9 @@ void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mes
     Render::RendererRemote::context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
     Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
-    texture->Set(0);
+
+    if(texture)
+        texture->Set(0);
 
     VS_CONSTANT_BUFFER buffer = {};
     buffer.proj = cam.GetProj();

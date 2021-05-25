@@ -7,8 +7,8 @@ struct ID3D11VertexShader;
 struct ID3D11PixelShader;
 struct ID3D11Buffer;
 
-#define PLAYER_INIT_VALID_COLOR {0.0f,1.0f,0.0f}
-#define PLAYER_INIT_INVALID_COLOR {1.0f,0.0f,0.0f}
+#define PLAYER_INIT_VALID_COLOR {0.0f,1.0f,0.0f,0.5f}
+#define PLAYER_INIT_INVALID_COLOR {1.0f,0.0f,0.0,0.5f}
 
 namespace Cookie
 {
@@ -25,28 +25,32 @@ namespace Cookie
 
 	namespace Render
 	{
-
+		class DrawDataHandler;
 
 		class PlayerDrawer
 		{
 		private:
-			ID3D11VertexShader* QuadVShader		{ nullptr };
-			ID3D11VertexShader* BuildingVShader	{ nullptr };
+
+
+			ID3D11VertexShader* VShader			{ nullptr };
 			ID3D11PixelShader*	PShader			{ nullptr };
-			ID3D11Buffer*		VBuffer			{ nullptr };
-			ID3D11Buffer*		CBuffer			{ nullptr };
+			ID3D11Buffer*		VCBuffer		{ nullptr };
+			ID3D11Buffer*		PCBuffer		{ nullptr };
+
+			std::unique_ptr<Resources::Mesh> quadMesh { nullptr };
 
 		public:
 			struct PlayerDrawInfo
 			{
-				Core::Math::Vec3 validColor		{ PLAYER_INIT_VALID_COLOR };
-				Core::Math::Vec3 invalidColor	{ PLAYER_INIT_INVALID_COLOR };
+				Core::Math::Mat4 viewProj;
+
+				Core::Math::Vec4 validColor		PLAYER_INIT_VALID_COLOR ;
+				Core::Math::Vec4 invalidColor	PLAYER_INIT_INVALID_COLOR ;
 				bool isValid					= false;
 				
 				/* for the selection quad, vertex buffer will be changed each time */
 				bool isMakingQuad				= false;
-				Core::Math::Vec3 quadStart;
-				Core::Math::Vec3 quadEnd;
+				Core::Math::Mat4				quadTrs;
 
 				/* if player is making a building, buildingMesh will not be at nullptr
 				 * so it also acts as boolean */
@@ -55,6 +59,7 @@ namespace Cookie
 				Core::Math::Mat4	buildingTRS;
 			};
 
+			PlayerDrawInfo playerDrawInfo;
 
 		private:
 			void InitShader();
@@ -63,7 +68,7 @@ namespace Cookie
 			PlayerDrawer();
 			~PlayerDrawer();
 
-			void Set(const Gameplay::PlayerData& player);
+			void Set(const DrawDataHandler& drawData);
 			void Draw();
 		};
 	}

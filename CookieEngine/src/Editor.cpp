@@ -133,7 +133,7 @@ void Editor::Loop()
     Cookie::Resources::Particles::ColorRandGenerate         color(Vec3(1, 1, 1), Vec3(1, 1, 1));
     first.data[0].countAlive = 10;
     first.data[0].mesh = game.resources.meshes["Quad"].get();
-    first.data[0].texture = game.resources.textures["Assets/Light.png"].get();
+    first.data[0].texture = game.resources.textures["Assets/Particles/Light.png"].get();
     first.particlesEmiter[0].generators.push_back(&circle);
     first.particlesEmiter[0].generators.push_back(&velRand);
     first.particlesEmiter[0].generators.push_back(&timeRand);
@@ -163,7 +163,7 @@ void Editor::Loop()
     Cookie::Resources::Particles::ParticlesSystem second = Cookie::Resources::Particles::ParticlesSystem(40, 30);
     second.data[0].countAlive = 10;
     second.data[0].mesh = game.resources.meshes["Quad"].get();
-    second.data[0].texture = game.resources.textures["Assets/Etoile.png"].get();
+    second.data[0].texture = game.resources.textures["Assets/Particles/Etoile.png"].get();
     second.particlesEmiter[0].generators.push_back(&box);
     second.particlesEmiter[0].generators.push_back(&vel);
     second.particlesEmiter[0].generators.push_back(&mass);
@@ -185,7 +185,7 @@ void Editor::Loop()
 
     bool isActive = false;
     {
-        game.scene->map.model.mesh = game.resources.meshes["NormalCube"].get();
+        //game.scene->map.model.mesh = game.resources.meshes["NormalCube"].get();
         game.scene->map.model.albedo = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
     }
 

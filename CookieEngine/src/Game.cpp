@@ -105,9 +105,6 @@ void Game::HandleGameplayInputs(Render::DebugRenderer& dbg)
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V])
             InputAddUnit(0);
 
-        //should be move in another function
-        if (playerData.makingASelectionQuad)
-            DisplaySelectionQuad(dbg);
         DisplayNewEntityDestination(dbg);
     }
 }
@@ -217,10 +214,7 @@ void Game::InputAddUnit(int index)
             gameplay.componentProducer.AddUnitToQueue(index);
     }
 }
-void Game::DisplaySelectionQuad(Render::DebugRenderer& dbg)
-{
-    dbg.AddQuad(playerData.selectionQuadStart, playerData.mousePosInWorld, 0x00FF00);
-}
+
 void Game::DisplayNewEntityDestination(Render::DebugRenderer& dbg)
 {
     for (int i = 0; i < coordinator.selectedEntities.size(); ++i)

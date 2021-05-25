@@ -57,7 +57,6 @@ namespace Cookie
 			void InputSetNewEntityDestination();
 			void InputStartBuilding(int index);
 			void InputAddUnit(int index);
-			void DisplaySelectionQuad(Render::DebugRenderer& dbg);
 			void DisplayNewEntityDestination(Render::DebugRenderer& dbg);
 			void ECSCalls(Render::DebugRenderer& dbg);
 

@@ -41,7 +41,6 @@ namespace Cookie
             if (FAILED(D3DCompile(PSSource.c_str(), PSSource.length(), nullptr, nullptr, nullptr, "main", "ps_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, &PS, &PSErr)))
             {
                 printf("Failed To Compile Pixel Shader: %s\n", (const char*)(PSErr->GetBufferPointer()));
-                PS->Release();
                 PSErr->Release();
                 return false;
             }
@@ -50,7 +49,6 @@ namespace Cookie
             if (FAILED(result))
             {
                 printf("Failed Creating Pixel Shader: %s\n", std::system_category().message(result).c_str());
-                PS->Release();
                 PSErr->Release();
                 return false;
             }

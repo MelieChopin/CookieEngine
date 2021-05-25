@@ -1,7 +1,8 @@
 #include "D3D11Helper.hpp"
+#include "DrawDataHandler.hpp"
 #include "RenderPass/GameplayPass.hpp"
 
-using namespace Cookie::Math;
+using namespace Cookie::Core::Math;
 using namespace Cookie::Render;
 
 
@@ -9,19 +10,27 @@ using namespace Cookie::Render;
 
 GameplayPass::GameplayPass()
 {
-
+    InitState();
 }
 
 GameplayPass::~GameplayPass()
 {
     if (rasterizerState)
+    {
         rasterizerState->Release();
+    }
     if (depthStencilState)
+    {
         depthStencilState->Release();
-	if (blendState)
-		blendState->Release();
-	if (PSampler)
-		PSampler->Release();
+    }
+    if (blendState)
+    {
+        blendState->Release();
+    }
+    if (PSampler)
+    {
+        PSampler->Release();
+    }
 }
 
 /*=========================== INIT METHODS ===========================*/
@@ -34,7 +43,7 @@ void GameplayPass::InitState()
 
     // Set up the description of the stencil state.
     depthStencilDesc.DepthEnable = true;
-    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
     depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
 
     depthStencilDesc.StencilEnable = false;
@@ -59,7 +68,7 @@ void GameplayPass::InitState()
 
     // Setup the raster description which will determine how and what polygons will be drawn.
     rasterDesc.AntialiasedLineEnable = false;
-    rasterDesc.CullMode = D3D11_CULL_BACK;
+    rasterDesc.CullMode = D3D11_CULL_NONE;
     rasterDesc.DepthBias = 0;
     rasterDesc.DepthBiasClamp = 0.0f;
     rasterDesc.DepthClipEnable = true;
@@ -76,8 +85,8 @@ void GameplayPass::InitState()
     blenDesc.AlphaToCoverageEnable                  = false;
     blenDesc.IndependentBlendEnable                 = false;
     blenDesc.RenderTarget[0].BlendEnable            = true;
-    blenDesc.RenderTarget[0].SrcBlend               = D3D11_BLEND_SRC_COLOR;
-    blenDesc.RenderTarget[0].DestBlend              = D3D11_BLEND_INV_SRC_COLOR;
+    blenDesc.RenderTarget[0].SrcBlend               = D3D11_BLEND_SRC_ALPHA;
+    blenDesc.RenderTarget[0].DestBlend              = D3D11_BLEND_INV_SRC_ALPHA;
     blenDesc.RenderTarget[0].BlendOp                = D3D11_BLEND_OP_ADD;
     blenDesc.RenderTarget[0].SrcBlendAlpha          = D3D11_BLEND_SRC_ALPHA;
     blenDesc.RenderTarget[0].DestBlendAlpha         = D3D11_BLEND_INV_SRC_ALPHA;
@@ -114,4 +123,13 @@ void GameplayPass::Set()
     Render::RendererRemote::context->OMSetBlendState(blendState, blendFactor, 0xffffffff);
 
     Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
+}
+
+void GameplayPass::Draw(const DrawDataHandler& drawData)
+{
+    if (drawData.player && drawData.currentCam)
+    {
+        playerDrawer.Set(drawData);
+        playerDrawer.Draw();
+    }
 }
