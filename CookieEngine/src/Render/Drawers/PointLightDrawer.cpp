@@ -3,9 +3,8 @@
 #include "Mat4.hpp"
 #include "Light.hpp"
 #include "Mesh.hpp"
-#include "ShadowBuffer.hpp"
 #include "DrawDataHandler.hpp"
-#include "RenderPass/PointLightPass.hpp"
+#include "Drawers/PointLightDrawer.hpp"
 
 using namespace Cookie::Core::Math;
 using namespace Cookie::Render;
@@ -19,13 +18,13 @@ struct INSTANCE_POINT_LIGHT
 
 /*======================= CONSTRUCTORS/DESTRUCTORS =======================*/
 
-PointLightPass::PointLightPass()
+PointLightDrawer::PointLightDrawer()
 {
     sphereMesh = Core::Primitives::CreateIcoSphere();
     InitShader();
 }
 
-PointLightPass::~PointLightPass()
+PointLightDrawer::~PointLightDrawer()
 {
     if (VShader)
         VShader->Release();
@@ -39,7 +38,7 @@ PointLightPass::~PointLightPass()
 
 /*======================= INIT METHODS =======================*/
 
-void PointLightPass::InitShader()
+void PointLightDrawer::InitShader()
 {
     ID3DBlob* blob = nullptr;
 
@@ -179,7 +178,7 @@ void PointLightPass::InitShader()
 
 /*======================= REALTIME METHODS =======================*/
 
-void PointLightPass::Set(ID3D11Buffer** lightCBuffer, const LightsArray& lights, const DrawDataHandler& drawData)
+void PointLightDrawer::Set(ID3D11Buffer** lightCBuffer, const LightsArray& lights, const DrawDataHandler& drawData)
 {
     RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     RendererRemote::context->PSSetShader(PShader, nullptr, 0);
@@ -198,7 +197,7 @@ void PointLightPass::Set(ID3D11Buffer** lightCBuffer, const LightsArray& lights,
     RendererRemote::context->IASetVertexBuffers(0, 2, VBuffers, stride, offset);
 }
 
-void PointLightPass::Draw(const unsigned int instanceNb)
+void PointLightDrawer::Draw(const unsigned int instanceNb)
 {
     RendererRemote::context->DrawIndexedInstanced(sphereMesh->INb, instanceNb, 0, 0, 0);
 }

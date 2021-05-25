@@ -4,7 +4,7 @@
 #include <Mat4.hpp>
 #include <array>
 #include <vector>
-#include "MapDrawer.hpp"
+#include "Drawers/MapDrawer.hpp"
 
 struct ID3D11Buffer;
 struct ID3D11DepthStencilView;

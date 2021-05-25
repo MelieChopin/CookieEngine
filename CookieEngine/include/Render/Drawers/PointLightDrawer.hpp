@@ -1,5 +1,5 @@
-#ifndef __POINT_LIGHT_PASS_HPP__
-#define __POINT_LIGHT_PASS_HPP__
+#ifndef __POINT_LIGHT_DRAWER_HPP__
+#define __POINT_LIGHT_DRAWER_HPP__
 
 struct ID3D11VertexShader;
 struct ID3D11PixelShader;
@@ -18,7 +18,7 @@ namespace Cookie
 		struct PointLight;
 		class DrawDataHandler;
 
-		class PointLightPass
+		class PointLightDrawer
 		{
 		private:
 			ID3D11VertexShader* VShader{ nullptr };
@@ -33,8 +33,8 @@ namespace Cookie
 			void InitShader();
 
 		public:
-			PointLightPass();
-			~PointLightPass();
+			PointLightDrawer();
+			~PointLightDrawer();
 
 			void Set(ID3D11Buffer** lightCBuffer, const LightsArray& lights, const DrawDataHandler& drawData);
 			void Draw(const unsigned int instanceNb);
@@ -42,4 +42,4 @@ namespace Cookie
 	}
 }
 
-#endif /*__POINT_LIGHT_PASS_HPP__*/
+#endif /*__POINT_LIGHT_DRAWER_HPP__*/
