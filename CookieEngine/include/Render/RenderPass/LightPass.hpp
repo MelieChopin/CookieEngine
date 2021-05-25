@@ -2,8 +2,8 @@
 #define __LIGHT_PASS_HPP__
 
 #include "FrameBuffer.hpp"
-#include "RenderPass/DirLightPass.hpp"
-#include "RenderPass/PointLightPass.hpp"
+#include "Drawers/DirLightDrawer.hpp"
+#include "Drawers/PointLightDrawer.hpp"
 
 namespace Cookie
 {
@@ -16,8 +16,8 @@ namespace Cookie
 		class LightPass
 		{
 		private:
-			DirLightPass				dirPass;
-			PointLightPass				pointPass;
+			DirLightDrawer				dirDrawer;
+			PointLightDrawer			pointDrawer;
 
 			ID3D11Buffer*				lightCBuffer		{ nullptr };
 			ID3D11SamplerState*			PSampler			{ nullptr };

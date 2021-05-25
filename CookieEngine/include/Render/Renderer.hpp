@@ -4,7 +4,7 @@
 
 #include "Core/Window.hpp"
 #include "Light.hpp"
-#include "Render/FBODrawer.hpp"
+#include "Drawers/FBODrawer.hpp"
 #include "Render/RendererRemote.hpp"
 #include "Render/DrawDataHandler.hpp"
 #include "Render/RenderPass/GeometryPass.hpp"

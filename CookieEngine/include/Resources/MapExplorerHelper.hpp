@@ -44,7 +44,7 @@ namespace Cookie::Resources
 	template <>
 	void SelectableResourceDisplay<Texture>(const std::unordered_map<std::string, std::unique_ptr<Texture>>::iterator& textIt, const std::string& researchString, Texture*& currentR, const bool is_selected)
 	{
-		if (textIt->second && (StringHelper::findCaseInsensitive(textIt->second->name, researchString) != std::string::npos))
+		if ((StringHelper::findCaseInsensitive(textIt->second->name, researchString) != std::string::npos))
 		{
 			if (textIt->second->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
 			{
@@ -74,12 +74,15 @@ namespace Cookie::Resources
 
 			for (typename std::unordered_map<std::string, std::unique_ptr<C>>::iterator It = resourceMap.begin(); It != resourceMap.end(); It++)
 			{
-				const bool is_selected = (currentR != nullptr && It->second && currentR->name == It->second->name);
+				if (It->second)
+				{
+					const bool is_selected = (currentR != nullptr && currentR->name == It->second->name);
 
-				SelectableResourceDisplay<C>(It, researchString, currentR, is_selected);
+					SelectableResourceDisplay<C>(It, researchString, currentR, is_selected);
 
-				if (is_selected)
-					ImGui::SetItemDefaultFocus();
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
 			}
 
 			ImGui::NewLine();

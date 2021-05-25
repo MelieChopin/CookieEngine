@@ -9,7 +9,7 @@
 #include "Resources/Sound.hpp"
 
 #include "Resources/ResourcesManager.hpp"
-#include "Render/Skybox.hpp"
+#include "Drawers/Skybox.hpp"
 #include "ECS/Coordinator.hpp"
 #include "Resources/Particles/ParticlesHandler.hpp"
 #include "PlayerData.hpp"

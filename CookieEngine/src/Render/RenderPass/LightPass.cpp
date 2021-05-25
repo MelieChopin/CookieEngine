@@ -156,18 +156,18 @@ void LightPass::Draw(const LightsArray& lights, const ShadowBuffer& shadowMap, c
     if (lights.useDir)
     {
         Render::RendererRemote::context->OMSetRenderTargets(2, rtvs, nullptr);
-        dirPass.Set(lights.dirLight, shadowMap, &lightCBuffer);
+        dirDrawer.Set(lights.dirLight, shadowMap, &lightCBuffer);
         Render::RendererRemote::context->Draw(3, 0);
     }
     if (lights.usedPoints > 0)
     {
 
-        pointPass.Set(&lightCBuffer, lights, drawData);
+        pointDrawer.Set(&lightCBuffer, lights, drawData);
 
         Render::RendererRemote::context->RSSetState(volumeRasterState);
         Render::RendererRemote::context->OMSetRenderTargets(2, rtvs, drawData.depthStencilView);
 
-        pointPass.Draw(lights.usedPoints);
+        pointDrawer.Draw(lights.usedPoints);
     }
     
 }
