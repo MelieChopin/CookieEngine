@@ -499,29 +499,29 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 if (model["texture"]["albedo"].is_string())
 			 {
 				 if (model["texture"]["albedo"].get<std::string>() != "NO ALBEDO")
-					 component.GetComponentModel(entity.entities[i].id).albedo = resourcesManager.textures[(model["texture"]["albedo"].get<std::string>())].get();
+					 component.GetComponentModel(entity.entities[i].id).albedo = resourcesManager.textures2D[(model["texture"]["albedo"].get<std::string>())].get();
 			 }
 			 else if (entity.entities[i].namePrefab != "NONE")
 				component.GetComponentModel(entity.entities[i].id).albedo =
-						 resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name].get();
+						 resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name].get();
 				 
 			 if (model["texture"]["normal"].is_string())
 			 {
 				 if (model["texture"]["normal"].get<std::string>() != "NO NORMAL")
-					 component.GetComponentModel(entity.entities[i].id).normal = resourcesManager.textures[(model["texture"]["normal"].get<std::string>())].get();
+					 component.GetComponentModel(entity.entities[i].id).normal = resourcesManager.textures2D[(model["texture"]["normal"].get<std::string>())].get();
 			 }
 			 else if (entity.entities[i].namePrefab != "NONE")
 				 component.GetComponentModel(entity.entities[i].id).normal =
-				 resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name].get();
+				 resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name].get();
 
 			 if (model["texture"]["metallic"].is_string())
 			 {
 				 if (model["texture"]["metallic"].get<std::string>() != "NO METALLIC")
-					 component.GetComponentModel(entity.entities[i].id).metallicRoughness = resourcesManager.textures[(model["texture"]["metallic"].get<std::string>())].get();
+					 component.GetComponentModel(entity.entities[i].id).metallicRoughness = resourcesManager.textures2D[(model["texture"]["metallic"].get<std::string>())].get();
 			 }
 			 else if (entity.entities[i].namePrefab != "NONE")
 				component.GetComponentModel(entity.entities[i].id).metallicRoughness =
-				resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name].get();
+				resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name].get();
 		 
 		 }
 		 if (entity.entities[i].signature & C_SIGNATURE::PHYSICS)
@@ -578,13 +578,14 @@ std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const c
 		 //js["Map"]["trs"]["scale"].get_to(scene->map.trs.scale.e);
 
 		 if (js["Map"]["model"].contains("albedo"))
-			scene->map.model.albedo = resources.textures[js["Map"]["model"]["albedo"].get<std::string>()].get();
+			scene->map.model.albedo = resources.textures2D[js["Map"]["model"]["albedo"].get<std::string>()].get();
 		 if (js["Map"]["model"].contains("normal"))
-			 scene->map.model.normal = resources.textures[js["Map"]["model"]["normal"].get<std::string>()].get();
+			 scene->map.model.normal = resources.textures2D[js["Map"]["model"]["normal"].get<std::string>()].get();
 		 if (js["Map"]["model"].contains("metallic"))
-			 scene->map.model.metallicRoughness = resources.textures[js["Map"]["model"]["metallic"].get<std::string>()].get();
+			 scene->map.model.metallicRoughness = resources.textures2D[js["Map"]["model"]["metallic"].get<std::string>()].get();
 
 		 LoadPhysic(js["Map"]["physic"], scene->map.physic);
+		 scene->map.InitTiles();
 	 } 
 	 
 	 if (js.contains("EntityHandler"))
@@ -668,8 +669,8 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 			 }
 			 if (js["Model"]["Texture"]["albedo"].is_string())
 			 {
-				 if (resourcesManager.textures.find(js["Model"]["Texture"]["albedo"]) != resourcesManager.textures.end())
-					newPrefab.model.albedo = resourcesManager.textures[js["Model"]["Texture"]["albedo"]].get();
+				 if (resourcesManager.textures2D.find(js["Model"]["Texture"]["albedo"]) != resourcesManager.textures2D.end())
+					newPrefab.model.albedo = resourcesManager.textures2D[js["Model"]["Texture"]["albedo"]].get();
 				 else
 				 {
 					 std::string name = js["Model"]["Texture"]["albedo"];
@@ -678,8 +679,8 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 			 }
 			 if (js["Model"]["Texture"]["normal"].is_string())
 			 {
-				 if (resourcesManager.textures.find(js["Model"]["Texture"]["normal"]) != resourcesManager.textures.end())
-					 newPrefab.model.normal = resourcesManager.textures[js["Model"]["Texture"]["normal"]].get();
+				 if (resourcesManager.textures2D.find(js["Model"]["Texture"]["normal"]) != resourcesManager.textures2D.end())
+					 newPrefab.model.normal = resourcesManager.textures2D[js["Model"]["Texture"]["normal"]].get();
 				 else
 				 {
 					 std::string name = js["Model"]["Texture"]["normal"];
@@ -688,8 +689,8 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 			 }
 			 if (js["Model"]["Texture"]["metallic"].is_string())
 			 {
-				 if (resourcesManager.textures.find(js["Model"]["Texture"]["metallic"]) != resourcesManager.textures.end())
-					 newPrefab.model.metallicRoughness = resourcesManager.textures[js["Model"]["Texture"]["metallic"]].get();
+				 if (resourcesManager.textures2D.find(js["Model"]["Texture"]["metallic"]) != resourcesManager.textures2D.end())
+					 newPrefab.model.metallicRoughness = resourcesManager.textures2D[js["Model"]["Texture"]["metallic"]].get();
 				 else
 				 {
 					 std::string name = js["Model"]["Texture"]["metallic"];
@@ -766,7 +767,7 @@ void Cookie::Resources::Serialization::Load::LoadAllTextures(Cookie::Resources::
 		 js["color"].get_to(color.e);
 		 js["name"].get_to(name);
 
-		 resourcesManager.textures[name] = std::make_unique<Texture>(name, color);
+		 resourcesManager.textures2D[name] = std::make_unique<Texture>(name, color);
 	 }
  }
 

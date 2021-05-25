@@ -24,7 +24,6 @@ ParticlesPass::ParticlesPass()
 
 ParticlesPass::~ParticlesPass()
 {
-    //Render::RendererRemote::context->VSSetShader(nullptr, nullptr, 0);
     if (VShader)
         VShader->Release();
     if (PShader)

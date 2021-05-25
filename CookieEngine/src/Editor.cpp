@@ -21,7 +21,7 @@ Editor::Editor()
     : editorFBO{game.renderer.window.width,game.renderer.window.height}
 {
     game.resources.Load(game.renderer);
-    game.skyBox.texture = game.resources.textures["Assets/skybox.dds"].get();
+    game.skyBox.texture = game.resources.skyboxes["Assets/skybox.dds"].get();
     cam.SetProj(60.f, game.renderer.viewport.Width, game.renderer.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
     cam.rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
@@ -33,11 +33,11 @@ Editor::Editor()
     game.scene->InitCoordinator(game.coordinator);
     //game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>("Assets/Floor_DefaultMaterial_BaseColor.png"));
 
-    //Load all prefabs in folder Prefabs
-    Resources::Serialization::Load::LoadAllPrefabs(game.resources);
-
     //Load all Textures we have create in texture editor
     Resources::Serialization::Load::LoadAllTextures(game.resources);
+
+    //Load all prefabs in folder Prefabs
+    Resources::Serialization::Load::LoadAllPrefabs(game.resources);
 
     Resources::SoundManager::InitSystem();
     Resources::SoundManager::LoadAllMusic(game.resources);
@@ -131,7 +131,9 @@ void Editor::Loop()
     first.data[0].countAlive = 35;
     first.data[0].SetIsBIllboard(true);
     first.data[0].mesh = game.resources.meshes["Quad"].get();
-    first.data[0].texture = game.resources.textures["Assets/Particles/Smoke.png"].get();
+    first.data[0].texture = game.resources.textures2D["Assets/Particles\Smoke.png"].get();
+    if (first.data[0].texture != nullptr)
+        std::cout << "fefse\n";
     first.particlesEmiter[0].generators.push_back(&velRand);
     first.particlesEmiter[0].generators.push_back(&timeRand);
     first.particlesEmiter[0].generators.push_back(&color);
@@ -221,7 +223,9 @@ void Editor::Loop()
     second.data[0].countAlive = 10;
     second.data[0].SetIsBIllboard(true);
     second.data[0].mesh = game.resources.meshes["Quad"].get();
-    second.data[0].texture = game.resources.textures["Assets/Particles/Light.png"].get();
+    second.data[0].texture = game.resources.textures2D["Assets/Particles/Light.png"].get();
+    if (second.data[0].texture != nullptr)
+        std::cout << "fefse\n";
     Cookie::Resources::Particles::VelocityRandGenerate      velRand2(Vec3(-5, 5, -5), Vec3(5, 15, 5));
     Cookie::Resources::Particles::ScaleRandGenerate      scaleRand(Vec3(0.5, 0.5, 0.5), Vec3(1, 1, 1));
     second.particlesEmiter[0].generators.push_back(&box);
@@ -248,7 +252,7 @@ void Editor::Loop()
     bool isActive = false;
     {
         game.scene->map.model.mesh = game.resources.meshes["NormalCube"].get();
-        game.scene->map.model.albedo = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
+        game.scene->map.model.albedo = game.resources.textures2D["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
     }
 
     //for (int i = 0; i < MAX_ENTITIES; i++)
@@ -264,10 +268,7 @@ void Editor::Loop()
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
         // Present frame
-        CDebug.UpdateTime();
 
-        game.scene.get()->map.trs.rot.Debug();
-        game.scene.get()->map.trs.scale.Debug();
 
         //Update for 3D Music
         FMOD_VECTOR temp = { cam.pos.x, cam.pos.y, cam.pos.z };

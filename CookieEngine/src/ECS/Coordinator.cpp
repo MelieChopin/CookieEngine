@@ -168,16 +168,16 @@ void Coordinator::ApplyComputeTrs()
 
 
 //CGP_Producer
-void Coordinator::UpdateCGPProducer()
+void Coordinator::UpdateCGPProducer(Map& map)
 {
-	ApplyGameplayUpdateCountdownProducer();
+	ApplyGameplayUpdateCountdownProducer(map);
 }
-void Coordinator::ApplyGameplayUpdateCountdownProducer()
+void Coordinator::ApplyGameplayUpdateCountdownProducer(Map& map)
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::PRODUCER))
-			componentHandler->GetComponentGameplay(i).componentProducer.UpdateCountdown(*this, entityHandler->entities[i].id);
+			componentHandler->GetComponentGameplay(i).componentProducer.UpdateCountdown(map, *this, entityHandler->entities[i].id);
 }
 
 //CGP_Worker

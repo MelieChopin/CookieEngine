@@ -7,6 +7,7 @@
 #include "Gameplay/CGPAttack.hpp"
 #include "Gameplay/CGPProducer.hpp"
 #include "Gameplay/CGPWorker.hpp"
+#include "Gameplay/CGPResource.hpp"
 
 
 namespace Cookie
@@ -26,13 +27,14 @@ namespace Cookie
 	{
 		enum CGP_SIGNATURE
 		{
-			EMPTY_CGP     = 0b00000,
-			LIVE          = 0b00001,
-			MOVE          = 0b00010,
-			ATTACK	      = 0b00100,
-			PRODUCER      = 0b01000,
-			WORKER        = 0b10000,
-			ALL_CGP       = 0b11111
+			EMPTY_CGP     = 0b000000,
+			LIVE          = 0b000001,
+			MOVE          = 0b000010,
+			ATTACK	      = 0b000100,
+			PRODUCER      = 0b001000,
+			WORKER        = 0b010000,
+			RESOURCE      = 0b100000,
+			ALL_CGP       = 0b111111
 		};
 
 		struct Cost
@@ -49,14 +51,15 @@ namespace Cookie
 		public:
 			std::string            teamName {"No Team"};
 			int                    signatureGameplay{ 0 };
+			Cost                   cost;
+			Gameplay::E_ARMY_TYPE  type {Gameplay::E_ARMY_TYPE::E_DEFAULT};
 
 			Gameplay::CGPLive      componentLive;
 			Gameplay::CGPMove      componentMove;
 			Gameplay::CGPAttack    componentAttack;
 			Gameplay::CGPProducer  componentProducer;
 			Gameplay::CGPWorker    componentWorker;
-			Cost                   cost;
-			Gameplay::E_ARMY_TYPE  type {Gameplay::E_ARMY_TYPE::E_DEFAULT};
+			Gameplay::CGPResource  componentResource;
 
 			inline void AddComponent(int ComponentSignature) noexcept;
 			inline void RemoveComponent(int ComponentSignature)noexcept;

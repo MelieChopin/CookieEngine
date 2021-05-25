@@ -1,3 +1,4 @@
+#include "Core/Primitives.hpp"
 #include "Physics/PhysicsHandle.hpp"
 #include "Resources/Scene.hpp"
 #include "Game.hpp"
@@ -94,16 +95,20 @@ void Game::HandleGameplayInputs(Render::DebugRenderer& dbg)
             InputEndSelectionQuad();
 
         if (!ImGui::GetIO().MouseDownDuration[1])
+        {
             InputMoveSelected();
+            InputSetNewEntityDestination();
+        }
 
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_C])
             InputStartBuilding(0);
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V])
             InputAddUnit(0);
 
-
+        //should be move in another function
         if (playerData.makingASelectionQuad)
             DisplaySelectionQuad(dbg);
+        DisplayNewEntityDestination(dbg);
     }
 }
 
@@ -176,6 +181,17 @@ void Game::InputMoveSelected()
     }
 
 }
+void Game::InputSetNewEntityDestination()
+{
+    for (int i = 0; i < coordinator.selectedEntities.size(); ++i)
+    {
+        float selectedEntityId = coordinator.selectedEntities[i]->id;
+        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(selectedEntityId);
+
+        if (gameplay.signatureGameplay & CGP_SIGNATURE::PRODUCER)
+            gameplay.componentProducer.newUnitDestination = playerData.mousePosInWorld;
+    }
+}
 void Game::InputStartBuilding(int index)
 {
     for (int i = 0; i < coordinator.selectedEntities.size(); ++i)
@@ -205,12 +221,23 @@ void Game::DisplaySelectionQuad(Render::DebugRenderer& dbg)
 {
     dbg.AddQuad(playerData.selectionQuadStart, playerData.mousePosInWorld, 0x00FF00);
 }
+void Game::DisplayNewEntityDestination(Render::DebugRenderer& dbg)
+{
+    for (int i = 0; i < coordinator.selectedEntities.size(); ++i)
+    {
+        float selectedEntityId = coordinator.selectedEntities[i]->id;
+        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(selectedEntityId);
+
+        if (gameplay.signatureGameplay & CGP_SIGNATURE::PRODUCER)
+            dbg.AddDebugElement(Core::Primitives::CreateLine(coordinator.componentHandler->GetComponentTransform(selectedEntityId).pos, gameplay.componentProducer.newUnitDestination, 0x00FF00, 0x00FF00));
+    }
+}
 void Game::ECSCalls(Render::DebugRenderer& dbg)
 {
     coordinator.armyHandler->UpdateArmyCoordinators();
     resources.UpdateScriptsContent();
     coordinator.ApplyScriptUpdate();
-    coordinator.UpdateCGPProducer();
+    coordinator.UpdateCGPProducer(scene->map);
     coordinator.UpdateCGPWorker(scene->map);
     coordinator.UpdateCGPMove(scene->map, dbg);
     coordinator.UpdateCGPAttack();

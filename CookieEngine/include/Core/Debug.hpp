@@ -65,7 +65,7 @@ namespace Cookie
 		public:
 			// Summons the Debug manager.
 			inline static DebugMessageHandler& Summon()
-			{ static DebugMessageHandler debugSingleton; return debugSingleton; }
+			{ static DebugMessageHandler debugSingleton; debugSingleton.UpdateTime(); return debugSingleton; }
 
 
 			inline void UpdateTime()

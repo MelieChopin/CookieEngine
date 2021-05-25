@@ -44,17 +44,14 @@ namespace Cookie::Resources
 	template <>
 	void SelectableResourceDisplay<Texture>(const std::unordered_map<std::string, std::unique_ptr<Texture>>::iterator& textIt, const std::string& researchString, Texture*& currentR, const bool is_selected)
 	{
-		if ((StringHelper::findCaseInsensitive(textIt->second->name, researchString) != std::string::npos))
+		if (StringHelper::findCaseInsensitive(textIt->second->name, researchString) != std::string::npos)
 		{
-			if (textIt->second->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
-			{
-				ImGui::Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
+			ImGui::Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
 
-				ImGui::SameLine();
+			ImGui::SameLine();
 
-				if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
-					currentR = textIt->second.get();
-			}
+			if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
+				currentR = textIt->second.get();
 		}
 	}
 

@@ -129,17 +129,17 @@ void Inspector::ModelInterface()
         
         Text("Albedo:"); SameLine(100);
 
-        ResourceMapExplorer<Texture>("texture", "##ALDEBOSELECT", resources.textures, modelComp.albedo);
+        ResourceMapExplorer<Texture>("texture", "##ALDEBOSELECT", resources.textures2D, modelComp.albedo);
 
 
         Text("Normal:"); SameLine(100);
 
-        ResourceMapExplorer<Texture>("normal texture", "##NORMSELECT", resources.textures, modelComp.normal);
+        ResourceMapExplorer<Texture>("normal texture", "##NORMSELECT", resources.textures2D, modelComp.normal);
 
 
         ImGui::Custom::TextSnip("metallic-Roughness", 9); SameLine(); Text(":"); SameLine(100);
 
-        ResourceMapExplorer<Texture>("metallic-rough texture", "##MRSELECT", resources.textures, modelComp.metallicRoughness);
+        ResourceMapExplorer<Texture>("metallic-rough texture", "##MRSELECT", resources.textures2D, modelComp.metallicRoughness);
 
 //====================//
 

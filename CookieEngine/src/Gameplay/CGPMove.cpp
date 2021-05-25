@@ -167,8 +167,5 @@ void CGPMove::DrawPath(Render::DebugRenderer& debug, ECS::ComponentTransform& tr
 		debug.AddDebugElement(Core::Primitives::CreateLine({ trs.pos.x, 1, trs.pos.z }, { waypoints[0].x, 1, waypoints[0].z }, 0x00FFFF, 0x00FFFF));
 
 	for (int i = 1; i < waypoints.size(); ++i)
-	{
-		//use 1 for Y so the debug will not be mix up with the map
-		debug.AddDebugElement(Core::Primitives::CreateLine({ waypoints[i - 1].x, 1, waypoints[i - 1].z }, { waypoints[i].x, 1, waypoints[i].z }, 0x00FFFF, 0xFF0000));
-	}
+		debug.AddDebugElement(Core::Primitives::CreateLine(waypoints[i - 1], waypoints[i], 0x00FFFF, 0x00FFFF));
 }
