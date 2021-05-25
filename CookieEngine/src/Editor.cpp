@@ -23,7 +23,7 @@ Editor::Editor()
     : editorFBO{game.renderer.window.width,game.renderer.window.height}
 {
     game.resources.Load(game.renderer);
-    game.skyBox.texture = game.resources.textures["Assets/skybox.dds"].get();
+    game.skyBox.texture = game.resources.skyboxes["Assets/skybox.dds"].get();
     cam.SetProj(60.f, game.renderer.viewport.Width, game.renderer.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
     cam.rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
@@ -118,7 +118,7 @@ void Editor::Loop()
     Vec2 mousePos {0, 0};
     {
         game.scene->map.model.mesh                  = game.resources.meshes["NormalCube"].get();
-        game.scene->map.model.albedo                = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
+        game.scene->map.model.albedo                = game.resources.textures2D["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
     }
     Vec3 buildingPos {0, 0, 0};
     bool isBuildingValid = false;
@@ -145,7 +145,7 @@ void Editor::Loop()
     Cookie::Resources::Particles::ColorRandGenerate         color(Vec3(1, 1, 1), Vec3(1, 1, 1));
     first.data[0].countAlive = 10;
     first.data[0].mesh = game.resources.meshes["Quad"].get();
-    first.data[0].texture = game.resources.textures["Assets/Light.png"].get();
+    first.data[0].texture = game.resources.textures2D["Assets/Light.png"].get();
     first.particlesEmiter[0].generators.push_back(&circle);
     first.particlesEmiter[0].generators.push_back(&velRand);
     first.particlesEmiter[0].generators.push_back(&timeRand);
@@ -175,7 +175,7 @@ void Editor::Loop()
     Cookie::Resources::Particles::ParticlesSystem second = Cookie::Resources::Particles::ParticlesSystem(40, 30);
     second.data[0].countAlive = 10;
     second.data[0].mesh = game.resources.meshes["Quad"].get();
-    second.data[0].texture = game.resources.textures["Assets/Etoile.png"].get();
+    second.data[0].texture = game.resources.textures2D["Assets/Etoile.png"].get();
     second.particlesEmiter[0].generators.push_back(&box);
     second.particlesEmiter[0].generators.push_back(&vel);
     second.particlesEmiter[0].generators.push_back(&mass);
@@ -206,7 +206,6 @@ void Editor::Loop()
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
         // Present frame
-        CDebug.UpdateTime();
 
         game.resources.UpdateScriptsContent();
         game.coordinator.ApplyScriptUpdate();

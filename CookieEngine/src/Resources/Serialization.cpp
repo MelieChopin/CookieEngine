@@ -471,10 +471,10 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 						resourcesManager.meshes[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name].get();
 
 			 if (model.at("texture").is_string())
-				component.GetComponentModel(entity.entities[i].id).albedo = resourcesManager.textures[(model.at("texture").get<std::string>())].get();
+				component.GetComponentModel(entity.entities[i].id).albedo = resourcesManager.textures2D[(model.at("texture").get<std::string>())].get();
 			 else if (entity.entities[i].namePrefab != "NONE")
 				 component.GetComponentModel(entity.entities[i].id).albedo =
-									resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name].get();
+									resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name].get();
 		 }
 		 if (entity.entities[i].signature & C_SIGNATURE::PHYSICS)
 		 {
@@ -609,7 +609,7 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 			 if (js["Model"]["Mesh"].is_string())
 				newPrefab.model.mesh = resourcesManager.meshes[js["Model"]["Mesh"]].get();
 			 if (js["Model"]["Texture"].is_string())
-				 newPrefab.model.albedo = resourcesManager.textures[js["Model"]["Texture"]].get();
+				 newPrefab.model.albedo = resourcesManager.textures2D[js["Model"]["Texture"]].get();
 		 }
 
 		 if (js.contains("Transform"))
@@ -680,7 +680,7 @@ void Cookie::Resources::Serialization::Load::LoadAllTextures(Cookie::Resources::
 		 js["color"].get_to(color.e);
 		 js["name"].get_to(name);
 
-		 resourcesManager.textures[name] = std::make_unique<Texture>(name, color);
+		 resourcesManager.textures2D[name] = std::make_unique<Texture>(name, color);
 	 }
  }
 
