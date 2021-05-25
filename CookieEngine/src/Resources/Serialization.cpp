@@ -70,7 +70,9 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 			else
 			{
 				modelJ += json{ { "model", model.mesh != nullptr ? model.mesh->name : "NO MESH" },
-												{ "texture", model.albedo != nullptr ? model.albedo->name : "NO TEXTURE" } };
+								{ "texture", { { "albedo" , model.albedo != nullptr ? model.albedo->name : "NO ALBEDO"},
+											   { "normal" , model.normal != nullptr ? model.normal->name : "NO NORMAL"}, 
+											   { "metallic" , model.metallicRoughness != nullptr ? model.metallicRoughness->name : "NO METALLIC"}} } };
 			}
 		}
 		if (entity.entities[i].signature & C_SIGNATURE::PHYSICS)
