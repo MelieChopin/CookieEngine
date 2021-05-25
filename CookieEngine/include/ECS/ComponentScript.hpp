@@ -20,6 +20,9 @@ namespace Cookie
 			{
 				scripts.clear();
 			}
+
+			void Start();
+			void Update();
 		};
 	}
 }

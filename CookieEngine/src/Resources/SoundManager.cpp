@@ -163,7 +163,7 @@ void SoundManager::SetMode(std::string key, FMOD_MODE mode)
 }
 
 
-void SoundManager::PlayMusic(Sound* const& sound)
+void SoundManager::PlayMusic(Sound* const & sound)
 {
 	if (sound->sound == nullptr)
 		FMOD_RESULT result = system->createSound(sound->filepath.c_str(),

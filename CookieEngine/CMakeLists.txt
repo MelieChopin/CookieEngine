@@ -87,6 +87,7 @@ set (SRC_FILES
     "${SRC_DIR}/Render/ShadowBuffer.cpp" 
     "${SRC_DIR}/Render/RenderPass/ShadowPass.cpp"
     "${SRC_DIR}/Render/FBODrawer.cpp"
+    "${SRC_DIR}/Render/MapDrawer.cpp"
     "${SRC_DIR}/Render/ParticlesPass.cpp"
     
     "${SRC_DIR}/Resources/Loader.cpp" 
@@ -130,6 +131,7 @@ set (SRC_FILES
     "${SRC_DIR}/ECS/ComponentHandler.cpp"
     "${SRC_DIR}/ECS/ComponentModel.cpp" 
     "${SRC_DIR}/ECS/ComponentPhysics.cpp"
+    "${SRC_DIR}/ECS/ComponentScript.cpp"
     "${SRC_DIR}/ECS/Coordinator.cpp"
     "${SRC_DIR}/ECS/EntityHandler.cpp"
 

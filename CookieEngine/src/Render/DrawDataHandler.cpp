@@ -140,8 +140,7 @@ void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 	ECS::ComponentHandler& components = *game.coordinator.componentHandler;
 	bool cull = false;
 
-	models.push_back(game.scene->map.model);
-	matrices.push_back(game.scene->map.trs.TRS);
+	mapDrawer.Set(game.scene->map);
 
 	for (int i = 0; i < entityHandler.livingEntities; ++i)
 	{

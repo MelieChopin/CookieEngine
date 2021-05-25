@@ -397,6 +397,27 @@ void Cookie::Resources::Serialization::Save::SaveVolumAndModeMusic(std::string k
 	file << std::setw(4) << js << std::endl;
 }
 
+void Cookie::Resources::Serialization::Save::SaveVolumAndModeMusic(Sound* const & sound)
+{
+	std::string filepath = sound->filepath;
+
+	std::size_t pos = filepath.find(".mp3");
+	std::size_t end = filepath.length();
+
+	filepath.replace(pos, end, ".MAsset");
+
+	std::ofstream file(filepath);
+
+	json js;
+
+	std::cout << sound->vol;
+	js["Volume"] = sound->vol;
+	js["Mode"] = sound->mode;
+	js["Pos"] = sound->pos.e;
+
+	file << std::setw(4) << js << std::endl;
+}
+
  //------------------------------------------------------------------------------------------------------------------
 
 void Cookie::Resources::Serialization::Load::FromJson(json& js, Cookie::ECS::EntityHandler& entity)
@@ -586,9 +607,26 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 		 if (js.contains("Model"))
 		 {
 			 if (js["Model"]["Mesh"].is_string())
-				newPrefab.model.mesh = resourcesManager.meshes[js["Model"]["Mesh"]].get();
+			 {
+				 if (resourcesManager.meshes.find(js["Model"]["Mesh"]) != resourcesManager.meshes.end())
+					newPrefab.model.mesh = resourcesManager.meshes[js["Model"]["Mesh"]].get();
+				 else
+				 {
+					 std::string name = js["Model"]["Mesh"];
+					 CDebug.Error(std::string("Mesh " + name + " not found!").c_str());
+				 }
+				 
+			 }
 			 if (js["Model"]["Texture"].is_string())
-				 newPrefab.model.albedo = resourcesManager.textures[js["Model"]["Texture"]].get();
+			 {
+				 if (resourcesManager.textures.find(js["Model"]["Texture"]) != resourcesManager.textures.end())
+					newPrefab.model.albedo = resourcesManager.textures[js["Model"]["Texture"]].get();
+				 else
+				 {
+					 std::string name = js["Model"]["Texture"];
+					 CDebug.Error(std::string("Albedo " + name + " not found!").c_str());
+				 }
+			 }
 		 }
 
 		 if (js.contains("Transform"))

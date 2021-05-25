@@ -6,7 +6,6 @@ using namespace Cookie::Resources::Particles;
 
 void ParticlesHandler::Update()
 {
-	std::cout << particlesSystems.size() << "\n";
 	for (int i = 0; i < particlesSystems.size(); i++)
 	{
 		particlesSystems[i].Update();

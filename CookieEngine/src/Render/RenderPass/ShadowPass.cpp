@@ -109,7 +109,7 @@ void ShadowPass::InitState()
 
     // Setup the raster description which will determine how and what polygons will be drawn.
     rasterDesc.AntialiasedLineEnable = false;
-    rasterDesc.CullMode = D3D11_CULL_FRONT;
+    rasterDesc.CullMode = D3D11_CULL_NONE;
     rasterDesc.DepthBias = 0;
     rasterDesc.DepthBiasClamp = 0.0f;
     rasterDesc.DepthClipEnable = true;
@@ -190,7 +190,7 @@ void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
         buffer.lightViewProj = lights.dirLight.lightViewProj;
         Render::WriteCBuffer(&buffer, bufferSize, 0, &CBuffer);
 
-        drawData.Draw(1);
+        drawData.Draw();
         
     }
 }

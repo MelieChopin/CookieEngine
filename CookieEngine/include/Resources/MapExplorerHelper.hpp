@@ -74,7 +74,7 @@ namespace Cookie::Resources
 
 			for (typename std::unordered_map<std::string, std::unique_ptr<C>>::iterator It = resourceMap.begin(); It != resourceMap.end(); It++)
 			{
-				const bool is_selected = (currentR != nullptr && currentR->name == It->second->name);
+				const bool is_selected = (currentR != nullptr && It->second && currentR->name == It->second->name);
 
 				SelectableResourceDisplay<C>(It, researchString, currentR, is_selected);
 

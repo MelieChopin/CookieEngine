@@ -69,7 +69,6 @@ void ResourcesManager::InitPrimitives()
 {
 	meshes["Quad"]		= Cookie::Core::Primitives::CreateQuad();
 	meshes["Triangle"]	= Cookie::Core::Primitives::CreateTriangle();
-	meshes["NormalCube"]= Cookie::Core::Primitives::CreateNormalCube();
 	meshes["Cube"]		= Cookie::Core::Primitives::CreateCube();
 	meshes["Sphere"]	= Cookie::Core::Primitives::CreateSphere();
 	meshes["Pyramid"]	= Cookie::Core::Primitives::CreatePyramid();

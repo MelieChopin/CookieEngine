@@ -6,7 +6,6 @@
 
 #include "ECS/EntityHandler.hpp"
 #include "ECS/ComponentHandler.hpp"
-#include "ECS/SystemHandler.hpp"
 #include "ECS/Coordinator.hpp"
 
 #include "Gameplay/ArmyHandler.hpp"
@@ -58,13 +57,14 @@ Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab, std::str
 		componentHandler->GetComponentModel(newEntity.id) = prefab->model;
 	if (CheckSignature(newEntity.signature, C_SIGNATURE::PHYSICS))
 		componentHandler->GetComponentPhysics(newEntity.id) = prefab->physics;
-	//if (CheckSignature(signature, C_SIGNATURE::SCRIPT))
+	//if (CheckSignature(newEntity.signature, C_SIGNATURE::SCRIPT))
 		//componentHandler->GetComponentScript(newEntity.id) = prefab->script;
 	if (CheckSignature(newEntity.signature, C_SIGNATURE::GAMEPLAY))
 	{
-		componentHandler->GetComponentGameplay(newEntity.id) = prefab->gameplay;
-		componentHandler->GetComponentGameplay(newEntity.id).teamName = teamName;
-		armyHandler->AddElementToArmy(&componentHandler->GetComponentGameplay(newEntity.id));
+		ComponentGameplay& gameplay = componentHandler->GetComponentGameplay(newEntity.id);
+		gameplay = prefab->gameplay;
+		gameplay.teamName = teamName;
+		armyHandler->AddElementToArmy(&gameplay);
 	}
 
 
@@ -74,6 +74,9 @@ Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab, std::str
 void Coordinator::RemoveEntity(Entity& entity)
 {
 	assert(entityHandler->livingEntities > 0 && "No Entity to remove");
+
+	if (entity.signature & C_SIGNATURE::GAMEPLAY)
+		armyHandler->RemoveElementFromArmy(&componentHandler->GetComponentGameplay(entity.id));
 
 	//Reset Components
 	componentHandler->SubComponentToDefault(entity.signature, entity.id);
@@ -90,13 +93,13 @@ bool Coordinator::CheckSignature(const int entitySignature, const int signature)
 }
 
 //Selection
-void Coordinator::SelectEntities(Vec2& selectionQuadStart, Vec2& selectionQuadEnd)
+void Coordinator::SelectEntities(Vec3& selectionQuadStart, Vec3& selectionQuadEnd)
 {
 	selectedEntities.clear();
 	float minX = (selectionQuadStart.x < selectionQuadEnd.x) ? selectionQuadStart.x : selectionQuadEnd.x;
 	float maxX = (selectionQuadStart.x < selectionQuadEnd.x) ? selectionQuadEnd.x : selectionQuadStart.x;
-	float minZ = (selectionQuadStart.y < selectionQuadEnd.y) ? selectionQuadStart.y : selectionQuadEnd.y;
-	float maxZ = (selectionQuadStart.y < selectionQuadEnd.y) ? selectionQuadEnd.y : selectionQuadStart.y;
+	float minZ = (selectionQuadStart.z < selectionQuadEnd.z) ? selectionQuadStart.z : selectionQuadEnd.z;
+	float maxZ = (selectionQuadStart.z < selectionQuadEnd.z) ? selectionQuadEnd.z : selectionQuadStart.z;
 
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY))
@@ -107,54 +110,16 @@ void Coordinator::SelectEntities(Vec2& selectionQuadStart, Vec2& selectionQuadEn
 				selectedEntities.push_back(&entityHandler->entities[i]);
 		}
 }
-Entity* Coordinator::GetSelectedEntitiesCommander()
-{
-	float selectedEntitiesSize = selectedEntities.size();
-
-	//get Centroid
-	Vec3 centroid = { 0, 0, 0 };
-	for (int i = 0; i < selectedEntitiesSize; ++i)
-	{
-		//divide by selectedEntitiesSize in for loop, so we're sure we can't divide by 0
-		centroid += componentHandler->GetComponentTransform(selectedEntities[i]->id).pos / selectedEntitiesSize;
-	}
-
-	//get Commander
-	Entity* commander = nullptr;
-	float distFromCentroid = INFINITY;
-	for (int i = 0; i < selectedEntitiesSize; ++i)
-	{
-		float possibleNewDist = (centroid - componentHandler->GetComponentTransform(selectedEntities[i]->id).pos).Length();
-		if (possibleNewDist < distFromCentroid)
-		{
-			distFromCentroid = possibleNewDist;
-			commander = selectedEntities[i];
-		}
-	}
-
-	return commander;
-}
-void Coordinator::SetSelectedEntitiesCommander(Entity* commander)
-{
-	for (int i = 0; i < selectedEntities.size(); ++i)
-	{
-		if (CheckSignature(selectedEntities[i]->signature, C_SIGNATURE::GAMEPLAY) &&
-			CheckSignature(componentHandler->GetComponentGameplay(selectedEntities[i]->id).signatureGameplay, CGP_SIGNATURE::MOVE) &&
-			selectedEntities[i] != commander)
-			componentHandler->GetComponentGameplay(selectedEntities[i]->id).componentMove.SetCommander(componentHandler->GetComponentGameplay(commander->id).componentMove, componentHandler->GetComponentTransform(commander->id), componentHandler->GetComponentTransform(selectedEntities[i]->id));
-	}
-
-}
-
 
 
 //Primary Component
+/*
 void Coordinator::ApplySystemPhysics(float factor)
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::PHYSICS))
 			System::SystemPhysics(componentHandler->GetComponentPhysics(entityHandler->entities[i].id), factor);
-}
+}*/
 //void Coordinator::ApplyDraw(const Core::Math::Mat4& viewProj, ID3D11Buffer* CBuffer)
 //{
 //	for (int i = 0; i < entityHandler->livingEntities; ++i)
@@ -162,11 +127,17 @@ void Coordinator::ApplySystemPhysics(float factor)
 //			System::SystemDraw(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
 //				componentHandler->GetComponentModel(entityHandler->entities[i].id), viewProj, CBuffer);
 //}
+void Coordinator::ApplyScriptStart()
+{
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::SCRIPT))
+			componentHandler->GetComponentScript(entityHandler->entities[i].id).Start();
+}
 void Coordinator::ApplyScriptUpdate()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::SCRIPT))
-			System::SystemScriptUpdate(componentHandler->GetComponentScript(entityHandler->entities[i].id));
+			componentHandler->GetComponentScript(entityHandler->entities[i].id).Update();
 }
 void Coordinator::ApplyRemoveUnnecessaryEntities()
 {
@@ -227,7 +198,6 @@ void Coordinator::UpdateCGPMove(Resources::Map& map, Render::DebugRenderer& debu
 	ApplyGameplayUpdateReachGoalCooldown();
 
 	ApplyGameplayMoveTowardWaypoint();
-	ApplyGameplayMoveWithCommander();
 	
 	ApplyGameplayPosPrediction();
 	ApplyGameplayResolveCollision();
@@ -254,13 +224,6 @@ void Coordinator::ApplyGameplayMoveTowardWaypoint()
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
 			componentHandler->GetComponentGameplay(i).componentMove.MoveTowardWaypoint(componentHandler->GetComponentTransform(i));
-}
-void Coordinator::ApplyGameplayMoveWithCommander()
-{
-	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
-			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
-			componentHandler->GetComponentGameplay(i).componentMove.MoveWithCommander(componentHandler->GetComponentTransform(i));
 }
 void Coordinator::ApplyGameplayPosPrediction()
 {
