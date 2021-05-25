@@ -28,6 +28,7 @@ namespace Cookie
 			std::vector<Resources::Prefab*>	possibleUnits;
 			std::vector<Resources::Prefab*> queueOfUnits;
 			float                           currentCountdown {0};
+			Core::Math::Vec3				newUnitDestination {0, 0, 0};
 
 			Core::Math::Vec2                tileSize {{0, 0}};
 			std::vector<Resources::Tile*>   occupiedTiles;
@@ -50,7 +51,7 @@ namespace Cookie
 				
 			}
 		
-			void UpdateCountdown(ECS::Coordinator& coordinator, int selfId);
+			void UpdateCountdown(Resources::Map& map, ECS::Coordinator& coordinator, int selfId);
 
 			bool AddUnitToQueue(int indexInPossible);
 			void RemoveUnitFromQueue(int indexInQueue);
