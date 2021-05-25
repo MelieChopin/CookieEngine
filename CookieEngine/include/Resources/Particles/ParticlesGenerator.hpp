@@ -9,9 +9,6 @@ namespace Cookie
 {
 	namespace Core::Math
 	{
-		//in inline ?
-		static Cookie::Core::Math::Vec4 Random(Cookie::Core::Math::Vec4& min, Cookie::Core::Math::Vec4& max);
-		static Cookie::Core::Math::Vec3 Random(Cookie::Core::Math::Vec3& min, Cookie::Core::Math::Vec3& max);
 		union Mat4;
 	}
 	
@@ -31,21 +28,6 @@ namespace Cookie
 				~ParticlesGenerator() {}
 			};
 
-			class IsBillboard : public ParticlesGenerator
-			{
-			public:
-				virtual void generate(ParticlesData* data, int start, int end) override;
-
-				IsBillboard() { type = "IsBillboard"; }
-			};
-
-			class NotBillboard : public ParticlesGenerator
-			{
-			public:
-				virtual void generate(ParticlesData* data, int start, int end) override;
-
-				NotBillboard() { type = "NotBillboard"; }
-			};
 
 			class BoxPositionGenerate : public ParticlesGenerator
 			{
@@ -70,7 +52,31 @@ namespace Cookie
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
 				SpherePositionGenerate() { type = "CirclePositionGen"; }
-				SpherePositionGenerate(Cookie::Core::Math::Vec3 _pos, float radius, Cookie::Core::Math::Mat4* mat) : pos(_pos), radius(radius), trs(mat) { type = "CirclePositionGen"; }
+				SpherePositionGenerate(Cookie::Core::Math::Vec3 _pos, float radius, Cookie::Core::Math::Mat4* mat) : pos(_pos), trs(mat), radius(radius) { type = "CirclePositionGen"; }
+			};
+
+			class ScaleConstGenerate : public ParticlesGenerator
+			{
+			public:
+				Cookie::Core::Math::Vec3 scale;
+				virtual void generate(ParticlesData* data, int start, int end) override;
+
+				ScaleConstGenerate(Cookie::Core::Math::Vec3 scale = Cookie::Core::Math::Vec3(1, 1, 1)) : scale(scale) { type = "ScaleConstGenerate"; }
+				~ScaleConstGenerate() {}
+			};
+
+
+			class ScaleRandGenerate : public ParticlesGenerator
+			{
+			public:
+				Cookie::Core::Math::Vec3 scaleMin;
+				Cookie::Core::Math::Vec3 scaleMax;
+
+				virtual void generate(ParticlesData* data, int start, int end) override;
+
+				ScaleRandGenerate() { type = "ScaleRandGenerate"; }
+				ScaleRandGenerate(Cookie::Core::Math::Vec3 scaleMin, Cookie::Core::Math::Vec3 scaleMax) : scaleMin(scaleMin), scaleMax(scaleMax) { type = "ScaleRandGenerate"; }
+				~ScaleRandGenerate() {}
 			};
 
 			class VelocityConstGenerate : public ParticlesGenerator
@@ -95,8 +101,34 @@ namespace Cookie
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
 				VelocityRandGenerate() { type = "VelRandGen"; }
-				VelocityRandGenerate(Cookie::Core::Math::Vec3 velMin, Cookie::Core::Math::Vec3 velMax) : velMin(velMin), velMax() { type = "VelRandGen"; }
+				VelocityRandGenerate(Cookie::Core::Math::Vec3 velMin, Cookie::Core::Math::Vec3 velMax) : velMin(velMin), velMax(velMax) { type = "VelRandGen"; }
 				~VelocityRandGenerate() {}
+			};
+
+			class AccelerationConstGenerate : public ParticlesGenerator
+			{
+			public:
+				Cookie::Core::Math::Vec3 acc;
+
+				virtual void generate(ParticlesData* data, int start, int end) override;
+
+				AccelerationConstGenerate() { type = "AccConstGen"; }
+				AccelerationConstGenerate(Cookie::Core::Math::Vec3 acc) : acc(acc) { type = "AccConstGen"; }
+				~AccelerationConstGenerate() {}
+
+			};
+
+			class AccelerationRandGenerate : public ParticlesGenerator
+			{
+			public:
+				Cookie::Core::Math::Vec3 accMin;
+				Cookie::Core::Math::Vec3 accMax;
+
+				virtual void generate(ParticlesData* data, int start, int end) override;
+
+				AccelerationRandGenerate() { type = "AccRandGen"; }
+				AccelerationRandGenerate(Cookie::Core::Math::Vec3 accMin, Cookie::Core::Math::Vec3 accMax) : accMin(accMin), accMax(accMax) { type = "AccRandGen"; }
+				~AccelerationRandGenerate() {}
 			};
 
 			class MassConstGenerate : public ParticlesGenerator
@@ -130,7 +162,6 @@ namespace Cookie
 				TimeRandGenerate(float timeMin, float timeMax) : timeMin(timeMin), timeMax(timeMax) { type = "TimeRandGen"; }
 			};
 
-
 			class ColorRandGenerate : public ParticlesGenerator
 			{
 			public:
@@ -141,6 +172,17 @@ namespace Cookie
 
 				ColorRandGenerate() { type = "ColorRandGen"; }
 				ColorRandGenerate(Cookie::Core::Math::Vec4 colorMin, Cookie::Core::Math::Vec4 colorMax) : minCol(colorMin), maxCol(colorMax) { type = "ColorRandGen"; }
+			};
+
+			class ColorConstGenerate : public ParticlesGenerator
+			{
+			public:
+				Cookie::Core::Math::Vec4 col;
+
+				virtual void generate(ParticlesData* data, int start, int end) override;
+
+				ColorConstGenerate() { type = "ColorConstGen"; }
+				ColorConstGenerate(Cookie::Core::Math::Vec4 color) : col(color) { type = "ColorConstGen"; }
 			};
 		}
 	}

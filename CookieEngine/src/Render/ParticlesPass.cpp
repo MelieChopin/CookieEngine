@@ -24,6 +24,7 @@ ParticlesPass::ParticlesPass()
 
 ParticlesPass::~ParticlesPass()
 {
+    //Render::RendererRemote::context->VSSetShader(nullptr, nullptr, 0);
     if (VShader)
         VShader->Release();
     if (PShader)
@@ -32,7 +33,7 @@ ParticlesPass::~ParticlesPass()
         CBuffer->Release();
     if (ILayout)
         ILayout->Release();
-    if (InstanceBuffer)
+    if (InstanceBuffer != nullptr)
         InstanceBuffer->Release();
     if (blendState)
         blendState->Release();
@@ -42,6 +43,11 @@ ParticlesPass::~ParticlesPass()
         rasterizerState->Release();
     if (depthStencilState)
         depthStencilState->Release();
+}
+
+void ParticlesPass::Clean()
+{
+    Render::RendererRemote::context->VSSetShader(nullptr, nullptr, 0);
 }
 
 void ParticlesPass::InitShader()
@@ -84,20 +90,18 @@ void ParticlesPass::InitShader()
 
         if (vin.isBillBoard == 1)
         {
-            float3 forward = float3(0, 0, 1);
-            float3 cameraObj = normalize(gCamPos - temp);
-            float angle = 1;
-            if (dot(float3(-1, 0, 0), cameraObj) > 0)
-                angle = 3.1415 * 2 - acos(dot(normalize(forward), normalize(cameraObj)));
-            else
-                angle = acos(dot(normalize(forward), normalize(cameraObj)));
+            float3 z = normalize(gCamPos - temp);
+            float3 y = float3(0, 1, 0);
+            float3 x = normalize(cross(z, y));
+            y = normalize(cross(x, z));
 
-            float4x4 rot = float4x4(float4(cos(angle), 0, -sin(angle), 0),
-                                    float4(0, 1, 0, 0),
-                                    float4(sin(angle), 0, cos(angle), 0),
-                                    float4(0, 0, 0, 1));
 
-            temp = mul(float4(vin.PosL, 1.0f), mul(rot, vin.World));
+           float4x4 rot = float4x4(float4(x.x, x.y, x.z, 0),
+                                    float4(y.x, y.y, y.z, 0),
+                                    float4(-z.x, -z.y, -z.z, 0),
+                                    float4(0.0, 0.0, 0.0, 1));
+
+            temp = mul(float4(vin.PosL,1.0), mul(rot, vin.World ));
         }
 
 	    // Transform to world space space.
@@ -136,7 +140,7 @@ void ParticlesPass::InitShader()
     float4 main(PixelInputType input) : SV_TARGET
     {
         float4 finalColor = text.Sample(WrapSampler, input.Tex);
-        finalColor = float4(finalColor.rgb * input.Color.rgb, finalColor.a * input.Color.a);
+        finalColor = finalColor.rgba * input.Color.rgba;
         return finalColor; 
     }
 	)";
@@ -286,6 +290,8 @@ void ParticlesPass::AllocateMoreSpace(int newSpace)
 
 void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mesh, Resources::Texture* texture, std::vector<InstancedData> data)
 {
+    if (mesh == nullptr)
+        return;
     Render::RendererRemote::context->OMSetDepthStencilState(depthStencilState, 0);
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
@@ -309,7 +315,9 @@ void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mes
     Render::RendererRemote::context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
     Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
-    texture->Set(0);
+
+    if (texture != nullptr)
+        texture->Set(0);
 
     VS_CONSTANT_BUFFER buffer = {};
     buffer.proj = cam.GetProj();
@@ -322,7 +330,7 @@ void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mes
     Render::RendererRemote::context->IASetIndexBuffer(mesh->IBuffer, DXGI_FORMAT_R32_UINT, 0);
 
     D3D11_MAPPED_SUBRESOURCE ms;
-    HRESULT result = Render::RendererRemote::context->Map(InstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
+    Render::RendererRemote::context->Map(InstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
 
     memcpy(ms.pData, mInstancedData.data(), sizeof(Render::InstancedData) * mInstancedData.size());
     Render::RendererRemote::context->Unmap(InstanceBuffer, 0);
