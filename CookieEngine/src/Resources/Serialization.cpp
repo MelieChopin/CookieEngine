@@ -62,10 +62,21 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 					modelJ[modelJ.size()]["model"] = model.mesh->name;
 				else
 					modelJ[modelJ.size()]["model"] = 0;
+
 				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name != model.albedo->name)
-					modelJ[modelJ.size() - 1]["texture"] = model.albedo->name;
+					modelJ[modelJ.size() - 1]["texture"]["albedo"] = model.albedo->name;
 				else
-					modelJ[modelJ.size() - 1]["texture"] = 0;
+					modelJ[modelJ.size() - 1]["texture"]["albedo"] = 0;
+
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name != model.normal->name)
+					modelJ[modelJ.size() - 1]["texture"]["normal"] = model.normal->name;
+				else
+					modelJ[modelJ.size() - 1]["texture"]["normal"] = 0;
+
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name != model.metallicRoughness->name)
+					modelJ[modelJ.size() - 1]["texture"]["metallic"] = model.metallicRoughness->name;
+				else
+					modelJ[modelJ.size() - 1]["texture"]["metallic"] = 0;
 			}
 			else
 			{
@@ -126,25 +137,27 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 		js["Name"] = actScene.name;
 		js["Type"] = "map";
 	}
-	/*
+	
 	//Map
 	{
 		json& map = js["Map"];
 		Cookie::Resources::Map actMap = actScene.map;
 		map["tilesNb"] = actMap.tilesNb.e;
 		map["tilesSize"] = actMap.tilesSize.e;
-		map["tilesNbIcons"] = actMap.tilesNbIcons.e;
 
 		map["trs"]["pos"] = actMap.trs.pos.e;
 		map["trs"]["rot"] = actMap.trs.rot.e;
 		map["trs"]["scale"] = actMap.trs.scale.e;
 
-		map["model"]["mesh"] = actMap.model.mesh.get()->name;
-		map["model"]["texture"] = actMap.model.texture.get()->name;
-		map["model"]["shader"] = actMap.model.shader.get()->name;
+		if (actMap.model.albedo != nullptr)
+			map["model"]["texture"]["albedo"] = actMap.model.albedo->name;
+		if (actMap.model.normal != nullptr)
+			map["model"]["texture"]["normal"] = actMap.model.normal->name;
+		if (actMap.model.metallicRoughness != nullptr)
+			map["model"]["texture"]["metallic"] = actMap.model.metallicRoughness->name;
 
-		//SavePhysic(map, actMap.physic);
-	}*/
+		SavePhysic(map["physic"], actMap.physic);
+	}
 
 
 	if (actScene.entityHandler.livingEntities > 0)
@@ -188,10 +201,21 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const Prefab* const & pr
 			 model["Mesh"] = prefab->model.mesh->name;
 		 else
 			 model["Mesh"] = 0;
+
 		 if (prefab->model.albedo != nullptr)
-			 model["Texture"] = prefab->model.albedo->name;
+			 model["Texture"]["albedo"] = prefab->model.albedo->name;
 		 else
-			 model["Texture"] = 0;
+			 model["Texture"]["albedo"] = 0;
+
+		 if (prefab->model.normal != nullptr)
+			 model["Texture"]["normal"] = prefab->model.normal->name;
+		 else
+			 model["Texture"]["normal"] = 0;
+
+		 if (prefab->model.metallicRoughness != nullptr)
+			 model["Texture"]["metallic"] = prefab->model.metallicRoughness->name;
+		 else
+			 model["Texture"]["metallic"] = 0;
 	 }
 
 	 if (prefab->signature & C_SIGNATURE::PHYSICS)
@@ -466,17 +490,39 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 		 if (entity.entities[i].signature & C_SIGNATURE::MODEL)
 		 {
 			 json model = js["ComponentHandler"]["Model"][i];
-			 if (model.at("model").is_string())
-				component.GetComponentModel(entity.entities[i].id).mesh = resourcesManager.meshes[(model.at("model").get<std::string>())].get();
+			 if (model["model"].is_string())
+				component.GetComponentModel(entity.entities[i].id).mesh = resourcesManager.meshes[(model["model"].get<std::string>())].get();
 			 else if (entity.entities[i].namePrefab != "NONE")
 				 component.GetComponentModel(entity.entities[i].id).mesh =
 						resourcesManager.meshes[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name].get();
 
-			 if (model.at("texture").is_string())
-				component.GetComponentModel(entity.entities[i].id).albedo = resourcesManager.textures[(model.at("texture").get<std::string>())].get();
+			 if (model["texture"]["albedo"].is_string())
+			 {
+				 if (model["texture"]["albedo"].get<std::string>() != "NO ALBEDO")
+					 component.GetComponentModel(entity.entities[i].id).albedo = resourcesManager.textures[(model["texture"]["albedo"].get<std::string>())].get();
+			 }
 			 else if (entity.entities[i].namePrefab != "NONE")
-				 component.GetComponentModel(entity.entities[i].id).albedo =
-									resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name].get();
+				component.GetComponentModel(entity.entities[i].id).albedo =
+						 resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name].get();
+				 
+			 if (model["texture"]["normal"].is_string())
+			 {
+				 if (model["texture"]["normal"].get<std::string>() != "NO NORMAL")
+					 component.GetComponentModel(entity.entities[i].id).normal = resourcesManager.textures[(model["texture"]["normal"].get<std::string>())].get();
+			 }
+			 else if (entity.entities[i].namePrefab != "NONE")
+				 component.GetComponentModel(entity.entities[i].id).normal =
+				 resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name].get();
+
+			 if (model["texture"]["metallic"].is_string())
+			 {
+				 if (model["texture"]["metallic"].get<std::string>() != "NO METALLIC")
+					 component.GetComponentModel(entity.entities[i].id).metallicRoughness = resourcesManager.textures[(model["texture"]["metallic"].get<std::string>())].get();
+			 }
+			 else if (entity.entities[i].namePrefab != "NONE")
+				component.GetComponentModel(entity.entities[i].id).metallicRoughness =
+				resourcesManager.textures[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name].get();
+		 
 		 }
 		 if (entity.entities[i].signature & C_SIGNATURE::PHYSICS)
 		 {
@@ -519,26 +565,27 @@ std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const c
 		 }
 	 }
 	 
-	 /*
 	 if (js.contains("Map"))
 	 {
 		 Cookie::Resources::Scene* scene = newScene.get();
-		 Cookie::Resources::ResourcesManager resources = game.resources;
+		 Cookie::Resources::ResourcesManager& resources = game.resources;
 
 		 js["Map"]["tilesNb"].get_to(scene->map.tilesNb.e);
-		 js["Map"]["tilesNbIcons"].get_to(scene->map.tilesNbIcons.e);
 		 js["Map"]["tilesSize"].get_to(scene->map.tilesSize.e);
 
 		 js["Map"]["trs"]["pos"].get_to(scene->map.trs.pos.e);
 		 js["Map"]["trs"]["rot"].get_to(scene->map.trs.rot.e);
-		 js["Map"]["trs"]["scale"].get_to(scene->map.trs.scale.e);
+		 //js["Map"]["trs"]["scale"].get_to(scene->map.trs.scale.e);
 
-		 scene->map.model.mesh = resources.meshes[js["Map"]["model"]["mesh"].get<std::string>()];
-		 scene->map.model.texture = resources.textures[js["Map"]["model"]["texture"].get<std::string>()];
-		 scene->map.model.shader = resources.shaders[js["Map"]["model"]["shader"].get<std::string>()];
+		 if (js["Map"]["model"].contains("albedo"))
+			scene->map.model.albedo = resources.textures[js["Map"]["model"]["albedo"].get<std::string>()].get();
+		 if (js["Map"]["model"].contains("normal"))
+			 scene->map.model.normal = resources.textures[js["Map"]["model"]["normal"].get<std::string>()].get();
+		 if (js["Map"]["model"].contains("metallic"))
+			 scene->map.model.metallicRoughness = resources.textures[js["Map"]["model"]["metallic"].get<std::string>()].get();
 
-		 //LoadPhysic(js["Map"], scene->map.physic);
-	 } */
+		 LoadPhysic(js["Map"]["physic"], scene->map.physic);
+	 } 
 	 
 	 if (js.contains("EntityHandler"))
 	 {
@@ -619,14 +666,34 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 				 }
 				 
 			 }
-			 if (js["Model"]["Texture"].is_string())
+			 if (js["Model"]["Texture"]["albedo"].is_string())
 			 {
-				 if (resourcesManager.textures.find(js["Model"]["Texture"]) != resourcesManager.textures.end())
-					newPrefab.model.albedo = resourcesManager.textures[js["Model"]["Texture"]].get();
+				 if (resourcesManager.textures.find(js["Model"]["Texture"]["albedo"]) != resourcesManager.textures.end())
+					newPrefab.model.albedo = resourcesManager.textures[js["Model"]["Texture"]["albedo"]].get();
 				 else
 				 {
-					 std::string name = js["Model"]["Texture"];
+					 std::string name = js["Model"]["Texture"]["albedo"];
 					 CDebug.Error(std::string("Albedo " + name + " not found!").c_str());
+				 }
+			 }
+			 if (js["Model"]["Texture"]["normal"].is_string())
+			 {
+				 if (resourcesManager.textures.find(js["Model"]["Texture"]["normal"]) != resourcesManager.textures.end())
+					 newPrefab.model.normal = resourcesManager.textures[js["Model"]["Texture"]["normal"]].get();
+				 else
+				 {
+					 std::string name = js["Model"]["Texture"]["normal"];
+					 CDebug.Error(std::string("Normal " + name + " not found!").c_str());
+				 }
+			 }
+			 if (js["Model"]["Texture"]["metallic"].is_string())
+			 {
+				 if (resourcesManager.textures.find(js["Model"]["Texture"]["metallic"]) != resourcesManager.textures.end())
+					 newPrefab.model.metallicRoughness = resourcesManager.textures[js["Model"]["Texture"]["metallic"]].get();
+				 else
+				 {
+					 std::string name = js["Model"]["Texture"]["metallic"];
+					 CDebug.Error(std::string("Metallic " + name + " not found!").c_str());
 				 }
 			 }
 		 }

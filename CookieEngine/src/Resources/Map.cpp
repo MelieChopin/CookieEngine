@@ -36,6 +36,7 @@ void Map::InitTiles()
 		for (int y = 0; y < tilesNb.y; y++)
 		{
 			Tile& currentTile = tiles[x + y * tilesNb.x];
+			currentTile.id = x + y * tilesNb.x;
 			currentTile.pos = { { x * tilesSize.x + tilesSize.x / 2 - trs.scale.x / 2, y * tilesSize.y + tilesSize.y / 2 - trs.scale.z / 2} };
 
 			//Connect to neighbours

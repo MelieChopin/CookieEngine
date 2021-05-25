@@ -115,7 +115,6 @@ void Editor::Loop()
     /// Particles
     //First Particles 
     Cookie::Resources::Particles::ParticlesSystem first = Cookie::Resources::Particles::ParticlesSystem(40, 35);
-    first.shader.InitShader();
     first.trs.pos = Vec3(0, 3, 0);
     first.trs.rot = Vec3(0, 0, 0);
     first.trs.scale = Vec3(1, 1, 1);
@@ -267,6 +266,8 @@ void Editor::Loop()
         // Present frame
         CDebug.UpdateTime();
 
+        game.scene.get()->map.trs.rot.Debug();
+        game.scene.get()->map.trs.scale.Debug();
 
         //Update for 3D Music
         FMOD_VECTOR temp = { cam.pos.x, cam.pos.y, cam.pos.z };
