@@ -4,7 +4,7 @@
 #include "Resources/Texture.hpp"
 #include "Resources/Map.hpp"
 #include "Primitives.hpp"
-#include "Render/MapDrawer.hpp"
+#include "Render/Drawers/MapDrawer.hpp"
 
 using namespace Cookie::Render;
 using namespace Cookie::Core::Math;

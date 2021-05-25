@@ -2,7 +2,7 @@
 #include "Resources/Mesh.hpp"
 #include "Resources/Texture.hpp"
 #include "Resources/ResourcesManager.hpp"
-#include "Skybox.hpp"
+#include "Render/Drawers/Skybox.hpp"
 #include "Core/Math/Mat4.hpp"
 
 using namespace Cookie::Render;

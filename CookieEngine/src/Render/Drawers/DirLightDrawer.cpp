@@ -2,7 +2,7 @@
 #include "Mat4.hpp"
 #include "Light.hpp"
 #include "ShadowBuffer.hpp"
-#include "RenderPass/DirLightPass.hpp"
+#include "Drawers/DirLightDrawer.hpp"
 
 using namespace Cookie::Core::Math;
 using namespace Cookie::Render;
@@ -18,12 +18,12 @@ struct PS_DIRLIGHT_BUFFER
 
 /*======================= CONSTRUCTORS/DESTRUCTORS =======================*/
 
-DirLightPass::DirLightPass()
+DirLightDrawer::DirLightDrawer()
 {
 	InitShader();
 }
 
-DirLightPass::~DirLightPass()
+DirLightDrawer::~DirLightDrawer()
 {
     if (VShader)
         VShader->Release();
@@ -37,7 +37,7 @@ DirLightPass::~DirLightPass()
 
 /*======================= INIT METHODS =======================*/
 
-void DirLightPass::InitShader()
+void DirLightDrawer::InitShader()
 {
     ID3DBlob* blob = nullptr;
 
@@ -156,7 +156,7 @@ void DirLightPass::InitShader()
 
 /*======================= REALTIME METHODS =======================*/
 
-void DirLightPass::Set(const DirLight& dirLight, const ShadowBuffer& shadowMap, ID3D11Buffer** lightCBuffer)
+void DirLightDrawer::Set(const DirLight& dirLight, const ShadowBuffer& shadowMap, ID3D11Buffer** lightCBuffer)
 {
 
     RendererRemote::context->VSSetShader(VShader, nullptr, 0);
