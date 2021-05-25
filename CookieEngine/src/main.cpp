@@ -11,7 +11,7 @@ using namespace Cookie::Core::Math;
 int main()
 {
 	{
-			Core::UIcore::PreInitContext();
+		Core::UIcore::PreInitContext();
 		Editor editor;
 		
 		editor.Loop();

@@ -37,6 +37,7 @@ namespace Cookie
 				Core::Window	window;
 				RendererRemote	remote;
 				D3D11_VIEWPORT	viewport;
+				D3D11_PRIMITIVE_TOPOLOGY topo{ D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST };
 				DrawDataHandler drawData;
 
 				GeometryPass	gPass;

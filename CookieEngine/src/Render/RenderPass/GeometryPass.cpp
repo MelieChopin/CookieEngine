@@ -329,6 +329,7 @@ void GeometryPass::Draw(DrawDataHandler& drawData)
     Render::WriteCBuffer(&buffer,sizeof(buffer),0,&CBuffer);
 
     drawData.Draw();
+    drawData.mapDrawer.Draw();
 }
 
 void GeometryPass::Clear()

@@ -87,6 +87,7 @@ set (SRC_FILES
     "${SRC_DIR}/Render/ShadowBuffer.cpp" 
     "${SRC_DIR}/Render/RenderPass/ShadowPass.cpp"
     "${SRC_DIR}/Render/FBODrawer.cpp"
+    "${SRC_DIR}/Render/MapDrawer.cpp"
     "${SRC_DIR}/Render/ParticlesPass.cpp"
     
     "${SRC_DIR}/Resources/Loader.cpp" 

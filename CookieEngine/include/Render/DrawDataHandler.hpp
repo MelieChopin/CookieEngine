@@ -4,6 +4,7 @@
 #include <Mat4.hpp>
 #include <array>
 #include <vector>
+#include "MapDrawer.hpp"
 
 struct ID3D11Buffer;
 struct ID3D11DepthStencilView;
@@ -15,6 +16,12 @@ namespace Cookie
 	namespace ECS
 	{
 		class ComponentModel;
+	}
+
+	namespace Resources
+	{
+		class Texture;
+		class Mesh;
 	}
 
 	namespace Render
@@ -41,6 +48,9 @@ namespace Cookie
 
 				ID3D11DepthStencilView*				depthStencilView;
 				ID3D11Buffer*						CamCBuffer;
+				
+
+				MapDrawer							mapDrawer;
 
 			private:
 				void InitCBuffer();

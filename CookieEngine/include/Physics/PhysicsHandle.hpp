@@ -29,6 +29,17 @@ namespace Cookie
 					}
 
 					PhysicsHandle::physCom->destroyPhysicsWorld(physSim);
+
+					if (editWorld)
+					{
+						int max = Physics::PhysicsHandle::editWorld->getNbRigidBodies();
+						for (int i = 0; i < max; i++)
+						{
+							Physics::PhysicsHandle::editWorld->destroyRigidBody(Physics::PhysicsHandle::editWorld->getRigidBody(0));
+						}
+
+						Physics::PhysicsHandle::physCom->destroyPhysicsWorld(Physics::PhysicsHandle::editWorld);
+					}
 				}
 
 		};
