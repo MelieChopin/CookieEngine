@@ -149,33 +149,43 @@ void Game::InputEndSelectionQuad()
 }
 void Game::InputMoveSelected()
 {
-    std::vector<ECS::Entity*> movableEntity;
+    if (scene->map.GetTile(playerData.mousePosInWorld).isObstacle)
+        return;
+
+    //set MovableEntities
+    std::vector<ECS::Entity*> movableEntities;
     for (int i = 0; i < coordinator.selectedEntities.size(); ++i)
     {
         float selectedEntityId = coordinator.selectedEntities[i]->id;
         ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(selectedEntityId);
 
         if (gameplay.signatureGameplay & CGP_SIGNATURE::MOVE)
-            movableEntity.push_back(coordinator.selectedEntities[i]);
+            movableEntities.push_back(coordinator.selectedEntities[i]);
     }
 
+    //Calculate centroid
     Vec3 centroid{ 0, 0, 0 };
-    for (int i = 0; i < movableEntity.size(); ++i)
+    for (int i = 0; i < movableEntities.size(); ++i)
     {
-        //divide by movableEntity.size in for loop, so we're sure we can't divide by 0 if we don't use a if
-        centroid += coordinator.componentHandler->GetComponentTransform(movableEntity[i]->id).pos / movableEntity.size();
+        //divide by movableEntities.size in for loop, so we're sure we can't divide by 0 if we don't use a if (movableEntities.size())
+        centroid += coordinator.componentHandler->GetComponentTransform(movableEntities[i]->id).pos / movableEntities.size();
     }
 
-    for (int i = 0; i < movableEntity.size(); ++i)
+    //Apply pathfind to each movableEntities
+    for (int i = 0; i < movableEntities.size(); ++i)
     {
-        float movableEntityId = movableEntity[i]->id;
-        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(movableEntityId);
-        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(movableEntityId);
+        float movableEntitiesId = movableEntities[i]->id;
+        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(movableEntitiesId);
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(movableEntitiesId);
 
         Vec3 offsetFromCentroid = trs.pos - centroid;
         Vec3 finalPos = playerData.mousePosInWorld + offsetFromCentroid;
-        if (scene->map.ApplyPathfinding(scene->map.GetTile(trs.pos), scene->map.tiles[scene->map.GetTileIndex(finalPos)]))
-            gameplay.componentMove.SetPath(scene->map.tiles[scene->map.GetTileIndex(finalPos)], trs);
+        //pathfind to mousePos + offset
+        if (offsetFromCentroid.Length() < OFFSET_MAX_FROM_CENTROID && scene->map.ApplyPathfinding(scene->map.GetTile(trs.pos), scene->map.GetTile(finalPos)))
+            gameplay.componentMove.SetPath(scene->map.GetTile(finalPos), trs);
+        //pathfind to mousePos
+        else if (scene->map.ApplyPathfinding(scene->map.GetTile(trs.pos), scene->map.GetTile(playerData.mousePosInWorld)))
+            gameplay.componentMove.SetPath(scene->map.GetTile(playerData.mousePosInWorld), trs);
         else
             std::cout << "No Path Find\n";
     }

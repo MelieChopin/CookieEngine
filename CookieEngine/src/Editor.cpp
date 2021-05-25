@@ -185,7 +185,6 @@ void Editor::Loop()
 
     bool isActive = false;
     {
-        game.scene->map.model.mesh = game.resources.meshes["NormalCube"].get();
         game.scene->map.model.albedo = game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
     }
 
