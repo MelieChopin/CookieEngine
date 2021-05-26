@@ -94,6 +94,7 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 		if (entity.entities[i].signature & C_SIGNATURE::GAMEPLAY)
 		{
 			ComponentGameplay gameplay = component.GetComponentGameplay(entity.entities[i].id);
+
 			int index = js["Gameplay"].size();
 			json& game = js["Gameplay"][index];
 			game["TeamName"] = gameplay.teamName;
@@ -104,27 +105,46 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 			game["Cost"]["CostSupply"] = gameplay.cost.costSupply;
 			game["Cost"]["TimeToProduce"] = gameplay.cost.timeToProduce;
 
-			game["CGPLive"]["Life"] = gameplay.componentLive.life;
-			game["CGPLive"]["Armor"] = gameplay.componentLive.armor;
+			if (gameplay.signatureGameplay & CGP_SIGNATURE::LIVE)
+			{
+				game["CGPLive"]["Life"] = gameplay.componentLive.life;
+				game["CGPLive"]["Armor"] = gameplay.componentLive.armor;
+			}
 
-			game["CGPAttack"]["NeedToAttack"] = gameplay.componentAttack.needToAttack;
-			game["CGPAttack"]["AttackDamage"] = gameplay.componentAttack.attackDamage;
-			game["CGPAttack"]["AttackSpeed"] = gameplay.componentAttack.attackSpeed;
-			game["CGPAttack"]["AttackRange"] = gameplay.componentAttack.attackRange;
+			if (gameplay.signatureGameplay & CGP_SIGNATURE::ATTACK)
+			{
+				game["CGPAttack"]["NeedToAttack"] = gameplay.componentAttack.needToAttack;
+				game["CGPAttack"]["AttackDamage"] = gameplay.componentAttack.attackDamage;
+				game["CGPAttack"]["AttackSpeed"] = gameplay.componentAttack.attackSpeed;
+				game["CGPAttack"]["AttackRange"] = gameplay.componentAttack.attackRange;
+			}
 
-			game["CGPMove"]["MoveSpeed"] = gameplay.componentMove.moveSpeed;
-			game["CGPMove"]["isFlying"] = gameplay.componentMove.isFlying;
+			if (gameplay.signatureGameplay & CGP_SIGNATURE::MOVE)
+			{
+				game["CGPMove"]["MoveSpeed"] = gameplay.componentMove.moveSpeed;
+				game["CGPMove"]["isFlying"] = gameplay.componentMove.isFlying;
+			}
 
-			for (int i = 0; i < gameplay.componentProducer.possibleUnits.size(); i++)
-				game["CGPProducer"]["name"] += gameplay.componentProducer.possibleUnits[i]->name;
+			if (gameplay.signatureGameplay & CGP_SIGNATURE::PRODUCER)
+			{
+				for (int i = 0; i < gameplay.componentProducer.possibleUnits.size(); i++)
+					game["CGPProducer"]["name"] += gameplay.componentProducer.possibleUnits[i]->name;
 
-			for (int i = 0; i < gameplay.componentProducer.occupiedTiles.size(); i++)
-				js["Map"]["OccupiedTiles"] += gameplay.componentProducer.occupiedTiles[i]->id;
+				for (int i = 0; i < gameplay.componentProducer.occupiedTiles.size(); i++)
+					js["Map"]["OccupiedTiles"] += gameplay.componentProducer.occupiedTiles[i]->id;
 
-			game["CGPProducer"]["TileSize"] = gameplay.componentProducer.tileSize.e;
+				game["CGPProducer"]["TileSize"] = gameplay.componentProducer.tileSize.e;
+			}
 
-			for (int i = 0; i < gameplay.componentWorker.possibleBuildings.size(); i++)
-				game["CGPWorker"]["name"] += gameplay.componentWorker.possibleBuildings[i]->name;
+			if (gameplay.signatureGameplay & CGP_SIGNATURE::WORKER)
+				for (int i = 0; i < gameplay.componentWorker.possibleBuildings.size(); i++)
+					game["CGPWorker"]["name"] += gameplay.componentWorker.possibleBuildings[i]->name;
+
+			if (gameplay.signatureGameplay & CGP_SIGNATURE::RESOURCE)
+			{
+				game["CGPResource"] = json{ { "resourcesReserve", gameplay.componentResource.resourceReserve },
+											{ "isPrimary", gameplay.componentResource.isPrimary } };
+			}	
 		}
 	}
 }
@@ -897,30 +917,42 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 	GPComponent.cost.costSupply = temp["CostSupply"].get<float>();
 	GPComponent.cost.timeToProduce = temp["TimeToProduce"].get<float>();
 
-	temp = gameplay["CGPLive"];
-	GPComponent.componentLive.life = temp["Life"].get<float>();
-	GPComponent.componentLive.armor = temp["Armor"].get<float>();
-
-	temp = gameplay["CGPAttack"];
-	GPComponent.componentAttack.needToAttack = temp["NeedToAttack"].get<bool>();
-	GPComponent.componentAttack.attackDamage = temp["AttackDamage"].get<float>();
-	GPComponent.componentAttack.attackSpeed = temp["AttackSpeed"].get<float>();
-	GPComponent.componentAttack.attackRange = temp["AttackRange"].get<float>();
-
-	temp = gameplay["CGPMove"];
-	GPComponent.componentMove.moveSpeed = temp["MoveSpeed"].get<float>();
-	GPComponent.componentMove.isFlying = temp["isFlying"].get<bool>();
-
-	temp = gameplay["CGPProducer"];
-	temp["TileSize"].get_to(GPComponent.componentProducer.tileSize.e);
-
-	if (temp.contains("name"))
+	if (gameplay.contains("CGPLive"))
 	{
-		for (int i = 0; i < temp["name"].size(); i++)
+		temp = gameplay["CGPLive"];
+		GPComponent.componentLive.life = temp["Life"].get<float>();
+		GPComponent.componentLive.armor = temp["Armor"].get<float>();
+	}
+
+	if (gameplay.contains("CGPAttack"))
+	{
+		temp = gameplay["CGPAttack"];
+		GPComponent.componentAttack.needToAttack = temp["NeedToAttack"].get<bool>();
+		GPComponent.componentAttack.attackDamage = temp["AttackDamage"].get<float>();
+		GPComponent.componentAttack.attackSpeed = temp["AttackSpeed"].get<float>();
+		GPComponent.componentAttack.attackRange = temp["AttackRange"].get<float>();
+	}
+
+	if (gameplay.contains("CGPMove"))
+	{
+		temp = gameplay["CGPMove"];
+		GPComponent.componentMove.moveSpeed = temp["MoveSpeed"].get<float>();
+		GPComponent.componentMove.isFlying = temp["isFlying"].get<bool>();
+	}
+	
+	if (gameplay.contains("CGPProducer"))
+	{
+		temp = gameplay["CGPProducer"];
+		temp["TileSize"].get_to(GPComponent.componentProducer.tileSize.e);
+
+		if (temp.contains("name"))
 		{
-			std::string name = temp["name"][i].get<std::string>();
-			if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end())
-				GPComponent.componentProducer.possibleUnits.push_back(resourcesManager.prefabs[name].get());
+			for (int i = 0; i < temp["name"].size(); i++)
+			{
+				std::string name = temp["name"][i].get<std::string>();
+				if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end())
+					GPComponent.componentProducer.possibleUnits.push_back(resourcesManager.prefabs[name].get());
+			}
 		}
 	}
 
@@ -936,6 +968,13 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 					GPComponent.componentWorker.possibleBuildings.push_back(resourcesManager.prefabs[name].get());
 			}
 		}
+	}
+
+	if (gameplay.contains("CGPResource"))
+	{
+		temp = gameplay["CGPResource"];
+		GPComponent.componentResource.resourceReserve = temp["resourcesReserve"].get<int>();
+		GPComponent.componentResource.isPrimary = temp["isPrimary"].get<bool>();
 	}
 }
 
