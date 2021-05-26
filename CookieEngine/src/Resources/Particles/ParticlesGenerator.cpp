@@ -10,6 +10,12 @@ float Random(float min, float max)
 
 using namespace Cookie::Resources::Particles;
 
+void PointPositionGenerate::generate(ParticlesData* data, int start, int end)
+{
+	for (int i = start; i < end; i++)
+		data->data[i].pos = (*trs) * pos;
+}
+
 void BoxPositionGenerate::generate(ParticlesData* data, int start, int end)
 {
 	Cookie::Core::Math::Vec3 posMin( pos.x - sizeBox.x,
@@ -59,6 +65,13 @@ void ScaleRandGenerate::generate(ParticlesData* data, int start, int end)
 		data->data[i].scaleBegin = data->data[i].scale;
 	}
 }
+
+void RotateRandGenerate::generate(ParticlesData* data, int start, int end)
+{
+	for (int i = start; i < end; i++)
+		data->data[i].rot = Cookie::Core::Math::Random(rotMin, rotMax);	
+}
+
 
 void VelocityConstGenerate::generate(ParticlesData* data, int start, int end)
 {

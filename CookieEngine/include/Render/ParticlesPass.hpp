@@ -56,6 +56,7 @@ namespace Cookie
 			void Clean();
 
 			ParticlesPass();
+			ParticlesPass(const ParticlesPass& pass);
 			~ParticlesPass();
 		};
 	}

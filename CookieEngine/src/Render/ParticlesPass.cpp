@@ -22,25 +22,40 @@ ParticlesPass::ParticlesPass()
     InitShader();
 }
 
+ParticlesPass::ParticlesPass(const ParticlesPass& pass) : VShader(pass.VShader), PShader(pass.PShader), CBuffer(pass.CBuffer), ILayout(pass.ILayout),
+                InstanceBuffer(pass.InstanceBuffer), blendState(pass.blendState), PSampler(pass.PSampler), rasterizerState(pass.rasterizerState), 
+                depthStencilState(pass.depthStencilState), mInstancedData(pass.mInstancedData)
+{
+    VShader->AddRef();
+    PShader->AddRef();
+    CBuffer->AddRef();
+    ILayout->AddRef();
+    InstanceBuffer->AddRef();
+    blendState->AddRef();
+    PSampler->AddRef();
+    rasterizerState->AddRef();
+    depthStencilState->AddRef();
+}
+
 ParticlesPass::~ParticlesPass()
 {
-    if (VShader)
+    if (VShader != nullptr)
         VShader->Release();
-    if (PShader)
+    if (PShader != nullptr)
         PShader->Release();
-    if (CBuffer)
+    if (CBuffer != nullptr)
         CBuffer->Release();
-    if (ILayout)
+    if (ILayout != nullptr)
         ILayout->Release();
     if (InstanceBuffer != nullptr)
         InstanceBuffer->Release();
-    if (blendState)
+    if (blendState != nullptr)
         blendState->Release();
-    if (PSampler)
+    if (PSampler != nullptr)
         PSampler->Release();
-    if (rasterizerState)
+    if (rasterizerState != nullptr)
         rasterizerState->Release();
-    if (depthStencilState)
+    if (depthStencilState != nullptr)
         depthStencilState->Release();
 }
 

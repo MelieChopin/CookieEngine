@@ -12,10 +12,7 @@ void ParticlesHandler::Update()
 		if (particlesSystems[i].needToBeRemoved)
 		{
 			particlesSystems[i].shader.Clean();
-			Cookie::Resources::Particles::ParticlesSystem temp = particlesSystems[i];
-			particlesSystems[i] = particlesSystems[particlesSystems.size() - 1];
-			particlesSystems[particlesSystems.size() - 1] = temp;
-			particlesSystems.erase(particlesSystems.end() - 1);
+			particlesSystems.erase(particlesSystems.begin() + i);
 			i--;
 			continue;
 		}

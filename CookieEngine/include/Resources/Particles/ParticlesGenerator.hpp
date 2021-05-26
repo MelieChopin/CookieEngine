@@ -28,6 +28,17 @@ namespace Cookie
 				~ParticlesGenerator() {}
 			};
 
+			class PointPositionGenerate : public ParticlesGenerator
+			{
+			public:
+				Cookie::Core::Math::Vec3 pos;
+				Cookie::Core::Math::Mat4* trs;
+
+				virtual void generate(ParticlesData* data, int start, int end) override;
+
+				PointPositionGenerate() { type = "PointPositionGen"; }
+				PointPositionGenerate(Cookie::Core::Math::Vec3 _pos, Cookie::Core::Math::Mat4* mat) : pos(_pos), trs(mat) { type = "PointPositionGen"; }
+			};
 
 			class BoxPositionGenerate : public ParticlesGenerator
 			{
@@ -77,6 +88,19 @@ namespace Cookie
 				ScaleRandGenerate() { type = "ScaleRandGenerate"; }
 				ScaleRandGenerate(Cookie::Core::Math::Vec3 scaleMin, Cookie::Core::Math::Vec3 scaleMax) : scaleMin(scaleMin), scaleMax(scaleMax) { type = "ScaleRandGenerate"; }
 				~ScaleRandGenerate() {}
+			};
+
+			class RotateRandGenerate : public ParticlesGenerator
+			{
+			public:
+				Cookie::Core::Math::Vec3 rotMin;
+				Cookie::Core::Math::Vec3 rotMax;
+
+				virtual void generate(ParticlesData* data, int start, int end) override;
+
+				RotateRandGenerate() { type = "RotateRandGenerate"; }
+				RotateRandGenerate(Cookie::Core::Math::Vec3 rotateMin, Cookie::Core::Math::Vec3 rotateMax) : rotMin(rotateMin), rotMax(rotateMax) { type = "RotateRandGenerate"; }
+				~RotateRandGenerate() {}
 			};
 
 			class VelocityConstGenerate : public ParticlesGenerator

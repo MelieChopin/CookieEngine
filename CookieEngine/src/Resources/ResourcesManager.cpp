@@ -129,7 +129,7 @@ void ResourcesManager::Load(Render::Renderer& _renderer)
 				skyboxes[iFile] = std::move(iTexture);
 			}
 		}
-		printf("%s\n", iFile.c_str());
+		//printf("%s\n", iFile.c_str());
 	}
 }
 

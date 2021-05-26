@@ -29,7 +29,7 @@ namespace Cookie
 
 				ParticlesSystem() {}
 
-				ParticlesSystem(const ParticlesSystem& other) : data(other.data), particlesEmiter(other.particlesEmiter)
+				ParticlesSystem(const ParticlesSystem& other) : data(other.data), particlesEmiter(other.particlesEmiter), shader(std::move(other.shader))
 				{ }
 
 				ParticlesSystem(int size, int sizeFrame)
@@ -43,6 +43,7 @@ namespace Cookie
 				void Update()
 				{
 					for (int j = 0; j < data.size(); j++)
+					{
 						for (int k = 0; k < particlesEmiter[j].updates.size(); k++)
 						{
 							particlesEmiter[j].updates[k]->Update(&data[j]);
@@ -64,6 +65,7 @@ namespace Cookie
 									break;
 							}
 						}
+					}
 				}
 
 				void Draw(const Render::Camera& cam, Render::Frustrum& frustrum)

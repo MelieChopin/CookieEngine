@@ -112,9 +112,9 @@ void Editor::Loop()
     Physics::PhysicsHandle physHandle;
 
     /// Particles
-    {
+    
         //First Particles 
-        Cookie::Resources::Particles::ParticlesSystem first = Cookie::Resources::Particles::ParticlesSystem(40, 35);
+        Cookie::Resources::Particles::ParticlesSystem first = Cookie::Resources::Particles::ParticlesSystem(2, 1);
         first.trs.pos = Vec3(0, 3, 0);
         first.trs.rot = Vec3(0, 0, 0);
         first.trs.scale = Vec3(1, 1, 1);
@@ -127,21 +127,22 @@ void Editor::Loop()
         Cookie::Resources::Particles::TimeConstGenerate         time(2);
         Cookie::Resources::Particles::AccelerationRandGenerate  acc(Vec3(-10, -10, -10), Vec3(10, 10, 10));
         Cookie::Resources::Particles::TimeRandGenerate          timeRand(1.0f, 2.25f);
-        Cookie::Resources::Particles::ColorRandGenerate         color(Vec4(0, 0, 0, 1), Vec4(0.7, 0, 0, 0));
-        first.data[0].countAlive = 35;
-        first.data[0].SetIsBIllboard(true);
+        Cookie::Resources::Particles::ColorConstGenerate        color(Vec4(1, 1, 1, 1));
+        Cookie::Resources::Particles::RotateRandGenerate        rot(Vec3(Math::PI/2, 0, 0), Vec3(Math::PI / 2, 0, Math::PI));
+        first.data[0].countAlive = 1;
+        first.data[0].SetIsBIllboard(false);
         first.data[0].mesh = game.resources.meshes["Quad"].get();
-        first.data[0].texture = game.resources.textures2D["Assets/Particles/Smoke.png"].get();
-        first.particlesEmiter[0].generators.push_back(&velRand);
+        first.data[0].texture = game.resources.textures2D["Assets/VFX/Flaque.png"].get();
+        //first.particlesEmiter[0].generators.push_back(&velRand);
         first.particlesEmiter[0].generators.push_back(&timeRand);
-        first.particlesEmiter[0].generators.push_back(&color);
+        first.particlesEmiter[0].generators.push_back(&rot);
         //first.particlesEmiter[0].generators.push_back(&mass);
-        first.particlesEmiter[0].generators.push_back(&acc);
+        //first.particlesEmiter[0].generators.push_back(&acc);
         //for (int i = 0; i < first.particlesEmiter[0].generators.size(); i++)
         //    first.particlesEmiter[0].generators[i]->generate(&first.data[0], 0, first.data[0].countAlive);
 
         Cookie::Resources::Particles::UpdateVelocity    updateVel;
-        Cookie::Resources::Particles::UpdateScale       updateScale;
+        Cookie::Resources::Particles::UpdateScale       updateScale(Math::Vec3(4, 4, 4));
         Cookie::Resources::Particles::EnabledGravity    enabledGravity(-9.81f);
         Cookie::Resources::Particles::UpdateTime        updateTime;
         Cookie::Resources::Particles::UpdateAlpha       alpha;
@@ -149,25 +150,25 @@ void Editor::Loop()
         Cookie::Resources::Particles::SlowDown          slow(0.45f);
         Cookie::Resources::Particles::ColorOverLife     col(Vec4(1.5f, 1, 0, 0));
         Cookie::Resources::Particles::CollisionWithPlane collisionWithPlane(Cookie::Core::Math::Vec3(0, 1, 0), -1);
-        first.particlesEmiter[0].updates.push_back(&updateVel);
+        //first.particlesEmiter[0].updates.push_back(&updateVel);
         first.particlesEmiter[0].updates.push_back(&updateTime);
-        first.particlesEmiter[0].updates.push_back(&col);
-        first.particlesEmiter[0].updates.push_back(&accu);
-        first.particlesEmiter[0].updates.push_back(&slow);
-        //first.particlesEmiter[0].updates.push_back(&updateScale);
+        first.particlesEmiter[0].updates.push_back(&alpha);
+        //first.particlesEmiter[0].updates.push_back(&accu);
+        //first.particlesEmiter[0].updates.push_back(&slow);
+        first.particlesEmiter[0].updates.push_back(&updateScale);
         //first.particlesEmiter[0].updates.push_back(&collisionWithPlane);
         //first.particlesEmiter[0].updates.push_back(&enabledGravity);
 
-        for (int i = 0; i < 5; i++) // Create 5
+        //for (int i = 0; i < 5; i++) // Create 5
             game.particlesHandler.particlesSystems.push_back(first);
 
-        game.particlesHandler.particlesSystems[0].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(-10, 5, -10));
-        Cookie::Resources::Particles::SpherePositionGenerate circle(Vec3(0, 0, 0), 1, &game.particlesHandler.particlesSystems[0].trs.TRS);
+        game.particlesHandler.particlesSystems[0].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(10, 1, 0));
+        Cookie::Resources::Particles::PointPositionGenerate circle(Vec3(0, 0, 0), &game.particlesHandler.particlesSystems[0].trs.TRS);
         game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators.push_back(&circle);
         Cookie::Resources::Particles::Loop loop(game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators);
         //game.particlesHandler.particlesSystems[0].particlesEmiter[0].updates.push_back(&loop);
 
-        game.particlesHandler.particlesSystems[1].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(-10, 5, 10));
+        /*game.particlesHandler.particlesSystems[1].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(-10, 5, 10));
         Cookie::Resources::Particles::SpherePositionGenerate circle2(Vec3(0, 0, 0), 1, &game.particlesHandler.particlesSystems[1].trs.TRS);
         game.particlesHandler.particlesSystems[1].particlesEmiter[0].generators.push_back(&circle2);
         Cookie::Resources::Particles::Loop loop1(game.particlesHandler.particlesSystems[1].particlesEmiter[0].generators);
@@ -185,10 +186,10 @@ void Editor::Loop()
         Cookie::Resources::Particles::Loop loop3(game.particlesHandler.particlesSystems[3].particlesEmiter[0].generators);
         //game.particlesHandler.particlesSystems[3].particlesEmiter[0].updates.push_back(&loop3);
 
-        game.particlesHandler.particlesSystems[4].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(0, 5, 0));
+        game.particlesHandler.particlesSystems[4].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(-10, 5, -10));
         Cookie::Resources::Particles::SpherePositionGenerate circle5(Vec3(0, 0, 0), 0.4f, &game.particlesHandler.particlesSystems[4].trs.TRS);
         game.particlesHandler.particlesSystems[4].particlesEmiter[0].generators.push_back(&circle5);
-        Cookie::Resources::Particles::Loop loop4(game.particlesHandler.particlesSystems[4].particlesEmiter[0].generators);
+        Cookie::Resources::Particles::Loop loop4(game.particlesHandler.particlesSystems[4].particlesEmiter[0].generators);*/
         //game.particlesHandler.particlesSystems[4].particlesEmiter[0].updates.push_back(&loop4);
 
         for (int i = 0; i < game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators.size(); i++)
@@ -196,7 +197,7 @@ void Editor::Loop()
             generate(&game.particlesHandler.particlesSystems[0].data[0], 0,
                 game.particlesHandler.particlesSystems[0].data[0].countAlive);
 
-        for (int i = 0; i < game.particlesHandler.particlesSystems[1].particlesEmiter[0].generators.size(); i++)
+        /*for (int i = 0; i < game.particlesHandler.particlesSystems[1].particlesEmiter[0].generators.size(); i++)
             game.particlesHandler.particlesSystems[1].particlesEmiter[0].generators[i]->
             generate(&game.particlesHandler.particlesSystems[1].data[0], 0,
                 game.particlesHandler.particlesSystems[1].data[0].countAlive);
@@ -214,10 +215,10 @@ void Editor::Loop()
         for (int i = 0; i < game.particlesHandler.particlesSystems[4].particlesEmiter[0].generators.size(); i++)
             game.particlesHandler.particlesSystems[4].particlesEmiter[0].generators[i]->
             generate(&game.particlesHandler.particlesSystems[4].data[0], 0,
-                game.particlesHandler.particlesSystems[4].data[0].countAlive);
+                game.particlesHandler.particlesSystems[4].data[0].countAlive);*/
 
         //Second Particles in the center particles 
-        Cookie::Resources::Particles::ParticlesSystem second = Cookie::Resources::Particles::ParticlesSystem(40, 30);
+       /* Cookie::Resources::Particles::ParticlesSystem second = Cookie::Resources::Particles::ParticlesSystem(40, 30);
         second.data[0].countAlive = 10;
         second.data[0].SetIsBIllboard(true);
         second.data[0].mesh = game.resources.meshes["Quad"].get();
@@ -243,8 +244,8 @@ void Editor::Loop()
         second.particlesEmiter[0].updates.push_back(&updateScale);
 
         game.particlesHandler.particlesSystems[4].data.push_back(second.data[0]);
-        game.particlesHandler.particlesSystems[4].particlesEmiter.push_back(second.particlesEmiter[0]);
-    }
+        game.particlesHandler.particlesSystems[4].particlesEmiter.push_back(second.particlesEmiter[0]);*/
+    
 
     bool isActive = false;
     {
