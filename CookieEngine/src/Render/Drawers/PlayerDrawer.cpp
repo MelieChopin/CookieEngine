@@ -11,102 +11,20 @@
 using namespace Cookie::Core::Math;
 using namespace Cookie::Render;
 
+constexpr float upEpsilon = 0.1f;
+
+
 struct VS_CONSTANT_BUFFER
 {
     Mat4 model;
     Mat4 viewProj;
 };
 
-constexpr float upEpsilon = 0.1f;
 
 /*=========================== CONSTRUCTORS/DESTRUCTORS ===========================*/
 
 PlayerDrawer::PlayerDrawer()
 {
-	InitShader();
-}
-
-PlayerDrawer::~PlayerDrawer()
-{
-    if (VShader)
-        VShader->Release();
-    if (PShader)
-        PShader->Release();
-    if (VCBuffer)
-        VCBuffer->Release();
-    if (PCBuffer)
-        PCBuffer->Release();
-}
-
-/*=========================== INIT METHODS ===========================*/
-
-void PlayerDrawer::InitShader()
-{
-	ID3DBlob* blob = nullptr;
-
-    std::string source = (const char*)R"(#line 31
-    struct VOut
-    {
-        float4 position : SV_POSITION;
-        float2 uv : UV;
-    };
-
-    cbuffer VS_CONSTANT_BUFFER : register(b0)
-    {
-        float4x4  model;
-        float4x4  viewProj;
-    };
-    
-    VOut main(float3 position : POSITION, float2 uv : UV, float3 normal : NORMAL)
-    {
-        VOut output;
-    
-        output.position = mul(mul(float4(position,1.0),model), viewProj);
-        output.uv       = uv;
-    
-        return output;
-
-    }
-    )";
-
-    Render::CompileVertex(source, &blob, &VShader);
-
-    source = (const char*)R"(#line 31
-
-    Texture2D	albedoTex : register(t0);
-    
-    SamplerState WrapSampler : register(s0);
-
-    struct VOut
-    {
-        float4 position : SV_POSITION;
-        float2 uv : UV;
-    };
-
-    cbuffer PS_CONSTANT_BUFFER : register(b0)
-    {
-        float4 color;
-    };
-    
-    float4 main(VOut vertexOutput) : SV_TARGET
-    {
-        float3 texColor     = albedoTex.Sample(WrapSampler,vertexOutput.uv).rgb;
-
-        float4 finalColor   = float4(lerp(texColor*color.rgb,color.rgb,step(0.0,dot(texColor,texColor))),color.a);
-    
-        return finalColor;
-
-    }
-    )";
-
-    Render::CompilePixel(source, &PShader);
-
-    VS_CONSTANT_BUFFER buffer = {};
-    Render::CreateBuffer(&buffer, sizeof(VS_CONSTANT_BUFFER), &VCBuffer);
-
-    Vec4 aColor;
-    Render::CreateBuffer(&aColor, sizeof(Vec4), &PCBuffer);
-
     /* creating a quad already rotated */
     std::vector<float> vertices = { -0.5f, upEpsilon, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
                                      0.5f, upEpsilon, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
@@ -117,9 +35,14 @@ void PlayerDrawer::InitShader()
 
 
     quadMesh = std::make_unique<Resources::Mesh>("SelectQuad", vertices, indices, 6);
-
-    blob->Release();
 }
+
+PlayerDrawer::~PlayerDrawer()
+{
+}
+
+/*=========================== INIT METHODS ===========================*/
+
 
 /*=========================== REALTIME METHODS ===========================*/
 
@@ -143,18 +66,17 @@ void PlayerDrawer::Set(const DrawDataHandler& drawData)
         {
             playerDrawInfo.buildingMesh         = player.workerWhoBuild->possibleBuildings[player.indexOfBuildingInWorker]->model.mesh;
             playerDrawInfo.buildingAlbedoTex    = player.workerWhoBuild->possibleBuildings[player.indexOfBuildingInWorker]->model.albedo;
-            playerDrawInfo.buildingTRS          = player.workerWhoBuild->possibleBuildings[player.indexOfBuildingInWorker]->transform.TRS;
+            playerDrawInfo.buildingTRS          = player.workerWhoBuild->possibleBuildings[player.indexOfBuildingInWorker]->transform.TRS * Mat4::Translate(player.buildingPos);
         }
+    }
+    else
+    {
+        playerDrawInfo.buildingMesh = nullptr;
     }
 }
 
-void PlayerDrawer::Draw()
+void PlayerDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
 {
-    Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
-    Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
-    Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &VCBuffer);
-    Render::RendererRemote::context->PSSetConstantBuffers(0, 1, &PCBuffer);
-
     ID3D11ShaderResourceView* tex[1] = {nullptr};
     Render::RendererRemote::context->PSSetShaderResources(0, 1, tex);
 
@@ -165,13 +87,12 @@ void PlayerDrawer::Draw()
 
     Vec4 color = playerDrawInfo.validColor;
     size_t colorSize = sizeof(Vec4);
+    Render::WriteCBuffer(&color, colorSize, 0, &PCBuffer);
 
     if (playerDrawInfo.isMakingQuad)
     {
         buffer.model = playerDrawInfo.quadTrs;
         Render::WriteCBuffer(&buffer, bufferSize, 0, &VCBuffer);
-
-        Render::WriteCBuffer(&color, colorSize, 0, &PCBuffer);
 
         quadMesh->Set();
         quadMesh->Draw();

@@ -635,6 +635,8 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 				 js["Transform"]["Rotation"].get_to(newPrefab.transform.rot.e); 
 			 if (js["Transform"]["Scale"].is_array())
 				 js["Transform"]["Scale"].get_to(newPrefab.transform.scale.e);
+			 
+			 newPrefab.transform.ComputeTRS();
 		 }
 
 		 if (js.contains("Signature"))

@@ -17,6 +17,12 @@ namespace Cookie
 		class GameplayPass
 		{
 			private:
+				ID3D11VertexShader*			VShader{ nullptr };
+				ID3D11PixelShader*			PShader{ nullptr };
+
+				ID3D11Buffer* VCBuffer{ nullptr };
+				ID3D11Buffer* PCBuffer{ nullptr };
+
 				ID3D11RasterizerState*		rasterizerState		{ nullptr };
 				ID3D11DepthStencilState*	depthStencilState	{ nullptr };
 				ID3D11BlendState*			blendState			{ nullptr };
@@ -26,6 +32,8 @@ namespace Cookie
 				PlayerDrawer				playerDrawer;
 
 			private:
+
+				void InitShader();
 				void InitState();
 
 			public:

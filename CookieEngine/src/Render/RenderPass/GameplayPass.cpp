@@ -6,10 +6,17 @@ using namespace Cookie::Core::Math;
 using namespace Cookie::Render;
 
 
+struct VS_CONSTANT_BUFFER
+{
+    Mat4 model;
+    Mat4 viewProj;
+};
+
 /*=========================== CONSTRUCTORS/DESTRUCTORS ===========================*/
 
 GameplayPass::GameplayPass()
 {
+    InitShader();
     InitState();
 }
 
@@ -31,9 +38,88 @@ GameplayPass::~GameplayPass()
     {
         PSampler->Release();
     }
+    if (VShader)
+        VShader->Release();
+    if (PShader)
+        PShader->Release();
+    if (VCBuffer)
+        VCBuffer->Release();
+    if (PCBuffer)
+        PCBuffer->Release();
 }
 
 /*=========================== INIT METHODS ===========================*/
+
+
+void GameplayPass::InitShader()
+{
+    ID3DBlob* blob = nullptr;
+
+    std::string source = (const char*)R"(#line 31
+    struct VOut
+    {
+        float4 position : SV_POSITION;
+        float2 uv : UV;
+    };
+
+    cbuffer VS_CONSTANT_BUFFER : register(b0)
+    {
+        float4x4  model;
+        float4x4  viewProj;
+    };
+    
+    VOut main(float3 position : POSITION, float2 uv : UV, float3 normal : NORMAL)
+    {
+        VOut output;
+    
+        output.position = mul(mul(float4(position,1.0),model), viewProj);
+        output.uv       = uv;
+    
+        return output;
+
+    }
+    )";
+
+    Render::CompileVertex(source, &blob, &VShader);
+
+    source = (const char*)R"(#line 31
+
+    Texture2D	albedoTex : register(t0);
+    
+    SamplerState WrapSampler : register(s0);
+
+    struct VOut
+    {
+        float4 position : SV_POSITION;
+        float2 uv : UV;
+    };
+
+    cbuffer PS_CONSTANT_BUFFER : register(b0)
+    {
+        float4 color;
+    };
+    
+    float4 main(VOut vertexOutput) : SV_TARGET
+    {
+        float3 texColor     = albedoTex.Sample(WrapSampler,vertexOutput.uv).rgb;
+
+        float4 finalColor   = float4(lerp(texColor*color.rgb,color.rgb,step(0.0,dot(texColor,texColor))),color.a);
+    
+        return finalColor;
+
+    }
+    )";
+
+    Render::CompilePixel(source, &PShader);
+
+    VS_CONSTANT_BUFFER buffer = {};
+    Render::CreateBuffer(&buffer, sizeof(VS_CONSTANT_BUFFER), &VCBuffer);
+
+    Vec4 aColor;
+    Render::CreateBuffer(&aColor, sizeof(Vec4), &PCBuffer);
+
+    blob->Release();
+}
 
 void GameplayPass::InitState()
 {
@@ -123,6 +209,11 @@ void GameplayPass::Set()
     Render::RendererRemote::context->OMSetBlendState(blendState, blendFactor, 0xffffffff);
 
     Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
+
+    Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
+    Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
+    Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &VCBuffer);
+    Render::RendererRemote::context->PSSetConstantBuffers(0, 1, &PCBuffer);
 }
 
 void GameplayPass::Draw(const DrawDataHandler& drawData)
@@ -130,6 +221,6 @@ void GameplayPass::Draw(const DrawDataHandler& drawData)
     if (drawData.player && drawData.currentCam)
     {
         playerDrawer.Set(drawData);
-        playerDrawer.Draw();
+        playerDrawer.Draw(VCBuffer,PCBuffer);
     }
 }

@@ -37,7 +37,7 @@ namespace Cookie
 					Resources::Texture*					matTex = nullptr;
 
 					Core::Math::Mat4					model;
-					Core::Math::Vec2					tileSize;
+					Core::Math::Vec2					tileNb;
 
 					Core::Math::Vec3					limitColor;
 					Core::Math::Vec2					tileLimits{ {0.02f,0.98f} };

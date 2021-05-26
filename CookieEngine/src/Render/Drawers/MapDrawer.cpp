@@ -12,7 +12,7 @@ using namespace Cookie::Core::Math;
 struct VS_CONSTANT_BUFFER
 {
     Mat4 model;
-    Vec4 tileSize;
+    Vec4 tileNb;
 };
 
 
@@ -188,7 +188,7 @@ void MapDrawer::Set(const Resources::Map& map)
     mapInfo.matTex = map.model.metallicRoughness;
 
     mapInfo.model = map.trs.TRS;
-    mapInfo.tileSize = map.tilesSize;
+    mapInfo.tileNb = map.tilesNb;
 }
 
 void MapDrawer::Draw()
@@ -197,7 +197,7 @@ void MapDrawer::Draw()
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
     VS_CONSTANT_BUFFER vbuffer   = {};
     vbuffer.model                = mapInfo.model;
-    vbuffer.tileSize             = { mapInfo.tileSize.x,mapInfo.tileSize.y,0.0f,0.0f };
+    vbuffer.tileNb             = { mapInfo.tileNb.x,mapInfo.tileNb.y,0.0f,0.0f };
 
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &VCBuffer);
     Render::WriteCBuffer(&vbuffer, sizeof(vbuffer), 0, &VCBuffer);

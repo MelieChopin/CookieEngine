@@ -278,8 +278,6 @@ void Editor::Loop()
 
         //Draw
         game.renderer.Draw(&cam, game,editorFBO);
-        if (game.playerData.buildingToBuild)
-          dbgRenderer.AddQuad(game.playerData.buildingPos, game.playerData.buildingToBuild->tileSize.x * game.scene->map.tilesSize.x / 2, game.playerData.buildingToBuild->tileSize.y * game.scene->map.tilesSize.y / 2, (game.playerData.isBuildingValid) ? 0x00FF00 : 0xFF0000);
 		for (int i = 0; i < game.particlesHandler.particlesSystems.size(); i++)
             game.particlesHandler.particlesSystems[i].Draw(cam, game.resources);
 

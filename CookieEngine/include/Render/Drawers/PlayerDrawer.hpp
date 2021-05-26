@@ -3,8 +3,6 @@
 
 #include <Mat4.hpp>
 
-struct ID3D11VertexShader;
-struct ID3D11PixelShader;
 struct ID3D11Buffer;
 
 #define PLAYER_INIT_VALID_COLOR {0.0f,1.0f,0.0f,0.5f}
@@ -32,10 +30,8 @@ namespace Cookie
 		private:
 
 
-			ID3D11VertexShader* VShader			{ nullptr };
-			ID3D11PixelShader*	PShader			{ nullptr };
-			ID3D11Buffer*		VCBuffer		{ nullptr };
-			ID3D11Buffer*		PCBuffer		{ nullptr };
+			
+
 
 			std::unique_ptr<Resources::Mesh> quadMesh { nullptr };
 
@@ -61,15 +57,12 @@ namespace Cookie
 
 			PlayerDrawInfo playerDrawInfo;
 
-		private:
-			void InitShader();
-
 		public:
 			PlayerDrawer();
 			~PlayerDrawer();
 
 			void Set(const DrawDataHandler& drawData);
-			void Draw();
+			void Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer);
 		};
 	}
 }
