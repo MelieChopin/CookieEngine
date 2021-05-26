@@ -72,6 +72,11 @@ void Game::HandleGameplayInputs(Render::DebugRenderer& dbg)
 {
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
         coordinator.AddEntity(resources.prefabs["04Base"].get(), "good");
+    if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_H])
+    {
+        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["04Base"].get(), "good");
+        coordinator.componentHandler->GetComponentGameplay(newEntity.id).AddComponent(CGP_SIGNATURE::RESOURCE);
+    }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B])
         coordinator.AddEntity(resources.prefabs["04Base"].get(), "bad");
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
@@ -96,8 +101,14 @@ void Game::HandleGameplayInputs(Render::DebugRenderer& dbg)
 
         if (!ImGui::GetIO().MouseDownDuration[1])
         {
+            //CGPMove
             InputMoveSelected();
+            
+            //CGPProducer
             InputSetNewEntityDestination();
+
+            //CGPWorker
+            InputSetResourceToWorkers();
         }
 
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_C])
@@ -150,7 +161,7 @@ void Game::InputEndSelectionQuad()
     if ((playerData.selectionQuadStart - playerData.mousePosInWorld).Length() < MINIMUM_SELECTION_QUAD_LENGTH)
     {
         coordinator.selectedEntities.clear();
-        ECS::Entity* possibleSelectedEntity = coordinator.GetClosestValidEntity(playerData.selectionQuadStart);
+        ECS::Entity* possibleSelectedEntity = coordinator.GetClosestSelectableEntity(playerData.selectionQuadStart);
 
         if (possibleSelectedEntity)
             coordinator.selectedEntities.push_back(possibleSelectedEntity);
@@ -212,6 +223,39 @@ void Game::InputSetNewEntityDestination()
         if (gameplay.signatureGameplay & CGP_SIGNATURE::PRODUCER)
             gameplay.componentProducer.newUnitDestination = playerData.mousePosInWorld;
     }
+}
+void Game::InputSetResourceToWorkers()
+{
+    ECS::Entity* resource = coordinator.GetClosestSelectableEntity(playerData.mousePosInWorld, CGP_SIGNATURE::RESOURCE);
+
+    //if we don't select an entity with CGPResource in the first place, quit
+    if (!resource)
+        return;
+
+    for (int i = 0; i < coordinator.selectedEntities.size(); ++i)
+    {
+        if (coordinator.componentHandler->GetComponentGameplay(resource->id).componentResource.nbOfWorkerOnIt == MAX_WORKER_PER_RESOURCE)
+        {
+            resource = coordinator.GetClosestFreeResourceEntity(playerData.mousePosInWorld);
+            //if there is no more free resources available
+            if (!resource)
+                return;
+        }
+
+        float selectedEntityId = coordinator.selectedEntities[i]->id;
+        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(selectedEntityId);
+
+        if (gameplay.signatureGameplay & CGP_SIGNATURE::WORKER)
+        {
+            if (gameplay.componentWorker.resource)
+                gameplay.componentWorker.resource->nbOfWorkerOnIt--;
+
+            gameplay.componentWorker.posResource = &coordinator.componentHandler->GetComponentTransform(resource->id).pos;
+            gameplay.componentWorker.resource    = &coordinator.componentHandler->GetComponentGameplay(resource->id).componentResource;
+            gameplay.componentWorker.resource->nbOfWorkerOnIt++;
+        }
+    }
+
 }
 void Game::InputStartBuilding(int index)
 {

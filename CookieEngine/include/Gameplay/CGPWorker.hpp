@@ -2,6 +2,7 @@
 #define _CGP_WORKER_HPP__
 
 #include "ComponentTransform.hpp"
+#include "Gameplay/CGPResource.hpp"
 #include "Gameplay/Income.hpp"
 #include <vector>
 
@@ -34,10 +35,10 @@ namespace Cookie
 			//Harvest
 			Income* income                   {nullptr};
 			Core::Math::Vec3* posBase        {nullptr};
-			Core::Math::Vec3  posResource    {25, 0, 0};
+			Core::Math::Vec3* posResource    {nullptr};
+			CGPResource*      resource       {nullptr};
 			float harvestCountdown           {0};
 			bool isCarryingResource          {false};
-			bool isResourcePrimary           {true};
 
 			//Building
 			std::vector<Resources::Prefab*>	possibleBuildings;
@@ -53,10 +54,10 @@ namespace Cookie
 			{
 				income						= nullptr;
 				posBase                     = nullptr;
-				posResource                 = {0, 0, 0};
+				posResource                 = nullptr;
+				resource					= nullptr;
 				harvestCountdown            = 0;
 				isCarryingResource          = false;
-				isResourcePrimary           = false;
 				BuildingInConstruction       = nullptr;
 				constructionCountdown       = 0;
 			}

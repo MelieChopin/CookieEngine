@@ -54,13 +54,15 @@ void CGPWorker::Update(Resources::Map& map, Coordinator& coordinator, int selfId
 
 	//isMoving
 	ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(selfId);
-	Core::Math::Vec3 destination = (needTostartBuilding) ? posBuilding : (isCarryingResource) ? *posBase : posResource;
-	Core::Math::Vec3 direction = (destination - trs.pos).Normalize();
+	Core::Math::Vec3* destination = (needTostartBuilding) ? &posBuilding : (isCarryingResource) ? posBase : posResource;
+	if (!destination)
+		return;
+	Core::Math::Vec3 direction = (*destination - trs.pos).Normalize();
 	trs.pos += direction * (moveSpeed * Core::DeltaTime());
 	trs.trsHasChanged = true;
 
 	//HasReachDestination
-	if ((destination - trs.pos).Length() < 0.1)
+	if ((*destination - trs.pos).Length() < 0.1)
 	{
 		if (needTostartBuilding)
 		{
@@ -69,8 +71,9 @@ void CGPWorker::Update(Resources::Map& map, Coordinator& coordinator, int selfId
 		}
 		else if (isCarryingResource)
 		{
-			isCarryingResource = false;
-			(isResourcePrimary ? income->primary : income->secondary) += (isResourcePrimary ? PRIMARY_PER_RECOLT : SECONDARY_PER_RECOLT);
+			isCarryingResource = false;			
+			(resource->isPrimary ? income->primary : income->secondary) += (resource->isPrimary ? PRIMARY_PER_RECOLT : SECONDARY_PER_RECOLT);
+			resource->resourceReserve -= (resource->isPrimary ? PRIMARY_PER_RECOLT : SECONDARY_PER_RECOLT);
 			std::cout << coordinator.componentHandler->GetComponentGameplay(selfId).teamName << " : " << income->primary << "\n";
 		}
 		else

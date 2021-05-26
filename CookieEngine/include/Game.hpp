@@ -57,6 +57,7 @@ namespace Cookie
 			void InputEndSelectionQuad();
 			void InputMoveSelected();
 			void InputSetNewEntityDestination();
+			void InputSetResourceToWorkers();
 			void InputStartBuilding(int index);
 			void InputAddUnit(int index);
 			void DisplaySelectionQuad(Render::DebugRenderer& dbg);
