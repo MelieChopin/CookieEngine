@@ -118,6 +118,9 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 			for (int i = 0; i < gameplay.componentProducer.possibleUnits.size(); i++)
 				game["CGPProducer"]["name"] += gameplay.componentProducer.possibleUnits[i]->name;
 
+			for (int i = 0; i < gameplay.componentProducer.occupiedTiles.size(); i++)
+				js["Map"]["OccupiedTiles"] += gameplay.componentProducer.occupiedTiles[i]->id;
+
 			game["CGPProducer"]["TileSize"] = gameplay.componentProducer.tileSize.e;
 
 			for (int i = 0; i < gameplay.componentWorker.possibleBuildings.size(); i++)
@@ -159,7 +162,6 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 		SavePhysic(map["physic"], actMap.physic);
 	}
 
-
 	if (actScene.entityHandler.livingEntities > 0)
 	{
 		//Entities
@@ -170,6 +172,21 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 		//Components
 		{
 			Cookie::Resources::Serialization::Save::ToJson(js, actScene.entityHandler, actScene.componentHandler, resourcesManager);
+		}
+	}
+
+	//UI Scene
+	{
+		Cookie::UI::UIscene ui = actScene.uiScene;
+
+		std::vector<Cookie::UI::UIscene::GameWindowInfo> info = ui.SaveLayout();
+		for (int i = 0; i < info.size(); i++)
+		{
+			js["UIScene"] += json{  { "ID", info[i].ID },
+									{ "xPos", info[i].xPos },
+									{ "yPos", info[i].yPos },
+									{ "width", info[i].width },
+									{ "height", info[i].height } };
 		}
 	}
 
@@ -565,29 +582,6 @@ std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const c
 		 }
 	 }
 	 
-	 if (js.contains("Map"))
-	 {
-		 Cookie::Resources::Scene* scene = newScene.get();
-		 Cookie::Resources::ResourcesManager& resources = game.resources;
-
-		 js["Map"]["tilesNb"].get_to(scene->map.tilesNb.e);
-		 js["Map"]["tilesSize"].get_to(scene->map.tilesSize.e);
-
-		 js["Map"]["trs"]["pos"].get_to(scene->map.trs.pos.e);
-		 js["Map"]["trs"]["rot"].get_to(scene->map.trs.rot.e);
-		 //js["Map"]["trs"]["scale"].get_to(scene->map.trs.scale.e);
-
-		 if (js["Map"]["model"]["texture"].contains("albedo"))
-			 scene->map.model.albedo = resources.textures2D[js["Map"]["model"]["texture"]["albedo"].get<std::string>()].get();
-		 if (js["Map"]["model"]["texture"].contains("normal"))
-			 scene->map.model.normal = resources.textures2D[js["Map"]["model"]["texture"]["normal"].get<std::string>()].get();
-		 if (js["Map"]["model"]["texture"].contains("metallic"))
-			 scene->map.model.metallicRoughness = resources.textures2D[js["Map"]["model"]["texture"]["metallic"].get<std::string>()].get();
-
-		 LoadPhysic(js["Map"]["physic"], scene->map.physic);
-		 scene->map.InitTiles();
-	 } 
-	 
 	 if (js.contains("EntityHandler"))
 	 {
 		 int newSizeEntities = js["EntityHandler"].size();
@@ -614,6 +608,56 @@ std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const c
 		 }
 	 }
 		 
+	 if (js.contains("Map"))
+	 {
+		 Cookie::Resources::Scene* scene = newScene.get();
+		 Cookie::Resources::ResourcesManager& resources = game.resources;
+
+		 js["Map"]["tilesNb"].get_to(scene->map.tilesNb.e);
+		 js["Map"]["tilesSize"].get_to(scene->map.tilesSize.e);
+
+		 js["Map"]["trs"]["pos"].get_to(scene->map.trs.pos.e);
+		 js["Map"]["trs"]["rot"].get_to(scene->map.trs.rot.e);
+		 //js["Map"]["trs"]["scale"].get_to(scene->map.trs.scale.e);
+		 scene->map.trs.ComputeTRS();
+
+		 if (js["Map"]["model"]["texture"].contains("albedo"))
+			 scene->map.model.albedo = resources.textures2D[js["Map"]["model"]["texture"]["albedo"].get<std::string>()].get();
+		 if (js["Map"]["model"]["texture"].contains("normal"))
+			 scene->map.model.normal = resources.textures2D[js["Map"]["model"]["texture"]["normal"].get<std::string>()].get();
+		 if (js["Map"]["model"]["texture"].contains("metallic"))
+			 scene->map.model.metallicRoughness = resources.textures2D[js["Map"]["model"]["texture"]["metallic"].get<std::string>()].get();
+
+		 if (js["Map"].contains("OccupiedTiles"))
+		 {
+			 for (int i = 0; i < js["Map"]["OccupiedTiles"].size(); i++)
+				 scene->map.tiles[js["Map"]["OccupiedTiles"][i].get<int>()].isObstacle = true;
+		 }
+
+		 LoadPhysic(js["Map"]["physic"], scene->map.physic);
+		 scene->map.InitTiles();
+	 }
+
+	 if (js.contains("UIScene"))
+	 {
+		 if (js["UIScene"].size() != 0)
+		 {
+			std::vector<Cookie::UI::UIscene::GameWindowInfo> list;
+			for (int i = 0; i < js["UIScene"].size(); i++)
+			{
+				Cookie::UI::UIscene::GameWindowInfo info;
+				json ui = js["UIScene"][i];
+				info.ID = ui["ID"].get<int>();
+				info.xPos = ui["xPos"].get<int>();
+				info.yPos = ui["yPos"].get<int>();
+				info.width = ui["width"].get<int>();
+				info.height = ui["height"].get<int>();
+				list.push_back(info);
+			}
+			newScene.get()->uiScene.LoadLayout(list);
+		 }
+	 }
+
 	 newScene->filepath = filepath;
 
 	 return newScene;

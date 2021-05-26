@@ -14,15 +14,15 @@ using namespace Cookie::Gameplay;
 Map::Map()
 {
 	trs.scale = { MAP_DEFAULT_SCALE_WIDTH, 1.0f, MAP_DEFAULT_SCALE_HEIGHT };
-	trs.ComputeTRS();
-	tilesSize = { { trs.scale.x / tilesNb.x, trs.scale.z / tilesNb.y } };
+	//trs.ComputeTRS();
+	//tilesSize = { { trs.scale.x / tilesNb.x, trs.scale.z / tilesNb.y } };
 
 	//init Component Physic
-	physic.physBody = Physics::PhysicsHandle::physSim->createRigidBody(rp3d::Transform(rp3d::Vector3(0.0, 0.0, 0.0), rp3d::Quaternion::identity()));
-	physic.physBody->setType(rp3d::BodyType::STATIC);
-	physic.AddCubeCollider(trs.scale / 2.f, trs.pos, trs.rot);
+	//physic.physBody = Physics::PhysicsHandle::physSim->createRigidBody(rp3d::Transform(rp3d::Vector3(0.0, 0.0, 0.0), rp3d::Quaternion::identity()));
+	//physic.physBody->setType(rp3d::BodyType::STATIC);
+	//physic.AddCubeCollider(trs.scale / 2.f, trs.pos, trs.rot);
 
-	InitTiles();
+	//InitTiles();
 }
 
 void Map::InitTiles()
