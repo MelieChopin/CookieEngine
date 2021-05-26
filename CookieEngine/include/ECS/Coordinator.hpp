@@ -48,7 +48,7 @@ namespace Cookie
 			
 			//Selection
 			void SelectEntities(Core::Math::Vec3& selectionQuadStart, Core::Math::Vec3& selectionQuadEnd);
-
+			Entity* GetClosestValidEntity(Core::Math::Vec3& pos, int minimumGameplaySignatureWanted = 0);
 
 			//Primary Component
 			//void ApplySystemPhysics(float factor);

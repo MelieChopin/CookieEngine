@@ -145,7 +145,18 @@ void Game::InputStartSelectionQuad()
 void Game::InputEndSelectionQuad()
 {
     playerData.makingASelectionQuad = false;
-    coordinator.SelectEntities(playerData.selectionQuadStart, playerData.mousePosInWorld);
+
+    //if selection quad is small try select closest Entity else select all entities with trs.pos inside selection quad
+    if ((playerData.selectionQuadStart - playerData.mousePosInWorld).Length() < MINIMUM_SELECTION_QUAD_LENGTH)
+    {
+        coordinator.selectedEntities.clear();
+        ECS::Entity* possibleSelectedEntity = coordinator.GetClosestValidEntity(playerData.selectionQuadStart);
+
+        if (possibleSelectedEntity)
+            coordinator.selectedEntities.push_back(possibleSelectedEntity);
+    }
+    else
+        coordinator.SelectEntities(playerData.selectionQuadStart, playerData.mousePosInWorld);
 }
 void Game::InputMoveSelected()
 {

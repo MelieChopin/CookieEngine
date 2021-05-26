@@ -23,6 +23,8 @@ namespace Cookie
 		class Scene;
 	}
 
+	#define MINIMUM_SELECTION_QUAD_LENGTH 1
+
 	class Game
 	{
 		private:
