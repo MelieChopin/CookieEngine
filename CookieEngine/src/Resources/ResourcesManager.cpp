@@ -59,7 +59,7 @@ void ResourcesManager::SearchForAssets(const fs::path& path, std::vector<std::st
 					assetsFiles.push_back(filepath.string());
 				else if (filepath.string().find(".ico") != std::string::npos)
 					assetsFiles.push_back(filepath.string());
-				else if (filepath.string().find(".tga") != std::string::npos)
+				else if (filepath.string().find(".tif") != std::string::npos)
 					assetsFiles.push_back(filepath.string());
 			}
 
@@ -117,9 +117,8 @@ void ResourcesManager::Load(Render::Renderer& _renderer)
 		if (textures2D.find(iFile) == textures2D.end() && icons.find(iFile) == icons.end() && skyboxes.find(iFile) == skyboxes.end())
 		{
 			std::unique_ptr<Texture> aTexture = std::make_unique<Texture>(iFile);
-			if (iFile.find(".ico") != std::string::npos || iFile.find(".tga") != std::string::npos)
+			if (iFile.find("Assets/EditorUIcons/") != std::string::npos || iFile.find("Assets/UI/") != std::string::npos)
 			{
-
 				icons[iFile] = std::move(aTexture);
 			}
 			else

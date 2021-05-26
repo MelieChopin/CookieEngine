@@ -32,7 +32,7 @@ namespace Cookie
 
 			private:
 				bool CreateTextureFromColor(const Core::Math::Vec4& color);
-				bool CreateShaderResource();
+				bool CreateShaderResource(DXGI_FORMAT format);
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
