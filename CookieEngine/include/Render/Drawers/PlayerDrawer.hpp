@@ -10,11 +10,6 @@ struct ID3D11Buffer;
 
 namespace Cookie
 {
-	namespace Gameplay
-	{
-		struct PlayerData;
-	}
-
 	namespace Resources
 	{
 		class Texture;
@@ -28,16 +23,9 @@ namespace Cookie
 		class PlayerDrawer
 		{
 		private:
-
-
-			
-
-
 			std::unique_ptr<Resources::Mesh> quadMesh { nullptr };
 
 		public:
-			struct PlayerDrawInfo
-			{
 				Core::Math::Mat4 viewProj;
 
 				Core::Math::Vec4 validColor		PLAYER_INIT_VALID_COLOR ;
@@ -53,9 +41,6 @@ namespace Cookie
 				Resources::Mesh*	buildingMesh		= nullptr;
 				Resources::Texture* buildingAlbedoTex	= nullptr;
 				Core::Math::Mat4	buildingTRS;
-			};
-
-			PlayerDrawInfo playerDrawInfo;
 
 		public:
 			PlayerDrawer();

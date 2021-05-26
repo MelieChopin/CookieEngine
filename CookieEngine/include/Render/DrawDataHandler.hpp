@@ -21,6 +21,7 @@ namespace Cookie
 	namespace ECS
 	{
 		class ComponentModel;
+		class ComponentGameplay;
 	}
 
 	namespace Resources
@@ -33,9 +34,8 @@ namespace Cookie
 	{
 		class Camera;
 
-		class Frustrum
+		struct Frustrum
 		{
-		public :
 			std::array<Core::Math::Vec4, 6> planes;
 			Core::Math::Vec3				centroid;
 			std::array<Core::Math::Vec3, 8> corners;
@@ -60,9 +60,13 @@ namespace Cookie
 				const Camera*						currentCam;
 				const Gameplay::PlayerData*			player;
 
+
+				std::vector<ECS::ComponentModel>	selectedModels;
+				std::vector<Core::Math::Mat4>		selectedMatrices;
+				std::vector<ECS::ComponentGameplay> selectedGameplays;
+
 			private:
 				void InitCBuffer();
-				//void MakeFrustrum(const Camera& cam);
 
 			public:
 				DrawDataHandler();
