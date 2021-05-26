@@ -5,24 +5,26 @@
 
 namespace Cookie::Resources { class Scene; class ResourceManager; }
 
-namespace Cookie::Render	{ struct LightsArray; }
+namespace Cookie::Render	{ struct LightsArray; class SkyBox; }
 
 
 namespace Cookie::UIwidget
 {
 	class WorldSettingsWidget final : public WItemBase
 	{
-		std::shared_ptr<Resources::Scene>& scene;
+		std::shared_ptr<Resources::Scene>&	scene;
+		Cookie::Render::LightsArray&		lights;
+		Cookie::Render::SkyBox&				skybox;
+
 		Cookie::Resources::ResourcesManager& resources;
 
-		Cookie::Render::LightsArray& lights;
-
 	public:
-		inline WorldSettingsWidget(std::shared_ptr<Resources::Scene>& _scene, Cookie::Resources::ResourcesManager& _resources, Cookie::Render::LightsArray& _lights)
+		inline WorldSettingsWidget(std::shared_ptr<Resources::Scene>& _scene, Cookie::Render::LightsArray& _lights, Cookie::Render::SkyBox& _skybox, Cookie::Resources::ResourcesManager& _resources)
 			: WItemBase	("World settings", false),
 			  scene		(_scene),
-			  resources (_resources),
-			  lights	(_lights)
+			  lights	(_lights),
+			  skybox	(_skybox),
+			  resources (_resources)
 		{}
 
 		void WindowDisplay() override;

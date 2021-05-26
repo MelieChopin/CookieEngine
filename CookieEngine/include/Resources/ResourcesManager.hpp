@@ -44,7 +44,7 @@ namespace Cookie
 				std::unordered_map<std::string, std::unique_ptr<Sound>>		sounds;
 				
 			private:
-				void SearchForAssets(const fs::path& path, std::vector<fs::path>& gltfFiles);
+				void SearchForAssets(const fs::path& path, std::vector<std::string>& gltfFiles);
 
 				void InitPrimitives();
 				

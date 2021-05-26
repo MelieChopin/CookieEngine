@@ -3,9 +3,8 @@
 
 #include "UIwidgetBases.hpp"
 
-namespace Cookie::Core		{ class  DebugMessageHandler; struct DebugMessage; }
-namespace Cookie::Resources { class  Texture; }
-namespace Cookie::Render	{ class  Renderer; }
+namespace Cookie::Core		{ class DebugMessageHandler; struct DebugMessage; }
+namespace Cookie::Resources { class ResourcesManager; class Texture; }
 
 
 namespace Cookie::UIwidget
@@ -18,7 +17,7 @@ namespace Cookie::UIwidget
 
 		bool messagesGrouped = false;
 
-		std::unique_ptr<Cookie::Resources::Texture> icons[3];
+		const Cookie::Resources::Texture* const icons[3];
 
 	private:
 		void UngroupedDisplay();
@@ -31,7 +30,7 @@ namespace Cookie::UIwidget
 		bool BeginWindow(int windowFlags = 0) final override;
 
 	public:
-		Console(Cookie::Core::DebugMessageHandler& _debugManager, Cookie::Render::Renderer& _renderer);
+		Console(Cookie::Core::DebugMessageHandler& _debugManager, Cookie::Resources::ResourcesManager& _resources);
 		Console(const Console&) = delete;
 		Console(Console&&)		= default;
 

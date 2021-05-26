@@ -9,7 +9,7 @@ namespace Cookie::UIwidget
 	namespace GameWidgetID
 	{ constexpr int GamespectorID = 1 << 0; }
 
-	class Gamespector : public GameWindowBase
+	class Gamespector final : public GameWindowBase
 	{
 	public:
 		inline Gamespector()

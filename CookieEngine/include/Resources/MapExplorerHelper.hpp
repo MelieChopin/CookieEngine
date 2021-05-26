@@ -46,9 +46,12 @@ namespace Cookie::Resources
 	{
 		if (StringHelper::findCaseInsensitive(textIt->second->name, researchString) != std::string::npos)
 		{
-			ImGui::Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
+			if (textIt->second->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
+			{
+				ImGui::Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
 
-			ImGui::SameLine();
+				ImGui::SameLine();
+			}
 
 			if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
 				currentR = textIt->second.get();
