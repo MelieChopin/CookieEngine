@@ -120,7 +120,8 @@ Entity* Coordinator::GetClosestFreeResourceEntity(Core::Math::Vec3& pos)
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::RESOURCE) &&
-			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentResource.nbOfWorkerOnIt < MAX_WORKER_PER_RESOURCE)
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentResource.nbOfWorkerOnIt < MAX_WORKER_PER_RESOURCE && 
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentResource.resourceReserve > 0)
 		{
 			ComponentTransform& trs = componentHandler->GetComponentTransform(entityHandler->entities[i].id);
 			float possibleNewDistance = (trs.pos - pos).Length();

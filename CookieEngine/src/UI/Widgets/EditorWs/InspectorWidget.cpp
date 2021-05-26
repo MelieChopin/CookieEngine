@@ -641,7 +641,7 @@ void Inspector::GameplayInterface()
                     gameplayComp.RemoveComponent(CGP_SIGNATURE::RESOURCE);
 
 
-                DragFloat("##RESERVE", &gameplayComp.componentMove.moveSpeed, 1.f, NULL, NULL, "Reserve: %.0f");
+                DragFloat("##RESERVE", &gameplayComp.componentResource.resourceReserve, 1.f, NULL, NULL, "Reserve: %.0f");
                 Text("Is a primary resource:"); SameLine(); Checkbox("##ISPRIMARY", &gameplayComp.componentResource.isPrimary);
 
                 TreePop();

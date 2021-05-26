@@ -49,11 +49,8 @@ void CGPProducer::UpdateCountdown(Resources::Map& map, Coordinator& coordinator,
 
 				Entity* resourceEntity = coordinator.GetClosestFreeResourceEntity(trs.pos);
 				if (resourceEntity)
-				{
-					newEntityGameplay.componentWorker.posResource = &coordinator.componentHandler->GetComponentTransform(resourceEntity->id).pos;
-					newEntityGameplay.componentWorker.resource    = &coordinator.componentHandler->GetComponentGameplay(resourceEntity->id).componentResource;
-					newEntityGameplay.componentWorker.resource->nbOfWorkerOnIt++;
-				}
+					newEntityGameplay.componentWorker.SetResource(coordinator.componentHandler->GetComponentTransform(resourceEntity->id).pos, coordinator.componentHandler->GetComponentGameplay(resourceEntity->id).componentResource);
+
 			}
 		}
 

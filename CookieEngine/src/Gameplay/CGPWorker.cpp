@@ -47,7 +47,19 @@ void CGPWorker::Update(Resources::Map& map, Coordinator& coordinator, int selfId
 	{
 		harvestCountdown -= Core::DeltaTime();
 		if (harvestCountdown <= 0)
+		{
 			isCarryingResource = true;
+			resource->resourceReserve -= (resource->isPrimary ? PRIMARY_PER_RECOLT : SECONDARY_PER_RECOLT);
+
+			if (resource->resourceReserve <= 0)
+			{
+				Entity* resourceEntity = coordinator.GetClosestFreeResourceEntity(*posResource);
+
+				if (resourceEntity)
+					SetResource(coordinator.componentHandler->GetComponentTransform(resourceEntity->id).pos, coordinator.componentHandler->GetComponentGameplay(resourceEntity->id).componentResource);
+			}
+				
+		}
 
 		return;
 	}
@@ -73,14 +85,22 @@ void CGPWorker::Update(Resources::Map& map, Coordinator& coordinator, int selfId
 		{
 			isCarryingResource = false;			
 			(resource->isPrimary ? income->primary : income->secondary) += (resource->isPrimary ? PRIMARY_PER_RECOLT : SECONDARY_PER_RECOLT);
-			resource->resourceReserve -= (resource->isPrimary ? PRIMARY_PER_RECOLT : SECONDARY_PER_RECOLT);
-			std::cout << coordinator.componentHandler->GetComponentGameplay(selfId).teamName << " : " << income->primary << "\n";
 		}
 		else
 			harvestCountdown = TIME_TO_HARVEST;
 	}
 
 	
+}
+
+void CGPWorker::SetResource(Core::Math::Vec3& resourcePos, CGPResource& resourceCGP)
+{
+	if (resource)
+		resource->nbOfWorkerOnIt--;
+
+	posResource = &resourcePos;
+	resource = &resourceCGP;
+	resource->nbOfWorkerOnIt++;
 }
 
 void CGPWorker::StartBuilding(Vec3& _posBuilding, int indexInPossibleBuildings)

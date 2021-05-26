@@ -9,6 +9,7 @@
 using namespace Cookie;
 using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
+using namespace Cookie::Gameplay;
 using namespace rp3d;
 
 /*================== CONSTRUCTORS/DESTRUCTORS ==================*/
@@ -70,17 +71,44 @@ void Game::CalculateMousePosInWorld(Render::FreeFlyCam& cam)
 }
 void Game::HandleGameplayInputs(Render::DebugRenderer& dbg)
 {
+    
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
-        coordinator.AddEntity(resources.prefabs["04Base"].get(), "good");
-    if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_H])
     {
         ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["04Base"].get(), "good");
-        coordinator.componentHandler->GetComponentGameplay(newEntity.id).AddComponent(CGP_SIGNATURE::RESOURCE);
+
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
+        CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer;
+
+        trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, producer.tileSize);			
+        Vec3 posTopLeft = trs.pos - trs.scale / 2;
+        scene->map.GiveTilesToBuilding(scene->map.GetTileIndex(posTopLeft), producer);        
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B])
-        coordinator.AddEntity(resources.prefabs["04Base"].get(), "bad");
+    {
+        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["04Base"].get(), "bad");
+
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
+        CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer;
+
+        trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, producer.tileSize);
+        Vec3 posTopLeft = trs.pos - trs.scale / 2;
+        scene->map.GiveTilesToBuilding(scene->map.GetTileIndex(posTopLeft), producer);
+    }
+    if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_X])
+    {
+        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["Resource"].get(), "good");
+
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
+        CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer;
+
+        trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, producer.tileSize);
+        Vec3 posTopLeft = trs.pos - trs.scale / 2;
+        scene->map.GiveTilesToBuilding(scene->map.GetTileIndex(posTopLeft), producer);
+    }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
         coordinator.armyHandler->AddArmyCoordinator("bad");
+        
+
 
     if (playerData.buildingToBuild)
     {
@@ -243,14 +271,8 @@ void Game::InputSetResourceToWorkers()
         ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(selectedEntityId);
 
         if (gameplay.signatureGameplay & CGP_SIGNATURE::WORKER)
-        {
-            if (gameplay.componentWorker.resource)
-                gameplay.componentWorker.resource->nbOfWorkerOnIt--;
+            gameplay.componentWorker.SetResource(coordinator.componentHandler->GetComponentTransform(resource->id).pos, coordinator.componentHandler->GetComponentGameplay(resource->id).componentResource);
 
-            gameplay.componentWorker.posResource = &coordinator.componentHandler->GetComponentTransform(resource->id).pos;
-            gameplay.componentWorker.resource    = &coordinator.componentHandler->GetComponentGameplay(resource->id).componentResource;
-            gameplay.componentWorker.resource->nbOfWorkerOnIt++;
-        }
     }
 
 }
