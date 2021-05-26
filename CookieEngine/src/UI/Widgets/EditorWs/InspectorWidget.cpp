@@ -485,15 +485,16 @@ void Inspector::GameplayInterface()
         {
             if (TreeNode("Life/Armor properties"))
             {
+                SameLine();
+                if (SmallButton("Remove##LIVE"))
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::LIVE);
+
+
                 DragFloat("##LIFE",  &gameplayComp.componentLive.life,  1.f, NULL, NULL, "Life: %.0f" );
                 DragFloat("##ARMOR", &gameplayComp.componentLive.armor, 1.f, NULL, NULL, "Armor: %.0f");
 
-
-                NewLine();
-                if (Selectable("Remove the property##LIVE"))
-                    gameplayComp.RemoveComponent(CGP_SIGNATURE::LIVE);
-
                 TreePop();
+                NewLine();
             }
         }
         else if (Selectable("Add life/Armor properties"))
@@ -504,17 +505,18 @@ void Inspector::GameplayInterface()
         {
             if (TreeNode("Movement capacities"))
             {
+                SameLine();
+                if (SmallButton("Remove##MOVE"))
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::MOVE);
+
+
                 DragFloat("##SPEED", &gameplayComp.componentMove.moveSpeed, 0.25f, NULL, NULL, "Speed: %.2f");
                 Text("Flying:"); SameLine(); Checkbox("##CANFLY", &gameplayComp.componentMove.isFlying);
 
                 DragFloat("##RADIUS", &gameplayComp.componentMove.radius, 0.25f, NULL, NULL, "Radius: %.2f");
 
-
-                NewLine();
-                if (Selectable("Remove the property##MOVE"))
-                    gameplayComp.RemoveComponent(CGP_SIGNATURE::MOVE);
-
                 TreePop();
+                NewLine();
             }
         }
         else if (Selectable("Add movement capacities"))
@@ -525,17 +527,18 @@ void Inspector::GameplayInterface()
         {
             if (TreeNode("Attack abilities"))
             {
+                SameLine();
+                if (SmallButton("Remove##ATTACK"))
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::ATTACK);
+
+                
                 DragFloat("##POWER",  &gameplayComp.componentAttack.powerLevel,   1.00f, NULL, NULL, "Power Lv: %.2f");
                 DragFloat("##DAMAGE", &gameplayComp.componentAttack.attackDamage, 0.25f, NULL, NULL, "Damage: %.2f"  );
                 DragFloat("##RANGE",  &gameplayComp.componentAttack.attackRange,  0.25f, NULL, NULL, "Range: %.2f"   );
                 DragFloat("##SPEED",  &gameplayComp.componentAttack.attackSpeed,  0.25f, NULL, NULL, "Speed: %.2f"   );
 
-
-                NewLine();
-                if (Selectable("Remove the property##ATTACK"))
-                    gameplayComp.RemoveComponent(CGP_SIGNATURE::ATTACK);
-
                 TreePop();
+                NewLine();
             }
         }
         else if (Selectable("Add attack abilities"))
@@ -546,6 +549,11 @@ void Inspector::GameplayInterface()
         {
             if (TreeNode("Production property"))
             {
+                SameLine();
+                if (SmallButton("Remove##PRODUCER"))
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::PRODUCER);
+
+
                 DragFloat2("Tile size (in x and z)", gameplayComp.componentProducer.tileSize.e, 0.5f, 0.5f, 100.f, "%.1f");
                 
                 NewLine();
@@ -574,12 +582,8 @@ void Inspector::GameplayInterface()
                         gameplayComp.componentProducer.possibleUnits.push_back(newProductable);
                 }
 
-
-                NewLine();
-                if (Selectable("Remove the property##PRODUCER"))
-                    gameplayComp.RemoveComponent(CGP_SIGNATURE::PRODUCER);
-
                 TreePop();
+                NewLine();
             }
         }
         else if (Selectable("Make this entity a producer"))
@@ -590,6 +594,11 @@ void Inspector::GameplayInterface()
         {
             if (TreeNode("Worker property"))
             {
+                SameLine();
+                if (SmallButton("Remove##WORKER"))
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::WORKER);
+
+
                 Text("Can produce the following buildings:");
 
                 int i = 0;
@@ -615,15 +624,32 @@ void Inspector::GameplayInterface()
                         gameplayComp.componentWorker.possibleBuildings.push_back(newProductable);
                 }
 
-                NewLine();
-                if (Selectable("Remove the property##WORKER"))
-                    gameplayComp.RemoveComponent(CGP_SIGNATURE::WORKER);
-
                 TreePop();
+                NewLine();
             }
         }
         else if (Selectable("Make this entity a worker"))
             gameplayComp.AddComponent(CGP_SIGNATURE::WORKER);
+
+
+        if (gameplayComp.signatureGameplay & CGP_SIGNATURE::RESOURCE)
+        {
+            if (TreeNode("Resource property"))
+            {
+                SameLine();
+                if (SmallButton("Remove##RESOURCE"))
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::RESOURCE);
+
+
+                DragFloat("##RESERVE", &gameplayComp.componentMove.moveSpeed, 1.f, NULL, NULL, "Reserve: %.0f");
+                Text("Is a primary resource:"); SameLine(); Checkbox("##ISPRIMARY", &gameplayComp.componentResource.isPrimary);
+
+                TreePop();
+            }
+        }
+        else if (Selectable("Transform this entity into game resources"))
+            gameplayComp.AddComponent(CGP_SIGNATURE::RESOURCE);
+
 
 
         NewLine();
