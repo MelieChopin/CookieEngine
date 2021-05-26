@@ -23,6 +23,8 @@ namespace Cookie
 		class Scene;
 	}
 
+	#define MINIMUM_SELECTION_QUAD_LENGTH 1
+
 	class Game
 	{
 		private:
@@ -55,6 +57,7 @@ namespace Cookie
 			void InputEndSelectionQuad();
 			void InputMoveSelected();
 			void InputSetNewEntityDestination();
+			void InputSetResourceToWorkers();
 			void InputStartBuilding(int index);
 			void InputAddUnit(int index);
 			void DisplayNewEntityDestination(Render::DebugRenderer& dbg);

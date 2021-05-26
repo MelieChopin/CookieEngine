@@ -249,8 +249,7 @@ void Editor::Loop()
 
     bool isActive = false;
     {
-        //game.scene->map.model.mesh = game.resources.meshes["NormalCube"].get();
-        //game.scene->map.model.albedo = game.resources.textures2D["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
+        game.scene->map.model.albedo = game.resources.textures2D["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
     }
 
     //for (int i = 0; i < MAX_ENTITIES; i++)
