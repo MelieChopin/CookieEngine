@@ -14,7 +14,7 @@ namespace Cookie
 												 0.5,  0.5, 0, 1, 1, 0, 0, -1,
 												-0.5,  0.5, 0, 0, 1, 0, 0, -1 };
 
-				std::vector<unsigned int> indices = { 3, 0, 1, 3, 1, 2 };
+				std::vector<unsigned int> indices = { 1, 0, 3, 2, 1, 3 };
 
 
 				std::unique_ptr<Resources::Mesh> quad = std::make_unique<Resources::Mesh>("Quad", vertices, indices, 6);
@@ -95,7 +95,7 @@ namespace Cookie
 				30 , 31 , 32 ,
 				33 , 34 , 35 };
 
-				std::unique_ptr<Cookie::Resources::Mesh> cube = std::make_unique<Cookie::Resources::Mesh>("NormalCube", vertices, indices, 36);
+				std::unique_ptr<Cookie::Resources::Mesh> cube = std::make_unique<Cookie::Resources::Mesh>("Cube", vertices, indices, 36);
 				return cube;
 			}
 

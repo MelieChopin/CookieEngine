@@ -34,6 +34,8 @@ SkyBox::~SkyBox()
         CBuffer->Release();
     if (ILayout)
         ILayout->Release();
+    if (PSampler)
+        PSampler->Release();
 }
 
 /*==================== INIT METHODS ====================*/

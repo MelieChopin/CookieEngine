@@ -43,6 +43,8 @@ GeometryPass::~GeometryPass()
         depthStencilState->Release();
     if (rasterizerState)
         rasterizerState->Release();
+    if (blendState)
+        blendState->Release();
 }
 
 /*=========================== INIT METHODS ===========================*/

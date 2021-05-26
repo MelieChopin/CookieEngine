@@ -22,17 +22,29 @@ LightPass::LightPass(int width, int height) :
 LightPass::~LightPass()
 {
     if (lightCBuffer)
+    {
         lightCBuffer->Release();
+    }
     if (PSampler)
+    {
         PSampler->Release();
+    }
     if (depthStencilState)
+    {
         depthStencilState->Release();
+    }
     if (rasterizerState)
+    {
         rasterizerState->Release();
+    }
     if (blendState)
+    {
         blendState->Release();
+    }
     if (volumeRasterState)
+    {
         volumeRasterState->Release();
+    }
 }
 
 /*======================= INIT METHODS =======================*/
@@ -40,8 +52,6 @@ LightPass::~LightPass()
 void LightPass::InitShader()
 {
     Vec4 cam = {};
-
-    Render::CreateBuffer(&cam, sizeof(Vec4), &lightCBuffer);
 
     D3D11_SAMPLER_DESC samDesc = {};
     samDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;

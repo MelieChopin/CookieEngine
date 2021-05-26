@@ -13,7 +13,7 @@ namespace Cookie::UI
 	{
 		std::vector<UIwidget::GameWindowBase*> sceneWidgets;
 
-		
+	public:
 		// Simple struct to facilitate UI scene load/save.
 		struct GameWindowInfo
 		{
@@ -23,7 +23,7 @@ namespace Cookie::UI
 				width, height;
 		};
 
-	public:
+	
 		UIscene() = default;
 		UIscene(const std::vector<GameWindowInfo>& _gameWindows);
 

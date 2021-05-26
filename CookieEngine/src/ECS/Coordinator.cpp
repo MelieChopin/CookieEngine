@@ -27,6 +27,7 @@ Entity& Coordinator::AddEntity(const int signature, std::string name)
 	Entity& newEntity = entityHandler->entities[entityHandler->livingEntities];
 	entityHandler->livingEntities++;
 	newEntity.name = name;
+	newEntity.namePrefab = "NONE";
 
 	if (CheckSignature(signature, C_SIGNATURE::TRANSFORM))
 		componentHandler->AddComponent(newEntity, C_SIGNATURE::TRANSFORM);
@@ -49,6 +50,7 @@ Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab, std::str
 	Entity& newEntity = entityHandler->entities[entityHandler->livingEntities];
 	entityHandler->livingEntities++;
 	newEntity.name = prefab->name;
+	newEntity.namePrefab = prefab->name;
 	newEntity.signature = prefab->signature;
 
 	if (CheckSignature(newEntity.signature, C_SIGNATURE::TRANSFORM))

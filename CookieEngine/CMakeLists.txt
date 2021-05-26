@@ -75,19 +75,24 @@ set (SRC_FILES
     "${SRC_DIR}/Render/Renderer.cpp"
     "${SRC_DIR}/Render/DebugRenderer.cpp"
     "${SRC_DIR}/Render/RendererRemote.cpp"
-    "${SRC_DIR}/Render/FrameBuffer.cpp"
-    "${SRC_DIR}/Render/Drawers/SkyBox.cpp"
-    "${SRC_DIR}/Render/Light.cpp"
     "${SRC_DIR}/Render/DrawDataHandler.cpp"
-    "${SRC_DIR}/Render/RenderPass/GeometryPass.cpp"
-    "${SRC_DIR}/Render/RenderPass/LightPass.cpp"
-    "src/Render/Drawers/DirLightDrawer.cpp"
-    "src/Render/Drawers/PointLightDrawer.cpp"
-    "${SRC_DIR}/Render/RenderPass/ComposePass.cpp"
+
+    "${SRC_DIR}/Render/FrameBuffer.cpp"
+    "${SRC_DIR}/Render/Light.cpp"
     "${SRC_DIR}/Render/ShadowBuffer.cpp" 
-    "${SRC_DIR}/Render/RenderPass/ShadowPass.cpp"
+
+    "${SRC_DIR}/Render/Drawers/DirLightDrawer.cpp"
+    "${SRC_DIR}/Render/Drawers/PointLightDrawer.cpp"
     "${SRC_DIR}/Render/Drawers/FBODrawer.cpp"
     "${SRC_DIR}/Render/Drawers/MapDrawer.cpp"
+    "${SRC_DIR}/Render/Drawers/SkyBox.cpp"
+    "${SRC_DIR}/Render/Drawers/PlayerDrawer.cpp"
+
+    "${SRC_DIR}/Render/RenderPass/GeometryPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/LightPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/ShadowPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/ComposePass.cpp"
+    "${SRC_DIR}/Render/RenderPass/GameplayPass.cpp"
     "${SRC_DIR}/Render/ParticlesPass.cpp"
     
     "${SRC_DIR}/Resources/Loader.cpp" 
@@ -121,7 +126,9 @@ set (SRC_FILES
     "${SRC_DIR}/UI/Widgets/EditorWs/ToolbarWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/ViewportWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/WorldSettingsWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/GameWs/ActionPanelWidget.cpp"
     "${SRC_DIR}/UI/Widgets/GameWs/TestWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/GameWs/GamespectorWidget.cpp"
 
     
     "${SRC_DIR}/Physics/PhysicsSimulator.cpp"

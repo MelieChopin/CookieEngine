@@ -62,7 +62,7 @@ void Loader::InitTextures(const char* pathName, aiMaterial** materials, unsigned
 		{
 			std::string fullpath = (std::string(pathName) + '/' + std::string(path.C_Str())).c_str();
 
-			_resources.textures[fullpath] = std::make_unique<Texture>(fullpath.c_str());
+			_resources.textures2D[fullpath] = std::make_unique<Texture>(fullpath.c_str());
 		}
 	}
 }

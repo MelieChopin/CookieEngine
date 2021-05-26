@@ -23,10 +23,6 @@ namespace Cookie::UIwidget
 
 		
 		virtual void WindowDisplay() = 0;
-
-
-		//inline		 bool& GetOpenSwitch()			{ return opened; }
-		//inline const bool  GetOpenSwitch() const	{ return opened; }
 	};
 	
 	

@@ -13,6 +13,11 @@ namespace Cookie
 {
 	class Game;
 
+	namespace Gameplay
+	{
+		struct PlayerData;
+	}
+
 	namespace ECS
 	{
 		class ComponentModel;
@@ -28,12 +33,15 @@ namespace Cookie
 	{
 		class Camera;
 
-		struct Frustrum
+		class Frustrum
 		{
+		public :
 			std::array<Core::Math::Vec4, 6> planes;
 			Core::Math::Vec3				centroid;
 			std::array<Core::Math::Vec3, 8> corners;
 			std::array<Core::Math::Vec3, 2> AABB;
+
+			void MakeFrustrum(const Camera& cam);
 		};
 		
 		class DrawDataHandler
@@ -44,17 +52,17 @@ namespace Cookie
 				std::vector<ECS::ComponentModel>	models;
 				std::vector<Core::Math::Mat4>		matrices;
 				std::array<Core::Math::Vec3, 2>		AABB;
-				const Camera*						currentCam;
-
+				
 				ID3D11DepthStencilView*				depthStencilView;
 				ID3D11Buffer*						CamCBuffer;
-				
-
 				MapDrawer							mapDrawer;
+
+				const Camera*						currentCam;
+				const Gameplay::PlayerData*			player;
 
 			private:
 				void InitCBuffer();
-				void MakeFrustrum(const Camera& cam);
+				//void MakeFrustrum(const Camera& cam);
 
 			public:
 				DrawDataHandler();
