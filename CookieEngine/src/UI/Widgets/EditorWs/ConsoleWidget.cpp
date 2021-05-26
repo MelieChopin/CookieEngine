@@ -1,6 +1,6 @@
 #include "Debug.hpp"
 #include "Resources/Texture.hpp"
-#include "Renderer.hpp"
+#include "ResourcesManager.hpp"
 #include "ConsoleWidget.hpp"
 
 #include <imgui.h>
@@ -10,14 +10,14 @@ using namespace Cookie::UIwidget;
 using namespace Cookie::Core;
 
 
-Console::Console(DebugMessageHandler& _debugManager, Cookie::Render::Renderer& _renderer)
+Console::Console(DebugMessageHandler& _debugManager, Cookie::Resources::ResourcesManager& _resources)
 	: WItemBase		("Console", false),
-	  debugManager	(_debugManager)
-{
-	icons[0] = std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/Log.ico");
-	icons[1] = std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/Warning.ico");
-	icons[2] = std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/Error.ico");
-}
+	  debugManager	(_debugManager),
+
+	  icons			{_resources.icons["Assets/EditorUIcons/Log.ico"].get(),
+					 _resources.icons["Assets/EditorUIcons/Warning.ico"].get(),
+					 _resources.icons["Assets/EditorUIcons/Error.ico"].get()}
+{}
 
 
 bool Console::BeginWindow(int windowFlags)
