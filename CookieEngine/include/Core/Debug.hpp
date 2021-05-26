@@ -11,8 +11,8 @@ namespace Cookie
 	{
 		struct DebugMessage
 		{
-			const char*	text;
-			char		timestamp[10] {};
+			const std::string	text;
+			char				timestamp[10] {};
 
 			enum Type
 			{ 
@@ -32,7 +32,7 @@ namespace Cookie
 			bool			bouncing		= false;
 
 
-			inline DebugMessage(const char* _text, Type&& _type, unsigned short&& _colorBounces = 0)
+			inline DebugMessage(const std::string& _text, Type&& _type, unsigned short&& _colorBounces = 0)
 				: text			(_text),
 				  messageType	(_type),
 				  colorBounces	(_colorBounces)
@@ -72,21 +72,21 @@ namespace Cookie
 			{ time(&currentTime); localtime_s(&currentTmcov, &currentTime); }
 
 
-			inline void Log(const char* text)
+			inline void Log(const char*&& text)
 			{ AddMessage({text, DebugMessage::Log}); }
 
 			inline void Log(const std::string& strext)
 			{ AddMessage({strext.c_str(), DebugMessage::Log}); }
 			
 			
-			inline void Warning(const char* text)
+			inline void Warning(const char*&& text)
 			{ AddMessage({text, DebugMessage::Warning, 1}); }
 
 			inline void Warning(const std::string& strext)
 			{ AddMessage({strext.c_str(), DebugMessage::Warning, 1}); }
 
 
-			inline void Error(const char* text)
+			inline void Error(const char*&& text)
 			{ AddMessage({text, DebugMessage::Error, 2}); }
 
 			inline void Error(const std::string& strext)
