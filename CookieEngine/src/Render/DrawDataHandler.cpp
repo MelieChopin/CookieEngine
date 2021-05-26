@@ -40,49 +40,49 @@ void DrawDataHandler::InitCBuffer()
 
 /*========================= REALTIME METHODS =========================*/
 
-void DrawDataHandler::MakeFrustrum(const Camera& cam)
+void Frustrum::MakeFrustrum(const Camera& cam)
 {
 	Mat4 viewProj = cam.GetViewProj();
 
 	//left plane
-	frustrum.planes[0].x = viewProj.c[3].e[0] + viewProj.c[0].e[0];
-	frustrum.planes[0].y = viewProj.c[3].e[1] + viewProj.c[0].e[1];
-	frustrum.planes[0].z = viewProj.c[3].e[2] + viewProj.c[0].e[2];
-	frustrum.planes[0].w = viewProj.c[3].e[3] + viewProj.c[0].e[3];
+	planes[0].x = viewProj.c[3].e[0] + viewProj.c[0].e[0];
+	planes[0].y = viewProj.c[3].e[1] + viewProj.c[0].e[1];
+	planes[0].z = viewProj.c[3].e[2] + viewProj.c[0].e[2];
+	planes[0].w = viewProj.c[3].e[3] + viewProj.c[0].e[3];
 
 	//right plane
-	frustrum.planes[1].x = viewProj.c[3].e[0] - viewProj.c[0].e[0];
-	frustrum.planes[1].y = viewProj.c[3].e[1] - viewProj.c[0].e[1];
-	frustrum.planes[1].z = viewProj.c[3].e[2] - viewProj.c[0].e[2];
-	frustrum.planes[1].w = viewProj.c[3].e[3] - viewProj.c[0].e[3];
+	planes[1].x = viewProj.c[3].e[0] - viewProj.c[0].e[0];
+	planes[1].y = viewProj.c[3].e[1] - viewProj.c[0].e[1];
+	planes[1].z = viewProj.c[3].e[2] - viewProj.c[0].e[2];
+	planes[1].w = viewProj.c[3].e[3] - viewProj.c[0].e[3];
 
 	//top plane
-	frustrum.planes[2].x = viewProj.c[3].e[0] - viewProj.c[1].e[0];
-	frustrum.planes[2].y = viewProj.c[3].e[1] - viewProj.c[1].e[1];
-	frustrum.planes[2].z = viewProj.c[3].e[2] - viewProj.c[1].e[2];
-	frustrum.planes[2].w = viewProj.c[3].e[3] - viewProj.c[1].e[3];
+	planes[2].x = viewProj.c[3].e[0] - viewProj.c[1].e[0];
+	planes[2].y = viewProj.c[3].e[1] - viewProj.c[1].e[1];
+	planes[2].z = viewProj.c[3].e[2] - viewProj.c[1].e[2];
+	planes[2].w = viewProj.c[3].e[3] - viewProj.c[1].e[3];
 
 	//bottom plane
-	frustrum.planes[3].x = viewProj.c[3].e[0] + viewProj.c[1].e[0];
-	frustrum.planes[3].y = viewProj.c[3].e[1] + viewProj.c[1].e[1];
-	frustrum.planes[3].z = viewProj.c[3].e[2] + viewProj.c[1].e[2];
-	frustrum.planes[3].w = viewProj.c[3].e[3] + viewProj.c[1].e[3];
+	planes[3].x = viewProj.c[3].e[0] + viewProj.c[1].e[0];
+	planes[3].y = viewProj.c[3].e[1] + viewProj.c[1].e[1];
+	planes[3].z = viewProj.c[3].e[2] + viewProj.c[1].e[2];
+	planes[3].w = viewProj.c[3].e[3] + viewProj.c[1].e[3];
 
 	//near plane
-	frustrum.planes[4].x = viewProj.c[2].e[0];
-	frustrum.planes[4].y = viewProj.c[2].e[1];
-	frustrum.planes[4].z = viewProj.c[2].e[2];
-	frustrum.planes[4].w = viewProj.c[2].e[3];
+	planes[4].x = viewProj.c[2].e[0];
+	planes[4].y = viewProj.c[2].e[1];
+	planes[4].z = viewProj.c[2].e[2];
+	planes[4].w = viewProj.c[2].e[3];
 
 	//far plane
-	frustrum.planes[5].x = viewProj.c[3].e[0] - viewProj.c[2].e[0];
-	frustrum.planes[5].y = viewProj.c[3].e[1] - viewProj.c[2].e[1];
-	frustrum.planes[5].z = viewProj.c[3].e[2] - viewProj.c[2].e[2];
-	frustrum.planes[5].w = viewProj.c[3].e[3] - viewProj.c[2].e[3];
+	planes[5].x = viewProj.c[3].e[0] - viewProj.c[2].e[0];
+	planes[5].y = viewProj.c[3].e[1] - viewProj.c[2].e[1];
+	planes[5].z = viewProj.c[3].e[2] - viewProj.c[2].e[2];
+	planes[5].w = viewProj.c[3].e[3] - viewProj.c[2].e[3];
 
-	for (int i = 0; i < frustrum.planes.size(); i++)
+	for (int i = 0; i < planes.size(); i++)
 	{
-		frustrum.planes[i] = frustrum.planes[i].Normalize();
+		planes[i] = planes[i].Normalize();
 	}
 
 	//the vectors of the referential of cam
@@ -104,27 +104,27 @@ void DrawDataHandler::MakeFrustrum(const Camera& cam)
 	//Center of each plane
 	Core::Math::Vec3 nearCenter = cam.pos + camFwd * cam.camNear;
 	Core::Math::Vec3 farCenter	= cam.pos + camFwd * cam.camFar;
-	frustrum.centroid = cam.pos + camFwd * ((cam.camNear + cam.camFar) / 2.0f);
+	centroid = cam.pos + camFwd * ((cam.camNear + cam.camFar) / 2.0f);
 
 	//the corners of the frustrum
-	frustrum.corners[0] = nearCenter - (camUp * (heightNear / 2.0f)) - (camRight * (widthNear / 2.0f));
-	frustrum.corners[1] = nearCenter - (camUp * (heightNear / 2.0f)) + (camRight * (widthNear / 2.0f));
-	frustrum.corners[2] = nearCenter + (camUp * (heightNear / 2.0f)) - (camRight * (widthNear / 2.0f));
-	frustrum.corners[3] = nearCenter + (camUp * (heightNear / 2.0f)) + (camRight * (widthNear / 2.0f));
-	frustrum.corners[4] = farCenter - (camUp * (heightFar / 2.0f)) - (camRight * (widthFar / 2.0f));
-	frustrum.corners[5] = farCenter - (camUp * (heightFar / 2.0f)) + (camRight * (widthFar / 2.0f));
-	frustrum.corners[6] = farCenter + (camUp * (heightFar / 2.0f)) - (camRight * (widthFar / 2.0f));
-	frustrum.corners[7] = farCenter + (camUp * (heightFar / 2.0f)) + (camRight * (widthFar / 2.0f));
+	corners[0] = nearCenter - (camUp * (heightNear / 2.0f)) - (camRight * (widthNear / 2.0f));
+	corners[1] = nearCenter - (camUp * (heightNear / 2.0f)) + (camRight * (widthNear / 2.0f));
+	corners[2] = nearCenter + (camUp * (heightNear / 2.0f)) - (camRight * (widthNear / 2.0f));
+	corners[3] = nearCenter + (camUp * (heightNear / 2.0f)) + (camRight * (widthNear / 2.0f));
+	corners[4] = farCenter - (camUp * (heightFar / 2.0f)) - (camRight * (widthFar / 2.0f));
+	corners[5] = farCenter - (camUp * (heightFar / 2.0f)) + (camRight * (widthFar / 2.0f));
+	corners[6] = farCenter + (camUp * (heightFar / 2.0f)) - (camRight * (widthFar / 2.0f));
+	corners[7] = farCenter + (camUp * (heightFar / 2.0f)) + (camRight * (widthFar / 2.0f));
 
-	for (int i = 0; i < frustrum.corners.size(); i++)
+	for (int i = 0; i < corners.size(); i++)
 	{
-		frustrum.AABB[0].x = std::min(frustrum.corners[i].x, frustrum.AABB[0].x);
-		frustrum.AABB[0].y = std::min(frustrum.corners[i].y, frustrum.AABB[0].y);
-		frustrum.AABB[0].z = std::min(frustrum.corners[i].z, frustrum.AABB[0].z);
+		AABB[0].x = std::min(corners[i].x, AABB[0].x);
+		AABB[0].y = std::min(corners[i].y, AABB[0].y);
+		AABB[0].z = std::min(corners[i].z, AABB[0].z);
 
-		frustrum.AABB[1].x = std::max(frustrum.corners[i].x, frustrum.AABB[1].x);
-		frustrum.AABB[1].y = std::max(frustrum.corners[i].y, frustrum.AABB[1].y);
-		frustrum.AABB[1].z = std::max(frustrum.corners[i].z, frustrum.AABB[1].z);
+		AABB[1].x = std::max(corners[i].x, AABB[1].x);
+		AABB[1].y = std::max(corners[i].y, AABB[1].y);
+		AABB[1].z = std::max(corners[i].z, AABB[1].z);
 	}
 
 }
@@ -132,7 +132,7 @@ void DrawDataHandler::MakeFrustrum(const Camera& cam)
 void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 {
 	currentCam = cam;
-	MakeFrustrum(*cam);
+	frustrum.MakeFrustrum(*cam);
 	depthStencilView	= game.renderer.gPass.depthBuffer;
 	CamCBuffer			= game.renderer.gPass.CBuffer;
 

@@ -16,6 +16,7 @@ int main()
 		
 		editor.Loop();
 
+		Core::UIcore::Terminate();
 	}
 	{
 		ID3D11Debug* debug;

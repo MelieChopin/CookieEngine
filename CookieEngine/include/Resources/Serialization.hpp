@@ -37,8 +37,6 @@ namespace Cookie
 		class Sound;
 	}
 
-
-
 	namespace Resources
 	{
 		namespace Serialization

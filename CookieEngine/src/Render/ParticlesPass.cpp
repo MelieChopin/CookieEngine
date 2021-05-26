@@ -22,18 +22,46 @@ ParticlesPass::ParticlesPass()
     InitShader();
 }
 
+ParticlesPass::ParticlesPass(const ParticlesPass& pass) : VShader(pass.VShader), PShader(pass.PShader), CBuffer(pass.CBuffer), ILayout(pass.ILayout),
+                InstanceBuffer(pass.InstanceBuffer), blendState(pass.blendState), PSampler(pass.PSampler), rasterizerState(pass.rasterizerState), 
+                depthStencilState(pass.depthStencilState), mInstancedData(pass.mInstancedData)
+{
+    VShader->AddRef();
+    PShader->AddRef();
+    CBuffer->AddRef();
+    ILayout->AddRef();
+    InstanceBuffer->AddRef();
+    blendState->AddRef();
+    PSampler->AddRef();
+    rasterizerState->AddRef();
+    depthStencilState->AddRef();
+}
+
 ParticlesPass::~ParticlesPass()
 {
-    if (VShader)
+    if (VShader != nullptr)
         VShader->Release();
-    if (PShader)
+    if (PShader != nullptr)
         PShader->Release();
-    if (CBuffer)
+    if (CBuffer != nullptr)
         CBuffer->Release();
-    if (ILayout)
+    if (ILayout != nullptr)
         ILayout->Release();
-    if (InstanceBuffer)
+    if (InstanceBuffer != nullptr)
         InstanceBuffer->Release();
+    if (blendState != nullptr)
+        blendState->Release();
+    if (PSampler != nullptr)
+        PSampler->Release();
+    if (rasterizerState != nullptr)
+        rasterizerState->Release();
+    if (depthStencilState != nullptr)
+        depthStencilState->Release();
+}
+
+void ParticlesPass::Clean()
+{
+    Render::RendererRemote::context->VSSetShader(nullptr, nullptr, 0);
 }
 
 void ParticlesPass::InitShader()
@@ -46,7 +74,7 @@ void ParticlesPass::InitShader()
         float4x4 gProj;
 	    float4x4 gView;
         float3 gCamPos;
-        bool isBillboard;
+        float padding;
     };
 
     struct VertexInputType
@@ -56,7 +84,7 @@ void ParticlesPass::InitShader()
         float3 NormalL  : NORMAL;
         float4x4 World  : WORLD;
 	    float4 Color    : COLOR;
-	    uint InstanceId : SV_InstanceID;
+        uint isBillBoard : ISBILLBOARD;
     };
     
     struct PixelInputType
@@ -74,22 +102,20 @@ void ParticlesPass::InitShader()
 
         float4 temp = mul(float4(vin.PosL, 1.0f), vin.World);
 
-        if (isBillboard)
+        if (vin.isBillBoard == 1)
         {
-            float3 forward = float3(0, 0, 1);
-            float3 cameraObj = normalize(gCamPos - temp);
-            float angle = 1;
-            if (dot(float3(-1, 0, 0), cameraObj) > 0)
-                angle = 3.1415 * 2 - acos(dot(normalize(forward), normalize(cameraObj)));
-            else
-                angle = acos(dot(normalize(forward), normalize(cameraObj)));
+            float3 z = normalize(gCamPos - temp);
+            float3 y = float3(0, 1, 0);
+            float3 x = normalize(cross(z, y));
+            y = normalize(cross(x, z));
 
-            float4x4 rot = float4x4(float4(cos(angle), 0, -sin(angle), 0),
-                                    float4(0, 1, 0, 0),
-                                    float4(sin(angle), 0, cos(angle), 0),
-                                    float4(0, 0, 0, 1));
 
-            temp = mul(float4(vin.PosL, 1.0f), mul(rot, vin.World));
+           float4x4 rot = float4x4(float4(x.x, x.y, x.z, 0),
+                                    float4(y.x, y.y, y.z, 0),
+                                    float4(-z.x, -z.y, -z.z, 0),
+                                    float4(0.0, 0.0, 0.0, 1));
+
+            temp = mul(float4(vin.PosL,1.0), mul(rot, vin.World ));
         }
 
 	    // Transform to world space space.
@@ -127,9 +153,8 @@ void ParticlesPass::InitShader()
 
     float4 main(PixelInputType input) : SV_TARGET
     {
-        float4 color = float4(input.Color.rgb, 1);
-        float4 finalColor = text.Sample(WrapSampler, input.Tex);// * color;
-        finalColor = float4(finalColor.rgb, finalColor.a);// * finalColor.a;
+        float4 finalColor = text.Sample(WrapSampler, input.Tex);
+        finalColor = finalColor.rgba * input.Color.rgba;
         return finalColor; 
     }
 	)";
@@ -145,10 +170,11 @@ void ParticlesPass::InitShader()
         { "WORLD", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
         { "WORLD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
         { "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 64, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
+        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 64, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+        { "ISBILLBOARD", 0, DXGI_FORMAT_R32_UINT, 1, 80, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
     };
      
-    Render::CreateLayout(&blob, ied, 8, &ILayout);
+    Render::CreateLayout(&blob, ied, 9, &ILayout);
 
     mInstancedData.resize(1);
 
@@ -182,11 +208,11 @@ void ParticlesPass::InitShader()
 
     D3D11_BLEND_DESC blenDesc = {  };
 
-    blenDesc.AlphaToCoverageEnable = true;
+    blenDesc.AlphaToCoverageEnable = false;
     blenDesc.IndependentBlendEnable = false;
-    blenDesc.RenderTarget[0].BlendEnable = false;
-    blenDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-    blenDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
+    blenDesc.RenderTarget[0].BlendEnable = true;
+    blenDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    blenDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
     blenDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
     blenDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA;
     blenDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
@@ -209,10 +235,36 @@ void ParticlesPass::InitShader()
 
     Render::CreateSampler(&samDesc, &PSampler);
 
+    // Initialize the description of the stencil state.
+    D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
+
+    // Set up the description of the stencil state.
+    depthStencilDesc.DepthEnable = true;
+    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+    depthStencilDesc.StencilEnable = false;
+    depthStencilDesc.StencilReadMask = 0xFF;
+    depthStencilDesc.StencilWriteMask = 0xFF;
+
+    // Stencil operations if pixel is front-facing.
+    depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+    // Stencil operations if pixel is back-facing.
+    depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+    RendererRemote::device->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
+
     D3D11_RASTERIZER_DESC rasterDesc = {};
 
     // Setup the raster description which will determine how and what polygons will be drawn.
-    rasterDesc.AntialiasedLineEnable = false;
+    rasterDesc.AntialiasedLineEnable = true;
     rasterDesc.CullMode = D3D11_CULL_FRONT;
     rasterDesc.DepthBias = 0;
     rasterDesc.DepthBiasClamp = 0.0f;
@@ -252,6 +304,9 @@ void ParticlesPass::AllocateMoreSpace(int newSpace)
 
 void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mesh, Resources::Texture* texture, std::vector<InstancedData> data)
 {
+    if (mesh == nullptr)
+        return;
+    Render::RendererRemote::context->OMSetDepthStencilState(depthStencilState, 0);
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
 
@@ -274,20 +329,22 @@ void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mes
     Render::RendererRemote::context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
     Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
-    texture->Set(0);
+
+    if (texture != nullptr)
+        texture->Set(0);
 
     VS_CONSTANT_BUFFER buffer = {};
     buffer.proj = cam.GetProj();
     buffer.view = cam.GetView();
     buffer.pos = cam.pos;
-    buffer.isBillboard = false;
+    buffer.isBillboard = true;
     Render::WriteCBuffer(&buffer, sizeof(buffer), 0, &CBuffer);
  
     Render::RendererRemote::context->IASetVertexBuffers(0, 2, vbs, stride, offset);
     Render::RendererRemote::context->IASetIndexBuffer(mesh->IBuffer, DXGI_FORMAT_R32_UINT, 0);
 
     D3D11_MAPPED_SUBRESOURCE ms;
-    HRESULT result = Render::RendererRemote::context->Map(InstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
+    Render::RendererRemote::context->Map(InstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
 
     memcpy(ms.pData, mInstancedData.data(), sizeof(Render::InstancedData) * mInstancedData.size());
     Render::RendererRemote::context->Unmap(InstanceBuffer, 0);

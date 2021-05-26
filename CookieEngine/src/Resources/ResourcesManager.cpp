@@ -97,6 +97,7 @@ void ResourcesManager::Load(Render::Renderer& _renderer)
 		//printf("%s\n", gltfFiles.at(i).c_str());
 	}
 	
+	/* load models */
 	for (unsigned int i = 0; i < assetsFiles.size(); i++)
 	{
 		std::string& iFile = assetsFiles.at(i);
@@ -131,6 +132,7 @@ void ResourcesManager::Load(Render::Renderer& _renderer)
 				skyboxes.emplace(iFile, std::move(aTexture));
 			}
 		}
+		//printf("%s\n", iFile.c_str());
 	}
 }
 
