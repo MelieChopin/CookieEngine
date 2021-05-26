@@ -24,6 +24,7 @@ namespace Cookie
 
 		struct Tile
 		{
+			int id = 0;
 			bool isObstacle = false;
 			bool isVisited = false;
 

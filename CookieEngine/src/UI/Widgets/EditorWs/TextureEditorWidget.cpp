@@ -22,7 +22,7 @@ void TextureEditor::WindowDisplay()
 		Text("Currently loaded and available textures:");
 		
 		
-		BeginGroup();
+		/*BeginGroup();
 
         for (std::unordered_map<std::string, std::unique_ptr<Texture>>::iterator textPtr = resources.textures.begin(); textPtr != resources.textures.end(); textPtr++)
         {
@@ -54,7 +54,7 @@ void TextureEditor::WindowDisplay()
 			if (GetContentRegionAvail().x < 100.f) NewLine();
         }
 
-		EndGroup();
+		EndGroup();*/
 
 
 		Separator();
@@ -93,7 +93,7 @@ void TextureEditor::WindowDisplay()
 			}
 			else if (Button("Confirm and save"))
 			{				
-				resources.textures[newTexture.name] = (std::make_unique<Texture>(newTexture.name, newTexture.color));
+				resources.textures2D[newTexture.name] = (std::make_unique<Texture>(newTexture.name, newTexture.color));
 				Cookie::Resources::Serialization::Save::SaveTexture(newTexture.name, newTexture.color);
 
 				newTexture.creating = false;

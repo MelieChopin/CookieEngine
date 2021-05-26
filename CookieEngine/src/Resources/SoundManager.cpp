@@ -57,7 +57,6 @@ void SoundManager::LoadAllMusic(ResourcesManager& resourcesManager)
 		std::replace(iFile.begin(), iFile.end(), '\\', '/');
 	}
 
-	FMOD_RESULT result;
 	FMOD_MODE mode = FMOD_DEFAULT | FMOD_CREATECOMPRESSEDSAMPLE;
 
 	for (int i = 0; i < filesPath.size(); i++)
@@ -93,8 +92,7 @@ void SoundManager::LoadAllMusic(ResourcesManager& resourcesManager)
 void SoundManager::PlayMusic(std::string key)
 {
 	if ((*(sounds))[key].get()->sound == nullptr)
-		FMOD_RESULT result = system->createSound((*(sounds))[key].get()->filepath.c_str(), 
-									(*(sounds))[key].get()->mode, nullptr, &(*(sounds))[key].get()->sound);
+		system->createSound((*(sounds))[key].get()->filepath.c_str(), (*(sounds))[key].get()->mode, nullptr, &(*(sounds))[key].get()->sound);
 	
 	system->playSound((*(sounds))[key].get()->sound, nullptr, false, &(*(sounds))[key].get()->chan);
 	(*(sounds))[key].get()->chan->setVolume((*(sounds))[key].get()->vol);
@@ -109,7 +107,7 @@ void SoundManager::PlayMusic(std::string key)
 void SoundManager::Play3DMusic(std::string key, const Cookie::Core::Math::Vec3& pos)
 {
 	if ((*(sounds))[key].get()->sound == nullptr)
-		FMOD_RESULT result = system->createSound((*(sounds))[key].get()->filepath.c_str(),
+		system->createSound((*(sounds))[key].get()->filepath.c_str(),
 			(*(sounds))[key].get()->mode, nullptr, &(*(sounds))[key].get()->sound);
 
 	system->playSound((*(sounds))[key].get()->sound, nullptr, false, &(*(sounds))[key].get()->chan);
@@ -166,8 +164,7 @@ void SoundManager::SetMode(std::string key, FMOD_MODE mode)
 void SoundManager::PlayMusic(Sound* const & sound)
 {
 	if (sound->sound == nullptr)
-		FMOD_RESULT result = system->createSound(sound->filepath.c_str(),
-												 sound->mode, nullptr, &sound->sound);
+		system->createSound(sound->filepath.c_str(), sound->mode, nullptr, &sound->sound);
 
 	system->playSound(sound->sound, nullptr, false, &sound->chan);
 	sound->chan->setVolume(sound->vol);

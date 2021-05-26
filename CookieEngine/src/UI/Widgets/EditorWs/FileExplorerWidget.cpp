@@ -1,7 +1,5 @@
 #include <string>
 #include <filesystem>
-#include "Renderer.hpp"
-#include "Resources/Texture.hpp"
 #include "Game.hpp"
 #include "FileExplorerWidget.hpp"
 
@@ -15,12 +13,12 @@ using namespace ImGui;
 using namespace Cookie::UIwidget;
 
 
-FileExplorer::FileExplorer(Cookie::Render::Renderer& _renderer, Cookie::Game& _game)
+FileExplorer::FileExplorer(Cookie::Game& _game)
             : WItemBase     ("File explorer"),
-              game          (_game)
-{
-    saveIcon = std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/Save2.ico");
-}
+              game          (_game),
+              saveIcon      (_game.resources.icons["Assets/EditorUIcons/Save2.ico"].get())
+{}
+
 
 void FileExplorer::ExploreFiles(const fs::path& path, const char* researchQuery)const
 {

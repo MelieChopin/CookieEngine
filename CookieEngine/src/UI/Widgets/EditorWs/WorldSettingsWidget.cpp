@@ -1,6 +1,7 @@
 #include "Scene.hpp"
 #include "ResourcesManager.hpp"
 #include "Light.hpp"
+#include "Drawers/Skybox.hpp"
 #include "WorldSettingsWidget.hpp"
 
 #include "MapExplorerHelper.hpp"
@@ -71,19 +72,19 @@ void WorldSettingsWidget::WindowDisplay()
 
 			// Model
 			{
-				Text("Map albedo:"); SameLine(100);
+				Text("Map albedo:"); SameLine(110);
 
-				ResourceMapExplorer<Texture>("texture", "##MAPTEXTSELECT", resources.textures, scene->map.model.albedo);
-
-
-				Text("Map normal:"); SameLine(100);
-
-				ResourceMapExplorer<Texture>("normal texture", "##MAPNORMSELECT", resources.textures, scene->map.model.normal);
+				ResourceMapExplorer<Texture>("texture", "##MAPTEXTSELECT", resources.textures2D, scene->map.model.albedo);
 
 
-				ImGui::Custom::TextSnip("Map metallic-Roughness", 9); SameLine(); Text(":"); SameLine(100);
+				Text("Map normal:"); SameLine(110);
 
-				ResourceMapExplorer<Texture>("metallic-rough texture", "##MAPMRSELECT", resources.textures, scene->map.model.metallicRoughness);
+				ResourceMapExplorer<Texture>("normal texture", "##MAPNORMSELECT", resources.textures2D, scene->map.model.normal);
+
+
+				ImGui::Custom::TextSnip("Map metallic-Roughness", 9); SameLine(); Text(":"); SameLine(110);
+
+				ResourceMapExplorer<Texture>("metallic-rough texture", "##MAPMRSELECT", resources.textures2D, scene->map.model.metallicRoughness);
 			}
 
 			
@@ -132,6 +133,15 @@ void WorldSettingsWidget::WindowDisplay()
 
 				TreePop();
 			}
+
+			TreePop();
+		}
+	
+		
+		if (TreeNode("Skybox settings"))
+		{
+			Text("Skybox texture:");
+			ResourceMapExplorer<Texture>("cubic texture", "##SKYBOXSELECT", resources.skyboxes, skybox.texture);
 
 			TreePop();
 		}

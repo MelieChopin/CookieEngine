@@ -17,7 +17,6 @@ int main()
 		editor.Loop();
 
 		Core::UIcore::Terminate();
-
 	}
 	{
 		//if (Render::RendererRemote::device)

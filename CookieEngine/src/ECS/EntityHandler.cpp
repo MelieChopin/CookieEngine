@@ -8,13 +8,14 @@ using namespace Cookie::ECS;
 
 Entity::Entity(unsigned int _id) : id{ _id } {}
 Entity::Entity(unsigned int _id, int _signature, std::string _name, std::string _namePrefab) : id{ _id }, signature{ _signature }, name{ _name }, namePrefab{ _namePrefab } {}
-Entity::Entity(const Entity& entity): id{ entity.id }, signature{ entity.signature }, name{ entity.name }, tag{ entity.tag }, needToBeRemoved{ entity.needToBeRemoved } {}
+Entity::Entity(const Entity& entity): id{ entity.id }, signature{ entity.signature }, name{ entity.name }, namePrefab{ entity.namePrefab }, tag{ entity.tag }, needToBeRemoved{ entity.needToBeRemoved } {}
 
 
 void Entity::operator= (const Entity& entity)
 {
 	id = entity.id;
 	name = entity.name;
+	namePrefab = entity.namePrefab;
 	tag = entity.tag;
 	signature = entity.signature;
 	needToBeRemoved = entity.needToBeRemoved;
@@ -31,6 +32,7 @@ void Entity::ToDefault()
 {
 	signature = 0;
 	name = "No Name";
+	namePrefab = "NONE";
 	tag = "No Tag";
 	needToBeRemoved = false;
 }
