@@ -6,7 +6,8 @@
 struct ID3D11Buffer;
 struct ID3D11DepthStencilView;
 
-#define SELECTION_COLOR {0.0f,1.0f,0.0f,0.5f}
+#define ARROW_COLOR {0.0f,1.0f,0.0f,0.3f}
+#define OUTLINE_COLOR {1.0f,1.0f,1.0f,0.5f}
 #define OUTLINE_SIZE {1.21f,1.21f,1.21f}
 
 namespace Cookie

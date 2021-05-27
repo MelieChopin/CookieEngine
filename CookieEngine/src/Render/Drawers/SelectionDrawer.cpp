@@ -107,7 +107,7 @@ void SelectionDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
     VS_CONSTANT_BUFFER buffer = {};
     buffer.viewProj = viewProj;
 
-    Vec4 color = SELECTION_COLOR;
+    Vec4 color = OUTLINE_COLOR;
     WriteCBuffer(&color, sizeof(Vec4), 0, &PCBuffer);
 
     size_t bufferSize = sizeof(VS_CONSTANT_BUFFER);
@@ -134,6 +134,9 @@ void SelectionDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
     Render::RendererRemote::context->ClearDepthStencilView(stencilBuffer, D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     //drawing arrows
+    color = ARROW_COLOR;
+    WriteCBuffer(&color, sizeof(Vec4), 0, &PCBuffer);
+
     arrowMesh->Set();
 
     Vec3 src = { -1.0f,0.0f,0.0f };
