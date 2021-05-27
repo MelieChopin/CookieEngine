@@ -73,7 +73,6 @@ void Game::CalculateMousePosInWorld(Render::FreeFlyCam& cam)
 }
 void Game::HandleGameplayInputs()
 {
-    
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
     {
         ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["04Base"].get(), "good");
@@ -100,12 +99,9 @@ void Game::HandleGameplayInputs()
     {
         ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["Resource"].get(), "good");
 
-        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
-        CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer;
-
-        trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, producer.tileSize);
-        Vec3 posTopLeft = trs.pos - trs.scale / 2;
-        scene->map.GiveTilesToBuilding(scene->map.GetTileIndex(posTopLeft), producer);
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id); 
+        Vec2 tileSize {1, 1};
+        trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, tileSize);
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
         coordinator.armyHandler->AddArmyCoordinator("bad");

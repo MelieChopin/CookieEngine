@@ -314,7 +314,7 @@ void Editor::Loop()
         }
 
 
-        if (selectedEntity.toChangeEntityId >= 0)
+        if (selectedEntity.toChangeEntityIndex >= 0)
         {
             PopulateFocusedEntity();
         }
@@ -329,7 +329,11 @@ void Editor::Loop()
         game.CalculateMousePosInWorld(cam);
         game.HandleGameplayInputs();
         game.ECSCalls(dbgRenderer);
+
         game.coordinator.armyHandler->Debug();
+        game.coordinator.entityHandler->Debug();
+
+
 
 		if (isActive)
             game.particlesHandler.Update();

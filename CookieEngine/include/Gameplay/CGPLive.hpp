@@ -10,7 +10,8 @@ namespace Cookie
 		{
 		public:
 
-			float life = 10;
+			float lifeMax = 10;
+			float lifeCurrent = 10;
 			float armor = 0;
 
 			CGPLive() {}
@@ -18,7 +19,8 @@ namespace Cookie
 
 			inline void ToDefault() noexcept
 			{
-				life = 10;
+				float lifeMax = 10;
+				lifeCurrent = 10;
 				armor = 0;
 			}
 

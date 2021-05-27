@@ -24,7 +24,7 @@ namespace Cookie
 
 	struct FocusEntity
 	{
-		int						toChangeEntityId{ -1 };
+		int						toChangeEntityIndex{ -1 };
 		ECS::Entity*			focusedEntity	{ nullptr };
 		ECS::ComponentHandler*	componentHandler{ nullptr };
 		ECS::ComponentEditor*	editComp		{ nullptr };
@@ -74,17 +74,17 @@ namespace Cookie
 					selectedEntity.editComp->Update();
 				}
 
-				selectedEntity.focusedEntity = &game.coordinator.entityHandler->entities[selectedEntity.toChangeEntityId];
-				selectedEntity.editComp = &editingComponent[selectedEntity.toChangeEntityId];
-				selectedEntity.toChangeEntityId = -1;
+				selectedEntity.focusedEntity = &game.coordinator.entityHandler->entities[selectedEntity.toChangeEntityIndex];
+				selectedEntity.editComp = &editingComponent[game.coordinator.entityHandler->entities[selectedEntity.toChangeEntityIndex].id];
+				selectedEntity.toChangeEntityIndex = -1;
 			}
 			inline virtual float notifyRaycastHit(const rp3d::RaycastInfo& info)
 			{
-				for (int i = 0; i < MAX_ENTITIES; i++)
+				for (int i = 0; i < game.coordinator.entityHandler->livingEntities; i++)
 				{
-					if (editingComponent[i].body == info.body)
+					if (editingComponent[game.coordinator.entityHandler->entities[i].id].body == info.body)
 					{
-						selectedEntity.toChangeEntityId = i;
+						selectedEntity.toChangeEntityIndex = i;
 						PopulateFocusedEntity();
 					}
 				}
