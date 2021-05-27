@@ -13,5 +13,5 @@ void TestBoi::WindowDisplay()
 		Text("OOooohohohoho!");
 	}
 
-	ImGui::EndChild();
+	ImGui::End();
 }

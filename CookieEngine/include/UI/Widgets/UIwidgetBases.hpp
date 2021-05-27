@@ -42,13 +42,14 @@ namespace Cookie::UIwidget
 		// Note: The flags to prevent docking and collapsing are always given.
 		virtual bool BeginWindow(int windowFlags = 0) override;
 
+		virtual void WindowPreview() {};
+
 	public:
 		inline GameWindowBase(const char* _nameTag, bool _opened)
 			: WindowBase	(_nameTag, _opened)
 		{}
 
 		bool WindowEdit();
-
 
 		virtual inline int GetID() = 0;
 	};

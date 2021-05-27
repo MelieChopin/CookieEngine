@@ -58,13 +58,17 @@ bool GameWindowBase::WindowEdit()
 
 	if (IsWindowFocused())
 	{
-		xPos	= ((int)((GetWindowPos().x - parentWindowPos.x)	/ 10)) * 10;
-		yPos	= ((int)((GetWindowPos().y - parentWindowPos.y)	/ 10)) * 10;
-		width	= ((int)(GetWindowWidth()	/ 10)) * 10;
-		height	= ((int)(GetWindowHeight()	/ 10)) * 10;
+		if (ImGui::GetIO().MouseDown[0])
+		{
+			xPos	= ((int)((GetWindowPos().x - parentWindowPos.x)	/ 10)) * 10;
+			yPos	= ((int)((GetWindowPos().y - parentWindowPos.y)	/ 10)) * 10;
+			width	= ((int)(GetWindowWidth()	/ 10)) * 10;
+			height	= ((int)(GetWindowHeight()	/ 10)) * 10;
 
-		SetWindowPos ({ xPos + parentWindowPos.x, yPos + parentWindowPos.y  });
-		SetWindowSize({ width					, height					});
+			SetWindowPos ({ xPos + parentWindowPos.x, yPos + parentWindowPos.y  });
+			SetWindowSize({ width					, height					});
+		}
+		else WindowPreview();
 
 		if (!invalid)
 		{
