@@ -49,7 +49,7 @@ namespace Cookie
 			//In Loop
 			//Remove the debugRenderer later on
 			void CalculateMousePosInWorld(Render::FreeFlyCam& cam);
-			void HandleGameplayInputs(Render::DebugRenderer& dbg);
+			void HandleGameplayInputs();
 			void CheckIfBuildingValid();
 			void InputCancelBuilding();
 			void InputValidateBuilding();

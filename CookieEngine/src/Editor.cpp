@@ -327,7 +327,7 @@ void Editor::Loop()
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
         
         game.CalculateMousePosInWorld(cam);
-        game.HandleGameplayInputs(dbgRenderer);
+        game.HandleGameplayInputs();
         game.ECSCalls(dbgRenderer);
         game.coordinator.armyHandler->Debug();
 

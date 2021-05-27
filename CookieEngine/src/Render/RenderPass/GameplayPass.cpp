@@ -144,18 +144,18 @@ void GameplayPass::InitState()
     depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
     depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
     depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+    depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
 
     // Stencil operations if pixel is back-facing.
     depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
     depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
     depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+    depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
 
     RendererRemote::device->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
 
     // Set up the description of the stencil state.
-    depthStencilDesc.DepthEnable = false;
+    depthStencilDesc.DepthEnable = true;
     depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
     depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
 
@@ -164,15 +164,15 @@ void GameplayPass::InitState()
     depthStencilDesc.StencilWriteMask = 0xFF;
 
     // Stencil operations if pixel is front-facing.
-    depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_INCR_SAT;
+    depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_REPLACE;
+    depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_REPLACE;
+    depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
     depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
     // Stencil operations if pixel is back-facing.
-    depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_INCR_SAT;
+    depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_REPLACE;
+    depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_REPLACE;
+    depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
     depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
     RendererRemote::device->CreateDepthStencilState(&depthStencilDesc, &outLineState);
@@ -256,11 +256,19 @@ void GameplayPass::Draw(const DrawDataHandler& drawData)
         }
 
         selectDrawer.Set(drawData);
+
+        Render::RendererRemote::context->PSSetShader(nullptr, nullptr, 0);
+        Render::RendererRemote::context->OMSetDepthStencilState(outLineState, 1);
+        Render::RendererRemote::context->OMSetRenderTargets(0, nullptr, drawData.depthStencilView);
+        selectDrawer.FillStencil(VCBuffer);
+
+        Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
+        Render::RendererRemote::context->OMSetRenderTargets(1, &FBO, drawData.depthStencilView);
+        Render::RendererRemote::context->OMSetDepthStencilState(depthStencilState, 1);
         selectDrawer.Draw(VCBuffer, PCBuffer);
 
-        /* clear stencil */
-        Render::RendererRemote::context->ClearDepthStencilView(drawData.depthStencilView, D3D11_CLEAR_STENCIL, 1.0f, 0);
         selectDrawer.Clear();
     }
 
+    FBO->Release();
 }

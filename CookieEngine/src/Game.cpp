@@ -36,6 +36,7 @@ void Game::Loop()
     while (!glfwWindowShouldClose(renderer.window.window))
     {
         Update();
+
         renderer.Render();
     }
 }
@@ -55,6 +56,7 @@ void Game::Update()
     scene->camera->Update();
 
     renderer.Draw(scene->camera.get(), *this,frameBuffer);
+
     renderer.SetBackBuffer();
 }
 
@@ -69,7 +71,7 @@ void Game::CalculateMousePosInWorld(Render::FreeFlyCam& cam)
         playerData.mousePosInWorld = {raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z};
 
 }
-void Game::HandleGameplayInputs(Render::DebugRenderer& dbg)
+void Game::HandleGameplayInputs()
 {
     
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
@@ -143,8 +145,6 @@ void Game::HandleGameplayInputs(Render::DebugRenderer& dbg)
             InputStartBuilding(0);
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V])
             InputAddUnit(0);
-
-        DisplayNewEntityDestination(dbg);
     }
 }
 
@@ -302,17 +302,6 @@ void Game::InputAddUnit(int index)
     }
 }
 
-void Game::DisplayNewEntityDestination(Render::DebugRenderer& dbg)
-{
-    for (int i = 0; i < coordinator.selectedEntities.size(); ++i)
-    {
-        float selectedEntityId = coordinator.selectedEntities[i]->id;
-        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(selectedEntityId);
-
-        if (gameplay.signatureGameplay & CGP_SIGNATURE::PRODUCER)
-            dbg.AddDebugElement(Core::Primitives::CreateLine(coordinator.componentHandler->GetComponentTransform(selectedEntityId).pos, gameplay.componentProducer.newUnitDestination, 0x00FF00, 0x00FF00));
-    }
-}
 void Game::ECSCalls(Render::DebugRenderer& dbg)
 {
     coordinator.armyHandler->UpdateArmyCoordinators();
@@ -339,7 +328,8 @@ void Game::SetScene(const std::shared_ptr<Resources::Scene>& _scene)
     scene->camera->rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
     scene->camera->ResetPreviousMousePos();
     scene->camera->Update();
-    scene->camera->Deactivate();
+    //scene->camera->Deactivate();
+    //scene->camera->Activate();
 }
 
 void Game::TryResizeWindow()

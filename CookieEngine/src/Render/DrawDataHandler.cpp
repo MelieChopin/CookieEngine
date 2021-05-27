@@ -270,6 +270,7 @@ void DrawDataHandler::Clear()
 	matrices.clear();
 	selectedModels.clear();
 	selectedMatrices.clear();
+	selectedGameplays.clear();
 	AABB[0] = { std::numeric_limits<float>().max(),std::numeric_limits<float>().max() ,std::numeric_limits<float>().max() };
 	AABB[1] = { -std::numeric_limits<float>().max(), -std::numeric_limits<float>().max() , -std::numeric_limits<float>().max() };
 	frustrum.AABB[0] = { std::numeric_limits<float>().max(),std::numeric_limits<float>().max() ,std::numeric_limits<float>().max() };
