@@ -112,7 +112,70 @@ void Coordinator::SelectEntities(Vec3& selectionQuadStart, Vec3& selectionQuadEn
 				selectedEntities.push_back(&entityHandler->entities[i]);
 		}
 }
+Entity* Coordinator::GetClosestFreeResourceEntity(Core::Math::Vec3& pos)
+{
+	float   minimumDistance{ INFINITY };
+	Entity* entityToReturn{ nullptr };
 
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
+			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::RESOURCE) &&
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentResource.nbOfWorkerOnIt < MAX_WORKER_PER_RESOURCE && 
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentResource.resourceReserve > 0)
+		{
+			ComponentTransform& trs = componentHandler->GetComponentTransform(entityHandler->entities[i].id);
+			float possibleNewDistance = (trs.pos - pos).Length();
+
+			if (possibleNewDistance < minimumDistance)
+			{
+				minimumDistance = possibleNewDistance;
+				entityToReturn = &entityHandler->entities[i];
+			}
+		}
+
+	if (minimumDistance > MAX_RESOURCE_DISTANCE_FROM_BASE)
+		return nullptr;
+
+	return entityToReturn;
+}
+Entity* Coordinator::GetClosestEntity(Vec3& pos, int minimumGameplaySignatureWanted)
+{
+	float   minimumDistance {INFINITY};
+	Entity* entityToReturn  {nullptr};
+
+	//Get closest Entity with minimumGameplaySignatureWanted
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
+			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, minimumGameplaySignatureWanted))
+		{
+			ComponentTransform& trs = componentHandler->GetComponentTransform(entityHandler->entities[i].id);
+			float possibleNewDistance = (trs.pos - pos).Length();
+
+			if (possibleNewDistance < minimumDistance)
+			{
+				minimumDistance = possibleNewDistance;
+				entityToReturn = &entityHandler->entities[i];
+			}
+		}
+
+	return entityToReturn;
+}
+Entity* Coordinator::GetClosestSelectableEntity(Core::Math::Vec3& pos, int minimumGameplaySignatureWanted)
+{
+	Entity* entityToReturn = GetClosestEntity(pos, minimumGameplaySignatureWanted);
+
+	//Check if pos exceed scales
+	if (entityToReturn)
+	{
+		ComponentTransform& trs = componentHandler->GetComponentTransform(entityToReturn->id);
+
+		if (pos.x < trs.pos.x - trs.scale.x || trs.pos.x + trs.scale.x < pos.x ||
+			pos.z < trs.pos.z - trs.scale.z || trs.pos.z + trs.scale.z < pos.z)
+			entityToReturn = nullptr;
+	}
+
+	return entityToReturn;
+}
 
 //Primary Component
 /*

@@ -30,6 +30,10 @@ ShadowPass::ShadowPass():
 
 ShadowPass::~ShadowPass()
 {
+    if (VShader)
+        VShader->Release();
+    if (CBuffer)
+        CBuffer->Release();
     if (blendState)
         blendState->Release();
     if (depthStencilState)
@@ -165,7 +169,6 @@ void ShadowPass::Set()
 
 void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
 {
-    const Camera& cam = *drawData.currentCam;
     ID3D11Buffer* CBuffers[2] = { drawData.CBuffer, CBuffer };
 
     Render::RendererRemote::context->VSSetConstantBuffers(0, 2, CBuffers);

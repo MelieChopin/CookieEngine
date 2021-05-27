@@ -22,6 +22,7 @@ namespace Cookie
 		//use constexpr, for now it bug
 		#define CGPMOVE_CD_BEFORE_RETURN 0.5f
 		#define CGPMOVE_CD_BEFORE_STATIC 5.f
+		#define OFFSET_MAX_FROM_CENTROID 10
 
 		class CGPMove
 		{

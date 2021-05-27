@@ -10,6 +10,7 @@
 #include "Render/RenderPass/ShadowPass.hpp"
 #include "Render/RenderPass/LightPass.hpp"
 #include "Render/RenderPass/ComposePass.hpp"
+#include "Render/RenderPass/GameplayPass.hpp"
 
 namespace Cookie
 {
@@ -39,10 +40,11 @@ namespace Cookie
 				D3D11_PRIMITIVE_TOPOLOGY topo{ D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST };
 				DrawDataHandler drawData;
 
-				GeometryPass	gPass;
-				ShadowPass		sPass;
-				LightPass		lPass;
-				ComposePass		cPass;
+				GeometryPass	geomPass;
+				ShadowPass		shadPass;
+				LightPass		lightPass;
+				ComposePass		compPass;
+				GameplayPass	gamePass;
 
 			private:
 				Render::FBODrawer	fboDrawer;

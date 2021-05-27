@@ -27,6 +27,8 @@ DrawDataHandler::DrawDataHandler()
 
 DrawDataHandler::~DrawDataHandler()
 {
+	if (CBuffer)
+		CBuffer->Release();
 }
 
 /*========================= INIT METHODS =========================*/
@@ -133,8 +135,9 @@ void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 {
 	currentCam = cam;
 	frustrum.MakeFrustrum(*cam);
-	depthStencilView	= game.renderer.gPass.depthBuffer;
-	CamCBuffer			= game.renderer.gPass.CBuffer;
+	depthStencilView	= game.renderer.geomPass.depthBuffer;
+	CamCBuffer			= game.renderer.geomPass.CBuffer;
+	player				= &game.playerData;
 
 	const ECS::EntityHandler& entityHandler = *game.coordinator.entityHandler;
 	ECS::ComponentHandler& components = *game.coordinator.componentHandler;

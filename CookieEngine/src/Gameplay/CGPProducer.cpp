@@ -44,7 +44,14 @@ void CGPProducer::UpdateCountdown(Resources::Map& map, Coordinator& coordinator,
 			}
 
 			if (newEntityGameplay.signatureGameplay & CGP_SIGNATURE::WORKER)
+			{
 				newEntityGameplay.componentWorker.posBase = &trs.pos;
+
+				Entity* resourceEntity = coordinator.GetClosestFreeResourceEntity(trs.pos);
+				if (resourceEntity)
+					newEntityGameplay.componentWorker.SetResource(coordinator.componentHandler->GetComponentTransform(resourceEntity->id).pos, coordinator.componentHandler->GetComponentGameplay(resourceEntity->id).componentResource);
+
+			}
 		}
 
 		queueOfUnits.erase(queueOfUnits.begin());

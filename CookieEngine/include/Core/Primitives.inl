@@ -95,7 +95,7 @@ namespace Cookie
 				30 , 31 , 32 ,
 				33 , 34 , 35 };
 
-				std::unique_ptr<Cookie::Resources::Mesh> cube = std::make_unique<Cookie::Resources::Mesh>("NormalCube", vertices, indices, 36);
+				std::unique_ptr<Cookie::Resources::Mesh> cube = std::make_unique<Cookie::Resources::Mesh>("Cube", vertices, indices, 36);
 				return cube;
 			}
 

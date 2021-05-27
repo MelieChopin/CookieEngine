@@ -51,11 +51,11 @@ Editor::Editor()
 
     editorUI.AddItem(new UIwidget::SaveButton(game.scene, game.resources), 0);
     editorUI.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
-
+    
     editorUI.AddWItem(new UIwidget::TextureEditor(game.resources), 1);
     editorUI.AddWItem(new UIwidget::GameUIeditor(game.renderer.window, game.scene), 1);
     editorUI.AddWItem(new UIwidget::SoundOrchestrator(), 1);
-
+    
     editorUI.AddWItem(new UIwidget::GamePort(isPlaying, game), 2);
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
     editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
@@ -249,8 +249,7 @@ void Editor::Loop()
 
     bool isActive = false;
     {
-        //game.scene->map.model.mesh = game.resources.meshes["NormalCube"].get();
-        //game.scene->map.model.albedo = game.resources.textures2D["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
+        game.scene->map.model.albedo = game.resources.textures2D["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
     }
 
     //for (int i = 0; i < MAX_ENTITIES; i++)
@@ -340,8 +339,6 @@ void Editor::Loop()
 
         //Draw
         game.renderer.Draw(&cam, game,editorFBO);
-        if (game.playerData.buildingToBuild)
-            dbgRenderer.AddQuad(game.playerData.buildingPos, game.playerData.buildingToBuild->tileSize.x * game.scene->map.tilesSize.x / 2, game.playerData.buildingToBuild->tileSize.y * game.scene->map.tilesSize.y / 2, (game.playerData.isBuildingValid) ? 0x00FF00 : 0xFF0000);
 		game.particlesHandler.Draw(cam);
 
         dbgRenderer.Draw(cam.GetViewProj());

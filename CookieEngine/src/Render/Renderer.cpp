@@ -17,8 +17,8 @@ using namespace Cookie::Core::Math;
 Renderer::Renderer():
     remote {InitDevice(window)},
     viewport {0.0f,0.0f,static_cast<float>(window.width),static_cast<float>(window.height),0.0f,0.9999999f},
-    gPass{window.width,window.height},
-    lPass{window.width,window.height}
+    geomPass{window.width,window.height},
+    lightPass{window.width,window.height}
 {
     CreateDrawBuffer(window.width,window.height);
     remote.context->RSSetViewports(1, &viewport);
@@ -28,17 +28,6 @@ Renderer::Renderer():
 Renderer::~Renderer()
 {
     remote.context->ClearState();
-
-    ID3D11RenderTargetView* nullViews[] = { nullptr,nullptr,nullptr,nullptr };
-
-    remote.context->OMSetRenderTargets(4, nullViews, nullptr);
-
-    ID3D11SamplerState* null[] = { nullptr};
-
-    remote.context->PSSetSamplers(0, 1, null);
-
-    remote.context->VSSetShader(nullptr,0,0);
-    remote.context->PSSetShader(nullptr,0,0);
 
     if (swapchain)
         swapchain->Release();
@@ -63,7 +52,7 @@ RendererRemote Renderer::InitDevice(Core::Window& window)
     DXGI_SWAP_CHAIN_DESC scd = {};
 
     // fill the swap chain description struct
-    scd.BufferCount = 1;                                    // one back buffer
+    scd.BufferCount = 2;                                    // two back buffer
     scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;// use 32-bit color
     scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;      // how swap chain is to be used
     scd.OutputWindow = glfwGetWin32Window(window.window);   // the window to be used
@@ -72,7 +61,7 @@ RendererRemote Renderer::InitDevice(Core::Window& window)
     scd.SampleDesc.Count = 1;                               // how many multisamples
     scd.SampleDesc.Quality = 0;
     scd.Windowed = TRUE;                                    // windowed/full-screen mode
-    scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+    scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
     // create a device, device context and swap chain using the information in the scd struct
     HRESULT result = D3D11CreateDeviceAndSwapChain(
@@ -106,7 +95,6 @@ bool Renderer::CreateDrawBuffer(int width, int height)
 {
     // get the address of the back buffer
     ID3D11Texture2D* pBackBuffer = nullptr;
-    
 
     if (FAILED(swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer)))
         return false;
@@ -130,7 +118,7 @@ void Renderer::ResizeBuffer(int width, int height)
 
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
 
-    gPass.depthBuffer->Release();
+    geomPass.depthBuffer->Release();
     backbuffer->Release();
 
     HRESULT result = swapchain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
@@ -140,16 +128,16 @@ void Renderer::ResizeBuffer(int width, int height)
         printf("%s", (std::string("Failing Resizing SwapChain Buffer : ") + std::system_category().message(result)).c_str());
     }
 
-    gPass.CreateDepth(width,height);
+    geomPass.CreateDepth(width,height);
     CreateDrawBuffer(width,height);
 
     remote.context->OMSetRenderTargets(1, &backbuffer, nullptr);
 
-    gPass.posFBO.Resize(width,height);
-    gPass.normalFBO.Resize(width, height);
-    gPass.albedoFBO.Resize(width, height);
-    lPass.diffuseFBO.Resize(width, height);
-    lPass.specularFBO.Resize(width, height);
+    geomPass.posFBO.Resize(width,height);
+    geomPass.normalFBO.Resize(width, height);
+    geomPass.albedoFBO.Resize(width, height);
+    lightPass.diffuseFBO.Resize(width, height);
+    lightPass.specularFBO.Resize(width, height);
 
     remote.context->ClearState();
     remote.context->Flush();
@@ -169,60 +157,60 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
 
     drawData.SetDrawData(cam,game);
 
-    gPass.Set();
-    gPass.Draw(drawData);
+    geomPass.Set();
+    geomPass.Draw(drawData);
 
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
 
-    sPass.Set();
-    sPass.Draw(drawData, game.scene.get()->lights);
+    geomPass.Set();
+    shadPass.Draw(drawData, game.scene.get()->lights);
     remote.context->RSSetViewports(1, &viewport);
 
-    lPass.Set(gPass.posFBO,gPass.normalFBO,gPass.albedoFBO);
-    lPass.Draw(game.scene.get()->lights,sPass.shadowMap,drawData);
+    lightPass.Set(geomPass.posFBO, geomPass.normalFBO, geomPass.albedoFBO);
+    lightPass.Draw(game.scene.get()->lights, shadPass.shadowMap, drawData);
 
-    //remote.context->ClearState();
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
-    sPass.Set();
+    shadPass.Set();
 
     if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F1] >= 0.0f)
     {
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
-        DrawFrameBuffer(game.renderer.gPass.posFBO);
+        DrawFrameBuffer(game.renderer.geomPass.posFBO);
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F2] >= 0.0f)
     {
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
-        DrawFrameBuffer(game.renderer.gPass.normalFBO);
+        DrawFrameBuffer(game.renderer.geomPass.normalFBO);
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F3] >= 0.0f)
     {
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
-        DrawFrameBuffer(game.renderer.gPass.albedoFBO);
+        DrawFrameBuffer(game.renderer.geomPass.albedoFBO);
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F4] >= 0.0f)
     {
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
-        DrawFrameBuffer(lPass.diffuseFBO);
+        DrawFrameBuffer(lightPass.diffuseFBO);
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F5] >= 0.0f)
     {
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
-        DrawFrameBuffer(lPass.specularFBO);
+        DrawFrameBuffer(lightPass.specularFBO);
     }
     else
     {
 
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
-        cPass.Set(lPass.diffuseFBO,lPass.specularFBO,gPass.albedoFBO);
-        cPass.Draw();
+        compPass.Set(lightPass.diffuseFBO,lightPass.specularFBO,geomPass.albedoFBO);
+        compPass.Draw();
     }
 
-    remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, gPass.depthBuffer);
+    remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, geomPass.depthBuffer);
 
     game.skyBox.Draw(cam->GetProj(), cam->GetView());
 
-    
+    gamePass.Set();
+    gamePass.Draw(drawData);
 }
 
 void Renderer::DrawFrameBuffer(FrameBuffer& fbo)
@@ -245,15 +233,15 @@ void Renderer::Clear()
     Core::Math::Vec4 clearColor = {0.0f,0.0f,0.0f,1.0f};
 
     remote.context->ClearRenderTargetView(backbuffer, clearColor.e);
-    remote.context->ClearDepthStencilView(gPass.depthBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-    sPass.Clear();
+    remote.context->ClearDepthStencilView(geomPass.depthBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    shadPass.Clear();
 
     ID3D11ShaderResourceView* null = nullptr;
 
     remote.context->PSSetShaderResources(0, 1, &null);
 
-    gPass.Clear();
-    lPass.Clear();
+    geomPass.Clear();
+    lightPass.Clear();
     drawData.Clear();
 }
 

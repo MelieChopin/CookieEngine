@@ -9,6 +9,7 @@
 using namespace Cookie;
 using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
+using namespace Cookie::Gameplay;
 using namespace rp3d;
 
 /*================== CONSTRUCTORS/DESTRUCTORS ==================*/
@@ -70,12 +71,44 @@ void Game::CalculateMousePosInWorld(Render::FreeFlyCam& cam)
 }
 void Game::HandleGameplayInputs(Render::DebugRenderer& dbg)
 {
+    
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
-        coordinator.AddEntity(resources.prefabs["04Base"].get(), "good");
+    {
+        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["04Base"].get(), "good");
+
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
+        CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer;
+
+        trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, producer.tileSize);			
+        Vec3 posTopLeft = trs.pos - trs.scale / 2;
+        scene->map.GiveTilesToBuilding(scene->map.GetTileIndex(posTopLeft), producer);        
+    }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B])
-        coordinator.AddEntity(resources.prefabs["04Base"].get(), "bad");
+    {
+        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["04Base"].get(), "bad");
+
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
+        CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer;
+
+        trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, producer.tileSize);
+        Vec3 posTopLeft = trs.pos - trs.scale / 2;
+        scene->map.GiveTilesToBuilding(scene->map.GetTileIndex(posTopLeft), producer);
+    }
+    if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_X])
+    {
+        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["Resource"].get(), "good");
+
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
+        CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer;
+
+        trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, producer.tileSize);
+        Vec3 posTopLeft = trs.pos - trs.scale / 2;
+        scene->map.GiveTilesToBuilding(scene->map.GetTileIndex(posTopLeft), producer);
+    }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
         coordinator.armyHandler->AddArmyCoordinator("bad");
+        
+
 
     if (playerData.buildingToBuild)
     {
@@ -96,8 +129,14 @@ void Game::HandleGameplayInputs(Render::DebugRenderer& dbg)
 
         if (!ImGui::GetIO().MouseDownDuration[1])
         {
+            //CGPMove
             InputMoveSelected();
+            
+            //CGPProducer
             InputSetNewEntityDestination();
+
+            //CGPWorker
+            InputSetResourceToWorkers();
         }
 
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_C])
@@ -105,9 +144,6 @@ void Game::HandleGameplayInputs(Render::DebugRenderer& dbg)
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V])
             InputAddUnit(0);
 
-        //should be move in another function
-        if (playerData.makingASelectionQuad)
-            DisplaySelectionQuad(dbg);
         DisplayNewEntityDestination(dbg);
     }
 }
@@ -145,37 +181,58 @@ void Game::InputStartSelectionQuad()
 void Game::InputEndSelectionQuad()
 {
     playerData.makingASelectionQuad = false;
-    coordinator.SelectEntities(playerData.selectionQuadStart, playerData.mousePosInWorld);
+
+    //if selection quad is small try select closest Entity else select all entities with trs.pos inside selection quad
+    if ((playerData.selectionQuadStart - playerData.mousePosInWorld).Length() < MINIMUM_SELECTION_QUAD_LENGTH)
+    {
+        coordinator.selectedEntities.clear();
+        ECS::Entity* possibleSelectedEntity = coordinator.GetClosestSelectableEntity(playerData.selectionQuadStart);
+
+        if (possibleSelectedEntity)
+            coordinator.selectedEntities.push_back(possibleSelectedEntity);
+    }
+    else
+        coordinator.SelectEntities(playerData.selectionQuadStart, playerData.mousePosInWorld);
 }
 void Game::InputMoveSelected()
 {
-    std::vector<ECS::Entity*> movableEntity;
+    if (scene->map.GetTile(playerData.mousePosInWorld).isObstacle)
+        return;
+
+    //set MovableEntities
+    std::vector<ECS::Entity*> movableEntities;
     for (int i = 0; i < coordinator.selectedEntities.size(); ++i)
     {
         float selectedEntityId = coordinator.selectedEntities[i]->id;
         ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(selectedEntityId);
 
         if (gameplay.signatureGameplay & CGP_SIGNATURE::MOVE)
-            movableEntity.push_back(coordinator.selectedEntities[i]);
+            movableEntities.push_back(coordinator.selectedEntities[i]);
     }
 
+    //Calculate centroid
     Vec3 centroid{ 0, 0, 0 };
-    for (int i = 0; i < movableEntity.size(); ++i)
+    for (int i = 0; i < movableEntities.size(); ++i)
     {
-        //divide by movableEntity.size in for loop, so we're sure we can't divide by 0 if we don't use a if
-        centroid += coordinator.componentHandler->GetComponentTransform(movableEntity[i]->id).pos / movableEntity.size();
+        //divide by movableEntities.size in for loop, so we're sure we can't divide by 0 if we don't use a if (movableEntities.size())
+        centroid += coordinator.componentHandler->GetComponentTransform(movableEntities[i]->id).pos / movableEntities.size();
     }
 
-    for (int i = 0; i < movableEntity.size(); ++i)
+    //Apply pathfind to each movableEntities
+    for (int i = 0; i < movableEntities.size(); ++i)
     {
-        float movableEntityId = movableEntity[i]->id;
-        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(movableEntityId);
-        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(movableEntityId);
+        float movableEntitiesId = movableEntities[i]->id;
+        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(movableEntitiesId);
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(movableEntitiesId);
 
         Vec3 offsetFromCentroid = trs.pos - centroid;
         Vec3 finalPos = playerData.mousePosInWorld + offsetFromCentroid;
-        if (scene->map.ApplyPathfinding(scene->map.GetTile(trs.pos), scene->map.tiles[scene->map.GetTileIndex(finalPos)]))
-            gameplay.componentMove.SetPath(scene->map.tiles[scene->map.GetTileIndex(finalPos)], trs);
+        //pathfind to mousePos + offset
+        if (offsetFromCentroid.Length() < OFFSET_MAX_FROM_CENTROID && scene->map.ApplyPathfinding(scene->map.GetTile(trs.pos), scene->map.GetTile(finalPos)))
+            gameplay.componentMove.SetPath(scene->map.GetTile(finalPos), trs);
+        //pathfind to mousePos
+        else if (scene->map.ApplyPathfinding(scene->map.GetTile(trs.pos), scene->map.GetTile(playerData.mousePosInWorld)))
+            gameplay.componentMove.SetPath(scene->map.GetTile(playerData.mousePosInWorld), trs);
         else
             std::cout << "No Path Find\n";
     }
@@ -191,6 +248,33 @@ void Game::InputSetNewEntityDestination()
         if (gameplay.signatureGameplay & CGP_SIGNATURE::PRODUCER)
             gameplay.componentProducer.newUnitDestination = playerData.mousePosInWorld;
     }
+}
+void Game::InputSetResourceToWorkers()
+{
+    ECS::Entity* resource = coordinator.GetClosestSelectableEntity(playerData.mousePosInWorld, CGP_SIGNATURE::RESOURCE);
+
+    //if we don't select an entity with CGPResource in the first place, quit
+    if (!resource)
+        return;
+
+    for (int i = 0; i < coordinator.selectedEntities.size(); ++i)
+    {
+        if (coordinator.componentHandler->GetComponentGameplay(resource->id).componentResource.nbOfWorkerOnIt == MAX_WORKER_PER_RESOURCE)
+        {
+            resource = coordinator.GetClosestFreeResourceEntity(playerData.mousePosInWorld);
+            //if there is no more free resources available
+            if (!resource)
+                return;
+        }
+
+        float selectedEntityId = coordinator.selectedEntities[i]->id;
+        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(selectedEntityId);
+
+        if (gameplay.signatureGameplay & CGP_SIGNATURE::WORKER)
+            gameplay.componentWorker.SetResource(coordinator.componentHandler->GetComponentTransform(resource->id).pos, coordinator.componentHandler->GetComponentGameplay(resource->id).componentResource);
+
+    }
+
 }
 void Game::InputStartBuilding(int index)
 {
@@ -217,10 +301,7 @@ void Game::InputAddUnit(int index)
             gameplay.componentProducer.AddUnitToQueue(index);
     }
 }
-void Game::DisplaySelectionQuad(Render::DebugRenderer& dbg)
-{
-    dbg.AddQuad(playerData.selectionQuadStart, playerData.mousePosInWorld, 0x00FF00);
-}
+
 void Game::DisplayNewEntityDestination(Render::DebugRenderer& dbg)
 {
     for (int i = 0; i < coordinator.selectedEntities.size(); ++i)

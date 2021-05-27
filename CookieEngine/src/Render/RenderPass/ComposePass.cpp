@@ -14,7 +14,18 @@ ComposePass::ComposePass()
 
 ComposePass::~ComposePass()
 {
-
+    if (VShader)
+        VShader->Release();
+    if (PShader)
+        PShader->Release();
+    if (PSampler)
+        PSampler->Release();
+    if (depthStencilState)
+        depthStencilState->Release();
+    if (rasterizerState)
+        rasterizerState->Release();
+    if (blendState)
+        blendState->Release();
 }
 
 /*======================= INIT METHODS =======================*/

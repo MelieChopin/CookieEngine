@@ -13,6 +13,11 @@ namespace Cookie
 {
 	class Game;
 
+	namespace Gameplay
+	{
+		struct PlayerData;
+	}
+
 	namespace ECS
 	{
 		class ComponentModel;
@@ -47,13 +52,13 @@ namespace Cookie
 				std::vector<ECS::ComponentModel>	models;
 				std::vector<Core::Math::Mat4>		matrices;
 				std::array<Core::Math::Vec3, 2>		AABB;
-				const Camera*						currentCam;
-
+				
 				ID3D11DepthStencilView*				depthStencilView;
 				ID3D11Buffer*						CamCBuffer;
-				
-
 				MapDrawer							mapDrawer;
+
+				const Camera*						currentCam;
+				const Gameplay::PlayerData*			player;
 
 			private:
 				void InitCBuffer();
