@@ -11,11 +11,10 @@
 #include "ECS/ComponentHandler.hpp"
 #include "Resources/Serialization.hpp"
 #include "Resources/Prefab.hpp"
+#include "Light.hpp"
 #include <reactphysics3d/reactphysics3d.h>
 #include <iostream>
 #include <fstream>
-#include <iomanip>
-#include <bitset>
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -207,6 +206,32 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 									{ "yPos", info[i].yPos },
 									{ "width", info[i].width },
 									{ "height", info[i].height } };
+		}
+	}
+
+	//Light
+	{
+		Render::LightsArray array = actScene.lights;
+		json& light = js["LightsArray"];
+		
+		light["useDir"] = array.useDir;
+		light["usedPoints"] = array.usedPoints;
+		//DirLight
+		{
+			json& dir = light["DirLight"];
+			dir["dir"] = array.dirLight.dir.e;
+			dir["color"] = array.dirLight.color.e;
+			dir["castShadow"] = array.dirLight.castShadow;
+		}
+		//PointLights
+		{
+			json& point = light["PointLights"];
+			for (int i = 0; i < array.pointLights.size(); i++)
+			{
+				point += json{	{ "pos", array.pointLights[i].pos.e },
+								{ "color", array.pointLights[i].color.e },
+								{ "radius", array.pointLights[i].radius } };
+			}
 		}
 	}
 
@@ -595,12 +620,7 @@ std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const c
 	 file >> js;
 	 
 	 if (js.contains("Name"))
-	 {
-		 //name
-		 {
-			  js["Name"].get_to(newScene->name);
-		 }
-	 }
+		js["Name"].get_to(newScene->name);
 	 
 	 if (js.contains("EntityHandler"))
 	 {
@@ -675,6 +695,33 @@ std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const c
 				list.push_back(info);
 			}
 			newScene.get()->uiScene.LoadLayout(list);
+		 }
+	 }
+
+	 if (js.contains("LightsArray"))
+	 {
+		 json light = js["LightsArray"];
+
+		 newScene->lights.useDir = light["useDir"].get<bool>();
+		 newScene->lights.usedPoints = light["usedPoints"].get<unsigned int>();
+
+		 if (light.contains("DirLight"))
+		 {
+			 json dir = light["DirLight"];
+			 dir["dir"].get_to(newScene->lights.dirLight.dir.e);
+			 dir["color"].get_to(newScene->lights.dirLight.color.e);
+			 newScene->lights.dirLight.castShadow = dir["castShadow"].get<bool>();
+		 }
+
+		 if (light.contains("PointLights"))
+		 {
+			 json point = light["PointLights"];
+			 for (int i = 0; i < point.size(); i++)
+			 {
+				 point[i]["pos"].get_to(newScene->lights.pointLights[i].pos.e);
+				 point[i]["color"].get_to(newScene->lights.pointLights[i].color.e);
+				 newScene->lights.pointLights[i].radius = point[i]["radius"].get<float>();
+			 }
 		 }
 	 }
 

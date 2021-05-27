@@ -59,7 +59,7 @@ Editor::Editor()
     editorUI.AddWItem(new UIwidget::GamePort(isPlaying, game), 2);
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
     editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
-    editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.renderer.lights, game.skyBox, game.resources), 2);
+    editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.scene.get()->lights, game.skyBox, game.resources), 2);
     editorUI.AddWItem(new UIwidget::Console(CDebug, game.resources), 2);
     editorUI.AddWItem(new UIwidget::FileExplorer(game), 2);
 
@@ -162,7 +162,7 @@ void Editor::Loop()
         //for (int i = 0; i < 5; i++) // Create 5
             game.particlesHandler.particlesSystems.push_back(first);
 
-        game.particlesHandler.particlesSystems[0].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(10, 1, 0));
+        game.particlesHandler.particlesSystems[0].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(10, 0.55, 0));
         Cookie::Resources::Particles::PointPositionGenerate circle(Vec3(0, 0, 0), &game.particlesHandler.particlesSystems[0].trs.TRS);
         game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators.push_back(&circle);
         Cookie::Resources::Particles::Loop loop(game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators);

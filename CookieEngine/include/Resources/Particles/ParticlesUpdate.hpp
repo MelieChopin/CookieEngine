@@ -122,6 +122,18 @@ namespace Cookie
 
 				virtual void Update(ParticlesData* p) override;
 			};
+
+
+			class CreateParticles : public ParticlesUpdate
+			{
+			public:
+				Cookie::Core::Math::Vec4 col;
+
+				virtual void Update(ParticlesData* p) override;
+
+				CreateParticles() { type = "CreateParticles"; }
+				CreateParticles(Cookie::Core::Math::Vec4 color) : col(color) { type = "CreateParticles"; }
+			};
 		}
 	}
 }
