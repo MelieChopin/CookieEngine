@@ -107,7 +107,7 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 
 			if (gameplay.signatureGameplay & CGP_SIGNATURE::LIVE)
 			{
-				game["CGPLive"]["Life"] = gameplay.componentLive.life;
+				game["CGPLive"]["Life"] = gameplay.componentLive.lifeCurrent;
 				game["CGPLive"]["Armor"] = gameplay.componentLive.armor;
 			}
 
@@ -332,7 +332,7 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const Prefab* const & pr
 		 cost["TimeToProduce"] = gameplay.cost.timeToProduce;
 
 		 json& live = js["Gameplay"]["CGPLive"];
-		 live["Life"] = gameplay.componentLive.life;
+		 live["Life"] = gameplay.componentLive.lifeCurrent;
 		 live["Armor"] = gameplay.componentLive.armor;
 
 		 json& attack = js["Gameplay"]["CGPAttack"];
@@ -922,7 +922,7 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 	if (gameplay.contains("CGPLive"))
 	{
 		temp = gameplay["CGPLive"];
-		GPComponent.componentLive.life = temp["Life"].get<float>();
+		GPComponent.componentLive.lifeCurrent = temp["Life"].get<float>();
 		GPComponent.componentLive.armor = temp["Armor"].get<float>();
 	}
 

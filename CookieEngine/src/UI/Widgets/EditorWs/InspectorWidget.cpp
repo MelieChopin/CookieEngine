@@ -490,7 +490,7 @@ void Inspector::GameplayInterface()
                     gameplayComp.RemoveComponent(CGP_SIGNATURE::LIVE);
 
 
-                DragFloat("##LIFE",  &gameplayComp.componentLive.life,  1.f, NULL, NULL, "Life: %.0f" );
+                DragFloat("##LIFE",  &gameplayComp.componentLive.lifeCurrent,  1.f, NULL, NULL, "Life: %.0f" );
                 DragFloat("##ARMOR", &gameplayComp.componentLive.armor, 1.f, NULL, NULL, "Armor: %.0f");
 
                 TreePop();
