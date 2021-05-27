@@ -208,7 +208,7 @@ void Coordinator::ApplyRemoveUnnecessaryEntities()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (entityHandler->entities[i].needToBeRemoved ||
-			(CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::LIVE) && componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentLive.life <= 0))
+			(CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::LIVE) && componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentLive.lifeCurrent <= 0))
 		{
 			RemoveEntity(entityHandler->entities[i]);
 			i = std::max(i - 1, 0);
