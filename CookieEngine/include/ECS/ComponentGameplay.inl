@@ -48,6 +48,8 @@ namespace Cookie
 				componentProducer.ToDefault();
 			if (ComponentSignature & CGP_SIGNATURE::WORKER)
 				componentWorker.ToDefault();
+			if (ComponentSignature & CGP_SIGNATURE::RESOURCE)
+				componentResource.ToDefault();
 		}
 
 	}

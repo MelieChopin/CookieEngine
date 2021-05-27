@@ -97,13 +97,6 @@ void Game::HandleGameplayInputs(Render::DebugRenderer& dbg)
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_X])
     {
         ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["Resource"].get(), "good");
-
-        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
-        CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer;
-
-        trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, producer.tileSize);
-        Vec3 posTopLeft = trs.pos - trs.scale / 2;
-        scene->map.GiveTilesToBuilding(scene->map.GetTileIndex(posTopLeft), producer);
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
         coordinator.armyHandler->AddArmyCoordinator("bad");
