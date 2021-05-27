@@ -71,7 +71,6 @@ void Game::CalculateMousePosInWorld(Render::FreeFlyCam& cam)
 }
 void Game::HandleGameplayInputs(Render::DebugRenderer& dbg)
 {
-    
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
     {
         ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["04Base"].get(), "good");
@@ -97,6 +96,10 @@ void Game::HandleGameplayInputs(Render::DebugRenderer& dbg)
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_X])
     {
         ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["Resource"].get(), "good");
+
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id); 
+        Vec2 tileSize {1, 1};
+        trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, tileSize);
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
         coordinator.armyHandler->AddArmyCoordinator("bad");

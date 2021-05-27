@@ -1,4 +1,5 @@
 #include "ECS/EntityHandler.hpp"
+#include <iostream>
 
 using namespace Cookie::ECS;
 
@@ -14,10 +15,10 @@ Entity::Entity(const Entity& entity): id{ entity.id }, signature{ entity.signatu
 void Entity::operator= (const Entity& entity)
 {
 	id = entity.id;
+	signature = entity.signature;
 	name = entity.name;
 	namePrefab = entity.namePrefab;
 	tag = entity.tag;
-	signature = entity.signature;
 	needToBeRemoved = entity.needToBeRemoved;
 }
 void Entity::Swap(Entity& entity)
@@ -43,4 +44,16 @@ EntityHandler::EntityHandler()
 {
 	for (unsigned int id = 0; id < MAX_ENTITIES; ++id)
 		entities.push_back(Entity(id));
+}
+
+void EntityHandler::Debug()
+{
+	for (int i = 0; i < livingEntities; ++i)
+	{
+		std::cout << " id : "		  << entities[i].id			<< "\n"
+			      << " signature : "  << entities[i].signature  << "\n"
+				  << " name : "		  << entities[i].name		<< "\n"
+				  << " tag : "		  << entities[i].tag		<< "\n"
+				  << " namePrefab : " << entities[i].namePrefab << "\n\n";
+	}
 }
