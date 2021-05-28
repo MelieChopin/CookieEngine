@@ -15,7 +15,16 @@ namespace Cookie
 
 		inline void Camera::Update()
 		{
-			viewMat = Core::Math::Mat4::Translate(-pos) * Core::Math::Mat4::RotateY(rot.y)  * Core::Math::Mat4::RotateX(rot.x);
+			rotMat = Core::Math::Mat4::RotateY(rot.y) * Core::Math::Mat4::RotateX(rot.x);
+			posMat = Core::Math::Mat4::Translate(-pos);
+			viewMat =  posMat * rotMat;
+		}
+
+		inline void Camera::ForceUpdate()
+		{
+			rotMat = Core::Math::Mat4::RotateY(rot.y) * Core::Math::Mat4::RotateX(rot.x);
+			posMat = Core::Math::Mat4::Translate(-pos);
+			viewMat = posMat * rotMat;
 		}
 
 		inline void Camera::ResetPreviousMousePos()
@@ -24,13 +33,34 @@ namespace Cookie
 			previousMouseY = ImGui::GetIO().MousePos.y;
 		}					 
 
-		inline Core::Math::Vec3 Camera::MouseToWorldDir()
+		inline Core::Math::Vec3 Camera::MouseToWorldDir()const
 		{
 			Core::Math::Vec2 mousePos = { { ImGui::GetIO().MousePos.x - windowOffset.x,ImGui::GetIO().MousePos.y - windowOffset.y} };
 
 			Core::Math::Vec2 ratio = { { (mousePos.x / (width * 0.5f)) - 1.0f,  (-mousePos.y / (height * 0.5f)) + 1.0f} };
 
-			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(viewMat * projMat) * Core::Math::Vec4(ratio.x,ratio.y, 1.0f,1.0f);
+			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(rotMat * projMat) * Core::Math::Vec4(ratio.x,ratio.y, 1.0f,1.0f);
+
+			return Core::Math::Vec3({ r.x / r.a,r.y / r.a,r.z / r.a }).Normalize();
+		}
+
+		inline Core::Math::Vec3 Camera::MouseToWorldDirClamp()const
+		{
+			Core::Math::Vec2 mousePos = { { ImGui::GetIO().MousePos.x - windowOffset.x,ImGui::GetIO().MousePos.y - windowOffset.y} };
+
+			Core::Math::Vec2 ratio = { { (mousePos.x / (width * 0.5f)) - 1.0f,  (-mousePos.y / (height * 0.5f)) + 1.0f} };
+
+			if (ratio.x > 1.0f || ratio.x < -1.0f || ratio.y > 1.0f || ratio.y < -1.0f)
+				return Core::Math::Vec3();
+
+			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(rotMat * projMat) * Core::Math::Vec4(ratio.x, ratio.y, 10.0f, 1.0f);
+
+			return Core::Math::Vec3({ r.x / r.a,r.y / r.a,r.z / r.a }).Normalize();
+		}
+
+		inline Core::Math::Vec3 Camera::ScreenPointToWorldDir(const Core::Math::Vec2& point)const
+		{
+			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(rotMat * projMat) * Core::Math::Vec4(point.x, point.y, 10.0f, 1.0f);
 
 			return Core::Math::Vec3({ r.x / r.a,r.y / r.a,r.z / r.a }).Normalize();
 		}
