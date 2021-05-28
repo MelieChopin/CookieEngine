@@ -109,8 +109,8 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 
 			if (gameplay.signatureGameplay & CGP_SIGNATURE::LIVE)
 			{
-				game["CGPLive"]["Life"] = gameplay.componentLive.life;
-				//game["CGPLive"]["LifeMax"] = gameplay.componentLive.lifeMax;
+				game["CGPLive"]["Life"] = gameplay.componentLive.lifeCurrent;
+				game["CGPLive"]["LifeMax"] = gameplay.componentLive.lifeMax;
 				game["CGPLive"]["Armor"] = gameplay.componentLive.armor;
 			}
 
@@ -1146,6 +1146,7 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 	{
 		temp = gameplay["CGPLive"];
 		GPComponent.componentLive.lifeCurrent = temp["Life"].get<float>();
+		GPComponent.componentLive.lifeMax = temp["LifeMax"].get<float>();
 		GPComponent.componentLive.armor = temp["Armor"].get<float>();
 	}
 

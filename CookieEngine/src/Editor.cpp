@@ -110,109 +110,6 @@ void Editor::Loop()
 {
     //Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
     Physics::PhysicsHandle physHandle;
-    {
-        /// Particles
-        //First Particles 
-        /*Cookie::Resources::Particles::ParticlesSystem first = Cookie::Resources::Particles::ParticlesSystem(2, 1);
-        first.trs.pos = Vec3(0, 3, 0);
-        first.trs.rot = Vec3(0, 0, 0);
-        first.trs.scale = Vec3(1, 1, 1);
-        first.trs.ComputeTRS();
-
-        Cookie::Resources::Particles::BoxPositionGenerate       box(Vec3(0, 2, 0), Vec3(0.5, 0.5, 0.5), &first.trs.TRS);
-        Cookie::Resources::Particles::VelocityConstGenerate     vel(Vec3(0, 10, 0));
-        Cookie::Resources::Particles::VelocityRandGenerate      velRand(Vec3(-1, -1, -1), Vec3(2, 3, 2));
-        Cookie::Resources::Particles::MassConstGenerate         mass(1);
-        Cookie::Resources::Particles::TimeConstGenerate         time(2);
-        Cookie::Resources::Particles::TimeRandGenerate          timeRand(1.0f, 2.25f);
-        Cookie::Resources::Particles::ColorConstGenerate        color(Vec4(1, 1, 1, 1));
-        Cookie::Resources::Particles::RotateRandGenerate        rot(Vec3(Math::PI / 2, 0, 0), Vec3(Math::PI / 2, 0, Math::PI));
-        first.data[0].countAlive = 1;
-        first.data[0].SetIsBIllboard(false);
-        first.data[0].mesh = game.resources.meshes["Quad"].get();
-        first.data[0].texture = game.resources.textures2D["Assets/VFX/Flaque.png"].get();
-        first.particlesEmiter[0].generators.push_back(&timeRand);
-        first.particlesEmiter[0].generators.push_back(&rot);
-
-        Cookie::Resources::Particles::UpdateVelocity    updateVel;
-        Cookie::Resources::Particles::UpdateScale       updateScale(Math::Vec3(4, 4, 4));
-        Cookie::Resources::Particles::EnabledGravity    enabledGravity(-9.81f);
-        Cookie::Resources::Particles::UpdateTime        updateTime;
-        Cookie::Resources::Particles::UpdateAlpha       alpha;
-        Cookie::Resources::Particles::ColorOverLife     col(Vec4(1.5f, 1, 0, 0));
-        Cookie::Resources::Particles::CollisionWithPlane collisionWithPlane(Cookie::Core::Math::Vec3(0, 1, 0), -1);
-        first.particlesEmiter[0].updates.push_back(&updateTime);
-        first.particlesEmiter[0].updates.push_back(&alpha);
-        first.particlesEmiter[0].updates.push_back(&updateScale);
-
-        //for (int i = 0; i < 5; i++) // Create 5
-        game.particlesHandler.particlesSystems.push_back(first);
-
-        game.particlesHandler.particlesSystems[0].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(5, 0.55, 5));
-        Cookie::Resources::Particles::PointPositionGenerate circle(Vec3(0, 0, 0), &game.particlesHandler.particlesSystems[0].trs.TRS);
-        game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators.push_back(&circle);
-        Cookie::Resources::Particles::Loop loop(game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators);
-        //game.particlesHandler.particlesSystems[0].particlesEmiter[0].updates.push_back(&loop);
-
-
-        for (int i = 0; i < game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators.size(); i++)
-            game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators[i]->
-            generate(&game.particlesHandler.particlesSystems[0].data[0], 0,
-                game.particlesHandler.particlesSystems[0].data[0].countAlive);
-
-        //Second Particles in the center particles
-        Cookie::Resources::Particles::ParticlesSystem second = Cookie::Resources::Particles::ParticlesSystem(40, 30);
-        second.data[0].countAlive = 5;
-        second.data[0].SetIsBIllboard(true);
-        second.data[0].mesh = game.resources.meshes["Quad"].get();
-        second.data[0].texture = game.resources.textures2D["Assets/VFX/SplashChoco.png"].get();
-        Cookie::Resources::Particles::VelocityRandGenerate      velRand2(Vec3(-5, 5, -5), Vec3(5, 10, 5));
-        Cookie::Resources::Particles::ScaleRandGenerate      scaleRand(Vec3(0.15, 0.15, 0.15), Vec3(0.35, 0.35, 0.35));
-        second.particlesEmiter[0].generators.push_back(&circle);
-        second.particlesEmiter[0].generators.push_back(&velRand2);
-        second.particlesEmiter[0].generators.push_back(&mass);
-        second.particlesEmiter[0].generators.push_back(&timeRand);
-        second.particlesEmiter[0].generators.push_back(&scaleRand);
-
-        Cookie::Resources::Particles::UpdateScale       little(Math::Vec3(0, 0, 0));
-        Cookie::Resources::Particles::UpdateAlpha     col2(0);
-        second.particlesEmiter[0].updates.push_back(&enabledGravity);
-        second.particlesEmiter[0].updates.push_back(&updateVel);
-        second.particlesEmiter[0].updates.push_back(&updateTime);
-        second.particlesEmiter[0].updates.push_back(&little);
-
-        game.particlesHandler.particlesSystems[0].data.push_back(second.data[0]);
-        game.particlesHandler.particlesSystems[0].particlesEmiter.push_back(second.particlesEmiter[0]);
-
-        for (int i = 0; i < game.particlesHandler.particlesSystems[0].particlesEmiter[1].generators.size(); i++)
-            game.particlesHandler.particlesSystems[0].particlesEmiter[1].generators[i]->
-            generate(&game.particlesHandler.particlesSystems[0].data[1], 0,
-                game.particlesHandler.particlesSystems[0].data[1].countAlive);
-
-        Cookie::Resources::Particles::ParticlesSystem third = Cookie::Resources::Particles::ParticlesSystem(310, 300);
-        third.data[0].countAlive = 0;
-        third.data[0].SetIsBIllboard(true);
-        third.data[0].mesh = game.resources.meshes["Quad"].get();
-        third.data[0].texture = game.resources.textures2D["Assets/VFX/Smoke.png"].get();
-        //third.particlesEmiter[0].generators.push_back(&circle);
-        //Cookie::Resources::Particles::TimeRandGenerate          timeRa(1.0f, 2.25f);
-        //third.particlesEmiter[0].generators.push_back(&timeRa);
-
-        third.particlesEmiter[0].updates.push_back(&updateTime);
-        third.particlesEmiter[0].updates.push_back(&alpha);
-
-        game.particlesHandler.particlesSystems[0].data.push_back(third.data[0]);
-        game.particlesHandler.particlesSystems[0].particlesEmiter.push_back(third.particlesEmiter[0]);
-
-        for (int i = 0; i < game.particlesHandler.particlesSystems[0].particlesEmiter[2].generators.size(); i++)
-            game.particlesHandler.particlesSystems[0].particlesEmiter[2].generators[i]->
-            generate(&game.particlesHandler.particlesSystems[0].data[2], 0,
-                game.particlesHandler.particlesSystems[0].data[2].countAlive);
-
-        Cookie::Resources::Particles::CreateParticles create(game.particlesHandler.particlesSystems[0].data[2]);
-        game.particlesHandler.particlesSystems[0].particlesEmiter[1].updates.push_back(&create);*/
-         }
-
     game.particlesHandler.particlesSystems.resize(1);
     
     Serialization::Load::LoadParticles(game.particlesHandler.particlesSystems[0], game.resources);
@@ -223,7 +120,6 @@ void Editor::Loop()
             game.particlesHandler.particlesSystems[0].particlesEmiter[j].generators[i]->
             generate(&game.particlesHandler.particlesSystems[0].data[j], 0,
                 game.particlesHandler.particlesSystems[0].data[j].countAlive);
-
 
     game.particlesHandler.particlesSystems[0].name = "death";
     //Resources::Serialization::Save::SaveParticles(game.particlesHandler.particlesSystems[0]);
