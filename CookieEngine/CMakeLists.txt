@@ -87,6 +87,7 @@ set (SRC_FILES
     "${SRC_DIR}/Render/Drawers/MapDrawer.cpp"
     "${SRC_DIR}/Render/Drawers/SkyBox.cpp"
     "${SRC_DIR}/Render/Drawers/PlayerDrawer.cpp"
+    "${SRC_DIR}/Render/Drawers/SelectionDrawer.cpp"
 
     "${SRC_DIR}/Render/RenderPass/GeometryPass.cpp"
     "${SRC_DIR}/Render/RenderPass/LightPass.cpp"

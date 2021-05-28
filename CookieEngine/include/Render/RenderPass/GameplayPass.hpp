@@ -2,6 +2,7 @@
 #define __GAMEPLAY_PASS_HPP__
 
 #include "Render/Drawers/PlayerDrawer.hpp"
+#include "Render/Drawers/SelectionDrawer.hpp"
 
 struct ID3D11BlendState;
 struct ID3D11DepthStencilState;
@@ -25,11 +26,14 @@ namespace Cookie
 
 				ID3D11RasterizerState*		rasterizerState		{ nullptr };
 				ID3D11DepthStencilState*	depthStencilState	{ nullptr };
+				ID3D11DepthStencilState*	outLineState		{ nullptr };
 				ID3D11BlendState*			blendState			{ nullptr };
 				ID3D11SamplerState*			PSampler			{ nullptr };
 
 			public:
+
 				PlayerDrawer				playerDrawer;
+				SelectionDrawer				selectDrawer;
 
 			private:
 

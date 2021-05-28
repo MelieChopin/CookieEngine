@@ -20,9 +20,7 @@ namespace Cookie
 			private:
 				Core::Math::Mat4 projMat = Core::Math::Mat4::Identity();
 
-				
-
-			public:
+			protected:
 				Core::Math::Mat4 viewMat = Core::Math::Mat4::Identity();
 
 				bool activated = true;
@@ -31,6 +29,12 @@ namespace Cookie
 				float previousMouseY{ 0.0 };
 
 			public:
+				//because of windows "max" def
+				#undef max 
+				Core::Math::Vec2 mapClampX = {{ -std::numeric_limits<float>().max(),std::numeric_limits<float>().max() }};
+				Core::Math::Vec2 mapClampZ = {{ -std::numeric_limits<float>().max(),std::numeric_limits<float>().max() }};
+
+
 				float camNear	= 0.0f;
 				float camFar	= 0.0f;
 				float fov		= 0.0f;
@@ -53,12 +57,12 @@ namespace Cookie
 				inline Core::Math::Mat4 GetViewProj() const		{ return viewMat * projMat;	}
 				
 				inline void SetProj(float yFov, float _width, float _height, float n, float f) { fov = yFov; width = _width; height = _height; camFar = f; camNear = n;  aspectRatio = width / height; projMat = Core::Math::Mat4::Perspective(Core::Math::ToRadians(yFov), width / height, n, f); }
-				inline void LookAt(const Core::Math::Vec3& toLook) { viewMat = Core::Math::Mat4::Inverse(Core::Math::Mat4::Translate(pos) * Core::Math::Mat4::LookAt(pos, toLook, { 0.0f,1.0f,0.0f }));}
+				inline void LookAt(const Core::Math::Vec3& toLook) { viewMat = Core::Math::Mat4::LookAt(pos, toLook, { 0.0f,1.0f,0.0f });}
 
 				inline virtual void Update() = 0;
 
-				inline void Activate() { activated = true; }
-				inline void Deactivate() { activated = false; }
+				inline void Activate()noexcept { activated = true; }
+				inline void Deactivate()noexcept { activated = false; }
 
 				inline virtual void ResetPreviousMousePos();
 
@@ -81,12 +85,16 @@ namespace Cookie
 
 		};
 
+		#define GAME_CAM_LOWER_EPSILON -0.98f
+		#define GAME_CAM_HIGHER_EPSILON 0.98f
+
 		class GameCam : public Camera
 		{
 		private:
 
 
 		public:
+
 			GameCam() {}
 			virtual ~GameCam() {}
 

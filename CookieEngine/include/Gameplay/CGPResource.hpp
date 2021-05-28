@@ -24,6 +24,7 @@ namespace Cookie
 			{
 				resourceReserve = 1000;
 				isPrimary       = true;
+				nbOfWorkerOnIt  = 0;
 			}
 
 		};
