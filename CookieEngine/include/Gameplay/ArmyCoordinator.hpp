@@ -2,6 +2,7 @@
 #define _ARMY_COORDINATOR_HPP__
 
 #include <vector>
+#include "Gameplay/AIBehavior.hpp"
 
 namespace Cookie
 {
@@ -12,6 +13,7 @@ namespace Cookie
 		enum E_GOALS
 		{
 			//Economic
+			E_DEVELOP_WORKER,
 			E_DEVELOP_BASE,
 			E_DEVELOP_ARMY,
 			E_WAIT_ECONOMIC,
@@ -31,11 +33,27 @@ namespace Cookie
 
 			Army*                army {nullptr};
 			std::vector<E_GOALS> goals;
-			int nbOfWorkerInProduction {0};
-			int nbOfUnitInProduction   {0};
+
+			AIBehavior			 behavior; //use a Behavior* when it will be loaded in the RM
+
+			int nbOfWorkerInProduction   {0};
+			int nbOfBuildingInProduction {0};
+			int nbOfUnitInProduction     {0};
 
 
-			ArmyCoordinator(Army* _army) : army{_army}  {}
+			ArmyCoordinator(Army* _army) : army{_army}
+			{
+				behavior.steps.push_back(AIStep{});
+				behavior.steps[0].nbOfWorker = 6;
+				behavior.steps[0].nbOfUnits = 5;
+				behavior.steps[0].listOfBuildings.push_back("02Producer");
+
+				behavior.steps.push_back(AIStep{});
+				behavior.steps[1].nbOfWorker = 0;
+				behavior.steps[1].nbOfUnits = 4;
+				behavior.steps[1].listOfBuildings.push_back("02Producer");
+				behavior.steps[1].listOfBuildings.push_back("02Producer");
+			}
 			~ArmyCoordinator() {}
 
 
@@ -44,6 +62,7 @@ namespace Cookie
 			void ResourceAllocation();
 
 		private:
+			void DevelopWorker();
 			void DevelopBase();
 			void DevelopArmy();
 			void Attack();

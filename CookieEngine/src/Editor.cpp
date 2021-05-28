@@ -330,8 +330,8 @@ void Editor::Loop()
         game.HandleGameplayInputs();
         game.ECSCalls(dbgRenderer);
 
-        game.coordinator.armyHandler->Debug();
-        game.coordinator.entityHandler->Debug();
+        //game.coordinator.armyHandler->Debug();
+        //game.coordinator.entityHandler->Debug();
 
 
 

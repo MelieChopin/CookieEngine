@@ -89,7 +89,10 @@ void ArmyHandler::AddElementToArmy(Army& army, ECS::ComponentGameplay* element)
 
 	case E_ARMY_TYPE::E_BUILDING:
 		element->componentProducer.income = &(army.income);
+		army.income.supplyMax += element->componentProducer.supplyGiven;
 		army.buildings.push_back(element);
+		if (armyCoordinator)
+			armyCoordinator->nbOfBuildingInProduction--;
 		break;
 
 	default:
@@ -108,6 +111,8 @@ void ArmyHandler::RemoveElementFromArmy(ECS::ComponentGameplay* element)
 }
 void ArmyHandler::RemoveElementFromArmy(Army& army, ECS::ComponentGameplay* element)
 {
+	ArmyCoordinator* armyCoordinator = GetArmyCoordinator(army.name);
+
 	switch (element->type)
 	{
 	case E_ARMY_TYPE::E_WORKER:
@@ -120,6 +125,9 @@ void ArmyHandler::RemoveElementFromArmy(Army& army, ECS::ComponentGameplay* elem
 
 	case E_ARMY_TYPE::E_BUILDING:
 		RemoveElementFromVector(army.buildings, element);
+		army.income.supplyMax -= element->componentProducer.supplyGiven;
+		//if (armyCoordinator)
+		//	armyCoordinator->behavior.stepGoals.listOfBuildings.push_back(element.name);
 		break;
 
 	default:
