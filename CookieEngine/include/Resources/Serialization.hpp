@@ -35,6 +35,10 @@ namespace Cookie
 		class Prefab;
 		class Texture;
 		class Sound;
+		namespace Particles
+		{
+			class ParticlesSystem;
+		}
 	}
 
 	namespace Resources
@@ -55,6 +59,7 @@ namespace Cookie
 				void SaveTexture(std::string& name, Cookie::Core::Math::Vec4& color);
 				void SaveVolumAndModeMusic(std::string key);
 				void SaveVolumAndModeMusic(Sound* const & sound);
+				void SaveParticles(Cookie::Resources::Particles::ParticlesSystem& particles);
 			}
 
 			namespace Load
@@ -69,6 +74,7 @@ namespace Cookie
 				void LoadPhysic(json& physic, Cookie::ECS::ComponentPhysics& physics);
 				void LoadGameplay(json& game, Cookie::ECS::ComponentGameplay& gameplay, Cookie::Resources::ResourcesManager& resourcesManager);
 				void LoadVolumAndModeMusic(std::string path, std::string key);
+				void LoadParticles(Particles::ParticlesSystem& system, Cookie::Resources::ResourcesManager& resourcesManager);
 			}
 		}
 	}

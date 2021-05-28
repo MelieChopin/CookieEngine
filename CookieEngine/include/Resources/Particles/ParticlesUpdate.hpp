@@ -14,11 +14,24 @@ namespace Cookie
 			class ParticlesData;
 			class ParticlesGenerator;
 
+			enum TYPEUP
+			{
+				UPDATEVEL,
+				UPDATESCALE,
+				UPDATEALPHA,
+				COLOROVERLIFE,
+				ENABLEGRAVITY,
+				UPDATETIME,
+				LOOP,
+				COLLISIONWITHPLANE,
+				CREATPARTICLES
+			};
+
 			class ParticlesUpdate
 			{
 			public :
 				virtual void Update(ParticlesData* p) = 0;
-				std::string type;
+				TYPEUP type;
 
 				ParticlesUpdate() {}
 				~ParticlesUpdate() {}
@@ -27,36 +40,18 @@ namespace Cookie
 			class UpdateVelocity : public ParticlesUpdate
 			{
 			public :
-				UpdateVelocity() { type = "UpdateVel"; }
+				UpdateVelocity() { type = TYPEUP::UPDATEVEL; }
 				~UpdateVelocity() {}
 
 				virtual void Update(ParticlesData* p) override;
 			};
 
-			class UpdateAcc : public ParticlesUpdate
-			{
-			public:
-				UpdateAcc() { type = "UpdateAcc"; }
-				~UpdateAcc() {}
-
-				virtual void Update(ParticlesData* p) override;
-			};
-
-			class SlowDown : public ParticlesUpdate
-			{
-			public:
-				float coeff;
-				SlowDown(float coeff = 0.2f): coeff(coeff) { type = "SlowDown"; }
-				~SlowDown() {}
-
-				virtual void Update(ParticlesData* p) override;
-			};
 
 			class UpdateScale : public ParticlesUpdate
 			{
 			public:
 				Cookie::Core::Math::Vec3 scaleEnd;
-				UpdateScale(Cookie::Core::Math::Vec3 scale = Cookie::Core::Math::Vec3(0, 0, 0)) : scaleEnd(scale) { type = "UpdateScale"; }
+				UpdateScale(Cookie::Core::Math::Vec3 scale = Cookie::Core::Math::Vec3(0, 0, 0)) : scaleEnd(scale) { type = TYPEUP::UPDATESCALE; }
 				~UpdateScale() {}
 
 				virtual void Update(ParticlesData* p) override;
@@ -66,7 +61,7 @@ namespace Cookie
 			{
 			public:
 				float alphaEnd;
-				UpdateAlpha(float alpha = 0): alphaEnd(alpha) { type = "UpdateAlpha"; }
+				UpdateAlpha(float alpha = 0): alphaEnd(alpha) { type = TYPEUP::UPDATEALPHA; }
 				~UpdateAlpha() {}
 
 				virtual void Update(ParticlesData* p) override;
@@ -76,7 +71,7 @@ namespace Cookie
 			{
 			public:
 				Cookie::Core::Math::Vec4 colorEnd;
-				ColorOverLife(Cookie::Core::Math::Vec4 color = Cookie::Core::Math::Vec4(1, 1, 1, 1)) : colorEnd(color) { type = "ColorOverLife"; }
+				ColorOverLife(Cookie::Core::Math::Vec4 color = Cookie::Core::Math::Vec4(1, 1, 1, 1)) : colorEnd(color) { type = TYPEUP::COLOROVERLIFE; }
 				~ColorOverLife() {}
 
 				virtual void Update(ParticlesData* p) override;
@@ -86,7 +81,7 @@ namespace Cookie
 			{
 			public:
 				float gravity;
-				EnabledGravity(float gravity = -9.81f) : gravity(gravity) { type = "EnabledGravity"; }
+				EnabledGravity(float gravity = -9.81f) : gravity(gravity) { type = TYPEUP::ENABLEGRAVITY; }
 				~EnabledGravity() {}
 
 				virtual void Update(ParticlesData* p) override;
@@ -95,7 +90,7 @@ namespace Cookie
 			class UpdateTime : public ParticlesUpdate
 			{
 			public :
-				UpdateTime() { type = "UpdateTime"; }
+				UpdateTime() { type = TYPEUP::UPDATETIME; }
 				~UpdateTime() {}
 
 				virtual void Update(ParticlesData* p) override;
@@ -104,9 +99,9 @@ namespace Cookie
 			class Loop : public ParticlesUpdate
 			{
 			public:
-				Loop(std::vector<ParticlesGenerator*>& _particlesGen) : particlesGen(_particlesGen) { type = "Loop"; }
+				Loop(std::vector<ParticlesGenerator*>& _particlesGen) : particlesGen(&_particlesGen) { type = TYPEUP::LOOP; }
 				~Loop() {}
-				std::vector<ParticlesGenerator*>& particlesGen;
+				std::vector<ParticlesGenerator*>* particlesGen;
 
 				virtual void Update(ParticlesData* p) override;
 			};
@@ -114,7 +109,7 @@ namespace Cookie
 			class CollisionWithPlane : public ParticlesUpdate
 			{
 			public:
-				CollisionWithPlane(Cookie::Core::Math::Vec3 normal = {0, 1, 0}, float distance = 0) : dis(distance), n(normal) { type = "CollisionWithPlane"; }
+				CollisionWithPlane(Cookie::Core::Math::Vec3 normal = {0, 1, 0}, float distance = 0) : dis(distance), n(normal) { type = TYPEUP::COLLISIONWITHPLANE; }
 				~CollisionWithPlane() {}
 
 				float dis;
@@ -127,12 +122,11 @@ namespace Cookie
 			class CreateParticles : public ParticlesUpdate
 			{
 			public:
-				Cookie::Core::Math::Vec4 col;
+				ParticlesData& data;
 
 				virtual void Update(ParticlesData* p) override;
 
-				CreateParticles() { type = "CreateParticles"; }
-				CreateParticles(Cookie::Core::Math::Vec4 color) : col(color) { type = "CreateParticles"; }
+				CreateParticles(ParticlesData& data) : data(data) { type = TYPEUP::CREATPARTICLES; }
 			};
 		}
 	}

@@ -8,13 +8,7 @@ using namespace Cookie::Resources::Particles;
 void UpdateVelocity::Update(ParticlesData* p)
 {
 	for (int i = 0; i < p->countAlive; i++)
-		p->data[i].pos += p->data[i].vel * Cookie::Core::DeltaTime();
-}
-
-void UpdateAcc::Update(ParticlesData* p)
-{
-	for (int i = 0; i < p->countAlive; i++)
-		p->data[i].vel += p->data[i].acc * Cookie::Core::DeltaTime();
+		p->data[i].pos += p->data[i].vel * Cookie::Core::DeltaTime();	
 }
 
 void UpdateScale::Update(ParticlesData* p)
@@ -25,12 +19,6 @@ void UpdateScale::Update(ParticlesData* p)
 		p->data[i].scale.y = Cookie::Core::Math::Lerp(scaleEnd.y, p->data[i].scaleBegin.y, p->data[i].time / p->data[i].timeMax);
 		p->data[i].scale.z = Cookie::Core::Math::Lerp(scaleEnd.z, p->data[i].scaleBegin.z, p->data[i].time / p->data[i].timeMax);
 	}
-}
-
-void SlowDown::Update(ParticlesData* p)
-{
-	for (int i = 0; i < p->countAlive; i++)
-		p->data[i].acc *= coeff;
 }
 
 void UpdateAlpha::Update(ParticlesData* p)
@@ -61,6 +49,7 @@ void UpdateTime::Update(ParticlesData* p)
 	for (int i = 0; i < p->countAlive; i++)
 	{
 		p->data[i].time -= Cookie::Core::DeltaTime();
+		//std::cout << p->data[i].time << "\n";
 		if (p->data[i].time < 0)
 			p->kill(i);
 	}
@@ -75,8 +64,8 @@ void Loop::Update(ParticlesData* p)
 
 		p->wake(countAlive, countFrame);
 
-		for (int i = 0; i < particlesGen.size(); i++)
-			particlesGen[i]->generate(p, countAlive, countFrame + 1);
+		for (int i = 0; i < particlesGen->size(); i++)
+			(*particlesGen)[i]->generate(p, countAlive, countFrame + 1);
 	}
 }
 
@@ -96,3 +85,23 @@ void CollisionWithPlane::Update(ParticlesData* p)
 		}
 	}
 }
+
+
+void CreateParticles::Update(ParticlesData* p)
+{
+	for (int i = 0; i < p->countAlive; i++)
+	{
+		if (data.countAlive < data.data.size())
+		{
+			data.data[data.countAlive].alive = true;
+			data.data[data.countAlive].pos = p->data[i].pos - p->data[i].vel * 3 * Cookie::Core::DeltaTime();
+			data.data[data.countAlive].time = 0.35f;
+			data.data[data.countAlive].timeMax = 0.35f;
+			data.data[data.countAlive].scale = p->data[i].scale;
+			data.data[data.countAlive].col = p->data[i].colBegin;
+			data.data[data.countAlive].colBegin = Cookie::Core::Math::Vec4(1, 1, 1, 1);
+			data.countAlive ++;
+		}
+	}
+}
+

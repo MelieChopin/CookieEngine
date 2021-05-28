@@ -27,9 +27,11 @@ namespace Cookie
 				bool needToBeRemoved = false;
 				Cookie::Render::ParticlesPass shader;
 
+				std::string name;
+
 				ParticlesSystem() {}
 
-				ParticlesSystem(const ParticlesSystem& other) : data(other.data), particlesEmiter(other.particlesEmiter), shader(std::move(other.shader))
+				ParticlesSystem(const ParticlesSystem& other) : data(other.data), particlesEmiter(other.particlesEmiter), trs(std::move(other.trs)), shader(std::move(other.shader))
 				{ }
 
 				ParticlesSystem(int size, int sizeFrame)
@@ -44,27 +46,28 @@ namespace Cookie
 				{
 					for (int j = 0; j < data.size(); j++)
 					{
-						for (int k = 0; k < particlesEmiter[j].updates.size(); k++)
-						{
-							particlesEmiter[j].updates[k]->Update(&data[j]);
-							if (data[j].countAlive <= 0)
+						if (particlesEmiter.size() > j)
+							for (int k = 0; k < particlesEmiter[j].updates.size(); k++)
 							{
-								data.erase(data.begin() + j);
-								particlesEmiter.erase(particlesEmiter.begin() + j);
-								if (data.size() == 0)
+								particlesEmiter[j].updates[k]->Update(&data[j]);
+								if (data[j].countAlive <= 0)
 								{
-									needToBeRemoved = true;
-									break;
+									data.erase(data.begin() + j);
+									particlesEmiter.erase(particlesEmiter.begin() + j);
+									if (data.size() == 0)
+									{
+										needToBeRemoved = true;
+										break;
+									}
+									else if (j + 1 < data.size())
+									{
+										j++;
+										k = 0;
+									}
+									else
+										break;
 								}
-								else if (j + 1 < data.size())
-								{
-									j++;
-									k = 0;
-								}
-								else
-									break;
 							}
-						}
 					}
 				}
 
@@ -88,7 +91,6 @@ namespace Cookie
 							}
 
 							Cookie::Render::InstancedData temp;
-							Cookie::Core::Math::Vec3 rot(0, 0, 0);
 							temp.World = Cookie::Core::Math::Mat4::TRS(data[j].data[i].pos, data[j].data[i].rot, data[j].data[i].scale);
 							temp.Color = data[j].data[i].col;
 							temp.isBillboard = data[j].data[i].isBillboard;
