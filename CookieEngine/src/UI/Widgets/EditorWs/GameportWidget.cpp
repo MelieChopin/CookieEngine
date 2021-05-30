@@ -1,5 +1,6 @@
 #include "Game.hpp"
 #include "GameportWidget.hpp"
+#include "Scene.hpp"
 
 #include "Scene.hpp"
 
@@ -25,15 +26,17 @@ void GamePort::WindowDisplay()
 {
 	TryBeginWindow(ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus)
 	{
-		if (!isPlaying)
-		{ Text("[Game not running]"); }
+		ImVec2 gameportPos;
 
-		else
-		{
-			ImGui::Image(static_cast<ImTextureID>(game.frameBuffer.shaderResource), { (float)game.renderer.window.width, (float)game.renderer.window.height });
+		gameportPos.x = GetWindowPos().x + GetCursorPosX();
+		gameportPos.y = GetWindowPos().y + GetCursorPosY();
+
+		game.scene->camera->windowOffset = { {gameportPos.x, gameportPos.y} };
+		game.scene->camera->Activate();
+
+		ImGui::Image(static_cast<ImTextureID>(game.frameBuffer.shaderResource), { (float)game.renderer.window.width, (float)game.renderer.window.height });
 			
-			game.scene->uiScene.RenderLayout();
-		}
+		game.scene->uiScene.RenderLayout();
 	}
 
 	ImGui::End();

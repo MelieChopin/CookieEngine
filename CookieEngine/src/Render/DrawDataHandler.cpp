@@ -147,16 +147,17 @@ void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 
 	for (int i = 0; i < entityHandler.livingEntities; ++i)
 	{
-		if ((entityHandler.entities[i].signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL)) == (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
+		Entity iEntity = entityHandler.entities[i];
+		if ((iEntity.signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL)) == (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
 		{
-			ECS::ComponentModel& model = components.GetComponentModel(entityHandler.entities[i].id);
+			ECS::ComponentModel& model = components.GetComponentModel(iEntity.id);
 
 			if (model.mesh == nullptr)
 			{
 				continue;
 			}
 
-			Core::Math::Mat4& trs = components.GetComponentTransform(entityHandler.entities[i].id).TRS;
+			Core::Math::Mat4& trs = components.GetComponentTransform(iEntity.id).TRS;
 
 			Vec4 modelMin = trs * Core::Math::Vec4(model.mesh->AABBMin, 1.0f);
 			Vec4 modelMax = trs * Core::Math::Vec4(model.mesh->AABBMax, 1.0f);
@@ -188,6 +189,46 @@ void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 
 			models.push_back(model);
 			matrices.push_back(trs);
+		}
+	}
+
+	for (int i = 0; i < game.coordinator.selectedEntities.size(); ++i)
+	{
+		Entity iEntity = *game.coordinator.selectedEntities[i];
+		if ((iEntity.signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL)) == (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
+		{
+			ECS::ComponentModel& model = components.GetComponentModel(iEntity.id);
+
+			if (model.mesh == nullptr)
+			{
+				continue;
+			}
+
+			Core::Math::Mat4& trs = components.GetComponentTransform(iEntity.id).TRS;
+
+			Vec4 modelMin = trs * Core::Math::Vec4(model.mesh->AABBMin, 1.0f);
+			Vec4 modelMax = trs * Core::Math::Vec4(model.mesh->AABBMax, 1.0f);
+
+			for (int j = 0; j < frustrum.planes.size(); j++)
+			{
+
+				if ((frustrum.planes[j].Dot(modelMin) + frustrum.planes[j].w) < cullEpsilon && (frustrum.planes[j].Dot(modelMax) + frustrum.planes[j].w) < cullEpsilon)
+				{
+					cull = true;
+					break;
+				}
+
+			}
+
+			if (cull)
+			{
+				cull = false;
+				continue;
+			}
+
+			selectedModels.push_back(model);
+			selectedMatrices.push_back(trs);
+			selectedGameplays.push_back(components.GetComponentGameplay(iEntity.id));
 		}
 	}
 }
@@ -227,6 +268,9 @@ void DrawDataHandler::Clear()
 {
 	models.clear();
 	matrices.clear();
+	selectedModels.clear();
+	selectedMatrices.clear();
+	selectedGameplays.clear();
 	AABB[0] = { std::numeric_limits<float>().max(),std::numeric_limits<float>().max() ,std::numeric_limits<float>().max() };
 	AABB[1] = { -std::numeric_limits<float>().max(), -std::numeric_limits<float>().max() , -std::numeric_limits<float>().max() };
 	frustrum.AABB[0] = { std::numeric_limits<float>().max(),std::numeric_limits<float>().max() ,std::numeric_limits<float>().max() };

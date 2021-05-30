@@ -45,7 +45,7 @@ Texture::Texture(const std::string& texName, const Core::Math::Vec4& color):
 {
 	if (CreateTextureFromColor(color))
 	{
-		CreateShaderResource(DXGI_FORMAT_R16G16B16A16_FLOAT);
+		CreateShaderResource(DXGI_FORMAT_R32G32B32A32_FLOAT);
 	}
 }
 
@@ -72,7 +72,7 @@ bool Texture::CreateTextureFromColor(const Core::Math::Vec4& color)
 	desc.Height = 1;
 	desc.MipLevels = 1;
 	desc.ArraySize = 1;
-	desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+	desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	desc.SampleDesc.Count = 1;
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;

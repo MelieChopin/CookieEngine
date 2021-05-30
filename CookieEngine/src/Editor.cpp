@@ -289,55 +289,55 @@ void Editor::Loop()
         {
             glfwPollEvents();
             TryResizeWindow();
-            game.renderer.Clear();
-            game.renderer.ClearFrameBuffer(editorFBO);
+            game.coordinator.ApplyComputeTrs();
 
             cam.Update();
+
+            if (!ImGui::GetIO().MouseDownDuration[0])
+            {
+                Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
+                rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, { fwdRay.x,fwdRay.y,fwdRay.z });
+                physHandle.editWorld->raycast(ray, this);
+            }
+
+            if (currentScene != game.scene.get())
+            {
+                selectedEntity = {};
+                selectedEntity.componentHandler = game.coordinator.componentHandler;
+                ModifyEditComp();
+                currentScene = game.scene.get();
+            }
+
+            if (selectedEntity.toChangeEntityIndex >= 0)
+            {
+                PopulateFocusedEntity();
+            }
+            if (selectedEntity.focusedEntity && (selectedEntity.focusedEntity->signature & C_SIGNATURE::PHYSICS))
+            {
+                selectedEntity.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id).Set(selectedEntity.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id));
+            }
         }
 
-        if (currentScene != game.scene.get())
-        {
-            selectedEntity = {};
-            selectedEntity.componentHandler = game.coordinator.componentHandler;
-            ModifyEditComp();
-            currentScene = game.scene.get();
-        }
-
-        //if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
-        //    Resources::Serialization::Save::SaveScene(*game.scene, game.resources);
-
-        if (!ImGui::GetIO().MouseDownDuration[0])
-        {            
-            Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
-            rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, {fwdRay.x,fwdRay.y,fwdRay.z});
-            physHandle.editWorld->raycast(ray,this);
-        }
-
-
-        if (selectedEntity.toChangeEntityId >= 0)
-        {
-            PopulateFocusedEntity();
-        }
-        if (selectedEntity.focusedEntity && (selectedEntity.focusedEntity->signature & C_SIGNATURE::PHYSICS))
-        {
-            selectedEntity.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id).Set(selectedEntity.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id));
-        }
            
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
         
         game.CalculateMousePosInWorld(cam);
-        game.HandleGameplayInputs(dbgRenderer);
+        game.HandleGameplayInputs();
         game.ECSCalls(dbgRenderer);
+
         game.coordinator.armyHandler->Debug();
+        game.coordinator.entityHandler->Debug();
 
 		if (isActive)
             game.particlesHandler.Update();
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
             isActive = true;
-        game.coordinator.ApplyComputeTrs();
+
 
         //Draw
+        game.renderer.Clear();
+        game.renderer.ClearFrameBuffer(editorFBO);
         game.renderer.Draw(&cam, game,editorFBO);
 		game.particlesHandler.Draw(cam);
 

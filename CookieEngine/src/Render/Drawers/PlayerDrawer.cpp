@@ -50,28 +50,28 @@ void PlayerDrawer::Set(const DrawDataHandler& drawData)
 {
     const Gameplay::PlayerData& player = *drawData.player;
 
-    playerDrawInfo.viewProj = drawData.currentCam->GetViewProj();
+    viewProj = drawData.currentCam->GetViewProj();
 
-    playerDrawInfo.isMakingQuad = player.makingASelectionQuad;
-    if (playerDrawInfo.isMakingQuad)
+    isMakingQuad = player.makingASelectionQuad;
+    if (isMakingQuad)
     {
         Vec3 quadCenter = (player.mousePosInWorld + player.selectionQuadStart) * 0.5f;
-        playerDrawInfo.quadTrs = Mat4::Scale({(quadCenter.x - player.selectionQuadStart.x)*2.0f,1.0f,(quadCenter.z - player.selectionQuadStart.z)*2.0f }) * Mat4::Translate(quadCenter);
+        quadTrs = Mat4::Scale({(quadCenter.x - player.selectionQuadStart.x)*2.0f,1.0f,(quadCenter.z - player.selectionQuadStart.z)*2.0f }) * Mat4::Translate(quadCenter);
     }
 
-    playerDrawInfo.isValid = player.isBuildingValid;
+    isValid = player.isBuildingValid;
     if (player.workerWhoBuild)
     {
         if (player.workerWhoBuild->possibleBuildings[player.indexOfBuildingInWorker])
         {
-            playerDrawInfo.buildingMesh         = player.workerWhoBuild->possibleBuildings[player.indexOfBuildingInWorker]->model.mesh;
-            playerDrawInfo.buildingAlbedoTex    = player.workerWhoBuild->possibleBuildings[player.indexOfBuildingInWorker]->model.albedo;
-            playerDrawInfo.buildingTRS          = player.workerWhoBuild->possibleBuildings[player.indexOfBuildingInWorker]->transform.TRS * Mat4::Translate(player.buildingPos);
+            buildingMesh         = player.workerWhoBuild->possibleBuildings[player.indexOfBuildingInWorker]->model.mesh;
+            buildingAlbedoTex    = player.workerWhoBuild->possibleBuildings[player.indexOfBuildingInWorker]->model.albedo;
+            buildingTRS          = player.workerWhoBuild->possibleBuildings[player.indexOfBuildingInWorker]->transform.TRS * Mat4::Translate(player.buildingPos);
         }
     }
     else
     {
-        playerDrawInfo.buildingMesh = nullptr;
+        buildingMesh = nullptr;
     }
 }
 
@@ -83,39 +83,39 @@ void PlayerDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
     VS_CONSTANT_BUFFER buffer = {};
     size_t bufferSize = sizeof(VS_CONSTANT_BUFFER);
 
-    buffer.viewProj = playerDrawInfo.viewProj;
+    buffer.viewProj = viewProj;
 
-    Vec4 color = playerDrawInfo.validColor;
+    Vec4 color = validColor;
     size_t colorSize = sizeof(Vec4);
     Render::WriteCBuffer(&color, colorSize, 0, &PCBuffer);
 
-    if (playerDrawInfo.isMakingQuad)
+    if (isMakingQuad)
     {
-        buffer.model = playerDrawInfo.quadTrs;
+        buffer.model = quadTrs;
         Render::WriteCBuffer(&buffer, bufferSize, 0, &VCBuffer);
 
         quadMesh->Set();
         quadMesh->Draw();
     }
 
-    if (playerDrawInfo.buildingMesh)
+    if (buildingMesh)
     {
-        buffer.model = playerDrawInfo.buildingTRS;
+        buffer.model = buildingTRS;
         Render::WriteCBuffer(&buffer, bufferSize, 0, &VCBuffer);
 
-        if (!playerDrawInfo.isValid)
+        if (!isValid)
         {
-            color = playerDrawInfo.invalidColor;
+            color = invalidColor;
             Render::WriteCBuffer(&color, colorSize, 0, &PCBuffer);
         }
 
-        if (playerDrawInfo.buildingAlbedoTex)
+        if (buildingAlbedoTex)
         {
-            tex[0] = playerDrawInfo.buildingAlbedoTex->GetResourceView();
+            tex[0] = buildingAlbedoTex->GetResourceView();
             Render::RendererRemote::context->PSSetShaderResources(0, 1, tex);
         }
 
-        playerDrawInfo.buildingMesh->Set();
-        playerDrawInfo.buildingMesh->Draw();
+        buildingMesh->Set();
+        buildingMesh->Draw();
     }
 }
