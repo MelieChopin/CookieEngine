@@ -11,16 +11,18 @@ namespace Cookie
 		struct AIBehavior
 		{
 			std::vector<AIStep> steps;
-			int					currentStepIndex {-1};
+			int					currentStepIndex {0};
 
 			AIStep				stepGoals;
 
 			void AddNextStep()
 			{
-				currentStepIndex++;
 
-				if(currentStepIndex < steps.size())
+				if (currentStepIndex < steps.size())
+				{
 					stepGoals += steps[currentStepIndex];
+					currentStepIndex++;
+				}
 				//else loop with last Step goals
 			}
 

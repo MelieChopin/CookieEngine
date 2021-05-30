@@ -18,7 +18,7 @@ void CGPWorker::Update(Resources::Map& map, Coordinator& coordinator, int selfId
 	//isBuilding
 	if (constructionCountdown > 0)
 	{
-		std::cout << "Worker updating " << constructionCountdown << "\n";
+		//std::cout << "Worker updating " << constructionCountdown << "\n";
 		constructionCountdown -= Core::DeltaTime();
 
 
@@ -103,7 +103,7 @@ void CGPWorker::SetResource(Core::Math::Vec3& resourcePos, CGPResource& resource
 	resource->nbOfWorkerOnIt++;
 }
 
-void CGPWorker::StartBuilding(Vec3& _posBuilding, int indexInPossibleBuildings)
+bool CGPWorker::StartBuilding(Vec3& _posBuilding, int indexInPossibleBuildings)
 {
 	//should be impossible when UI implemented
 	assert(indexInPossibleBuildings < possibleBuildings.size());
@@ -115,7 +115,7 @@ void CGPWorker::StartBuilding(Vec3& _posBuilding, int indexInPossibleBuildings)
 		buildingToAdd->gameplay.cost.costSecondary > income->secondary)
 	{
 		std::cout << "not enough Resources to Build\n";
-		return;
+		return false;
 	}
 
 	income->primary   -= buildingToAdd->gameplay.cost.costPrimary;
@@ -124,4 +124,5 @@ void CGPWorker::StartBuilding(Vec3& _posBuilding, int indexInPossibleBuildings)
 	posBuilding = _posBuilding;
 	BuildingInConstruction = possibleBuildings[indexInPossibleBuildings];
 	needTostartBuilding = true;
+	return true;
 }

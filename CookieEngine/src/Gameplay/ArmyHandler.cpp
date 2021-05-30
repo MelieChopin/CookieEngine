@@ -16,12 +16,12 @@ void ArmyHandler::Debug()
 	}
 }
 
-void ArmyHandler::UpdateArmyCoordinators()
+void ArmyHandler::UpdateArmyCoordinators(Resources::Map& map)
 {
 	for (int i = 0; i < armiesCoordinator.size(); ++i)
 	{
 		armiesCoordinator[i].Analysis();
-		armiesCoordinator[i].ResourceAllocation();
+		armiesCoordinator[i].ResourceAllocation(map);
 	}
 }
 
@@ -100,16 +100,16 @@ void ArmyHandler::AddElementToArmy(Army& army, ECS::ComponentGameplay* element)
 	}
 }
 
-void ArmyHandler::RemoveElementFromArmy(ECS::ComponentGameplay* element)
+void ArmyHandler::RemoveElementFromArmy(ECS::ComponentGameplay* element, std::string entityName)
 {
 	for (int i = 0; i < livingArmies; ++i)
 		if (armies[i].name == element->teamName)
 		{
-			RemoveElementFromArmy(armies[i], element);
+			RemoveElementFromArmy(armies[i], element, entityName);
 			return;
 		}
 }
-void ArmyHandler::RemoveElementFromArmy(Army& army, ECS::ComponentGameplay* element)
+void ArmyHandler::RemoveElementFromArmy(Army& army, ECS::ComponentGameplay* element, std::string entityName)
 {
 	ArmyCoordinator* armyCoordinator = GetArmyCoordinator(army.name);
 
@@ -124,10 +124,10 @@ void ArmyHandler::RemoveElementFromArmy(Army& army, ECS::ComponentGameplay* elem
 		break;
 
 	case E_ARMY_TYPE::E_BUILDING:
-		RemoveElementFromVector(army.buildings, element);
 		army.income.supplyMax -= element->componentProducer.supplyGiven;
-		//if (armyCoordinator)
-		//	armyCoordinator->behavior.stepGoals.listOfBuildings.push_back(element.name);
+		if (armyCoordinator)
+			armyCoordinator->behavior.stepGoals.listOfBuildings.push_back(entityName);
+		RemoveElementFromVector(army.buildings, element);
 		break;
 
 	default:

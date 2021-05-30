@@ -7,6 +7,11 @@
 
 namespace Cookie
 {
+	namespace Resources
+	{
+		class Map;
+	}
+
 	namespace Gameplay
 	{
 
@@ -38,18 +43,18 @@ namespace Cookie
 			~ArmyHandler() {}
 
 			void Debug();
-			void UpdateArmyCoordinators();
+			void UpdateArmyCoordinators(Resources::Map& map);
 
 			Army*			 GetArmy(std::string name);
 			ArmyCoordinator* GetArmyCoordinator(std::string name);
 
 			void AddArmyCoordinator(std::string name);
 			void AddElementToArmy(ECS::ComponentGameplay* element);
-			void RemoveElementFromArmy(ECS::ComponentGameplay* element);
+			void RemoveElementFromArmy(ECS::ComponentGameplay* element, std::string entityName);
 
 		private:
 			void AddElementToArmy(Army& army, ECS::ComponentGameplay* element);
-			void RemoveElementFromArmy(Army& army, ECS::ComponentGameplay* element);
+			void RemoveElementFromArmy(Army& army, ECS::ComponentGameplay* element, std::string entityName);
 			void RemoveElementFromVector(std::vector<ECS::ComponentGameplay*>& vector, ECS::ComponentGameplay* element);
 		};
 

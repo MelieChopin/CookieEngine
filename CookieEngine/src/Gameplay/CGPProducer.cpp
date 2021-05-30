@@ -15,7 +15,7 @@ void CGPProducer::UpdateCountdown(Resources::Map& map, Coordinator& coordinator,
 	if (queueOfUnits.size() == 0)
 		return;
 
-	std::cout << "producer updating " << currentCountdown << "\n";
+	//std::cout << "producer updating " << currentCountdown << "\n";
 	currentCountdown -= Core::DeltaTime();
 
 	if (currentCountdown <= 0)
@@ -37,7 +37,7 @@ void CGPProducer::UpdateCountdown(Resources::Map& map, Coordinator& coordinator,
 					occupiedTiles[i]->isObstacle = false;
 
 				if (map.ApplyPathfinding(map.GetTile(newEntityTrs.pos), map.GetTile(newUnitDestination)) )
-					newEntityGameplay.componentMove.SetPath(map.GetTile(newUnitDestination), newEntityTrs);
+					newEntityGameplay.componentMove.SetPath(map.GetTile(newUnitDestination));
 
 				for (int i = 0; i < occupiedTiles.size(); ++i)
 					occupiedTiles[i]->isObstacle = true;

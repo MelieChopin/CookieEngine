@@ -65,7 +65,7 @@ namespace Cookie
 			void Update(Resources::Map& map, ECS::Coordinator& coordinator, int selfId);
 
 			void SetResource(Core::Math::Vec3& resourcePos, CGPResource& resourceCGP);
-			void StartBuilding(Core::Math::Vec3& _posBuilding, int indexInPossibleBuildings);
+			bool StartBuilding(Core::Math::Vec3& _posBuilding, int indexInPossibleBuildings);
 		};
 
 	}

@@ -6,6 +6,11 @@
 
 namespace Cookie
 {
+	namespace Resources
+	{
+		class Map;
+	}
+
 	namespace Gameplay
 	{
 		class Army;
@@ -25,7 +30,7 @@ namespace Cookie
 			E_WAIT_MILITARY
 		};
 
-
+		#define NB_TILES_BETWEEN_BUILDINGS 2
 
 		class ArmyCoordinator
 		{
@@ -45,12 +50,12 @@ namespace Cookie
 			{
 				behavior.steps.push_back(AIStep{});
 				behavior.steps[0].nbOfWorker = 6;
-				behavior.steps[0].nbOfUnits = 5;
+				behavior.steps[0].nbOfUnits = 1;
 				behavior.steps[0].listOfBuildings.push_back("02Producer");
 
 				behavior.steps.push_back(AIStep{});
 				behavior.steps[1].nbOfWorker = 0;
-				behavior.steps[1].nbOfUnits = 4;
+				behavior.steps[1].nbOfUnits = 2;
 				behavior.steps[1].listOfBuildings.push_back("02Producer");
 				behavior.steps[1].listOfBuildings.push_back("02Producer");
 			}
@@ -59,14 +64,14 @@ namespace Cookie
 
 			//void Tactical(); done by the CGPAttack
 			void Analysis();
-			void ResourceAllocation();
+			void ResourceAllocation(Resources::Map& map);
 
 		private:
 			void DevelopWorker();
-			void DevelopBase();
+			void DevelopBase(Resources::Map& map);
 			void DevelopArmy();
-			void Attack();
-			void Defense();
+			void Attack(Resources::Map& map);
+			void Defense(Resources::Map& map);
 			void Retreat();
 
 		};
