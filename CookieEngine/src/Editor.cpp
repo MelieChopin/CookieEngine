@@ -295,7 +295,7 @@ void Editor::Loop()
 
             if (!ImGui::GetIO().MouseDownDuration[0])
             {
-                Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
+                Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDirClamp() * cam.camFar;
                 rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, { fwdRay.x,fwdRay.y,fwdRay.z });
                 physHandle.editWorld->raycast(ray, this);
             }

@@ -21,6 +21,8 @@ namespace Cookie
 				Core::Math::Mat4 projMat = Core::Math::Mat4::Identity();
 
 			protected:
+				Core::Math::Mat4 rotMat = Core::Math::Mat4::Identity();
+				Core::Math::Mat4 posMat = Core::Math::Mat4::Identity();
 				Core::Math::Mat4 viewMat = Core::Math::Mat4::Identity();
 
 				bool activated = true;
@@ -60,14 +62,18 @@ namespace Cookie
 				inline void LookAt(const Core::Math::Vec3& toLook) { viewMat = Core::Math::Mat4::LookAt(pos, toLook, { 0.0f,1.0f,0.0f });}
 
 				inline virtual void Update() = 0;
+				inline void ForceUpdate();
 
 				inline void Activate()noexcept { activated = true; }
 				inline void Deactivate()noexcept { activated = false; }
 
 				inline virtual void ResetPreviousMousePos();
 
-				inline Core::Math::Vec3 MouseToWorldDir();
-					   
+				inline Core::Math::Vec3 MouseToWorldDir()const;
+				inline Core::Math::Vec3 MouseToWorldDirClamp()const;
+
+				/* a screen point between -1.0 and 1.0 on x and y coordinates */
+				inline Core::Math::Vec3 ScreenPointToWorldDir(const Core::Math::Vec2& point)const;
 		};
 
 		class FreeFlyCam : public Camera

@@ -321,14 +321,39 @@ void Game::SetScene(const std::shared_ptr<Resources::Scene>& _scene)
 
     scene->camera = std::make_shared<Render::GameCam>();
 
-    scene->camera->SetProj(110.f, renderer.window.width, renderer.window.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+    scene->camera->SetProj(60.f, renderer.window.width, renderer.window.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     scene->camera->pos = { 0.f , 20.0f,15.0f };
     scene->camera->rot = { Core::Math::ToRadians(80.0f) ,0.0f,0.0f };
     scene->camera->ResetPreviousMousePos();
-    scene->camera->mapClampX = {-scene->map.trs.scale.x*0.5f,scene->map.trs.scale.x * 0.5f};
-    scene->camera->mapClampZ = {-scene->map.trs.scale.z*0.5f,scene->map.trs.scale.z * 0.5f};
-    //scene->camera->Update();
+    scene->camera->ForceUpdate();
+    SetCamClampFromMap();
     scene->camera->Deactivate();
+}
+
+void Game::SetCamClampFromMap()
+{
+    Vec3 middle = scene->camera->ScreenPointToWorldDir({ 0.0f,0.0f });
+    Vec3 UpperRight = scene->camera->ScreenPointToWorldDir({ 1.0f,1.0f });
+    Vec3 DownLeft = scene->camera->ScreenPointToWorldDir({ -1.0f,-1.0f });
+
+    float t = (scene->camera->pos.y) / middle.y;
+    middle = scene->camera->pos - middle * t;
+    t = (scene->camera->pos.y) / UpperRight.y;
+    UpperRight = scene->camera->pos - UpperRight * t;
+    t = (scene->camera->pos.y) / DownLeft.y;
+    DownLeft = scene->camera->pos - DownLeft * t;
+
+    float width = UpperRight.x - DownLeft.x;
+    if (width > scene->map.trs.scale.x)
+        width = scene->map.trs.scale.x;
+
+    /* going forward is in the negative z */
+    float depth = DownLeft.z - UpperRight.z;
+    if (depth > scene->map.trs.scale.z)
+        depth = scene->map.trs.scale.z;
+
+    scene->camera->mapClampX = { -scene->map.trs.scale.x * 0.5f + (width * 0.5f),scene->map.trs.scale.x * 0.5f - (width * 0.5f) };
+    scene->camera->mapClampZ = { -scene->map.trs.scale.z * 0.5f + (depth * 0.5f), scene->map.trs.scale.z * 0.5f - (depth * 0.5f) };
 }
 
 void Game::TryResizeWindow()

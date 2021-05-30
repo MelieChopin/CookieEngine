@@ -64,6 +64,7 @@ namespace Cookie
 			void ECSCalls(Render::DebugRenderer& dbg);
 
 			void SetScene(const std::shared_ptr<Resources::Scene>& _scene);
+			void SetCamClampFromMap();
 			void TryResizeWindow();
 	};
 }
