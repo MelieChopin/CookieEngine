@@ -33,8 +33,8 @@ namespace Cookie::UIwidget
 		bool invalid = false;
 
 	public:
-		float	xPos	= 10, 
-				yPos	= 10, 
+		float	xPos	= 0, 
+				yPos	= 0, 
 				width	= 100,
 				height	= 100;
 	

@@ -8,7 +8,7 @@ namespace Cookie { class Game; }
 
 namespace Cookie::UIwidget
 {
-	class GamePort final : public WItemBase
+	class GamePort final : public WindowBase
 	{
 		bool& isPlaying;
 		const Cookie::Game& game;
@@ -18,7 +18,7 @@ namespace Cookie::UIwidget
 	
 	public:
 		GamePort(bool& _isPlaying, const Cookie::Game& _game)
-			: WItemBase	("Gameport"),
+			: WindowBase("Gameport", false),
 			  isPlaying (_isPlaying),
 			  game		(_game)
 		{}
