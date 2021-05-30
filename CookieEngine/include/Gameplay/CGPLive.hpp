@@ -19,7 +19,7 @@ namespace Cookie
 
 			inline void ToDefault() noexcept
 			{
-				float lifeMax = 10;
+				lifeMax = 10;
 				lifeCurrent = 10;
 				armor = 0;
 			}

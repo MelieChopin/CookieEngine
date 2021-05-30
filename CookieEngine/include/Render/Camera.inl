@@ -95,23 +95,28 @@ namespace Cookie
 		}
 
 
-		/* Game Camera*/
+		/* Game Camera */
 
 		inline void GameCam::UpdateGamePos()
 		{
 			//Calculate DeltaMousePos, later on will put in inputs
-			float tempMouseX = ImGui::GetIO().MousePos.x;
-			float tempMouseY = ImGui::GetIO().MousePos.y;
+			float tempMouseX = ImGui::GetIO().MousePos.x - windowOffset.x;
+			float tempMouseY = ImGui::GetIO().MousePos.y - windowOffset.y;
 			
-			float deltaMouseX = (tempMouseX - previousMouseX) * CAM_MOUSE_SENSITIVITY_X;
-			float deltaMouseY = (tempMouseY - previousMouseY) * CAM_MOUSE_SENSITIVITY_Y;
-			
+			Core::Math::Vec2 ratio = { { (tempMouseX / (width * 0.5f)) - 1.0f,  (-tempMouseY / (height * 0.5f)) + 1.0f} };
+
 			previousMouseX = tempMouseX;
 			previousMouseY = tempMouseY;
 			
-			float speed = (Core::DeltaTime() * CAM_MOUSE_SPEED * CAM_MOUSE_SPEED_UP_SCALE);
+			float speed = (Core::DeltaTime() * CAM_MOUSE_SPEED);
 			
-			pos += Core::Math::Vec3(deltaMouseX, 0.0f, deltaMouseY) * speed;
+			if (ratio.x >= GAME_CAM_HIGHER_EPSILON || ratio.x <= GAME_CAM_LOWER_EPSILON)
+				pos.x += ratio.x * speed;
+			if (ratio.y >= GAME_CAM_HIGHER_EPSILON || ratio.y <= GAME_CAM_LOWER_EPSILON)
+				pos.z -= ratio.y * speed;
+
+			pos.x = std::clamp(pos.x, mapClampX.x, mapClampX.y);
+			pos.z = std::clamp(pos.z, mapClampZ.x, mapClampZ.y);
 		}
 
 		inline void GameCam::UpdateZoom()

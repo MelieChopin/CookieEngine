@@ -35,7 +35,9 @@ namespace Cookie::UI
 
 		void CleanLayout();
 		
-		inline std::vector<UIwidget::GameWindowBase*>& GetWidgets()
+		void RenderLayout();
+
+		inline std::vector<UIwidget::GameWindowBase*>& GetLayout()
 		{ return sceneWidgets; }
 	};
 }

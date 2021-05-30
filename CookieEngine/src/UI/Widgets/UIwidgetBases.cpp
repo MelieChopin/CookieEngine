@@ -26,11 +26,11 @@ bool GameWindowBase::BeginWindow(int windowFlags)
 {
 	if (!opened || invalid) return false;
 
-	SetNextWindowPos ({ xPos + GetWindowPos().x, yPos + GetWindowPos().y }, ImGuiCond_Appearing);
-	SetNextWindowSize({ width				   , height					 }, ImGuiCond_Appearing);
+	SetNextWindowSize({ width												, height											   }, ImGuiCond_Appearing);
+	SetNextWindowPos ({ xPos + GetWindowPos().x + GetStyle().WindowPadding.x, yPos + GetWindowPos().y + GetStyle().WindowPadding.y }					 );
 
 	SetNextWindowViewport(GetWindowViewport()->ID);
-	contentVisible = Begin(windowName, nullptr, windowFlags | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking);
+	contentVisible = Begin(windowName, nullptr, windowFlags | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings);
 
 	return true;
 }
@@ -52,19 +52,25 @@ bool GameWindowBase::WindowEdit()
 	}
 
 	SetNextWindowViewport(GetWindowViewport()->ID);
-	ImGui::Begin(windowName, nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
+	ImGui::Begin(windowName, nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings);
 
 	SetWindowPos({ xPos + parentWindowPos.x, yPos + parentWindowPos.y }, IsWindowFocused() ? ImGuiCond_Appearing : ImGuiCond_Always);
 
 	if (IsWindowFocused())
 	{
-		xPos	= ((int)((GetWindowPos().x - parentWindowPos.x)	/ 10)) * 10;
-		yPos	= ((int)((GetWindowPos().y - parentWindowPos.y)	/ 10)) * 10;
-		width	= ((int)(GetWindowWidth()	/ 10)) * 10;
-		height	= ((int)(GetWindowHeight()	/ 10)) * 10;
-
-		SetWindowPos ({ xPos + parentWindowPos.x, yPos + parentWindowPos.y  });
-		SetWindowSize({ width					, height					});
+		if (ImGui::GetIO().MouseDown[0])
+		{
+			xPos	= ((int)((GetWindowPos().x - parentWindowPos.x)	/ 10)) * 10;
+			yPos	= ((int)((GetWindowPos().y - parentWindowPos.y)	/ 10)) * 10;
+			width	= ((int)(GetWindowWidth()	/ 10)) * 10;
+			height	= ((int)(GetWindowHeight()	/ 10)) * 10;
+		}
+		else if (GetIO().MouseReleased[0])
+		{
+			SetWindowPos ({ xPos + parentWindowPos.x, yPos + parentWindowPos.y  });
+			SetWindowSize({ width					, height					});
+		}
+		else WindowPreview();
 
 		if (!invalid)
 		{

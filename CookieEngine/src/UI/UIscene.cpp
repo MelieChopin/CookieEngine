@@ -75,3 +75,9 @@ void UIscene::CleanLayout()
 
 	std::vector<GameWindowBase*>().swap(sceneWidgets);
 }
+
+void UIscene::RenderLayout()
+{
+	for (UIwidget::GameWindowBase*& gw : sceneWidgets)
+		gw->WindowDisplay();
+}

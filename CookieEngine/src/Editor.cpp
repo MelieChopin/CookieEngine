@@ -53,10 +53,9 @@ Editor::Editor()
     editorUI.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
     
     editorUI.AddWItem(new UIwidget::TextureEditor(game.resources), 1);
-    editorUI.AddWItem(new UIwidget::GameUIeditor(game.renderer.window, game.scene), 1);
+    editorUI.AddWItem(new UIwidget::GameUIeditor(game), 1);
     editorUI.AddWItem(new UIwidget::SoundOrchestrator(), 1);
     
-    editorUI.AddWItem(new UIwidget::GamePort(isPlaying, game), 2);
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
     editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
     editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.renderer.lights, game.skyBox, game.resources), 2);
@@ -68,6 +67,7 @@ Editor::Editor()
 
     UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.resources, isPlaying);
     editorUI.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, editorFBO, &cam, game.coordinator, selectedEntity));
+    editorUI.AddWindow(new UIwidget::GamePort(isPlaying, game));
 
     InitEditComp();
 
@@ -289,39 +289,35 @@ void Editor::Loop()
         {
             glfwPollEvents();
             TryResizeWindow();
-            game.renderer.Clear();
-            game.renderer.ClearFrameBuffer(editorFBO);
+            game.coordinator.ApplyComputeTrs();
 
             cam.Update();
+
+            if (!ImGui::GetIO().MouseDownDuration[0])
+            {
+                Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
+                rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, { fwdRay.x,fwdRay.y,fwdRay.z });
+                physHandle.editWorld->raycast(ray, this);
+            }
+
+            if (currentScene != game.scene.get())
+            {
+                selectedEntity = {};
+                selectedEntity.componentHandler = game.coordinator.componentHandler;
+                ModifyEditComp();
+                currentScene = game.scene.get();
+            }
+
+            if (selectedEntity.toChangeEntityIndex >= 0)
+            {
+                PopulateFocusedEntity();
+            }
+            if (selectedEntity.focusedEntity && (selectedEntity.focusedEntity->signature & C_SIGNATURE::PHYSICS))
+            {
+                selectedEntity.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id).Set(selectedEntity.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id));
+            }
         }
 
-        if (currentScene != game.scene.get())
-        {
-            selectedEntity = {};
-            selectedEntity.componentHandler = game.coordinator.componentHandler;
-            ModifyEditComp();
-            currentScene = game.scene.get();
-        }
-
-        //if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
-        //    Resources::Serialization::Save::SaveScene(*game.scene, game.resources);
-
-        if (!ImGui::GetIO().MouseDownDuration[0])
-        {            
-            Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
-            rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, {fwdRay.x,fwdRay.y,fwdRay.z});
-            physHandle.editWorld->raycast(ray,this);
-        }
-
-
-        if (selectedEntity.toChangeEntityIndex >= 0)
-        {
-            PopulateFocusedEntity();
-        }
-        if (selectedEntity.focusedEntity && (selectedEntity.focusedEntity->signature & C_SIGNATURE::PHYSICS))
-        {
-            selectedEntity.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id).Set(selectedEntity.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id));
-        }
            
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
@@ -333,15 +329,15 @@ void Editor::Loop()
         //game.coordinator.armyHandler->Debug();
         //game.coordinator.entityHandler->Debug();
 
-
-
 		if (isActive)
             game.particlesHandler.Update();
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
             isActive = true;
-        game.coordinator.ApplyComputeTrs();
+
 
         //Draw
+        game.renderer.Clear();
+        game.renderer.ClearFrameBuffer(editorFBO);
         game.renderer.Draw(&cam, game,editorFBO);
 		game.particlesHandler.Draw(cam);
 
