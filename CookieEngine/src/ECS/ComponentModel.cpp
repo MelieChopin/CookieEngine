@@ -30,6 +30,7 @@ ComponentModel::~ComponentModel()
 void ComponentModel::ToDefault()
 {
     mesh = nullptr;
+    icon = nullptr;
     albedo = nullptr;
     normal = nullptr;
     metallicRoughness = nullptr;
