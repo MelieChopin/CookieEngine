@@ -124,6 +124,7 @@ set (SRC_FILES
     "${SRC_DIR}/UI/Widgets/EditorWs/ParticleEditorWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/SoundOrchestratorWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/TextureEditorWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/AIBehaviorEditorWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/ToolbarWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/ViewportWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/WorldSettingsWidget.cpp"

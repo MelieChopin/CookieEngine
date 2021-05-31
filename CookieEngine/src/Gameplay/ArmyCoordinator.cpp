@@ -111,53 +111,40 @@ void ArmyCoordinator::DevelopBase(Map& map)
 						//Calculate Pos
 						Vec3 pos {INFINITY, INFINITY, INFINITY};
 						Vec2 newBuildingTileNb = worker.possibleBuildings[j]->gameplay.componentProducer.tileSize;
-						int tempNbOfBuildingInProduction = nbOfBuildingInProduction;
 						for (int l = 0; l < army->buildings.size(); ++l)
 						{
 							//make a function for pos check later on 
 
 							//Check Right pos
 							Vec3 posToCheck = army->buildings[l]->trs->pos + Vec3{(NB_TILES_BETWEEN_BUILDINGS + newBuildingTileNb.x) * map.tilesSize.x + ((int)newBuildingTileNb.x % 2) * map.tilesSize.x / 2, 0, 0};
-							
 							if (!map.GetTile(posToCheck).isObstacle)
 							{
-								if (tempNbOfBuildingInProduction <= 0)
-								{
-									pos = posToCheck;
-									break;
-								}
-								tempNbOfBuildingInProduction--;
+								pos = posToCheck;
+								break;
+								
 							}
 
 							//Check Bottom pos
 							posToCheck = army->buildings[l]->trs->pos + Vec3{0, 0, (NB_TILES_BETWEEN_BUILDINGS + newBuildingTileNb.y) * map.tilesSize.y + ((int)newBuildingTileNb.y % 2) * map.tilesSize.y / 2 };
 							if (!map.GetTile(posToCheck).isObstacle)
 							{
-								if (tempNbOfBuildingInProduction <= 0)
-								{
-									pos = posToCheck;
-									break;
-								}
-								tempNbOfBuildingInProduction--;
+								pos = posToCheck;
+								break;
 							}
 
 							//Check Right-Bottom pos
 							posToCheck = army->buildings[l]->trs->pos + Vec3{ (NB_TILES_BETWEEN_BUILDINGS + newBuildingTileNb.x) * map.tilesSize.x + ((int)newBuildingTileNb.x % 2) * map.tilesSize.x / 2, 0, (NB_TILES_BETWEEN_BUILDINGS + newBuildingTileNb.y) * map.tilesSize.y + ((int)newBuildingTileNb.y % 2) * map.tilesSize.y / 2 };
 							if (!map.GetTile(posToCheck).isObstacle)
 							{
-								if (tempNbOfBuildingInProduction <= 0)
-								{
-									pos = posToCheck;
-									break;
-								}
-								tempNbOfBuildingInProduction--;
+								pos = posToCheck;
+								break;
 							}
 						}
 
 						if (pos == Vec3{ INFINITY, INFINITY, INFINITY })
 							return;
 
-						if (worker.StartBuilding(pos, j))
+						if (worker.StartBuilding(map, pos, j))
 						{
 							behavior.stepGoals.listOfBuildings.erase(behavior.stepGoals.listOfBuildings.begin() + k);
 							nbOfBuildingInProduction++;

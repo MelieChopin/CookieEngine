@@ -53,6 +53,7 @@ Editor::Editor()
     editorUI.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
     
     editorUI.AddWItem(new UIwidget::TextureEditor(game.resources), 1);
+    editorUI.AddWItem(new UIwidget::AIBehaviorEditor(game.resources), 1);
     editorUI.AddWItem(new UIwidget::GameUIeditor(game), 1);
     editorUI.AddWItem(new UIwidget::SoundOrchestrator(), 1);
     

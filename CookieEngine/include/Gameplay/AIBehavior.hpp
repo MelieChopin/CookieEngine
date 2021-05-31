@@ -10,10 +10,11 @@ namespace Cookie
 	{
 		struct AIBehavior
 		{
+			std::string			name {"No Name"}; //for UI and Save
 			std::vector<AIStep> steps;
-			int					currentStepIndex {0};
 
-			AIStep				stepGoals;
+			int					currentStepIndex {0};
+			AIStep				stepGoals; //total
 
 			void AddNextStep()
 			{
@@ -25,7 +26,13 @@ namespace Cookie
 				}
 				//else loop with last Step goals
 			}
-
+			void Clear()
+			{
+				name = "No Name";
+				steps.clear();
+				currentStepIndex = 0;
+				stepGoals.Clear();
+			}
 		};
 	}
 }

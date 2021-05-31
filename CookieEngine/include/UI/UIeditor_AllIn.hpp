@@ -12,6 +12,7 @@
 #include "Widgets/EditorWs/ParticleEditorWidget.hpp"
 #include "Widgets/EditorWs/SoundOrchestratorWidget.hpp"
 #include "Widgets/EditorWs/TextureEditorWidget.hpp"
+#include "Widgets/EditorWs/AIBehaviorEditorWidget.hpp"
 #include "Widgets/EditorWs/ToolbarWidget.hpp"
 #include "Widgets/EditorWs/ViewportWidget.hpp"
 #include "Widgets/EditorWs/WorldSettingsWidget.hpp"

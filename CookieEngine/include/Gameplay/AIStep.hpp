@@ -14,6 +14,13 @@ namespace Cookie
 			int nbOfUnits  {0};  //maybe use powerLevel instead
 			std::vector<std::string> listOfBuildings;
 
+			void Clear()
+			{
+				nbOfWorker = 0;
+				nbOfUnits = 0;
+				listOfBuildings.clear();
+			}
+
 			AIStep operator+(const AIStep& other)
 			{
 				AIStep toreturn = *this;
@@ -26,7 +33,6 @@ namespace Cookie
 
 				return toreturn;
 			}
-
 			AIStep& operator+=(const AIStep& other) { *this = *this + other; return *this; }
 		};
 	}

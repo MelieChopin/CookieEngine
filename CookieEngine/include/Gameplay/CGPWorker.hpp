@@ -2,6 +2,7 @@
 #define _CGP_WORKER_HPP__
 
 #include "ComponentTransform.hpp"
+#include "Map.hpp"
 #include "Gameplay/CGPResource.hpp"
 #include "Gameplay/Income.hpp"
 #include <vector>
@@ -46,6 +47,7 @@ namespace Cookie
 			Core::Math::Vec3				posBuilding            {0,  0, 0}; // = mousePos when start construction
 			bool							needTostartBuilding    {false};
 			float                           constructionCountdown  {0};
+			std::vector<Resources::Tile*>   occupiedTiles; //get at start of building, then set in building
 
 			CGPWorker() {}
 			~CGPWorker() {}
@@ -60,12 +62,15 @@ namespace Cookie
 				isCarryingResource          = false;
 				BuildingInConstruction       = nullptr;
 				constructionCountdown       = 0;
+				for (int i = 0; i < occupiedTiles.size(); ++i)
+					occupiedTiles[i]->isObstacle = false;
+				occupiedTiles.clear();
 			}
 
 			void Update(Resources::Map& map, ECS::Coordinator& coordinator, int selfId);
 
 			void SetResource(Core::Math::Vec3& resourcePos, CGPResource& resourceCGP);
-			bool StartBuilding(Core::Math::Vec3& _posBuilding, int indexInPossibleBuildings);
+			bool StartBuilding(Resources::Map& map, Core::Math::Vec3& _posBuilding, int indexInPossibleBuildings);
 		};
 
 	}
