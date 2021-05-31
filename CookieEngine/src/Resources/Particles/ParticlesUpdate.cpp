@@ -105,8 +105,8 @@ void CreateParticles::Update(ParticlesData* p)
 		{
 			data->data[data->countAlive].alive = true;
 			data->data[data->countAlive].pos = p->data[i].pos - p->data[i].vel * coeffPos * Cookie::Core::DeltaTime();
-			data->data[data->countAlive].time = time;
-			data->data[data->countAlive].timeMax = time;
+			data->data[data->countAlive].time = 0.15f;
+			data->data[data->countAlive].timeMax = 0.15f;
 			data->data[data->countAlive].scale = p->data[i].scale * coeffScale;
 			data->data[data->countAlive].col = p->data[i].colBegin;
 			data->data[data->countAlive].colBegin = Cookie::Core::Math::Vec4(1, 1, 1, 1);

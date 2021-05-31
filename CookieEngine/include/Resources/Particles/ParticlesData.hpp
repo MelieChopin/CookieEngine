@@ -46,6 +46,7 @@ namespace Cookie
 				Cookie::Resources::Texture*				texture = nullptr;
 				int										countFrame = 0;
 				int										countAlive = 0;
+				bool									canRemoved = true;
 
 				ParticlesData() {}
 				~ParticlesData() {}

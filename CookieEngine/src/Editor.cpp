@@ -186,7 +186,7 @@ void Editor::Loop()
     {
         // Present frame
 
-        std::cout << game.particlesHandler.living << "\n";
+        //std::cout << game.particlesHandler.living << "\n";
 
         //Update for 3D Music
         FMOD_VECTOR temp = { cam.pos.x, cam.pos.y, cam.pos.z };

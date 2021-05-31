@@ -7,24 +7,23 @@ using namespace Cookie::Resources::Particles;
 
 void ParticlesHandler::Update()
 {
-	for (int i = 0; i < living; i++)
+	for (std::list<ParticlesSystem>::iterator particles = particlesSystems.begin(); particles != particlesSystems.end(); particles++)
 	{
-		particlesSystems[i].Update();
-		if (particlesSystems[i].needToBeRemoved)
+		(*particles).Update();
+		if ((*particles).needToBeRemoved)
 		{
-			particlesSystems[i].Swap(particlesSystems[living - 1]);
+			particles = particlesSystems.erase(particles);
 			living--;
-			i--;
-			continue;
 		}
 	}
+		
 }
 
 void ParticlesHandler::Draw(const Render::Camera& cam)
 {
 	frustrum.MakeFrustrum(cam);
-	for (int i = 0; i < particlesSystems.size(); i++)
-		particlesSystems[i].Draw(cam, frustrum);	
+	for (std::list<ParticlesSystem>::iterator particles = particlesSystems.begin(); particles != particlesSystems.end(); particles++)
+		(*particles).Draw(cam, frustrum);
 }
 
 void ParticlesHandler::CreateParticlesWithPrefab
@@ -32,7 +31,7 @@ void ParticlesHandler::CreateParticlesWithPrefab
 {
 	if (living >= particlesSystems.size())
 		return;
-	ParticlesSystem& particles = particlesSystems[living];
+	ParticlesSystem& particles = *std::next(particlesSystems.begin(), living);
 	particles.shader = &shader;
 
 	particles.name = prefab->name;
@@ -46,8 +45,7 @@ void ParticlesHandler::CreateParticlesWithPrefab
 		particles.data[i].texture = prefab->data[i].texture;
 		particles.data[i].countFrame = prefab->data[i].countFrame;
 		particles.data[i].countAlive = prefab->data[i].countAlive;
-		particles.data[i].SetIsBIllboard(prefab->data[i].isBillboard);
-		
+		particles.data[i].SetIsBIllboard(prefab->data[i].isBillboard);	
 	}
 
 	particles.particlesEmiter = prefab->emitter;
@@ -68,6 +66,7 @@ void ParticlesHandler::CreateParticlesWithPrefab
 			else if (name == "CreateParticles")
 			{
 				CreateParticles* create = new CreateParticles(particles.data[prefab->emit[i][j].data[0].x]);
+				particles.data[prefab->emit[i][j].data[0].x].canRemoved = false;
 				create->coeffScale = prefab->emit[i][j].data[1].x;
 				create->coeffPos = prefab->emit[i][j].data[1].y;
 				create->time = prefab->emit[i][j].data[1].z;

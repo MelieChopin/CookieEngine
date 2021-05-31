@@ -73,13 +73,6 @@ namespace Cookie
 				}
 				~ParticlesSystem() {}
 
-				void Swap(ParticlesSystem& other)
-				{
-					ParticlesSystem temp(other);
-					other = *this;
-					*this = temp;
-				}
-
 				void generate()
 				{
 					for (int j = 0; j < particlesEmiter.size(); j++)
@@ -89,30 +82,26 @@ namespace Cookie
 
 				void Update()
 				{
+					needToBeRemoved = false;
 					for (int j = 0; j < data.size(); j++)
 					{
 						if (particlesEmiter.size() > j)
+						{
 							for (int k = 0; k < particlesEmiter[j].updates.size(); k++)
-							{
 								particlesEmiter[j].updates[k]->Update(&data[j]);
-								if (data[j].countAlive <= 0)
-								{
-									data.erase(data.begin() + j);
-									particlesEmiter.erase(particlesEmiter.begin() + j);
-									if (data.size() == 0)
-									{
-										needToBeRemoved = true;
-										break;
-									}
-									else if (j + 1 < data.size())
-									{
-										j++;
-										k = 0;
-									}
-									else
-										break;
-								}
-							}
+						}
+						if (data[j].countAlive <= 0 && data[j].canRemoved)
+							needToBeRemoved = true;
+						else if (!data[j].canRemoved && needToBeRemoved && data[j].countAlive <= 0)
+							needToBeRemoved = true;
+						else
+							needToBeRemoved = false;
+					}
+					
+					if (needToBeRemoved)
+					{
+						data.clear();
+						particlesEmiter.clear();
 					}
 				}
 

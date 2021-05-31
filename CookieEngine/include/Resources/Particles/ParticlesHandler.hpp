@@ -12,13 +12,16 @@ namespace Cookie
 			class ParticlesHandler
 			{
 			public:
-				std::vector<ParticlesSystem> particlesSystems;
+				std::list<ParticlesSystem> particlesSystems;
 				unsigned int living = 0;
 
 				Render::Frustrum frustrum;
 				Cookie::Render::ParticlesPass shader;
 
-				ParticlesHandler() { particlesSystems.resize(500); }
+				ParticlesHandler() 
+				{ 
+					particlesSystems.resize(500);
+				}
 
 				void Update();
 				void Draw(const Render::Camera& cam);
