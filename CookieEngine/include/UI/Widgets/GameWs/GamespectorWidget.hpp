@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace Cookie::ECS { class Coordinator; }
-
+namespace Cookie::Resources { class Texture; }
 
 namespace Cookie::UIwidget
 {
@@ -17,10 +17,13 @@ namespace Cookie::UIwidget
 	{
 		const Cookie::ECS::Coordinator& coordinator;
 
+		const Cookie::Resources::Texture* const & nullTexture;
+
 	public:
-		inline Gamespector(const Cookie::ECS::Coordinator& _coordinator)
+		inline Gamespector(const Cookie::ECS::Coordinator& _coordinator, const Cookie::Resources::Texture* const & _nullTexture)
 			: GameWindowBase	("Gamespector", true),
-			  coordinator		(_coordinator)
+			  coordinator		(_coordinator),
+			  nullTexture		(_nullTexture)
 		{}
 
 		void WindowDisplay() override;

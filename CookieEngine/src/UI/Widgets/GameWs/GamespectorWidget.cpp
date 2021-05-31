@@ -2,14 +2,15 @@
 #include "GamespectorWidget.hpp"
 
 #include "ComponentHandler.hpp"
-
+#include "Texture.hpp"
 #include "Prefab.hpp"
 
 #include <imgui.h>
 
-using namespace Cookie::UIwidget;
-using namespace Cookie::ECS;
 using namespace ImGui;
+using namespace Cookie::UIwidget;
+using namespace Cookie::Resources;
+using namespace Cookie::ECS;
 
 
 void Gamespector::WindowDisplay()
@@ -19,41 +20,48 @@ void Gamespector::WindowDisplay()
 		if (coordinator.selectedEntities.size() == 1)
 		{
 			const Entity* const & selectedEntity = coordinator.selectedEntities[0];
+
+			const Texture* const & assignedIcon = coordinator.componentHandler->GetComponentModel(selectedEntity->id).icon;
+			const ImTextureID usedSEicon = static_cast<ImTextureID>(assignedIcon != nullptr ? assignedIcon->GetResourceView() : nullTexture->GetResourceView());
+			
 			const ComponentGameplay& sEntityGameplayComp = coordinator.componentHandler->GetComponentGameplay(selectedEntity->id);
+			
+			
+			BeginGroup();
 
 			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::LIVE)
 			{
-				const unsigned int rectNums = GetContentRegionAvail().x / 5;
-				const unsigned int litRects = (rectNums * sEntityGameplayComp.componentLive.lifeCurrent) / sEntityGameplayComp.componentLive.lifeMax;
+				const float regionHeight = GetContentRegionAvail().y;
+
+				Image(usedSEicon, {regionHeight - 19.f, regionHeight - 19.f});
+				
+
+				const float lifeFrac = sEntityGameplayComp.componentLive.lifeCurrent / sEntityGameplayComp.componentLive.lifeMax;
 
 				Cookie::Core::Math::Vec3 RGBc;
-				ColorConvertHSVtoRGB((175.f * litRects) / rectNums, 100, 100, RGBc.r, RGBc.g, RGBc.b);
+				ColorConvertHSVtoRGB(0.486f * lifeFrac, 1, 1, RGBc.r, RGBc.g, RGBc.b);
 
-				const ImU32 color = ColorConvertFloat4ToU32({RGBc.r, RGBc.g, RGBc.b, 1});
+				PushStyleColor(ImGuiCol_PlotHistogram, ColorConvertFloat4ToU32({ RGBc.r, RGBc.g, RGBc.b, 1 }));
 
-				for (unsigned int i = 0; i < rectNums; i++)
-				{
-					if (i <= litRects)
-						GetWindowDrawList()->AddRectFilled({ 0, 0 }, { 5, 10 }, color);
-					else
-						GetWindowDrawList()->AddRect({ 0, 0 }, { 5, 10 }, color);
-
-					SameLine();
-				}
-
-				NewLine();
+				std::string lifeBarOverlay = std::to_string((int)sEntityGameplayComp.componentLive.lifeCurrent) + std::string("/") + std::to_string((int)sEntityGameplayComp.componentLive.lifeMax);
+				ProgressBar(lifeFrac, {regionHeight - 19.f, 15.f}, lifeBarOverlay.c_str());
+				
+				PopStyleColor();
 			}
+			else
+				Image(usedSEicon, { GetContentRegionAvail().y, GetContentRegionAvail().y });
 
-			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::MOVE)
-			{
-				if (sEntityGameplayComp.componentMove.reachGoalCountdown > 0)
-					Text("Reaching destination in %.2f", sEntityGameplayComp.componentMove.reachGoalCountdown);
-			}
+			EndGroup();
+			SameLine();
+
+			BeginGroup();
 
 			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::PRODUCER)
 			{
-
+				
 			}
+
+			EndGroup();
 		}
 	}
 

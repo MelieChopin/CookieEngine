@@ -26,8 +26,8 @@ bool GameWindowBase::BeginWindow(int windowFlags)
 {
 	if (!opened || invalid) return false;
 
-	SetNextWindowSize({ width												, height											   }, ImGuiCond_Appearing);
-	SetNextWindowPos ({ xPos + GetWindowPos().x + GetStyle().WindowPadding.x, yPos + GetWindowPos().y + GetStyle().WindowPadding.y }					 );
+	SetNextWindowSize({ width				   , height					}, ImGuiCond_Appearing);
+	SetNextWindowPos ({ xPos + GetWindowPos().x, yPos + GetWindowPos().y}					  );
 
 	SetNextWindowViewport(GetWindowViewport()->ID);
 	contentVisible = Begin(windowName, nullptr, windowFlags | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings);
