@@ -290,8 +290,9 @@ void ParticlesPass::InitShader()
 
 void ParticlesPass::AllocateMoreSpace(int newSpace)
 {
-    InstanceBuffer->Release();
-    D3D11_BUFFER_DESC vbd;
+    if (InstanceBuffer != nullptr)
+        InstanceBuffer->Release();
+    D3D11_BUFFER_DESC vbd = {};
     vbd.Usage = D3D11_USAGE_DYNAMIC;
     vbd.ByteWidth = sizeof(InstancedData) * newSpace;
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -338,7 +339,7 @@ void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mes
     buffer.view = cam.GetView();
     buffer.pos = cam.pos;
     buffer.isBillboard = true;
-    Render::WriteCBuffer(&buffer, sizeof(buffer), 0, &CBuffer);
+    Render::WriteBuffer(&buffer, sizeof(buffer), 0, &CBuffer);
  
     Render::RendererRemote::context->IASetVertexBuffers(0, 2, vbs, stride, offset);
     Render::RendererRemote::context->IASetIndexBuffer(mesh->IBuffer, DXGI_FORMAT_R32_UINT, 0);

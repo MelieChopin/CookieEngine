@@ -188,7 +188,7 @@ void PointLightDrawer::Set(ID3D11Buffer** lightCBuffer, const LightsArray& light
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &drawData.CamCBuffer);
 
 
-    WriteCBuffer(lights.pointLights.data(), sizeof(INSTANCE_POINT_LIGHT) * lights.usedPoints, 0, &IBuffer);
+    WriteBuffer(lights.pointLights.data(), sizeof(INSTANCE_POINT_LIGHT) * lights.usedPoints, 0, &IBuffer);
 
     UINT stride[2] = { ((2 * sizeof(Core::Math::Vec3)) + sizeof(Core::Math::Vec2)), sizeof(INSTANCE_POINT_LIGHT) };
     UINT offset[2] = { 0 , 0 };

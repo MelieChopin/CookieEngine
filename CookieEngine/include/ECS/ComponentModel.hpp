@@ -19,10 +19,10 @@ namespace Cookie
         {
         public:
             Resources::Mesh*    mesh    { nullptr };
-            Resources::Texture* icon    { nullptr };
             Resources::Texture* albedo  { nullptr };
             Resources::Texture* normal  { nullptr };
             Resources::Texture* metallicRoughness { nullptr };
+            Resources::Texture* icon    { nullptr };
 
 
             //Material material;
@@ -32,8 +32,6 @@ namespace Cookie
             ~ComponentModel();
 
             void ToDefault();
-
-            void Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view, const Core::Math::Mat4& modelMat, ID3D11Buffer** CBuffer);
         };
 
     }

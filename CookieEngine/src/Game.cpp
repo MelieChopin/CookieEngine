@@ -21,6 +21,7 @@ Game::Game():
 
     Physics::PhysicsHandle::Init();
     Core::UIcore::FinishInit(renderer);
+    renderer.drawData.Init(*this);
 }
 
 Game::~Game()
@@ -62,8 +63,9 @@ void Game::Update()
     renderer.SetBackBuffer();
 }
 
-void Game::CalculateMousePosInWorld(Render::FreeFlyCam& cam)
+void Game::CalculateMousePosInWorld()
 {
+    const Render::Camera& cam = *scene->camera;
     Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
     rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, { fwdRay.x,fwdRay.y,fwdRay.z });
     RaycastInfo raycastInfo;
@@ -332,9 +334,9 @@ void Game::SetScene(const std::shared_ptr<Resources::Scene>& _scene)
 
 void Game::SetCamClampFromMap()
 {
-    Vec3 middle = scene->camera->ScreenPointToWorldDir({ 0.0f,0.0f });
-    Vec3 UpperRight = scene->camera->ScreenPointToWorldDir({ 1.0f,1.0f });
-    Vec3 DownLeft = scene->camera->ScreenPointToWorldDir({ -1.0f,-1.0f });
+    Vec3 middle = scene->camera->ScreenPointToWorldDir({ { 0.0f,0.0f } });
+    Vec3 UpperRight = scene->camera->ScreenPointToWorldDir({ { 1.0f,1.0f } });
+    Vec3 DownLeft = scene->camera->ScreenPointToWorldDir({ { -1.0f,-1.0f } });
 
     float t = (scene->camera->pos.y) / middle.y;
     middle = scene->camera->pos - middle * t;
@@ -352,8 +354,8 @@ void Game::SetCamClampFromMap()
     if (depth > scene->map.trs.scale.z)
         depth = scene->map.trs.scale.z;
 
-    scene->camera->mapClampX = { -scene->map.trs.scale.x * 0.5f + (width * 0.5f),scene->map.trs.scale.x * 0.5f - (width * 0.5f) };
-    scene->camera->mapClampZ = { -scene->map.trs.scale.z * 0.5f + (depth * 0.5f), scene->map.trs.scale.z * 0.5f - (depth * 0.5f) };
+    scene->camera->mapClampX = {{ -scene->map.trs.scale.x * 0.5f + (width * 0.5f),scene->map.trs.scale.x * 0.5f - (width * 0.5f) } };
+    scene->camera->mapClampZ = {{ -scene->map.trs.scale.z * 0.5f + (depth * 0.5f), scene->map.trs.scale.z * 0.5f - (depth * 0.5f)} };
 }
 
 void Game::TryResizeWindow()

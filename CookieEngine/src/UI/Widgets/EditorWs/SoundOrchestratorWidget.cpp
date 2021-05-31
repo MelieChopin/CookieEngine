@@ -25,12 +25,16 @@ void SoundOrchestrator::WindowDisplay()
 
 		if (selectedSound != nullptr)
 		{
-			static bool pausedSound = false;
+			static bool pausedSound = true;
 			
-			if (Selectable("Play this sound"))
+			if (Selectable("Play this sound") && pausedSound)
 			{
-				SoundManager::PlayMusic(selectedSound);
-				SoundManager::SetPaused(selectedSound, false);
+				bool isAlreadyPlay;
+				selectedSound->chan->isPlaying(&isAlreadyPlay);
+				if (isAlreadyPlay)
+					SoundManager::SetPaused(selectedSound, false);
+				else
+					SoundManager::PlayMusic(selectedSound);
 				pausedSound = false;
 			}
 

@@ -112,7 +112,7 @@ namespace Cookie
             return true;
         }
 
-        inline bool WriteCBuffer(const void* data, size_t bufferSize, UINT CBufferIndex, ID3D11Buffer** CBuffer)
+        inline bool WriteBuffer(const void* data, size_t bufferSize, UINT CBufferIndex, ID3D11Buffer** CBuffer)
         {
             D3D11_MAPPED_SUBRESOURCE ms;
 

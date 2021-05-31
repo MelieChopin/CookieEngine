@@ -4,6 +4,7 @@
 #include <Mat4.hpp>
 #include <array>
 #include <vector>
+#include "Drawers/ModelDrawer.hpp"
 #include "Drawers/MapDrawer.hpp"
 
 struct ID3D11Buffer;
@@ -20,6 +21,7 @@ namespace Cookie
 
 	namespace ECS
 	{
+		class Coordinator;
 		class ComponentModel;
 		class ComponentGameplay;
 	}
@@ -39,22 +41,39 @@ namespace Cookie
 			std::array<Core::Math::Vec4, 6> planes;
 			Core::Math::Vec3				centroid;
 			std::array<Core::Math::Vec3, 8> corners;
-			std::array<Core::Math::Vec3, 2> AABB;
 
 			void MakeFrustrum(const Camera& cam);
+		};
+
+		struct DrawData
+		{
+			Resources::Mesh* mesh;
+			Resources::Texture* albedo;
+			Resources::Texture* normalMap;
+			Resources::Texture* matMap;
+
+			/* the first is all of them, the second is the ones that are not culled by the frustrum culling of current cam */
+			std::vector<Core::Math::Mat4>		matrices;
+			std::vector<Core::Math::Mat4>		visibleMatrices;
+
+			bool operator==(const ECS::ComponentModel& model);
 		};
 		
 		class DrawDataHandler
 		{
 			public:
-				ID3D11Buffer* CBuffer{nullptr};
-				Frustrum frustrum;
-				std::vector<ECS::ComponentModel>	models;
-				std::vector<Core::Math::Mat4>		matrices;
+				const ECS::Coordinator*				coordinator	{nullptr};
+				Frustrum							frustrum;
+
+				std::vector<DrawData>	staticDrawData;
+				std::vector<DrawData>	dynamicDrawData;
+				
 				std::array<Core::Math::Vec3, 2>		AABB;
 				
 				ID3D11DepthStencilView*				depthStencilView;
 				ID3D11Buffer*						CamCBuffer;
+
+				ModelDrawer							modelDrawer;
 				MapDrawer							mapDrawer;
 
 				const Camera*						currentCam;
@@ -66,14 +85,15 @@ namespace Cookie
 				std::vector<ECS::ComponentGameplay> selectedGameplays;
 
 			private:
-				void InitCBuffer();
+				void PushDrawData(std::vector<DrawData>& drawDatas, const ECS::ComponentModel& model, const Core::Math::Mat4& trs, bool culled);
 
 			public:
 				DrawDataHandler();
 				~DrawDataHandler();
 
+				void Init(const Game& game);
 				void SetDrawData(const Camera* cam, const Game& game);
-				void Draw(int _i = 0);
+				void Draw(bool drawOccluded = false);
 				void Clear();
 		};
 	}

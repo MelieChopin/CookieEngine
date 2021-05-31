@@ -161,7 +161,7 @@ void LightPass::Draw(const LightsArray& lights, const ShadowBuffer& shadowMap, c
 
     Vec4 camBuffer[2] = { { cam.pos.x,cam.pos.y ,cam.pos.z ,0.0f },{static_cast<float>(diffuseFBO.width),static_cast<float>(diffuseFBO.height),cam.camFar,0.0f} };
 
-    Render::WriteCBuffer(&camBuffer, sizeof(Vec4) * 2, 0, &lightCBuffer);
+    Render::WriteBuffer(&camBuffer, sizeof(Vec4) * 2, 0, &lightCBuffer);
 
     if (lights.useDir)
     {
