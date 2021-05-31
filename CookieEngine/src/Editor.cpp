@@ -323,7 +323,7 @@ void Editor::Loop()
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
         
-        game.CalculateMousePosInWorld(cam);
+        game.CalculateMousePosInWorld();
         game.HandleGameplayInputs();
         game.ECSCalls(dbgRenderer);
 
