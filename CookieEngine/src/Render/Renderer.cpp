@@ -23,16 +23,8 @@ Renderer::Renderer():
     CreateDrawBuffer(window.width,window.height);
     remote.context->RSSetViewports(1, &viewport);
     remote.context->IASetPrimitiveTopology(topo);
-    lights.dirLight = { {0.0f,-1.0f,-1.0f},{0.5f,0.5f,0.5f}, true};
-
-    for (int i = -4; i < 4; i++)
-    {
-        for (int j = -4; j < 4; j++)
-        {
-            float k = lights.usedPoints++;
-            lights.pointLights[k] = { {i * 10.0f ,1.0f, j * 10.0f }, 5.0f,{((float)i+4.0f)/8.0f,((float)j + 4.0f) / 8.0f ,0.0f} };
-        }
-    }
+    drawData.depthStencilView   = geomPass.depthBuffer;
+    drawData.CamCBuffer         = geomPass.CBuffer;
 }
 
 Renderer::~Renderer()
@@ -139,6 +131,7 @@ void Renderer::ResizeBuffer(int width, int height)
     }
 
     geomPass.CreateDepth(width,height);
+    drawData.depthStencilView = geomPass.depthBuffer;
     CreateDrawBuffer(width,height);
 
     remote.context->OMSetRenderTargets(1, &backbuffer, nullptr);
