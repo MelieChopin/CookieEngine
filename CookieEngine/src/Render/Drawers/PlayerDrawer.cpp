@@ -87,12 +87,12 @@ void PlayerDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
 
     Vec4 color = validColor;
     size_t colorSize = sizeof(Vec4);
-    Render::WriteCBuffer(&color, colorSize, 0, &PCBuffer);
+    Render::WriteBuffer(&color, colorSize, 0, &PCBuffer);
 
     if (isMakingQuad)
     {
         buffer.model = quadTrs;
-        Render::WriteCBuffer(&buffer, bufferSize, 0, &VCBuffer);
+        Render::WriteBuffer(&buffer, bufferSize, 0, &VCBuffer);
 
         quadMesh->Set();
         quadMesh->Draw();
@@ -101,12 +101,12 @@ void PlayerDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
     if (buildingMesh)
     {
         buffer.model = buildingTRS;
-        Render::WriteCBuffer(&buffer, bufferSize, 0, &VCBuffer);
+        Render::WriteBuffer(&buffer, bufferSize, 0, &VCBuffer);
 
         if (!isValid)
         {
             color = invalidColor;
-            Render::WriteCBuffer(&color, colorSize, 0, &PCBuffer);
+            Render::WriteBuffer(&color, colorSize, 0, &PCBuffer);
         }
 
         if (buildingAlbedoTex)

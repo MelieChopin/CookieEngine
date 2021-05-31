@@ -200,13 +200,13 @@ void MapDrawer::Draw()
     vbuffer.tileNb             = { mapInfo.tileNb.x,mapInfo.tileNb.y,0.0f,0.0f };
 
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &VCBuffer);
-    Render::WriteCBuffer(&vbuffer, sizeof(vbuffer), 0, &VCBuffer);
+    Render::WriteBuffer(&vbuffer, sizeof(vbuffer), 0, &VCBuffer);
 
     PS_CONSTANT_BUFFER pbuffer = {};
     pbuffer.limitColor = { mapInfo.limitColor.r,mapInfo.limitColor.g ,mapInfo.limitColor.b, 1.0f };
     pbuffer.tileLimits = { mapInfo.tileLimits.x,mapInfo.tileLimits.y,0.0f,0.0f };
     Render::RendererRemote::context->PSSetConstantBuffers(0, 1, &PCBuffer);
-    Render::WriteCBuffer(&pbuffer, sizeof(pbuffer), 0, &PCBuffer);
+    Render::WriteBuffer(&pbuffer, sizeof(pbuffer), 0, &PCBuffer);
 
     if (mapInfo.albedoTex)
         mapInfo.albedoTex->Set(0);

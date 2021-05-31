@@ -81,6 +81,7 @@ set (SRC_FILES
     "${SRC_DIR}/Render/Light.cpp"
     "${SRC_DIR}/Render/ShadowBuffer.cpp" 
 
+    "${SRC_DIR}/Render/Drawers/ModelDrawer.cpp"
     "${SRC_DIR}/Render/Drawers/DirLightDrawer.cpp"
     "${SRC_DIR}/Render/Drawers/PointLightDrawer.cpp"
     "${SRC_DIR}/Render/Drawers/FBODrawer.cpp"
@@ -104,7 +105,6 @@ set (SRC_FILES
     "${SRC_DIR}/Resources/Scene.cpp"
     "${SRC_DIR}/Resources/Serialization.cpp" 
     "${SRC_DIR}/Resources/SoundManager.cpp" 
-
 
     "${SRC_DIR}/UI/UIcore.cpp"
     "${SRC_DIR}/Resources/Particles/ParticlesGenerator.cpp"

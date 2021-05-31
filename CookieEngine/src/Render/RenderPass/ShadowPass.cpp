@@ -50,17 +50,13 @@ void ShadowPass::InitShader()
     ID3DBlob* blob = nullptr;
 
     std::string source = (const char*)R"(#line 35
-    cbuffer MODEL_CONSTANT : register(b0)
-    {
-        float4x4  model;
-    };
 
-    cbuffer CAM_CONSTANT : register(b1)
+    cbuffer CAM_CONSTANT : register(b0)
     {
         float4x4  lightViewProj;
     };
     
-    float4 main(float3 position : POSITION, float2 uv : UV, float3 normal : NORMAL) : SV_POSITION
+    float4 main(float3 position : POSITION, float2 uv : UV, float3 normal : NORMAL, float4x4 model : WORLD) : SV_POSITION
     {
         float4 pos;
     
@@ -169,9 +165,7 @@ void ShadowPass::Set()
 
 void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
 {
-    ID3D11Buffer* CBuffers[2] = { drawData.CBuffer, CBuffer };
-
-    Render::RendererRemote::context->VSSetConstantBuffers(0, 2, CBuffers);
+    Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
 
     VS_CONSTANT_BUFFER buffer = {};
 
@@ -191,9 +185,9 @@ void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
 
         lights.dirLight.lightViewProj = view * proj;
         buffer.lightViewProj = lights.dirLight.lightViewProj;
-        Render::WriteCBuffer(&buffer, bufferSize, 0, &CBuffer);
+        Render::WriteBuffer(&buffer, bufferSize, 0, &CBuffer);
 
-        drawData.Draw();
+        drawData.Draw(true);
         
     }
 }

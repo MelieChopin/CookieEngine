@@ -91,7 +91,7 @@ void SelectionDrawer::FillStencil(ID3D11Buffer* VCBuffer)
         if (model.mesh)
         {
             buffer.model = _selectedMatrices[i];
-            Render::WriteCBuffer(&buffer, bufferSize, 0, &VCBuffer);
+            Render::WriteBuffer(&buffer, bufferSize, 0, &VCBuffer);
 
             model.mesh->Set();
             model.mesh->Draw();
@@ -108,7 +108,7 @@ void SelectionDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
     buffer.viewProj = viewProj;
 
     Vec4 color = OUTLINE_COLOR;
-    WriteCBuffer(&color, sizeof(Vec4), 0, &PCBuffer);
+    WriteBuffer(&color, sizeof(Vec4), 0, &PCBuffer);
 
     size_t bufferSize = sizeof(VS_CONSTANT_BUFFER);
 
@@ -123,7 +123,7 @@ void SelectionDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
         if (model.mesh)
         {
             buffer.model = outLineSize * _selectedMatrices[i];
-            Render::WriteCBuffer(&buffer, bufferSize, 0, &VCBuffer);
+            Render::WriteBuffer(&buffer, bufferSize, 0, &VCBuffer);
 
             model.mesh->Set();
             model.mesh->Draw();
@@ -135,7 +135,7 @@ void SelectionDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
 
     //drawing arrows
     color = ARROW_COLOR;
-    WriteCBuffer(&color, sizeof(Vec4), 0, &PCBuffer);
+    WriteBuffer(&color, sizeof(Vec4), 0, &PCBuffer);
 
     arrowMesh->Set();
 
@@ -145,7 +145,7 @@ void SelectionDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
     for (int i = 0; i < arrowsMatrices.size(); i++)
     {
         buffer.model = arrowsMatrices[i];
-        Render::WriteCBuffer(&buffer, bufferSize, 0, &VCBuffer);
+        Render::WriteBuffer(&buffer, bufferSize, 0, &VCBuffer);
         arrowMesh->Draw();
     }
 }
