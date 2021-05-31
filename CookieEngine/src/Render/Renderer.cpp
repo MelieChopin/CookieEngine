@@ -23,6 +23,8 @@ Renderer::Renderer():
     CreateDrawBuffer(window.width,window.height);
     remote.context->RSSetViewports(1, &viewport);
     remote.context->IASetPrimitiveTopology(topo);
+    drawData.depthStencilView   = geomPass.depthBuffer;
+    drawData.CamCBuffer         = geomPass.CBuffer;
 }
 
 Renderer::~Renderer()
@@ -129,6 +131,7 @@ void Renderer::ResizeBuffer(int width, int height)
     }
 
     geomPass.CreateDepth(width,height);
+    drawData.depthStencilView = geomPass.depthBuffer;
     CreateDrawBuffer(width,height);
 
     remote.context->OMSetRenderTargets(1, &backbuffer, nullptr);

@@ -35,9 +35,6 @@ void DrawDataHandler::Init(const Game& game)
 {
 	coordinator			= &game.coordinator;
 	player				= &game.playerData;
-
-	depthStencilView	= game.renderer.geomPass.depthBuffer;
-	CamCBuffer			= game.renderer.geomPass.CBuffer;
 }
 
 /*========================= DRAW DATA METHODS =========================*/
