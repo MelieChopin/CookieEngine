@@ -19,10 +19,10 @@ namespace Cookie
         {
         public:
             Resources::Mesh*    mesh    { nullptr };
-            Resources::Texture* icon    { nullptr };
             Resources::Texture* albedo  { nullptr };
             Resources::Texture* normal  { nullptr };
             Resources::Texture* metallicRoughness { nullptr };
+            Resources::Texture* icon    { nullptr };
 
 
             //Material material;
