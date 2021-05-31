@@ -86,15 +86,14 @@ int  Map::GetTileIndex(Vec2& mousePos)
 {
 	Vec2 unsignedMousePos{ {mousePos.x + trs.scale.x / 2, mousePos.y + trs.scale.z / 2} };
 
-	return int(unsignedMousePos.x / tilesSize.x) + tilesNb.x * int(unsignedMousePos.y / tilesSize.y);
+	return std::clamp(int(unsignedMousePos.x / tilesSize.x), 0, int(tilesNb.x - 1) ) + tilesNb.x * std::clamp(int(unsignedMousePos.y / tilesSize.y), 0, int(tilesNb.y - 1));
 }
 int  Map::GetTileIndex(Vec3& pos)
 {
 	//helper, same as GetTileIndex(Vec2) juste use Vec3.z instead of Vec2.y
-
 	Vec2 unsignedPos{ {pos.x + trs.scale.x / 2, pos.z + trs.scale.z / 2} };
 
-	return int(unsignedPos.x / tilesSize.x) + tilesNb.x * int(unsignedPos.y / tilesSize.y);
+	return std::clamp(int(unsignedPos.x / tilesSize.x), 0, int(tilesNb.x - 1)) + tilesNb.x * std::clamp(int(unsignedPos.y / tilesSize.y), 0, int(tilesNb.y - 1));
 }
 Tile& Map::GetTile(Core::Math::Vec2& mousePos)
 {
