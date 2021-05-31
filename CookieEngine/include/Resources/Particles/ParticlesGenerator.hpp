@@ -75,7 +75,7 @@ namespace Cookie
 			public:
 				Cookie::Core::Math::Vec3 pos; 
 				Cookie::Core::Math::Mat4* trs;
-				float radius;
+				float radius = 2;
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
@@ -149,7 +149,7 @@ namespace Cookie
 			class MassConstGenerate : public ParticlesGenerator
 			{
 			public:
-				float mass;
+				float mass = 1;
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
 				MassConstGenerate() { type = TYPEGEN::MASSCONSTGEN; }
@@ -159,7 +159,7 @@ namespace Cookie
 			class TimeConstGenerate : public ParticlesGenerator
 			{
 			public:
-				float time;
+				float time = 1;
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
 				TimeConstGenerate() { type = TYPEGEN::TIMECONSTGEN; }
@@ -169,8 +169,8 @@ namespace Cookie
 			class TimeRandGenerate : public ParticlesGenerator
 			{
 			public:
-				float timeMin;
-				float timeMax;
+				float timeMin = 1;
+				float timeMax = 2;
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
 				TimeRandGenerate() { type = TYPEGEN::TIMERANDGEN; }

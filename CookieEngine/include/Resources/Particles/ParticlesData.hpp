@@ -30,11 +30,11 @@ namespace Cookie
 				Cookie::Core::Math::Vec3 scaleBegin = Cookie::Core::Math::Vec3(1, 1, 1);
 				Cookie::Core::Math::Vec3 vel = Cookie::Core::Math::Vec3(0, 0, 0);
 				Cookie::Core::Math::Vec3 rot = Cookie::Core::Math::Vec3(0, 0, 0);
-				float					 time = 2;
-				float					 timeMax = 2;
-				float					 mass;
-				bool					 isBillboard;
-				bool					 alive;
+				float					 time = 1;
+				float					 timeMax = 1;
+				float					 mass = 1.0f;
+				bool					 isBillboard = true;
+				bool					 alive = false;
 			};
 
 			class ParticlesData
@@ -54,7 +54,6 @@ namespace Cookie
 				{
 					countFrame = sizeFrame;
 					countAlive = 0;
-
 					data.resize(size);
 				}
 
@@ -80,6 +79,8 @@ namespace Cookie
 						data[i].pos = Cookie::Core::Math::Vec3(0, 0, 0);
 						data[i].scale = Cookie::Core::Math::Vec3(1, 1, 1);
 						data[i].rot = Cookie::Core::Math::Vec3(0, 0, 0);
+						data[i].time = 10;
+						data[i].timeMax = 10;
 					}
 				}
 

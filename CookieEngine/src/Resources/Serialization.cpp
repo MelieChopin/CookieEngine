@@ -668,10 +668,13 @@ void Cookie::Resources::Serialization::Save::SaveParticles(Cookie::Resources::Pa
 				}
 				case (TYPEUP::CREATPARTICLES):{
 					CreateParticles& upCreate = dynamic_cast<CreateParticles&>(*particlesEmitter.updates[k]);
-					ParticlesData constData = upCreate.data;
+					ParticlesData constData = *upCreate.data;
 					std::vector<ParticlesData>::iterator result = std::find(particles.data.begin(), particles.data.end(), constData);
 					if (result != particles.data.end())
 						update["index"] = std::distance(particles.data.begin(), result);
+					update["coeffScale"] = upCreate.coeffScale;
+					update["coeffPos"] = upCreate.coeffPos;
+					update["time"] = upCreate.time;
 					break;
 				}
 				}
@@ -1226,9 +1229,10 @@ void Cookie::Resources::Serialization::Load::LoadVolumAndModeMusic(std::string p
 	Cookie::Resources::SoundManager::SetMode(key, js["Mode"].get<int>());
 }
 
-void Cookie::Resources::Serialization::Load::LoadParticles(Particles::ParticlesSystem& system, Cookie::Resources::ResourcesManager& resourcesManager)
+void Cookie::Resources::Serialization::Load::LoadParticles(Cookie::Resources::ResourcesManager& resourcesManager)
 {
-	ParticlesSystem& newParticles = system;
+	//ParticlesSystem& newParticles = system;
+	ParticlesPrefab pref;
 
 	std::ifstream file("Assets/VFX/death.PSAsset");
 
@@ -1241,134 +1245,149 @@ void Cookie::Resources::Serialization::Load::LoadParticles(Particles::ParticlesS
 	json js;
 	file >> js;
 
-	newParticles.name = js["Name"].get<std::string>();
+	pref.name = js["Name"].get<std::string>();
 
 	//Data
 	{
-		newParticles.data.resize(js["Data"].size());
+		pref.data.resize(js["Data"].size());
 		for (int i = 0; i < js["Data"].size(); i++)
 		{
 			json data = js["Data"][i];
-			ParticlesData& particlesData = newParticles.data[i];
 			std::string name = data["Mesh"].get<std::string>();
 			if (name != "NO MESH")
+			{
 				if (resourcesManager.meshes.find(name) != resourcesManager.meshes.end())
-					particlesData.mesh = resourcesManager.meshes[name].get();
+					pref.data[i].mesh = resourcesManager.meshes[name].get();
+			}
+			else
+				pref.data[i].mesh = nullptr;
 			name = data["Texture"].get<std::string>();
 			if (name != "NO TEXTURE")
+			{
 				if (resourcesManager.textures2D.find(name) != resourcesManager.textures2D.end())
-					particlesData.texture = resourcesManager.textures2D[name].get();
-			particlesData.generate(data["Size"].get<int>(), data["CountFrame"].get<int>());
-			particlesData.wake(0, data["CountAlive"].get<int>());
-			if (data["IsBillBoard"].get<bool>())
-				particlesData.SetIsBIllboard(true);
+					pref.data[i].texture = resourcesManager.textures2D[name].get();
+			}
 			else
-				particlesData.SetIsBIllboard(false);
+				pref.data[i].texture = nullptr;
+			pref.data[i].countAlive = data["CountAlive"].get<int>();
+			pref.data[i].countFrame = data["CountFrame"].get<int>();
+			pref.data[i].size = data["Size"].get<int>();
+			pref.data[i].isBillboard = data["IsBillBoard"].get<bool>();
 		}
 	}
 
 	//Emitter
 	{
 		json emitter = js["Emitter"];
-		newParticles.particlesEmiter.resize(emitter.size());
+		pref.emitter.resize(emitter.size());
+		pref.emit.resize(emitter.size());
 		for (int i = 0; i < emitter.size(); i++)
 		{
-			ParticlesEmitter& particlesEmitter = newParticles.particlesEmiter[i];
 			if (emitter[i]["Generators"].is_array())
 			{
 				json gen = emitter[i]["Generators"];
-				particlesEmitter.generators.resize(gen.size());
 				for (int j = 0; j < gen.size(); j++)
 				{
 					TYPEGEN typeGen = (TYPEGEN)gen[j]["Type"].get<int>();
+					Particles::ParticlesEmitter& emitter = pref.emitter[i];
 					switch (typeGen)
 					{
 					case (TYPEGEN::POINTPOSITIONGEN): {
-						PointPositionGenerate* point = new PointPositionGenerate;
-						gen[j]["pos"].get_to(point->pos.e);
-						point->trs = &newParticles.trs.TRS;
-						particlesEmitter.generators[j] = point;
+						Particles::emit emit;
+						emit.name = "PointPositionGen";
+						gen[j]["pos"].get_to(emit.data[0].e);
+						pref.emit[i].push_back(emit);
 						break;
 					}
 					case (TYPEGEN::BOXPOSITIONGEN): {
-						BoxPositionGenerate* box = new BoxPositionGenerate;
+						Particles::emit emit;
+						emit.name = "BoxPositionGen";
+						gen[j]["pos"].get_to(emit.data[0].e);
+						gen[j]["sizeBox"].get_to(emit.data[1].e);
+						pref.emit[i].push_back(emit);
+						/*BoxPositionGenerate* box = new BoxPositionGenerate;
 						gen[j]["pos"].get_to(box->pos.e);
 						gen[j]["sizeBox"].get_to(box->sizeBox.e);
 						box->trs = &newParticles.trs.TRS;
-						particlesEmitter.generators[j] = box;
+						particlesEmitter.generators[j] = box;*/
 						break;
 					}
 					case (TYPEGEN::CIRCLEPOSITIONGEN): {
-						SpherePositionGenerate* sphere = new SpherePositionGenerate();
+						Particles::emit emit;
+						emit.name = "CirclePositionGen";
+						gen[j]["pos"].get_to(emit.data[0].e);
+						emit.data[1].x = gen[j]["radius"].get<float>();
+						pref.emit[i].push_back(emit);
+						/*SpherePositionGenerate* sphere = new SpherePositionGenerate();
 						gen[j]["pos"].get_to(sphere->pos.e);
 						sphere->radius = gen[j]["radius"].get<float>();
 						sphere->trs = &newParticles.trs.TRS;
-						particlesEmitter.generators[j] = sphere;
+						particlesEmitter.generators[j] = sphere;*/
 						break;
 					}
 					case (TYPEGEN::SCALECONSTGEN): {
 						ScaleConstGenerate* scaleC = new ScaleConstGenerate();
 						gen[j]["scale"].get_to(scaleC->scale.e);
-						particlesEmitter.generators[j] = scaleC;
+						emitter.generators.push_back(scaleC);
 						break;
 					}
 					case (TYPEGEN::SCALERANDGEN): {
 						ScaleRandGenerate* scaleR = new ScaleRandGenerate();
 						gen[j]["scaleMin"].get_to(scaleR->scaleMin.e);
 						gen[j]["scaleMax"].get_to(scaleR->scaleMax.e);
-						particlesEmitter.generators[j] = scaleR;
+						emitter.generators.push_back(scaleR);
 						break;
 					}
 					case (TYPEGEN::ROTATERANDGEN): {
 						RotateRandGenerate* rot = new RotateRandGenerate();
 						gen[j]["rotMin"].get_to(rot->rotMin.e);
 						gen[j]["rotMax"].get_to(rot->rotMax.e);
-						particlesEmitter.generators[j] = rot;
+						emitter.generators.push_back(rot);
 						break;
 					}
 					case (TYPEGEN::VELCONSTGEN): {
 						VelocityConstGenerate* velC = new VelocityConstGenerate();
 						gen[j]["vel"].get_to(velC->vel.e);
-						particlesEmitter.generators[j] = velC;
+						emitter.generators.push_back(velC);
 						break;
 					}
 					case (TYPEGEN::VELRANDGEN): {
 						VelocityRandGenerate* velR = new VelocityRandGenerate();
 						gen[j]["velMin"].get_to(velR->velMin.e);
 						gen[j]["velMax"].get_to(velR->velMax.e);
-						particlesEmitter.generators[j] = velR;
+						emitter.generators.push_back(velR);
 						break;
 					}
 					case (TYPEGEN::MASSCONSTGEN): {
 						MassConstGenerate* mass = new MassConstGenerate();
 						mass->mass = gen[j]["mass"].get<float>();
-						particlesEmitter.generators[j] = mass;
+						emitter.generators.push_back(mass);
 						break;
 					}
 					case (TYPEGEN::TIMECONSTGEN): {
 						TimeConstGenerate* timeC = new TimeConstGenerate();
 						timeC->time = gen[j]["time"].get<float>();
-						particlesEmitter.generators[j] = timeC;
+						emitter.generators.push_back(timeC);
 						break;
 					}
 					case (TYPEGEN::TIMERANDGEN): {
 						TimeRandGenerate* timeR = new TimeRandGenerate();
 						timeR->timeMin = gen[j]["timeMin"].get<float>();
 						timeR->timeMax = gen[j]["timeMax"].get<float>();
-						particlesEmitter.generators[j] = timeR;
+						emitter.generators.push_back(timeR);
 						break;
 					}
 					case (TYPEGEN::COLORCONSTGEN): {
 						ColorConstGenerate* colorC = new ColorConstGenerate();
 						gen[j]["color"].get_to(colorC->col.e);
-						particlesEmitter.generators[j] = colorC;
+						emitter.generators.push_back(colorC);
 						break;
 					}
 					case (TYPEGEN::COLORRANDGEN): {
 						ColorRandGenerate* colorR = new ColorRandGenerate();
 						gen[j]["colorMin"].get_to(colorR->minCol.e);
 						gen[j]["colorMax"].get_to(colorR->maxCol.e);
-						particlesEmitter.generators[j] = colorR;
+						emitter.generators.push_back(colorR);
 						break;
 					}
 					}
@@ -1378,61 +1397,72 @@ void Cookie::Resources::Serialization::Load::LoadParticles(Particles::ParticlesS
 			if (emitter[i]["Updates"].is_array())
 			{
 				json up = emitter[i]["Updates"];
-				particlesEmitter.updates.resize(up.size());
 				for (int j = 0; j < up.size(); j++)
 				{
 					TYPEUP typeUp = (TYPEUP)up[j]["Type"].get<int>();
+					Particles::ParticlesEmitter& emitter = pref.emitter[i];
 					switch (typeUp)
 					{
 					case (TYPEUP::UPDATEVEL): {
 						UpdateVelocity* vel = new UpdateVelocity();
-						particlesEmitter.updates[j] = vel;
+						emitter.updates.push_back(vel);
 						break;
 					}
 					case (TYPEUP::UPDATESCALE): {
 						UpdateScale* upScale = new UpdateScale();
 						up[j]["scaleEnd"].get_to(upScale->scaleEnd.e);
-						particlesEmitter.updates[j] = upScale;
+						emitter.updates.push_back(upScale);
 						break;
 					}
 					case (TYPEUP::UPDATEALPHA): {
 						UpdateAlpha* upAlpha = new UpdateAlpha();
 						upAlpha->alphaEnd = up[j]["alphaEnd"].get<float>();
-						particlesEmitter.updates[j] = upAlpha;
+						emitter.updates.push_back(upAlpha);
 						break;
 					}
 					case (TYPEUP::COLOROVERLIFE): {
 						ColorOverLife* upColor = new ColorOverLife();
 						up[j]["colorEnd"].get_to(upColor->colorEnd.e);
-						particlesEmitter.updates[j] = upColor;
+						emitter.updates.push_back(upColor);
 						break;
 					}
 					case (TYPEUP::ENABLEGRAVITY): {
 						EnabledGravity* upGravity = new EnabledGravity();
 						upGravity->gravity = up[j]["gravity"].get<float>();
-						particlesEmitter.updates[j] = upGravity;
+						emitter.updates.push_back(upGravity);
 						break;
 					}
 					case (TYPEUP::UPDATETIME): {
 						UpdateTime* time = new UpdateTime();
-						particlesEmitter.updates[j] = time;
+						emitter.updates.push_back(time);
 						break;
 					}
 					case (TYPEUP::LOOP):{
-						Loop* loop = new Loop(particlesEmitter.generators);
-						particlesEmitter.updates[j] = loop;
+						Particles::emit emit;
+						emit.name = "Loop";
+						pref.emit[i].push_back(emit);
+						//Loop* loop = new Loop(particlesEmitter.generators);
+						//particlesEmitter.updates[j] = loop;
 						break;
 					}
 					case (TYPEUP::COLLISIONWITHPLANE): {
-						CollisionWithPlane* upCollision = new CollisionWithPlane;
+						/*CollisionWithPlane* upCollision = new CollisionWithPlane;
 						upCollision->dis = up[j]["distance"].get<float>();
 						up[j]["normal"].get_to(upCollision->n.e);
-						particlesEmitter.updates[j] = upCollision;
+						particlesEmitter.updates[j] = upCollision;*/
 						break;
 					}
 					case (TYPEUP::CREATPARTICLES): {
-						CreateParticles* upCreate = new CreateParticles(newParticles.data[up[j]["index"].get<int>()]);
-						particlesEmitter.updates[j] = upCreate;
+						Particles::emit emit;
+						emit.name = "CreateParticles";
+						emit.data[0] = Cookie::Core::Math::Vec3(0, 0, 0);
+						emit.data[0].x = up[j]["index"].get<int>();
+						emit.data[1].x = up[j]["coeffScale"].get<float>();
+						emit.data[1].y = up[j]["coeffPos"].get<float>();
+						emit.data[1].z = up[j]["time"].get<float>();
+						pref.emit[i].push_back(emit);
+						//CreateParticles* upCreate = new CreateParticles(newParticles.data[up[j]["index"].get<int>()]);
+						//particlesEmitter.updates[j] = upCreate;
 						break;
 					}
 					}
@@ -1441,4 +1471,6 @@ void Cookie::Resources::Serialization::Load::LoadParticles(Particles::ParticlesS
 			
 		}
 	}
+
+	resourcesManager.particles[pref.name] = std::make_unique<ParticlesPrefab>(pref);
 }

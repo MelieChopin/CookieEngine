@@ -1,5 +1,7 @@
 #include "ParticlesUpdate.hpp"
 #include "ParticlesData.hpp"
+#include "ParticlesHandler.hpp"
+#include "Serialization.hpp"
 #include "Time.hpp"
 #include "Mat4.hpp"
 
@@ -41,7 +43,7 @@ void ColorOverLife::Update(ParticlesData* p)
 void EnabledGravity::Update(ParticlesData* p)
 {
 	for (int i = 0; i < p->countAlive; i++)
-		p->data[i].vel += Cookie::Core::Math::Vec3(0, gravity * p->data[i].mass, 0) * Cookie::Core::DeltaTime();
+		p->data[i].vel += Cookie::Core::Math::Vec3(0, gravity * p->data[i].mass, 0) * Cookie::Core::DeltaTime();	
 }
 
 void UpdateTime::Update(ParticlesData* p)
@@ -49,7 +51,6 @@ void UpdateTime::Update(ParticlesData* p)
 	for (int i = 0; i < p->countAlive; i++)
 	{
 		p->data[i].time -= Cookie::Core::DeltaTime();
-		//std::cout << p->data[i].time << "\n";
 		if (p->data[i].time < 0)
 			p->kill(i);
 	}
@@ -75,13 +76,22 @@ void CollisionWithPlane::Update(ParticlesData* p)
 	{
 		Cookie::Core::Math::Vec3 pos(p->data[i].pos.x, p->data[i].pos.y, p->data[i].pos.z);
 		float distance = (pos.Dot(n) + dis) / n.Length();
-		
+
 		if (distance <= Cookie::Core::Math::EPSILON && p->data[i].isBillboard == true)
 		{
-			p->data[i].isBillboard = false;
+			/*int size = particlesHandler->particlesSystems.size();
+			particlesHandler->particlesSystems.resize(size + 1);
+			Serialization::Load::LoadParticles(particlesHandler->particlesSystems[size], *manager);
+			for (int j = 0; j < particlesHandler->particlesSystems[size].particlesEmiter.size(); j++)
+				for (int i = 0; i < particlesHandler->particlesSystems[size].particlesEmiter[j].generators.size(); i++)
+					particlesHandler->particlesSystems[size].particlesEmiter[j].generators[i]->
+					generate(&particlesHandler->particlesSystems[size].data[j], 0,
+						particlesHandler->particlesSystems[size].data[j].countAlive);*/
+
+			/*p->data[i].isBillboard = false;
 			p->data[i].vel = Cookie::Core::Math::Vec3(0, 0, 0);
 			p->data[i].mass = 0;
-			p->data[i].rot = Cookie::Core::Math::Vec3(Cookie::Core::Math::PI / 2, 0, 0);
+			p->data[i].rot = Cookie::Core::Math::Vec3(Cookie::Core::Math::PI/2, 0, 0);*/
 		}
 	}
 }
@@ -91,16 +101,16 @@ void CreateParticles::Update(ParticlesData* p)
 {
 	for (int i = 0; i < p->countAlive; i++)
 	{
-		if (data.countAlive < data.data.size())
+		if (data->countAlive < data->data.size())
 		{
-			data.data[data.countAlive].alive = true;
-			data.data[data.countAlive].pos = p->data[i].pos - p->data[i].vel * 3 * Cookie::Core::DeltaTime();
-			data.data[data.countAlive].time = 0.35f;
-			data.data[data.countAlive].timeMax = 0.35f;
-			data.data[data.countAlive].scale = p->data[i].scale;
-			data.data[data.countAlive].col = p->data[i].colBegin;
-			data.data[data.countAlive].colBegin = Cookie::Core::Math::Vec4(1, 1, 1, 1);
-			data.countAlive ++;
+			data->data[data->countAlive].alive = true;
+			data->data[data->countAlive].pos = p->data[i].pos - p->data[i].vel * coeffPos * Cookie::Core::DeltaTime();
+			data->data[data->countAlive].time = time;
+			data->data[data->countAlive].timeMax = time;
+			data->data[data->countAlive].scale = p->data[i].scale * coeffScale;
+			data->data[data->countAlive].col = p->data[i].colBegin;
+			data->data[data->countAlive].colBegin = Cookie::Core::Math::Vec4(1, 1, 1, 1);
+			data->countAlive ++;
 		}
 	}
 }

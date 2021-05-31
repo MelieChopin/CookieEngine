@@ -290,8 +290,9 @@ void ParticlesPass::InitShader()
 
 void ParticlesPass::AllocateMoreSpace(int newSpace)
 {
-    InstanceBuffer->Release();
-    D3D11_BUFFER_DESC vbd;
+    if (InstanceBuffer != nullptr)
+        InstanceBuffer->Release();
+    D3D11_BUFFER_DESC vbd = {};
     vbd.Usage = D3D11_USAGE_DYNAMIC;
     vbd.ByteWidth = sizeof(InstancedData) * newSpace;
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;

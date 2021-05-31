@@ -74,7 +74,7 @@ namespace Cookie
 				void LoadPhysic(json& physic, Cookie::ECS::ComponentPhysics& physics);
 				void LoadGameplay(json& game, Cookie::ECS::ComponentGameplay& gameplay, Cookie::Resources::ResourcesManager& resourcesManager);
 				void LoadVolumAndModeMusic(std::string path, std::string key);
-				void LoadParticles(Particles::ParticlesSystem& system, Cookie::Resources::ResourcesManager& resourcesManager);
+				void LoadParticles(Cookie::Resources::ResourcesManager& resourcesManager);
 			}
 		}
 	}

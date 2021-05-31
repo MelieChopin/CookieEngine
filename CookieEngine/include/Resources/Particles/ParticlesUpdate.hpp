@@ -9,10 +9,13 @@ namespace Cookie
 {
 	namespace Resources
 	{
+		class ResourcesManager;
+
 		namespace Particles
 		{
 			class ParticlesData;
 			class ParticlesGenerator;
+			class ParticlesHandler;
 
 			enum TYPEUP
 			{
@@ -80,7 +83,7 @@ namespace Cookie
 			class EnabledGravity : public ParticlesUpdate
 			{
 			public:
-				float gravity;
+				float gravity = -9.81f;
 				EnabledGravity(float gravity = -9.81f) : gravity(gravity) { type = TYPEUP::ENABLEGRAVITY; }
 				~EnabledGravity() {}
 
@@ -109,11 +112,15 @@ namespace Cookie
 			class CollisionWithPlane : public ParticlesUpdate
 			{
 			public:
-				CollisionWithPlane(Cookie::Core::Math::Vec3 normal = {0, 1, 0}, float distance = 0) : dis(distance), n(normal) { type = TYPEUP::COLLISIONWITHPLANE; }
+				CollisionWithPlane(Particles::ParticlesHandler& handler, Cookie::Resources::ResourcesManager& manager,
+					Cookie::Core::Math::Vec3 normal = {0, 1, 0}, float distance = -0.55f)
+					: dis(distance), n(normal), particlesHandler(&handler), manager(&manager) { type = TYPEUP::COLLISIONWITHPLANE; }
 				~CollisionWithPlane() {}
 
-				float dis;
-				Cookie::Core::Math::Vec3 n;
+				float dis = -0.55f;
+				Cookie::Core::Math::Vec3 n = Cookie::Core::Math::Vec3(0, 1, 0);
+				Particles::ParticlesHandler* particlesHandler;
+				Cookie::Resources::ResourcesManager* manager;
 
 				virtual void Update(ParticlesData* p) override;
 			};
@@ -122,11 +129,17 @@ namespace Cookie
 			class CreateParticles : public ParticlesUpdate
 			{
 			public:
-				ParticlesData& data;
+				ParticlesData* data;
+				float coeffScale = 1;
+				float coeffPos = 3;
+				float time = 0.35f;
 
 				virtual void Update(ParticlesData* p) override;
 
-				CreateParticles(ParticlesData& data) : data(data) { type = TYPEUP::CREATPARTICLES; }
+				//CreateParticles(float time = 0.35f, float coeff = 1, float coeffPos = 3) : coeffScale(coeff), coeffPos(coeffPos), time(time) { type = TYPEUP::CREATPARTICLES; }
+
+				CreateParticles(ParticlesData& data, float time = 0.35f, float coeff = 1, float coeffPos = 3) 
+					: data(&data), coeffScale(coeff), coeffPos(coeffPos), time(time) { type = TYPEUP::CREATPARTICLES; }
 			};
 		}
 	}

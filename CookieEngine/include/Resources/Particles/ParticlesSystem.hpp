@@ -1,6 +1,7 @@
 #ifndef __PARTICLESSYSTEM_HPP__
 #define __PARTICLESSYSTEM_HPP__
 
+
 #include "ParticlesEmitter.hpp"
 #include "ParticlesData.hpp"
 #include "ComponentTransform.hpp"
@@ -8,8 +9,8 @@
 #include "Resources/Mesh.hpp"
 #include "Resources/Texture.hpp"
 #include "Camera.hpp"
-#include "ResourcesManager.hpp"
 #include "DrawDataHandler.hpp"
+#include "Resources/ResourcesManager.hpp"
 
 namespace Cookie
 {
@@ -17,22 +18,52 @@ namespace Cookie
 	{
 		namespace Particles
 		{
+			struct emit
+			{
+				std::string name;
+				Cookie::Core::Math::Vec3 data[2];
+			};
+
+			class ParticlesPrefab
+			{
+			public:
+				std::string name;
+				struct data
+				{
+					Mesh* mesh;
+					Texture* texture;
+					int size;
+					int countFrame;
+					int countAlive;
+					bool isBillboard;
+				};
+				
+				std::vector<data> data;
+				std::vector<ParticlesEmitter> emitter;
+				std::vector<std::vector<emit>> emit;
+			};
+
 			class ParticlesSystem
 			{
 			public :
 				std::vector<ParticlesData> data;
 				std::vector<ParticlesEmitter> particlesEmiter;
 
-				ECS::ComponentTransform trs;
+				Core::Math::Mat4 trs = Core::Math::Mat4::Identity();
 				bool needToBeRemoved = false;
-				Cookie::Render::ParticlesPass shader;
 
+				Cookie::Render::ParticlesPass* shader;
 				std::string name;
 
-				ParticlesSystem() {}
+				ParticlesSystem() 
+				{}
 
-				ParticlesSystem(const ParticlesSystem& other) : data(other.data), particlesEmiter(other.particlesEmiter), trs(std::move(other.trs)), shader(std::move(other.shader))
-				{ }
+				ParticlesSystem(const ParticlesSystem& other): data(other.data), particlesEmiter(other.particlesEmiter), 
+					trs(other.trs), needToBeRemoved(other.needToBeRemoved), shader(other.shader), name(other.name)
+				{}
+
+				ParticlesSystem(Cookie::Render::ParticlesPass* shader) : shader(shader)
+				{}
 
 				ParticlesSystem(int size, int sizeFrame)
 				{
@@ -41,6 +72,20 @@ namespace Cookie
 					data[0].generate(size, sizeFrame);
 				}
 				~ParticlesSystem() {}
+
+				void Swap(ParticlesSystem& other)
+				{
+					ParticlesSystem temp(other);
+					other = *this;
+					*this = temp;
+				}
+
+				void generate()
+				{
+					for (int j = 0; j < particlesEmiter.size(); j++)
+						for (int i = 0; i < particlesEmiter[j].generators.size(); i++)
+							particlesEmiter[j].generators[i]->generate(&data[j], 0, data[j].countAlive);
+				}
 
 				void Update()
 				{
@@ -98,7 +143,7 @@ namespace Cookie
 						}
 
 						if (newData.size() > 0)
-							shader.Draw(cam, data[j].mesh, data[j].texture, newData);
+							shader->Draw(cam, data[j].mesh, data[j].texture, newData);
 					}
 				}
 			};

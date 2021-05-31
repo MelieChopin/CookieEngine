@@ -110,19 +110,61 @@ void Editor::Loop()
 {
     //Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
     Physics::PhysicsHandle physHandle;
-    game.particlesHandler.particlesSystems.resize(1);
-    
-    Serialization::Load::LoadParticles(game.particlesHandler.particlesSystems[0], game.resources);
-    game.particlesHandler.particlesSystems[0].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(5, 0.55, 5));
-    
-    for (int j = 0; j < game.particlesHandler.particlesSystems[0].particlesEmiter.size(); j++)
-        for (int i = 0; i < game.particlesHandler.particlesSystems[0].particlesEmiter[j].generators.size(); i++)
-            game.particlesHandler.particlesSystems[0].particlesEmiter[j].generators[i]->
-            generate(&game.particlesHandler.particlesSystems[0].data[j], 0,
-                game.particlesHandler.particlesSystems[0].data[j].countAlive);
 
-    game.particlesHandler.particlesSystems[0].name = "death";
+    {
+        /* game.particlesHandler.particlesSystems.push_back(Particles::ParticlesSystem(2, 1));
+         game.particlesHandler.particlesSystems[0].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(5, 20, 5));
+         game.particlesHandler.particlesSystems[0].data[0].mesh = game.resources.meshes["Quad"].get();
+         game.particlesHandler.particlesSystems[0].data[0].texture = game.resources.textures2D["Assets/VFX/Choco.png"].get();
+         game.particlesHandler.particlesSystems[0].data[0].SetIsBIllboard(true);
+         game.particlesHandler.particlesSystems[0].particlesEmiter.resize(1);
+         game.particlesHandler.particlesSystems[0].data[0].countAlive = 1;
+         Particles::PointPositionGenerate point(Cookie::Core::Math::Vec3(0, 0, 0), &game.particlesHandler.particlesSystems[0].trs.TRS);
+         Particles::MassConstGenerate mass;
+         Particles::VelocityConstGenerate velC(Cookie::Core::Math::Vec3(0, -9.81f, 0));
+         Particles::TimeConstGenerate time(10);
+
+         game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators.push_back(&point);
+         game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators.push_back(&time);
+         game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators.push_back(&mass);
+         game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators.push_back(&velC);
+
+         Particles::UpdateVelocity vel;
+         Particles::UpdateTime upTime;
+         //Particles::CollisionWithPlane collision(game.particlesHandler, game.resources);
+         game.particlesHandler.particlesSystems[0].particlesEmiter[0].updates.push_back(&vel);
+         game.particlesHandler.particlesSystems[0].particlesEmiter[0].updates.push_back(&upTime);
+         //game.particlesHandler.particlesSystems[0].particlesEmiter[0].updates.push_back(&collision);
+
+         Particles::ParticlesSystem second(500, 300);
+         second.data[0].mesh = game.resources.meshes["Quad"].get();
+         second.data[0].texture = game.resources.textures2D["Assets/VFX/Smoke.png"].get();
+         second.data[0].SetIsBIllboard(true);
+         Particles::UpdateAlpha alpha;
+         Particles::UpdateTime time2;
+         second.particlesEmiter[0].updates.push_back(&alpha);
+         second.particlesEmiter[0].updates.push_back(&time2);
+
+         game.particlesHandler.particlesSystems[0].data.push_back(second.data[0]);
+         game.particlesHandler.particlesSystems[0].particlesEmiter.push_back(second.particlesEmiter[0]);
+
+         Particles::CreateParticles smoke(game.particlesHandler.particlesSystems[0].data[1], 0.2f, 0.25f, 8);
+         game.particlesHandler.particlesSystems[0].particlesEmiter[0].updates.push_b ack(&smoke);*/
+    }
+
+    //game.particlesHandler.particlesSystems.resize(1);
+    Serialization::Load::LoadParticles(game.resources);
+
+
+    //game.particlesHandler.CreateParticlesWithPrefab(Vec3(5, 0.55, 5), game.resources.particles["death"].get());
+    
+
+    /*game.particlesHandler.particlesSystems[0].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(5, 0.55, 5));
+
+    game.particlesHandler.particlesSystems[0].name = "death";*/
     //Resources::Serialization::Save::SaveParticles(game.particlesHandler.particlesSystems[0]);
+      
+    //game.particlesHandler.particlesSystems[0].generate();
 
     bool isActive = false;
     {
@@ -143,6 +185,7 @@ void Editor::Loop()
     {
         // Present frame
 
+        std::cout << game.particlesHandler.living << "\n";
 
         //Update for 3D Music
         FMOD_VECTOR temp = { cam.pos.x, cam.pos.y, cam.pos.z };
@@ -150,18 +193,11 @@ void Editor::Loop()
         Cookie::Resources::SoundManager::system->update();
 
         //TEMP : TEST FOR 3D
-        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_L) == GLFW_PRESS)
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
         {
-            game.particlesHandler.particlesSystems.resize(1);
-            Cookie::Resources::SoundManager::PlayMusic("Magic.mp3");
-            Serialization::Load::LoadParticles(game.particlesHandler.particlesSystems[0], game.resources);
-            game.particlesHandler.particlesSystems[0].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(5, 0.55, 5));
 
-            for (int j = 0; j < game.particlesHandler.particlesSystems[0].particlesEmiter.size(); j++)
-                for (int i = 0; i < game.particlesHandler.particlesSystems[0].particlesEmiter[j].generators.size(); i++)
-                    game.particlesHandler.particlesSystems[0].particlesEmiter[j].generators[i]->
-                    generate(&game.particlesHandler.particlesSystems[0].data[j], 0,
-                        game.particlesHandler.particlesSystems[0].data[j].countAlive);
+            game.particlesHandler.CreateParticlesWithPrefab(Vec3(5, 0.55, 5), game.resources.particles["death"].get());
+
         }
             
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
