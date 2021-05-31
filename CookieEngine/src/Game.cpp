@@ -85,7 +85,7 @@ void Game::HandleGameplayInputs()
 
         trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, producer.tileSize);			
         Vec3 posTopLeft = trs.pos - trs.scale / 2;
-        scene->map.GiveTilesToBuilding(scene->map.GetTileIndex(posTopLeft), producer);        
+        scene->map.FillOccupiedTiles(scene->map.GetTileIndex(posTopLeft), producer.tileSize, producer.occupiedTiles);
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B])
     {
@@ -96,14 +96,14 @@ void Game::HandleGameplayInputs()
 
         trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, producer.tileSize);
         Vec3 posTopLeft = trs.pos - trs.scale / 2;
-        scene->map.GiveTilesToBuilding(scene->map.GetTileIndex(posTopLeft), producer);
+        scene->map.FillOccupiedTiles(scene->map.GetTileIndex(posTopLeft), producer.tileSize, producer.occupiedTiles);
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_X])
     {
         ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["Resource"].get(), "good");
 
         ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id); 
-        Vec2 tileSize {1, 1};
+        Vec2 tileSize {{1, 1}};
         trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, tileSize);
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
@@ -166,7 +166,7 @@ void Game::InputCancelBuilding()
 }
 void Game::InputValidateBuilding()
 {
-    playerData.workerWhoBuild->StartBuilding(playerData.buildingPos, playerData.indexOfBuildingInWorker);
+    playerData.workerWhoBuild->StartBuilding(scene->map, playerData.buildingPos, playerData.indexOfBuildingInWorker);
 
     playerData.buildingToBuild = nullptr;
     playerData.workerWhoBuild = nullptr;
@@ -228,10 +228,10 @@ void Game::InputMoveSelected()
         Vec3 finalPos = playerData.mousePosInWorld + offsetFromCentroid;
         //pathfind to mousePos + offset
         if (offsetFromCentroid.Length() < OFFSET_MAX_FROM_CENTROID && scene->map.ApplyPathfinding(scene->map.GetTile(trs.pos), scene->map.GetTile(finalPos)))
-            gameplay.componentMove.SetPath(scene->map.GetTile(finalPos), trs);
+            gameplay.componentMove.SetPath(scene->map.GetTile(finalPos));
         //pathfind to mousePos
         else if (scene->map.ApplyPathfinding(scene->map.GetTile(trs.pos), scene->map.GetTile(playerData.mousePosInWorld)))
-            gameplay.componentMove.SetPath(scene->map.GetTile(playerData.mousePosInWorld), trs);
+            gameplay.componentMove.SetPath(scene->map.GetTile(playerData.mousePosInWorld));
         else
             std::cout << "No Path Find\n";
     }
@@ -303,7 +303,7 @@ void Game::InputAddUnit(int index)
 
 void Game::ECSCalls(Render::DebugRenderer& dbg)
 {
-    coordinator.armyHandler->UpdateArmyCoordinators();
+    coordinator.armyHandler->UpdateArmyCoordinators(scene->map);
     resources.UpdateScriptsContent();
     coordinator.ApplyScriptUpdate();
     coordinator.UpdateCGPProducer(scene->map);

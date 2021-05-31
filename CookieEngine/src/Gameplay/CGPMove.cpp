@@ -15,7 +15,7 @@ void CGPMove::UpdatePushedCooldown(Resources::Map& map, ECS::ComponentTransform&
 	{
 		//reset of timer should be remove after test
 		pushedCooldownBeforeReturn = CGPMOVE_CD_BEFORE_RETURN;
-		SetPath(map.GetTile(posBeforePushed), trs);
+		SetPath(map.GetTile(posBeforePushed));
 	}
 }
 void CGPMove::UpdateReachGoalCooldown()
@@ -33,7 +33,7 @@ void CGPMove::UpdateReachGoalCooldown()
 
 }
 
-void CGPMove::SetPath(Resources::Tile& lastWaypoint, ECS::ComponentTransform& trs)
+void CGPMove::SetPath(Resources::Tile& lastWaypoint)
 {
 	waypoints.clear();
 	state = CGPMOVE_STATE::E_MOVING;

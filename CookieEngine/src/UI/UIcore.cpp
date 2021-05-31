@@ -56,6 +56,8 @@ void UIcore::EndFrame()
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(GetDrawData());
 
+#ifdef IMGUI_HAS_VIEWPORT
 	UpdatePlatformWindows();
 	RenderPlatformWindowsDefault();
+#endif
 }

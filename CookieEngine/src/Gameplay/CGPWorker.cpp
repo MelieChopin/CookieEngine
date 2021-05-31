@@ -10,6 +10,7 @@
 using namespace Cookie::Core::Math;
 using namespace Cookie::Gameplay;
 using namespace Cookie::ECS;
+using namespace Cookie::Resources;
 
 
 void CGPWorker::Update(Resources::Map& map, Coordinator& coordinator, int selfId)
@@ -18,7 +19,7 @@ void CGPWorker::Update(Resources::Map& map, Coordinator& coordinator, int selfId
 	//isBuilding
 	if (constructionCountdown > 0)
 	{
-		std::cout << "Worker updating " << constructionCountdown << "\n";
+		//std::cout << "Worker updating " << constructionCountdown << "\n";
 		constructionCountdown -= Core::DeltaTime();
 
 
@@ -28,12 +29,8 @@ void CGPWorker::Update(Resources::Map& map, Coordinator& coordinator, int selfId
 			{
 				Entity& newEntity = coordinator.AddEntity(BuildingInConstruction, coordinator.componentHandler->GetComponentGameplay(selfId).teamName);
 
-				ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
-				CGPProducer& producer   = coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer;
-
-				trs.pos = posBuilding;
-				Vec3 posTopLeft = trs.pos - trs.scale / 2;
-				map.GiveTilesToBuilding(map.GetTileIndex(posTopLeft), producer);
+				coordinator.componentHandler->GetComponentTransform(newEntity.id).pos = posBuilding;
+				coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer.occupiedTiles = occupiedTiles;
 			}
 
 			BuildingInConstruction = nullptr;
@@ -103,7 +100,7 @@ void CGPWorker::SetResource(Core::Math::Vec3& resourcePos, CGPResource& resource
 	resource->nbOfWorkerOnIt++;
 }
 
-void CGPWorker::StartBuilding(Vec3& _posBuilding, int indexInPossibleBuildings)
+bool CGPWorker::StartBuilding(Map& map, Vec3& _posBuilding, int indexInPossibleBuildings)
 {
 	//should be impossible when UI implemented
 	assert(indexInPossibleBuildings < possibleBuildings.size());
@@ -115,7 +112,7 @@ void CGPWorker::StartBuilding(Vec3& _posBuilding, int indexInPossibleBuildings)
 		buildingToAdd->gameplay.cost.costSecondary > income->secondary)
 	{
 		std::cout << "not enough Resources to Build\n";
-		return;
+		return false;
 	}
 
 	income->primary   -= buildingToAdd->gameplay.cost.costPrimary;
@@ -124,4 +121,8 @@ void CGPWorker::StartBuilding(Vec3& _posBuilding, int indexInPossibleBuildings)
 	posBuilding = _posBuilding;
 	BuildingInConstruction = possibleBuildings[indexInPossibleBuildings];
 	needTostartBuilding = true;
+
+	Vec3 posTopLeft = posBuilding - buildingToAdd->transform.scale / 2;
+	map.FillOccupiedTiles(map.GetTileIndex(posTopLeft), buildingToAdd->gameplay.componentProducer.tileSize, occupiedTiles);
+	return true;
 }

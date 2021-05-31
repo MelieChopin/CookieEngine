@@ -67,6 +67,10 @@ void Hierarchy::WindowDisplay()
                 EndPopup();
             }
         }
+
+        NewLine();
+        NewLine();
+        NewLine();
     }
 
     ImGui::End();

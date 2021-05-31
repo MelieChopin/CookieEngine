@@ -70,7 +70,7 @@ namespace Cookie
 			Core::Math::Vec3 GetCenterOfBuilding(Core::Math::Vec3& mousePos, Core::Math::Vec2& buildingNbOfTiles);
 
 			bool isBuildingValid(int indexTopLeft, Core::Math::Vec2& tileSize);
-			void GiveTilesToBuilding(int indexTopLeft, Gameplay::CGPProducer& building);
+			void FillOccupiedTiles(int indexTopLeft, Core::Math::Vec2& tileSize, std::vector<Tile*>& vectorOfOccupiedTiles);
 
 			bool ApplyPathfinding(Tile& tileStart, Tile& tileEnd);
 

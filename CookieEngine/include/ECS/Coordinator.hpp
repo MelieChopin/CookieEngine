@@ -37,8 +37,8 @@ namespace Cookie
 			Gameplay::ArmyHandler* armyHandler      {nullptr};
 			std::vector<Entity*>   selectedEntities;
 
-			Coordinator() {};
-			~Coordinator() {};
+			Coordinator() {}
+			~Coordinator() {}
 
 			//Entity
 			Entity& AddEntity(const int signature, std::string name = std::string("No Name"));

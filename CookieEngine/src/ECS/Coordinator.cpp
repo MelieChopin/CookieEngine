@@ -66,6 +66,7 @@ Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab, std::str
 		ComponentGameplay& gameplay = componentHandler->GetComponentGameplay(newEntity.id);
 		gameplay = prefab->gameplay;
 		gameplay.teamName = teamName;
+		gameplay.trs = &componentHandler->GetComponentTransform(newEntity.id);
 		armyHandler->AddElementToArmy(&gameplay);
 	}
 
@@ -78,7 +79,7 @@ void Coordinator::RemoveEntity(Entity& entity)
 	assert(entityHandler->livingEntities > 0 && "No Entity to remove");
 
 	if (entity.signature & C_SIGNATURE::GAMEPLAY)
-		armyHandler->RemoveElementFromArmy(&componentHandler->GetComponentGameplay(entity.id));
+		armyHandler->RemoveElementFromArmy(&componentHandler->GetComponentGameplay(entity.id), entity.name);
 
 	//Reset Components
 	componentHandler->SubComponentToDefault(entity.signature, entity.id);
@@ -240,7 +241,7 @@ void Coordinator::ApplyGameplayUpdateCountdownProducer(Map& map)
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::PRODUCER))
-			componentHandler->GetComponentGameplay(i).componentProducer.UpdateCountdown(map, *this, entityHandler->entities[i].id);
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentProducer.UpdateCountdown(map, *this, entityHandler->entities[i].id);
 }
 
 //CGP_Worker
@@ -253,7 +254,7 @@ void Coordinator::ApplyGameplayUpdateWorker(Map& map)
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::WORKER))
-			componentHandler->GetComponentGameplay(i).componentWorker.Update(map , *this, entityHandler->entities[i].id);
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentWorker.Update(map , *this, entityHandler->entities[i].id);
 }
 
 //CGP_Move
@@ -274,28 +275,28 @@ void Coordinator::ApplyGameplayUpdatePushedCooldown(Resources::Map& map)
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
-			componentHandler->GetComponentGameplay(i).componentMove.UpdatePushedCooldown(map, componentHandler->GetComponentTransform(i));
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove.UpdatePushedCooldown(map, componentHandler->GetComponentTransform(entityHandler->entities[i].id));
 }
 void Coordinator::ApplyGameplayUpdateReachGoalCooldown()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
-			componentHandler->GetComponentGameplay(i).componentMove.UpdateReachGoalCooldown();
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove.UpdateReachGoalCooldown();
 }
 void Coordinator::ApplyGameplayMoveTowardWaypoint()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
-			componentHandler->GetComponentGameplay(i).componentMove.MoveTowardWaypoint(componentHandler->GetComponentTransform(i));
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove.MoveTowardWaypoint(componentHandler->GetComponentTransform(entityHandler->entities[i].id));
 }
 void Coordinator::ApplyGameplayPosPrediction()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
-			componentHandler->GetComponentGameplay(i).componentMove.PositionPrediction();
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove.PositionPrediction();
 }
 void Coordinator::ApplyGameplayResolveCollision()
 {
@@ -306,8 +307,8 @@ void Coordinator::ApplyGameplayResolveCollision()
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
 		{
 
-			CGPMove& cgpMoveSelf = componentHandler->GetComponentGameplay(i).componentMove;
-			ComponentTransform& trsSelf = componentHandler->GetComponentTransform(i);
+			CGPMove& cgpMoveSelf = componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove;
+			ComponentTransform& trsSelf = componentHandler->GetComponentTransform(entityHandler->entities[i].id);
 
 			for (int j = 0; j < entitiesToCheck.size(); ++j)
 			{
@@ -362,7 +363,7 @@ void Coordinator::ApplyGameplayDrawPath(DebugRenderer& debug)
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
-			componentHandler->GetComponentGameplay(i).componentMove.DrawPath(debug, componentHandler->GetComponentTransform(i));
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove.DrawPath(debug, componentHandler->GetComponentTransform(entityHandler->entities[i].id));
 }
 
 //CGP_Attack
@@ -377,7 +378,7 @@ void Coordinator::ApplyGameplayCheckEnemyInRange()
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::ATTACK))
 		{
-			CGPAttack& cgpAttack = componentHandler->GetComponentGameplay(i).componentAttack;
+			CGPAttack& cgpAttack = componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentAttack;
 			cgpAttack.target = nullptr;
 			float smallestDist = cgpAttack.attackRange;
 
@@ -387,18 +388,18 @@ void Coordinator::ApplyGameplayCheckEnemyInRange()
 					componentHandler->GetComponentGameplay(entityHandler->entities[i].id).teamName != componentHandler->GetComponentGameplay(entityHandler->entities[j].id).teamName &&
 					CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[j].id).signatureGameplay, CGP_SIGNATURE::LIVE))
 				{
-					float possibleNewDist = (componentHandler->GetComponentTransform(i).pos - componentHandler->GetComponentTransform(j).pos).Length();
+					float possibleNewDist = (componentHandler->GetComponentTransform(entityHandler->entities[i].id).pos - componentHandler->GetComponentTransform(entityHandler->entities[j].id).pos).Length();
 
 					if (possibleNewDist < smallestDist)
 					{
 						smallestDist = possibleNewDist;
-						cgpAttack.target = &componentHandler->GetComponentGameplay(j).componentLive;
+						cgpAttack.target = &componentHandler->GetComponentGameplay(entityHandler->entities[j].id).componentLive;
 					}
 				}
 
 			if (CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
 			{
-				CGPMove& cgpMove = componentHandler->GetComponentGameplay(i).componentMove;
+				CGPMove& cgpMove = componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove;
 
 				//stop mvt
 				if (cgpMove.state == CGPMOVE_STATE::E_MOVING && cgpAttack.target != nullptr)
@@ -415,6 +416,6 @@ void Coordinator::ApplyGameplayAttack()
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::GAMEPLAY) && 
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::ATTACK))
-			componentHandler->GetComponentGameplay(i).componentAttack.Attack();
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentAttack.Attack();
 }
 

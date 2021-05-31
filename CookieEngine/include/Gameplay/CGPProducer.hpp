@@ -25,6 +25,7 @@ namespace Cookie
 		{
 		public:
 			Income*							income {nullptr};
+			int								supplyGiven {0};
 			std::vector<Resources::Prefab*>	possibleUnits;
 			std::vector<Resources::Prefab*> queueOfUnits;
 			float                           currentCountdown {0};
@@ -55,6 +56,7 @@ namespace Cookie
 
 			bool AddUnitToQueue(int indexInPossible);
 			void RemoveUnitFromQueue(int indexInQueue);
+
 		};
 	}
 }

@@ -149,14 +149,17 @@ bool Map::isBuildingValid(int indexTopLeft, Vec2& tileSize)
 
 	return true;
 }
-void Map::GiveTilesToBuilding(int indexTopLeft, CGPProducer& building)
+
+void Map::FillOccupiedTiles(int indexTopLeft, Vec2& tileSize, std::vector<Tile*>& vectorOfOccupiedTiles)
 {
-	for(int i = 0; i < building.tileSize.x; ++i)
-		for (int j = 0; j < building.tileSize.y; ++j)
+	vectorOfOccupiedTiles.clear();
+
+	for (int i = 0; i < tileSize.x; ++i)
+		for (int j = 0; j < tileSize.y; ++j)
 		{
 			Tile* currentTile = &tiles[indexTopLeft + i + tilesNb.x * j];
 			currentTile->isObstacle = true;
-			building.occupiedTiles.push_back(currentTile);
+			vectorOfOccupiedTiles.push_back(currentTile);
 		}
 }
 
