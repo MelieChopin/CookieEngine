@@ -19,7 +19,7 @@ namespace Cookie
 
 	namespace Gameplay
 	{
-		class AIBehavior;
+		struct AIBehavior;
 	}
 
 	namespace Render

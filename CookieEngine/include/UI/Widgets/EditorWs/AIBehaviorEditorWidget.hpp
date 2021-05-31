@@ -4,32 +4,30 @@
 #include "UIwidgetBases.hpp"
 #include "AIBehavior.hpp"
 
-namespace std { using string = basic_string<char, char_traits<char>, allocator<char>>; }
-namespace Cookie::Render { class Renderer; }
+namespace Cookie::Resources { class ResourcesManager; }
+namespace Cookie::Gameplay	{ struct AIStep; }
 
 
-namespace Cookie
+namespace Cookie::UIwidget
 {
-	namespace Resources
+	class AIBehaviorEditor final : public WItemBase
 	{
-		class ResourcesManager;
-	}
+		Cookie::Resources::ResourcesManager& resources;
 
-	namespace UIwidget
-	{
-		class AIBehaviorEditor final : public WItemBase
-		{
-			Resources::ResourcesManager& resources;
-			Gameplay::AIBehavior		 behaviorToEdit;
+		Cookie::Gameplay::AIBehavior		 behaviorToEdit;
 
-			Gameplay::AIStep*            selectedStep {nullptr};
-			bool			 			 isEditing    {false};
+		Cookie::Gameplay::AIStep*            selectedStep		= nullptr;
+		bool			 					 isEditing			= false;
 
-		public:
-			inline AIBehaviorEditor(Resources::ResourcesManager& _resources) : WItemBase("AIBehavior editor"), resources(_resources) {}
-			void WindowDisplay() override;
-		};
-	}
+	public:
+		inline AIBehaviorEditor(Resources::ResourcesManager& _resources) 
+			: WItemBase	("AIBehavior editor"), 
+			  resources	(_resources)
+		{}
+		
+		
+		void WindowDisplay() override;
+	};
 }
 
 #endif

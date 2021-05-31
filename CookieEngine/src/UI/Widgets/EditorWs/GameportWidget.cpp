@@ -24,8 +24,10 @@ bool GamePort::BeginWindow(int windowFlags)
 
 void GamePort::WindowDisplay()
 {
-	TryBeginWindow(ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus)
+	TryBeginWindow(ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus)
 	{
+		BeginChild("UnmovingContainer", {(float)game.renderer.window.width, (float)game.renderer.window.height}, false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove);
+
 		ImVec2 gameportPos;
 
 		gameportPos.x = GetWindowPos().x + GetCursorPosX();
@@ -37,6 +39,8 @@ void GamePort::WindowDisplay()
 		ImGui::Image(static_cast<ImTextureID>(game.frameBuffer.shaderResource), { (float)game.renderer.window.width, (float)game.renderer.window.height });
 			
 		game.scene->uiScene.RenderLayout();
+
+		EndChild();
 	}
 
 	ImGui::End();
