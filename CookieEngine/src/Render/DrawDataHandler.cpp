@@ -40,6 +40,15 @@ void DrawDataHandler::InitCBuffer()
 	Render::CreateBuffer(&buffer, sizeof(VS_CONSTANT_BUFFER), &CBuffer);
 }
 
+void DrawDataHandler::Init(const Game& game)
+{
+	coordinator			= &game.coordinator;
+	player				= &game.playerData;
+
+	depthStencilView	= game.renderer.geomPass.depthBuffer;
+	CamCBuffer			= game.renderer.geomPass.CBuffer;
+}
+
 /*========================= REALTIME METHODS =========================*/
 
 void Frustrum::MakeFrustrum(const Camera& cam)
@@ -117,37 +126,24 @@ void Frustrum::MakeFrustrum(const Camera& cam)
 	corners[5] = farCenter - (camUp * (heightFar / 2.0f)) + (camRight * (widthFar / 2.0f));
 	corners[6] = farCenter + (camUp * (heightFar / 2.0f)) - (camRight * (widthFar / 2.0f));
 	corners[7] = farCenter + (camUp * (heightFar / 2.0f)) + (camRight * (widthFar / 2.0f));
-
-	for (int i = 0; i < corners.size(); i++)
-	{
-		AABB[0].x = std::min(corners[i].x, AABB[0].x);
-		AABB[0].y = std::min(corners[i].y, AABB[0].y);
-		AABB[0].z = std::min(corners[i].z, AABB[0].z);
-
-		AABB[1].x = std::max(corners[i].x, AABB[1].x);
-		AABB[1].y = std::max(corners[i].y, AABB[1].y);
-		AABB[1].z = std::max(corners[i].z, AABB[1].z);
-	}
-
 }
 
 void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 {
-	currentCam = cam;
+	currentCam			= cam;
 	frustrum.MakeFrustrum(*cam);
-	depthStencilView	= game.renderer.geomPass.depthBuffer;
-	CamCBuffer			= game.renderer.geomPass.CBuffer;
-	player				= &game.playerData;
 
-	const ECS::EntityHandler& entityHandler = *game.coordinator.entityHandler;
-	ECS::ComponentHandler& components = *game.coordinator.componentHandler;
+	const Coordinator&			coord			= *coordinator;
+	const ECS::EntityHandler&	entityHandler	= *coord.entityHandler;
+	ECS::ComponentHandler&		components		= *coord.componentHandler;
+
 	bool cull = false;
 
 	mapDrawer.Set(game.scene->map);
 
 	for (int i = 0; i < entityHandler.livingEntities; ++i)
 	{
-		Entity iEntity = entityHandler.entities[i];
+		const Entity& iEntity = entityHandler.entities[i];
 		if ((iEntity.signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL)) == (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
 		{
 			ECS::ComponentModel& model = components.GetComponentModel(iEntity.id);
@@ -186,15 +182,15 @@ void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 			AABB[1].x = std::max(modelMax.x, AABB[1].x);
 			AABB[1].y = std::max(modelMax.y, AABB[1].y);
 			AABB[1].z = std::max(modelMax.z, AABB[1].z);
-
+			 
 			models.push_back(model);
 			matrices.push_back(trs);
 		}
 	}
 
-	for (int i = 0; i < game.coordinator.selectedEntities.size(); ++i)
+	for (int i = 0; i < coord.selectedEntities.size(); ++i)
 	{
-		Entity iEntity = *game.coordinator.selectedEntities[i];
+		Entity& iEntity = *coord.selectedEntities[i];
 		if ((iEntity.signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL)) == (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
 		{
 			ECS::ComponentModel& model = components.GetComponentModel(iEntity.id);
@@ -273,6 +269,4 @@ void DrawDataHandler::Clear()
 	selectedGameplays.clear();
 	AABB[0] = { std::numeric_limits<float>().max(),std::numeric_limits<float>().max() ,std::numeric_limits<float>().max() };
 	AABB[1] = { -std::numeric_limits<float>().max(), -std::numeric_limits<float>().max() , -std::numeric_limits<float>().max() };
-	frustrum.AABB[0] = { std::numeric_limits<float>().max(),std::numeric_limits<float>().max() ,std::numeric_limits<float>().max() };
-	frustrum.AABB[1] = { -std::numeric_limits<float>().max(),-std::numeric_limits<float>().max() ,-std::numeric_limits<float>().max() };
 }

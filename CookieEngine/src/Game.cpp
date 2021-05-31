@@ -21,6 +21,7 @@ Game::Game():
 
     Physics::PhysicsHandle::Init();
     Core::UIcore::FinishInit(renderer);
+    renderer.drawData.Init(*this);
 }
 
 Game::~Game()
