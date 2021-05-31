@@ -3,6 +3,8 @@
 
 #include "ComponentHandler.hpp"
 
+#include "Prefab.hpp"
+
 #include <imgui.h>
 
 using namespace Cookie::UIwidget;
@@ -21,7 +23,7 @@ void Gamespector::WindowDisplay()
 
 			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::LIVE)
 			{
-				const unsigned int rectNums = GetContentRegionAvail().x / 10;
+				const unsigned int rectNums = GetContentRegionAvail().x / 5;
 				const unsigned int litRects = (rectNums * sEntityGameplayComp.componentLive.lifeCurrent) / sEntityGameplayComp.componentLive.lifeMax;
 
 				Cookie::Core::Math::Vec3 RGBc;
@@ -32,14 +34,25 @@ void Gamespector::WindowDisplay()
 				for (unsigned int i = 0; i < rectNums; i++)
 				{
 					if (i <= litRects)
-						GetWindowDrawList()->AddRectFilled({ 0, 0 }, { 10, 20 }, color);
+						GetWindowDrawList()->AddRectFilled({ 0, 0 }, { 5, 10 }, color);
 					else
-						GetWindowDrawList()->AddRect({ 0, 0 }, { 10, 20 }, color);
+						GetWindowDrawList()->AddRect({ 0, 0 }, { 5, 10 }, color);
 
 					SameLine();
 				}
 
 				NewLine();
+			}
+
+			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::MOVE)
+			{
+				if (sEntityGameplayComp.componentMove.reachGoalCountdown > 0)
+					Text("Reaching destination in %.2f", sEntityGameplayComp.componentMove.reachGoalCountdown);
+			}
+
+			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::PRODUCER)
+			{
+
 			}
 		}
 	}

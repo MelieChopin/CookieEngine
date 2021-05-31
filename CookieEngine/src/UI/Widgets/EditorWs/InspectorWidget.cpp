@@ -141,6 +141,11 @@ void Inspector::ModelInterface()
 
         ResourceMapExplorer<Texture>("metallic-rough texture", "##MRSELECT", resources.textures2D, modelComp.metallicRoughness);
 
+
+        ImGui::Custom::TextSnip("In-Game icon", 9); SameLine(); Text(":"); SameLine(100);
+
+        ResourceMapExplorer<Texture>("In-Game icon", "##IGICSELECTOR", resources.icons, modelComp.icon);
+
 //====================//
 
         NewLine();
