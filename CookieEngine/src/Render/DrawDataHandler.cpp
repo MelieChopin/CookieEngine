@@ -182,9 +182,18 @@ void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 			AABB[1].x = std::max(modelMax.x, AABB[1].x);
 			AABB[1].y = std::max(modelMax.y, AABB[1].y);
 			AABB[1].z = std::max(modelMax.z, AABB[1].z);
-			 
-			models.push_back(model);
-			matrices.push_back(trs);
+
+			ECS::ComponentGameplay& iGameplay = components.GetComponentGameplay(iEntity.id);
+
+			//if (iGameplay.signatureGameplay & (CGP_SIGNATURE::PRODUCER | CGP_SIGNATURE::WORKER))
+			//{
+			//
+			//}
+			//else
+			{
+				models.push_back(model);
+				matrices.push_back(trs);
+			}
 		}
 	}
 
@@ -200,30 +209,8 @@ void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 				continue;
 			}
 
-			Core::Math::Mat4& trs = components.GetComponentTransform(iEntity.id).TRS;
-
-			Vec4 modelMin = trs * Core::Math::Vec4(model.mesh->AABBMin, 1.0f);
-			Vec4 modelMax = trs * Core::Math::Vec4(model.mesh->AABBMax, 1.0f);
-
-			for (int j = 0; j < frustrum.planes.size(); j++)
-			{
-
-				if ((frustrum.planes[j].Dot(modelMin) + frustrum.planes[j].w) < cullEpsilon && (frustrum.planes[j].Dot(modelMax) + frustrum.planes[j].w) < cullEpsilon)
-				{
-					cull = true;
-					break;
-				}
-
-			}
-
-			if (cull)
-			{
-				cull = false;
-				continue;
-			}
-
 			selectedModels.push_back(model);
-			selectedMatrices.push_back(trs);
+			selectedMatrices.push_back(components.GetComponentTransform(iEntity.id).TRS);
 			selectedGameplays.push_back(components.GetComponentGameplay(iEntity.id));
 		}
 	}
