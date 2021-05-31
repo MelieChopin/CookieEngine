@@ -79,13 +79,19 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 					modelJ[modelJ.size() - 1]["texture"]["metallic"] = model.metallicRoughness->name;
 				else
 					modelJ[modelJ.size() - 1]["texture"]["metallic"] = 0;
+
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name != model.icon->name)
+					modelJ[modelJ.size() - 1]["texture"]["icon"] = model.icon->name;
+				else
+					modelJ[modelJ.size() - 1]["texture"]["icon"] = 0;
 			}
 			else
 			{
 				modelJ += json{ { "model", model.mesh != nullptr ? model.mesh->name : "NO MESH" },
 								{ "texture", { { "albedo" , model.albedo != nullptr ? model.albedo->name : "NO ALBEDO"},
 											   { "normal" , model.normal != nullptr ? model.normal->name : "NO NORMAL"}, 
-											   { "metallic" , model.metallicRoughness != nullptr ? model.metallicRoughness->name : "NO METALLIC"}} } };
+											   { "metallic" , model.metallicRoughness != nullptr ? model.metallicRoughness->name : "NO METALLIC"},
+											   { "icon" , model.icon != nullptr ? model.icon->name : "NO ICON"}} } };
 				
 			}
 		}
@@ -283,6 +289,11 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const Prefab* const & pr
 			 model["Texture"]["metallic"] = prefab->model.metallicRoughness->name;
 		 else
 			 model["Texture"]["metallic"] = 0;
+
+		 if (prefab->model.icon != nullptr)
+			 model["Texture"]["icon"] = prefab->model.icon->name;
+		 else
+			 model["Texture"]["icon"] = 0;
 	 }
 
 	 if (prefab->signature & C_SIGNATURE::PHYSICS)
@@ -764,6 +775,15 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 else if (entity.entities[i].namePrefab != "NONE")
 				component.GetComponentModel(entity.entities[i].id).metallicRoughness =
 				resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name].get();
+
+			 if (model["texture"]["icon"].is_string())
+			 {
+				 if (model["texture"]["icon"].get<std::string>() != "NO ICON")
+					 component.GetComponentModel(entity.entities[i].id).icon = resourcesManager.icons[(model["texture"]["icon"].get<std::string>())].get();
+			 }
+			 else if (entity.entities[i].namePrefab != "NONE")
+				 component.GetComponentModel(entity.entities[i].id).icon =
+				 resourcesManager.icons[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name].get();
 		 
 		 }
 		 if (entity.entities[i].signature & C_SIGNATURE::PHYSICS)
@@ -986,6 +1006,16 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 				 {
 					 std::string name = js["Model"]["Texture"]["metallic"];
 					 CDebug.Error(std::string("Metallic " + name + " not found!").c_str());
+				 }
+			 }
+			 if (js["Model"]["Texture"]["icon"].is_string())
+			 {
+				 if (resourcesManager.icons.find(js["Model"]["Texture"]["icon"]) != resourcesManager.icons.end())
+					 newPrefab.model.icon = resourcesManager.icons[js["Model"]["Texture"]["icon"]].get();
+				 else
+				 {
+					 std::string name = js["Model"]["Texture"]["icon"];
+					 CDebug.Error(std::string("icon " + name + " not found!").c_str());
 				 }
 			 }
 		 }
