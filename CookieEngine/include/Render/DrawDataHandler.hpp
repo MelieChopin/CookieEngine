@@ -20,6 +20,7 @@ namespace Cookie
 
 	namespace ECS
 	{
+		class Coordinator;
 		class ComponentModel;
 		class ComponentGameplay;
 	}
@@ -39,7 +40,6 @@ namespace Cookie
 			std::array<Core::Math::Vec4, 6> planes;
 			Core::Math::Vec3				centroid;
 			std::array<Core::Math::Vec3, 8> corners;
-			std::array<Core::Math::Vec3, 2> AABB;
 
 			void MakeFrustrum(const Camera& cam);
 		};
@@ -47,8 +47,10 @@ namespace Cookie
 		class DrawDataHandler
 		{
 			public:
-				ID3D11Buffer* CBuffer{nullptr};
-				Frustrum frustrum;
+				const ECS::Coordinator*				coordinator	{nullptr};
+				ID3D11Buffer*						CBuffer		{nullptr};
+				Frustrum							frustrum;
+
 				std::vector<ECS::ComponentModel>	models;
 				std::vector<Core::Math::Mat4>		matrices;
 				std::array<Core::Math::Vec3, 2>		AABB;
@@ -72,6 +74,7 @@ namespace Cookie
 				DrawDataHandler();
 				~DrawDataHandler();
 
+				void Init(const Game& game);
 				void SetDrawData(const Camera* cam, const Game& game);
 				void Draw(int _i = 0);
 				void Clear();

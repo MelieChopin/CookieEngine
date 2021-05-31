@@ -21,6 +21,7 @@ Game::Game():
 
     Physics::PhysicsHandle::Init();
     Core::UIcore::FinishInit(renderer);
+    renderer.drawData.Init(*this);
 }
 
 Game::~Game()
@@ -62,8 +63,9 @@ void Game::Update()
     renderer.SetBackBuffer();
 }
 
-void Game::CalculateMousePosInWorld(Render::FreeFlyCam& cam)
+void Game::CalculateMousePosInWorld()
 {
+    const Render::Camera& cam = *scene->camera;
     Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
     rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, { fwdRay.x,fwdRay.y,fwdRay.z });
     RaycastInfo raycastInfo;
@@ -84,7 +86,7 @@ void Game::HandleGameplayInputs()
 
         trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, producer.tileSize);			
         Vec3 posTopLeft = trs.pos - trs.scale / 2;
-        scene->map.GiveTilesToBuilding(scene->map.GetTileIndex(posTopLeft), producer);        
+        scene->map.FillOccupiedTiles(scene->map.GetTileIndex(posTopLeft), producer.tileSize, producer.occupiedTiles);
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B])
     {
@@ -95,14 +97,14 @@ void Game::HandleGameplayInputs()
 
         trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, producer.tileSize);
         Vec3 posTopLeft = trs.pos - trs.scale / 2;
-        scene->map.GiveTilesToBuilding(scene->map.GetTileIndex(posTopLeft), producer);
+        scene->map.FillOccupiedTiles(scene->map.GetTileIndex(posTopLeft), producer.tileSize, producer.occupiedTiles);
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_X])
     {
         ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["Resource"].get(), "good");
 
         ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id); 
-        Vec2 tileSize {1, 1};
+        Vec2 tileSize {{1, 1}};
         trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, tileSize);
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
@@ -165,7 +167,7 @@ void Game::InputCancelBuilding()
 }
 void Game::InputValidateBuilding()
 {
-    playerData.workerWhoBuild->StartBuilding(playerData.buildingPos, playerData.indexOfBuildingInWorker);
+    playerData.workerWhoBuild->StartBuilding(scene->map, playerData.buildingPos, playerData.indexOfBuildingInWorker);
 
     playerData.buildingToBuild = nullptr;
     playerData.workerWhoBuild = nullptr;
@@ -227,10 +229,10 @@ void Game::InputMoveSelected()
         Vec3 finalPos = playerData.mousePosInWorld + offsetFromCentroid;
         //pathfind to mousePos + offset
         if (offsetFromCentroid.Length() < OFFSET_MAX_FROM_CENTROID && scene->map.ApplyPathfinding(scene->map.GetTile(trs.pos), scene->map.GetTile(finalPos)))
-            gameplay.componentMove.SetPath(scene->map.GetTile(finalPos), trs);
+            gameplay.componentMove.SetPath(scene->map.GetTile(finalPos));
         //pathfind to mousePos
         else if (scene->map.ApplyPathfinding(scene->map.GetTile(trs.pos), scene->map.GetTile(playerData.mousePosInWorld)))
-            gameplay.componentMove.SetPath(scene->map.GetTile(playerData.mousePosInWorld), trs);
+            gameplay.componentMove.SetPath(scene->map.GetTile(playerData.mousePosInWorld));
         else
             std::cout << "No Path Find\n";
     }
@@ -302,7 +304,7 @@ void Game::InputAddUnit(int index)
 
 void Game::ECSCalls(Render::DebugRenderer& dbg)
 {
-    coordinator.armyHandler->UpdateArmyCoordinators();
+    coordinator.armyHandler->UpdateArmyCoordinators(scene->map);
     resources.UpdateScriptsContent();
     coordinator.ApplyScriptUpdate();
     coordinator.UpdateCGPProducer(scene->map);
@@ -321,14 +323,39 @@ void Game::SetScene(const std::shared_ptr<Resources::Scene>& _scene)
 
     scene->camera = std::make_shared<Render::GameCam>();
 
-    scene->camera->SetProj(110.f, renderer.window.width, renderer.window.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+    scene->camera->SetProj(60.f, renderer.window.width, renderer.window.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     scene->camera->pos = { 0.f , 20.0f,15.0f };
     scene->camera->rot = { Core::Math::ToRadians(80.0f) ,0.0f,0.0f };
     scene->camera->ResetPreviousMousePos();
-    scene->camera->mapClampX = {-scene->map.trs.scale.x*0.5f,scene->map.trs.scale.x * 0.5f};
-    scene->camera->mapClampZ = {-scene->map.trs.scale.z*0.5f,scene->map.trs.scale.z * 0.5f};
-    //scene->camera->Update();
+    scene->camera->ForceUpdate();
+    SetCamClampFromMap();
     scene->camera->Deactivate();
+}
+
+void Game::SetCamClampFromMap()
+{
+    Vec3 middle = scene->camera->ScreenPointToWorldDir({ { 0.0f,0.0f } });
+    Vec3 UpperRight = scene->camera->ScreenPointToWorldDir({ { 1.0f,1.0f } });
+    Vec3 DownLeft = scene->camera->ScreenPointToWorldDir({ { -1.0f,-1.0f } });
+
+    float t = (scene->camera->pos.y) / middle.y;
+    middle = scene->camera->pos - middle * t;
+    t = (scene->camera->pos.y) / UpperRight.y;
+    UpperRight = scene->camera->pos - UpperRight * t;
+    t = (scene->camera->pos.y) / DownLeft.y;
+    DownLeft = scene->camera->pos - DownLeft * t;
+
+    float width = UpperRight.x - DownLeft.x;
+    if (width > scene->map.trs.scale.x)
+        width = scene->map.trs.scale.x;
+
+    /* going forward is in the negative z */
+    float depth = DownLeft.z - UpperRight.z;
+    if (depth > scene->map.trs.scale.z)
+        depth = scene->map.trs.scale.z;
+
+    scene->camera->mapClampX = {{ -scene->map.trs.scale.x * 0.5f + (width * 0.5f),scene->map.trs.scale.x * 0.5f - (width * 0.5f) } };
+    scene->camera->mapClampZ = {{ -scene->map.trs.scale.z * 0.5f + (depth * 0.5f), scene->map.trs.scale.z * 0.5f - (depth * 0.5f)} };
 }
 
 void Game::TryResizeWindow()

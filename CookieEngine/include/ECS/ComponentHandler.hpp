@@ -44,7 +44,11 @@ namespace Cookie
 
 
 		public:
-			ComponentHandler() {}
+			ComponentHandler()
+			{
+				for (int i = 0; i < MAX_ENTITIES; ++i)
+					componentGameplays[i].trs = &componentTransforms[i];
+			}
 			~ComponentHandler() {}
 
 			inline void AddComponent(Entity& entity, int signature) noexcept;

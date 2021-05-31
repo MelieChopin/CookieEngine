@@ -141,6 +141,11 @@ void Inspector::ModelInterface()
 
         ResourceMapExplorer<Texture>("metallic-rough texture", "##MRSELECT", resources.textures2D, modelComp.metallicRoughness);
 
+
+        ImGui::Custom::TextSnip("In-Game icon", 9); SameLine(); Text(":"); SameLine(100);
+
+        ResourceMapExplorer<Texture>("In-Game icon", "##IGICSELECTOR", resources.icons, modelComp.icon);
+
 //====================//
 
         NewLine();
@@ -490,8 +495,10 @@ void Inspector::GameplayInterface()
                     gameplayComp.RemoveComponent(CGP_SIGNATURE::LIVE);
 
 
-                DragFloat("##LIFE",  &gameplayComp.componentLive.lifeCurrent,  1.f, NULL, NULL, "Life: %.0f" );
-                DragFloat("##ARMOR", &gameplayComp.componentLive.armor, 1.f, NULL, NULL, "Armor: %.0f");
+                DragFloat("##LIFEMAX",  &gameplayComp.componentLive.lifeMax,     1.f, NULL, NULL,                               "Max life: %.0f");
+                DragFloat("##LIFE",     &gameplayComp.componentLive.lifeCurrent, 1.f,    0, gameplayComp.componentLive.lifeMax, "Life: %.0f" );
+                
+                DragFloat("##ARMOR",    &gameplayComp.componentLive.armor,       1.f, NULL, NULL, "Armor: %.0f");
 
                 TreePop();
                 NewLine();

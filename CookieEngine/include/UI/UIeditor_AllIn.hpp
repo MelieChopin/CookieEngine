@@ -3,6 +3,7 @@
 
 #include "UIeditor.hpp"
 
+#include "Widgets/EditorWs/AIBehaviorEditorWidget.hpp"
 #include "Widgets/EditorWs/ConsoleWidget.hpp"
 #include "Widgets/EditorWs/FileExplorerWidget.hpp"
 #include "Widgets/EditorWs/GameportWidget.hpp"

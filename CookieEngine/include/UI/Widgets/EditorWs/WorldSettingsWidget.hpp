@@ -4,7 +4,6 @@
 #include "UIwidgetBases.hpp"
 
 namespace Cookie::Resources { class Scene; class ResourceManager; }
-
 namespace Cookie::Render	{ struct LightsArray; class SkyBox; }
 
 

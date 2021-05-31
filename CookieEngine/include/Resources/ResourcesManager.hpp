@@ -18,6 +18,11 @@ namespace Cookie
 		class Entity;
 	}
 
+	namespace Gameplay
+	{
+		struct AIBehavior;
+	}
+
 	namespace Render
 	{
 		class Renderer;
@@ -41,14 +46,15 @@ namespace Cookie
 		class ResourcesManager
 		{
 			public:
-				std::unordered_map<std::string, std::unique_ptr<Mesh>>								meshes;
-				std::unordered_map<std::string, std::unique_ptr<Texture>>							textures2D;
-				std::unordered_map<std::string, std::unique_ptr<Texture>>							skyboxes;
-				std::unordered_map<std::string, std::unique_ptr<Texture>>							icons;
-				std::unordered_map<std::string, std::unique_ptr<Script>>							scripts;
-				std::unordered_map<std::string, std::unique_ptr<Prefab>>							prefabs;
-				std::unordered_map<std::string, std::unique_ptr<Sound>>								sounds;
-				std::unordered_map<std::string, std::unique_ptr<Particles::ParticlesPrefab>>		particles;
+				std::unordered_map<std::string, std::unique_ptr<Mesh>>					meshes;
+				std::unordered_map<std::string, std::unique_ptr<Texture>>				textures2D;
+				std::unordered_map<std::string, std::unique_ptr<Texture>>				skyboxes;
+				std::unordered_map<std::string, std::unique_ptr<Texture>>				icons;
+				std::unordered_map<std::string, std::unique_ptr<Script>>				scripts;
+				std::unordered_map<std::string, std::unique_ptr<Prefab>>				prefabs;
+				std::unordered_map<std::string, std::unique_ptr<Sound>>					sounds;
+				std::unordered_map<std::string, std::unique_ptr<Gameplay::AIBehavior>>	aiBehaviors;
+				std::unordered_map<std::string, std::unique_ptr<Particles::ParticlesPrefab>> particles;
 				
 			private:
 				void SearchForAssets(const fs::path& path, std::vector<std::string>& gltfFiles);

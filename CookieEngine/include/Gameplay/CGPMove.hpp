@@ -58,7 +58,7 @@ namespace Cookie
 			void UpdatePushedCooldown(Resources::Map& map, ECS::ComponentTransform& trs);
 			void UpdateReachGoalCooldown();
 
-			void SetPath(Resources::Tile& lastWaypoint, ECS::ComponentTransform& trs);
+			void SetPath(Resources::Tile& lastWaypoint);
 			
 			void MoveTowardWaypoint(ECS::ComponentTransform& trs);
 			

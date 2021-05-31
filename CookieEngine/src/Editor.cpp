@@ -53,10 +53,10 @@ Editor::Editor()
     editorUI.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
     
     editorUI.AddWItem(new UIwidget::TextureEditor(game.resources), 1);
-    editorUI.AddWItem(new UIwidget::GameUIeditor(game.renderer.window, game.scene), 1);
+    editorUI.AddWItem(new UIwidget::AIBehaviorEditor(game.resources), 1);
+    editorUI.AddWItem(new UIwidget::GameUIeditor(game), 1);
     editorUI.AddWItem(new UIwidget::SoundOrchestrator(), 1);
     
-    editorUI.AddWItem(new UIwidget::GamePort(isPlaying, game), 2);
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
     editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
     editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.scene.get()->lights, game.skyBox, game.resources), 2);
@@ -68,6 +68,7 @@ Editor::Editor()
 
     UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.resources, isPlaying);
     editorUI.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, editorFBO, &cam, game.coordinator, selectedEntity));
+    editorUI.AddWindow(new UIwidget::GamePort(isPlaying, game));
 
     InitEditComp();
 
@@ -220,7 +221,7 @@ void Editor::Loop()
 
             if (!ImGui::GetIO().MouseDownDuration[0])
             {
-                Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDir() * cam.camFar;
+                Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDirClamp() * cam.camFar;
                 rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, { fwdRay.x,fwdRay.y,fwdRay.z });
                 physHandle.editWorld->raycast(ray, this);
             }
@@ -247,12 +248,12 @@ void Editor::Loop()
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
         
-        game.CalculateMousePosInWorld(cam);
+        game.CalculateMousePosInWorld();
         game.HandleGameplayInputs();
         game.ECSCalls(dbgRenderer);
 
-        game.coordinator.armyHandler->Debug();
-        game.coordinator.entityHandler->Debug();
+        //game.coordinator.armyHandler->Debug();
+        //game.coordinator.entityHandler->Debug();
 
 		if (isActive)
             game.particlesHandler.Update();

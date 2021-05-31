@@ -16,7 +16,7 @@ Toolbar::Toolbar(Cookie::Resources::ResourcesManager& _resources, bool& _isPlayi
 					 _resources.icons["Assets/EditorUIcons/rotate.ico"].get(),
 			         _resources.icons["Assets/EditorUIcons/zoom.ico"].get(),
 			         _resources.icons["Assets/EditorUIcons/play.ico"].get(),
-			         _resources.icons["Assets/EditorUIcons/stop.ico"].get(),
+			         _resources.icons["Assets/EditorUIcons/Stop.ico"].get(),
 			         _resources.icons["Assets/EditorUIcons/pause.ico"].get(),
 			         _resources.icons["Assets/EditorUIcons/frame.ico"].get()}
 {}

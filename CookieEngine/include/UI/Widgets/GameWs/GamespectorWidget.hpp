@@ -5,7 +5,7 @@
 
 #include <vector>
 
-namespace Cookie::ECS { class Entity; }
+namespace Cookie::ECS { class Coordinator; }
 
 
 namespace Cookie::UIwidget
@@ -15,12 +15,12 @@ namespace Cookie::UIwidget
 
 	class Gamespector final : public GameWindowBase
 	{
-		const std::vector<Cookie::ECS::Entity*>& selectedEntities;
+		const Cookie::ECS::Coordinator& coordinator;
 
 	public:
-		inline Gamespector(const std::vector<Cookie::ECS::Entity*>& _selectedEntities)
+		inline Gamespector(const Cookie::ECS::Coordinator& _coordinator)
 			: GameWindowBase	("Gamespector", true),
-			  selectedEntities	(_selectedEntities)
+			  coordinator		(_coordinator)
 		{}
 
 		void WindowDisplay() override;

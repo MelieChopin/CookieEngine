@@ -115,6 +115,7 @@ set (SRC_FILES
     "${SRC_DIR}/UI/CustomImWidget.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgetBases.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgets.cpp" 
+    "${SRC_DIR}/UI/Widgets/EditorWs/AIBehaviorEditorWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/ConsoleWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/FileExplorerWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/GameportWidget.cpp"

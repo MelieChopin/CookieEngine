@@ -48,7 +48,7 @@ namespace Cookie
 
 			//In Loop
 			//Remove the debugRenderer later on
-			void CalculateMousePosInWorld(Render::FreeFlyCam& cam);
+			void CalculateMousePosInWorld();
 			void HandleGameplayInputs();
 			void CheckIfBuildingValid();
 			void InputCancelBuilding();
@@ -64,6 +64,7 @@ namespace Cookie
 			void ECSCalls(Render::DebugRenderer& dbg);
 
 			void SetScene(const std::shared_ptr<Resources::Scene>& _scene);
+			void SetCamClampFromMap();
 			void TryResizeWindow();
 	};
 }

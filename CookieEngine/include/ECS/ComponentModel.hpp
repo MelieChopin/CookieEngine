@@ -22,6 +22,7 @@ namespace Cookie
             Resources::Texture* albedo  { nullptr };
             Resources::Texture* normal  { nullptr };
             Resources::Texture* metallicRoughness { nullptr };
+            Resources::Texture* icon    { nullptr };
 
 
             //Material material;
