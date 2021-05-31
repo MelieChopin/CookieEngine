@@ -8,10 +8,8 @@
 #include "UI/UIscene.hpp"
 #include "Camera.hpp"
 #include "Resources/Map.hpp"
+#include "Light.hpp"
 
-
-//temp
-#include <iostream>
 
 namespace Cookie
 {
@@ -37,6 +35,7 @@ namespace Cookie
 			Map										map;
 			UI::UIscene								uiScene;
 			std::shared_ptr<Cookie::Render::Camera> camera{nullptr};
+			Cookie::Render::LightsArray lights;
 
 		public:
 			Scene();

@@ -85,18 +85,6 @@ void VelocityRandGenerate::generate(ParticlesData* data, int start, int end)
 		data->data[i].vel = Cookie::Core::Math::Random(velMin, velMax);
 }
 
-void AccelerationConstGenerate::generate(ParticlesData* data, int start, int end)
-{
-	for (int i = start; i < end; i++)
-		data->data[i].acc = acc;
-}
-
-void AccelerationRandGenerate::generate(ParticlesData* data, int start, int end)
-{
-	for (int i = start; i < end; i++)
-		data->data[i].acc = Cookie::Core::Math::Random(accMin, accMax);
-}
-
 void MassConstGenerate::generate(ParticlesData* data, int start, int end)
 {
 	for (int i = start; i < end; i++)
