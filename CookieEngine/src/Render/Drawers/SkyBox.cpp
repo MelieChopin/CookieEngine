@@ -167,7 +167,7 @@ void SkyBox::Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view)
 
     VS_CONSTANT_BUFFER buffer = { proj,view };
 
-    Render::WriteCBuffer(&buffer, sizeof(buffer), 0, &CBuffer);
+    Render::WriteBuffer(&buffer, sizeof(buffer), 0, &CBuffer);
 
 	if (texture)
 		texture->Set();

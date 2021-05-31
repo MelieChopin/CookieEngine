@@ -182,5 +182,5 @@ void DirLightDrawer::Set(const DirLight& dirLight, const ShadowBuffer& shadowMap
     Render::RendererRemote::context->PSSetShaderResources(3, 1, shaderResources);
 
     PS_DIRLIGHT_BUFFER dirLightBuffer = { dirLight.dir,static_cast<float>(dirLight.castShadow), dirLight.color,0.0f, dirLight.lightViewProj };
-    Render::WriteCBuffer(&dirLightBuffer, sizeof(PS_DIRLIGHT_BUFFER), 0, &CBuffer);
+    Render::WriteBuffer(&dirLightBuffer, sizeof(PS_DIRLIGHT_BUFFER), 0, &CBuffer);
 }

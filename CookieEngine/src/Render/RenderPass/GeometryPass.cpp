@@ -62,20 +62,15 @@ void GeometryPass::InitShader()
         float3 fragPos : FRAGPOS;
         float4 view    : VIEW;
     };
-    
-    cbuffer MODEL_CONSTANT : register(b0)
-    {
-        float4x4  model;
-    };
 
-    cbuffer CAM_CONSTANT : register(b1)
+    cbuffer CAM_CONSTANT : register(b0)
     {
         float4x4  proj;
         float4x4  view;
     };
 
     
-    VOut main(float3 position : POSITION, float2 uv : UV, float3 normal : NORMAL)
+    VOut main(float3 position : POSITION, float2 uv : UV, float3 normal : NORMAL, float4x4 model : WORLD)
     {
         VOut output;
     
@@ -163,12 +158,17 @@ void GeometryPass::InitShader()
     // create the input layout object
     D3D11_INPUT_ELEMENT_DESC ied[] =
     {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex,position), D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex, uv), D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, normal), D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,     offsetof(Vertex,position),  D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"UV",       0, DXGI_FORMAT_R32G32_FLOAT,    0,     offsetof(Vertex, uv),       D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0,     offsetof(Vertex, normal),   D3D11_INPUT_PER_VERTEX_DATA, 0},
+
+        { "WORLD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, offsetof(Mat4, c[0]), D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+        { "WORLD", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, offsetof(Mat4, c[1]), D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+        { "WORLD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, offsetof(Mat4, c[2]), D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+        { "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, offsetof(Mat4, c[3]), D3D11_INPUT_PER_INSTANCE_DATA, 1 },
     };
 
-    Render::CreateLayout(&blob, ied, 3, &ILayout);
+    Render::CreateLayout(&blob, ied, 7, &ILayout);
 
     VS_CONSTANT_BUFFER buffer = {};
 
@@ -322,15 +322,19 @@ void GeometryPass::Set()
 void GeometryPass::Draw(DrawDataHandler& drawData)
 {
     const Camera& cam = *drawData.currentCam;
-    ID3D11Buffer* CBuffers[2] = { drawData.CBuffer, CBuffer};
 
-    Render::RendererRemote::context->VSSetConstantBuffers(0, 2, CBuffers);
+    Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
 
     VS_CONSTANT_BUFFER buffer = { cam.GetProj(), cam.GetView() };
 
-    Render::WriteCBuffer(&buffer,sizeof(buffer),0,&CBuffer);
+    Render::WriteBuffer(&buffer,sizeof(buffer),0,&CBuffer);
 
     drawData.Draw();
+
+    ID3D11Buffer* CBuffers[2] = { nullptr, CBuffer };
+
+    Render::RendererRemote::context->VSSetConstantBuffers(0, 2, CBuffers);
+
     drawData.mapDrawer.Draw();
 }
 

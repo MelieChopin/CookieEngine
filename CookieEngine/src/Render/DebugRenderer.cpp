@@ -207,7 +207,7 @@ void DebugRenderer::Draw(const Mat4& viewProj)
         Render::RendererRemote::context->IASetInputLayout(ILayout);
         Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
 
-        Render::WriteCBuffer(viewProj.e,sizeof(viewProj),0,&CBuffer);
+        Render::WriteBuffer(viewProj.e,sizeof(viewProj),0,&CBuffer);
 
         /* save previous State to put it back at the end*/
         D3D11_PRIMITIVE_TOPOLOGY topo = D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;

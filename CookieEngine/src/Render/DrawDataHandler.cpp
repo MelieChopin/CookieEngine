@@ -15,30 +15,21 @@ constexpr float cullEpsilon = -3.0f;
 
 struct VS_CONSTANT_BUFFER
 {
-	Mat4 model = Cookie::Core::Math::Mat4::Identity();
+	Mat4 proj = Mat4::Identity();
+	Mat4 view = Mat4::Identity();
 };
 
 /*======================= CONSTRUCTORS/DESTRUCTORS =======================*/
 
 DrawDataHandler::DrawDataHandler()
 {
-	InitCBuffer();
 }
 
 DrawDataHandler::~DrawDataHandler()
 {
-	if (CBuffer)
-		CBuffer->Release();
 }
 
 /*========================= INIT METHODS =========================*/
-
-void DrawDataHandler::InitCBuffer()
-{
-	VS_CONSTANT_BUFFER buffer = {};
-
-	Render::CreateBuffer(&buffer, sizeof(VS_CONSTANT_BUFFER), &CBuffer);
-}
 
 void DrawDataHandler::Init(const Game& game)
 {
@@ -49,7 +40,17 @@ void DrawDataHandler::Init(const Game& game)
 	CamCBuffer			= game.renderer.geomPass.CBuffer;
 }
 
-/*========================= REALTIME METHODS =========================*/
+/*========================= DRAW DATA METHODS =========================*/
+
+bool DrawData::operator==(const ECS::ComponentModel& model)
+{
+	return (model.mesh == mesh 
+			&& model.albedo == albedo 
+			&& model.normal == normalMap 
+			&& model.metallicRoughness == matMap);
+}
+
+/*========================= FRUSTRUM METHODS =========================*/
 
 void Frustrum::MakeFrustrum(const Camera& cam)
 {
@@ -128,6 +129,8 @@ void Frustrum::MakeFrustrum(const Camera& cam)
 	corners[7] = farCenter + (camUp * (heightFar / 2.0f)) + (camRight * (widthFar / 2.0f));
 }
 
+/*========================= REALTIME METHODS =========================*/
+
 void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 {
 	currentCam			= cam;
@@ -169,22 +172,29 @@ void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 
 			}
 
-			if (cull)
+			if (!cull)
 			{
-				cull = false;
-				continue;
+				AABB[0].x = std::min(modelMin.x, AABB[0].x);
+				AABB[0].y = std::min(modelMin.y, AABB[0].y);
+				AABB[0].z = std::min(modelMin.z, AABB[0].z);
+
+				AABB[1].x = std::max(modelMax.x, AABB[1].x);
+				AABB[1].y = std::max(modelMax.y, AABB[1].y);
+				AABB[1].z = std::max(modelMax.z, AABB[1].z);
 			}
 
-			AABB[0].x = std::min(modelMin.x, AABB[0].x);
-			AABB[0].y = std::min(modelMin.y, AABB[0].y);
-			AABB[0].z = std::min(modelMin.z, AABB[0].z);
+			ECS::ComponentGameplay& iGameplay = components.GetComponentGameplay(iEntity.id);
 
-			AABB[1].x = std::max(modelMax.x, AABB[1].x);
-			AABB[1].y = std::max(modelMax.y, AABB[1].y);
-			AABB[1].z = std::max(modelMax.z, AABB[1].z);
-			 
-			models.push_back(model);
-			matrices.push_back(trs);
+			if (iGameplay.signatureGameplay & (CGP_SIGNATURE::PRODUCER | CGP_SIGNATURE::WORKER))
+			{
+				PushDrawData(dynamicDrawData, model, trs, cull);
+			}
+			else
+			{
+				PushDrawData(staticDrawData, model, trs, cull);
+			}
+
+			cull = false;
 		}
 	}
 
@@ -200,70 +210,47 @@ void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 				continue;
 			}
 
-			Core::Math::Mat4& trs = components.GetComponentTransform(iEntity.id).TRS;
-
-			Vec4 modelMin = trs * Core::Math::Vec4(model.mesh->AABBMin, 1.0f);
-			Vec4 modelMax = trs * Core::Math::Vec4(model.mesh->AABBMax, 1.0f);
-
-			for (int j = 0; j < frustrum.planes.size(); j++)
-			{
-
-				if ((frustrum.planes[j].Dot(modelMin) + frustrum.planes[j].w) < cullEpsilon && (frustrum.planes[j].Dot(modelMax) + frustrum.planes[j].w) < cullEpsilon)
-				{
-					cull = true;
-					break;
-				}
-
-			}
-
-			if (cull)
-			{
-				cull = false;
-				continue;
-			}
-
 			selectedModels.push_back(model);
-			selectedMatrices.push_back(trs);
+			selectedMatrices.push_back(components.GetComponentTransform(iEntity.id).TRS);
 			selectedGameplays.push_back(components.GetComponentGameplay(iEntity.id));
 		}
 	}
 }
 
-void DrawDataHandler::Draw(int _i)
+void DrawDataHandler::PushDrawData(std::vector<DrawData>& drawDatas, const ECS::ComponentModel& model, const Core::Math::Mat4& trs, bool culled)
 {
-	ID3D11ShaderResourceView* fbos[3] = { nullptr, nullptr, nullptr };
-
-	VS_CONSTANT_BUFFER buffer;
-
-	size_t bufferSize = sizeof(buffer);
-
-	for (int i = _i; i < models.size(); i++)
+	for (int i = 0; i < drawDatas.size(); i++)
 	{
-		buffer.model = matrices[i];
-		Render::WriteCBuffer(&buffer, bufferSize, 0, &CBuffer);
-
-		const ECS::ComponentModel& iModel = models[i];
-
-		if (iModel.albedo)
-			iModel.albedo->Set(0);
-		if (iModel.normal)
-			iModel.normal->Set(1);
-		if (iModel.metallicRoughness)
-			iModel.metallicRoughness->Set(2);
-		if (iModel.mesh)
+		DrawData& draw = drawDatas[i];
+		if (draw == model)
 		{
-			iModel.mesh->Set();
-			iModel.mesh->Draw();
-		}
+			draw.matrices.push_back(trs);
+			if (!culled)
+				draw.visibleMatrices.push_back(trs);
 
-		Render::RendererRemote::context->PSSetShaderResources(0, 3, fbos);
+			return;
+		}
 	}
+
+	drawDatas.push_back({ model.mesh,model.albedo,model.normal,model.metallicRoughness });
+
+	DrawData& draw = drawDatas[drawDatas.size() - 1];
+	draw.matrices.push_back(trs);
+
+	if (!culled)
+		draw.visibleMatrices.push_back(trs);
+}
+
+void DrawDataHandler::Draw(bool drawOccluded)
+{
+	modelDrawer.Draw(staticDrawData,drawOccluded);
+	modelDrawer.Draw(dynamicDrawData,drawOccluded);
 }
 
 void DrawDataHandler::Clear()
 {
-	models.clear();
-	matrices.clear();
+	staticDrawData.clear();
+	dynamicDrawData.clear();
 	selectedModels.clear();
 	selectedMatrices.clear();
 	selectedGameplays.clear();

@@ -24,18 +24,18 @@ int main()
 
 		Core::UIcore::Terminate();
 	}
-	{
-		//if (Render::RendererRemote::device)
-		//{
-		//	//ID3D11Debug* debug = nullptr;
-		//	//Render::RendererRemote::device->QueryInterface(IID_PPV_ARGS(&debug));
-		//	//if (debug)
-		//	//{
-		//	//	debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
-		//	//	debug->Release();
-		//	//}
-		//}
-	}
+	//{
+	//	if (Render::RendererRemote::device)
+	//	{
+	//		ID3D11Debug* debug = nullptr;
+	//		Render::RendererRemote::device->QueryInterface(IID_PPV_ARGS(&debug));
+	//		if (debug)
+	//		{
+	//			debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	//			debug->Release();
+	//		}
+	//	}
+	//}
 
 	return 0;
 }
