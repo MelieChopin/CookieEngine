@@ -13,6 +13,7 @@ void ParticlesHandler::Update()
 		if ((*particles).needToBeRemoved)
 		{
 			particles = particlesSystems.erase(particles);
+			particlesSystems.push_back(ParticlesSystem());
 			living--;
 		}
 	}
@@ -27,12 +28,14 @@ void ParticlesHandler::Draw(const Render::Camera& cam)
 }
 
 void ParticlesHandler::CreateParticlesWithPrefab
-(const Cookie::Core::Math::Vec3& pos, ParticlesPrefab* prefab)
+(const Cookie::Core::Math::Vec3& pos, const std::string& namePrefab, const Cookie::Core::Math::Vec3& posSpawnEnd)
 {
-	if (living >= particlesSystems.size())
+	if (living + 1 >= particlesSystems.size() || particlesPrefab->find(namePrefab) == particlesPrefab->end())
 		return;
 	ParticlesSystem& particles = *std::next(particlesSystems.begin(), living);
 	particles.shader = &shader;
+
+	ParticlesPrefab* prefab = (*particlesPrefab)[namePrefab].get();
 
 	particles.name = prefab->name;
 	particles.data.resize(prefab->data.size());
@@ -63,14 +66,57 @@ void ParticlesHandler::CreateParticlesWithPrefab
 				point->trs = &particles.trs;
 				particles.particlesEmiter[i].generators.push_back(point);
 			}
+			else if (name == "Loop")
+			{
+				Loop* loop = new Loop(particles.particlesEmiter[i].generators);
+				particles.particlesEmiter[i].updates.push_back(loop);
+			}
+			else if (name == "BoxPositionGen")
+			{
+				BoxPositionGenerate* box = new BoxPositionGenerate();
+				box->pos = prefab->emit[i][j].data[0];
+				box->sizeBox = prefab->emit[i][j].data[1];
+				box->trs = &particles.trs;
+				particles.particlesEmiter[i].generators.push_back(box);
+			}
+			else if (name == "CirclePositionGen")
+			{
+				SpherePositionGenerate* sphere = new SpherePositionGenerate();
+				sphere->pos = prefab->emit[i][j].data[0];
+				sphere->radius = prefab->emit[i][j].data[1].x;
+				sphere->trs = &particles.trs;
+				particles.particlesEmiter[i].generators.push_back(sphere);
+			}
 			else if (name == "CreateParticles")
 			{
-				CreateParticles* create = new CreateParticles(particles.data[prefab->emit[i][j].data[0].x]);
+				CreateParticlesFollowing* create = new CreateParticlesFollowing(particles.data[prefab->emit[i][j].data[0].x]);
 				particles.data[prefab->emit[i][j].data[0].x].canRemoved = false;
 				create->coeffScale = prefab->emit[i][j].data[1].x;
 				create->coeffPos = prefab->emit[i][j].data[1].y;
 				create->time = prefab->emit[i][j].data[1].z;
 				particles.particlesEmiter[i].updates.push_back(create);
+			}
+			else if (name == "CollisionWithPlane")
+			{
+				CollisionWithPlane* plane = new CollisionWithPlane(*this);
+				plane->dis = prefab->emit[i][j].data[1].x;
+				plane->n = prefab->emit[i][j].data[0];
+				plane->namePrefab = prefab->emit[i][j].nameData;
+				particles.particlesEmiter[i].updates.push_back(plane);
+			}
+			else if (name == "Shadow")
+			{
+				Shadow* shadow = new Shadow(particles.data[prefab->emit[i][j].data[0].x]);
+				particles.data[prefab->emit[i][j].data[0].x].canRemoved = false;
+				shadow->time = prefab->emit[i][j].data[0].y;
+				particles.particlesEmiter[i].updates.push_back(shadow);
+			}
+			else if (name == "SpawnEnd")
+			{
+				SpawnEnd* plane = new SpawnEnd(*this);
+				plane->namePrefab = prefab->emit[i][j].nameData;
+				plane->posSpawn = posSpawnEnd;
+				particles.particlesEmiter[i].updates.push_back(plane);
 			}
 		}
 	}

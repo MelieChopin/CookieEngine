@@ -22,6 +22,7 @@ namespace Cookie
 			{
 				std::string name;
 				Cookie::Core::Math::Vec3 data[2];
+				std::string nameData;
 			};
 
 			class ParticlesPrefab
