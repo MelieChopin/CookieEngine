@@ -22,6 +22,7 @@ namespace Cookie
 			{
 				std::string name;
 				Cookie::Core::Math::Vec3 data[2];
+				std::string nameData;
 			};
 
 			class ParticlesPrefab
@@ -71,7 +72,11 @@ namespace Cookie
 					particlesEmiter.push_back(ParticlesEmitter());
 					data[0].generate(size, sizeFrame);
 				}
-				~ParticlesSystem() {}
+				~ParticlesSystem() 
+				{
+					data.clear();
+					particlesEmiter.clear();
+				}
 
 				void generate()
 				{
