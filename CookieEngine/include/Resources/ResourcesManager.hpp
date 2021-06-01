@@ -6,6 +6,7 @@
 #include <memory>
 #include <filesystem>
 #include <d3d11.h>
+#include "Particles/ParticlesSystem.hpp"
 
 namespace fs = std::filesystem;
 
@@ -37,6 +38,11 @@ namespace Cookie
 		class Prefab;
 		class Sound;
 
+		namespace Particles
+		{
+			class ParticlesPrefab;
+		}
+
 		class ResourcesManager
 		{
 			public:
@@ -48,6 +54,7 @@ namespace Cookie
 				std::unordered_map<std::string, std::unique_ptr<Prefab>>				prefabs;
 				std::unordered_map<std::string, std::unique_ptr<Sound>>					sounds;
 				std::unordered_map<std::string, std::unique_ptr<Gameplay::AIBehavior>>	aiBehaviors;
+				std::unordered_map<std::string, std::unique_ptr<Particles::ParticlesPrefab>> particles;
 				
 			private:
 				void SearchForAssets(const fs::path& path, std::vector<std::string>& gltfFiles);

@@ -21,7 +21,7 @@ namespace Cookie
 		{
 		public:
 
-			std::string                          name {"No Name"};
+			Gameplay::E_ARMY_NAME                name {Gameplay::E_ARMY_NAME::E_DEFAULT_NAME};
 			Income                               income;
 			std::vector<ECS::ComponentGameplay*> workers;
 			std::vector<ECS::ComponentGameplay*> units;
@@ -45,10 +45,10 @@ namespace Cookie
 			void Debug();
 			void UpdateArmyCoordinators(Resources::Map& map);
 
-			Army*			 GetArmy(std::string name);
-			ArmyCoordinator* GetArmyCoordinator(std::string name);
+			Army*			 GetArmy(Gameplay::E_ARMY_NAME armyName);
+			ArmyCoordinator* GetArmyCoordinator(Gameplay::E_ARMY_NAME armyName);
 
-			void AddArmyCoordinator(std::string name);
+			void AddArmyCoordinator(Gameplay::E_ARMY_NAME armyName);
 			void AddElementToArmy(ECS::ComponentGameplay* element);
 			void RemoveElementFromArmy(ECS::ComponentGameplay* element, std::string entityName);
 

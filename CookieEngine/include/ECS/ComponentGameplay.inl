@@ -34,13 +34,13 @@ namespace Cookie
 		{
 			SubComponentToDefault(signatureGameplay);
 
-			teamName           = "No Team";
+			teamName		   = Gameplay::E_ARMY_NAME::E_DEFAULT_NAME;
 			signatureGameplay  = CGP_SIGNATURE::EMPTY_CGP;
 			cost.costPrimary   = 0;
 			cost.costSecondary = 0;
 			cost.costSupply    = 0;
 			cost.timeToProduce = 0;
-			type               = Gameplay::E_ARMY_TYPE::E_DEFAULT;
+			type               = Gameplay::E_ARMY_TYPE::E_DEFAULT_TYPE;
 		}
 
 		inline void ComponentGameplay::SubComponentToDefault(int ComponentSignature)noexcept

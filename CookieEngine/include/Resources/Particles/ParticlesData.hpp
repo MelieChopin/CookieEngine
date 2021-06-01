@@ -29,15 +29,13 @@ namespace Cookie
 				Cookie::Core::Math::Vec3 scale = Cookie::Core::Math::Vec3(1, 1, 1);
 				Cookie::Core::Math::Vec3 scaleBegin = Cookie::Core::Math::Vec3(1, 1, 1);
 				Cookie::Core::Math::Vec3 vel = Cookie::Core::Math::Vec3(0, 0, 0);
-				Cookie::Core::Math::Vec3 acc = Cookie::Core::Math::Vec3(1, 1, 1);
 				Cookie::Core::Math::Vec3 rot = Cookie::Core::Math::Vec3(0, 0, 0);
-				float					 time;
-				float					 timeMax;
-				float					 mass;
-				bool					 isBillboard;
-				bool					 alive;
+				float					 time = 1;
+				float					 timeMax = 1;
+				float					 mass = 1.0f;
+				bool					 isBillboard = true;
+				bool					 alive = false;
 			};
-
 
 			class ParticlesData
 			{
@@ -46,25 +44,23 @@ namespace Cookie
 
 				Cookie::Resources::Mesh*				mesh = nullptr;
 				Cookie::Resources::Texture*				texture = nullptr;
-				int										count = 0;
 				int										countFrame = 0;
 				int										countAlive = 0;
+				bool									canRemoved = true;
 
 				ParticlesData() {}
 				~ParticlesData() {}
 
 				void generate(int size, int sizeFrame) 
 				{
-					count = size;
 					countFrame = sizeFrame;
 					countAlive = 0;
-
 					data.resize(size);
 				}
 
 				void SetIsBIllboard(bool value)
 				{
-					for (int i = 0; i < count; i++)
+					for (int i = 0; i < data.size(); i++)
 						data[i].isBillboard = value;
 				}
 
@@ -77,19 +73,27 @@ namespace Cookie
 
 				void wake(int indexBegin, int indexEnd)
 				{
-					for (int i = indexBegin; i <= indexEnd; i++)
+					for (int i = indexBegin; i < indexEnd; i++)
 					{
 						data[i].alive = true;
 						countAlive += 1;
 						data[i].pos = Cookie::Core::Math::Vec3(0, 0, 0);
 						data[i].scale = Cookie::Core::Math::Vec3(1, 1, 1);
 						data[i].rot = Cookie::Core::Math::Vec3(0, 0, 0);
+						data[i].time = 10;
+						data[i].timeMax = 10;
 					}
 				}
 
 				void swapData(int indexA, int indexB) 
 				{
 					std::iter_swap(data.begin() + indexA, data.begin() + indexB);
+				}
+
+				bool operator==(const ParticlesData& data) const
+				{
+					return data.countAlive == countAlive && data.countFrame == countFrame
+						&& data.mesh == mesh && data.texture == texture;
 				}
 			};
 			

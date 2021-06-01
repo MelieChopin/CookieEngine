@@ -15,8 +15,7 @@ using namespace rp3d;
 /*================== CONSTRUCTORS/DESTRUCTORS ==================*/
 
 Game::Game():
-    skyBox{resources},
-    frameBuffer{renderer.window.width,renderer.window.height }
+    frameBuffer{ renderer.window.width,renderer.window.height }, scene{}
 {
 
     Physics::PhysicsHandle::Init();
@@ -74,12 +73,13 @@ void Game::CalculateMousePosInWorld()
     if (scene->map.physic.physBody->raycast(ray, raycastInfo))
         playerData.mousePosInWorld = {raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z};
 
+    playerData.mousePosInWorld.Debug();
 }
 void Game::HandleGameplayInputs()
 {
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
     {
-        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["04Base"].get(), "good");
+        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["04Base"].get(), E_ARMY_NAME::E_PLAYER);
 
         ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
         CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer;
@@ -90,7 +90,7 @@ void Game::HandleGameplayInputs()
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B])
     {
-        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["04Base"].get(), "bad");
+        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["04Base"].get(), E_ARMY_NAME::E_AI1);
 
         ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
         CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer;
@@ -101,14 +101,14 @@ void Game::HandleGameplayInputs()
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_X])
     {
-        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["Resource"].get(), "good");
+        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["Resource"].get(), E_ARMY_NAME::E_DEFAULT_NAME);
 
         ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id); 
         Vec2 tileSize {{1, 1}};
         trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, tileSize);
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
-        coordinator.armyHandler->AddArmyCoordinator("bad");
+        coordinator.armyHandler->AddArmyCoordinator(E_ARMY_NAME::E_AI1);
         
 
 
@@ -321,11 +321,7 @@ void Game::SetScene(const std::shared_ptr<Resources::Scene>& _scene)
     scene = _scene;
     scene->InitCoordinator(coordinator);
 
-    scene->camera = std::make_shared<Render::GameCam>();
-
-    scene->camera->SetProj(60.f, renderer.window.width, renderer.window.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
-    scene->camera->pos = { 0.f , 20.0f,15.0f };
-    scene->camera->rot = { Core::Math::ToRadians(80.0f) ,0.0f,0.0f };
+    scene->camera->SetProj(scene->camera.get()->fov, renderer.window.width, renderer.window.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     scene->camera->ResetPreviousMousePos();
     scene->camera->ForceUpdate();
     SetCamClampFromMap();

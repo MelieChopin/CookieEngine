@@ -15,6 +15,12 @@ struct VS_CONSTANT_BUFFER
 
 /*==================== CONSTRUCTORS/DESTRUCTORS ====================*/
 
+SkyBox::SkyBox()
+{
+    InitShader();
+    InitRasterizer();
+}
+
 SkyBox::SkyBox(Resources::ResourcesManager& _resources):
 	cube {_resources.meshes["Cube"].get()}
 {

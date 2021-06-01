@@ -11,7 +11,6 @@ using namespace Cookie::Core::Math;
 
 Scene::Scene()
 {
-
 }
 
 Scene::~Scene()

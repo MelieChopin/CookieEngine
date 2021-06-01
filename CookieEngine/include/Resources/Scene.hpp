@@ -8,10 +8,9 @@
 #include "UI/UIscene.hpp"
 #include "Camera.hpp"
 #include "Resources/Map.hpp"
+#include "Light.hpp"
+#include "Drawers/Skybox.hpp"
 
-
-//temp
-#include <iostream>
 
 namespace Cookie
 {
@@ -36,7 +35,9 @@ namespace Cookie
 			Physics::PhysicsSimulator				physSim;
 			Map										map;
 			UI::UIscene								uiScene;
+			Cookie::Render::SkyBox					skyBox;
 			std::shared_ptr<Cookie::Render::Camera> camera{nullptr};
+			Cookie::Render::LightsArray				lights;
 
 		public:
 			Scene();

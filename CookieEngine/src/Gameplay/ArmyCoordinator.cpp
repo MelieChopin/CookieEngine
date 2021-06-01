@@ -24,13 +24,21 @@ void ArmyCoordinator::Analysis()
 	//Military
 	//if base under attack
 	//goals.push_back(E_GOALS::E_DEFEND);
+
+	//if Reach Goal
 	if (army->workers.size() >= behavior.stepGoals.nbOfWorker &&
 		behavior.stepGoals.listOfBuildings.empty() &&
-		army->units.size() >= behavior.stepGoals.nbOfUnits)
+		army->units.size() >= behavior.stepGoals.nbOfUnits )
 	{
-		goals.push_back(E_GOALS::E_ATTACK);
-		behavior.AddNextStep();
+		if (canAttack)
+		{
+			canAttack = false;
+			goals.push_back(E_GOALS::E_ATTACK);
+			behavior.AddNextStep();
+		}
 	}
+	else
+		canAttack = true;
 
 }
 
