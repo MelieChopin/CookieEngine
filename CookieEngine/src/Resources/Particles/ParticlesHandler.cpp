@@ -89,12 +89,15 @@ void ParticlesHandler::CreateParticlesWithPrefab
 			}
 			else if (name == "CreateParticles")
 			{
-				CreateParticlesFollowing* create = new CreateParticlesFollowing(particles.data[prefab->emit[i][j].data[0].x]);
-				particles.data[prefab->emit[i][j].data[0].x].canRemoved = false;
-				create->coeffScale = prefab->emit[i][j].data[1].x;
-				create->coeffPos = prefab->emit[i][j].data[1].y;
-				create->time = prefab->emit[i][j].data[1].z;
-				particles.particlesEmiter[i].updates.push_back(create);
+				if (particles.data.size() > prefab->emit[i][j].data[0].x)
+				{
+					CreateParticlesFollowing* create = new CreateParticlesFollowing(particles.data[prefab->emit[i][j].data[0].x]);
+					particles.data[prefab->emit[i][j].data[0].x].canRemoved = false;
+					create->coeffScale = prefab->emit[i][j].data[1].x;
+					create->coeffPos = prefab->emit[i][j].data[1].y;
+					create->time = prefab->emit[i][j].data[1].z;
+					particles.particlesEmiter[i].updates.push_back(create);
+				}
 			}
 			else if (name == "CollisionWithPlane")
 			{
@@ -106,10 +109,13 @@ void ParticlesHandler::CreateParticlesWithPrefab
 			}
 			else if (name == "Shadow")
 			{
-				Shadow* shadow = new Shadow(particles.data[prefab->emit[i][j].data[0].x]);
-				particles.data[prefab->emit[i][j].data[0].x].canRemoved = false;
-				shadow->time = prefab->emit[i][j].data[0].y;
-				particles.particlesEmiter[i].updates.push_back(shadow);
+				if (particles.data.size() > prefab->emit[i][j].data[0].x)
+				{
+					Shadow* shadow = new Shadow(particles.data[prefab->emit[i][j].data[0].x]);
+					particles.data[prefab->emit[i][j].data[0].x].canRemoved = false;
+					shadow->time = prefab->emit[i][j].data[0].y;
+					particles.particlesEmiter[i].updates.push_back(shadow);
+				}
 			}
 			else if (name == "SpawnEnd")
 			{
@@ -117,6 +123,13 @@ void ParticlesHandler::CreateParticlesWithPrefab
 				plane->namePrefab = prefab->emit[i][j].nameData;
 				plane->posSpawn = posSpawnEnd;
 				particles.particlesEmiter[i].updates.push_back(plane);
+			}
+			else if (name == "InitVelWithPoint")
+			{
+				std::cout << "sfdesf\n";
+				InitVelocityWithPoint* vel = new InitVelocityWithPoint();
+				vel->endPoint = posSpawnEnd;
+				particles.particlesEmiter[i].generators.push_back(vel);
 			}
 		}
 	}

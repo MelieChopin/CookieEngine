@@ -32,7 +32,8 @@ namespace Cookie
 				TIMECONSTGEN,
 				TIMERANDGEN,
 				COLORCONSTGEN,
-				COLORRANDGEN
+				COLORRANDGEN,
+				INITVELWITHPOINT
 			};
 
 			class ParticlesGenerator
@@ -198,6 +199,19 @@ namespace Cookie
 
 				ColorConstGenerate() { type = TYPEGEN::COLORCONSTGEN; }
 				ColorConstGenerate(Cookie::Core::Math::Vec4 color) : col(color) { type = TYPEGEN::COLORCONSTGEN; }
+			};
+
+			class InitVelocityWithPoint : public ParticlesGenerator
+			{
+			public:
+				Cookie::Core::Math::Vec3 endPoint;
+
+				virtual void generate(ParticlesData* data, int start, int end) override;
+
+				InitVelocityWithPoint() { type = TYPEGEN::INITVELWITHPOINT; }
+				InitVelocityWithPoint(Cookie::Core::Math::Vec3 point) : endPoint(point) { type = TYPEGEN::INITVELWITHPOINT; }
+				~InitVelocityWithPoint() {}
+
 			};
 		}
 	}

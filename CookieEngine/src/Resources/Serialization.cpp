@@ -513,7 +513,6 @@ void Cookie::Resources::Serialization::Save::SaveVolumAndModeMusic(std::string k
 
 	json js;
 
-	std::cout << sound.vol;
 	js["Volume"] = sound.vol;
 	js["Mode"] = sound.mode;
 	js["Pos"] = sound.pos.e;
@@ -534,7 +533,6 @@ void Cookie::Resources::Serialization::Save::SaveVolumAndModeMusic(Sound* const 
 
 	json js;
 
-	std::cout << sound->vol;
 	js["Volume"] = sound->vol;
 	js["Mode"] = sound->mode;
 	js["Pos"] = sound->pos.e;
@@ -1482,6 +1480,12 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["colorMin"].get_to(colorR->minCol.e);
 							gen[j]["colorMax"].get_to(colorR->maxCol.e);
 							emitter.generators.push_back(colorR);
+							break;
+						}
+						case (TYPEGEN::INITVELWITHPOINT): {
+							Particles::emit emit;
+							emit.name = "InitVelWithPoint";
+							pref.emit[i].push_back(emit);
 							break;
 						}
 						}
