@@ -76,7 +76,7 @@ namespace Cookie
 			void ApplyGameplayUpdateReachGoalCooldown();
 			void ApplyGameplayMoveTowardWaypoint();
 			void ApplyGameplayPosPrediction();
-			void ApplyGameplayResolveCollision();
+			void ApplyGameplayResolveCollision(Resources::Map& map);
 			void ApplyGameplayDrawPath(Render::DebugRenderer& debug);
 
 			//CGP_Attack

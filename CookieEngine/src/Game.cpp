@@ -73,8 +73,6 @@ void Game::CalculateMousePosInWorld()
     //if raycast hit
     if (scene->map.physic.physBody->raycast(ray, raycastInfo))
         playerData.mousePosInWorld = {raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z};
-
-    playerData.mousePosInWorld.Debug();
 }
 void Game::HandleGameplayInputs()
 {

@@ -9,6 +9,7 @@
 
 using namespace Cookie::Resources;
 using namespace Cookie::Core::Math;
+using namespace Cookie::ECS;
 using namespace Cookie::Gameplay;
 
 Map::Map()
@@ -104,6 +105,53 @@ Tile& Map::GetTile(Core::Math::Vec3& pos)
 	return tiles[GetTileIndex(pos)];
 }
 
+void Map::ClampPosInMap(Vec2& posToClamp, Vec2& buildingNbOfTiles)
+{
+	float minX = -trs.scale.x / 2 + buildingNbOfTiles.x * tilesSize.x / 2;
+	float maxX =  trs.scale.x / 2 - buildingNbOfTiles.x * tilesSize.x / 2;
+	float minZ = -trs.scale.z / 2 + buildingNbOfTiles.y * tilesSize.y / 2;
+	float maxZ =  trs.scale.z / 2 - buildingNbOfTiles.y * tilesSize.y / 2;
+
+	posToClamp = { std::min(std::max(minX, posToClamp.x), maxX),
+				   std::min(std::max(minZ, posToClamp.y), maxZ) };
+}
+void Map::ClampPosInMap(Vec3& posToClamp)
+{
+	float minX = -trs.scale.x / 2;
+	float maxX =  trs.scale.x / 2;
+	float minZ = -trs.scale.z / 2;
+	float maxZ =  trs.scale.z / 2;
+
+	posToClamp  = {std::min(std::max(minX, posToClamp.x), maxX),
+				   posToClamp.y,
+				   std::min(std::max(minZ, posToClamp.z), maxZ) };
+}
+void Map::ClampPosInMapWithScale(ComponentTransform& trsToClamp)
+{
+	float minX = -trs.scale.x / 2 + trsToClamp.scale.x / 2;
+	float maxX =  trs.scale.x / 2 - trsToClamp.scale.x / 2;
+	float minZ = -trs.scale.z / 2 + trsToClamp.scale.z / 2;
+	float maxZ =  trs.scale.z / 2 - trsToClamp.scale.z / 2;
+
+	trsToClamp.pos = {std::min(std::max(minX, trsToClamp.pos.x), maxX),
+				      trsToClamp.pos.y,
+					  std::min(std::max(minZ, trsToClamp.pos.z), maxZ) };
+
+	trsToClamp.trsHasChanged = true;
+}
+void Map::ClampPosOutsideObstacleTile(ComponentTransform& trsToClamp)
+{
+	Tile& tile = GetTile(trsToClamp.pos);
+
+	if (!tile.isObstacle)
+		return;
+
+	Vec3 tilePos { tile.pos.x, trsToClamp.pos.y, tile.pos.y };
+	Vec3 direction = (trsToClamp.pos - tilePos).Normalize();
+	trsToClamp.pos = tilePos + direction * (trsToClamp.scale.x / 2 + tilesSize.x / 2);
+	trsToClamp.trsHasChanged = true;
+}
+
 Vec2 Map::GetCenterOfBuilding(Vec2& mousePos, Vec2& buildingNbOfTiles)
 {
 	Vec2 tilePos = tiles[GetTileIndex(mousePos)].pos;
@@ -127,14 +175,9 @@ Vec3 Map::GetCenterOfBuilding(Vec3& mousePos, Vec2& buildingNbOfTiles)
 	//if buildingNbOfTiles has peer values add half tileSize for each
 	tilePos += { {(int)(buildingNbOfTiles.x + 1) % 2 * tilesSize.x / 2, (int)(buildingNbOfTiles.y + 1) % 2 * tilesSize.y / 2}};
 	
-	float leftX = -trs.scale.x / 2 + buildingNbOfTiles.x * tilesSize.x / 2;
-	float rightX = trs.scale.x / 2 - buildingNbOfTiles.x * tilesSize.x / 2;
-	float leftZ = -trs.scale.z / 2 + buildingNbOfTiles.y * tilesSize.y / 2;
-	float rightZ = trs.scale.z / 2 - buildingNbOfTiles.y * tilesSize.y / 2;
+	ClampPosInMap(tilePos, buildingNbOfTiles);
 
-	return  {std::clamp(tilePos.x, (leftX <= rightX) ? leftX : rightX, (leftX <= rightX) ? rightX : leftX),
-			 mousePos.y,
-			 std::clamp(tilePos.y, (leftZ <= rightZ) ? leftZ : rightZ, (leftZ <= rightZ) ? rightZ : leftZ)};
+	return {tilePos.x, mousePos.y, tilePos.y};
 
 }
 

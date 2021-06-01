@@ -66,6 +66,11 @@ namespace Cookie
 			Tile& GetTile(Core::Math::Vec2& mousePos);
 			Tile& GetTile(Core::Math::Vec3& pos);
 
+			void ClampPosInMap(Core::Math::Vec2& posToClamp, Core::Math::Vec2& buildingNbOfTiles);
+			void ClampPosInMap(Core::Math::Vec3& posToClamp);
+			void ClampPosInMapWithScale(ECS::ComponentTransform& trsToClamp);
+			void ClampPosOutsideObstacleTile(ECS::ComponentTransform& trsToClamp);
+
 			Core::Math::Vec2 GetCenterOfBuilding(Core::Math::Vec2& mousePos, Core::Math::Vec2& buildingNbOfTiles);
 			Core::Math::Vec3 GetCenterOfBuilding(Core::Math::Vec3& mousePos, Core::Math::Vec2& buildingNbOfTiles);
 

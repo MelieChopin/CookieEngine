@@ -65,8 +65,10 @@ Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab, E_ARMY_N
 	{
 		ComponentGameplay& gameplay = componentHandler->GetComponentGameplay(newEntity.id);
 		gameplay = prefab->gameplay;
+
 		gameplay.teamName = teamName;
 		gameplay.trs = &componentHandler->GetComponentTransform(newEntity.id);
+		gameplay.componentMove.trs = &componentHandler->GetComponentTransform(newEntity.id);
 		armyHandler->AddElementToArmy(&gameplay);
 	}
 
@@ -258,7 +260,7 @@ void Coordinator::ApplyGameplayUpdateWorker(Map& map)
 }
 
 //CGP_Move
-void Coordinator::UpdateCGPMove(Resources::Map& map, Render::DebugRenderer& debug)
+void Coordinator::UpdateCGPMove(Map& map, Render::DebugRenderer& debug)
 {
 	ApplyGameplayUpdatePushedCooldown(map);
 	ApplyGameplayUpdateReachGoalCooldown();
@@ -266,16 +268,16 @@ void Coordinator::UpdateCGPMove(Resources::Map& map, Render::DebugRenderer& debu
 	ApplyGameplayMoveTowardWaypoint();
 	
 	ApplyGameplayPosPrediction();
-	ApplyGameplayResolveCollision();
+	ApplyGameplayResolveCollision(map);
 	
 	ApplyGameplayDrawPath(debug);
 }
-void Coordinator::ApplyGameplayUpdatePushedCooldown(Resources::Map& map)
+void Coordinator::ApplyGameplayUpdatePushedCooldown(Map& map)
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
-			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove.UpdatePushedCooldown(map, componentHandler->GetComponentTransform(entityHandler->entities[i].id));
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove.UpdatePushedCooldown(map);
 }
 void Coordinator::ApplyGameplayUpdateReachGoalCooldown()
 {
@@ -289,7 +291,7 @@ void Coordinator::ApplyGameplayMoveTowardWaypoint()
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
-			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove.MoveTowardWaypoint(componentHandler->GetComponentTransform(entityHandler->entities[i].id));
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove.MoveTowardWaypoint();
 }
 void Coordinator::ApplyGameplayPosPrediction()
 {
@@ -298,7 +300,7 @@ void Coordinator::ApplyGameplayPosPrediction()
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
 			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove.PositionPrediction();
 }
-void Coordinator::ApplyGameplayResolveCollision()
+void Coordinator::ApplyGameplayResolveCollision(Map& map)
 {
 	std::vector<Entity*> entitiesToCheck;
 
@@ -317,7 +319,7 @@ void Coordinator::ApplyGameplayResolveCollision()
 
 				//if the two circles collide
 				if ((trsSelf.pos - trsOther.pos).Length() < cgpMoveSelf.radius + cgpMoveOther.radius)
-					cgpMoveSelf.ResolveColision(trsSelf, cgpMoveOther, trsOther);
+					cgpMoveSelf.ResolveColision(cgpMoveOther, map);
 			}
 
 			entitiesToCheck.push_back(&entityHandler->entities[i]);
@@ -363,7 +365,7 @@ void Coordinator::ApplyGameplayDrawPath(DebugRenderer& debug)
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
-			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove.DrawPath(debug, componentHandler->GetComponentTransform(entityHandler->entities[i].id));
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove.DrawPath(debug);
 }
 
 //CGP_Attack

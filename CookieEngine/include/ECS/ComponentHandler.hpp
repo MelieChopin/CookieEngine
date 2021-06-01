@@ -47,7 +47,10 @@ namespace Cookie
 			ComponentHandler()
 			{
 				for (int i = 0; i < MAX_ENTITIES; ++i)
+				{
 					componentGameplays[i].trs = &componentTransforms[i];
+					componentGameplays[i].componentMove.trs = &componentTransforms[i];
+				}
 			}
 			~ComponentHandler() {}
 
