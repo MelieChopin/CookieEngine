@@ -58,15 +58,31 @@ bool GameWindowBase::WindowEdit()
 
 	if (IsWindowFocused())
 	{
-		if (ImGui::GetIO().MouseDown[0])
+		if (GetIO().MouseDown[0])
 		{
-			xPos	= ((int)((GetWindowPos().x - parentWindowPos.x)	/ 10)) * 10;
-			yPos	= ((int)((GetWindowPos().y - parentWindowPos.y)	/ 10)) * 10;
-			width	= ((int)(GetWindowWidth()	/ 10)) * 10;
-			height	= ((int)(GetWindowHeight()	/ 10)) * 10;
+			if (GetIO().KeyShift)
+			{
+				float sqrSize = ((int)((GetWindowWidth() + GetWindowHeight()) / 20)) * 10;
+				
+				width = sqrSize,
+				height = sqrSize;
+
+				const ImVec2& winPos = GetWindowPos();
+
+				GetForegroundDrawList()->AddRect(winPos, { winPos.x + sqrSize, winPos.y + sqrSize }, ColorConvertFloat4ToU32({1, 1, 1, 1}));
+			}
 		}
 		else if (GetIO().MouseReleased[0])
 		{
+			xPos	= ((int)((GetWindowPos().x - parentWindowPos.x)	/ 10)) * 10;
+			yPos	= ((int)((GetWindowPos().y - parentWindowPos.y)	/ 10)) * 10;
+
+			if (!GetIO().KeyShift)
+			{
+				width	= ((int)(GetWindowWidth()	/ 10)) * 10;
+				height	= ((int)(GetWindowHeight()	/ 10)) * 10;
+			}
+
 			SetWindowPos ({ xPos + parentWindowPos.x, yPos + parentWindowPos.y  });
 			SetWindowSize({ width					, height					});
 		}
