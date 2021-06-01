@@ -41,6 +41,7 @@ namespace Cookie
 			public:
 
 				/* CONSTRUCTORS/DESTRUCTORS */
+				SkyBox();
 				SkyBox(Resources::ResourcesManager& _resources);
 				~SkyBox();
 

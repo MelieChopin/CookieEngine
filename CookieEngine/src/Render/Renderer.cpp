@@ -210,7 +210,7 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
 
     remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, geomPass.depthBuffer);
 
-    game.skyBox.Draw(cam->GetProj(), cam->GetView());
+    game.scene.get()->skyBox.Draw(cam->GetProj(), cam->GetView());
 
     gamePass.Set();
     gamePass.Draw(drawData);

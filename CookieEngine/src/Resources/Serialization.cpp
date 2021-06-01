@@ -13,6 +13,7 @@
 #include "Resources/Prefab.hpp"
 #include "Light.hpp"
 #include "Particles/ParticlesSystem.hpp"
+#include "Camera.hpp"
 #include <reactphysics3d/reactphysics3d.h>
 #include <iostream>
 #include <fstream>
@@ -190,6 +191,25 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 			map["model"]["texture"]["metallic"] = actMap.model.metallicRoughness->name;
 
 		SavePhysic(map["physic"], actMap.physic);
+	}
+
+	//Skybox
+	{
+		js["SkyboxName"] = actScene.skyBox.texture->name;
+	}
+
+	//Camera
+	{
+		json& cam = js["Camera"];
+		Cookie::Render::Camera* camera = actScene.camera.get();
+
+		cam["camNear"] = camera->camNear;
+		cam["camFar"] = camera->camFar;
+		cam["fov"] = camera->fov;
+		cam["aspectRatio"] = camera->aspectRatio;
+		cam["windowOffset"] = camera->windowOffset.e;
+		cam["pos"] = camera->pos.e;
+		cam["rot"] = camera->rot.e;
 	}
 
 	if (actScene.entityHandler.livingEntities > 0)
@@ -837,6 +857,28 @@ std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const c
 	 if (js.contains("Name"))
 		js["Name"].get_to(newScene->name);
 	 
+	 if (js.contains("SkyboxName"))
+	 {
+		 newScene->skyBox.cube = game.resources.meshes["Cube"].get();
+		 newScene->skyBox.texture = game.resources.skyboxes[js["SkyboxName"].get<std::string>()].get();
+	 }
+
+	 if (js.contains("Camera"))
+	 {
+		 json& cam = js["Camera"];
+		 newScene.get()->camera = std::make_shared<Render::GameCam>();
+		 Cookie::Render::Camera* camera = newScene.get()->camera.get();
+
+		 camera->camNear = cam["camNear"].get<float>();
+		 camera->camFar = cam["camFar"].get<float>();
+		 camera->fov = cam["fov"].get<float>();
+		 camera->aspectRatio = cam["aspectRatio"].get<float>();
+
+		 cam["windowOffset"].get_to(camera->windowOffset.e);
+		 cam["pos"].get_to(camera->pos.e);
+		 cam["rot"].get_to(camera->rot.e);
+	 }
+
 	 if (js.contains("EntityHandler"))
 	 {
 		 int newSizeEntities = js["EntityHandler"].size();

@@ -9,7 +9,7 @@
 #include "Resources/Sound.hpp"
 
 #include "Resources/ResourcesManager.hpp"
-#include "Drawers/Skybox.hpp"
+
 #include "ECS/Coordinator.hpp"
 #include "Resources/Particles/ParticlesHandler.hpp"
 #include "PlayerData.hpp"
@@ -32,7 +32,6 @@ namespace Cookie
 			Gameplay::PlayerData                            playerData;
 			Render::Renderer								renderer;
 			Resources::ResourcesManager						resources;
-			Render::SkyBox									skyBox;
 			ECS::Coordinator								coordinator;
 			Render::FrameBuffer								frameBuffer;
 			Resources::Particles::ParticlesHandler			particlesHandler;

@@ -21,17 +21,13 @@ Editor::Editor()
     : editorFBO{game.renderer.window.width,game.renderer.window.height}
 {
     game.resources.Load(game.renderer);
-    game.skyBox.texture = game.resources.skyboxes["Assets/skybox.dds"].get();
     cam.SetProj(60.f, game.renderer.viewport.Width, game.renderer.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
     cam.rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
-
     cam.ResetPreviousMousePos();
     cam.Update();
     cam.Deactivate();
-    //scene = Editor::Scene(resources, coordinator);
     game.scene->InitCoordinator(game.coordinator);
-    //game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>("Assets/Floor_DefaultMaterial_BaseColor.png"));
 
     //Load all Textures we have create in texture editor
     Resources::Serialization::Load::LoadAllTextures(game.resources);
@@ -45,10 +41,7 @@ Editor::Editor()
     game.particlesHandler.particlesPrefab = &game.resources.particles;
 
     //Load default Scene
-    //std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/DefaultDuck.CAsset", game);
     std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", game);
-
-
     game.SetScene(_scene);
 
     editorUI.AddItem(new UIwidget::SaveButton(game.scene, game.resources), 0);
@@ -61,7 +54,7 @@ Editor::Editor()
     
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
     editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
-    editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.scene.get()->lights, game.skyBox, game.resources), 2);
+    editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.scene.get()->lights, game.scene.get()->skyBox, game.resources), 2);
     editorUI.AddWItem(new UIwidget::Console(CDebug, game.resources), 2);
     editorUI.AddWItem(new UIwidget::FileExplorer(game), 2);
 
@@ -137,7 +130,7 @@ void Editor::Loop()
         //std::cout << game.particlesHandler.living << "\n";
 
         //Update for 3D Music
-        FMOD_VECTOR temp = { cam.pos.x, cam.pos.y, cam.pos.z };
+        FMOD_VECTOR temp = { cam.pos.x, cam.pos.y, cam.pos.z }; // Modify to have cam in scene
         Cookie::Resources::SoundManager::system->set3DListenerAttributes(0, &temp, nullptr, nullptr, nullptr);
         Cookie::Resources::SoundManager::system->update();
 
