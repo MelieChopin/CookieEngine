@@ -25,27 +25,27 @@ void ArmyHandler::UpdateArmyCoordinators(Resources::Map& map)
 	}
 }
 
-Army* ArmyHandler::GetArmy(std::string name)
+Army* ArmyHandler::GetArmy(E_ARMY_NAME armyName)
 {
 	for (int i = 0; i < livingArmies; ++i)
-		if (armies[i].name == name)
+		if (armies[i].name == armyName)
 			return &armies[i];
 
 	return nullptr;
 }
-ArmyCoordinator* ArmyHandler::GetArmyCoordinator(std::string name)
+ArmyCoordinator* ArmyHandler::GetArmyCoordinator(E_ARMY_NAME armyName)
 {
 	for (int i = 0; i < armiesCoordinator.size(); ++i)
-		if (armiesCoordinator[i].army->name == name)
+		if (armiesCoordinator[i].army->name == armyName)
 			return &armiesCoordinator[i];
 
 	return nullptr;
 }
 
-void ArmyHandler::AddArmyCoordinator(std::string name)
+void ArmyHandler::AddArmyCoordinator(E_ARMY_NAME armyName)
 {
 	for (int i = 0; i < livingArmies; ++i)
-		if (armies[i].name == name)
+		if (armies[i].name == armyName)
 		{
 			armiesCoordinator.push_back(ArmyCoordinator{ &armies[i] });
 			return;

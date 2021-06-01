@@ -44,7 +44,8 @@ namespace Cookie
 			int nbOfWorkerInProduction   {0};
 			int nbOfBuildingInProduction {0};
 			int nbOfUnitInProduction     {0};
-
+			bool canAttack				 {true};
+			bool canDefend               {true};
 
 			ArmyCoordinator(Army* _army) : army{_army}
 			{

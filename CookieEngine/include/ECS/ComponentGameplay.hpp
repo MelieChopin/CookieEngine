@@ -14,9 +14,16 @@ namespace Cookie
 {
 	namespace Gameplay
 	{
+		enum E_ARMY_NAME
+		{
+			E_DEFAULT_NAME,
+			E_PLAYER,
+			E_AI1
+		};
+
 		enum E_ARMY_TYPE
 		{
-			E_DEFAULT,
+			E_DEFAULT_TYPE,
 			E_WORKER,
 			E_UNIT,
 			E_BUILDING
@@ -49,10 +56,10 @@ namespace Cookie
 		{
 
 		public:
-			std::string            teamName {"No Team"};
+			Gameplay::E_ARMY_NAME  teamName {Gameplay::E_ARMY_NAME::E_DEFAULT_NAME};
 			int                    signatureGameplay{ 0 };
 			Cost                   cost;
-			Gameplay::E_ARMY_TYPE  type {Gameplay::E_ARMY_TYPE::E_DEFAULT};
+			Gameplay::E_ARMY_TYPE  type {Gameplay::E_ARMY_TYPE::E_DEFAULT_TYPE};
 			ComponentTransform*    trs {nullptr};
 
 			Gameplay::CGPLive      componentLive;
