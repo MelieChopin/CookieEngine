@@ -59,7 +59,7 @@ void Game::Update()
     scene->camera->Update();
     coordinator.ApplyComputeTrs();
 
-    renderer.Draw(scene->camera.get(), frameBuffer);
+    renderer.DrawMiniMap(frameBuffer);
     particlesHandler.Draw(*scene->camera.get());
 
     renderer.SetBackBuffer();
@@ -330,7 +330,7 @@ void Game::SetScene(const std::shared_ptr<Resources::Scene>& _scene)
     SetCamClampFromMap();
     scene->camera->Deactivate();
 
-    renderer.drawData.SetScene(*scene);
+    renderer.drawData.SetScene(scene.get());
     renderer.skyBox.texture = scene->skyBox;
 }
 

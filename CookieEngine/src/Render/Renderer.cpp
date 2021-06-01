@@ -157,6 +157,7 @@ void Renderer::Draw(const Camera* cam, FrameBuffer& framebuffer)
 {
     ID3D11RenderTargetView* nullViews[] = { nullptr,nullptr,nullptr,nullptr };
     remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
+    Render::RendererRemote::context->RSSetViewports(1, &viewport);
 
     drawData.SetDrawData(cam);
 
@@ -214,6 +215,19 @@ void Renderer::Draw(const Camera* cam, FrameBuffer& framebuffer)
 
     gamePass.Set();
     gamePass.Draw(drawData);
+}
+
+void Renderer::DrawMiniMap(FrameBuffer& fbo)
+{
+
+
+    drawData.SetStaticDrawData();
+    geomPass.Set();
+    ID3D11RenderTargetView* nullViews[] = { nullptr,nullptr,nullptr,nullptr };
+    remote.context->OMSetRenderTargets(4, nullViews, nullptr);
+    remote.context->OMSetRenderTargets(1, &fbo.renderTargetView, nullptr);
+    miniMapPass.Set();
+    miniMapPass.Draw(drawData);
 }
 
 void Renderer::DrawFrameBuffer(FrameBuffer& fbo)

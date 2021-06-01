@@ -72,8 +72,6 @@ Editor::Editor()
 
 Editor::~Editor()
 {
-    if (game.scene)
-        game.scene->skyBox = game.renderer.skyBox.texture;
     //Save all prefabs in folder Prefabs
    // Resources::Serialization::Save::SaveAllPrefabs(game.resources);
     Resources::SoundManager::Release();
@@ -216,6 +214,9 @@ void Editor::Loop()
         UIcore::EndFrame();
         game.renderer.Render();
     }
+
+    if (game.scene)
+        game.scene->skyBox = game.renderer.skyBox.texture;
 }
 
 void Editor::TryResizeWindow()

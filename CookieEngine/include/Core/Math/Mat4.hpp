@@ -30,7 +30,6 @@ namespace Cookie
                 inline static Mat4 TRS(const Vec3& t, const Vec3& r, const Vec3& s);
                 inline static Mat4 Perspective(float yFov, float aspect, float n, float f);
                 inline static Mat4 Ortho(float left, float right, float top, float bottom, float n, float f);
-                inline static Mat4 OrthoLH(float width, float height, float n, float f);
                 inline static Mat4 Inverse(const Mat4& _mat);
                 inline static Mat4 LookAt(const Vec3& eye, const Vec3& center, const Vec3& up);
                 inline static Mat4 Dir(const Vec3& dirVec);

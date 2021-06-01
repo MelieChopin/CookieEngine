@@ -37,10 +37,9 @@ void DrawDataHandler::Init(const Game& game)
 	player				= &game.playerData;
 }
 
-void DrawDataHandler::SetScene(Resources::Scene& scene)
+void DrawDataHandler::SetScene(Resources::Scene* _scene)
 {
-	mapDrawer.Set(scene.map);
-	lights = &scene.lights;
+	currentScene = _scene;
 }
 
 /*========================= DRAW DATA METHODS =========================*/
@@ -136,66 +135,57 @@ void Frustrum::MakeFrustrum(const Camera& cam)
 
 void DrawDataHandler::SetDrawData(const Camera* cam)
 {
+	/* setup component for future renderpass and occlusion culling*/
 	currentCam			= cam;
 	frustrum.MakeFrustrum(*cam);
 
+	/* set if the scene changed */
+	if (currentScene)
+	{
+		mapDrawer.Set(currentScene->map);
+		lights = &currentScene->lights;
+	}
+
+	/* get the different array of ECS */
 	const Coordinator&			coord			= *coordinator;
 	const ECS::EntityHandler&	entityHandler	= *coord.entityHandler;
 	ECS::ComponentHandler&		components		= *coord.componentHandler;
 
+	/* used to know if a model is culled or not */
 	bool cull = false;
 
 	for (int i = 0; i < entityHandler.livingEntities; ++i)
 	{
 		const Entity& iEntity = entityHandler.entities[i];
+
+		/* we look up if the entity is displayable */
 		if ((iEntity.signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL)) == (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
 		{
+			/* seeing the signature it should be displayable but ... */
 			ECS::ComponentModel& model = components.GetComponentModel(iEntity.id);
 
+			/* we at least need a mesh to display the entity */
 			if (model.mesh == nullptr)
 			{
 				continue;
 			}
 
+			/* occlusion culling process */
 			Core::Math::Mat4& trs = components.GetComponentTransform(iEntity.id).TRS;
+			cull = Cull(model, trs);
 
-			Vec4 modelMin = trs * Core::Math::Vec4(model.mesh->AABBMin, 1.0f);
-			Vec4 modelMax = trs * Core::Math::Vec4(model.mesh->AABBMax, 1.0f);
-
-			for (int j = 0; j < frustrum.planes.size(); j++)
-			{
-
-				if ((frustrum.planes[j].Dot(modelMin) + frustrum.planes[j].w) < cullEpsilon && (frustrum.planes[j].Dot(modelMax) + frustrum.planes[j].w) < cullEpsilon)
-				{
-					cull = true;
-					break;
-				}
-
-			}
-
-			if (!cull)
-			{
-				AABB[0].x = std::min(modelMin.x, AABB[0].x);
-				AABB[0].y = std::min(modelMin.y, AABB[0].y);
-				AABB[0].z = std::min(modelMin.z, AABB[0].z);
-
-				AABB[1].x = std::max(modelMax.x, AABB[1].x);
-				AABB[1].y = std::max(modelMax.y, AABB[1].y);
-				AABB[1].z = std::max(modelMax.z, AABB[1].z);
-			}
-
+			/* at this point, we know if we should display it or not, we just separate it into two arrays:
+			 * static and dynamic for a simpler drawing process, 
+			 * only workers and those who have a move component should be able to move */
 			ECS::ComponentGameplay& iGameplay = components.GetComponentGameplay(iEntity.id);
-
-			if (iGameplay.signatureGameplay & (CGP_SIGNATURE::PRODUCER | CGP_SIGNATURE::WORKER))
+			if (iGameplay.signatureGameplay & (CGP_SIGNATURE::MOVE | CGP_SIGNATURE::WORKER))
 			{
-				PushDrawData(dynamicDrawData, model, trs,iEntity.id, cull);
+				PushDrawData(dynamicDrawData, model, trs, iGameplay, cull);
 			}
 			else
 			{
-				PushDrawData(staticDrawData, model, trs, iEntity.id, cull);
+				PushDrawData(staticDrawData, model, trs, iGameplay, cull);
 			}
-
-			cull = false;
 		}
 	}
 
@@ -211,14 +201,131 @@ void DrawDataHandler::SetDrawData(const Camera* cam)
 				continue;
 			}
 
-			selectedModels.push_back(model);
-			selectedMatrices.push_back(components.GetComponentTransform(iEntity.id).TRS);
-			selectedGameplays.push_back(components.GetComponentGameplay(iEntity.id));
+			selectedDrawData.push_back({ model.mesh,model.albedo,model.normal,model.metallicRoughness });
+			DrawData& draw = selectedDrawData[selectedDrawData.size() - 1];
+
+			draw.matrices.push_back(components.GetComponentTransform(iEntity.id).TRS);
+			draw.gameplays.push_back(&components.GetComponentGameplay(iEntity.id));
 		}
 	}
 }
 
-void DrawDataHandler::PushDrawData(std::vector<DrawData>& drawDatas, const ECS::ComponentModel& model, const Core::Math::Mat4& trs, int entityId, bool culled)
+void DrawDataHandler::SetStaticDrawData()
+{
+	/* get the different array of ECS */
+	const Coordinator& coord = *coordinator;
+	const ECS::EntityHandler& entityHandler = *coord.entityHandler;
+	ECS::ComponentHandler& components = *coord.componentHandler;
+
+	/* used to know if a model is culled or not */
+	bool cull = false;
+
+	for (int i = 0; i < entityHandler.livingEntities; ++i)
+	{
+		const Entity& iEntity = entityHandler.entities[i];
+
+		/* we look up if the entity is displayable */
+		if ((iEntity.signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL)) == (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
+		{
+			/* seeing the signature it should be displayable but ... */
+			ECS::ComponentModel& model = components.GetComponentModel(iEntity.id);
+
+			/* we at least need a mesh to display the entity */
+			if (model.mesh == nullptr)
+			{
+				continue;
+			}
+
+			/* occlusion culling process */
+			Core::Math::Mat4& trs = components.GetComponentTransform(iEntity.id).TRS;
+
+			/* pushing if the entity is a static entity */
+			ECS::ComponentGameplay& iGameplay = components.GetComponentGameplay(iEntity.id);
+			if (!(iGameplay.signatureGameplay & (CGP_SIGNATURE::MOVE | CGP_SIGNATURE::WORKER)))
+			{
+				PushDrawData(staticDrawData, model, trs, iGameplay, cull);
+			}
+		}
+	}
+}
+
+void DrawDataHandler::SetStaticDrawData(const Camera* cam)
+{
+	/* setup component for future renderpass and occlusion culling*/
+	currentCam = cam;
+	frustrum.MakeFrustrum(*cam);
+
+	/* get the different array of ECS */
+	const Coordinator& coord = *coordinator;
+	const ECS::EntityHandler& entityHandler = *coord.entityHandler;
+	ECS::ComponentHandler& components = *coord.componentHandler;
+
+	/* used to know if a model is culled or not */
+	bool cull = false;
+
+	for (int i = 0; i < entityHandler.livingEntities; ++i)
+	{
+		const Entity& iEntity = entityHandler.entities[i];
+
+		/* we look up if the entity is displayable */
+		if ((iEntity.signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL)) == (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
+		{
+			/* seeing the signature it should be displayable but ... */
+			ECS::ComponentModel& model = components.GetComponentModel(iEntity.id);
+
+			/* we at least need a mesh to display the entity */
+			if (model.mesh == nullptr)
+			{
+				continue;
+			}
+
+			/* occlusion culling process */
+			Core::Math::Mat4& trs = components.GetComponentTransform(iEntity.id).TRS;
+			cull = Cull(model, trs);
+
+			/* pushing if the entity is a static entity */
+			ECS::ComponentGameplay& iGameplay = components.GetComponentGameplay(iEntity.id);
+			if (!(iGameplay.signatureGameplay & (CGP_SIGNATURE::MOVE | CGP_SIGNATURE::WORKER)))
+			{
+				PushDrawData(staticDrawData, model, trs, iGameplay, cull);
+			}
+		}
+	}
+}
+
+bool DrawDataHandler::Cull(ECS::ComponentModel& model, Core::Math::Mat4& trs)
+{
+	bool cull = false;
+
+	Vec4 modelMin = trs * Core::Math::Vec4(model.mesh->AABBMin, 1.0f);
+	Vec4 modelMax = trs * Core::Math::Vec4(model.mesh->AABBMax, 1.0f);
+
+	for (int j = 0; j < frustrum.planes.size(); j++)
+	{
+
+		if ((frustrum.planes[j].Dot(modelMin) + frustrum.planes[j].w) < cullEpsilon && (frustrum.planes[j].Dot(modelMax) + frustrum.planes[j].w) < cullEpsilon)
+		{
+			cull = true;
+			break;
+		}
+
+	}
+
+	if (!cull)
+	{
+		AABB[0].x = std::min(modelMin.x, AABB[0].x);
+		AABB[0].y = std::min(modelMin.y, AABB[0].y);
+		AABB[0].z = std::min(modelMin.z, AABB[0].z);
+
+		AABB[1].x = std::max(modelMax.x, AABB[1].x);
+		AABB[1].y = std::max(modelMax.y, AABB[1].y);
+		AABB[1].z = std::max(modelMax.z, AABB[1].z);
+	}
+
+	return cull;
+}
+
+void DrawDataHandler::PushDrawData(std::vector<DrawData>& drawDatas, const ECS::ComponentModel& model, const Core::Math::Mat4& trs, const ECS::ComponentGameplay& gameplay, bool culled)
 {
 	for (int i = 0; i < drawDatas.size(); i++)
 	{
@@ -226,12 +333,12 @@ void DrawDataHandler::PushDrawData(std::vector<DrawData>& drawDatas, const ECS::
 		if (draw == model)
 		{
 			draw.matrices.push_back(trs);
-			draw.id.push_back(entityId);
+			draw.gameplays.push_back(&gameplay);
 
 			if (!culled)
 			{
 				draw.visibleMatrices.push_back(trs);
-				draw.visibleId.push_back(entityId);
+				draw.visibleGameplays.push_back(&gameplay);
 			}
 
 			return;
@@ -243,12 +350,12 @@ void DrawDataHandler::PushDrawData(std::vector<DrawData>& drawDatas, const ECS::
 	DrawData& draw = drawDatas[drawDatas.size() - 1];
 
 	draw.matrices.push_back(trs);
-	draw.id.push_back(entityId);
+	draw.gameplays.push_back(&gameplay);
 
 	if (!culled)
 	{
 		draw.visibleMatrices.push_back(trs);
-		draw.visibleId.push_back(entityId);
+		draw.visibleGameplays.push_back(&gameplay);
 	}
 }
 
@@ -262,9 +369,7 @@ void DrawDataHandler::Clear()
 {
 	staticDrawData.clear();
 	dynamicDrawData.clear();
-	selectedModels.clear();
-	selectedMatrices.clear();
-	selectedGameplays.clear();
+	selectedDrawData.clear();
 	AABB[0] = { std::numeric_limits<float>().max(),std::numeric_limits<float>().max() ,std::numeric_limits<float>().max() };
 	AABB[1] = { -std::numeric_limits<float>().max(), -std::numeric_limits<float>().max() , -std::numeric_limits<float>().max() };
 }

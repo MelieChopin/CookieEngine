@@ -20,6 +20,7 @@ namespace Cookie
 
 	namespace Render
 	{
+		struct DrawData;
 		class DrawDataHandler;
 
 		class SelectionDrawer
@@ -32,8 +33,7 @@ namespace Cookie
 			public:
 				Core::Math::Mat4 viewProj;
 
-				const std::vector<ECS::ComponentModel>*	selectedModels;
-				const std::vector<Core::Math::Mat4>*	selectedMatrices;
+				const std::vector<DrawData>*	selectedDrawData;
 
 				std::vector<Core::Math::Mat4> arrowsMatrices;
 			public:

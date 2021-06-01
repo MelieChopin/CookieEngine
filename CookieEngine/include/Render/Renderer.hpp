@@ -12,6 +12,7 @@
 #include "Render/RenderPass/LightPass.hpp"
 #include "Render/RenderPass/ComposePass.hpp"
 #include "Render/RenderPass/GameplayPass.hpp"
+#include "Render/RenderPass/MiniMapPass.hpp"
 
 namespace Cookie
 {
@@ -47,6 +48,7 @@ namespace Cookie
 				LightPass		lightPass;
 				ComposePass		compPass;
 				GameplayPass	gamePass;
+				MiniMapPass		miniMapPass;
 
 			private:
 				Render::FBODrawer	fboDrawer;
