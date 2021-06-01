@@ -2,6 +2,7 @@
 #define __COORDINATOR_HPP__
 
 #include "Core/Math/Mat4.hpp"
+#include "ComponentGameplay.hpp" //for E_ARMY_NAME
 #include <vector>
 
 namespace Cookie
@@ -42,7 +43,7 @@ namespace Cookie
 
 			//Entity
 			Entity& AddEntity(const int signature, std::string name = std::string("No Name"));
-			Entity& AddEntity(const Resources::Prefab* const & prefab, std::string teamName = "No Team");
+			Entity& AddEntity(const Resources::Prefab* const & prefab, Gameplay::E_ARMY_NAME teamName = Gameplay::E_ARMY_NAME::E_DEFAULT_NAME);
 			void RemoveEntity(Entity& entity);
 			bool CheckSignature(const int entitySignature, const int signature);
 			
