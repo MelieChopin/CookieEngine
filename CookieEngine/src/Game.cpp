@@ -324,17 +324,14 @@ void Game::SetScene(const std::shared_ptr<Resources::Scene>& _scene)
     scene = _scene;
     scene->InitCoordinator(coordinator);
 
-    scene->camera = std::make_shared<Render::GameCam>();
-
-    scene->camera->SetProj(60.f, renderer.window.width, renderer.window.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
-    scene->camera->pos = { 0.f , 20.0f,15.0f };
-    scene->camera->rot = { Core::Math::ToRadians(80.0f) ,0.0f,0.0f };
+    scene->camera->SetProj(scene->camera.get()->fov, renderer.window.width, renderer.window.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     scene->camera->ResetPreviousMousePos();
     scene->camera->ForceUpdate();
     SetCamClampFromMap();
     scene->camera->Deactivate();
 
     renderer.drawData.SetScene(*scene);
+    renderer.skyBox.texture = scene->skyBox;
 }
 
 void Game::SetCamClampFromMap()

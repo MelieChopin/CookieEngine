@@ -57,6 +57,8 @@ namespace Cookie
 			/* the first is all of them, the second is the ones that are not culled by the frustrum culling of current cam */
 			std::vector<Core::Math::Mat4>		matrices;
 			std::vector<Core::Math::Mat4>		visibleMatrices;
+			std::vector<int>					id;
+			std::vector<int>					visibleId;
 
 			bool operator==(const ECS::ComponentModel& model);
 		};
@@ -87,7 +89,7 @@ namespace Cookie
 				std::vector<ECS::ComponentGameplay> selectedGameplays;
 
 			private:
-				void PushDrawData(std::vector<DrawData>& drawDatas, const ECS::ComponentModel& model, const Core::Math::Mat4& trs, bool culled);
+				void PushDrawData(std::vector<DrawData>& drawDatas, const ECS::ComponentModel& model, const Core::Math::Mat4& trs, int entityId, bool culled);
 
 			public:
 				DrawDataHandler();

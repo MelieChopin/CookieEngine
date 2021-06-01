@@ -188,11 +188,11 @@ void DrawDataHandler::SetDrawData(const Camera* cam)
 
 			if (iGameplay.signatureGameplay & (CGP_SIGNATURE::PRODUCER | CGP_SIGNATURE::WORKER))
 			{
-				PushDrawData(dynamicDrawData, model, trs, cull);
+				PushDrawData(dynamicDrawData, model, trs,iEntity.id, cull);
 			}
 			else
 			{
-				PushDrawData(staticDrawData, model, trs, cull);
+				PushDrawData(staticDrawData, model, trs, iEntity.id, cull);
 			}
 
 			cull = false;
@@ -218,7 +218,7 @@ void DrawDataHandler::SetDrawData(const Camera* cam)
 	}
 }
 
-void DrawDataHandler::PushDrawData(std::vector<DrawData>& drawDatas, const ECS::ComponentModel& model, const Core::Math::Mat4& trs, bool culled)
+void DrawDataHandler::PushDrawData(std::vector<DrawData>& drawDatas, const ECS::ComponentModel& model, const Core::Math::Mat4& trs, int entityId, bool culled)
 {
 	for (int i = 0; i < drawDatas.size(); i++)
 	{
@@ -226,8 +226,13 @@ void DrawDataHandler::PushDrawData(std::vector<DrawData>& drawDatas, const ECS::
 		if (draw == model)
 		{
 			draw.matrices.push_back(trs);
+			draw.id.push_back(entityId);
+
 			if (!culled)
+			{
 				draw.visibleMatrices.push_back(trs);
+				draw.visibleId.push_back(entityId);
+			}
 
 			return;
 		}
@@ -236,10 +241,15 @@ void DrawDataHandler::PushDrawData(std::vector<DrawData>& drawDatas, const ECS::
 	drawDatas.push_back({ model.mesh,model.albedo,model.normal,model.metallicRoughness });
 
 	DrawData& draw = drawDatas[drawDatas.size() - 1];
+
 	draw.matrices.push_back(trs);
+	draw.id.push_back(entityId);
 
 	if (!culled)
+	{
 		draw.visibleMatrices.push_back(trs);
+		draw.visibleId.push_back(entityId);
+	}
 }
 
 void DrawDataHandler::Draw(bool drawOccluded)
