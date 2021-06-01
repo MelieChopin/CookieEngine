@@ -21,7 +21,7 @@ Editor::Editor()
     : editorFBO{game.renderer.window.width,game.renderer.window.height}
 {
     game.resources.Load(game.renderer);
-    game.skyBox.texture = game.resources.skyboxes["Assets/skybox.dds"].get();
+    game.renderer.skyBox.texture = game.resources.skyboxes["Assets/skybox.dds"].get();
     cam.SetProj(60.f, game.renderer.viewport.Width, game.renderer.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
     cam.rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
@@ -59,7 +59,7 @@ Editor::Editor()
     
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
     editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
-    editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.renderer.lights, game.skyBox, game.resources), 2);
+    editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.renderer.lights, game.renderer.skyBox, game.resources), 2);
     editorUI.AddWItem(new UIwidget::Console(CDebug, game.resources), 2);
     editorUI.AddWItem(new UIwidget::FileExplorer(game), 2);
 
@@ -339,7 +339,7 @@ void Editor::Loop()
         //Draw
         game.renderer.Clear();
         game.renderer.ClearFrameBuffer(editorFBO);
-        game.renderer.Draw(&cam, game,editorFBO);
+        game.renderer.Draw(&cam,editorFBO);
 		game.particlesHandler.Draw(cam);
 
         dbgRenderer.Draw(cam.GetViewProj());

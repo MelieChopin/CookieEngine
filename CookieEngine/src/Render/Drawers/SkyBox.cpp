@@ -1,4 +1,5 @@
 #include "Render/D3D11Helper.hpp"
+#include "Core/Primitives.hpp"
 #include "Resources/Mesh.hpp"
 #include "Resources/Texture.hpp"
 #include "Resources/ResourcesManager.hpp"
@@ -6,6 +7,7 @@
 #include "Core/Math/Mat4.hpp"
 
 using namespace Cookie::Render;
+using namespace Cookie::Core::Math;
 
 struct VS_CONSTANT_BUFFER
 {
@@ -15,8 +17,8 @@ struct VS_CONSTANT_BUFFER
 
 /*==================== CONSTRUCTORS/DESTRUCTORS ====================*/
 
-SkyBox::SkyBox(Resources::ResourcesManager& _resources):
-	cube {_resources.meshes["Cube"].get()}
+SkyBox::SkyBox():
+	cube {Core::Primitives::CreateCube()}
 {
     InitShader();
     InitRasterizer();

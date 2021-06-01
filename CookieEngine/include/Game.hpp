@@ -32,9 +32,9 @@ namespace Cookie
 			Gameplay::PlayerData                            playerData;
 			Render::Renderer								renderer;
 			Resources::ResourcesManager						resources;
-			Render::SkyBox									skyBox;
 			ECS::Coordinator								coordinator;
 			Render::FrameBuffer								frameBuffer;
+			Render::FrameBuffer								miniMapBuffer;
 			Resources::Particles::ParticlesHandler			particlesHandler;
 
 			std::shared_ptr<Resources::Scene>				scene{nullptr};

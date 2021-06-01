@@ -1,6 +1,13 @@
 #ifndef __SKYBOX_HPP__
 #define __SKYBOX_HPP__
 
+struct ID3D11Buffer;
+struct ID3D11InputLayout;
+struct ID3D11VertexShader;
+struct ID3D11PixelShader;
+struct ID3D11SamplerState;
+struct ID3D11RasterizerState;
+
 namespace Cookie
 {
 	namespace Resources
@@ -28,8 +35,8 @@ namespace Cookie
 
 
 			public:
-				Cookie::Resources::Mesh*	cube			{ nullptr };
-				Cookie::Resources::Texture*	texture			{ nullptr };
+				std::unique_ptr<Cookie::Resources::Mesh>	cube			{ nullptr };
+				Cookie::Resources::Texture*					texture			{ nullptr };
 
 				ID3D11RasterizerState*		rasterizerState	{ nullptr };
 
@@ -41,7 +48,7 @@ namespace Cookie
 			public:
 
 				/* CONSTRUCTORS/DESTRUCTORS */
-				SkyBox(Resources::ResourcesManager& _resources);
+				SkyBox();
 				~SkyBox();
 
 				void Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view);

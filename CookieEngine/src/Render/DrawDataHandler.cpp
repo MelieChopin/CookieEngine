@@ -37,6 +37,11 @@ void DrawDataHandler::Init(const Game& game)
 	player				= &game.playerData;
 }
 
+void DrawDataHandler::SetMap(const Resources::Map& map)
+{
+	mapDrawer.Set(map);
+}
+
 /*========================= DRAW DATA METHODS =========================*/
 
 bool DrawData::operator==(const ECS::ComponentModel& model)
@@ -128,7 +133,7 @@ void Frustrum::MakeFrustrum(const Camera& cam)
 
 /*========================= REALTIME METHODS =========================*/
 
-void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
+void DrawDataHandler::SetDrawData(const Camera* cam)
 {
 	currentCam			= cam;
 	frustrum.MakeFrustrum(*cam);
@@ -138,8 +143,6 @@ void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
 	ECS::ComponentHandler&		components		= *coord.componentHandler;
 
 	bool cull = false;
-
-	mapDrawer.Set(game.scene->map);
 
 	for (int i = 0; i < entityHandler.livingEntities; ++i)
 	{

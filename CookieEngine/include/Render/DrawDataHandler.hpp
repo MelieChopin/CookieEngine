@@ -92,7 +92,8 @@ namespace Cookie
 				~DrawDataHandler();
 
 				void Init(const Game& game);
-				void SetDrawData(const Camera* cam, const Game& game);
+				void SetMap(const Resources::Map& map);
+				void SetDrawData(const Camera* cam);
 				void Draw(bool drawOccluded = false);
 				void Clear();
 		};

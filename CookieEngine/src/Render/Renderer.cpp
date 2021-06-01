@@ -153,12 +153,12 @@ void Renderer::ResizeBuffer(int width, int height)
 
 /*========================= RENDER METHODS =========================*/
 
-void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
+void Renderer::Draw(const Camera* cam, FrameBuffer& framebuffer)
 {
     ID3D11RenderTargetView* nullViews[] = { nullptr,nullptr,nullptr,nullptr };
     remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
 
-    drawData.SetDrawData(cam,game);
+    drawData.SetDrawData(cam);
 
     geomPass.Set();
     geomPass.Draw(drawData);
@@ -178,17 +178,17 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F1] >= 0.0f)
     {
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
-        DrawFrameBuffer(game.renderer.geomPass.posFBO);
+        DrawFrameBuffer(geomPass.posFBO);
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F2] >= 0.0f)
     {
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
-        DrawFrameBuffer(game.renderer.geomPass.normalFBO);
+        DrawFrameBuffer(geomPass.normalFBO);
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F3] >= 0.0f)
     {
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
-        DrawFrameBuffer(game.renderer.geomPass.albedoFBO);
+        DrawFrameBuffer(geomPass.albedoFBO);
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F4] >= 0.0f)
     {
@@ -210,7 +210,7 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
 
     remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, geomPass.depthBuffer);
 
-    game.skyBox.Draw(cam->GetProj(), cam->GetView());
+    skyBox.Draw(cam->GetProj(), cam->GetView());
 
     gamePass.Set();
     gamePass.Draw(drawData);

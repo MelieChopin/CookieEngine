@@ -12,11 +12,13 @@ using namespace Cookie::ECS;
 using namespace Cookie::Gameplay;
 using namespace rp3d;
 
+constexpr int miniMapResolution = 128;
+
 /*================== CONSTRUCTORS/DESTRUCTORS ==================*/
 
 Game::Game():
-    skyBox{resources},
-    frameBuffer{renderer.window.width,renderer.window.height }
+    frameBuffer{renderer.window.width,renderer.window.height },
+    miniMapBuffer{miniMapResolution, miniMapResolution}
 {
 
     Physics::PhysicsHandle::Init();
@@ -57,7 +59,7 @@ void Game::Update()
     scene->camera->Update();
     coordinator.ApplyComputeTrs();
 
-    renderer.Draw(scene->camera.get(), *this,frameBuffer);
+    renderer.Draw(scene->camera.get(), frameBuffer);
     particlesHandler.Draw(*scene->camera.get());
 
     renderer.SetBackBuffer();
@@ -330,6 +332,8 @@ void Game::SetScene(const std::shared_ptr<Resources::Scene>& _scene)
     scene->camera->ForceUpdate();
     SetCamClampFromMap();
     scene->camera->Deactivate();
+
+    renderer.drawData.SetMap(scene->map);
 }
 
 void Game::SetCamClampFromMap()
