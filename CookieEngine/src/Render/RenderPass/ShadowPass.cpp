@@ -168,7 +168,6 @@ void ShadowPass::Draw(DrawDataHandler& drawData)
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
 
     VS_CONSTANT_BUFFER buffer = {};
-    
 
     size_t bufferSize = sizeof(buffer);
 

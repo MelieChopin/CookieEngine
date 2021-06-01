@@ -6,6 +6,7 @@
 struct ID3D11VertexShader;
 struct ID3D11PixelShader;
 struct ID3D11Buffer;
+struct ID3D11InputLayout;
 
 namespace Cookie
 {
@@ -23,10 +24,11 @@ namespace Cookie
 		class MapDrawer
 		{
 			private:
-				ID3D11VertexShader* VShader{ nullptr };
-				ID3D11PixelShader*	PShader{ nullptr };
+				ID3D11VertexShader* VShader	{ nullptr };
+				ID3D11PixelShader*	PShader	{ nullptr };
 				ID3D11Buffer*		VCBuffer{ nullptr };
 				ID3D11Buffer*		PCBuffer{ nullptr };
+				ID3D11InputLayout*	ILayout	{ nullptr };
 
 			public:
 				struct MapDrawInfo

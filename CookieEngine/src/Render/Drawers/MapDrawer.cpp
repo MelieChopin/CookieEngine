@@ -48,6 +48,10 @@ MapDrawer::~MapDrawer()
     {
         PCBuffer->Release();
     }
+    if (ILayout)
+    {
+        ILayout->Release();
+    }
 }
 
 /*============================= INIT METHODS =============================*/
@@ -166,6 +170,23 @@ void MapDrawer::InitShader()
         return pOutput;
     })";
 
+    struct Vertex
+    {
+        Core::Math::Vec3 position;
+        Core::Math::Vec2 uv;
+        Core::Math::Vec3 normal;
+    };
+
+    // create the input layout object
+    D3D11_INPUT_ELEMENT_DESC ied[] =
+    {
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,     offsetof(Vertex,position),  D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"UV",       0, DXGI_FORMAT_R32G32_FLOAT,    0,     offsetof(Vertex, uv),       D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0,     offsetof(Vertex, normal),   D3D11_INPUT_PER_VERTEX_DATA, 0},
+    };
+
+    Render::CreateLayout(&blob, ied, 3, &ILayout);
+
     Render::CompilePixel(source, &PShader);
 
     VS_CONSTANT_BUFFER vbuffer = {};
@@ -195,6 +216,8 @@ void MapDrawer::Draw()
 {
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
+    Render::RendererRemote::context->IASetInputLayout(ILayout);
+
     VS_CONSTANT_BUFFER vbuffer   = {};
     vbuffer.model                = mapInfo.model;
     vbuffer.tileNb             = { mapInfo.tileNb.x,mapInfo.tileNb.y,0.0f,0.0f };
