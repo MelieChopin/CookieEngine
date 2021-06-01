@@ -42,7 +42,7 @@ Entity& Coordinator::AddEntity(const int signature, std::string name)
 
 	return newEntity;
 }
-Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab, std::string teamName)
+Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab, E_ARMY_NAME teamName)
 {
 	assert(entityHandler->livingEntities < MAX_ENTITIES && "Too many entities in existence." && prefab != nullptr);
 

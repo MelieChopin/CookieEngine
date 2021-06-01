@@ -461,7 +461,15 @@ void Inspector::GameplayInterface()
     {
         ComponentGameplay& gameplayComp = coordinator.componentHandler->GetComponentGameplay(selectedEntity.focusedEntity->id);
 
-        InputText("##TEAMNAME", &gameplayComp.teamName);
+        static const char* armyNames[] = { "Default", "Player", "AI1"};
+        if (BeginCombo("##ARMY_NAME", armyNames[gameplayComp.teamName]))
+        {
+            if (Selectable(armyNames[0], gameplayComp.type == 0)) gameplayComp.teamName = Gameplay::E_ARMY_NAME::E_DEFAULT_NAME;
+            if (Selectable(armyNames[1], gameplayComp.type == 1)) gameplayComp.teamName = Gameplay::E_ARMY_NAME::E_PLAYER;
+            if (Selectable(armyNames[2], gameplayComp.type == 2)) gameplayComp.teamName = Gameplay::E_ARMY_NAME::E_AI1;
+
+            EndCombo();
+        }
 
         NewLine();
         DragFloat("##FIRSTCOST",  &gameplayComp.cost.costPrimary,   1.f, NULL, NULL, "Primary cost: %.0f");
@@ -475,7 +483,7 @@ void Inspector::GameplayInterface()
         static const char* _typesName[] = { "Default", "Worker", "Unit", "Building" };
         if (BeginCombo("##ENTITYTYPE", _typesName[gameplayComp.type]))
         {
-            if (Selectable(_typesName[0], gameplayComp.type == 0)) gameplayComp.type = Gameplay::E_ARMY_TYPE::E_DEFAULT;
+            if (Selectable(_typesName[0], gameplayComp.type == 0)) gameplayComp.type = Gameplay::E_ARMY_TYPE::E_DEFAULT_TYPE;
             if (Selectable(_typesName[1], gameplayComp.type == 1)) gameplayComp.type = Gameplay::E_ARMY_TYPE::E_WORKER;
             if (Selectable(_typesName[2], gameplayComp.type == 2)) gameplayComp.type = Gameplay::E_ARMY_TYPE::E_UNIT;
             if (Selectable(_typesName[3], gameplayComp.type == 3)) gameplayComp.type = Gameplay::E_ARMY_TYPE::E_BUILDING;

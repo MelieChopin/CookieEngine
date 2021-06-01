@@ -8,6 +8,8 @@ struct ID3D11PixelShader;
 struct ID3D11SamplerState;
 struct ID3D11RasterizerState;
 
+#include <memory>
+
 namespace Cookie
 {
 	namespace Resources

@@ -3,7 +3,6 @@
 
 
 #include "Core/Window.hpp"
-#include "Light.hpp"
 #include "Drawers/Skybox.hpp"
 #include "Drawers/FBODrawer.hpp"
 #include "Render/RendererRemote.hpp"
@@ -48,8 +47,6 @@ namespace Cookie
 				LightPass		lightPass;
 				ComposePass		compPass;
 				GameplayPass	gamePass;
-
-				LightsArray lights;
 
 			private:
 				Render::FBODrawer	fboDrawer;

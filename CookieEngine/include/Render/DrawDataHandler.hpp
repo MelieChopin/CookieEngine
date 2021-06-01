@@ -28,6 +28,7 @@ namespace Cookie
 
 	namespace Resources
 	{
+		class Scene;
 		class Texture;
 		class Mesh;
 	}
@@ -35,6 +36,7 @@ namespace Cookie
 	namespace Render
 	{
 		class Camera;
+		struct LightsArray;
 
 		struct Frustrum
 		{
@@ -78,7 +80,7 @@ namespace Cookie
 
 				const Camera*						currentCam;
 				const Gameplay::PlayerData*			player;
-
+				LightsArray*						lights;
 
 				std::vector<ECS::ComponentModel>	selectedModels;
 				std::vector<Core::Math::Mat4>		selectedMatrices;
@@ -92,7 +94,7 @@ namespace Cookie
 				~DrawDataHandler();
 
 				void Init(const Game& game);
-				void SetMap(const Resources::Map& map);
+				void SetScene(Resources::Scene& scene);
 				void SetDrawData(const Camera* cam);
 				void Draw(bool drawOccluded = false);
 				void Clear();

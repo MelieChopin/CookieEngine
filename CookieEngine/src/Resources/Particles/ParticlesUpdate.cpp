@@ -1,5 +1,7 @@
 #include "ParticlesUpdate.hpp"
 #include "ParticlesData.hpp"
+#include "ParticlesHandler.hpp"
+#include "Serialization.hpp"
 #include "Time.hpp"
 #include "Mat4.hpp"
 
@@ -8,13 +10,7 @@ using namespace Cookie::Resources::Particles;
 void UpdateVelocity::Update(ParticlesData* p)
 {
 	for (int i = 0; i < p->countAlive; i++)
-		p->data[i].pos += p->data[i].vel * Cookie::Core::DeltaTime();
-}
-
-void UpdateAcc::Update(ParticlesData* p)
-{
-	for (int i = 0; i < p->countAlive; i++)
-		p->data[i].vel += p->data[i].acc * Cookie::Core::DeltaTime();
+		p->data[i].pos += p->data[i].vel * Cookie::Core::DeltaTime();	
 }
 
 void UpdateScale::Update(ParticlesData* p)
@@ -25,12 +21,6 @@ void UpdateScale::Update(ParticlesData* p)
 		p->data[i].scale.y = Cookie::Core::Math::Lerp(scaleEnd.y, p->data[i].scaleBegin.y, p->data[i].time / p->data[i].timeMax);
 		p->data[i].scale.z = Cookie::Core::Math::Lerp(scaleEnd.z, p->data[i].scaleBegin.z, p->data[i].time / p->data[i].timeMax);
 	}
-}
-
-void SlowDown::Update(ParticlesData* p)
-{
-	for (int i = 0; i < p->countAlive; i++)
-		p->data[i].acc *= coeff;
 }
 
 void UpdateAlpha::Update(ParticlesData* p)
@@ -53,7 +43,7 @@ void ColorOverLife::Update(ParticlesData* p)
 void EnabledGravity::Update(ParticlesData* p)
 {
 	for (int i = 0; i < p->countAlive; i++)
-		p->data[i].vel += Cookie::Core::Math::Vec3(0, gravity * p->data[i].mass, 0) * Cookie::Core::DeltaTime();
+		p->data[i].vel += Cookie::Core::Math::Vec3(0, gravity * p->data[i].mass, 0) * Cookie::Core::DeltaTime();	
 }
 
 void UpdateTime::Update(ParticlesData* p)
@@ -75,8 +65,8 @@ void Loop::Update(ParticlesData* p)
 
 		p->wake(countAlive, countFrame);
 
-		for (int i = 0; i < particlesGen.size(); i++)
-			particlesGen[i]->generate(p, countAlive, countFrame + 1);
+		for (int i = 0; i < particlesGen->size(); i++)
+			(*particlesGen)[i]->generate(p, countAlive, countFrame + 1);
 	}
 }
 
@@ -86,13 +76,60 @@ void CollisionWithPlane::Update(ParticlesData* p)
 	{
 		Cookie::Core::Math::Vec3 pos(p->data[i].pos.x, p->data[i].pos.y, p->data[i].pos.z);
 		float distance = (pos.Dot(n) + dis) / n.Length();
-		
+
 		if (distance <= Cookie::Core::Math::EPSILON && p->data[i].isBillboard == true)
 		{
-			p->data[i].isBillboard = false;
-			p->data[i].vel = Cookie::Core::Math::Vec3(0, 0, 0);
-			p->data[i].mass = 0;
-			p->data[i].rot = Cookie::Core::Math::Vec3(Cookie::Core::Math::PI / 2, 0, 0);
+			p->countAlive--;
+			particlesHandler->CreateParticlesWithPrefab(p->data[i].pos, namePrefab);
+		}
+	}
+}
+
+void CreateParticlesFollowing::Update(ParticlesData* p)
+{
+	for (int i = 0; i < p->countAlive; i++)
+	{
+		if (data->countAlive < data->data.size())
+		{
+			data->data[data->countAlive].alive = true;
+			data->data[data->countAlive].pos = p->data[i].pos - p->data[i].vel * coeffPos * Cookie::Core::DeltaTime();
+			data->data[data->countAlive].time = time;
+			data->data[data->countAlive].timeMax = time;
+			data->data[data->countAlive].scale = p->data[i].scale * coeffScale;
+			data->data[data->countAlive].col = p->data[i].colBegin;
+			data->data[data->countAlive].colBegin = Cookie::Core::Math::Vec4(1, 1, 1, 1);
+			data->countAlive ++;
+		}
+	}
+}
+
+void Shadow::Update(ParticlesData* p)
+{
+	for (int i = 0; i < p->countAlive; i++)
+	{
+		if (i < data->data.size())
+		{
+			data->data[i].alive = true;
+			data->data[i].pos = p->data[i].pos;
+			data->data[i].pos.y = 0.55f;
+			data->data[i].rot = Cookie::Core::Math::Vec3(Core::Math::PI / 2, 0, 0);
+			data->data[i].time = time;
+			data->data[i].timeMax = time;
+			data->data[i].scale = p->data[i].scale;
+			data->data[i].col = Cookie::Core::Math::Vec4(1, 1, 1, 1);
+			data->data[i].colBegin = Cookie::Core::Math::Vec4(1, 1, 1, 1);
+		}
+	}
+}
+
+void SpawnEnd::Update(ParticlesData* p)
+{
+	for (int i = 0; i < p->countAlive; i++)
+	{
+		if (p->data[i].time <= Cookie::Core::DeltaTime() * 2)
+		{
+			p->countAlive--;
+			particlesHandler->CreateParticlesWithPrefab(posSpawn, namePrefab);
 		}
 	}
 }

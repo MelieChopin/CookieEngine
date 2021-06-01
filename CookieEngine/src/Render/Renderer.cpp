@@ -166,11 +166,11 @@ void Renderer::Draw(const Camera* cam, FrameBuffer& framebuffer)
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
 
     shadPass.Set();
-    shadPass.Draw(drawData, lights);
+    shadPass.Draw(drawData);
     remote.context->RSSetViewports(1, &viewport);
 
-    lightPass.Set(geomPass.posFBO,geomPass.normalFBO,geomPass.albedoFBO);
-    lightPass.Draw(lights,shadPass.shadowMap,drawData);
+    lightPass.Set(geomPass.posFBO, geomPass.normalFBO, geomPass.albedoFBO);
+    lightPass.Draw(shadPass.shadowMap, drawData);
 
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
     shadPass.Set();

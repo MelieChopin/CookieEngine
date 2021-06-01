@@ -37,9 +37,10 @@ void DrawDataHandler::Init(const Game& game)
 	player				= &game.playerData;
 }
 
-void DrawDataHandler::SetMap(const Resources::Map& map)
+void DrawDataHandler::SetScene(Resources::Scene& scene)
 {
-	mapDrawer.Set(map);
+	mapDrawer.Set(scene.map);
+	lights = &scene.lights;
 }
 
 /*========================= DRAW DATA METHODS =========================*/

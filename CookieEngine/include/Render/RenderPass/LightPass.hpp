@@ -43,7 +43,7 @@ namespace Cookie
 			~LightPass();
 
 			void Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& albedoFBO);
-			void Draw(const LightsArray& lights, const ShadowBuffer& shadowMap, const DrawDataHandler& drawData);
+			void Draw(const ShadowBuffer& shadowMap, const DrawDataHandler& drawData);
 			void Clear();
 		};
 	}
