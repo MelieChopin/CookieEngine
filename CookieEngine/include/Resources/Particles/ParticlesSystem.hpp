@@ -72,7 +72,11 @@ namespace Cookie
 					particlesEmiter.push_back(ParticlesEmitter());
 					data[0].generate(size, sizeFrame);
 				}
-				~ParticlesSystem() {}
+				~ParticlesSystem() 
+				{
+					data.clear();
+					particlesEmiter.clear();
+				}
 
 				void generate()
 				{
