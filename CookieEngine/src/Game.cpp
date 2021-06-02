@@ -10,6 +10,7 @@ using namespace Cookie;
 using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
 using namespace Cookie::Gameplay;
+using namespace Cookie::Resources::Particles;
 using namespace rp3d;
 
 /*================== CONSTRUCTORS/DESTRUCTORS ==================*/
@@ -17,7 +18,6 @@ using namespace rp3d;
 Game::Game():
     frameBuffer{ renderer.window.width,renderer.window.height }, scene{}
 {
-
     Physics::PhysicsHandle::Init();
     Core::UIcore::FinishInit(renderer);
     renderer.drawData.Init(*this);
@@ -58,6 +58,8 @@ void Game::Update()
 
     renderer.Draw(scene->camera.get(), *this,frameBuffer);
     particlesHandler.Draw(*scene->camera.get());
+
+    DisplayLife();
 
     renderer.SetBackBuffer();
 }
@@ -312,6 +314,31 @@ void Game::ECSCalls(Render::DebugRenderer& dbg)
     coordinator.ApplyRemoveUnnecessaryEntities();
 }
 
+void Game::DisplayLife()
+{
+    std::vector<Cookie::Render::InstancedData> data;
+    for (int i = 0; i < coordinator.entityHandler->livingEntities; i++)
+    {
+        if (!coordinator.CheckSignature(coordinator.entityHandler->entities[i].signature, C_SIGNATURE::GAMEPLAY))
+            continue;
+
+        ComponentGameplay gameplay = coordinator.componentHandler->GetComponentGameplay(coordinator.entityHandler->entities[i].id);
+        if ((gameplay.signatureGameplay & CGP_SIGNATURE::LIVE) != CGP_SIGNATURE::LIVE)
+            continue;
+
+        Cookie::Render::InstancedData newData;
+        newData.World = (Cookie::Core::Math::Mat4::Translate(gameplay.trs->pos))
+                        * (Cookie::Core::Math::Mat4::Scale(Vec3(1, 1, 1)) * Cookie::Core::Math::Mat4::Translate(Vec3(0, 5, 0)));
+        newData.Color = Vec4(1, 1, 1, 1);
+        newData.isBillboard = true;
+        data.push_back(newData);
+    }
+
+    if (data.size() > 0)
+        ::ParticlesHandler::shader.Draw(*scene.get()->camera.get(), resources.meshes["Assets/Rec.gltf - meshes[0]"].get(), resources.textures2D["Red"].get(), data);
+}
+
+
 /*================== SETTER/GETTER ==================*/
 
 void Game::SetScene(const std::shared_ptr<Resources::Scene>& _scene)
@@ -374,3 +401,5 @@ void Game::TryResizeWindow()
         //scene->camera->SetProj(Core::Math::ToRadians(60.f), width, height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     }
 }
+
+

@@ -61,6 +61,7 @@ namespace Cookie
 			void InputAddUnit(int index);
 			void DisplayNewEntityDestination(Render::DebugRenderer& dbg);
 			void ECSCalls(Render::DebugRenderer& dbg);
+			void DisplayLife();
 
 			void SetScene(const std::shared_ptr<Resources::Scene>& _scene);
 			void SetCamClampFromMap();
