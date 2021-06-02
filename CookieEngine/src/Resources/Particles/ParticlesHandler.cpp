@@ -5,6 +5,11 @@
 
 using namespace Cookie::Resources::Particles;
 
+std::list<ParticlesSystem> ParticlesHandler::particlesSystems;
+unsigned int ParticlesHandler::living;
+std::unordered_map<std::string, std::unique_ptr<ParticlesPrefab>>* ParticlesHandler::particlesPrefab;
+Cookie::Render::ParticlesPass ParticlesHandler::shader;
+
 void ParticlesHandler::Update()
 {
 	for (std::list<ParticlesSystem>::iterator particles = particlesSystems.begin(); particles != particlesSystems.end(); particles++)
@@ -33,7 +38,6 @@ void ParticlesHandler::CreateParticlesWithPrefab
 	if (living + 1 >= particlesSystems.size() || particlesPrefab->find(namePrefab) == particlesPrefab->end())
 		return;
 	ParticlesSystem& particles = *std::next(particlesSystems.begin(), living);
-	particles.shader = &shader;
 
 	ParticlesPrefab* prefab = (*particlesPrefab)[namePrefab].get();
 
@@ -101,7 +105,7 @@ void ParticlesHandler::CreateParticlesWithPrefab
 			}
 			else if (name == "CollisionWithPlane")
 			{
-				CollisionWithPlane* plane = new CollisionWithPlane(*this);
+				CollisionWithPlane* plane = new CollisionWithPlane();
 				plane->dis = prefab->emit[i][j].data[1].x;
 				plane->n = prefab->emit[i][j].data[0];
 				plane->namePrefab = prefab->emit[i][j].nameData;
@@ -119,14 +123,13 @@ void ParticlesHandler::CreateParticlesWithPrefab
 			}
 			else if (name == "SpawnEnd")
 			{
-				SpawnEnd* plane = new SpawnEnd(*this);
+				SpawnEnd* plane = new SpawnEnd();
 				plane->namePrefab = prefab->emit[i][j].nameData;
 				plane->posSpawn = posSpawnEnd;
 				particles.particlesEmiter[i].updates.push_back(plane);
 			}
 			else if (name == "InitVelWithPoint")
 			{
-				std::cout << "sfdesf\n";
 				InitVelocityWithPoint* vel = new InitVelocityWithPoint();
 				vel->endPoint = posSpawnEnd;
 				particles.particlesEmiter[i].generators.push_back(vel);

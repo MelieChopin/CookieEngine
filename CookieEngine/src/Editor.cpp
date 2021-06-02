@@ -136,9 +136,9 @@ void Editor::Loop()
 
         //TEMP : TEST FOR 3D
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
-            game.particlesHandler.CreateParticlesWithPrefab(Vec3(-5, 15, 5), "Attack", Vec3(10, 0, 25));
+            Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(-5, 15, 5), "Attack", Vec3(10, 0, 25));
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P])
-            game.particlesHandler.CreateParticlesWithPrefab(Vec3(5, 5, 5), "Load", Vec3(15, 15, 5));
+            Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(5, 5, 5), "Load", Vec3(15, 15, 5));
             
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
             Cookie::Resources::SoundManager::SetPaused("Music.mp3", true);

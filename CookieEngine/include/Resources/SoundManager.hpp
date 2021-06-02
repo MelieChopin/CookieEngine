@@ -33,44 +33,44 @@ namespace Cookie
 			static void SetMode		(std::string key, FMOD_MODE mode);
 
 
-			static void PlayMusic			(Sound* const & sound);
+			static void PlayMusic(Sound* const& sound);
 
 
-			static inline void SetVolume	(Sound* const & sound, float vol)
+			static inline void SetVolume(Sound* const& sound, float vol)
 			{ sound->vol = vol; }
 
-			static inline void SetPaused	(Sound* const & sound, bool isPaused)
+			static inline void SetPaused(Sound* const& sound, bool isPaused)
 			{ sound->chan->setPaused(isPaused); }
 
-			static inline void Loop			(Sound* const & sound)
+			static inline void Loop(Sound* const& sound)
 			{ sound->mode |= FMOD_LOOP_NORMAL; }
 
-			static inline void Normal		(Sound* const & sound)
+			static inline void Normal(Sound* const& sound)
 			{ sound->mode -= FMOD_LOOP_NORMAL; }
 
-			static inline void Set3D		(Sound* const & sound, const Cookie::Core::Math::Vec3& pos)
+			static inline void Set3D(Sound* const& sound, const Cookie::Core::Math::Vec3& pos)
 			{ 
 				sound->mode -= sound->mode & FMOD_2D;
 				sound->mode |= FMOD_3D;
 				sound->pos = pos;
 			}
 
-			static inline void Set3D		(Sound* const & sound)
+			static inline void Set3D(Sound* const& sound)
 			{ 
 				sound->mode -= sound->mode & FMOD_2D;
 				sound->mode |= FMOD_3D;
 			}
 
-			static inline void SetPosition	(Sound* const & sound, const Cookie::Core::Math::Vec3& pos)
+			static inline void SetPosition(Sound* const& sound, const Cookie::Core::Math::Vec3& pos)
 			{ sound->pos = pos; }
 
-			static inline void Set2D		(Sound* const & sound)
+			static inline void Set2D(Sound* const& sound)
 			{ 
 				sound->mode -= sound->mode & FMOD_3D;
 				sound->mode |= FMOD_2D;
 			}
 
-			static inline void SetMode		(Sound* const & sound, FMOD_MODE mode)
+			static inline void SetMode(Sound* const& sound, FMOD_MODE mode)
 			{ sound->mode = mode; }
 		};
 	}

@@ -653,6 +653,8 @@ void Cookie::Resources::Serialization::Save::SaveParticles(Cookie::Resources::Pa
 					generator["colorMax"] = colorR.maxCol.e;
 					break;
 				}
+				case (TYPEGEN::INITVELWITHPOINT):
+					break;
 				}
 			}
 
