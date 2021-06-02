@@ -90,12 +90,8 @@ void CGPMove::PositionPrediction()
 void CGPMove::ResolveColision(CGPMove& other, Map& map)
 {
 	//Priority High
-	if ((state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_PUSHED) ||
-		(state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_STATIC) ||
-		(state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_REACH_GOAL) ||
-		(state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_STATIC) ||
-		(state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_REACH_GOAL) ||
-		(state == CGPMOVE_STATE::E_REACH_GOAL && other.state == CGPMOVE_STATE::E_REACH_GOAL && reachGoalCountdown >= other.reachGoalCountdown))
+	if (state > other.state ||
+		(state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_PUSHED))
 	{
 		if (other.state == CGPMOVE_STATE::E_STATIC)
 		{
@@ -104,8 +100,10 @@ void CGPMove::ResolveColision(CGPMove& other, Map& map)
 		}
 		other.pushedCooldownBeforeReturn = CGPMOVE_CD_BEFORE_RETURN;
 
+		std::cout << "Colision Higher Priority\n";
 		Core::Math::Vec3 direction = (other.trs->pos - trs->pos).Normalize();
 		other.trs->pos = trs->pos + direction * (radius + other.radius);
+
 		map.ClampPosInMapWithScale(*other.trs);
 		map.ClampPosOutsideObstacleTile(*other.trs);
 		other.trs->trsHasChanged = true;
@@ -119,13 +117,11 @@ void CGPMove::ResolveColision(CGPMove& other, Map& map)
 		Core::Math::Vec3 directionSelf = (waypoints[0] - trs->pos).Normalize();
 		Core::Math::Vec3 directionOther = (other.waypoints[0] - other.trs->pos).Normalize();
 
-
 		if (directionSelfToOther.Dot(directionSelf) > 0.9) // if they face each other
 		{
 			std::cout << "Colision face each other\n";
 			trs->pos += Core::Math::Vec3{ directionSelf.z, directionSelf.y, -directionSelf.x } *(overlapLength / 2);
 			other.trs->pos += Core::Math::Vec3{ directionOther.z, directionOther.y, -directionOther.x } *(overlapLength / 2);
-
 		}
 		else // they colidde side by side
 		{
@@ -137,33 +133,12 @@ void CGPMove::ResolveColision(CGPMove& other, Map& map)
 		}
 
 		map.ClampPosInMapWithScale(*trs);
-		map.ClampPosInMapWithScale(*other.trs);
 		map.ClampPosOutsideObstacleTile(*trs);
-		map.ClampPosOutsideObstacleTile(*other.trs);
 		trs->trsHasChanged = true;
+		map.ClampPosInMapWithScale(*other.trs);
+		map.ClampPosOutsideObstacleTile(*other.trs);
 		other.trs->trsHasChanged = true;
 
-	}
-	//Priority Low
-	else if ((state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_MOVING) ||
-		(state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_MOVING) ||
-		(state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_PUSHED) ||
-		(state == CGPMOVE_STATE::E_REACH_GOAL && other.state == CGPMOVE_STATE::E_MOVING) ||
-		(state == CGPMOVE_STATE::E_REACH_GOAL && other.state == CGPMOVE_STATE::E_PUSHED) ||
-		(state == CGPMOVE_STATE::E_REACH_GOAL && other.state == CGPMOVE_STATE::E_REACH_GOAL && reachGoalCountdown < other.reachGoalCountdown))
-	{
-		if (state == CGPMOVE_STATE::E_STATIC)
-		{
-			state = CGPMOVE_STATE::E_PUSHED;
-			posBeforePushed = trs->pos;
-		}
-		pushedCooldownBeforeReturn = CGPMOVE_CD_BEFORE_RETURN;
-
-		Core::Math::Vec3 direction = (trs->pos - other.trs->pos).Normalize();
-		trs->pos = other.trs->pos + direction * (radius + other.radius);
-		map.ClampPosInMapWithScale(*trs);
-		map.ClampPosOutsideObstacleTile(*trs);
-		trs->trsHasChanged = true;
 	}
 
 }

@@ -44,12 +44,7 @@ void Gamespector::WindowDisplay()
 				NewLine();
 			}
 
-			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::MOVE)
-			{
-				if (sEntityGameplayComp.componentMove.reachGoalCountdown > 0)
-					Text("Reaching destination in %.2f", sEntityGameplayComp.componentMove.reachGoalCountdown);
-			}
-
+			
 			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::PRODUCER)
 			{
 

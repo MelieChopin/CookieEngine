@@ -301,7 +301,7 @@ void Coordinator::ApplyGameplayPosPrediction()
 			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove.PositionPrediction();
 }
 void Coordinator::ApplyGameplayResolveCollision(Map& map)
-{
+{/*
 	std::vector<Entity*> entitiesToCheck;
 
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
@@ -323,41 +323,42 @@ void Coordinator::ApplyGameplayResolveCollision(Map& map)
 			}
 
 			entitiesToCheck.push_back(&entityHandler->entities[i]);
-		}
-	/*
-	bool allCollisionResolved = false;
-	int counter = 0;
+		}*/
 
-	while (!allCollisionResolved && counter < 20)
-	{
-		allCollisionResolved = true;
-		counter++;
+	std::vector<CGPMove*> allEntitiespossible;
+	std::vector<CGPMove*> entitiesToCheck;
 
-		for (int i = 0; i < entitiesToCheck.size(); ++i)
+	//Fill Vectors
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
+			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
 		{
-			CGPMove& cgpMoveSelf = componentHandler->GetComponentGameplay(entitiesToCheck[i]->id).componentMove;
-			ComponentTransform& trsSelf = componentHandler->GetComponentTransform(entitiesToCheck[i]->id);
-
-			for (int j = 0; j < entitiesToCheck.size(); ++j)
-			{
-				if (i != j)
-				{
-					CGPMove& cgpMoveOther = componentHandler->GetComponentGameplay(entitiesToCheck[j]->id).componentMove;
-					ComponentTransform& trsOther = componentHandler->GetComponentTransform(entitiesToCheck[j]->id);
-
-					//if the two circles collide
-					if ((trsSelf.pos - trsOther.pos).Length() < cgpMoveSelf.radius + cgpMoveOther.radius - 0.1)
-					{
-						std::cout << "length : " << (trsSelf.pos - trsOther.pos).Length() << " radius added : " << cgpMoveSelf.radius + cgpMoveOther.radius - 0.1 << "\n";
-						allCollisionResolved = false;
-						cgpMoveSelf.ResolveColision(trsSelf, cgpMoveOther, trsOther);
-					}
-				}
-			}
-
+			CGPMove& cgpMoveSelf = componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove;
+			allEntitiespossible.push_back(&cgpMoveSelf);
+			entitiesToCheck.push_back(&cgpMoveSelf);
 		}
 
-	}*/
+	//Recursive Colision
+	while (!entitiesToCheck.empty())
+	{
+		for (int i = 0; i < allEntitiespossible.size(); ++i)
+		{
+			if (entitiesToCheck[0] == allEntitiespossible[i])
+				continue;
+
+			Vec3 otherInitialPos = allEntitiespossible[i]->trs->pos;
+
+			//if the two circles collide
+			if ((entitiesToCheck[0]->trs->pos - allEntitiespossible[i]->trs->pos).Length() < entitiesToCheck[0]->radius + allEntitiespossible[i]->radius)
+				entitiesToCheck[0]->ResolveColision(*allEntitiespossible[i], map);
+
+			//if the other unit was pushed add it back to the entities to check
+			if (otherInitialPos != allEntitiespossible[i]->trs->pos)
+				entitiesToCheck.emplace(entitiesToCheck.begin() + 1, allEntitiespossible[i]);
+		}
+
+		entitiesToCheck.erase(entitiesToCheck.begin());
+	}
 
 }
 void Coordinator::ApplyGameplayDrawPath(DebugRenderer& debug)

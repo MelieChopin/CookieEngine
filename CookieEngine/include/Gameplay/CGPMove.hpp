@@ -11,18 +11,17 @@ namespace Cookie
 	{
 		enum CGPMOVE_STATE
 		{
-			E_MOVING,
-			E_PUSHED,
-			E_STATIC,
 			E_REACH_GOAL,
-
-			E_WAITING
+			E_STATIC,
+			E_WAITING,
+			E_PUSHED,
+			E_MOVING
 		};
 
 		//use constexpr, for now it bug
 		#define CGPMOVE_CD_BEFORE_RETURN 0.5f
-		#define CGPMOVE_CD_BEFORE_STATIC 5.f
-		#define OFFSET_MAX_FROM_CENTROID 10
+		#define CGPMOVE_CD_BEFORE_STATIC 2.f
+		#define OFFSET_MAX_FROM_CENTROID 5
 
 		class CGPMove
 		{
