@@ -1,10 +1,10 @@
 #include "Coordinator.hpp"
+#include "ResourcesManager.hpp"
+#include "Texture.hpp"
 #include "GamespectorWidget.hpp"
 
 #include "ComponentHandler.hpp"
-#include "Texture.hpp"
 #include "Prefab.hpp"
-#include "ResourcesManager.hpp"
 
 #include <imgui.h>
 
@@ -16,7 +16,7 @@ using namespace Cookie::ECS;
 
 void Gamespector::SafeIcon(const Texture* const & texture, const float size)
 {
-	static const Texture* const & nullTexture = resources.icons["Assets/UI/IconCanon.tif"].get();
+	static const Texture* const & nullTexture = resources.icons["Assets/EditorUIcons/Log.ico"].get();
 
 	Image(static_cast<ImTextureID>(texture ? texture->GetResourceView() : nullTexture->GetResourceView()), {size, size}); 
 }
@@ -46,7 +46,7 @@ void Gamespector::WindowDisplay()
 			const Entity* const & selectedEntity = coordinator.selectedEntities[0];
 			const ComponentGameplay& sEntityGameplayComp = coordinator.componentHandler->GetComponentGameplay(selectedEntity->id);
 			
-			Dummy({GetContentRegionAvail().x / 4.f, GetContentRegionAvail().y});
+			Dummy({GetContentRegionAvail().x / 5.f, GetContentRegionAvail().y});
 			
 			SameLine();
 			BeginGroup();
@@ -121,6 +121,62 @@ void Gamespector::WindowDisplay()
 				Separator();
 			}
 
+			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::MOVE)
+			{
+				static const Texture* const & moveIcon = resources.icons["Assets/UI/Deplacement.png"].get();
+
+				SafeIcon(moveIcon, 50.f);
+
+				if (IsItemHovered())
+				{
+					BeginTooltip();
+					Text("Speed: %.1f", sEntityGameplayComp.componentMove.moveSpeed);
+					
+					if (sEntityGameplayComp.componentMove.isFlying)
+						TextColored({0, 1, 0, 1}, "Flying");
+					
+					EndTooltip();
+				}
+			}
+
+			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::ATTACK)
+			{
+				if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::MOVE)
+					SameLine();
+
+
+				static const Texture* const & attackIcon = resources.icons["Assets/UI/Attaque.png"].get();
+				
+				SafeIcon(attackIcon, 50.f);
+
+				if (IsItemHovered())
+				{
+					BeginTooltip();
+					Text("Attack damage: %.1f", sEntityGameplayComp.componentAttack.attackDamage);
+					Text("Attack speed: %.1f", sEntityGameplayComp.componentAttack.attackSpeed);
+					Text("Attack range: %.1f", sEntityGameplayComp.componentAttack.attackRange);
+					EndTooltip();
+				}
+			}
+
+			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::LIVE)
+			{
+				if (sEntityGameplayComp.signatureGameplay & (CGP_SIGNATURE::ATTACK | CGP_SIGNATURE::MOVE))
+					SameLine();
+
+
+				static const Texture* const& armorIcon = nullptr;
+
+				SafeIcon(armorIcon, 50.f);
+
+				if (IsItemHovered())
+				{
+					BeginTooltip();
+					Text("This unit has an armor of %.1f resistance units", sEntityGameplayComp.componentLive.armor);
+					EndTooltip();
+				}
+			}
+
 			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::RESOURCE)
 			{
 				if (sEntityGameplayComp.componentResource.isPrimary)
@@ -152,35 +208,6 @@ void Gamespector::WindowDisplay()
 			for (const Entity* const & e : coordinator.selectedEntities)
 			{
 				SafeIcon(coordinator.componentHandler->GetComponentModel(e->id).icon, size);
-
-
-				const ComponentGameplay& eGC = coordinator.componentHandler->GetComponentGameplay(e->id);
-
-				if (eGC.signatureGameplay && IsItemHovered())
-				{
-					BeginTooltip();
-					
-					if (eGC.signatureGameplay & CGP_SIGNATURE::LIVE)
-						LifeBar(eGC.componentLive.lifeCurrent, eGC.componentLive.lifeMax, 50.f, 15.f);
-					
-					if ((eGC.signatureGameplay & CGP_SIGNATURE::PRODUCER) && (eGC.componentProducer.queueOfUnits.size() > 0))
-					{
-						SafeIcon(eGC.componentProducer.queueOfUnits[0]->model.icon, 50.f);
-
-						SameLine();
-						BeginGroup();
-
-						Dummy({ 0.f, 31.f });
-
-						PushStyleColor(ImGuiCol_PlotHistogram, { 0, 1, 1, 1 });
-						ProgressBar(eGC.componentProducer.currentCountdown / eGC.componentProducer.queueOfUnits[0]->gameplay.cost.timeToProduce, { 160.f, 15.f }, std::to_string((int)eGC.componentProducer.currentCountdown).c_str());
-						PopStyleColor();
-
-						EndGroup();
-					}
-					
-					EndTooltip();
-				}
 
 				placedTemp++;
 
