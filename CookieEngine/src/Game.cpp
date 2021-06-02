@@ -107,8 +107,17 @@ void Game::HandleGameplayInputs()
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
         coordinator.armyHandler->AddArmyCoordinator(E_ARMY_NAME::E_AI1);
-        
 
+    if (ImGui::GetIO().KeysDown[GLFW_KEY_SPACE])
+    {
+        if (coordinator.selectedEntities.empty())
+            scene->camera->pos = { 0, 0, 0 };
+        else
+            scene->camera->pos = coordinator.componentHandler->GetComponentTransform(coordinator.selectedEntities[0]->id).pos;
+
+        scene->camera->pos += {0, 10, 15};
+        scene->camera->ForceUpdate();
+    }
 
     if (playerData.buildingToBuild)
     {
