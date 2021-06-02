@@ -1,6 +1,8 @@
 #include "ResourcesManager.hpp"
 #include "Resources/Prefab.hpp"
 #include "Resources/Map.hpp"
+#include "SoundManager.hpp"
+#include "ParticlesHandler.hpp"
 #include "Core/Primitives.hpp"
 #include "Render/DebugRenderer.hpp"
 
@@ -13,6 +15,7 @@
 #include <assert.h>
 
 using namespace Cookie::Resources;
+using namespace Cookie::Resources::Particles;
 using namespace Cookie::Render;
 using namespace Cookie::Gameplay;
 using namespace Cookie::Core::Math;
@@ -65,10 +68,14 @@ Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab, E_ARMY_N
 	{
 		ComponentGameplay& gameplay = componentHandler->GetComponentGameplay(newEntity.id);
 		gameplay = prefab->gameplay;
-
 		gameplay.teamName = teamName;
-		gameplay.trs = &componentHandler->GetComponentTransform(newEntity.id);
-		gameplay.componentMove.trs = &componentHandler->GetComponentTransform(newEntity.id);
+
+		ComponentTransform* trsPtr = &componentHandler->GetComponentTransform(newEntity.id);
+		gameplay.trs				 = trsPtr;
+		gameplay.componentLive.trs   = trsPtr;
+		gameplay.componentAttack.trs = trsPtr;
+		gameplay.componentMove.trs   = trsPtr;
+
 		armyHandler->AddElementToArmy(&gameplay);
 	}
 
@@ -210,12 +217,30 @@ void Coordinator::ApplyScriptUpdate()
 void Coordinator::ApplyRemoveUnnecessaryEntities()
 {
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (entityHandler->entities[i].needToBeRemoved ||
-			(CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::LIVE) && componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentLive.lifeCurrent <= 0))
+	{
+		if (entityHandler->entities[i].needToBeRemoved)
 		{
 			RemoveEntity(entityHandler->entities[i]);
 			i = std::max(i - 1, 0);
 		}
+		else if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::GAMEPLAY) &&
+				 CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::LIVE))
+		{
+			CGPLive& life = componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentLive;
+
+			if (life.lifeCurrent <= 0)
+			{
+				if (life.sfxDeath)
+					SoundManager::PlayMusic3D(life.sfxDeath, life.trs->pos);
+				if (life.vfxDeath)
+					ParticlesHandler::CreateParticlesWithPrefab(life.trs->pos, life.vfxDeath);
+
+				RemoveEntity(entityHandler->entities[i]);
+				i = std::max(i - 1, 0);
+			}
+		}
+	
+	}
 }
 void Coordinator::ApplyComputeTrs()
 {
