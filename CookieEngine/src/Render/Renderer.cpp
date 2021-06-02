@@ -222,12 +222,10 @@ void Renderer::DrawMiniMap(FrameBuffer& fbo)
     /* in terms of state, they have actually a lot in common so 
      * use the already existent to not create new ones */
     geomPass.Set();
-    remote.context->OMSetRenderTargets(1, &fbo.renderTargetView, geomPass.depthBuffer);
 
     miniMapPass.Draw(drawData,fbo);
 
-    remote.context->OMSetRenderTargets(1, &fbo.renderTargetView, geomPass.depthBuffer);
-    remote.context->ClearDepthStencilView(geomPass.depthBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    remote.context->ClearDepthStencilView(miniMapPass.depthBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
 void Renderer::DrawFrameBuffer(FrameBuffer& fbo)

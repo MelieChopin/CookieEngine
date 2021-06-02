@@ -35,8 +35,6 @@ namespace Cookie
 			D3D11_VIEWPORT viewport;
 			
 		public:
-			float aspectRatio = 1.0f;
-
 			Core::Math::Mat4 ortho;
 			Core::Math::Mat4 miniMapView;
 
@@ -46,10 +44,12 @@ namespace Cookie
 			ID3D11DepthStencilState*	depthStencilState;
 			ID3D11RasterizerState*		rasterState;
 
+			ID3D11DepthStencilView* depthBuffer = nullptr;
 		private:
 			void InitState();
 
 		public:
+			void CreateDepth(int width, int height);
 
 			MiniMapPass();
 			~MiniMapPass();

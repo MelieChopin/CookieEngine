@@ -194,7 +194,6 @@ void Mesh::Set()const
     UINT offset = 0;
     Render::RendererRemote::context->IASetVertexBuffers(0,1,&VBuffer,&stride,&offset);
     Render::RendererRemote::context->IASetIndexBuffer(IBuffer, DXGI_FORMAT_R32_UINT,0);
-    Render::RendererRemote::context->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void Mesh::Draw()const

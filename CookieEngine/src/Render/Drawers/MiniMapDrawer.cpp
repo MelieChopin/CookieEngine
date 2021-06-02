@@ -26,10 +26,10 @@ MiniMapDrawer::MiniMapDrawer():
     InitShader();
 
     /* creating a quad that works with line strips */
-    std::vector<float> vertices = { -0.5f, 0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-                                     0.5f, 0.0f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-                                     0.5f, 0.0f,  0.5f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,
-                                    -0.5f, 0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f };
+    std::vector<float> vertices = { -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+                                     0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+                                     0.5f, 0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,
+                                    -0.5f, 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f };
     
     std::vector<unsigned int> indices = { 0 , 1, 2, 3 , 0 };
 
@@ -146,7 +146,9 @@ void MiniMapDrawer::Set(const Camera& cam, const Resources::Map& map)
     Vec3 UpperRight = cam.ScreenPointToWorldDir({ { 1.0f,1.0f } });
     Vec3 DownLeft = cam.ScreenPointToWorldDir({ { -1.0f,-1.0f } });
 
-    float t = (-cam.pos.y) / UpperRight.y;
+    float t = (-cam.pos.y) / middle.y;
+    middle = cam.pos + middle * t;
+    t = (-cam.pos.y) / UpperRight.y;
     UpperRight = cam.pos + UpperRight * t;
     t = (-cam.pos.y) / DownLeft.y;
     DownLeft = cam.pos + DownLeft * t;
