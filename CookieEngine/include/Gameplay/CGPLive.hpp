@@ -4,11 +4,34 @@
 
 namespace Cookie
 {
+	namespace Resources
+	{
+		class Sound;
+
+		namespace Particles
+		{
+			class ParticlesPrefab;
+		}
+	}
+
+	namespace ECS
+	{
+		class ComponentTransform;
+	}
+
 	namespace Gameplay
 	{
 		class CGPLive
 		{
 		public:
+
+			ECS::ComponentTransform*               trs      {nullptr};
+			Resources::Sound*					   sfxDeath {nullptr};
+			Resources::Particles::ParticlesPrefab* vfxDeath {nullptr};
+
+			Resources::Sound*					   sfxHit   {nullptr};
+			Resources::Particles::ParticlesPrefab* vfxHit   {nullptr};
+
 
 			float lifeMax = 10;
 			float lifeCurrent = 10;
@@ -19,6 +42,12 @@ namespace Cookie
 
 			inline void ToDefault() noexcept
 			{
+				sfxDeath = nullptr;
+				vfxDeath = nullptr;
+
+				sfxHit = nullptr;
+				vfxHit = nullptr;
+
 				lifeMax = 10;
 				lifeCurrent = 10;
 				armor = 0;

@@ -394,6 +394,7 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const Prefab* const & pr
 
 		 json& live = js["Gameplay"]["CGPLive"];
 		 live["Life"] = gameplay.componentLive.lifeCurrent;
+		 live["LifeMax"] = gameplay.componentLive.lifeMax;
 		 live["Armor"] = gameplay.componentLive.armor;
 
 		 json& attack = js["Gameplay"]["CGPAttack"];

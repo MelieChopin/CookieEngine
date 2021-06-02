@@ -51,6 +51,8 @@ namespace Cookie::UIwidget
 		// Allows to interface with three inner components corresponding to the entity's health and armor, movement capacities and attack abilities.
 		void GameplayInterface();
 
+		void FXInterface();
+
 		// Allows editing of different parameters used exclusively by map entities.
 		void MapInterface();
 
