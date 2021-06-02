@@ -21,6 +21,21 @@ void Gamespector::SafeIcon(const Texture* const & texture, const float size)
 	Image(static_cast<ImTextureID>(texture ? texture->GetResourceView() : nullTexture->GetResourceView()), {size, size}); 
 }
 
+void Gamespector::LifeBar(const float currentLife, const float maxLife, const float barWidth, const float barHeight)
+{
+	const float lifeFrac = currentLife / maxLife;
+
+	static float RGBc[3] = {0, 0, 0};
+	ColorConvertHSVtoRGB(0.486f * lifeFrac, 1, 1, RGBc[0], RGBc[1], RGBc[2]);
+
+	PushStyleColor(ImGuiCol_PlotHistogram, { RGBc[0], RGBc[1], RGBc[2], 1 });
+
+	std::string lifeBarOverlay = std::to_string((int)currentLife) + std::string("/") + std::to_string((int)maxLife);
+	ProgressBar(lifeFrac, { barWidth, barHeight }, lifeBarOverlay.c_str());
+
+	PopStyleColor();
+}
+
 
 void Gamespector::WindowDisplay()
 {
@@ -42,18 +57,7 @@ void Gamespector::WindowDisplay()
 
 				SafeIcon(coordinator.componentHandler->GetComponentModel(selectedEntity->id).icon, regionHeight - 19.f);
 				
-
-				const float lifeFrac = sEntityGameplayComp.componentLive.lifeCurrent / sEntityGameplayComp.componentLive.lifeMax;
-
-				Cookie::Core::Math::Vec3 RGBc;
-				ColorConvertHSVtoRGB(0.486f * lifeFrac, 1, 1, RGBc.r, RGBc.g, RGBc.b);
-
-				PushStyleColor(ImGuiCol_PlotHistogram, { RGBc.r, RGBc.g, RGBc.b, 1 });
-
-				std::string lifeBarOverlay = std::to_string((int)sEntityGameplayComp.componentLive.lifeCurrent) + std::string("/") + std::to_string((int)sEntityGameplayComp.componentLive.lifeMax);
-				ProgressBar(lifeFrac, {regionHeight - 19.f, 15.f}, lifeBarOverlay.c_str());
-				
-				PopStyleColor();
+				LifeBar(sEntityGameplayComp.componentLive.lifeCurrent, sEntityGameplayComp.componentLive.lifeMax, regionHeight - 19.f, 15.f);
 			}
 			else
 				SafeIcon(coordinator.componentHandler->GetComponentModel(selectedEntity->id).icon, GetContentRegionAvail().y);
@@ -78,7 +82,7 @@ void Gamespector::WindowDisplay()
 					Dummy({0.f, 31.f});
 					
 					PushStyleColor(ImGuiCol_PlotHistogram, { 0, 1, 1, 1 });
-					ProgressBar(sEntityGameplayComp.componentProducer.currentCountdown / unitsQueue[0]->gameplay.cost.timeToProduce, { GetContentRegionAvail().x / 3.f, 15.f }, std::to_string((int)sEntityGameplayComp.componentProducer.currentCountdown).c_str());
+					ProgressBar(sEntityGameplayComp.componentProducer.currentCountdown / unitsQueue[0]->gameplay.cost.timeToProduce, { 160.f, 15.f }, std::to_string((int)sEntityGameplayComp.componentProducer.currentCountdown).c_str());
 					PopStyleColor();
 
 					EndGroup();
@@ -117,6 +121,18 @@ void Gamespector::WindowDisplay()
 				Separator();
 			}
 
+			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::RESOURCE)
+			{
+				if (sEntityGameplayComp.componentResource.isPrimary)
+				{
+					TextColored({ 1.f, 0.816f, 0.31f, 1.f }, "Remaining wheat: %.2f units", sEntityGameplayComp.componentResource.resourceReserve);
+				}
+				else
+				{
+					TextColored({ 0.235f, 0.16f, 0.16f, 255.f }, "Remaining chocolate: %.2f units", sEntityGameplayComp.componentResource.resourceReserve);
+				}
+			}
+
 			EndGroup();
 		}
 		else if (coordinator.selectedEntities.size() > 1)
@@ -124,9 +140,9 @@ void Gamespector::WindowDisplay()
 			float size = (int)GetContentRegionAvail().y * 0.75f;
 			int iconsPerLines = GetContentRegionAvail().x / (size + 8);
 
-			while ((int)(((coordinator.selectedEntities.size() - 1) / iconsPerLines) + 1) * (size + 4) > GetContentRegionAvail().y)
+			while ((int)((coordinator.selectedEntities.size() / iconsPerLines) + 1) * (size + 4) > GetContentRegionAvail().y)
 			{
-				size /= 1.5f;
+				size /= 2.f;
 				iconsPerLines = GetContentRegionAvail().x / (size + 8);
 			}
 
@@ -137,11 +153,39 @@ void Gamespector::WindowDisplay()
 			{
 				SafeIcon(coordinator.componentHandler->GetComponentModel(e->id).icon, size);
 
+
+				const ComponentGameplay& eGC = coordinator.componentHandler->GetComponentGameplay(e->id);
+
+				if (eGC.signatureGameplay && IsItemHovered())
+				{
+					BeginTooltip();
+					
+					if (eGC.signatureGameplay & CGP_SIGNATURE::LIVE)
+						LifeBar(eGC.componentLive.lifeCurrent, eGC.componentLive.lifeMax, 50.f, 15.f);
+					
+					if ((eGC.signatureGameplay & CGP_SIGNATURE::PRODUCER) && (eGC.componentProducer.queueOfUnits.size() > 0))
+					{
+						SafeIcon(eGC.componentProducer.queueOfUnits[0]->model.icon, 50.f);
+
+						SameLine();
+						BeginGroup();
+
+						Dummy({ 0.f, 31.f });
+
+						PushStyleColor(ImGuiCol_PlotHistogram, { 0, 1, 1, 1 });
+						ProgressBar(eGC.componentProducer.currentCountdown / eGC.componentProducer.queueOfUnits[0]->gameplay.cost.timeToProduce, { 160.f, 15.f }, std::to_string((int)eGC.componentProducer.currentCountdown).c_str());
+						PopStyleColor();
+
+						EndGroup();
+					}
+					
+					EndTooltip();
+				}
+
 				placedTemp++;
 
 				(placedTemp % iconsPerLines) ? SameLine() : NewLine();
 			}
-
 		}
 	}
 
