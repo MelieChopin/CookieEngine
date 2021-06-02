@@ -31,6 +31,7 @@ namespace Cookie
 				void Update();
 				void Draw(const Render::Camera& cam);
 				static void CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3& pos, const std::string& name, const Cookie::Core::Math::Vec3& posSpawnEnd = Cookie::Core::Math::Vec3(0, 0, 0));
+				static void CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3& pos, Particles::ParticlesPrefab* particlesPrefab, const Cookie::Core::Math::Vec3& posSpawnEnd = Cookie::Core::Math::Vec3(0, 0, 0));
 			};
 		}
 	}

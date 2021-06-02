@@ -19,7 +19,7 @@ void SoundOrchestrator::WindowDisplay()
 	{
 		static Sound* selectedSound = nullptr;
 
-		ResourceMapExplorer<Sound>("sound", "##SOUNDESELECTOR", *SoundManager::sounds, selectedSound);
+		ResourceMapExplorer<Sound>("sound", "##SOUNDESELECTOR", manager.sounds, selectedSound);
 
 		NewLine();
 

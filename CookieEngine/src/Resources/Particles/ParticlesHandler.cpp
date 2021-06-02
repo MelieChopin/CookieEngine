@@ -32,14 +32,20 @@ void ParticlesHandler::Draw(const Render::Camera& cam)
 		(*particles).Draw(cam, frustrum);
 }
 
-void ParticlesHandler::CreateParticlesWithPrefab
-(const Cookie::Core::Math::Vec3& pos, const std::string& namePrefab, const Cookie::Core::Math::Vec3& posSpawnEnd)
+void ParticlesHandler::CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3& pos, const std::string& namePref, const Cookie::Core::Math::Vec3& posSpawnEnd)
 {
-	if (living + 1 >= particlesSystems.size() || particlesPrefab->find(namePrefab) == particlesPrefab->end())
+	ParticlesPrefab* prefab = (*particlesPrefab)[namePref].get();
+	CreateParticlesWithPrefab(pos, prefab, posSpawnEnd);
+}
+
+void ParticlesHandler::CreateParticlesWithPrefab
+(const Cookie::Core::Math::Vec3& pos, ParticlesPrefab* particlesPrefab, const Cookie::Core::Math::Vec3& posSpawnEnd)
+{
+	if (living + 1 >= particlesSystems.size() || !particlesPrefab)
 		return;
 	ParticlesSystem& particles = *std::next(particlesSystems.begin(), living);
 
-	ParticlesPrefab* prefab = (*particlesPrefab)[namePrefab].get();
+	ParticlesPrefab* prefab = particlesPrefab;
 
 	particles.name = prefab->name;
 	particles.data.resize(prefab->data.size());
@@ -102,14 +108,6 @@ void ParticlesHandler::CreateParticlesWithPrefab
 					create->time = prefab->emit[i][j].data[1].z;
 					particles.particlesEmiter[i].updates.push_back(create);
 				}
-			}
-			else if (name == "CollisionWithPlane")
-			{
-				CollisionWithPlane* plane = new CollisionWithPlane();
-				plane->dis = prefab->emit[i][j].data[1].x;
-				plane->n = prefab->emit[i][j].data[0];
-				plane->namePrefab = prefab->emit[i][j].nameData;
-				particles.particlesEmiter[i].updates.push_back(plane);
 			}
 			else if (name == "Shadow")
 			{

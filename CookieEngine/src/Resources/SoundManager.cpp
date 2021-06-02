@@ -10,7 +10,6 @@ namespace fs = std::filesystem;
 using namespace Cookie::Resources;
 
 FMOD::System* SoundManager::system;
-std::unordered_map<std::string, std::unique_ptr<Cookie::Resources::Sound>>* SoundManager::sounds;
 
 void SoundManager::InitSystem()
 {
@@ -76,8 +75,6 @@ void SoundManager::LoadAllMusic(ResourcesManager& resourcesManager)
 		resourcesManager.sounds[name] = std::make_unique<Cookie::Resources::Sound>(newSound);
 	}
 
-	sounds = &resourcesManager.sounds;
-
 	for (int i = 0; i < MAsset.size(); i++)
 	{
 		std::size_t pos = MAsset[i].find("c/");
@@ -85,83 +82,20 @@ void SoundManager::LoadAllMusic(ResourcesManager& resourcesManager)
 		pos = name.find(".MAsset");
 		std::size_t end = name.length();
 		name.replace(pos, end, ".mp3");
-		Cookie::Resources::Serialization::Load::LoadVolumAndModeMusic(MAsset[i], name);
+		Cookie::Resources::Serialization::Load::LoadVolumAndModeMusic(MAsset[i], resourcesManager.sounds[name].get());
 	}
 }
-
-void SoundManager::PlayMusic(std::string key)
-{
-	if ((*(sounds))[key].get()->sound == nullptr)
-		system->createSound((*(sounds))[key].get()->filepath.c_str(), (*(sounds))[key].get()->mode, nullptr, &(*(sounds))[key].get()->sound);
-	
-	system->playSound((*(sounds))[key].get()->sound, nullptr, false, &(*(sounds))[key].get()->chan);
-	(*(sounds))[key].get()->chan->setVolume((*(sounds))[key].get()->vol);
-	if ((*(sounds))[key].get()->mode & FMOD_3D)
-	{
-		Cookie::Core::Math::Vec3 posSound = (*(sounds))[key].get()->pos;
-		FMOD_VECTOR pos = { posSound.x, posSound.y, posSound.z};
-		(*(sounds))[key].get()->chan->set3DAttributes(&pos, nullptr);
-	}
-}
-
-void SoundManager::Play3DMusic(std::string key, const Cookie::Core::Math::Vec3& pos)
-{
-	if ((*(sounds))[key].get()->sound == nullptr)
-		system->createSound((*(sounds))[key].get()->filepath.c_str(),
-			(*(sounds))[key].get()->mode, nullptr, &(*(sounds))[key].get()->sound);
-
-	system->playSound((*(sounds))[key].get()->sound, nullptr, false, &(*(sounds))[key].get()->chan);
-	(*(sounds))[key].get()->chan->setVolume((*(sounds))[key].get()->vol);
-	if ((*(sounds))[key].get()->mode & FMOD_3D)
-	{
-		FMOD_VECTOR posSound = { pos.x, pos.y, pos.z };
-		(*(sounds))[key].get()->chan->set3DAttributes(&posSound, nullptr);
-	}
-}
-
-void SoundManager::SetVolume(std::string key, float vol)
-{
-	(*(sounds))[key].get()->vol = vol;
-}
-
-void SoundManager::SetPaused(std::string key, bool isPaused)
-{
-	(*(sounds))[key].get()->chan->setPaused(isPaused);
-}
-
-void SoundManager::Loop(std::string key)
-{
-	(*(sounds))[key].get()->mode |= FMOD_LOOP_NORMAL;
-}
-
-void SoundManager::Normal(std::string key)
-{
-	(*(sounds))[key].get()->mode -= FMOD_LOOP_NORMAL;
-}
-
-void SoundManager::Set3D(std::string key, const Cookie::Core::Math::Vec3& pos)
-{
-	(*(sounds))[key].get()->mode |= FMOD_3D;
-	(*(sounds))[key].get()->pos = pos;
-}
-
-void SoundManager::SetPosition(std::string key, const Cookie::Core::Math::Vec3& pos)
-{
-	(*(sounds))[key].get()->pos = pos;
-}
-
-void SoundManager::Set2D(std::string key)
-{
-	(*(sounds))[key].get()->mode -= FMOD_2D;
-}
-
-void SoundManager::SetMode(std::string key, FMOD_MODE mode)
-{
-	(*(sounds))[key].get()->mode = mode;
-}
-
 
 void SoundManager::PlayMusic(Sound* const & sound)
+{
+	if (sound->sound == nullptr)
+		system->createSound(sound->filepath.c_str(), sound->mode, nullptr, &sound->sound);
+
+	system->playSound(sound->sound, nullptr, false, &sound->chan);
+	sound->chan->setVolume(sound->vol);
+}
+
+void SoundManager::PlayMusic3D(Sound* const& sound, const Cookie::Core::Math::Vec3& pos)
 {
 	if (sound->sound == nullptr)
 		system->createSound(sound->filepath.c_str(), sound->mode, nullptr, &sound->sound);

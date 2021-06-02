@@ -15,26 +15,13 @@ namespace Cookie
 		{
 		public:
 			static FMOD::System* system;
-			static std::unordered_map<std::string, std::unique_ptr<Cookie::Resources::Sound>>* sounds;
 
 			static void InitSystem();
 			static void Release();
 			static void LoadAllMusic(ResourcesManager& resourcesManager);
 
-			static void PlayMusic	(std::string key);
-			static void Play3DMusic	(std::string key, const Cookie::Core::Math::Vec3& pos);
-			static void SetVolume	(std::string key, float vol);
-			static void SetPaused	(std::string key, bool isPaused);
-			static void Loop		(std::string key);
-			static void Normal		(std::string key);
-			static void Set3D		(std::string key, const Cookie::Core::Math::Vec3& pos);
-			static void SetPosition	(std::string key, const Cookie::Core::Math::Vec3& pos);
-			static void Set2D		(std::string key);
-			static void SetMode		(std::string key, FMOD_MODE mode);
-
-
 			static void PlayMusic(Sound* const& sound);
-
+			static void PlayMusic3D(Sound* const& sound, const Cookie::Core::Math::Vec3& pos);
 
 			static inline void SetVolume(Sound* const& sound, float vol)
 			{ sound->vol = vol; }
