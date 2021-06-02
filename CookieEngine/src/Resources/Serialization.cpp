@@ -394,6 +394,7 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const Prefab* const & pr
 
 		 json& live = js["Gameplay"]["CGPLive"];
 		 live["Life"] = gameplay.componentLive.lifeCurrent;
+		 live["LifeMax"] = gameplay.componentLive.lifeMax;
 		 live["Armor"] = gameplay.componentLive.armor;
 
 		 json& attack = js["Gameplay"]["CGPAttack"];
@@ -498,28 +499,6 @@ void Cookie::Resources::Serialization::Save::SavePhysic(json& js, Cookie::ECS::C
 	 js["physicTRS"]["quaternion"] = { quat.w, quat.x, quat.y, quat.z };
  }
 
-void Cookie::Resources::Serialization::Save::SaveVolumAndModeMusic(std::string key)
-{
-	Cookie::Resources::Sound sound = *(*(Cookie::Resources::SoundManager::sounds))[key].get();
-
-	std::string filepath = sound.filepath;
-
-	std::size_t pos = filepath.find(".mp3");
-	std::size_t end = filepath.length();
-
-	filepath.replace(pos, end, ".MAsset");
-
-	std::ofstream file(filepath);
-
-	json js;
-
-	std::cout << sound.vol;
-	js["Volume"] = sound.vol;
-	js["Mode"] = sound.mode;
-	js["Pos"] = sound.pos.e;
-
-	file << std::setw(4) << js << std::endl;
-}
 
 void Cookie::Resources::Serialization::Save::SaveVolumAndModeMusic(Sound* const & sound)
 {
@@ -534,7 +513,6 @@ void Cookie::Resources::Serialization::Save::SaveVolumAndModeMusic(Sound* const 
 
 	json js;
 
-	std::cout << sound->vol;
 	js["Volume"] = sound->vol;
 	js["Mode"] = sound->mode;
 	js["Pos"] = sound->pos.e;
@@ -655,6 +633,8 @@ void Cookie::Resources::Serialization::Save::SaveParticles(Cookie::Resources::Pa
 					generator["colorMax"] = colorR.maxCol.e;
 					break;
 				}
+				case (TYPEGEN::INITVELWITHPOINT):
+					break;
 				}
 			}
 
@@ -1294,7 +1274,7 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 	}
 }
 
-void Cookie::Resources::Serialization::Load::LoadVolumAndModeMusic(std::string path, std::string key)
+void Cookie::Resources::Serialization::Load::LoadVolumAndModeMusic(std::string path, Sound* const& sound)
 {
 	std::ifstream file(path);
 
@@ -1307,13 +1287,9 @@ void Cookie::Resources::Serialization::Load::LoadVolumAndModeMusic(std::string p
 	json js;
 	file >> js;
 
-	Cookie::Resources::SoundManager::SetVolume(key, js["Volume"].get<float>());
+	Cookie::Resources::SoundManager::SetVolume(sound, js["Volume"].get<float>());
 
-	Cookie::Core::Math::Vec3 pos;
-	js["Pos"].get_to(pos.e);
-	Cookie::Resources::SoundManager::SetPosition(key, pos);
-
-	Cookie::Resources::SoundManager::SetMode(key, js["Mode"].get<int>());
+	Cookie::Resources::SoundManager::SetMode(sound, js["Mode"].get<int>());
 }
 
 void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources::ResourcesManager& resourcesManager)
@@ -1483,6 +1459,12 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							emitter.generators.push_back(colorR);
 							break;
 						}
+						case (TYPEGEN::INITVELWITHPOINT): {
+							Particles::emit emit;
+							emit.name = "InitVelWithPoint";
+							pref.emit[i].push_back(emit);
+							break;
+						}
 						}
 					}
 				}
@@ -1537,12 +1519,11 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							break;
 						}
 						case (TYPEUP::COLLISIONWITHPLANE): {
-							Particles::emit emit;
-							emit.name = "CollisionWithPlane";
-							emit.data[1].x = up[j]["distance"].get<float>();
-							up[j]["normal"].get_to(emit.data[0].e);
-							emit.nameData = up[j]["namePrefab"].get<std::string>();
-							pref.emit[i].push_back(emit);
+							CollisionWithPlane* plane = new CollisionWithPlane();
+							plane->dis = up[j]["distance"].get<float>();
+							up[j]["normal"].get_to(plane->n.e);
+							plane->namePrefab = up[j]["namePrefab"].get<std::string>();
+							emitter.updates.push_back(plane);
 							break;
 						}
 						case (TYPEUP::CREATEPARTICLES): {

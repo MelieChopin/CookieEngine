@@ -40,7 +40,7 @@ void CGPWorker::Update(Resources::Map& map, Coordinator& coordinator, int selfId
 	}
 
 	//isHarvesting
-	if (harvestCountdown > 0)
+	if (harvestCountdown > 0 && !needTostartBuilding)
 	{
 		harvestCountdown -= Core::DeltaTime();
 		if (harvestCountdown <= 0)

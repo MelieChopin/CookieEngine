@@ -78,8 +78,6 @@ void Game::CalculateMousePosInWorld()
     //if raycast hit
     if (scene->map.physic.physBody->raycast(ray, raycastInfo))
         playerData.mousePosInWorld = {raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z};
-
-    playerData.mousePosInWorld.Debug();
 }
 void Game::HandleGameplayInputs()
 {
@@ -115,8 +113,17 @@ void Game::HandleGameplayInputs()
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
         coordinator.armyHandler->AddArmyCoordinator(E_ARMY_NAME::E_AI1);
-        
 
+    if (ImGui::GetIO().KeysDown[GLFW_KEY_SPACE])
+    {
+        if (coordinator.selectedEntities.empty())
+            scene->camera->pos = { 0, 0, 0 };
+        else
+            scene->camera->pos = coordinator.componentHandler->GetComponentTransform(coordinator.selectedEntities[0]->id).pos;
+
+        scene->camera->pos += {0, 10, 15};
+        scene->camera->ForceUpdate();
+    }
 
     if (playerData.buildingToBuild)
     {

@@ -22,13 +22,14 @@ namespace Cookie
 	{
 		enum  C_SIGNATURE
 		{
-			EMPTY_C       = 0b00000,
-			TRANSFORM     = 0b00001,
-			MODEL         = 0b00010,
-			PHYSICS	      = 0b00100,
-			SCRIPT        = 0b01000,
-			GAMEPLAY      = 0b10000,
-			ALL_C         = 0b11111
+			EMPTY_C       = 0b000000,
+			TRANSFORM     = 0b000001,
+			MODEL         = 0b000010,
+			PHYSICS	      = 0b000100,
+			SCRIPT        = 0b001000,
+			GAMEPLAY      = 0b010000,
+			FX			  = 0b100000, //not a real Component, used for customization in Inspector
+			ALL_C         = 0b111111
 		};
 
 
@@ -47,7 +48,14 @@ namespace Cookie
 			ComponentHandler()
 			{
 				for (int i = 0; i < MAX_ENTITIES; ++i)
-					componentGameplays[i].trs = &componentTransforms[i];
+				{
+					ComponentTransform* trsPtr				  = &componentTransforms[i];
+					componentGameplays[i].trs				  = trsPtr;
+					componentGameplays[i].componentLive.trs   = trsPtr;
+					componentGameplays[i].componentAttack.trs = trsPtr;
+					componentGameplays[i].componentMove.trs   = trsPtr;
+
+				}
 			}
 			~ComponentHandler() {}
 

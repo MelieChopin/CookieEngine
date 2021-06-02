@@ -11,18 +11,17 @@ namespace Cookie
 	{
 		enum CGPMOVE_STATE
 		{
-			E_MOVING,
-			E_PUSHED,
-			E_STATIC,
 			E_REACH_GOAL,
-
-			E_WAITING
+			E_STATIC,
+			E_WAITING,
+			E_PUSHED,
+			E_MOVING
 		};
 
 		//use constexpr, for now it bug
 		#define CGPMOVE_CD_BEFORE_RETURN 0.5f
-		#define CGPMOVE_CD_BEFORE_STATIC 5.f
-		#define OFFSET_MAX_FROM_CENTROID 10
+		#define CGPMOVE_CD_BEFORE_STATIC 2.f
+		#define OFFSET_MAX_FROM_CENTROID 5
 
 		class CGPMove
 		{
@@ -30,6 +29,7 @@ namespace Cookie
 			CGPMOVE_STATE state = CGPMOVE_STATE::E_STATIC;
 			float moveSpeed = 5;
 			bool  isFlying = false;
+			ECS::ComponentTransform* trs {nullptr};
 
 			//use it for collision Detection making a circle with trs.pos
 			// sqrt(scale.x^2 + scale.z^2)
@@ -55,17 +55,17 @@ namespace Cookie
 				reachGoalCountdown = CGPMOVE_CD_BEFORE_STATIC;
 			}
 
-			void UpdatePushedCooldown(Resources::Map& map, ECS::ComponentTransform& trs);
+			void UpdatePushedCooldown(Resources::Map& map);
 			void UpdateReachGoalCooldown();
 
 			void SetPath(Resources::Tile& lastWaypoint);
 			
-			void MoveTowardWaypoint(ECS::ComponentTransform& trs);
+			void MoveTowardWaypoint();
 			
 			void PositionPrediction();
-			void ResolveColision(ECS::ComponentTransform& trsSelf, CGPMove& other, ECS::ComponentTransform& trsOther);
+			void ResolveColision(CGPMove& other, Resources::Map& map);
 			
-			void DrawPath(Render::DebugRenderer& debug, ECS::ComponentTransform& trs);
+			void DrawPath(Render::DebugRenderer& debug);
 		};
 
 

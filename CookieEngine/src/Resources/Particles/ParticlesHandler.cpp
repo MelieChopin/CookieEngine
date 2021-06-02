@@ -5,6 +5,11 @@
 
 using namespace Cookie::Resources::Particles;
 
+std::list<ParticlesSystem> ParticlesHandler::particlesSystems;
+unsigned int ParticlesHandler::living;
+std::unordered_map<std::string, std::unique_ptr<ParticlesPrefab>>* ParticlesHandler::particlesPrefab;
+Cookie::Render::ParticlesPass ParticlesHandler::shader;
+
 void ParticlesHandler::Update()
 {
 	for (std::list<ParticlesSystem>::iterator particles = particlesSystems.begin(); particles != particlesSystems.end(); particles++)
@@ -27,15 +32,20 @@ void ParticlesHandler::Draw(const Render::Camera& cam)
 		(*particles).Draw(cam, frustrum);
 }
 
-void ParticlesHandler::CreateParticlesWithPrefab
-(const Cookie::Core::Math::Vec3& pos, const std::string& namePrefab, const Cookie::Core::Math::Vec3& posSpawnEnd)
+void ParticlesHandler::CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3& pos, const std::string& namePref, const Cookie::Core::Math::Vec3& posSpawnEnd)
 {
-	if (living + 1 >= particlesSystems.size() || particlesPrefab->find(namePrefab) == particlesPrefab->end())
+	ParticlesPrefab* prefab = (*particlesPrefab)[namePref].get();
+	CreateParticlesWithPrefab(pos, prefab, posSpawnEnd);
+}
+
+void ParticlesHandler::CreateParticlesWithPrefab
+(const Cookie::Core::Math::Vec3& pos, ParticlesPrefab* particlesPrefab, const Cookie::Core::Math::Vec3& posSpawnEnd)
+{
+	if (living + 1 >= particlesSystems.size() || !particlesPrefab)
 		return;
 	ParticlesSystem& particles = *std::next(particlesSystems.begin(), living);
-	particles.shader = &shader;
 
-	ParticlesPrefab* prefab = (*particlesPrefab)[namePrefab].get();
+	ParticlesPrefab* prefab = particlesPrefab;
 
 	particles.name = prefab->name;
 	particles.data.resize(prefab->data.size());
@@ -89,34 +99,38 @@ void ParticlesHandler::CreateParticlesWithPrefab
 			}
 			else if (name == "CreateParticles")
 			{
-				CreateParticlesFollowing* create = new CreateParticlesFollowing(particles.data[prefab->emit[i][j].data[0].x]);
-				particles.data[prefab->emit[i][j].data[0].x].canRemoved = false;
-				create->coeffScale = prefab->emit[i][j].data[1].x;
-				create->coeffPos = prefab->emit[i][j].data[1].y;
-				create->time = prefab->emit[i][j].data[1].z;
-				particles.particlesEmiter[i].updates.push_back(create);
-			}
-			else if (name == "CollisionWithPlane")
-			{
-				CollisionWithPlane* plane = new CollisionWithPlane(*this);
-				plane->dis = prefab->emit[i][j].data[1].x;
-				plane->n = prefab->emit[i][j].data[0];
-				plane->namePrefab = prefab->emit[i][j].nameData;
-				particles.particlesEmiter[i].updates.push_back(plane);
+				if (particles.data.size() > prefab->emit[i][j].data[0].x)
+				{
+					CreateParticlesFollowing* create = new CreateParticlesFollowing(particles.data[prefab->emit[i][j].data[0].x]);
+					particles.data[prefab->emit[i][j].data[0].x].canRemoved = false;
+					create->coeffScale = prefab->emit[i][j].data[1].x;
+					create->coeffPos = prefab->emit[i][j].data[1].y;
+					create->time = prefab->emit[i][j].data[1].z;
+					particles.particlesEmiter[i].updates.push_back(create);
+				}
 			}
 			else if (name == "Shadow")
 			{
-				Shadow* shadow = new Shadow(particles.data[prefab->emit[i][j].data[0].x]);
-				particles.data[prefab->emit[i][j].data[0].x].canRemoved = false;
-				shadow->time = prefab->emit[i][j].data[0].y;
-				particles.particlesEmiter[i].updates.push_back(shadow);
+				if (particles.data.size() > prefab->emit[i][j].data[0].x)
+				{
+					Shadow* shadow = new Shadow(particles.data[prefab->emit[i][j].data[0].x]);
+					particles.data[prefab->emit[i][j].data[0].x].canRemoved = false;
+					shadow->time = prefab->emit[i][j].data[0].y;
+					particles.particlesEmiter[i].updates.push_back(shadow);
+				}
 			}
 			else if (name == "SpawnEnd")
 			{
-				SpawnEnd* plane = new SpawnEnd(*this);
+				SpawnEnd* plane = new SpawnEnd();
 				plane->namePrefab = prefab->emit[i][j].nameData;
 				plane->posSpawn = posSpawnEnd;
 				particles.particlesEmiter[i].updates.push_back(plane);
+			}
+			else if (name == "InitVelWithPoint")
+			{
+				InitVelocityWithPoint* vel = new InitVelocityWithPoint();
+				vel->endPoint = posSpawnEnd;
+				particles.particlesEmiter[i].generators.push_back(vel);
 			}
 		}
 	}
