@@ -19,9 +19,7 @@ namespace Cookie::UIwidget
 		Cookie::Resources::ResourcesManager& resources;
 
 	private:
-		void SafeIcon(const Cookie::Resources::Texture* const & texture, const float size);
-
-		void LifeBar(const float currentLife, const float maxLife, const float barWidth, const float barHeight);
+		bool SafeIconButton(const Cookie::Resources::Texture* const & texture, const float size);
 
 	public:
 		inline ActionPanel(const Cookie::ECS::Coordinator& _coordinator, Cookie::Resources::ResourcesManager& _resources)

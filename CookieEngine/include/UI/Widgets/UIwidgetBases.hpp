@@ -37,7 +37,7 @@ namespace Cookie::UIwidget
 				yPos	= 0, 
 				width	= 100,
 				height	= 100;
-	
+
 	protected:
 		// Note: The flags to prevent docking and collapsing are always given.
 		virtual bool BeginWindow(int windowFlags = 0) override;
@@ -50,6 +50,8 @@ namespace Cookie::UIwidget
 		{}
 
 		bool WindowEdit();
+
+		inline const char* GetName() { return windowName; }
 
 		virtual inline int GetID() = 0;
 	};

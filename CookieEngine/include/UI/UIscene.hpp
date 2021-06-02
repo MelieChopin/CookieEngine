@@ -14,6 +14,9 @@ namespace Cookie::UI
 		std::vector<UIwidget::GameWindowBase*> sceneWidgets;
 
 	public:
+		bool isHovered = false;
+	
+	public:
 		// Simple struct to facilitate UI scene load/save.
 		struct GameWindowInfo
 		{

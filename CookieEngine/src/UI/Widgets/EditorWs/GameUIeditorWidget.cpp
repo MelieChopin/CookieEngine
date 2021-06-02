@@ -21,6 +21,9 @@ void GameUIeditor::WindowDisplay()
 
 			if (Selectable("Add a gamespector"))
 				game.scene->uiScene.GetLayout().push_back(new Gamespector(game.coordinator, game.resources));
+
+			if (Selectable("Add an action panel"))
+				game.scene->uiScene.GetLayout().push_back(new ActionPanel(game.coordinator, game.resources));
 		}
 		
 		EndChild();

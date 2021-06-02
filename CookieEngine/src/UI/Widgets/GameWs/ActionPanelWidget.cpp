@@ -14,11 +14,11 @@ using namespace Cookie::Resources;
 using namespace Cookie::ECS;
 
 
-void ActionPanel::SafeIcon(const Texture* const & texture, const float size)
+bool ActionPanel::SafeIconButton(const Texture* const & texture, const float size)
 {
-	static const Texture* const & nullTexture = resources.icons["Assets/UI/IconCanon.tif"].get();
+	static const Texture* const & nullTexture = resources.icons["Assets/EditorUIcons/Log.ico"].get();
 
-	Image(static_cast<ImTextureID>(texture ? texture->GetResourceView() : nullTexture->GetResourceView()), { size, size });
+	return ImageButton(static_cast<ImTextureID>(texture ? texture->GetResourceView() : nullTexture->GetResourceView()), { size, size });
 }
 
 
@@ -28,13 +28,24 @@ void ActionPanel::WindowDisplay()
 	{
 		if (coordinator.selectedEntities.size() == 1)
 		{
-			const Entity* const& selectedEntity = coordinator.selectedEntities[0];
-			const ComponentGameplay& sEntityGameplayComp = coordinator.componentHandler->GetComponentGameplay(selectedEntity->id);
+			const Entity* const & selectedEntity = coordinator.selectedEntities[0];
+			ComponentGameplay& sEntityGameplayComp = coordinator.componentHandler->GetComponentGameplay(selectedEntity->id);
+
+			const float iconSize = (GetContentRegionAvail().y / 4.f);
 
 			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::PRODUCER)
 			{
-			
+				for (size_t i = 0; i < sEntityGameplayComp.componentProducer.possibleUnits.size(); i++)
+				{
+					if (SafeIconButton(sEntityGameplayComp.componentProducer.possibleUnits[i]->model.icon, iconSize))
+						sEntityGameplayComp.componentProducer.AddUnitToQueue(i);
+
+					(i % 4) ? SameLine() : NewLine();
+				}
+
 			}
 		}
 	}
+
+	ImGui::End();
 }

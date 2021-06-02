@@ -3,6 +3,7 @@
 #include "UIgame_AllIn.hpp"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 using namespace ImGui;
 using namespace Cookie::UI;
@@ -76,8 +77,18 @@ void UIscene::CleanLayout()
 	std::vector<GameWindowBase*>().swap(sceneWidgets);
 }
 
+
 void UIscene::RenderLayout()
 {
+	isHovered = false;
+	const ImVec2 mPos = GetIO().MousePos;
+
 	for (UIwidget::GameWindowBase*& gw : sceneWidgets)
+	{
 		gw->WindowDisplay();
+
+		const ImRect lastRect = FindWindowByName(gw->GetName())->Rect();
+
+		isHovered |= (mPos.x > lastRect.Min.x) && (mPos.x < lastRect.Max.x) && (mPos.y > lastRect.Min.y) && (mPos.y < lastRect.Max.y);
+	}
 }

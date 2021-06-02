@@ -123,10 +123,10 @@ void Game::HandleGameplayInputs()
     }
     else
     {
-        if (ImGui::GetIO().MouseClicked[0])
+        if (ImGui::GetIO().MouseClicked[0] && !scene->uiScene.isHovered)
             InputStartSelectionQuad();
 
-        if (ImGui::GetIO().MouseReleased[0])
+        if (ImGui::GetIO().MouseReleased[0] && !scene->uiScene.isHovered)
             InputEndSelectionQuad();
 
         if (!ImGui::GetIO().MouseDownDuration[1])
@@ -350,8 +350,8 @@ void Game::SetCamClampFromMap()
     if (depth > scene->map.trs.scale.z)
         depth = scene->map.trs.scale.z;
 
-    scene->camera->mapClampX = {{ -scene->map.trs.scale.x * 0.5f + (width * 0.5f),scene->map.trs.scale.x * 0.5f - (width * 0.5f) } };
-    scene->camera->mapClampZ = {{ -scene->map.trs.scale.z * 0.5f + (depth * 0.5f), scene->map.trs.scale.z * 0.5f - (depth * 0.5f)} };
+    scene->camera->mapClampX = { { -scene->map.trs.scale.x * 0.5f ,scene->map.trs.scale.x * 0.5f } };
+    scene->camera->mapClampZ = { { -scene->map.trs.scale.z * 0.5f , scene->map.trs.scale.z * 0.5f} };
 }
 
 void Game::TryResizeWindow()
