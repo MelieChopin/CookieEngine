@@ -20,7 +20,7 @@ void GameUIeditor::WindowDisplay()
 				game.scene->uiScene.GetLayout().push_back(new TestBoi());
 
 			if (Selectable("Add a gamespector"))
-				game.scene->uiScene.GetLayout().push_back(new Gamespector(game.coordinator));
+				game.scene->uiScene.GetLayout().push_back(new Gamespector(game.coordinator, game.resources));
 		}
 		
 		EndChild();

@@ -21,17 +21,13 @@ Editor::Editor()
     : editorFBO{game.renderer.window.width,game.renderer.window.height}
 {
     game.resources.Load(game.renderer);
-    game.skyBox.texture = game.resources.skyboxes["Assets/skybox.dds"].get();
     cam.SetProj(60.f, game.renderer.viewport.Width, game.renderer.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
     cam.rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
-
     cam.ResetPreviousMousePos();
     cam.Update();
     cam.Deactivate();
-    //scene = Editor::Scene(resources, coordinator);
     game.scene->InitCoordinator(game.coordinator);
-    //game.resources.textures["Assets/Floor_DefaultMaterial_BaseColor.png"] = (std::make_shared<Resources::Texture>("Assets/Floor_DefaultMaterial_BaseColor.png"));
 
     //Load all Textures we have create in texture editor
     Resources::Serialization::Load::LoadAllTextures(game.resources);
@@ -41,12 +37,11 @@ Editor::Editor()
 
     Resources::SoundManager::InitSystem();
     Resources::SoundManager::LoadAllMusic(game.resources);
+    Serialization::Load::LoadAllParticles(game.resources);
+    game.particlesHandler.particlesPrefab = &game.resources.particles;
 
     //Load default Scene
-    //std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/DefaultDuck.CAsset", game);
     std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", game);
-
-
     game.SetScene(_scene);
 
     editorUI.AddItem(new UIwidget::SaveButton(game.scene, game.resources), 0);
@@ -59,7 +54,7 @@ Editor::Editor()
     
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
     editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
-    editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.scene.get()->lights, game.skyBox, game.resources), 2);
+    editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.scene.get()->lights, game.scene.get()->skyBox, game.resources), 2);
     editorUI.AddWItem(new UIwidget::Console(CDebug, game.resources), 2);
     editorUI.AddWItem(new UIwidget::FileExplorer(game), 2);
 
@@ -112,60 +107,6 @@ void Editor::Loop()
     //Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
     Physics::PhysicsHandle physHandle;
 
-    {
-        /* game.particlesHandler.particlesSystems.push_back(Particles::ParticlesSystem(2, 1));
-         game.particlesHandler.particlesSystems[0].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(5, 20, 5));
-         game.particlesHandler.particlesSystems[0].data[0].mesh = game.resources.meshes["Quad"].get();
-         game.particlesHandler.particlesSystems[0].data[0].texture = game.resources.textures2D["Assets/VFX/Choco.png"].get();
-         game.particlesHandler.particlesSystems[0].data[0].SetIsBIllboard(true);
-         game.particlesHandler.particlesSystems[0].particlesEmiter.resize(1);
-         game.particlesHandler.particlesSystems[0].data[0].countAlive = 1;
-         Particles::PointPositionGenerate point(Cookie::Core::Math::Vec3(0, 0, 0), &game.particlesHandler.particlesSystems[0].trs.TRS);
-         Particles::MassConstGenerate mass;
-         Particles::VelocityConstGenerate velC(Cookie::Core::Math::Vec3(0, -9.81f, 0));
-         Particles::TimeConstGenerate time(10);
-
-         game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators.push_back(&point);
-         game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators.push_back(&time);
-         game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators.push_back(&mass);
-         game.particlesHandler.particlesSystems[0].particlesEmiter[0].generators.push_back(&velC);
-
-         Particles::UpdateVelocity vel;
-         Particles::UpdateTime upTime;
-         //Particles::CollisionWithPlane collision(game.particlesHandler, game.resources);
-         game.particlesHandler.particlesSystems[0].particlesEmiter[0].updates.push_back(&vel);
-         game.particlesHandler.particlesSystems[0].particlesEmiter[0].updates.push_back(&upTime);
-         //game.particlesHandler.particlesSystems[0].particlesEmiter[0].updates.push_back(&collision);
-
-         Particles::ParticlesSystem second(500, 300);
-         second.data[0].mesh = game.resources.meshes["Quad"].get();
-         second.data[0].texture = game.resources.textures2D["Assets/VFX/Smoke.png"].get();
-         second.data[0].SetIsBIllboard(true);
-         Particles::UpdateAlpha alpha;
-         Particles::UpdateTime time2;
-         second.particlesEmiter[0].updates.push_back(&alpha);
-         second.particlesEmiter[0].updates.push_back(&time2);
-
-         game.particlesHandler.particlesSystems[0].data.push_back(second.data[0]);
-         game.particlesHandler.particlesSystems[0].particlesEmiter.push_back(second.particlesEmiter[0]);
-
-         Particles::CreateParticles smoke(game.particlesHandler.particlesSystems[0].data[1], 0.2f, 0.25f, 8);
-         game.particlesHandler.particlesSystems[0].particlesEmiter[0].updates.push_b ack(&smoke);*/
-    }
-
-    //game.particlesHandler.particlesSystems.resize(1);
-    Serialization::Load::LoadParticles(game.resources);
-
-
-    //game.particlesHandler.CreateParticlesWithPrefab(Vec3(5, 0.55, 5), game.resources.particles["death"].get());
-    
-
-    /*game.particlesHandler.particlesSystems[0].trs.TRS = Cookie::Core::Math::Mat4::Translate(Vec3(5, 0.55, 5));
-
-    game.particlesHandler.particlesSystems[0].name = "death";*/
-    //Resources::Serialization::Save::SaveParticles(game.particlesHandler.particlesSystems[0]);
-      
-    //game.particlesHandler.particlesSystems[0].generate();
 
     bool isActive = false;
     {
@@ -189,17 +130,15 @@ void Editor::Loop()
         //std::cout << game.particlesHandler.living << "\n";
 
         //Update for 3D Music
-        FMOD_VECTOR temp = { cam.pos.x, cam.pos.y, cam.pos.z };
+        FMOD_VECTOR temp = { cam.pos.x, cam.pos.y, cam.pos.z }; // Modify to have cam in scene
         Cookie::Resources::SoundManager::system->set3DListenerAttributes(0, &temp, nullptr, nullptr, nullptr);
         Cookie::Resources::SoundManager::system->update();
 
         //TEMP : TEST FOR 3D
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
-        {
-
-            game.particlesHandler.CreateParticlesWithPrefab(Vec3(5, 0.55, 5), game.resources.particles["death"].get());
-
-        }
+            game.particlesHandler.CreateParticlesWithPrefab(Vec3(-5, 15, 5), "Attack", Vec3(10, 0, 25));
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P])
+            game.particlesHandler.CreateParticlesWithPrefab(Vec3(5, 5, 5), "Load", Vec3(15, 15, 5));
             
         if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
             Cookie::Resources::SoundManager::SetPaused("Music.mp3", true);

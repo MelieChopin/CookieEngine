@@ -3,9 +3,8 @@
 
 #include "UIwidgetBases.hpp"
 
-#include <vector>
-
-namespace Cookie::ECS { class Coordinator; }
+namespace Cookie::ECS		{ class Coordinator; }
+namespace Cookie::Resources { class ResourcesManager; class Texture; }
 
 
 namespace Cookie::UIwidget
@@ -17,10 +16,16 @@ namespace Cookie::UIwidget
 	{
 		const Cookie::ECS::Coordinator& coordinator;
 
+		Cookie::Resources::ResourcesManager& resources;
+
+	private:
+		void SafeIcon(const Cookie::Resources::Texture* const & texture, const float size);
+		
 	public:
-		inline Gamespector(const Cookie::ECS::Coordinator& _coordinator)
+		inline Gamespector(const Cookie::ECS::Coordinator& _coordinator, Cookie::Resources::ResourcesManager& _resources)
 			: GameWindowBase	("Gamespector", true),
-			  coordinator		(_coordinator)
+			  coordinator		(_coordinator),
+			  resources			(_resources)
 		{}
 
 		void WindowDisplay() override;

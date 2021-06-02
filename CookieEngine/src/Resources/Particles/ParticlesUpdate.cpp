@@ -79,25 +79,13 @@ void CollisionWithPlane::Update(ParticlesData* p)
 
 		if (distance <= Cookie::Core::Math::EPSILON && p->data[i].isBillboard == true)
 		{
-			/*int size = particlesHandler->particlesSystems.size();
-			particlesHandler->particlesSystems.resize(size + 1);
-			Serialization::Load::LoadParticles(particlesHandler->particlesSystems[size], *manager);
-			for (int j = 0; j < particlesHandler->particlesSystems[size].particlesEmiter.size(); j++)
-				for (int i = 0; i < particlesHandler->particlesSystems[size].particlesEmiter[j].generators.size(); i++)
-					particlesHandler->particlesSystems[size].particlesEmiter[j].generators[i]->
-					generate(&particlesHandler->particlesSystems[size].data[j], 0,
-						particlesHandler->particlesSystems[size].data[j].countAlive);*/
-
-			/*p->data[i].isBillboard = false;
-			p->data[i].vel = Cookie::Core::Math::Vec3(0, 0, 0);
-			p->data[i].mass = 0;
-			p->data[i].rot = Cookie::Core::Math::Vec3(Cookie::Core::Math::PI/2, 0, 0);*/
+			p->countAlive--;
+			particlesHandler->CreateParticlesWithPrefab(p->data[i].pos, namePrefab);
 		}
 	}
 }
 
-
-void CreateParticles::Update(ParticlesData* p)
+void CreateParticlesFollowing::Update(ParticlesData* p)
 {
 	for (int i = 0; i < p->countAlive; i++)
 	{
@@ -105,8 +93,8 @@ void CreateParticles::Update(ParticlesData* p)
 		{
 			data->data[data->countAlive].alive = true;
 			data->data[data->countAlive].pos = p->data[i].pos - p->data[i].vel * coeffPos * Cookie::Core::DeltaTime();
-			data->data[data->countAlive].time = 0.15f;
-			data->data[data->countAlive].timeMax = 0.15f;
+			data->data[data->countAlive].time = time;
+			data->data[data->countAlive].timeMax = time;
 			data->data[data->countAlive].scale = p->data[i].scale * coeffScale;
 			data->data[data->countAlive].col = p->data[i].colBegin;
 			data->data[data->countAlive].colBegin = Cookie::Core::Math::Vec4(1, 1, 1, 1);
@@ -115,3 +103,33 @@ void CreateParticles::Update(ParticlesData* p)
 	}
 }
 
+void Shadow::Update(ParticlesData* p)
+{
+	for (int i = 0; i < p->countAlive; i++)
+	{
+		if (i < data->data.size())
+		{
+			data->data[i].alive = true;
+			data->data[i].pos = p->data[i].pos;
+			data->data[i].pos.y = 0.55f;
+			data->data[i].rot = Cookie::Core::Math::Vec3(Core::Math::PI / 2, 0, 0);
+			data->data[i].time = time;
+			data->data[i].timeMax = time;
+			data->data[i].scale = p->data[i].scale;
+			data->data[i].col = Cookie::Core::Math::Vec4(1, 1, 1, 1);
+			data->data[i].colBegin = Cookie::Core::Math::Vec4(1, 1, 1, 1);
+		}
+	}
+}
+
+void SpawnEnd::Update(ParticlesData* p)
+{
+	for (int i = 0; i < p->countAlive; i++)
+	{
+		if (p->data[i].time <= Cookie::Core::DeltaTime() * 2)
+		{
+			p->countAlive--;
+			particlesHandler->CreateParticlesWithPrefab(posSpawn, namePrefab);
+		}
+	}
+}

@@ -27,7 +27,9 @@ namespace Cookie
 				UPDATETIME,
 				LOOP,
 				COLLISIONWITHPLANE,
-				CREATPARTICLES
+				CREATEPARTICLES,
+				SHADOW,
+				SPAWNEND
 			};
 
 			class ParticlesUpdate
@@ -112,21 +114,21 @@ namespace Cookie
 			class CollisionWithPlane : public ParticlesUpdate
 			{
 			public:
-				CollisionWithPlane(Particles::ParticlesHandler& handler, Cookie::Resources::ResourcesManager& manager,
-					Cookie::Core::Math::Vec3 normal = {0, 1, 0}, float distance = -0.55f)
-					: dis(distance), n(normal), particlesHandler(&handler), manager(&manager) { type = TYPEUP::COLLISIONWITHPLANE; }
+				CollisionWithPlane(Particles::ParticlesHandler& handler, std::string namePrefab = "Explosion",
+					Cookie::Core::Math::Vec3 normal = {0, 1, 0}, float distance = -0.58f)
+					: dis(distance), n(normal), particlesHandler(&handler) { type = TYPEUP::COLLISIONWITHPLANE; }
 				~CollisionWithPlane() {}
 
-				float dis = -0.55f;
+				float dis = -0.58f;
 				Cookie::Core::Math::Vec3 n = Cookie::Core::Math::Vec3(0, 1, 0);
 				Particles::ParticlesHandler* particlesHandler;
-				Cookie::Resources::ResourcesManager* manager;
+				std::string namePrefab = "Explosion";
 
 				virtual void Update(ParticlesData* p) override;
 			};
 
 
-			class CreateParticles : public ParticlesUpdate
+			class CreateParticlesFollowing : public ParticlesUpdate
 			{
 			public:
 				ParticlesData* data;
@@ -136,10 +138,37 @@ namespace Cookie
 
 				virtual void Update(ParticlesData* p) override;
 
-				//CreateParticles(float time = 0.35f, float coeff = 1, float coeffPos = 3) : coeffScale(coeff), coeffPos(coeffPos), time(time) { type = TYPEUP::CREATPARTICLES; }
+				CreateParticlesFollowing(ParticlesData& data, float time = 0.35f, float coeff = 1, float coeffPos = 3)
+					: data(&data), coeffScale(coeff), coeffPos(coeffPos), time(time) { type = TYPEUP::CREATEPARTICLES; }
+			};
 
-				CreateParticles(ParticlesData& data, float time = 0.35f, float coeff = 1, float coeffPos = 3) 
-					: data(&data), coeffScale(coeff), coeffPos(coeffPos), time(time) { type = TYPEUP::CREATPARTICLES; }
+			class Shadow : public ParticlesUpdate
+			{
+			public:
+				ParticlesData* data;
+				float time = 0.35f;
+
+				virtual void Update(ParticlesData* p) override;
+
+				Shadow(ParticlesData& data, float time = 0.35f)
+					: data(&data), time(time) {
+					type = TYPEUP::CREATEPARTICLES;
+				}
+			};
+
+			class SpawnEnd : public ParticlesUpdate
+			{
+			public:
+				Particles::ParticlesHandler* particlesHandler;
+				Cookie::Core::Math::Vec3 posSpawn;
+				std::string namePrefab = "Explosion";
+
+				virtual void Update(ParticlesData* p) override;
+
+				SpawnEnd(Particles::ParticlesHandler& data)
+					: particlesHandler(&data) {
+					type = TYPEUP::SPAWNEND;
+				}
 			};
 		}
 	}
