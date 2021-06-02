@@ -67,7 +67,7 @@ namespace Cookie
 		{
 			public:
 				const ECS::Coordinator*				coordinator	{nullptr};
-				Resources::Scene*				currentScene{ nullptr };
+				Resources::Scene*					currentScene{ nullptr };
 
 				Frustrum							frustrum;
 

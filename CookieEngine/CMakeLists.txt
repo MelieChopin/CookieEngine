@@ -40,7 +40,7 @@ include_directories("${DEPS_INC_DIR}/FMOD/")
 IF(CMAKE_BUILD_TYPE MATCHES Release)
     message(STATUS "Generate CMake cache for Release")
     IF(WIN32)
-        set(SUB_SYS WIN32 "src/Render/Drawers/MiniMapDrawer.cpp")
+        set(SUB_SYS WIN32)
     ENDIF(WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
 ELSE()
@@ -90,6 +90,7 @@ set (SRC_FILES
     "${SRC_DIR}/Render/Drawers/PlayerDrawer.cpp"
     "${SRC_DIR}/Render/Drawers/SelectionDrawer.cpp"
     "${SRC_DIR}/Render/Drawers/MiniMapDrawer.cpp"
+    "${SRC_DIR}/Render/Drawers/MiniModelDrawer.cpp"
 
     "${SRC_DIR}/Render/RenderPass/GeometryPass.cpp"
     "${SRC_DIR}/Render/RenderPass/LightPass.cpp"

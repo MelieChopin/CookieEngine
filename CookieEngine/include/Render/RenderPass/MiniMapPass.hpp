@@ -6,45 +6,55 @@ struct ID3D11VertexShader;
 struct ID3D11PixelShader;
 struct ID3D11Buffer;
 
+#include <memory>
 #include "Drawers/MiniMapDrawer.hpp"
+#include "Drawers/MiniModelDrawer.hpp"
 
-#define PLAYER_ARMY_COLOR 0.0f,0.0f,1.0f
-#define AI1_ARMY_COLOR 1.0f,0.0f,0.0f
+struct ID3D11DepthStencilState;
+struct ID3D11RasterizerState;
 
 namespace Cookie
 {
+	namespace Resources
+	{
+		class Texture;
+		class Mesh;
+	}
+
 	namespace Render
 	{
+
+
+		class FrameBuffer;
+
 		class DrawDataHandler;
 
 		class MiniMapPass
 		{
 		private:
-			ID3D11InputLayout*	ILayout{ nullptr };
-			ID3D11VertexShader* VShader{ nullptr };
-			ID3D11PixelShader*	PShader{ nullptr };
-			D3D11_VIEWPORT		viewport;
-
+			D3D11_VIEWPORT viewport;
 			
 		public:
+			float aspectRatio = 1.0f;
+
 			Core::Math::Mat4 ortho;
 			Core::Math::Mat4 miniMapView;
 
 			MiniMapDrawer		miniMapDrawer;
+			MiniModelDrawer		miniModelDrawer;
 
-			ID3D11Buffer*		CamCBuffer{ nullptr };
-			ID3D11Buffer*		CBuffer{ nullptr };
+			ID3D11DepthStencilState*	depthStencilState;
+			ID3D11RasterizerState*		rasterState;
 
 		private:
-			void InitShader();
+			void InitState();
 
 		public:
 
 			MiniMapPass();
 			~MiniMapPass();
 
-			void Set();
-			void Draw(DrawDataHandler& drawData);
+			void Draw(DrawDataHandler& drawData, const FrameBuffer& frameBuffer);
 		};
 	}
 }

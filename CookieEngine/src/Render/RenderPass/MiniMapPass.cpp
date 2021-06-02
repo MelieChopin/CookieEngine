@@ -2,7 +2,11 @@
 #include "D3D11Helper.hpp"
 #include "DrawDataHandler.hpp"
 #include "ECS/ComponentGameplay.hpp"
+#include "Resources/Mesh.hpp"
+#include "Resources/Texture.hpp"
+#include "FrameBuffer.hpp"
 #include "Render/RenderPass/MiniMapPass.hpp"
+#include "Resources/Scene.hpp"
 #include "Render/Camera.hpp"
 
 using namespace Cookie::Core::Math;
@@ -27,146 +31,91 @@ struct VS_CONSTANT_BUFFER
 
 MiniMapPass::MiniMapPass()
 {
-	InitShader();
-	miniMapView = Mat4::Translate({0.0f,-1.0f,0.0f}) * Mat4::RotateX(ToRadians(90.0f));
+	miniMapView = Mat4::Translate({0.0f,-zEpsilon,0.0f}) * Mat4::RotateX(ToRadians(90.0f));
+
+	InitState();
 }
 
 MiniMapPass::~MiniMapPass()
 {
-	if (VShader)
-		VShader->Release();
-	if (PShader)
-		PShader->Release();
-	if (CBuffer)
-		CBuffer->Release();
-	if (CamCBuffer)
-		CamCBuffer->Release();
-	if (ILayout)
-		ILayout->Release();
+	if (depthStencilState)
+	{
+		depthStencilState->Release();
+	}
+	if (rasterState)
+	{
+		rasterState->Release();
+	}
 }
 
 /*=========================== INIT METHODS ===========================*/
 
-void MiniMapPass::InitShader()
+void MiniMapPass::InitState()
 {
-	ID3DBlob* blob = nullptr;
+    // Initialize the description of the stencil state.
+    D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 
-	std::string source = (const char*)R"(#line 27
-	struct VOut
-	{
-		float4 position : SV_POSITION;
-		float3 color : COLOR;
-	};
+    // Set up the description of the stencil state.
+    depthStencilDesc.DepthEnable	= true;
+    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    depthStencilDesc.DepthFunc		= D3D11_COMPARISON_LESS;
+    depthStencilDesc.StencilEnable	= false;
 
-	cbuffer COLOR_BUFFER : register(b0)
-	{
-		float4    firstColor;
-		float4    secondColor;
-	};
+    RendererRemote::device->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
 
-	cbuffer CAM_CONSTANT : register(b1)
-	{
-		float4x4  proj;
-		float4x4  view;
-	};
+    D3D11_RASTERIZER_DESC rasterDesc = {};
 
-	
-	VOut main(float3 position : POSITION, float2 uv : UV, float3 normal : NORMAL, float4x4 model : WORLD, float colorId : COLORID)
-	{
-		VOut output;
-	
-		output.position = mul(mul(mul(float4(position,1.0),model),view), proj);
+    // Setup the raster description which will determine how and what polygons will be drawn.
+    rasterDesc.AntialiasedLineEnable = false;
+    rasterDesc.CullMode = D3D11_CULL_NONE;
+    rasterDesc.DepthBias = 0;
+    rasterDesc.DepthBiasClamp = 0.0f;
+    rasterDesc.DepthClipEnable = true;
+    rasterDesc.FillMode = D3D11_FILL_SOLID;
+    rasterDesc.FrontCounterClockwise = true;
+    rasterDesc.MultisampleEnable = false;
+    rasterDesc.ScissorEnable = false;
+    rasterDesc.SlopeScaledDepthBias = 0.0f;
 
-		if (colorId == firstColor.a)
-		{
-			output.color = firstColor.rgb;
-		}
-		else if (colorId == secondColor.a)
-		{
-			output.color = secondColor.rgb;
-		}
-
-		return output;
-	}
-	)";
-
-	Render::CompileVertex(source, &blob, &VShader);
-
-	source = (const char*)R"(#line 93
-
-	float4 main(float4 position : SV_POSITION, float3 color : COLOR) : SV_TARGET
-	{
-		return float4(color,1.0);
-	})";
-
-	Render::CompilePixel(source, &PShader);
-
-	struct Vertex
-	{
-		Core::Math::Vec3 position;
-		Core::Math::Vec2 uv;
-		Core::Math::Vec3 normal;
-	};
-
-	// create the input layout object
-	D3D11_INPUT_ELEMENT_DESC ied[] =
-	{
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,     offsetof(Vertex,position),  D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"UV",       0, DXGI_FORMAT_R32G32_FLOAT,    0,     offsetof(Vertex, uv),       D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0,     offsetof(Vertex, normal),   D3D11_INPUT_PER_VERTEX_DATA, 0},
-
-		{ "WORLD",		0, DXGI_FORMAT_R32G32B32A32_FLOAT,	1, offsetof(Mat4, c[0]), D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-		{ "WORLD",		1, DXGI_FORMAT_R32G32B32A32_FLOAT,	1, offsetof(Mat4, c[1]), D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-		{ "WORLD",		2, DXGI_FORMAT_R32G32B32A32_FLOAT,	1, offsetof(Mat4, c[2]), D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-		{ "WORLD",		3, DXGI_FORMAT_R32G32B32A32_FLOAT,	1, offsetof(Mat4, c[3]), D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-
-
-		{ "COLORID",	0, DXGI_FORMAT_R32_FLOAT,			2, offsetof(Mat4, c[4]), D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-	};
-
-	Render::CreateLayout(&blob, ied, 7, &ILayout);
-
-	VS_CONSTANT_BUFFER buffer = {};
-
-	Render::CreateBuffer(&buffer, sizeof(VS_CONSTANT_BUFFER), &CBuffer);
-
-	CAM_CONSTANT_BUFFER camBuffer = {};
-
-	Render::CreateBuffer(&camBuffer, sizeof(CAM_CONSTANT_BUFFER), &CamCBuffer);
-
-	blob->Release();
+    RendererRemote::device->CreateRasterizerState(&rasterDesc, &rasterState);
 }
 
 /*=========================== REALTIME METHODS ===========================*/
 
-void MiniMapPass::Set()
+void MiniMapPass::Draw(DrawDataHandler& drawData, const FrameBuffer& framebuffer)
 {
-	Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
-	Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
 
-	Render::RendererRemote::context->IASetInputLayout(ILayout);
-}
+	const Camera& cam = *drawData.currentCam;
+	const Resources::Map& map = drawData.currentScene->map;
 
-void MiniMapPass::Draw(DrawDataHandler& drawData)
-{
-	float width = drawData.mapDrawer.mapInfo.model.c[0].Length();
-	float height = drawData.mapDrawer.mapInfo.model.c[2].Length();
+	float width = map.trs.scale.x;
+	float height = map.trs.scale.z;
 
-	ortho = Mat4::Ortho(-width * 0.5f, width * 0.5f, -height * 0.5f, height * 0.5f, -zEpsilon, zEpsilon);
+	aspectRatio = 1280.0f / 720.0f;
 
-	viewport.Width = width;
-	viewport.Height = height;
+	ortho = Mat4::Ortho(-width * 0.5f * aspectRatio, width * 0.5f * aspectRatio, -height * 0.5f, height * 0.5f, -zEpsilon, zEpsilon);
 
-	//Render::RendererRemote::context->RSSetViewports(1,&viewport);
+	viewport.Width = framebuffer.width;
+	viewport.Height = framebuffer.height;
 
-	ID3D11Buffer* CBuffers[2] = { CBuffer, CamCBuffer };
+	Render::RendererRemote::context->RSSetViewports(1, &viewport);
+
+	ID3D11Buffer* CBuffers[2] = { miniModelDrawer.CBuffer, miniModelDrawer.CamCBuffer };
 	Render::RendererRemote::context->VSSetConstantBuffers(0, 2, CBuffers);
 
-	CAM_CONSTANT_BUFFER buffer = { ortho, miniMapView};
+	CAM_CONSTANT_BUFFER buffer = { ortho, miniMapView };
 
-	Render::WriteBuffer(&buffer, sizeof(buffer), 0, &CamCBuffer);
+	Render::WriteBuffer(&buffer, sizeof(buffer), 0, &miniModelDrawer.CamCBuffer);
 
-	miniMapDrawer.Draw(drawData.staticDrawData);
+	miniModelDrawer.Set();
+	miniModelDrawer.Draw(drawData.staticDrawData);
+	miniModelDrawer.Draw(drawData.dynamicDrawData);
 
-	drawData.mapDrawer.Draw();
+	// Now set the rasterizer state.
+	Render::RendererRemote::context->RSSetState(rasterState);
+	// Set the depth stencil state.
+	Render::RendererRemote::context->OMSetDepthStencilState(depthStencilState, 1);
+
+	miniMapDrawer.Set(cam,map);
+	miniMapDrawer.Draw();
 }

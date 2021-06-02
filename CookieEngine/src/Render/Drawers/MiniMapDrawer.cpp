@@ -2,98 +2,192 @@
 #include "Render/D3D11Helper.hpp"
 #include "Resources/Mesh.hpp"
 #include "Resources/Texture.hpp"
-#include "ECS/ComponentGameplay.hpp"
+#include "Core/Primitives.hpp"
+#include "Resources/Map.hpp"
 #include "Render/DrawDataHandler.hpp"
 #include "Render/Drawers/MiniMapDrawer.hpp"
+#include "Render/Camera.hpp"
 
 using namespace Cookie::Core::Math;
 using namespace Cookie::Render;
 
+struct VS_CONSTANT_BUFFER
+{
+    Mat4 model;
+    Vec4 tileNb;
+};
+
 /*======================= CONSTRUCTORS/DESTRUCTORS =======================*/
 
-MiniMapDrawer::MiniMapDrawer()
+MiniMapDrawer::MiniMapDrawer():
+    mapMesh{Core::Primitives::CreateCube()},
+    quadColor{ std::make_unique<Resources::Texture>("White", Vec4(MINI_MAP_QUAD_COLOR)) }
 {
-    AllocateInstance(1);
+    InitShader();
+
+    /* creating a quad that works with line strips */
+    std::vector<float> vertices = { -0.5f, 0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+                                     0.5f, 0.0f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+                                     0.5f, 0.0f,  0.5f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,
+                                    -0.5f, 0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f };
+    
+    std::vector<unsigned int> indices = { 0 , 1, 2, 3 , 0 };
+
+
+    quad = std::make_unique<Resources::Mesh>("lineQuad", vertices, indices, 5);
 }
 
 MiniMapDrawer::~MiniMapDrawer()
 {
-    if (IMatricesBuffer)
-        IMatricesBuffer->Release();
-    if (IArmyBuffer)
-        IArmyBuffer->Release();
+    if (VShader)
+    {
+        VShader->Release();
+    }
+    if (PShader)
+    {
+        PShader->Release();
+    }
+    if (VCBuffer)
+    {
+        VCBuffer->Release();
+    }
+    if (ILayout)
+    {
+        ILayout->Release();
+    }
+}
+
+
+/*======================= INIT METHODS =======================*/
+
+
+void MiniMapDrawer::InitShader()
+{
+    ID3DBlob* blob = nullptr;
+
+    std::string source = (const char*)R"(#line 27
+    struct VOut
+    {
+        float4 position : SV_POSITION;
+        float2 uv       : UV; 
+    };
+    
+    cbuffer MODEL_CONSTANT : register(b0)
+    {
+        float4x4  model;
+        float2    tileNb;
+    };
+
+    cbuffer CAM_CONSTANT : register(b1)
+    {
+        float4x4  proj;
+        float4x4  view;
+    };
+    
+    VOut main(float3 position : POSITION, float2 uv : UV, float3 normal : NORMAL)
+    {
+        VOut output;
+    
+		output.position = mul(mul(mul(float4(position,1.0),model),view), proj);
+        output.uv       = uv * tileNb;
+    
+        return output;
+    }
+    )";
+
+    Render::CompileVertex(source, &blob, &VShader);
+    source = (const char*)R"(#line 83
+
+    Texture2D	albedoTex   : register(t0);
+
+    SamplerState WrapSampler : register(s0);
+
+    float4 main(float4 position : SV_POSITION, float2 uv : UV) : SV_TARGET
+    {
+        return  float4(albedoTex.Sample(WrapSampler,uv).rgb,1.0);
+    })";
+
+    struct Vertex
+    {
+        Core::Math::Vec3 position;
+        Core::Math::Vec2 uv;
+        Core::Math::Vec3 normal;
+    };
+
+    // create the input layout object
+    D3D11_INPUT_ELEMENT_DESC ied[] =
+    {
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,     offsetof(Vertex,position),  D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"UV",       0, DXGI_FORMAT_R32G32_FLOAT,    0,     offsetof(Vertex, uv),       D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0,     offsetof(Vertex, normal),   D3D11_INPUT_PER_VERTEX_DATA, 0},
+    };
+
+    Render::CreateLayout(&blob, ied, 3, &ILayout);
+
+    Render::CompilePixel(source, &PShader);
+
+    VS_CONSTANT_BUFFER vbuffer = {};
+
+    Render::CreateBuffer(&vbuffer, sizeof(VS_CONSTANT_BUFFER), &VCBuffer);
+
+    blob->Release();
 }
 
 /*======================= REALTIME METHODS =======================*/
 
-void MiniMapDrawer::AllocateInstance(unsigned int size)
+void MiniMapDrawer::Set(const Camera& cam, const Resources::Map& map)
 {
-    if (IMatricesBuffer)
-        IMatricesBuffer->Release();
+    mapAlbedo = map.model.albedo;
 
-    IBufferSize = size;
+    mapTrs = map.trs.TRS;
+    tileNb = map.tilesNb;
 
-    D3D11_BUFFER_DESC bDesc = {};
+    Vec3 middle = cam.ScreenPointToWorldDir({ { 0.0f,0.0f } });
+    Vec3 UpperRight = cam.ScreenPointToWorldDir({ { 1.0f,1.0f } });
+    Vec3 DownLeft = cam.ScreenPointToWorldDir({ { -1.0f,-1.0f } });
 
-    bDesc.ByteWidth = IBufferSize * sizeof(Mat4);
-    bDesc.Usage             = D3D11_USAGE_DYNAMIC;
-    bDesc.BindFlags         = D3D11_BIND_VERTEX_BUFFER;
-    bDesc.CPUAccessFlags    = D3D11_CPU_ACCESS_WRITE;
-    bDesc.MiscFlags = 0;
-    bDesc.StructureByteStride = 0;
+    float t = (-cam.pos.y) / UpperRight.y;
+    UpperRight = cam.pos + UpperRight * t;
+    t = (-cam.pos.y) / DownLeft.y;
+    DownLeft = cam.pos + DownLeft * t;
 
-
-    HRESULT result = Render::RendererRemote::device->CreateBuffer(&bDesc, nullptr, &IMatricesBuffer);
-
-    if (FAILED(result))
-    {
-        printf("Failed Creating Buffer: %p of size %u: %s \n", IMatricesBuffer, bDesc.ByteWidth, std::system_category().message(result).c_str());
-    }
-
-    bDesc.ByteWidth = IBufferSize * sizeof(float);
-
-    result = Render::RendererRemote::device->CreateBuffer(&bDesc, nullptr, &IArmyBuffer);
-
-    if (FAILED(result))
-    {
-        printf("Failed Creating Buffer: %p of size %u: %s \n", IArmyBuffer, bDesc.ByteWidth, std::system_category().message(result).c_str());
-    }
+    quadTrs = Mat4::Scale({ 10.0f,1.0f,10.0f }) * Mat4::Translate(middle);
 }
 
-void MiniMapDrawer::Draw(const std::vector<DrawData>& toDraw)
+void MiniMapDrawer::Draw()
 {
-    ID3D11ShaderResourceView* fbos[3] = { nullptr, nullptr, nullptr };
+    RendererRemote::context->VSSetShader(VShader, nullptr, 0);
+    RendererRemote::context->PSSetShader(PShader, nullptr, 0);
+    RendererRemote::context->IASetInputLayout(ILayout);
 
-    Render::RendererRemote::context->PSSetShaderResources(0, 3, fbos);
+    VS_CONSTANT_BUFFER vbuffer = {};
+    vbuffer.model   = mapTrs;
+    vbuffer.tileNb  = { tileNb.x,tileNb.y,0.0f,0.0f };
 
-    for (int i = 0; i < toDraw.size(); i++)
-    {
-        const std::vector<Mat4>& mat = toDraw[i].matrices;
-        const std::vector<const ECS::ComponentGameplay*>& gameplays = toDraw[i].gameplays;
+    RendererRemote::context->VSSetConstantBuffers(0, 1, &VCBuffer);
+    WriteBuffer(&vbuffer, sizeof(vbuffer), 0, &VCBuffer);;
 
-        if (mat.size() > IBufferSize)
-            AllocateInstance(mat.size());
+    if (mapAlbedo)
+        mapAlbedo->Set(0);
 
-        WriteBuffer(mat.data(), sizeof(Mat4) * mat.size(), 0, &IMatricesBuffer);
+    mapMesh->Set();
+    mapMesh->Draw();
 
-        std::vector<float> ids;
+    /* drawing the quad of view of the cam */
+    RendererRemote::context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
 
-        for (int j = 0; j < gameplays.size(); j++)
-        {
-            ids.push_back(gameplays.at(j)->teamName);
-        }
+    /* removing depth buffer */
+    ID3D11RenderTargetView* rtv = nullptr;
+    Render::RendererRemote::context->OMGetRenderTargets(1, &rtv, nullptr);
+    Render::RendererRemote::context->OMSetRenderTargets(1, &rtv, nullptr);
 
-        WriteBuffer(ids.data(), sizeof(float) * gameplays.size(), 0, &IArmyBuffer);
+    vbuffer.model = quadTrs;
+    WriteBuffer(&vbuffer, sizeof(vbuffer), 0, &VCBuffer);
+    vbuffer.tileNb = { 1.0f,1.0f,0.0f,0.0f };
+    quadColor->Set();
+    quad->Set();
+    quad->Draw();
 
-        UINT stride[3] = { ((2 * sizeof(Core::Math::Vec3)) + sizeof(Core::Math::Vec2)), sizeof(Mat4), sizeof(float) };
-        UINT offset[3] = { 0 , 0, 0 };
-        ID3D11Buffer* VBuffers[3] = { toDraw[i].mesh->VBuffer, IMatricesBuffer, IArmyBuffer };
-
-        RendererRemote::context->IASetIndexBuffer(toDraw[i].mesh->IBuffer, DXGI_FORMAT_R32_UINT, 0);
-        RendererRemote::context->IASetVertexBuffers(0, 3, VBuffers, stride, offset);
-
-        RendererRemote::context->DrawIndexedInstanced(toDraw[i].mesh->INb, mat.size(), 0, 0, 0);
-
-        Render::RendererRemote::context->PSSetShaderResources(0, 3, fbos);
-    }
+    rtv->Release();
+    RendererRemote::context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

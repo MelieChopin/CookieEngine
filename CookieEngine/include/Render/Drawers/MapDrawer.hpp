@@ -8,6 +8,8 @@ struct ID3D11PixelShader;
 struct ID3D11Buffer;
 struct ID3D11InputLayout;
 
+#define MAP_TILE_LIMITS {0.01f,0.99f}
+
 namespace Cookie
 {
 	namespace Resources
@@ -31,21 +33,17 @@ namespace Cookie
 				ID3D11InputLayout*	ILayout	{ nullptr };
 
 			public:
-				struct MapDrawInfo
-				{
-					std::unique_ptr<Resources::Mesh>	mapMesh;
-					Resources::Texture*					albedoTex = nullptr;
-					Resources::Texture*					normalTex = nullptr;
-					Resources::Texture*					matTex = nullptr;
+				std::unique_ptr<Resources::Mesh>	mapMesh;
+				Resources::Texture*					albedoTex = nullptr;
+				Resources::Texture*					normalTex = nullptr;
+				Resources::Texture*					matTex = nullptr;
 
-					Core::Math::Mat4					model;
-					Core::Math::Vec2					tileNb;
+				Core::Math::Mat4					model;
+				Core::Math::Vec2					tileNb;
 
-					Core::Math::Vec3					limitColor;
-					Core::Math::Vec2					tileLimits{ {0.02f,0.98f} };
-				};
+				Core::Math::Vec3					limitColor;
+				Core::Math::Vec2					tileLimits{ MAP_TILE_LIMITS };
 
-				MapDrawInfo mapInfo;
 
 			private:
 				void InitShader();

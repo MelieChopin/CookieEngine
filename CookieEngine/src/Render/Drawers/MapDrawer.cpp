@@ -15,7 +15,6 @@ struct VS_CONSTANT_BUFFER
     Vec4 tileNb;
 };
 
-
 struct PS_CONSTANT_BUFFER
 {
     Vec4 limitColor;
@@ -25,7 +24,7 @@ struct PS_CONSTANT_BUFFER
 /*============================= CONSTRUCTORS/DESTRUCTORS =============================*/
 
 MapDrawer::MapDrawer():
-    mapInfo{ Core::Primitives::CreateCube() }
+    mapMesh{ Core::Primitives::CreateCube() }
 {
 	InitShader();
 }
@@ -204,12 +203,12 @@ void MapDrawer::InitShader()
 
 void MapDrawer::Set(const Resources::Map& map)
 {
-    mapInfo.albedoTex = map.model.albedo;
-    mapInfo.normalTex = map.model.normal;
-    mapInfo.matTex = map.model.metallicRoughness;
+    albedoTex = map.model.albedo;
+    normalTex = map.model.normal;
+    matTex = map.model.metallicRoughness;
 
-    mapInfo.model = map.trs.TRS;
-    mapInfo.tileNb = map.tilesNb;
+    model = map.trs.TRS;
+    tileNb = map.tilesNb;
 }
 
 void MapDrawer::Draw()
@@ -219,25 +218,25 @@ void MapDrawer::Draw()
     Render::RendererRemote::context->IASetInputLayout(ILayout);
 
     VS_CONSTANT_BUFFER vbuffer   = {};
-    vbuffer.model                = mapInfo.model;
-    vbuffer.tileNb             = { mapInfo.tileNb.x,mapInfo.tileNb.y,0.0f,0.0f };
+    vbuffer.model                = model;
+    vbuffer.tileNb             = { tileNb.x,tileNb.y,0.0f,0.0f };
 
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &VCBuffer);
     Render::WriteBuffer(&vbuffer, sizeof(vbuffer), 0, &VCBuffer);
 
     PS_CONSTANT_BUFFER pbuffer = {};
-    pbuffer.limitColor = { mapInfo.limitColor.r,mapInfo.limitColor.g ,mapInfo.limitColor.b, 1.0f };
-    pbuffer.tileLimits = { mapInfo.tileLimits.x,mapInfo.tileLimits.y,0.0f,0.0f };
+    pbuffer.limitColor = { limitColor.r,limitColor.g ,limitColor.b, 1.0f };
+    pbuffer.tileLimits = { tileLimits.x,tileLimits.y,0.0f,0.0f };
     Render::RendererRemote::context->PSSetConstantBuffers(0, 1, &PCBuffer);
     Render::WriteBuffer(&pbuffer, sizeof(pbuffer), 0, &PCBuffer);
 
-    if (mapInfo.albedoTex)
-        mapInfo.albedoTex->Set(0);
-    if (mapInfo.normalTex)
-        mapInfo.normalTex->Set(1);
-    if (mapInfo.matTex)
-        mapInfo.matTex->Set(2);
+    if (albedoTex)
+        albedoTex->Set(0);
+    if (normalTex)
+        normalTex->Set(1);
+    if (matTex)
+        matTex->Set(2);
 
-    mapInfo.mapMesh->Set();
-    mapInfo.mapMesh->Draw();
+    mapMesh->Set();
+    mapMesh->Draw();
 }

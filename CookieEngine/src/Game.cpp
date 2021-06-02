@@ -12,7 +12,7 @@ using namespace Cookie::ECS;
 using namespace Cookie::Gameplay;
 using namespace rp3d;
 
-constexpr int miniMapResolution = 128;
+constexpr int miniMapResolution = 512;
 
 /*================== CONSTRUCTORS/DESTRUCTORS ==================*/
 
@@ -55,11 +55,13 @@ void Game::Update()
 
     renderer.Clear();
     renderer.ClearFrameBuffer(frameBuffer);
+    renderer.ClearFrameBuffer(miniMapBuffer);
 
     scene->camera->Update();
     coordinator.ApplyComputeTrs();
 
-    renderer.DrawMiniMap(frameBuffer);
+    renderer.Draw(scene->camera.get(), frameBuffer);
+    renderer.DrawMiniMap(miniMapBuffer);
     particlesHandler.Draw(*scene->camera.get());
 
     renderer.SetBackBuffer();
@@ -356,8 +358,8 @@ void Game::SetCamClampFromMap()
     if (depth > scene->map.trs.scale.z)
         depth = scene->map.trs.scale.z;
 
-    scene->camera->mapClampX = {{ -scene->map.trs.scale.x * 0.5f + (width * 0.5f),scene->map.trs.scale.x * 0.5f - (width * 0.5f) } };
-    scene->camera->mapClampZ = {{ -scene->map.trs.scale.z * 0.5f + (depth * 0.5f), scene->map.trs.scale.z * 0.5f - (depth * 0.5f)} };
+    scene->camera->mapClampX = {{ -scene->map.trs.scale.x * 0.5f ,scene->map.trs.scale.x * 0.5f } };
+    scene->camera->mapClampZ = {{ -scene->map.trs.scale.z * 0.5f , scene->map.trs.scale.z * 0.5f} };
 }
 
 void Game::TryResizeWindow()

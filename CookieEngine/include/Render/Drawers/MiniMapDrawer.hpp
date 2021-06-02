@@ -8,28 +8,48 @@ struct ID3D11PixelShader;
 struct ID3D11Buffer;
 struct ID3D11InputLayout;
 
+#define MINI_MAP_QUAD_COLOR 1.0f,1.0f,1.0f,1.0f
+
 namespace Cookie
 {
+	namespace Resources
+	{
+		class Map;
+		class Texture;
+		class Mesh;
+	}
+
 	namespace Render
 	{
 		class DrawDataHandler;
 		struct DrawData;
+		class Camera;
 
 		class MiniMapDrawer
 		{
 		private:
-			ID3D11Buffer* IMatricesBuffer{ nullptr };
-			ID3D11Buffer* IArmyBuffer{ nullptr };
-			unsigned int  IBufferSize = 0;
+			ID3D11VertexShader* VShader{ nullptr };
+			ID3D11PixelShader*	PShader{ nullptr };
+			ID3D11Buffer*		VCBuffer{ nullptr };
+			ID3D11InputLayout*	ILayout{ nullptr };
 
+			std::unique_ptr<Resources::Mesh>	mapMesh;
+			Resources::Texture*					mapAlbedo;
+			Core::Math::Mat4					mapTrs;
+			Core::Math::Vec2					tileNb;
+
+			std::unique_ptr<Resources::Mesh>	quad{ nullptr };
+			std::unique_ptr<Resources::Texture> quadColor{ nullptr };
+			Core::Math::Mat4					quadTrs;
 		private:
-			void AllocateInstance(unsigned int size);
+			void InitShader();
 
 		public:
 			MiniMapDrawer();
 			~MiniMapDrawer();
 
-			void Draw(const std::vector<DrawData>& toDraw);
+			void Set(const Camera& cam, const Resources::Map& map);
+			void Draw();
 		};
 	}
 }
