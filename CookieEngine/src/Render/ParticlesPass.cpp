@@ -19,10 +19,10 @@ struct VS_CONSTANT_BUFFER
 
 ParticlesPass::ParticlesPass()
 {
-    InitShader();
+   // InitShader();
 }
 
-ParticlesPass::ParticlesPass(const ParticlesPass& pass) : VShader(pass.VShader), PShader(pass.PShader), CBuffer(pass.CBuffer), ILayout(pass.ILayout),
+ParticlesPass::ParticlesPass(const ParticlesPass& pass) : VShader(pass.VShader), PShader(pass.PShader), ILayout(pass.ILayout), CBuffer(pass.CBuffer),
                 InstanceBuffer(pass.InstanceBuffer), blendState(pass.blendState), PSampler(pass.PSampler), rasterizerState(pass.rasterizerState), 
                 depthStencilState(pass.depthStencilState), mInstancedData(pass.mInstancedData)
 {

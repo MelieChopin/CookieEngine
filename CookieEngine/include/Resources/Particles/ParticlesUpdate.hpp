@@ -114,14 +114,13 @@ namespace Cookie
 			class CollisionWithPlane : public ParticlesUpdate
 			{
 			public:
-				CollisionWithPlane(Particles::ParticlesHandler& handler, std::string namePrefab = "Explosion",
+				CollisionWithPlane(std::string namePrefab = "Explosion",
 					Cookie::Core::Math::Vec3 normal = {0, 1, 0}, float distance = -0.58f)
-					: dis(distance), n(normal), particlesHandler(&handler) { type = TYPEUP::COLLISIONWITHPLANE; }
+					: dis(distance), n(normal) { type = TYPEUP::COLLISIONWITHPLANE; }
 				~CollisionWithPlane() {}
 
 				float dis = -0.58f;
 				Cookie::Core::Math::Vec3 n = Cookie::Core::Math::Vec3(0, 1, 0);
-				Particles::ParticlesHandler* particlesHandler;
 				std::string namePrefab = "Explosion";
 
 				virtual void Update(ParticlesData* p) override;
@@ -159,14 +158,13 @@ namespace Cookie
 			class SpawnEnd : public ParticlesUpdate
 			{
 			public:
-				Particles::ParticlesHandler* particlesHandler;
 				Cookie::Core::Math::Vec3 posSpawn;
 				std::string namePrefab = "Explosion";
 
 				virtual void Update(ParticlesData* p) override;
 
-				SpawnEnd(Particles::ParticlesHandler& data)
-					: particlesHandler(&data) {
+				SpawnEnd()
+				{
 					type = TYPEUP::SPAWNEND;
 				}
 			};

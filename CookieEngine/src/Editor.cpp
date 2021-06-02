@@ -50,7 +50,7 @@ Editor::Editor()
     editorUI.AddWItem(new UIwidget::TextureEditor(game.resources), 1);
     editorUI.AddWItem(new UIwidget::AIBehaviorEditor(game.resources), 1);
     editorUI.AddWItem(new UIwidget::GameUIeditor(game), 1);
-    editorUI.AddWItem(new UIwidget::SoundOrchestrator(), 1);
+    editorUI.AddWItem(new UIwidget::SoundOrchestrator(game.resources), 1);
     
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
     editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
@@ -110,7 +110,7 @@ void Editor::Loop()
 
     bool isActive = false;
     {
-        game.scene->map.model.albedo = game.resources.textures2D["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
+       // game.scene->map.model.albedo = game.resources.textures2D["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
     }
 
     //for (int i = 0; i < MAX_ENTITIES; i++)
@@ -134,16 +134,16 @@ void Editor::Loop()
         Cookie::Resources::SoundManager::system->set3DListenerAttributes(0, &temp, nullptr, nullptr, nullptr);
         Cookie::Resources::SoundManager::system->update();
 
-        //TEMP : TEST FOR 3D
+        //TEMP : TEST FOR 3D 
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
-            game.particlesHandler.CreateParticlesWithPrefab(Vec3(-5, 15, 5), "Attack", Vec3(10, 0, 25));
+            Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(-5, 15, 5), game.resources.particles["Bomb"].get(), Vec3(10, 0, 25));
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P])
-            game.particlesHandler.CreateParticlesWithPrefab(Vec3(5, 5, 5), "Load", Vec3(15, 15, 5));
+            Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(5, 5, 5), game.resources.particles["Attack"].get(), Vec3(15, 15, 5));
             
-        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
-            Cookie::Resources::SoundManager::SetPaused("Music.mp3", true);
-        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_L) == GLFW_PRESS)
-            Cookie::Resources::SoundManager::SetPaused("Music.mp3", false);
+        //if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
+           // Cookie::Resources::SoundManager::SetPaused("Music.mp3", true);
+       // if (glfwGetKey(game.renderer.window.window, GLFW_KEY_L) == GLFW_PRESS)
+           // Cookie::Resources::SoundManager::SetPaused("Music.mp3", false);
 
         // Present frame
         if (isPlaying)
