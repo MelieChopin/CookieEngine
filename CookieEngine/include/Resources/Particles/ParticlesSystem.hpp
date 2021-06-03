@@ -5,7 +5,7 @@
 #include "ParticlesEmitter.hpp"
 #include "ParticlesData.hpp"
 #include "ComponentTransform.hpp"
-#include "ParticlesPass.hpp"
+#include "RenderPass/ParticlesPass.hpp"
 #include "Resources/Mesh.hpp"
 #include "Resources/Texture.hpp"
 #include "Camera.hpp"

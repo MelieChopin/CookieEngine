@@ -34,6 +34,7 @@ namespace Cookie
 			Resources::ResourcesManager						resources;
 			ECS::Coordinator								coordinator;
 			Render::FrameBuffer								frameBuffer;
+			Render::FrameBuffer								miniMapBuffer;
 			Resources::Particles::ParticlesHandler			particlesHandler;
 
 			std::shared_ptr<Resources::Scene>				scene{nullptr};

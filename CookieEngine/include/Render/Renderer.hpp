@@ -3,6 +3,7 @@
 
 
 #include "Core/Window.hpp"
+#include "Drawers/Skybox.hpp"
 #include "Drawers/FBODrawer.hpp"
 #include "Render/RendererRemote.hpp"
 #include "Render/DrawDataHandler.hpp"
@@ -11,6 +12,7 @@
 #include "Render/RenderPass/LightPass.hpp"
 #include "Render/RenderPass/ComposePass.hpp"
 #include "Render/RenderPass/GameplayPass.hpp"
+#include "Render/RenderPass/MiniMapPass.hpp"
 
 namespace Cookie
 {
@@ -39,12 +41,14 @@ namespace Cookie
 				D3D11_VIEWPORT	viewport;
 				D3D11_PRIMITIVE_TOPOLOGY topo{ D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST };
 				DrawDataHandler drawData;
+				SkyBox			skyBox;
 
 				GeometryPass	geomPass;
 				ShadowPass		shadPass;
 				LightPass		lightPass;
 				ComposePass		compPass;
 				GameplayPass	gamePass;
+				MiniMapPass		miniMapPass;
 
 			private:
 				Render::FBODrawer	fboDrawer;
@@ -58,7 +62,8 @@ namespace Cookie
 				Renderer();
 				~Renderer();
 				
-				void Draw(const Camera* cam, Game& game, FrameBuffer& fbo);
+				void Draw(const Camera* cam, FrameBuffer& fbo);
+				void DrawMiniMap(FrameBuffer& fbo);
 				void Render()const;
 				void Clear();
 				void SetBackBuffer();

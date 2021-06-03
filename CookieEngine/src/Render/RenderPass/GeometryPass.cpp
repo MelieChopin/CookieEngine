@@ -310,24 +310,25 @@ void GeometryPass::Set()
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
 
-    Render::RendererRemote::context->IASetInputLayout(ILayout);
-
     Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
 
-	ID3D11RenderTargetView* fbos[3] = {posFBO.renderTargetView,normalFBO.renderTargetView,albedoFBO.renderTargetView};
-
-	Render::RendererRemote::context->OMSetRenderTargets(3, fbos, depthBuffer);
 }
 
 void GeometryPass::Draw(DrawDataHandler& drawData)
 {
     const Camera& cam = *drawData.currentCam;
+    
+	ID3D11RenderTargetView* fbos[3] = {posFBO.renderTargetView,normalFBO.renderTargetView,albedoFBO.renderTargetView};
+
+	Render::RendererRemote::context->OMSetRenderTargets(3, fbos, depthBuffer);
 
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
 
     VS_CONSTANT_BUFFER buffer = { cam.GetProj(), cam.GetView() };
 
     Render::WriteBuffer(&buffer,sizeof(buffer),0,&CBuffer);
+
+    Render::RendererRemote::context->IASetInputLayout(ILayout);
 
     drawData.Draw();
 
@@ -336,6 +337,8 @@ void GeometryPass::Draw(DrawDataHandler& drawData)
     Render::RendererRemote::context->VSSetConstantBuffers(0, 2, CBuffers);
 
     drawData.mapDrawer.Draw();
+
+    Render::RendererRemote::context->IASetInputLayout(ILayout);
 }
 
 void GeometryPass::Clear()

@@ -231,7 +231,7 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 
 	//Skybox
 	{
-		js["SkyboxName"] = actScene.skyBox.texture->name;
+		js["SkyboxName"] = actScene.skyBox->name;
 	}
 
 	//Camera
@@ -926,8 +926,7 @@ std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const c
 	 
 	 if (js.contains("SkyboxName"))
 	 {
-		 newScene->skyBox.cube = game.resources.meshes["Cube"].get();
-		 newScene->skyBox.texture = game.resources.skyboxes[js["SkyboxName"].get<std::string>()].get();
+		 newScene->skyBox = game.resources.skyboxes[js["SkyboxName"].get<std::string>()].get();
 	 }
 
 	 if (js.contains("Camera"))

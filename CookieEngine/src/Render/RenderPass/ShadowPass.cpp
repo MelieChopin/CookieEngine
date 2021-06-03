@@ -163,7 +163,7 @@ void ShadowPass::Set()
     
 }
 
-void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
+void ShadowPass::Draw(DrawDataHandler& drawData)
 {
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
 
@@ -173,18 +173,20 @@ void ShadowPass::Draw(DrawDataHandler& drawData, LightsArray& lights)
 
     Render::RendererRemote::context->RSSetViewports(1, &shadowViewport);
 
-    if (lights.useDir && lights.dirLight.castShadow)
+    if (drawData.lights->useDir && drawData.lights->dirLight.castShadow)
     {
+        DirLight& dirLight = drawData.lights->dirLight;
+
         Render::RendererRemote::context->OMSetRenderTargets(0, nullptr, shadowMap.depthStencilView);
 
-        Vec3 jDir = lights.dirLight.dir.Normalize();
-        Vec3 pos = (drawData.AABB[0] + drawData.AABB[1]) * 0.5f;
-        Mat4 view = Mat4::LookAt({ 0.0f,0.0f,0.0f }, jDir, { 0.0f,1.0f,0.0f });
+        Vec3 jDir   = dirLight.dir.Normalize();
+        Vec3 pos    = (drawData.AABB[0] + drawData.AABB[1]) * 0.5f;
+        Mat4 view   = Mat4::LookAt({ 0.0f,0.0f,0.0f }, jDir, { 0.0f,1.0f,0.0f });
 
         view = Mat4::Translate(-(pos - jDir * shadowProjEpsilon * 0.5f)) * view;
 
-        lights.dirLight.lightViewProj = view * proj;
-        buffer.lightViewProj = lights.dirLight.lightViewProj;
+        dirLight.lightViewProj  = view * proj;
+        buffer.lightViewProj    = dirLight.lightViewProj;
         Render::WriteBuffer(&buffer, bufferSize, 0, &CBuffer);
 
         drawData.Draw(true);

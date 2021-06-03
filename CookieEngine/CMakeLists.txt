@@ -89,13 +89,16 @@ set (SRC_FILES
     "${SRC_DIR}/Render/Drawers/SkyBox.cpp"
     "${SRC_DIR}/Render/Drawers/PlayerDrawer.cpp"
     "${SRC_DIR}/Render/Drawers/SelectionDrawer.cpp"
+    "${SRC_DIR}/Render/Drawers/MiniMapDrawer.cpp"
+    "${SRC_DIR}/Render/Drawers/MiniModelDrawer.cpp"
 
     "${SRC_DIR}/Render/RenderPass/GeometryPass.cpp"
     "${SRC_DIR}/Render/RenderPass/LightPass.cpp"
     "${SRC_DIR}/Render/RenderPass/ShadowPass.cpp"
     "${SRC_DIR}/Render/RenderPass/ComposePass.cpp"
     "${SRC_DIR}/Render/RenderPass/GameplayPass.cpp"
-    "${SRC_DIR}/Render/ParticlesPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/MiniMapPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/ParticlesPass.cpp"
     
     "${SRC_DIR}/Resources/Loader.cpp" 
     "${SRC_DIR}/Resources/Map.cpp" 

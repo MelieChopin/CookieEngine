@@ -15,14 +15,18 @@ using namespace Cookie::Gameplay;
 using namespace Cookie::Resources::Particles;
 using namespace rp3d;
 
+constexpr int miniMapResolution = 512;
+
 /*================== CONSTRUCTORS/DESTRUCTORS ==================*/
 
 Game::Game():
-    frameBuffer{ renderer.window.width,renderer.window.height }, scene{}
+    frameBuffer{renderer.window.width,renderer.window.height },
+    miniMapBuffer{miniMapResolution, miniMapResolution}
 {
     Physics::PhysicsHandle::Init();
     Core::UIcore::FinishInit(renderer);
     renderer.drawData.Init(*this);
+    renderer.miniMapPass.CreateDepth(miniMapResolution, miniMapResolution);
 }
 
 Game::~Game()
@@ -54,11 +58,13 @@ void Game::Update()
 
     renderer.Clear();
     renderer.ClearFrameBuffer(frameBuffer);
+    renderer.ClearFrameBuffer(miniMapBuffer);
 
     scene->camera->Update();
     coordinator.ApplyComputeTrs();
 
-    renderer.Draw(scene->camera.get(), *this,frameBuffer);
+    renderer.Draw(scene->camera.get(), frameBuffer);
+    renderer.DrawMiniMap(miniMapBuffer);
     particlesHandler.Draw(*scene->camera.get());
 
     DisplayLife();
@@ -113,8 +119,17 @@ void Game::HandleGameplayInputs()
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
         coordinator.armyHandler->AddArmyCoordinator(E_ARMY_NAME::E_AI1);
-        
 
+    if (ImGui::GetIO().KeysDown[GLFW_KEY_SPACE])
+    {
+        if (coordinator.selectedEntities.empty())
+            scene->camera->pos = { 0, 0, 0 };
+        else
+            scene->camera->pos = coordinator.componentHandler->GetComponentTransform(coordinator.selectedEntities[0]->id).pos;
+
+        scene->camera->pos += {0, 10, 15};
+        scene->camera->ForceUpdate();
+    }
 
     if (playerData.buildingToBuild)
     {
@@ -372,6 +387,9 @@ void Game::SetScene(const std::shared_ptr<Resources::Scene>& _scene)
     scene->camera->ForceUpdate();
     SetCamClampFromMap();
     scene->camera->Deactivate();
+
+    renderer.drawData.SetScene(scene.get());
+    renderer.skyBox.texture = scene->skyBox;
 }
 
 void Game::SetCamClampFromMap()
@@ -396,8 +414,8 @@ void Game::SetCamClampFromMap()
     if (depth > scene->map.trs.scale.z)
         depth = scene->map.trs.scale.z;
 
-    scene->camera->mapClampX = {{ -scene->map.trs.scale.x * 0.5f + (width * 0.5f),scene->map.trs.scale.x * 0.5f - (width * 0.5f) } };
-    scene->camera->mapClampZ = {{ -scene->map.trs.scale.z * 0.5f + (depth * 0.5f), scene->map.trs.scale.z * 0.5f - (depth * 0.5f)} };
+    scene->camera->mapClampX = {{ -scene->map.trs.scale.x * 0.5f ,scene->map.trs.scale.x * 0.5f } };
+    scene->camera->mapClampZ = {{ -scene->map.trs.scale.z * 0.5f , scene->map.trs.scale.z * 0.5f} };
 }
 
 void Game::TryResizeWindow()
