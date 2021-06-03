@@ -39,7 +39,7 @@ namespace Cookie
 
 			Core::Math::Vec2 ratio = { { (mousePos.x / (width * 0.5f)) - 1.0f,  (-mousePos.y / (height * 0.5f)) + 1.0f} };
 
-			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(rotMat * projMat) * Core::Math::Vec4(ratio.x,ratio.y, 1.0f,1.0f);
+			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(rotMat * projMat) * Core::Math::Vec4(ratio.x, ratio.y, 1.0f, 1.0f);
 
 			return Core::Math::Vec3({ r.x / r.a,r.y / r.a,r.z / r.a }).Normalize();
 		}
@@ -53,7 +53,7 @@ namespace Cookie
 			if (ratio.x > 1.0f || ratio.x < -1.0f || ratio.y > 1.0f || ratio.y < -1.0f)
 				return Core::Math::Vec3();
 
-			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(rotMat * projMat) * Core::Math::Vec4(ratio.x, ratio.y, 10.0f, 1.0f);
+			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(rotMat * projMat) * Core::Math::Vec4(ratio.x, ratio.y, 1.0f, 1.0f);
 
 			return Core::Math::Vec3({ r.x / r.a,r.y / r.a,r.z / r.a }).Normalize();
 		}

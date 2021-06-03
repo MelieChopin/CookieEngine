@@ -34,6 +34,7 @@ namespace Cookie
 			Resources::ResourcesManager						resources;
 			ECS::Coordinator								coordinator;
 			Render::FrameBuffer								frameBuffer;
+			Render::FrameBuffer								miniMapBuffer;
 			Resources::Particles::ParticlesHandler			particlesHandler;
 
 			std::unique_ptr<Resources::Scene>				scene{nullptr};
@@ -61,6 +62,7 @@ namespace Cookie
 			void InputAddUnit(int index);
 			void DisplayNewEntityDestination(Render::DebugRenderer& dbg);
 			void ECSCalls(Render::DebugRenderer& dbg);
+			void DisplayLife();
 
 			void SetScene();
 			void SetCamClampFromMap();

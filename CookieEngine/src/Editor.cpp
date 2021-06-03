@@ -50,11 +50,11 @@ Editor::Editor()
     editorUI.AddWItem(new UIwidget::TextureEditor(game.resources), 1);
     editorUI.AddWItem(new UIwidget::AIBehaviorEditor(game.resources), 1);
     editorUI.AddWItem(new UIwidget::GameUIeditor(game), 1);
-    editorUI.AddWItem(new UIwidget::SoundOrchestrator(), 1);
+    editorUI.AddWItem(new UIwidget::SoundOrchestrator(game.resources), 1);
     
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
     editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
-    editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.scene.get()->lights, game.scene.get()->skyBox, game.resources), 2);
+    editorUI.AddWItem(new UIwidget::WorldSettingsWidget(game.scene, game.scene.get()->lights, game.renderer.skyBox, game.resources), 2);
     editorUI.AddWItem(new UIwidget::Console(CDebug, game.resources), 2);
     editorUI.AddWItem(new UIwidget::FileExplorer(game), 2);
 
@@ -82,22 +82,43 @@ void Editor::InitEditComp()
 {
     for (int i = 0; i < MAX_ENTITIES; i++)
     {
-        editingComponent[i].InitComponent(game.coordinator.componentHandler->GetComponentTransform(i));
+        int j = game.coordinator.entityHandler->entities[i].id;
+        editingComponent[j].InitComponent(game.coordinator.componentHandler->GetComponentTransform(j));
     }
 }
 
 void Editor::ModifyEditComp()
 {
-    for (int i = 0; i < MAX_ENTITIES; i++)
+    int max = livingEntitiesNb > game.coordinator.entityHandler->livingEntities ? livingEntitiesNb : game.coordinator.entityHandler->livingEntities;
+    for (int i = 0; i < max; i++)
     {
-        editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i);
-        if ((game.coordinator.entityHandler->entities[i].signature & C_SIGNATURE::MODEL) && game.coordinator.componentHandler->GetComponentModel(i).mesh != nullptr)
+        int j = game.coordinator.entityHandler->entities[i].id;
+        ComponentEditor& jComponent = editingComponent[j];
+        jComponent.editTrs = &game.coordinator.componentHandler->GetComponentTransform(j);
+        bool hasMesh = (game.coordinator.entityHandler->entities[i].signature & C_SIGNATURE::MODEL) && game.coordinator.componentHandler->GetComponentModel(j).mesh != nullptr;
+
+        /* if it has mesh and alive, change collider */
+        if (hasMesh)
         {
-            editingComponent[i].AABBMin = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBMin;
-            editingComponent[i].AABBMax = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBMax;
-            editingComponent[i].MakeCollider();
+            jComponent.AABBMin = game.coordinator.componentHandler->GetComponentModel(j).mesh->AABBMin;
+            jComponent.AABBMax = game.coordinator.componentHandler->GetComponentModel(j).mesh->AABBMax;
+            jComponent.MakeCollider();
         }
-        editingComponent[i].Update();
+        
+        /* if entity deleted, remove collider */
+        if (!hasMesh && jComponent.collider)
+        {
+            if (jComponent.body)
+            {
+                if (jComponent.collider)
+                {
+                    jComponent.body->removeCollider(editingComponent[j].collider);
+                    jComponent.collider = nullptr;
+                }
+            }
+        }
+
+        jComponent.Update();
     }
 }
 
@@ -110,7 +131,7 @@ void Editor::Loop()
 
     bool isActive = false;
     {
-        game.scene->map.model.albedo = game.resources.textures2D["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
+       // game.scene->map.model.albedo = game.resources.textures2D["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
     }
 
     //for (int i = 0; i < MAX_ENTITIES; i++)
@@ -129,21 +150,16 @@ void Editor::Loop()
 
         //std::cout << game.particlesHandler.living << "\n";
 
-        //Update for 3D Music
-        FMOD_VECTOR temp = { cam.pos.x, cam.pos.y, cam.pos.z }; // Modify to have cam in scene
-        Cookie::Resources::SoundManager::system->set3DListenerAttributes(0, &temp, nullptr, nullptr, nullptr);
-        Cookie::Resources::SoundManager::system->update();
-
-        //TEMP : TEST FOR 3D
+        //TEMP : TEST FOR 3D 
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
-            game.particlesHandler.CreateParticlesWithPrefab(Vec3(-5, 15, 5), "Smoke");
+            Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(-5, 15, 5), game.resources.particles["Bomb"].get(), Vec3(10, 0, 25));
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P])
-            game.particlesHandler.CreateParticlesWithPrefab(Vec3(5, 5, 5), "Load", Vec3(15, 15, 5));
+            Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(5, 5, 5), game.resources.particles["Attack"].get(), Vec3(15, 15, 5));
             
-        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
-            Cookie::Resources::SoundManager::SetPaused("Music.mp3", true);
-        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_L) == GLFW_PRESS)
-            Cookie::Resources::SoundManager::SetPaused("Music.mp3", false);
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P])
+            Cookie::Resources::SoundManager::PlayMusic(game.resources.sounds["Music.mp3"].get());
+        if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
+            Cookie::Resources::SoundManager::PlayMusic3D(game.resources.sounds["Magic.mp3"].get(), Vec3(0, 0, 0));
 
         // Present frame
         if (isPlaying)
@@ -157,20 +173,21 @@ void Editor::Loop()
             game.coordinator.ApplyComputeTrs();
 
             cam.Update();
+           
+            if (currentScene != game.scene.get() || game.coordinator.entityHandler->livingEntities != livingEntitiesNb)
+            {
+                selectedEntity = {};
+                selectedEntity.componentHandler = game.coordinator.componentHandler;
+                ModifyEditComp();
+                currentScene = game.scene.get();
+                livingEntitiesNb = game.coordinator.entityHandler->livingEntities;
+            }
 
             if (!ImGui::GetIO().MouseDownDuration[0])
             {
                 Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDirClamp() * cam.camFar;
                 rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, { fwdRay.x,fwdRay.y,fwdRay.z });
                 physHandle.editWorld->raycast(ray, this);
-            }
-
-            if (currentScene != game.scene.get())
-            {
-                selectedEntity = {};
-                selectedEntity.componentHandler = game.coordinator.componentHandler;
-                ModifyEditComp();
-                currentScene = game.scene.get();
             }
 
             if (selectedEntity.toChangeEntityIndex >= 0)
@@ -181,6 +198,9 @@ void Editor::Loop()
             {
                 selectedEntity.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id).Set(selectedEntity.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id));
             }
+
+            //Update for 3D Music
+            Cookie::Resources::SoundManager::UpdateFMODFor3DMusic(cam);
         }
 
            
@@ -203,7 +223,7 @@ void Editor::Loop()
         //Draw
         game.renderer.Clear();
         game.renderer.ClearFrameBuffer(editorFBO);
-        game.renderer.Draw(&cam, game,editorFBO);
+        game.renderer.Draw(&cam,editorFBO);
 		game.particlesHandler.Draw(cam);
 
         dbgRenderer.Draw(cam.GetViewProj());
@@ -214,6 +234,9 @@ void Editor::Loop()
         UIcore::EndFrame();
         game.renderer.Render();
     }
+
+    if (game.scene)
+        game.scene->skyBox = game.renderer.skyBox.texture;
 }
 
 void Editor::TryResizeWindow()

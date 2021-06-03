@@ -227,34 +227,7 @@ namespace Cookie
                 m.c[3].e[2] = -(f + n) / (f_min_n);
                 m.c[3].e[3] = 1.0f;
 
-                return m;
-            }
-             inline Mat4 Mat4::OrthoLH(float width, float height, float n, float f)
-            {
-                Mat4 m;
-                float invF = 1.0f /(f - n);
-
-                m.c[0].e[0] = 2.0f/width;
-                m.c[0].e[1] = 0.f;
-                m.c[0].e[2] = 0.f;
-                m.c[0].e[3] = 0.0f;
-
-                m.c[1].e[0] = 0.f;
-                m.c[1].e[1] = 2.0f/height;
-                m.c[1].e[2] = 0.f;
-                m.c[1].e[3] = 0.0f;
-
-                m.c[2].e[0] = 0.f;
-                m.c[2].e[1] = 0.f;
-                m.c[2].e[2] = invF;
-                m.c[2].e[3] = 0.0f;
-
-                m.c[3].e[0] = 0.0f;
-                m.c[3].e[1] = 0.0f;
-                m.c[3].e[2] = -n * invF;
-                m.c[3].e[3] = 1.0f;
-
-                return m;
+                return m.Transpose();
             }
             inline Mat4 Mat4::LookAt(const Vec3& eye, const Vec3& center, const Vec3& up)
             {

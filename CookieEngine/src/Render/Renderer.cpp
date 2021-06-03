@@ -153,24 +153,25 @@ void Renderer::ResizeBuffer(int width, int height)
 
 /*========================= RENDER METHODS =========================*/
 
-void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
+void Renderer::Draw(const Camera* cam, FrameBuffer& framebuffer)
 {
     ID3D11RenderTargetView* nullViews[] = { nullptr,nullptr,nullptr,nullptr };
     remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
+    Render::RendererRemote::context->RSSetViewports(1, &viewport);
 
-    drawData.SetDrawData(cam,game);
+    drawData.SetDrawData(cam);
 
     geomPass.Set();
     geomPass.Draw(drawData);
 
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
 
-    geomPass.Set();
-    shadPass.Draw(drawData, game.scene.get()->lights);
+    shadPass.Set();
+    shadPass.Draw(drawData);
     remote.context->RSSetViewports(1, &viewport);
 
     lightPass.Set(geomPass.posFBO, geomPass.normalFBO, geomPass.albedoFBO);
-    lightPass.Draw(game.scene.get()->lights, shadPass.shadowMap, drawData);
+    lightPass.Draw(shadPass.shadowMap, drawData);
 
     remote.context->OMSetRenderTargets(4, nullViews, nullptr);
     shadPass.Set();
@@ -178,17 +179,17 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
     if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F1] >= 0.0f)
     {
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
-        DrawFrameBuffer(game.renderer.geomPass.posFBO);
+        DrawFrameBuffer(geomPass.posFBO);
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F2] >= 0.0f)
     {
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
-        DrawFrameBuffer(game.renderer.geomPass.normalFBO);
+        DrawFrameBuffer(geomPass.normalFBO);
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F3] >= 0.0f)
     {
         remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, nullptr);
-        DrawFrameBuffer(game.renderer.geomPass.albedoFBO);
+        DrawFrameBuffer(geomPass.albedoFBO);
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F4] >= 0.0f)
     {
@@ -210,10 +211,21 @@ void Renderer::Draw(const Camera* cam, Game& game, FrameBuffer& framebuffer)
 
     remote.context->OMSetRenderTargets(1, &framebuffer.renderTargetView, geomPass.depthBuffer);
 
-    game.scene.get()->skyBox.Draw(cam->GetProj(), cam->GetView());
+    skyBox.Draw(cam->GetProj(), cam->GetView());
 
     gamePass.Set();
     gamePass.Draw(drawData);
+}
+
+void Renderer::DrawMiniMap(FrameBuffer& fbo)
+{
+    /* in terms of state, they have actually a lot in common so 
+     * use the already existent to not create new ones */
+    geomPass.Set();
+
+    miniMapPass.Draw(drawData,fbo);
+
+    remote.context->ClearDepthStencilView(miniMapPass.depthBuffer, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
 void Renderer::DrawFrameBuffer(FrameBuffer& fbo)

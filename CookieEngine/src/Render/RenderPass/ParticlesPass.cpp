@@ -1,4 +1,4 @@
-#include "ParticlesPass.hpp"
+#include "RenderPass/ParticlesPass.hpp"
 #include "Core/Math/Mat4.hpp"
 #include "Render/RendererRemote.hpp"
 #include "Resources/Mesh.hpp"
@@ -19,10 +19,10 @@ struct VS_CONSTANT_BUFFER
 
 ParticlesPass::ParticlesPass()
 {
-    InitShader();
+   // InitShader();
 }
 
-ParticlesPass::ParticlesPass(const ParticlesPass& pass) : VShader(pass.VShader), PShader(pass.PShader), CBuffer(pass.CBuffer), ILayout(pass.ILayout),
+ParticlesPass::ParticlesPass(const ParticlesPass& pass) : VShader(pass.VShader), PShader(pass.PShader), ILayout(pass.ILayout), CBuffer(pass.CBuffer),
                 InstanceBuffer(pass.InstanceBuffer), blendState(pass.blendState), PSampler(pass.PSampler), rasterizerState(pass.rasterizerState), 
                 depthStencilState(pass.depthStencilState), mInstancedData(pass.mInstancedData)
 {
@@ -115,7 +115,7 @@ void ParticlesPass::InitShader()
                                     float4(-z.x, -z.y, -z.z, 0),
                                     float4(0.0, 0.0, 0.0, 1));
 
-            temp = mul(float4(vin.PosL,1.0), mul(rot, vin.World ));
+            temp = mul(float4(vin.PosL, 1.0), mul(rot, vin.World));
         }
 
 	    // Transform to world space space.

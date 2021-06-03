@@ -51,10 +51,10 @@ namespace Cookie
 				std::unordered_map<std::string, std::unique_ptr<Texture>>				skyboxes;
 				std::unordered_map<std::string, std::unique_ptr<Texture>>				icons;
 				std::unordered_map<std::string, std::unique_ptr<Script>>				scripts;
-				std::unordered_map<std::string, std::unique_ptr<Prefab>>				prefabs;
 				std::unordered_map<std::string, std::unique_ptr<Sound>>					sounds;
-				std::unordered_map<std::string, std::unique_ptr<Gameplay::AIBehavior>>	aiBehaviors;
 				std::unordered_map<std::string, std::unique_ptr<Particles::ParticlesPrefab>> particles;
+				std::unordered_map<std::string, std::unique_ptr<Gameplay::AIBehavior>>	aiBehaviors;
+				std::unordered_map<std::string, std::unique_ptr<Prefab>>				prefabs;
 				
 			private:
 				void SearchForAssets(const fs::path& path, std::vector<std::string>& gltfFiles);

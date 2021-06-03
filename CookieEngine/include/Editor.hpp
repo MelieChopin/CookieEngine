@@ -47,6 +47,7 @@ namespace Cookie
 
 			FocusEntity			selectedEntity	= {};
 			Resources::Scene*	currentScene	= nullptr;
+			unsigned int		livingEntitiesNb = 0;
 
 			bool				isPlaying = false;
 			
@@ -80,7 +81,7 @@ namespace Cookie
 			}
 			inline virtual float notifyRaycastHit(const rp3d::RaycastInfo& info)
 			{
-				for (int i = 0; i < game.coordinator.entityHandler->livingEntities; i++)
+				for (int i = 0; i < livingEntitiesNb; i++)
 				{
 					if (editingComponent[game.coordinator.entityHandler->entities[i].id].body == info.body)
 					{

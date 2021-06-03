@@ -16,6 +16,7 @@ using namespace ImGui;
 using namespace Cookie::UIwidget;
 using namespace Cookie::ECS;
 using namespace Cookie::Resources;
+using namespace Cookie::Gameplay;
 
 
 void Inspector::WindowDisplay()
@@ -47,6 +48,7 @@ void Inspector::EntityInspection()
     if (selectedEntity.focusedEntity->signature & C_SIGNATURE::PHYSICS)      PhysicsInterface();
     if (selectedEntity.focusedEntity->signature & C_SIGNATURE::SCRIPT)       ScriptInterface();
     if (selectedEntity.focusedEntity->signature & C_SIGNATURE::GAMEPLAY)     GameplayInterface();
+    if (selectedEntity.focusedEntity->signature & C_SIGNATURE::FX)           FXInterface();
 
 
     if (Button("Add component...")) OpenPopup("Add component popup");
@@ -65,11 +67,7 @@ void Inspector::EntityInspection()
 
         if (selectedEntity.focusedEntity->signature & C_SIGNATURE::PHYSICS)    TextDisabled("Component Physics already added");
         else if (Selectable("Add component Physics"))
-        {
             coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::PHYSICS);
-            coordinator.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id).Activate();
-        }
-
 
         if (selectedEntity.focusedEntity->signature & C_SIGNATURE::SCRIPT)     TextDisabled("Component Script already added");
         else if (Selectable("Add component Script"))
@@ -79,6 +77,10 @@ void Inspector::EntityInspection()
         if (selectedEntity.focusedEntity->signature & C_SIGNATURE::GAMEPLAY)   TextDisabled("Component Gameplay already added");
         else if (Selectable("Add component Gameplay"))
             coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::GAMEPLAY);
+
+        if (selectedEntity.focusedEntity->signature & C_SIGNATURE::FX)   TextDisabled("Component FX already added");
+        else if (Selectable("Add component FX"))
+            coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::FX);
 
         EndPopup();
     }
@@ -679,3 +681,99 @@ void Inspector::GameplayInterface()
     ImGui::Separator();
 }
 
+void Inspector::FXInterface()
+{
+    if (TreeNode("FX"))
+    {
+        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(selectedEntity.focusedEntity->id);
+
+        //Life
+        if (gameplay.signatureGameplay & CGP_SIGNATURE::LIVE)
+        {
+            CGPLive& life = gameplay.componentLive;
+
+            //Death
+            {
+                Text("On Death :");
+                if (BeginCombo("##DEATH_SFX", (life.sfxDeath) ? life.sfxDeath->filepath.c_str() : "SFX missing"))
+                {
+                    for (std::unordered_map<std::string, std::unique_ptr<Sound>>::iterator soundPtr = resources.sounds.begin(); soundPtr != resources.sounds.end(); ++soundPtr)
+                        if (Selectable(soundPtr->first.c_str()))
+                            life.sfxDeath = soundPtr->second.get();
+
+                    EndCombo();
+                }
+                if (BeginCombo("##DEATH_VFX", (life.vfxDeath) ? life.vfxDeath->name.c_str() : "VFX missing"))
+                {
+                    for (std::unordered_map<std::string, std::unique_ptr<Particles::ParticlesPrefab>>::iterator particlePtr = resources.particles.begin(); particlePtr != resources.particles.end(); ++particlePtr)
+                        if (Selectable(particlePtr->first.c_str()))
+                            life.vfxDeath = particlePtr->second.get();
+
+                    EndCombo();
+                }
+            }
+
+            //Hit
+            {
+                Text("On Hit :");
+                if (BeginCombo("##HIT_SFX", (life.sfxHit) ? life.sfxHit->filepath.c_str() : "SFX missing"))
+                {
+                    for (std::unordered_map<std::string, std::unique_ptr<Sound>>::iterator soundPtr = resources.sounds.begin(); soundPtr != resources.sounds.end(); ++soundPtr)
+                        if (Selectable(soundPtr->first.c_str()))
+                            life.sfxHit = soundPtr->second.get();
+
+                    EndCombo();
+                }
+                if (BeginCombo("##HIT_VFX", (life.vfxHit) ? life.vfxHit->name.c_str() : "VFX missing"))
+                {
+                    for (std::unordered_map<std::string, std::unique_ptr<Particles::ParticlesPrefab>>::iterator particlePtr = resources.particles.begin(); particlePtr != resources.particles.end(); ++particlePtr)
+                        if (Selectable(particlePtr->first.c_str()))
+                            life.vfxHit = particlePtr->second.get();
+
+                    EndCombo();
+                }
+            }
+        }
+        else
+            TextDisabled("Component Gameplay Life missing");
+        NewLine();
+
+        //Attack
+        if (gameplay.signatureGameplay & CGP_SIGNATURE::ATTACK)
+        {
+            CGPAttack& attack = gameplay.componentAttack;
+
+            //Attack
+            {
+                Text("On Attack :");
+                if (BeginCombo("##ATTACK_SFX", (attack.sfxAttack) ? attack.sfxAttack->filepath.c_str() : "SFX missing"))
+                {
+                    for (std::unordered_map<std::string, std::unique_ptr<Sound>>::iterator soundPtr = resources.sounds.begin(); soundPtr != resources.sounds.end(); ++soundPtr)
+                        if (Selectable(soundPtr->first.c_str()))
+                            attack.sfxAttack = soundPtr->second.get();
+
+                    EndCombo();
+                }
+                if (BeginCombo("##ATTACK_VFX", (attack.vfxAttack) ? attack.vfxAttack->name.c_str() : "VFX missing"))
+                {
+                    for (std::unordered_map<std::string, std::unique_ptr<Particles::ParticlesPrefab>>::iterator particlePtr = resources.particles.begin(); particlePtr != resources.particles.end(); ++particlePtr)
+                        if (Selectable(particlePtr->first.c_str()))
+                            attack.vfxAttack = particlePtr->second.get();
+
+                    EndCombo();
+                }
+            }
+        }
+        else
+            TextDisabled("Component Gameplay Attack missing");
+        NewLine();
+
+
+        if (Selectable("Remove component##FX"))
+            coordinator.componentHandler->RemoveComponent(*selectedEntity.focusedEntity, C_SIGNATURE::FX);
+
+        TreePop();
+    }
+
+    ImGui::Separator();
+}

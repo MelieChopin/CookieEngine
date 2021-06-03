@@ -80,7 +80,7 @@ void CollisionWithPlane::Update(ParticlesData* p)
 		if (distance <= Cookie::Core::Math::EPSILON && p->data[i].isBillboard == true)
 		{
 			p->countAlive--;
-			particlesHandler->CreateParticlesWithPrefab(p->data[i].pos, namePrefab);
+			ParticlesHandler::CreateParticlesWithPrefab(p->data[i].pos, namePrefab);
 		}
 	}
 }
@@ -129,7 +129,7 @@ void SpawnEnd::Update(ParticlesData* p)
 		if (p->data[i].time <= Cookie::Core::DeltaTime() * 2)
 		{
 			p->countAlive--;
-			particlesHandler->CreateParticlesWithPrefab(posSpawn, namePrefab);
+			ParticlesHandler::CreateParticlesWithPrefab(posSpawn, namePrefab);
 		}
 	}
 }

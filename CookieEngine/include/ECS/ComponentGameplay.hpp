@@ -60,7 +60,7 @@ namespace Cookie
 			int                    signatureGameplay{ 0 };
 			Cost                   cost;
 			Gameplay::E_ARMY_TYPE  type {Gameplay::E_ARMY_TYPE::E_DEFAULT_TYPE};
-			ComponentTransform*    trs {nullptr};
+			ComponentTransform*    trs {nullptr}; //for armyCoordinator
 
 			Gameplay::CGPLive      componentLive;
 			Gameplay::CGPMove      componentMove;

@@ -14,21 +14,25 @@ namespace Cookie
 			class ParticlesHandler
 			{
 			public:
-				std::list<ParticlesSystem> particlesSystems;
-				unsigned int living = 0;
-				std::unordered_map<std::string, std::unique_ptr<Particles::ParticlesPrefab>>* particlesPrefab;
+				static std::list<ParticlesSystem> particlesSystems;
+				static unsigned int living;
+				static std::unordered_map<std::string, std::unique_ptr<Particles::ParticlesPrefab>>* particlesPrefab;
 
 				Render::Frustrum frustrum;
-				Cookie::Render::ParticlesPass shader;
+				static Cookie::Render::ParticlesPass shader;
 
-				ParticlesHandler() 
+				ParticlesHandler()
 				{ 
 					particlesSystems.resize(MAX_PARTICLESSYSTEMS);
+					living = 0;
+					shader.InitShader();
 				}
 
+				static bool TestFrustrum(Render::Frustrum& frustrum, Cookie::Core::Math::Vec4& pos);
 				void Update();
 				void Draw(const Render::Camera& cam);
-				void CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3& pos, const std::string& name, const Cookie::Core::Math::Vec3& posSpawnEnd = Cookie::Core::Math::Vec3(0, 0, 0));
+				static void CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3& pos, const std::string& name, const Cookie::Core::Math::Vec3& posSpawnEnd = Cookie::Core::Math::Vec3(0, 0, 0));
+				static void CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3& pos, Particles::ParticlesPrefab* particlesPrefab, const Cookie::Core::Math::Vec3& posSpawnEnd = Cookie::Core::Math::Vec3(0, 0, 0));
 			};
 		}
 	}

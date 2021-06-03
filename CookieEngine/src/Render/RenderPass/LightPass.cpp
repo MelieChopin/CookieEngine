@@ -153,9 +153,11 @@ void LightPass::Set(FrameBuffer& posFBO, FrameBuffer& normalFBO, FrameBuffer& al
     Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
 }
 
-void LightPass::Draw(const LightsArray& lights, const ShadowBuffer& shadowMap, const DrawDataHandler& drawData)
+void LightPass::Draw(const ShadowBuffer& shadowMap, const DrawDataHandler& drawData)
 {
-    const Camera& cam = *drawData.currentCam;
+    const Camera& cam           = *drawData.currentCam;
+    const LightsArray& lights   = *drawData.lights;
+
     ID3D11RenderTargetView* rtvs[2] = { diffuseFBO.renderTargetView,specularFBO.renderTargetView };
 
 

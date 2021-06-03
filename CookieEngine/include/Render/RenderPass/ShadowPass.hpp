@@ -60,7 +60,7 @@ namespace Cookie
 			~ShadowPass();
 
 			void Set();
-			void Draw(DrawDataHandler& drawData, LightsArray& lights);
+			void Draw(DrawDataHandler& drawData);
 			void Clear();
 		};
 	}

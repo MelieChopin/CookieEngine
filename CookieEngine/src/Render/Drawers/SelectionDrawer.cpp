@@ -52,16 +52,15 @@ void SelectionDrawer::Set(const DrawDataHandler& drawData)
 {
     viewProj = drawData.currentCam->GetViewProj();
     stencilBuffer = drawData.depthStencilView;
-    selectedMatrices = &drawData.selectedMatrices;
-    selectedModels = &drawData.selectedModels;
+    selectedDrawData = &drawData.selectedDrawData;
 
-    for (int i = 0; i < drawData.selectedGameplays.size(); i++)
+    for (int i = 0; i < drawData.selectedDrawData.size(); i++)
     {
-        ECS::ComponentGameplay iGameplay = drawData.selectedGameplays[i];
+        const ECS::ComponentGameplay& iGameplay = *drawData.selectedDrawData[i].gameplays[0];
        
         if (iGameplay.signatureGameplay & ECS::CGP_SIGNATURE::PRODUCER)
         {
-            Mat4 mat = selectedMatrices->at(i);
+            Mat4 mat = drawData.selectedDrawData[i].matrices.at(0);
             Vec3 pos = Vec3(mat.e[3], mat.e[7], mat.e[11]);
             Vec3 tan = (iGameplay.componentProducer.newUnitDestination - pos);
 
@@ -81,20 +80,19 @@ void SelectionDrawer::FillStencil(ID3D11Buffer* VCBuffer)
     buffer.viewProj = viewProj;
     size_t bufferSize = sizeof(VS_CONSTANT_BUFFER);
 
-    const std::vector<ECS::ComponentModel> _selectedModels = *selectedModels;
-    const std::vector<Mat4> _selectedMatrices = *selectedMatrices;
+    const std::vector<DrawData>& selectedDrawData_ = *selectedDrawData;
 
-    for (int i = 0; i < _selectedModels.size(); i++)
+    for (int i = 0; i < selectedDrawData_.size(); i++)
     {
-        ECS::ComponentModel model = _selectedModels[i];
+        const DrawData& drawData = selectedDrawData_[i];
 
-        if (model.mesh)
+        if (drawData.mesh)
         {
-            buffer.model = _selectedMatrices[i];
+            buffer.model = drawData.matrices.at(0);
             Render::WriteBuffer(&buffer, bufferSize, 0, &VCBuffer);
 
-            model.mesh->Set();
-            model.mesh->Draw();
+            drawData.mesh->Set();
+            drawData.mesh->Draw();
         }
     }
 }
@@ -113,20 +111,19 @@ void SelectionDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
     size_t bufferSize = sizeof(VS_CONSTANT_BUFFER);
 
     // drawing outLines
-    const std::vector<ECS::ComponentModel> _selectedModels = *selectedModels;
-    const std::vector<Mat4> _selectedMatrices = *selectedMatrices;
+    const std::vector<DrawData>& selectedDrawData_ = *selectedDrawData;
 
-    for (int i = 0; i < _selectedModels.size(); i++)
+    for (int i = 0; i < selectedDrawData_.size(); i++)
     {
-        ECS::ComponentModel model = _selectedModels[i];
+        const DrawData& drawData = selectedDrawData_[i];
 
-        if (model.mesh)
+        if (drawData.mesh)
         {
-            buffer.model = outLineSize * _selectedMatrices[i];
+            buffer.model = outLineSize * drawData.matrices.at(0);
             Render::WriteBuffer(&buffer, bufferSize, 0, &VCBuffer);
 
-            model.mesh->Set();
-            model.mesh->Draw();
+            drawData.mesh->Set();
+            drawData.mesh->Draw();
         }
     }
 

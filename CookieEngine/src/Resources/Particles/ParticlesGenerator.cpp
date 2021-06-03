@@ -126,3 +126,12 @@ void ColorConstGenerate::generate(ParticlesData* data, int start, int end)
 		data->data[i].colBegin = data->data[i].col;
 	}
 }
+
+void InitVelocityWithPoint::generate(ParticlesData* data, int start, int end)
+{
+	for (int i = start; i < end; i++)
+	{
+		data->data[i].vel = (endPoint - data->data[i].pos);
+		data->data[i].vel.y = 0;
+	}
+}
