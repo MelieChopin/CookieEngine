@@ -5,16 +5,26 @@
 #include "UI/UIeditor.hpp"
 #include "Render/Camera.hpp"
 #include "DebugRenderer.hpp"
-#include "ComponentEditor.hpp"
+
+#include "ECS/ComponentEditor.hpp"
+#include "ECS/ComponentHandler.hpp"
+
 
 namespace Cookie
 {
 	namespace ECS
-	{ class Entity; }
+	{
+		class Entity;
+	}
+	namespace Resources
+	{
+		class Scene;
+	}
+
 
 	struct FocusEntity
 	{
-		int						toChangeEntityId{ -1 };
+		int						toChangeEntityIndex{ -1 };
 		ECS::Entity*			focusedEntity	{ nullptr };
 		ECS::ComponentHandler*	componentHandler{ nullptr };
 		ECS::ComponentEditor*	editComp		{ nullptr };
@@ -27,16 +37,16 @@ namespace Cookie
 		public:
 
 
+			UI::UIeditor			editorUI;
 			Game					game;
-			UI::UIeditor			ui;
 			Render::FreeFlyCam		cam;
-			Render::DebugRenderer	dbgRenderer;
+			Render::FrameBuffer		editorFBO;
 
 			std::array<ECS::ComponentEditor, MAX_ENTITIES> editingComponent;
+			Render::DebugRenderer	dbgRenderer;
 
 			FocusEntity			selectedEntity	= {};
 			Resources::Scene*	currentScene	= nullptr;
-
 
 			bool				isPlaying = false;
 			
@@ -45,37 +55,36 @@ namespace Cookie
 			Editor();
 			~Editor();
 
-			void Loop();
 
 			void InitEditComp();
 			void ModifyEditComp();
+			void TryResizeWindow();
 
 			inline void PopulateFocusedEntity()
 			{
-				if (selectedEntity.editComp)
+				if (selectedEntity.editComp && selectedEntity.editComp->body)
 				{
-					if ((selectedEntity.focusedEntity->signature & SIGNATURE_MODEL) == SIGNATURE_MODEL)
+					if ((selectedEntity.focusedEntity->signature & ECS::C_SIGNATURE::MODEL) && game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh != nullptr)
 					{
-						selectedEntity.editComp->AABB = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBhalfExtent;
+						selectedEntity.editComp->AABBMin = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBMin;
+						selectedEntity.editComp->AABBMax = game.coordinator.componentHandler->GetComponentModel(selectedEntity.focusedEntity->id).mesh->AABBMax;
 						selectedEntity.editComp->MakeCollider();
 					}
-					selectedEntity.editComp->editTrs = &game.coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id).localTRS;
+					selectedEntity.editComp->editTrs = &game.coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id);
 					selectedEntity.editComp->Update();
 				}
 
-				selectedEntity.focusedEntity	= &game.coordinator.entityHandler->entities[selectedEntity.toChangeEntityId];
-				selectedEntity.editComp			= &editingComponent[selectedEntity.toChangeEntityId];
-				selectedEntity.toChangeEntityId = -1;
+				selectedEntity.focusedEntity = &game.coordinator.entityHandler->entities[selectedEntity.toChangeEntityIndex];
+				selectedEntity.editComp = &editingComponent[game.coordinator.entityHandler->entities[selectedEntity.toChangeEntityIndex].id];
+				selectedEntity.toChangeEntityIndex = -1;
 			}
-
 			inline virtual float notifyRaycastHit(const rp3d::RaycastInfo& info)
 			{
-				printf("HIT : %f , %f , %f \n", info.worldPoint.x, info.worldPoint.y, info.worldPoint.z);
-				for (int i = 1; i < MAX_ENTITIES; i++)
+				for (int i = 0; i < game.coordinator.entityHandler->livingEntities; i++)
 				{
-					if (editingComponent[i].body == info.body)
+					if (editingComponent[game.coordinator.entityHandler->entities[i].id].body == info.body)
 					{
-						selectedEntity.toChangeEntityId = i;
+						selectedEntity.toChangeEntityIndex = i;
 						PopulateFocusedEntity();
 					}
 				}
@@ -83,7 +92,13 @@ namespace Cookie
 				return 0.0f;
 			}
 
+			void Loop();
+
 	};
 }
 
 #endif // !__EDITOR_HPP__
+
+#ifndef USING_EDITOR
+#define USING_EDITOR
+#endif // !USING_EDITOR

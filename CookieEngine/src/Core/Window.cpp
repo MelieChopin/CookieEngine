@@ -1,5 +1,5 @@
-#include <cstdio>
 #include "Core/Window.hpp"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -16,8 +16,7 @@ void debugGLFWCallback(int error_code, const char* description)
 
 /*============== CONSTRUCTORS/DESTRUCTORS =================*/
 
-Window::Window():
-    width{ initWidth }, height{initHeight}
+Window::Window() : width{ initWidth }, height{initHeight}
 {
     // Init glfw
     if (!glfwInit())

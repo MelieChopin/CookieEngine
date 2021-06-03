@@ -1,6 +1,7 @@
 #ifndef __PRIMITIVES_HPP__
 #define __PRIMITIVES_HPP__
 
+#include "Core/Math/Vec3.hpp"
 #include "Resources/Mesh.hpp"
 
 namespace Cookie
@@ -9,33 +10,41 @@ namespace Cookie
 	{
 		namespace Primitives
 		{
-			inline std::shared_ptr<Cookie::Resources::Mesh> CreateQuad()
+			struct DebugVertex
 			{
-				std::vector<float> vertices = { -1, -1, 0, 0, 0, 0, 0, 1,
-												 1, -1, 0, 1, 0, 0, 0, 1,
-												 1,  1, 0, 1, 1, 0, 0, 1,
-												-1,  1, 0, 0, 1, 0, 0, 1  };
+				Math::Vec3	vertex = {0.0f,0.0f,0.0f};
+				uint32_t			color = 0;
 
-				std::vector<unsigned int> indices = { 1, 2, 3, 3, 1, 0 };
+				DebugVertex(const Math::Vec3& _vertex, uint32_t _color) :vertex{ _vertex }, color{_color} {}
+			};
 
+			inline std::unique_ptr<Resources::Mesh> CreateQuad();
 
-				std::shared_ptr<Cookie::Resources::Mesh> quad = std::make_shared<Cookie::Resources::Mesh>("Quad", vertices, indices, 6);
-				return quad;
-			}
+			inline std::vector<DebugVertex> CreateLine(const Math::Vec3& start, const Math::Vec3& end, uint32_t color1, uint32_t color2);
 
-			inline std::shared_ptr<Cookie::Resources::Mesh> CreateTriangle()
-			{
-				std::vector<float> vertices = { -1, -1, 0, 0,   0, 0, 0, 1,
-												 1, -1, 0, 0,   1, 0, 0, 1,
-												 0,  1, 0, 0.5, 1, 0, 0, 1 };
+			inline std::unique_ptr<Resources::Mesh> CreateTriangle();
 
-				std::vector<unsigned int> indices = { 0, 1, 2 };
+			inline std::unique_ptr<Resources::Mesh> CreateCube();
 
-				std::shared_ptr<Cookie::Resources::Mesh> triangle = std::make_shared<Cookie::Resources::Mesh>("Triangle",vertices, indices, 3);
-				return triangle;
-			}
+			inline std::unique_ptr<Resources::Mesh> CreateSphere();
+
+			inline std::unique_ptr<Resources::Mesh> CreateIcoSphere();
+
+			inline std::unique_ptr<Resources::Mesh> CreatePyramid();
+
+			inline std::unique_ptr<Resources::Mesh> CreateCylinder();
+
+			inline std::unique_ptr<Resources::Mesh> CreateCone();
+
+			inline std::unique_ptr<Resources::Mesh> CreateCircle();
+
+			inline std::unique_ptr<Resources::Mesh> CreateCapsule();
 		}
 	}
 }
+
+
+#include "Primitives.inl"
+#include "Sphere.inl"
 
 #endif // !__PRIMITIVES_HPP__

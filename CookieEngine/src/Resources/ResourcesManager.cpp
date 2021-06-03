@@ -1,36 +1,38 @@
 #include <d3d11.h>
-#include "Resources/Shader/TextureShader.hpp"
+#include <algorithm>
 
 #include "Resources/Mesh.hpp"
-#include "Render/Renderer.hpp"
+#include "Resources/Texture.hpp"
+#include "Resources/Script.hpp"
+#include "Resources/Scene.hpp"
+#include "Resources/Prefab.hpp"
+#include "Resources/Sound.hpp"
 #include "Resources/Loader.hpp"
 #include "Resources/ResourcesManager.hpp"
+
+#include "Render/Renderer.hpp"
 #include "Core/Primitives.hpp"
-#include "Resources/Prefab.hpp"
+#include "ECS/EntityHandler.hpp"
+
+#include <memory>
 
 using namespace Cookie::Resources;
 
 ResourcesManager::ResourcesManager()
 {
-	scripts["test.lua"] = std::make_shared<Script>("Assets\\scripts\\test.lua");
-	scripts["test2.lua"] = std::make_shared<Script>("Assets\\scripts\\test2.lua");
+	//scripts["test.lua"] = std::make_shared<Script>("Assets\\scripts\\test.lua");
+	//scripts["test2.lua"] = std::make_shared<Script>("Assets\\scripts\\test2.lua");
 
-	InitShaders();
+	InitPrimitives();
 }
 
 ResourcesManager::~ResourcesManager()
 {
-	meshes.clear();
-	shaders.clear();
-	textures.clear();
-	scripts.clear();
-	prefabs.clear();
 }
 
 
-void ResourcesManager::SearchForGltf(const fs::path& path, std::vector<std::string>& gltfFiles)
+void ResourcesManager::SearchForAssets(const fs::path& path, std::vector<std::string>& assetsFiles)
 {
-
 	if (fs::exists(path) && fs::is_directory(path))
 	{
 		for (const fs::directory_entry& entry : fs::directory_iterator(path))
@@ -38,45 +40,108 @@ void ResourcesManager::SearchForGltf(const fs::path& path, std::vector<std::stri
 			const fs::path& filename = entry.path().c_str();
 			if (fs::is_directory(entry.status()))
 			{
-				SearchForGltf(filename,gltfFiles);
+				SearchForAssets(filename, assetsFiles);
 			}
 		}
 
 		for (const fs::directory_entry& entry : fs::directory_iterator(path))
 		{
-			const fs::path& filename = entry.path().c_str();
+			const fs::path& filepath = entry.path().c_str();
 			if (fs::is_regular_file(entry.status()))
 			{
-				if (filename.string().find(".gltf") != std::string::npos)
-					gltfFiles.push_back(filename.string());
+				if		(filepath.string().find(".gltf") != std::string::npos)
+					assetsFiles.push_back(filepath.string());
+				else if (filepath.string().find(".png") != std::string::npos)
+					assetsFiles.push_back(filepath.string());
+				else if (filepath.string().find(".dds") != std::string::npos)
+					assetsFiles.push_back(filepath.string());
+				else if (filepath.string().find(".jpg") != std::string::npos)
+					assetsFiles.push_back(filepath.string());
+				else if (filepath.string().find(".ico") != std::string::npos)
+					assetsFiles.push_back(filepath.string());
+				else if (filepath.string().find(".tif") != std::string::npos)
+					assetsFiles.push_back(filepath.string());
 			}
 
 		}
 	}
 }
 
-void ResourcesManager::InitShaders()
+void ResourcesManager::InitPrimitives()
 {
-	shaders["Texture_Shader"] = std::make_shared<TextureShader>("Texture_Shader");
+	meshes["Quad"]		= Cookie::Core::Primitives::CreateQuad();
+	meshes["Triangle"]	= Cookie::Core::Primitives::CreateTriangle();
+	meshes["Cube"]		= Cookie::Core::Primitives::CreateCube();
+	meshes["Sphere"]	= Cookie::Core::Primitives::CreateSphere();
+	meshes["Pyramid"]	= Cookie::Core::Primitives::CreatePyramid();
+	meshes["IcoSphere"]	= Cookie::Core::Primitives::CreateIcoSphere();
+	meshes["Cylinder"]	= Cookie::Core::Primitives::CreateCylinder();
+	meshes["Cone"]		= Cookie::Core::Primitives::CreateCone();
+	meshes["Circle"]	= Cookie::Core::Primitives::CreateCircle();
+	meshes["Capsule"]	= Cookie::Core::Primitives::CreateCapsule();
 }
 
 void ResourcesManager::Load(Render::Renderer& _renderer)
 {
-	meshes["Quad"] =  Cookie::Core::Primitives::CreateQuad();
-	meshes["Triangle"] = Cookie::Core::Primitives::CreateTriangle();
-
-
-
-	std::vector<std::string> gltfFiles;
-	SearchForGltf(std::string("Assets\\"),gltfFiles);
+	std::vector<std::string> assetsFiles;
+	SearchForAssets(std::string("Assets/"), assetsFiles);
 
 	Loader loader;
-	
-	for (unsigned int i = 0; i < gltfFiles.size(); i++)
+
+	for (unsigned int i = 0; i < assetsFiles.size(); i++)
 	{
-		loader.Load(gltfFiles.at(i).c_str(),*this,_renderer);
-		printf("%s\n", gltfFiles.at(i).c_str());
+		std::string& iFile = assetsFiles.at(i);
+		std::replace(iFile.begin(),iFile.end(),'\\','/');
+		//printf("%s\n", gltfFiles.at(i).c_str());
 	}
+	
+	/* load models */
+	for (unsigned int i = 0; i < assetsFiles.size(); i++)
+	{
+		std::string& iFile = assetsFiles.at(i);
+		//printf("%s\n", iFile.c_str());
+		if (iFile.find(".gltf") != std::string::npos)
+		{
+			loader.Load(iFile.c_str(), *this, _renderer);
+			assetsFiles.erase(assetsFiles.begin() + i);
+			i--;
+		}
+		//printf("%s\n", gltfFiles.at(i).c_str());
+	}
+
+	for (unsigned int i = 0; i < assetsFiles.size(); i++)
+	{
+		std::string& iFile = assetsFiles.at(i);
+
+
+		if (textures2D.find(iFile) == textures2D.end() && icons.find(iFile) == icons.end() && skyboxes.find(iFile) == skyboxes.end())
+		{
+			std::unique_ptr<Texture> aTexture = std::make_unique<Texture>(iFile);
+			if (iFile.find("Assets/EditorUIcons/") != std::string::npos || iFile.find("Assets/UI/") != std::string::npos)
+			{
+				icons[iFile] = std::move(aTexture);
+			}
+			else
+			{
+				if (aTexture->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
+				{
+					textures2D[iFile] = std::move(aTexture);
+				}
+				else if (aTexture->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURECUBE)
+				{
+					skyboxes[iFile] = std::move(aTexture);
+				}
+			}
+		}
+		//printf("%s\n", iFile.c_str());
+	}
+}
+
+void ResourcesManager::UpdateScriptsContent()
+{
+	for (std::unordered_map<std::string, std::unique_ptr<Script>>::iterator scrIt = scripts.begin(); scrIt != scripts.end(); scrIt++)
+		if (!(scrIt->second->isUpToDate()))
+			scrIt->second->UpdateContent();
 }
 
 void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandler& component)
@@ -84,14 +149,22 @@ void ResourcesManager::CreateNewPrefabs(ECS::Entity& entity, ECS::ComponentHandl
 	Prefab newPrefab;
 
 	newPrefab.name = entity.name;
-	newPrefab.nameMesh = component.componentModels[entity.id].mesh->name;
-	newPrefab.nameShader = "default";//component.componentModels[entity.id].shader->name;
-	newPrefab.nameTexture = component.componentModels[entity.id].texture->name;
-	newPrefab.signature = entity.id;
-	newPrefab.rotation = component.componentTransforms[entity.id].localTRS.rot;
-	newPrefab.scale = component.componentTransforms[entity.id].localTRS.scale;
-	newPrefab.filepath = "Assets/Prefabs" + entity.name + ".PAsset";
+	newPrefab.signature = entity.signature;
+	newPrefab.filepath = "Assets/Prefabs/" + entity.name + ".PAsset";
+	if (entity.signature & Cookie::ECS::C_SIGNATURE::TRANSFORM)
+		newPrefab.transform = component.GetComponentTransform(entity.id);
+	if (entity.signature & Cookie::ECS::C_SIGNATURE::MODEL)
+		newPrefab.model = component.GetComponentModel(entity.id);
+	if (entity.signature & Cookie::ECS::C_SIGNATURE::PHYSICS)
+		newPrefab.physics = component.GetComponentPhysics(entity.id);
+	if (entity.signature & Cookie::ECS::C_SIGNATURE::GAMEPLAY)
+		newPrefab.gameplay = component.GetComponentGameplay(entity.id);
 
 	entity.namePrefab = entity.name;
+
+	prefabs[newPrefab.name] = std::make_unique<Prefab>(newPrefab);
 }
+
+
+
 

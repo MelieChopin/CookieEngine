@@ -1,10 +1,12 @@
+#include "Core/Math/Vec4.hpp"
+#include "Render/RendererRemote.hpp"
+#include "Resources/Texture.hpp"
+
 #include <DirectXTex/initguid.h>
+#include <fstream>
 #include <system_error>
 #include <DirectXTex/DDSTextureLoader11.h>
 #include <DirectXTex/WICTextureLoader11.h>
-
-#include "Render/Renderer.hpp"
-#include "Resources/Texture.hpp"
 
 using namespace Cookie::Resources;
 
@@ -15,13 +17,15 @@ Texture::Texture(const std::string& texPath) :
 {
 	std::wstring wString = std::wstring(texPath.begin(),texPath.end());
 
-	if (name.find(".dss") != std::string::npos)
+	if (name.find(".dds") != std::string::npos)
 	{
-		HRESULT result = DirectX::CreateDDSTextureFromFile(Render::RendererRemote::device, wString.c_str(), &texture, &shaderResourceView);
+		HRESULT result = DirectX::CreateDDSTextureFromFile(Render::RendererRemote::device, Render::RendererRemote::context, wString.c_str(), &texture, &shaderResourceView);
 		if (FAILED(result))
 		{
 			printf("Failing Loading Texture %s: %s\n", name.c_str(), std::system_category().message(result).c_str());
+			return;
 		}
+		shaderResourceView->GetDesc(&desc);
 	}
 	else
 	{
@@ -29,7 +33,9 @@ Texture::Texture(const std::string& texPath) :
 		if (FAILED(result))
 		{
 			printf("Failing Loading Texture %s: %s\n", name.c_str(), std::system_category().message(result).c_str());
+			return;
 		}
+		shaderResourceView->GetDesc(&desc);
 	}
 		
 }
@@ -39,7 +45,7 @@ Texture::Texture(const std::string& texName, const Core::Math::Vec4& color):
 {
 	if (CreateTextureFromColor(color))
 	{
-		CreateShaderResource();
+		CreateShaderResource(DXGI_FORMAT_R32G32B32A32_FLOAT);
 	}
 }
 
@@ -51,9 +57,9 @@ Texture::~Texture()
 		shaderResourceView->Release();
 }
 
-void Texture::Set()
+void Texture::Set(unsigned int slot)
 {
-	Render::RendererRemote::context->PSSetShaderResources(0, 1, &shaderResourceView);
+	Render::RendererRemote::context->PSSetShaderResources(slot, 1, &shaderResourceView);
 }
 
 /*==================== CREATE METHODS ========================*/
@@ -87,16 +93,14 @@ bool Texture::CreateTextureFromColor(const Core::Math::Vec4& color)
 	return true;
 }
 
-bool Texture::CreateShaderResource()
+bool Texture::CreateShaderResource(DXGI_FORMAT format)
 {
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	desc.Format						= format;
+	desc.ViewDimension				= D3D11_SRV_DIMENSION_TEXTURE2D;
+	desc.Texture2D.MipLevels		= 1;
+	desc.Texture2D.MostDetailedMip	= 0;
 
-	srvDesc.Format						= DXGI_FORMAT_R32G32B32A32_FLOAT;
-	srvDesc.ViewDimension				= D3D11_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels			= 1;
-	srvDesc.Texture2D.MostDetailedMip	= 0;
-
-	HRESULT result = Render::RendererRemote::device->CreateShaderResourceView(texture, &srvDesc, &shaderResourceView);
+	HRESULT result = Render::RendererRemote::device->CreateShaderResourceView(texture, &desc, &shaderResourceView);
 	if (FAILED(result))
 	{
 		printf("Failing Creating FrameBuffer ShaderResource: %s\n", std::system_category().message(result).c_str());

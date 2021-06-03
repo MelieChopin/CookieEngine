@@ -9,7 +9,6 @@ namespace Cookie
     {
         namespace Math
         {
-
             union Vec4
             {
                 Vec4() = default;
@@ -18,9 +17,18 @@ namespace Cookie
 
                 struct { float x; float y; float z; float w; };
                 struct { float r; float g; float b; float a; };
+                struct { float xyz_[3]; float w_; };
                 float e[4];
 
+                inline Vec4  operator/(float other) const { return{ x / other, y / other, z / other, w/other}; }
+                inline Vec4& operator/=(float other) { x /= other; y /= other; z /= other; w /= other; return *this;}
+
+                inline float Length() const { return std::sqrt(x * x + y * y + z * z); }
+                inline Vec4 Normalize() const { return *this / Length(); }
+                inline float Dot(Vec4& other) { return (x * other.x + y * other.y + z * other.z ); }
+
                 inline void Debug() const { { std::cout << "{" << x << " ," << y << " ," << z << " ," << w << "}\n"; } }
+                inline Vec3 ToVec3() const { return Vec3(x, y, z); }
             };
 
         }

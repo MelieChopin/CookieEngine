@@ -1,40 +1,41 @@
-﻿#define _CRTDBG_MAP_ALLOC
-#include <cstdlib>
-#include <crtdbg.h>
+﻿#include "Editor.hpp"
+#include "UIcore.hpp"
 
-#include "Editor.hpp"
+#pragma comment(lib, "dxguid.lib")
+
+
+extern "C"
+{
+	__declspec(dllexport) int NvOptimusEnablement = 1;
+	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
 
 using namespace Cookie;
 using namespace Cookie::Core;
 using namespace Cookie::Core::Math;
 
-
 int main()
 {
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_DEBUG);
-
-	_CrtMemState sOld;
-	_CrtMemState sNew;
-	_CrtMemState sDiff;
-	_CrtMemCheckpoint(&sOld); //take a snapchot
-
 	{
+		Core::UIcore::PreInitContext();
 		Editor editor;
+
+		editor.Loop();
+
+		Core::UIcore::Terminate();
 	}
-
-	_CrtMemCheckpoint(&sNew); //take a snapchot 
-	if (_CrtMemDifference(&sDiff, &sOld, &sNew)) // if there is a difference
-	{
-		OutputDebugString("-----------_CrtMemDumpStatistics ---------");
-		_CrtMemDumpStatistics(&sDiff);
-		OutputDebugString("-----------_CrtMemDumpAllObjectsSince ---------");
-		_CrtMemDumpAllObjectsSince(&sOld);
-		OutputDebugString("-----------_CrtDumpMemoryLeaks ---------");
-		_CrtDumpMemoryLeaks();
-	}
-
-
+	//{
+	//	if (Render::RendererRemote::device)
+	//	{
+	//		ID3D11Debug* debug = nullptr;
+	//		Render::RendererRemote::device->QueryInterface(IID_PPV_ARGS(&debug));
+	//		if (debug)
+	//		{
+	//			debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	//			debug->Release();
+	//		}
+	//	}
+	//}
 
 	return 0;
 }

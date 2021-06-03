@@ -1,20 +1,10 @@
-#ifndef __UI_CORE_HPP_
-#define __UI_CORE_HPP_
+#ifndef __UI_EDITOR_HPP_
+#define __UI_EDITOR_HPP_
 
 
 #include "UIwidgetBases.hpp"
 
 #include <vector>
-
-
-struct GLFWwindow;
-
-struct ID3D11DeviceContext;
-struct ID3D11Device;
-struct ID3D11RenderTargetView;
-struct ID3D11DepthStencilView;
-
-namespace Cookie::Render {class Renderer;}
 
 
 namespace Cookie::UI
@@ -28,39 +18,36 @@ namespace Cookie::UI
 
 		// All stored item elements of the engine UI.
 		std::vector<std::shared_ptr<UIwidget::ItemBase>>	UItems[4];
-
-	private:
-		void BeginFrame();
-		void EndFrame();
 	
 	public:
-		UIeditor(const Cookie::Render::Renderer& _renderer);
-		void Terminate();
-
+		UIeditor();
+		void ClearWidgets();
 
 		// Adds a window inside the UI elements. Do mind, you'll need something to remote-control it if you intend to close it eventually.
-		inline void AddWindow (const std::shared_ptr<UIwidget::WindowBase>& UIW)
-		{ UIndows[4].push_back(UIW); }
+		inline void AddWindow (UIwidget::WindowBase* UIW)
+		{ UIndows[4].push_back(std::shared_ptr<UIwidget::WindowBase>(UIW)); }
 
 		// Adds an Item that'll be displayed in the main menu bar. They are usually not moving.
-		inline void AddItem	(const std::shared_ptr<UIwidget::ItemBase>& UIT, int i)
-		{ UItems[i].push_back(UIT); }
+		inline void AddItem	(UIwidget::ItemBase* UIT, int i)
+		{ UItems[i].push_back(std::shared_ptr<UIwidget::ItemBase>(UIT)); }
 
 		// WItems are considered both items and windows. Clicking the Item transforms it into a window.
-		void AddWItem(const std::shared_ptr<UIwidget::WItemBase>& UIWI, int i)
+		void AddWItem(UIwidget::WItemBase* UIWI, int i)
 		{
 			if (i <= 3)
 			{
-				UIndows[i].push_back(UIWI); 
-				UItems [i].push_back(UIWI);
+				std::shared_ptr<UIwidget::WItemBase> WItemShare(UIWI);
+
+				UIndows[i].push_back(WItemShare);
+				UItems [i].push_back(WItemShare);
 			}
 		}
 
 
 		/*
-			Main rendering function for the overall UI
+			Main rendering function for the overall UI of the editor.
 
-			Displays the main window, as well as the docking space with all other opened windows, and the menu bar.
+			Displays the main window, as well as all the widgets added within.
 		*/
 		void UpdateUI();
 	};

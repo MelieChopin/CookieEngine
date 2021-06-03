@@ -10,9 +10,37 @@ namespace Cookie
 		class PhysicsHandle
 		{
 			public:
-				inline static const std::unique_ptr<rp3d::PhysicsCommon>	physCom{std::make_unique<rp3d::PhysicsCommon>()};
+				inline static std::unique_ptr<rp3d::PhysicsCommon>			physCom{nullptr};
 				inline static rp3d::PhysicsWorld*							physSim{nullptr};
-				inline static rp3d::PhysicsWorld*							editWorld{Physics::PhysicsHandle::physCom->createPhysicsWorld()};
+				inline static rp3d::PhysicsWorld*							editWorld{nullptr};
+
+				static void Init()
+				{
+					physCom = std::make_unique<rp3d::PhysicsCommon>();
+					physSim = PhysicsHandle::physCom->createPhysicsWorld();
+				}
+
+				static void Terminate()
+				{
+					int max = physSim->getNbRigidBodies();
+					for (int i = 0; i < max; i++)
+					{
+						physSim->destroyRigidBody(physSim->getRigidBody(0));
+					}
+
+					PhysicsHandle::physCom->destroyPhysicsWorld(physSim);
+
+					if (editWorld)
+					{
+						int max = Physics::PhysicsHandle::editWorld->getNbRigidBodies();
+						for (int i = 0; i < max; i++)
+						{
+							Physics::PhysicsHandle::editWorld->destroyRigidBody(Physics::PhysicsHandle::editWorld->getRigidBody(0));
+						}
+
+						Physics::PhysicsHandle::physCom->destroyPhysicsWorld(Physics::PhysicsHandle::editWorld);
+					}
+				}
 
 				inline static void Terminate()
 				{

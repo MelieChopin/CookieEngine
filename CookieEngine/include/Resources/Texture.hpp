@@ -4,15 +4,18 @@
 #include <d3d11.h>
 #include <string>
 
-#include "Vec4.hpp"
-
 
 namespace Cookie
 {
+	namespace Core::Math
+	{
+		union Vec4;
+	}
+
 	namespace Render
 	{
 		class Renderer;
-		class RendererRemote;
+		struct RendererRemote;
 	}
 
 	namespace Resources
@@ -25,10 +28,11 @@ namespace Cookie
 
 			public:
 				std::string name;
+				D3D11_SHADER_RESOURCE_VIEW_DESC desc = {};
 
 			private:
 				bool CreateTextureFromColor(const Core::Math::Vec4& color);
-				bool CreateShaderResource();
+				bool CreateShaderResource(DXGI_FORMAT format);
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
@@ -37,7 +41,7 @@ namespace Cookie
 				~Texture();
 
 
-				void Set();
+				void Set(unsigned int slot = 0u);
 
 				inline ID3D11ShaderResourceView* GetResourceView() const { return shaderResourceView; };
 		};

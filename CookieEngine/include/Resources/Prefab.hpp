@@ -2,24 +2,41 @@
 #define __PREFAB_HPP__
 
 #include <string>
-#include "../Core/Math/Vec3.hpp"
+#include "ECS/ComponentTransform.hpp"
+#include "ECS/ComponentModel.hpp"
+#include "ECS/ComponentPhysics.hpp"
+#include "ECS/ComponentGameplay.hpp"
+
+namespace reactphysics3d
+{
+	class RigidBody;
+	class Collider;
+}
 
 namespace Cookie
 {
+	namespace Core
+	{
+		namespace Math
+		{
+			union Vec3;
+		}
+	}
+
 	namespace Resources
 	{
 		class Prefab
 		{
 		public:
-			std::string			name		= "No Name";
-			std::string			nameMesh	= "Null";
-			std::string			nameTexture = "Null";
-			std::string			nameShader	= "Null";
-			std::string			nameScript	= "Null";
-			std::string			filepath	= "Null";
-			Core::Math::Vec3	rotation;
-			Core::Math::Vec3	scale;
-			int					signature	= 0;
+			std::string									name		= "No Name";
+			int											signature = 0;
+
+			Cookie::ECS::ComponentTransform				transform;
+			Cookie::ECS::ComponentModel					model;
+			Cookie::ECS::ComponentPhysics				physics;
+			Cookie::ECS::ComponentGameplay				gameplay;
+
+			std::string									filepath	= "Null";
 
 			Prefab() {}
 			Prefab(const std::string& _name) : name{ _name }  {}

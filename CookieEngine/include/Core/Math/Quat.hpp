@@ -2,7 +2,6 @@
 #define __QUAT_HPP__
 
 #include "Vec3.hpp"
-#include "Calc.hpp"
 
 namespace Cookie
 {
@@ -10,7 +9,6 @@ namespace Cookie
     {
         namespace Math
         {
-
             union Quat
             {
                 Quat() = default;

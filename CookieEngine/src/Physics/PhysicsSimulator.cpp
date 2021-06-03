@@ -1,8 +1,6 @@
-#include <reactphysics3d/reactphysics3d.h>
-#include "imgui.h"
 #include "Core/Time.hpp"
-#include "Physics/PhysicsSimulator.hpp"
 #include "Physics/PhysicsHandle.hpp"
+#include "Physics/PhysicsSimulator.hpp"
 
 using namespace Cookie::Physics;
 
@@ -11,19 +9,12 @@ constexpr float initTimeStep = 1.0f / 60.0f;
 /*================ CONSTRUCTORS/DESTRUCTORS ================*/
 
 PhysicsSimulator::PhysicsSimulator()
-	:worldSim{ PhysicsHandle::physCom->createPhysicsWorld() }, timeStep{initTimeStep}
+	:worldSim{ Physics::PhysicsHandle::physSim}, timeStep{initTimeStep}
 {
 }
 
 PhysicsSimulator::~PhysicsSimulator()
 {
-	int max = worldSim->getNbRigidBodies();
-	for (int i = 0; i < max; i++)
-	{
-		worldSim->destroyRigidBody(worldSim->getRigidBody(0));
-	}
-
-	PhysicsHandle().physCom->destroyPhysicsWorld(worldSim);
 }
 
 /*================ REALTIME METHODS ================*/

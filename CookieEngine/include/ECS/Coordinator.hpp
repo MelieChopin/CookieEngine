@@ -1,124 +1,89 @@
 #ifndef __COORDINATOR_HPP__
 #define __COORDINATOR_HPP__
 
-#include "EntityHandler.hpp"
-#include "ComponentHandler.hpp"
-#include "SystemHandler.hpp"
-#include "ResourcesManager.hpp"
-#include "Render/Camera.hpp"
-#include <assert.h>
+#include "Core/Math/Mat4.hpp"
+#include "ComponentGameplay.hpp" //for E_ARMY_NAME
+#include <vector>
 
 namespace Cookie
 {
+	namespace Gameplay
+	{
+		class ArmyHandler;
+	}
+
+	namespace Resources
+	{
+		class ResourcesManager;
+		class Map;
+		class Prefab;
+	}
+	namespace Render
+	{
+		class DebugRenderer;
+	}
+
+
 	namespace ECS
 	{
+		class Entity;
+		class EntityHandler;
+		class ComponentHandler;
 
 		class Coordinator
 		{
 		public:
-			EntityHandler*     entityHandler    {nullptr};
-			ComponentHandler*  componentHandler {nullptr};
+			EntityHandler*         entityHandler    {nullptr};
+			ComponentHandler*      componentHandler {nullptr};
+			Gameplay::ArmyHandler* armyHandler      {nullptr};
+			std::vector<Entity*>   selectedEntities;
 
 			Coordinator() {}
 			~Coordinator() {}
 
-			void AddEntity(const int signature, const Resources::ResourcesManager& resources, std::string name = std::string("No Name"))
-			{
-				assert(entityHandler->livingEntities < MAX_ENTITIES && "Too many entities in existence.");
+			//Entity
+			Entity& AddEntity(const int signature, std::string name = std::string("No Name"));
+			Entity& AddEntity(const Resources::Prefab* const & prefab, Gameplay::E_ARMY_NAME teamName = Gameplay::E_ARMY_NAME::E_DEFAULT_NAME);
+			void RemoveEntity(Entity& entity);
+			bool CheckSignature(const int entitySignature, const int signature);
+			
+			//Selection
+			void SelectEntities(Core::Math::Vec3& selectionQuadStart, Core::Math::Vec3& selectionQuadEnd);
+			Entity* GetClosestFreeResourceEntity(Core::Math::Vec3& pos);
+			Entity* GetClosestEntity(Core::Math::Vec3& pos, int minimumGameplaySignatureWanted = 0);
+			Entity* GetClosestSelectableEntity(Core::Math::Vec3& pos, int minimumGameplaySignatureWanted = 0);
 
-				entityHandler->entities[entityHandler->livingEntities].name = name;
-				unsigned int id = entityHandler->entities[entityHandler->livingEntities].id;
-				entityHandler->livingEntities++;
+			//Primary Component
+			//void ApplySystemPhysics(float factor);
+			//void ApplyDraw(const Core::Math::Mat4& viewProj);
+			void ApplyScriptStart();
+			void ApplyScriptUpdate();
+			void ApplyRemoveUnnecessaryEntities();
+			void ApplyComputeTrs();
 
-				if (CheckSignature(signature, SIGNATURE_TRANSFORM))
-					componentHandler->AddComponentTransform(entityHandler->entities[id]);
-				if (CheckSignature(signature, SIGNATURE_MODEL))
-					componentHandler->AddComponentModel(entityHandler->entities[id]);
-				//if (CheckSignature(signature, SIGNATURE_PHYSICS))
-				//	componentHandler->AddComponentPhysics(entityHandler->entities[id], phs);
-				if (CheckSignature(signature, SIGNATURE_SCRIPT))
-					componentHandler->AddComponentScript(entityHandler->entities[id]);
 
-				//not clean should be moved somewhere else
-				componentHandler->GetComponentModel(id).shader = resources.shaders.at("Texture_Shader");
-			}
-			//will be removed when scene clean
-			static void AddEntity(EntityHandler& entityHandler, ComponentHandler& componentHandler, const int signature, const Resources::ResourcesManager& resources, std::string name = std::string("No Name") )
-			{
-				assert(entityHandler.livingEntities < MAX_ENTITIES && "Too many entities in existence.");
+			//CGP_Producer
+			void UpdateCGPProducer(Resources::Map& map);
+			void ApplyGameplayUpdateCountdownProducer(Resources::Map& map);
 
-				entityHandler.entities[entityHandler.livingEntities].name = name;
-				unsigned int id = entityHandler.entities[entityHandler.livingEntities].id;
-				entityHandler.livingEntities++;
+			//CGP_Worker
+			void UpdateCGPWorker(Resources::Map& map);
+			void ApplyGameplayUpdateWorker(Resources::Map& map);
 
-				if (CheckSignature(signature, SIGNATURE_TRANSFORM))
-					componentHandler.AddComponentTransform(entityHandler.entities[id]);
-				if (CheckSignature(signature, SIGNATURE_MODEL))
-					componentHandler.AddComponentModel(entityHandler.entities[id]);
-				//if (CheckSignature(signature, SIGNATURE_PHYSICS))
-				//	componentHandler.AddComponentPhysics(entityHandler.entities[id], phs);
-				if (CheckSignature(signature, SIGNATURE_SCRIPT))
-					componentHandler.AddComponentScript(entityHandler.entities[id]);
+			//CGP_Move
+			void UpdateCGPMove(Resources::Map& map, Render::DebugRenderer& debug);
+			void ApplyGameplayUpdatePushedCooldown(Resources::Map& map);
+			void ApplyGameplayUpdateReachGoalCooldown();
+			void ApplyGameplayMoveTowardWaypoint();
+			void ApplyGameplayPosPrediction();
+			void ApplyGameplayResolveCollision(Resources::Map& map);
+			void ApplyGameplayDrawPath(Render::DebugRenderer& debug);
 
-				//not clean should be moved somewhere else
-				componentHandler.GetComponentModel(id).shader = resources.shaders.at("Texture_Shader");
-			}
-			void RemoveEntity(Entity& entity)
-			{
-				assert(entityHandler->livingEntities > 0 && "No Entity to remove");
+			//CGP_Attack
+			void UpdateCGPAttack();
+			void ApplyGameplayCheckEnemyInRange();
+			void ApplyGameplayAttack();
 
-				//Reset Components
-				if (CheckSignature(entity.signature, SIGNATURE_TRANSFORM))
-					componentHandler->GetComponentTransform(entity.id).ToDefault();
-				if (CheckSignature(entity.signature, SIGNATURE_MODEL))
-					componentHandler->GetComponentModel(entity.id).ToDefault();
-				if (CheckSignature(entity.signature, SIGNATURE_PHYSICS))
-					componentHandler->GetComponentPhysics(entity.id).ToDefault();
-				if (CheckSignature(entity.signature, SIGNATURE_SCRIPT))
-					componentHandler->GetComponentScript(entity.id).ToDefault();
-
-				//Reset Entity
-				entity.signature = 0;
-				entity.name = "No Name";
-				entity.needToBeRemoved = false;
-
-				//for (unsigned int i = 0; i < entity.children.size(); ++i)
-				//	componentHandler->GetComponentTransform(entity.children[i]).parentTRS = Core::Math::Mat4::Identity();
-
-				//Switch the removed one with the last alive
-				entityHandler->livingEntities--;
-				entity.Swap(entityHandler->entities[entityHandler->livingEntities]);
-			}
-
-			static bool CheckSignature(const int entitySignature, const int signature) { return (entitySignature & signature) == signature;	}
-			void ApplySystemDisplayId()
-			{
-				for (int i = 0; i < entityHandler->livingEntities; ++i)
-					std::cout << entityHandler->entities[i].id << std::endl;
-			}
-
-			void ApplySystemPhysics(float factor) 
-			{
-				for (int i = 0; i < entityHandler->livingEntities; ++i)
-					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_PHYSICS))
-						System::SystemPhysics(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
-											   componentHandler->GetComponentPhysics(entityHandler->entities[i].id), factor);
-			}
-
-			void ApplyDraw(Render::RendererRemote& remote, const Core::Math::Mat4& viewProj)
-			{
-				for (int i = 0; i < entityHandler->livingEntities; ++i)
-					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_TRANSFORM + SIGNATURE_MODEL))
-						System::SystemDraw(componentHandler->GetComponentTransform(entityHandler->entities[i].id),
-							componentHandler->GetComponentModel(entityHandler->entities[i].id),remote, viewProj);
-			}
-
-			void ApplyScriptUpdate()
-			{
-				for (int i = 0; i < entityHandler->livingEntities; ++i)
-					if (CheckSignature(entityHandler->entities[i].signature, SIGNATURE_SCRIPT))
-						System::SystemScriptUpdate(componentHandler->GetComponentScript(entityHandler->entities[i].id));
-			}
 		};
 
 	}

@@ -120,6 +120,7 @@ namespace Cookie
 			inline Vec2& Vec2::operator*=(float other) { *this = *this * other; return *this; }
 			inline Vec2& Vec2::operator/=(float other) { *this = *this / other; return *this; }
 
+			inline float Vec2::Length() const { return std::sqrt(x * x + y * y); }
 		}
 	}
 }

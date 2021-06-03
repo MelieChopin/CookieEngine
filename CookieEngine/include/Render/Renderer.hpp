@@ -1,19 +1,22 @@
 #ifndef __RENDERER_HPP__
 #define __RENDERER_HPP__
 
-#include <vector>
-#include "Render/FrameBuffer.hpp"
+
 #include "Core/Window.hpp"
+#include "Drawers/Skybox.hpp"
+#include "Drawers/FBODrawer.hpp"
 #include "Render/RendererRemote.hpp"
-#include "Render/RendererState.hpp"
-#include "Core/Math/Mat4.hpp" 
+#include "Render/DrawDataHandler.hpp"
+#include "Render/RenderPass/GeometryPass.hpp"
+#include "Render/RenderPass/ShadowPass.hpp"
+#include "Render/RenderPass/LightPass.hpp"
+#include "Render/RenderPass/ComposePass.hpp"
+#include "Render/RenderPass/GameplayPass.hpp"
+#include "Render/RenderPass/MiniMapPass.hpp"
 
 namespace Cookie
 {
-	namespace ECS
-	{
-		class Coordinator;
-	};
+	class Game;
 
 	namespace Resources
 	{
@@ -22,43 +25,50 @@ namespace Cookie
 
 	namespace Render
 	{
+		class Camera;
+
+
 		class Renderer
 		{
 			private:
-				
-				struct IDXGISwapChain*			swapchain		= nullptr;
-				struct ID3D11RenderTargetView*	backbuffer		= nullptr;
-				struct ID3D11DepthStencilView*	depthBuffer		= nullptr;
-				std::vector<std::unique_ptr<FrameBuffer>> frameBuffers;
-				
+				IDXGISwapChain*				swapchain		= nullptr;
+				ID3D11RenderTargetView*		backbuffer		= nullptr;
+					
 			public:
-				Core::Window					window;
-				RendererRemote					remote;
-				RendererState					state;
+
+				Core::Window	window;
+				RendererRemote	remote;
+				D3D11_VIEWPORT	viewport;
+				D3D11_PRIMITIVE_TOPOLOGY topo{ D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST };
+				DrawDataHandler drawData;
+				SkyBox			skyBox;
+
+				GeometryPass	geomPass;
+				ShadowPass		shadPass;
+				LightPass		lightPass;
+				ComposePass		compPass;
+				GameplayPass	gamePass;
+				MiniMapPass		miniMapPass;
 
 			private:
-				bool InitDevice(Core::Window& window);
+				Render::FBODrawer	fboDrawer;
+
+			private:
+				RendererRemote InitDevice(Core::Window& window);
 				bool CreateDrawBuffer(int width, int height);
-				bool InitState(int width, int height);
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
 				Renderer();
 				~Renderer();
-
-				void AddFrameBuffer(Resources::ResourcesManager& resources);
-
-
-				bool CreateBuffer(D3D11_BUFFER_DESC bufferDesc, D3D11_SUBRESOURCE_DATA data, ID3D11Buffer** buffer);
 				
-				void Draw(const Core::Math::Mat4& viewProj, ECS::Coordinator& coordinator);
-				void Render();
+				void Draw(const Camera* cam, FrameBuffer& fbo);
+				void DrawMiniMap(FrameBuffer& fbo);
+				void Render()const;
 				void Clear();
 				void SetBackBuffer();
-				void SetFrameBuffer(const FrameBuffer& frameBuffer);
-				void ClearFrameBuffer(const FrameBuffer& frameBuffer);
-
-				inline FrameBuffer& GetLastFrameBuffer() { return *frameBuffers[frameBuffers.size() - 1 ]; }
+				void DrawFrameBuffer(FrameBuffer& fbo);
+				void ClearFrameBuffer(FrameBuffer& fbo);
 
 				void ResizeBuffer(int width, int height);
 		};

@@ -18,10 +18,40 @@ namespace Cookie::UIwidget
 
 	public:
 		WindowBase(const char* _windowName, bool _opened = true);
-		virtual ~WindowBase(){}
+		
+		virtual ~WindowBase() = default;
 
+		
 		virtual void WindowDisplay() = 0;
+	};
+	
+	
+	struct GameWindowBase : WindowBase
+	{
+	private:
+		// Invalid game windows are not ran at the beginning of a game and cannot be saved. Their tittle bar is red.
+		bool invalid = false;
 
+	public:
+		float	xPos	= 0, 
+				yPos	= 0, 
+				width	= 100,
+				height	= 100;
+	
+	protected:
+		// Note: The flags to prevent docking and collapsing are always given.
+		virtual bool BeginWindow(int windowFlags = 0) override;
+
+		virtual void WindowPreview() {};
+
+	public:
+		inline GameWindowBase(const char* _nameTag, bool _opened)
+			: WindowBase	(_nameTag, _opened)
+		{}
+
+		bool WindowEdit();
+
+		virtual inline int GetID() = 0;
 	};
 
 
@@ -36,7 +66,9 @@ namespace Cookie::UIwidget
 	public:
 		ItemBase(const char* _itemName,							  bool _visible = true);
 		ItemBase(const char* _itemName, const char* _shortcutSeq, bool _visible = true);
-		virtual ~ItemBase() {}
+
+		virtual ~ItemBase() = default;
+
 
 		virtual void ItemDisplay();
 	};
@@ -89,6 +121,9 @@ namespace Cookie::UIwidget
 			:	WindowBase	(_windowName,			   !_isItemFirst),
 				ItemBase	(_itemName,	  _shortcutSeq, _isItemFirst)
 		{}
+
+
+		virtual ~WItemBase() override = default;
 
 
 		virtual void ItemDisplay() override;

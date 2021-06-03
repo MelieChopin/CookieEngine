@@ -14,34 +14,22 @@ namespace Cookie
 		class Entity
 		{
 		public:
-			unsigned int				id{ 0 };
-			int                         signature{ 0 };
-			std::string					name{ "No Name" };
-			std::string					tag{ "No Tag" };
-			bool						needToBeRemoved{ false };
-			std::string					namePrefab{"NONE"};
-			//std::vector<unsigned int>   children;
+			unsigned int		id				  {0};
+			int                 signature		  {0}; 
+			std::string			name			  {"No Name"};
+			std::string			tag				  {"No Tag"};
+			bool				needToBeRemoved	  {false};
+			std::string			namePrefab		  {"NONE"};
 
-			Entity(unsigned int _id) : id{ _id } {}
-			Entity(unsigned int _id, int _signature, std::string _name, std::string _namePrefab) : id{ _id }, signature{ _signature }, name{ _name }, namePrefab{ _namePrefab } {}
-			Entity(const Entity& entity) : id{ entity.id }, signature{ entity.signature }, name{ entity.name }, tag{ entity.tag }, needToBeRemoved{ entity.needToBeRemoved } {}//, children{ entity.children } {}
-			~Entity() {}
+			Entity(unsigned int _id);
+			Entity(unsigned int _id, int _signature, std::string _name, std::string _namePrefab);
+			Entity(const Entity& entity);
+			~Entity() {};
 
-			void operator= (const Entity& entity)
-			{
-				id              = entity.id;
-				signature       = entity.signature;
-				name			= entity.name;
-				needToBeRemoved = entity.needToBeRemoved;
-				//children        = entity.children;
-				tag				= entity.tag;
-			}
-			void Swap(Entity& entity)
-			{
-				Entity temp {entity};
-				entity = *this;
-				*this = temp;
-			}
+			void operator= (const Entity& entity);
+			void Swap(Entity& entity);
+
+			void ToDefault();
 		};
 
 		class EntityHandler
@@ -50,12 +38,10 @@ namespace Cookie
 			std::vector<Entity> entities;
 			unsigned int        livingEntities {0};
 
-			EntityHandler()
-			{
-				for (unsigned int id = 0; id < MAX_ENTITIES; ++id)
-					entities.push_back( Entity(id) );
-			}
-			~EntityHandler() {}
+			EntityHandler();
+			~EntityHandler() {};
+
+			void Debug();
 		};
 
 	}

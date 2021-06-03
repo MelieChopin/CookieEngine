@@ -18,9 +18,12 @@ include_directories("${INC_DIR}/Core/")
 include_directories("${INC_DIR}/Core/Math/")
 include_directories("${INC_DIR}/UI/")
 include_directories("${INC_DIR}/UI/Widgets/")
+include_directories("${INC_DIR}/UI/Widgets/EditorWs/")
+include_directories("${INC_DIR}/UI/Widgets/GameWs/")
 include_directories("${INC_DIR}/Render/")
 include_directories("${INC_DIR}/ECS/")
 include_directories("${INC_DIR}/Resources/")
+include_directories("${INC_DIR}/Resources/Particles")
 include_directories("${INC_DIR}/Gameplay/")
 include_directories("${DEPS_INC_DIR}/ImGui/")
 include_directories("${DEPS_INC_DIR}/ImGuizmo/")
@@ -31,6 +34,7 @@ include_directories("${DEPS_INC_DIR}/DirectXTex/")
 include_directories("${DEPS_INC_DIR}/reactphysics3d/")
 include_directories("${DEPS_INC_DIR}/Lua/")
 include_directories("${DEPS_INC_DIR}/Sol/")
+include_directories("${DEPS_INC_DIR}/FMOD/")
 
 # Record SUB_SYS configuration (WIN32 for release en Windows to remove console)
 IF(CMAKE_BUILD_TYPE MATCHES Release)
@@ -71,41 +75,102 @@ set (SRC_FILES
     "${SRC_DIR}/Render/Renderer.cpp"
     "${SRC_DIR}/Render/DebugRenderer.cpp"
     "${SRC_DIR}/Render/RendererRemote.cpp"
+    "${SRC_DIR}/Render/DrawDataHandler.cpp"
+
     "${SRC_DIR}/Render/FrameBuffer.cpp"
+    "${SRC_DIR}/Render/Light.cpp"
+    "${SRC_DIR}/Render/ShadowBuffer.cpp" 
+
+    "${SRC_DIR}/Render/Drawers/ModelDrawer.cpp"
+    "${SRC_DIR}/Render/Drawers/DirLightDrawer.cpp"
+    "${SRC_DIR}/Render/Drawers/PointLightDrawer.cpp"
+    "${SRC_DIR}/Render/Drawers/FBODrawer.cpp"
+    "${SRC_DIR}/Render/Drawers/MapDrawer.cpp"
+    "${SRC_DIR}/Render/Drawers/SkyBox.cpp"
+    "${SRC_DIR}/Render/Drawers/PlayerDrawer.cpp"
+    "${SRC_DIR}/Render/Drawers/SelectionDrawer.cpp"
+    "${SRC_DIR}/Render/Drawers/MiniMapDrawer.cpp"
+    "${SRC_DIR}/Render/Drawers/MiniModelDrawer.cpp"
+
+    "${SRC_DIR}/Render/RenderPass/GeometryPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/LightPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/ShadowPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/ComposePass.cpp"
+    "${SRC_DIR}/Render/RenderPass/GameplayPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/MiniMapPass.cpp"
+    "${SRC_DIR}/Render/RenderPass/ParticlesPass.cpp"
     
     "${SRC_DIR}/Resources/Loader.cpp" 
+    "${SRC_DIR}/Resources/Map.cpp" 
     "${SRC_DIR}/Resources/ResourcesManager.cpp"
     "${SRC_DIR}/Resources/Mesh.cpp"
-    "src/Resources/Shader/TextureShader.cpp"
     "${SRC_DIR}/Resources/Texture.cpp"
     "${SRC_DIR}/Resources/Scene.cpp"
-    "${SRC_DIR}/Resources/Tiles.cpp"
     "${SRC_DIR}/Resources/Serialization.cpp" 
+    "${SRC_DIR}/Resources/SoundManager.cpp" 
 
+    "${SRC_DIR}/UI/UIcore.cpp"
+    "${SRC_DIR}/Resources/Particles/ParticlesGenerator.cpp"
+    "${SRC_DIR}/Resources/Particles/ParticlesUpdate.cpp"
+    "${SRC_DIR}/Resources/Particles/ParticlesHandler.cpp"
+    "${SRC_DIR}/Resources/Particles/ParticlesSystem.cpp"
     "${SRC_DIR}/UI/UIeditor.cpp"
+    "${SRC_DIR}/UI/UIscene.cpp"
     "${SRC_DIR}/UI/CustomImWidget.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgetBases.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgets.cpp" 
-    "${SRC_DIR}/UI/Widgets/ConsoleWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/FileExplorerWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/HierarchyWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/InspectorWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/TextureEditorWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/ToolbarWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/ViewportWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/AIBehaviorEditorWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/ConsoleWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/FileExplorerWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/GameportWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/GameUIeditorWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/HierarchyWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/InspectorWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/ParticleEditorWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/SoundOrchestratorWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/TextureEditorWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/ToolbarWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/ViewportWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/EditorWs/WorldSettingsWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/GameWs/ActionPanelWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/GameWs/TestWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/GameWs/GamespectorWidget.cpp"
+
     
     "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
+    
 
+    "${SRC_DIR}/ECS/ComponentEditor.cpp"
     "${SRC_DIR}/ECS/ComponentHandler.cpp"
+    "${SRC_DIR}/ECS/ComponentModel.cpp" 
+    "${SRC_DIR}/ECS/ComponentPhysics.cpp"
+    "${SRC_DIR}/ECS/ComponentScript.cpp"
+    "${SRC_DIR}/ECS/Coordinator.cpp"
+    "${SRC_DIR}/ECS/EntityHandler.cpp"
+
+    
+    "${SRC_DIR}/Gameplay/ArmyCoordinator.cpp"
+    "${SRC_DIR}/Gameplay/ArmyHandler.cpp"
+    "${SRC_DIR}/Gameplay/CGPAttack.cpp"
+    "${SRC_DIR}/Gameplay/CGPLive.cpp"
+    "${SRC_DIR}/Gameplay/CGPMove.cpp"
+    "${SRC_DIR}/Gameplay/CGPProducer.cpp"
+    "${SRC_DIR}/Gameplay/CGPWorker.cpp"
+    
 
     "${SRC_DIR}/Editor.cpp" 
-    "${SRC_DIR}/Game.cpp"
-     "src/Resources/Shader/PhysicsShader.cpp")
+    "${SRC_DIR}/Game.cpp")
 
 set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
-        "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/lua54.dll")
+        "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/lua54.dll"
+        "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/fmod.dll"
+        "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/fmodL.dll"
+        "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/fmodstudio.dll"
+        "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/fmodstudioL.dll")
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
+
+#add_compile_options(-O2)
 
 # Ajoutez une source à l'exécutable de ce projet.
 add_executable (CookieEngine ${SUB_SYS} ${SRC_FILES})
@@ -129,8 +194,12 @@ target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/liblua54.a")
 
 IF(CMAKE_BUILD_TYPE MATCHES Release)
     target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/reactphysics3d.lib")
+    target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/fmod_vc.lib")
+    target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/fmodstudio_vc.lib")
 ELSE()
     target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/debug_reactphysics3d.lib")
+    target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/fmodL_vc.lib")
+    target_link_libraries(CookieEngine PRIVATE "${LIB_DIR}/fmodstudioL_vc.lib")
 ENDIF(CMAKE_BUILD_TYPE MATCHES Release)
 
 

@@ -1,18 +1,14 @@
 #ifndef __COMPONENT_HANDLER_HPP__
 #define __COMPONENT_HANDLER_HPP__
 
-#include "ComponentTransform.hpp"
-#include "ComponentModel.hpp"
-#include "ComponentPhysics.hpp"
-#include "ComponentModel.hpp"
-#include "ComponentScript.hpp"
-#include "Debug.hpp"
-
 #include <array>
-#include <unordered_map>
 
 #include "ECS/EntityHandler.hpp"
-#include "Physics/PhysicsSimulator.hpp"
+#include "ECS/ComponentTransform.hpp"
+#include "ECS/ComponentModel.hpp"
+#include "ECS/ComponentPhysics.hpp"
+#include "ECS/ComponentScript.hpp"
+#include "ECS/ComponentGameplay.hpp"
 
 
 namespace Cookie
@@ -24,131 +20,64 @@ namespace Cookie
 
 	namespace ECS
 	{
-		#define SIGNATURE_EMPTY         0b0000
-		#define SIGNATURE_TRANSFORM     0b0001
-		#define SIGNATURE_MODEL         0b0010
-		#define SIGNATURE_PHYSICS		0b0100
-		#define SIGNATURE_SCRIPT        0b1000
-		#define SIGNATURE_ALL_COMPONENT 0b1111
+		enum  C_SIGNATURE
+		{
+			EMPTY_C       = 0b000000,
+			TRANSFORM     = 0b000001,
+			MODEL         = 0b000010,
+			PHYSICS	      = 0b000100,
+			SCRIPT        = 0b001000,
+			GAMEPLAY      = 0b010000,
+			FX			  = 0b100000, //not a real Component, used for customization in Inspector
+			ALL_C         = 0b111111
+		};
 
 
 		class ComponentHandler
 		{
-		public:
+		private:
 
 			std::array<ComponentTransform,	MAX_ENTITIES> componentTransforms;
-
 			std::array<ComponentModel,		MAX_ENTITIES> componentModels;
-
 			std::array<ComponentPhysics,	MAX_ENTITIES> componentPhysics;
-
 			std::array<ComponentScript,		MAX_ENTITIES> componentScripts;
+			std::array<ComponentGameplay,   MAX_ENTITIES> componentGameplays;
 
 
+		public:
+			ComponentHandler()
+			{
+				for (int i = 0; i < MAX_ENTITIES; ++i)
+				{
+					ComponentTransform* trsPtr				  = &componentTransforms[i];
+					componentGameplays[i].trs				  = trsPtr;
+					componentGameplays[i].componentLive.trs   = trsPtr;
+					componentGameplays[i].componentAttack.trs = trsPtr;
+					componentGameplays[i].componentMove.trs   = trsPtr;
 
-			ComponentHandler() {}
+				}
+			}
 			~ComponentHandler() {}
 
-			void AddComponentTransform(Entity& entity)
-			{
-				if (entity.signature & SIGNATURE_TRANSFORM)
-				{
-					CDebug.Warning("Component Transform already present");
-					return;
-				}
+			inline void AddComponent(Entity& entity, int signature) noexcept;
+			inline void RemoveComponent(Entity& entity, int signature) noexcept;
+			inline void SubComponentToDefault(int signature, int entityId)noexcept;
 
-				entity.signature += SIGNATURE_TRANSFORM;
-			}
-			void AddComponentModel(Entity& entity)
-			{
-				if (entity.signature & SIGNATURE_MODEL)
-				{
-					CDebug.Warning("Component Model already present");
-					return;
-				}
 
-				entity.signature += SIGNATURE_MODEL; 
-			}
-			void AddComponentPhysics(Entity& entity, const Physics::PhysicsSimulator& phs)
-			{
-				if (entity.signature & SIGNATURE_PHYSICS)
-				{
-					CDebug.Warning("Component Collider already present");
-					return;
-				}
+			void InitComponentPhysic(Entity& entity);
 
-				entity.signature += SIGNATURE_PHYSICS;
 
-				if (entity.signature & SIGNATURE_TRANSFORM)
-					componentTransforms [entity.id].SetPhysics();
-
-				componentPhysics	[entity.id].physBody = phs.worldSim->createRigidBody(componentTransforms[entity.id].physTransform);
-			}
-			void AddComponentScript(Entity& entity)
-			{
-				if (entity.signature & SIGNATURE_SCRIPT)
-				{
-					CDebug.Warning("Component Script already present");
-					return;
-				}
-
-				entity.signature += SIGNATURE_SCRIPT;
-			}
-
-			void ModifyComponentOfEntityToPrefab(Entity& entity, Cookie::Resources::ResourcesManager& resourcesManager, std::string& namePrefab);
-
-			void RemoveComponentTransform(Entity& entity)
-			{
-				if (entity.signature & SIGNATURE_TRANSFORM)
-				{
-					GetComponentTransform(entity.id).ToDefault();
-					entity.signature -= SIGNATURE_TRANSFORM;
-					return;
-				}
-				
-				CDebug.Warning("No Component Transform present");
-			}
-			void RemoveComponentModel(Entity& entity)
-			{
-				if (entity.signature & SIGNATURE_MODEL)
-				{
-					GetComponentModel(entity.id).ToDefault();
-					entity.signature -= SIGNATURE_MODEL;
-					return;
-				}
-
-				CDebug.Warning("No Component Model present");
-			}
-			void RemoveComponentPhysics(Entity& entity)
-			{
-				if (entity.signature & SIGNATURE_PHYSICS)
-				{
-					GetComponentPhysics(entity.id).ToDefault();
-					entity.signature -= SIGNATURE_PHYSICS;
-					return;
-				}
-
-				CDebug.Warning("No Component RigidBody present");
-			}
-			void RemoveComponentScript(Entity& entity)
-			{
-				if (entity.signature & SIGNATURE_SCRIPT)
-				{
-					GetComponentScript(entity.id).ToDefault();
-					entity.signature -= SIGNATURE_SCRIPT;
-					return;
-				}
-
-				CDebug.Warning("No Component Script present");
-			}
-
-			ComponentTransform& GetComponentTransform	(const unsigned int id) { return componentTransforms[id];	}
-			ComponentModel&		GetComponentModel		(const unsigned int id) { return componentModels[id];		}
-			ComponentPhysics&	GetComponentPhysics		(const unsigned int id) { return componentPhysics[id];		}
-			ComponentScript&    GetComponentScript		(const unsigned int id) { return componentScripts[id];		}
+			//template later on
+			inline ComponentTransform& GetComponentTransform (const unsigned int id) noexcept;
+			inline ComponentModel&     GetComponentModel     (const unsigned int id) noexcept;
+			inline ComponentPhysics&   GetComponentPhysics   (const unsigned int id) noexcept;
+			inline ComponentScript&    GetComponentScript    (const unsigned int id) noexcept;
+			inline ComponentGameplay&  GetComponentGameplay  (const unsigned int id) noexcept;
 		};
 
 	}
 }
+
+#include "ECS/ComponentHandler.inl"
 
 #endif

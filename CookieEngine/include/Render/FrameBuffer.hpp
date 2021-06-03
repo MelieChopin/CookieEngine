@@ -1,51 +1,38 @@
 #ifndef __FRAME_BUFFER_HPP__
 #define __FRAME_BUFFER_HPP__
 
-#include <d3d11.h>
-#include <memory>
+#include <dxgiformat.h>
+
+struct ID3D11Texture2D;
+struct ID3D11ShaderResourceView;
+struct ID3D11RenderTargetView;
 
 namespace Cookie
 {
-	namespace Resources
-	{
-		class ResourcesManager;
-		class Shader;
-		class Mesh;
-	}
-
 	namespace Render
 	{
-		class Renderer;
-		class RendererRemote;
-
 		class FrameBuffer
 		{
-			private:
-				std::shared_ptr<Cookie::Resources::Mesh>	quad				{ nullptr };
-				std::shared_ptr<Cookie::Resources::Shader>	shader				{ nullptr };
-				ID3D11Texture2D*							texBuffer			{ nullptr };
-				ID3D11ShaderResourceView*					shaderResource		{ nullptr };
-				ID3D11RenderTargetView*						renderTargetView	{ nullptr };
+			public:
+				ID3D11Texture2D*			texBuffer			{ nullptr };
+				ID3D11ShaderResourceView*	shaderResource		{ nullptr };
+				ID3D11RenderTargetView*		renderTargetView	{ nullptr };
+				DXGI_FORMAT					format				{ DXGI_FORMAT_UNKNOWN };
+				int							width				= 0;
+				int							height				= 0;
 
 
 			private:
-				bool CreateTexture(int width, int height);
+				bool CreateTexture();
 				bool CreateShaderResource();
 				bool CreateRenderTargetView();
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
-				FrameBuffer(Resources::ResourcesManager& _resources, int width, int height);
+				FrameBuffer(int width, int height, DXGI_FORMAT format = DXGI_FORMAT_R16G16B16A16_UNORM);
 				~FrameBuffer();
 
 				void Resize(int width, int height);
-				void Draw();
-
-				inline ID3D11Texture2D*const*			GetTexture()const			{ return &texBuffer; }
-				inline ID3D11ShaderResourceView*const*	GetShaderResource()const	{ return &shaderResource; }
-				inline ID3D11RenderTargetView*const*	GetRenderTarget()const		{ return &renderTargetView; }
-
-
 		};
 	}
 }
