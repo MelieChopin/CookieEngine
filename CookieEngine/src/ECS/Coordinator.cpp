@@ -77,7 +77,8 @@ Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab, E_ARMY_N
 		gameplay.componentAttack.trs = trsPtr;
 		gameplay.componentMove.trs   = trsPtr;
 
-		armyHandler->AddElementToArmy(&gameplay);
+		if(gameplay.teamName != E_ARMY_NAME::E_DEFAULT_NAME)
+			armyHandler->AddElementToArmy(&gameplay);
 	}
 
 
