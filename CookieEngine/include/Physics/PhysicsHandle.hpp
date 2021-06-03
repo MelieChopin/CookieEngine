@@ -42,17 +42,6 @@ namespace Cookie
 					}
 				}
 
-				inline static void Terminate()
-				{
-					int max = editWorld->getNbRigidBodies();
-					for (int i = 0; i < max; i++)
-					{
-						editWorld->destroyRigidBody(editWorld->getRigidBody(0));
-					}
-
-					PhysicsHandle().physCom->destroyPhysicsWorld(editWorld);
-				}
-
 		};
 	}
 }
