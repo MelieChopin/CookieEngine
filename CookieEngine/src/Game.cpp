@@ -4,12 +4,15 @@
 #include "Game.hpp"
 #include "ECS/ComponentGameplay.hpp"
 
+#include "SoundManager.hpp"
+
 #include "UIcore.hpp"
 
 using namespace Cookie;
 using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
 using namespace Cookie::Gameplay;
+using namespace Cookie::Resources::Particles;
 using namespace rp3d;
 
 constexpr int miniMapResolution = 512;
@@ -20,7 +23,6 @@ Game::Game():
     frameBuffer{renderer.window.width,renderer.window.height },
     miniMapBuffer{miniMapResolution, miniMapResolution}
 {
-
     Physics::PhysicsHandle::Init();
     Core::UIcore::FinishInit(renderer);
     renderer.drawData.Init(*this);
@@ -64,6 +66,10 @@ void Game::Update()
     renderer.Draw(scene->camera.get(), frameBuffer);
     renderer.DrawMiniMap(miniMapBuffer);
     particlesHandler.Draw(*scene->camera.get());
+
+    DisplayLife();
+    
+    Resources::SoundManager::UpdateFMODFor3DMusic(*scene->camera.get());
 
     renderer.SetBackBuffer();
 }
@@ -327,6 +333,48 @@ void Game::ECSCalls(Render::DebugRenderer& dbg)
     coordinator.ApplyRemoveUnnecessaryEntities();
 }
 
+void Game::DisplayLife()
+{
+    std::vector<Cookie::Render::InstancedData> data;
+    for (int i = 0; i < coordinator.entityHandler->livingEntities; i++)
+    {
+        if (!coordinator.CheckSignature(coordinator.entityHandler->entities[i].signature, C_SIGNATURE::GAMEPLAY))
+            continue;
+
+        ComponentGameplay gameplay = coordinator.componentHandler->GetComponentGameplay(coordinator.entityHandler->entities[i].id);
+        if ((gameplay.signatureGameplay & CGP_SIGNATURE::LIVE) != CGP_SIGNATURE::LIVE)
+            continue;
+
+        CGPLive live = gameplay.componentLive;
+        int lifeCurrent = gameplay.componentLive.lifeCurrent;
+        int lifeMax = gameplay.componentLive.lifeMax;
+        Cookie::Render::InstancedData newData;
+
+        Cookie::Core::Math::Vec4 pos = Cookie::Core::Math::Vec4(0, 0, 0, 1);
+        if (ParticlesHandler::TestFrustrum(particlesHandler.frustrum, pos))
+            continue;
+
+        newData.World = Cookie::Core::Math::Mat4::TRS(Vec3(0, 3 * gameplay.trs->scale.y / 3, 0), Vec3(Cookie::Core::Math::ToRadians(180) - scene.get()->camera.get()->rot.x, 0, 0),
+            Vec3(2 * lifeMax / 10, 0.25, 2 * lifeMax / 10)) // stocker matrix trs
+            * Cookie::Core::Math::Mat4::Translate(gameplay.trs->pos);
+
+        newData.Color = Vec4(0, 0, 0, 1);
+        newData.isBillboard = false;
+        data.push_back(newData);
+
+        newData.World = Cookie::Core::Math::Mat4::TRS(Vec3(-(lifeMax - lifeCurrent) / 10, 3 * gameplay.trs->scale.y / 4, 0), Vec3(Cookie::Core::Math::ToRadians(180) - scene.get()->camera.get()->rot.x, 0, 0),
+            Vec3(2 * lifeCurrent / 10, 0.25, 2 * lifeCurrent / 10))
+            * Cookie::Core::Math::Mat4::Translate(gameplay.trs->pos);
+
+        newData.Color = Vec4((lifeMax - lifeCurrent) / lifeMax , lifeCurrent / lifeMax, 0, 1);
+        data.push_back(newData);
+    }
+
+    if (data.size() > 0)
+        ::ParticlesHandler::shader.Draw(*scene.get()->camera.get(), resources.meshes["Quad"].get(), resources.textures2D["White"].get(), data);
+}
+
+
 /*================== SETTER/GETTER ==================*/
 
 void Game::SetScene(const std::shared_ptr<Resources::Scene>& _scene)
@@ -392,3 +440,5 @@ void Game::TryResizeWindow()
         //scene->camera->SetProj(Core::Math::ToRadians(60.f), width, height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     }
 }
+
+

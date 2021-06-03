@@ -115,7 +115,7 @@ void ParticlesPass::InitShader()
                                     float4(-z.x, -z.y, -z.z, 0),
                                     float4(0.0, 0.0, 0.0, 1));
 
-            temp = mul(float4(vin.PosL,1.0), mul(rot, vin.World ));
+            temp = mul(float4(vin.PosL, 1.0), mul(rot, vin.World));
         }
 
 	    // Transform to world space space.
