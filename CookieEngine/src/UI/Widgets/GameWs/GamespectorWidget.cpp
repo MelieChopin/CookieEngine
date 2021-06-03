@@ -1,10 +1,10 @@
 #include "Coordinator.hpp"
+#include "ResourcesManager.hpp"
+#include "Texture.hpp"
 #include "GamespectorWidget.hpp"
 
 #include "ComponentHandler.hpp"
-#include "Texture.hpp"
 #include "Prefab.hpp"
-#include "ResourcesManager.hpp"
 
 #include <imgui.h>
 
@@ -16,9 +16,24 @@ using namespace Cookie::ECS;
 
 void Gamespector::SafeIcon(const Texture* const & texture, const float size)
 {
-	static const Texture* const & nullTexture = resources.icons["Assets/UI/IconCanon.tif"].get();
+	static const Texture* const & nullTexture = resources.icons["Assets/EditorUIcons/Log.ico"].get();
 
 	Image(static_cast<ImTextureID>(texture ? texture->GetResourceView() : nullTexture->GetResourceView()), {size, size}); 
+}
+
+void Gamespector::LifeBar(const float currentLife, const float maxLife, const float barWidth, const float barHeight)
+{
+	const float lifeFrac = currentLife / maxLife;
+
+	static float RGBc[3] = {0, 0, 0};
+	ColorConvertHSVtoRGB(0.486f * lifeFrac, 1, 1, RGBc[0], RGBc[1], RGBc[2]);
+
+	PushStyleColor(ImGuiCol_PlotHistogram, { RGBc[0], RGBc[1], RGBc[2], 1 });
+
+	std::string lifeBarOverlay = std::to_string((int)currentLife) + std::string("/") + std::to_string((int)maxLife);
+	ProgressBar(lifeFrac, { barWidth, barHeight }, lifeBarOverlay.c_str());
+
+	PopStyleColor();
 }
 
 
@@ -31,7 +46,7 @@ void Gamespector::WindowDisplay()
 			const Entity* const & selectedEntity = coordinator.selectedEntities[0];
 			const ComponentGameplay& sEntityGameplayComp = coordinator.componentHandler->GetComponentGameplay(selectedEntity->id);
 			
-			Dummy({GetContentRegionAvail().x / 4.f, GetContentRegionAvail().y});
+			Dummy({GetContentRegionAvail().x / 5.f, GetContentRegionAvail().y});
 			
 			SameLine();
 			BeginGroup();
@@ -42,18 +57,7 @@ void Gamespector::WindowDisplay()
 
 				SafeIcon(coordinator.componentHandler->GetComponentModel(selectedEntity->id).icon, regionHeight - 19.f);
 				
-
-				const float lifeFrac = sEntityGameplayComp.componentLive.lifeCurrent / sEntityGameplayComp.componentLive.lifeMax;
-
-				Cookie::Core::Math::Vec3 RGBc;
-				ColorConvertHSVtoRGB(0.486f * lifeFrac, 1, 1, RGBc.r, RGBc.g, RGBc.b);
-
-				PushStyleColor(ImGuiCol_PlotHistogram, { RGBc.r, RGBc.g, RGBc.b, 1 });
-
-				std::string lifeBarOverlay = std::to_string((int)sEntityGameplayComp.componentLive.lifeCurrent) + std::string("/") + std::to_string((int)sEntityGameplayComp.componentLive.lifeMax);
-				ProgressBar(lifeFrac, {regionHeight - 19.f, 15.f}, lifeBarOverlay.c_str());
-				
-				PopStyleColor();
+				LifeBar(sEntityGameplayComp.componentLive.lifeCurrent, sEntityGameplayComp.componentLive.lifeMax, regionHeight - 19.f, 15.f);
 			}
 			else
 				SafeIcon(coordinator.componentHandler->GetComponentModel(selectedEntity->id).icon, GetContentRegionAvail().y);
@@ -78,7 +82,7 @@ void Gamespector::WindowDisplay()
 					Dummy({0.f, 31.f});
 					
 					PushStyleColor(ImGuiCol_PlotHistogram, { 0, 1, 1, 1 });
-					ProgressBar(sEntityGameplayComp.componentProducer.currentCountdown / unitsQueue[0]->gameplay.cost.timeToProduce, { GetContentRegionAvail().x / 3.f, 15.f }, std::to_string((int)sEntityGameplayComp.componentProducer.currentCountdown).c_str());
+					ProgressBar(sEntityGameplayComp.componentProducer.currentCountdown / unitsQueue[0]->gameplay.cost.timeToProduce, { 160.f, 15.f }, std::to_string((int)sEntityGameplayComp.componentProducer.currentCountdown).c_str());
 					PopStyleColor();
 
 					EndGroup();
@@ -117,6 +121,74 @@ void Gamespector::WindowDisplay()
 				Separator();
 			}
 
+			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::MOVE)
+			{
+				static const Texture* const & moveIcon = resources.icons["Assets/UI/Deplacement.png"].get();
+
+				SafeIcon(moveIcon, 50.f);
+
+				if (IsItemHovered())
+				{
+					BeginTooltip();
+					Text("Speed: %.1f", sEntityGameplayComp.componentMove.moveSpeed);
+					
+					if (sEntityGameplayComp.componentMove.isFlying)
+						TextColored({0, 1, 0, 1}, "Flying");
+					
+					EndTooltip();
+				}
+			}
+
+			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::ATTACK)
+			{
+				if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::MOVE)
+					SameLine();
+
+
+				static const Texture* const & attackIcon = resources.icons["Assets/UI/Attaque.png"].get();
+				
+				SafeIcon(attackIcon, 50.f);
+
+				if (IsItemHovered())
+				{
+					BeginTooltip();
+					Text("Attack damage: %.1f", sEntityGameplayComp.componentAttack.attackDamage);
+					Text("Attack speed: %.1f", sEntityGameplayComp.componentAttack.attackSpeed);
+					Text("Attack range: %.1f", sEntityGameplayComp.componentAttack.attackRange);
+					EndTooltip();
+				}
+			}
+
+			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::LIVE)
+			{
+				if (sEntityGameplayComp.signatureGameplay & (CGP_SIGNATURE::ATTACK | CGP_SIGNATURE::MOVE))
+					SameLine();
+
+
+				static const Texture* const& armorIcon = nullptr;
+
+				SafeIcon(armorIcon, 50.f);
+
+				if (IsItemHovered())
+				{
+					BeginTooltip();
+					Text("This unit has an armor of %.1f resistance units", sEntityGameplayComp.componentLive.armor);
+					EndTooltip();
+				}
+			}
+
+			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::RESOURCE)
+			{
+				if (sEntityGameplayComp.componentResource.isPrimary)
+				{
+					TextColored({ 1.f, 0.816f, 0.31f, 1.f }, "Remaining wheat: %.2f units", sEntityGameplayComp.componentResource.resourceReserve);
+				}
+				else
+				{
+					TextColored({ 123.f, 63.f, 0.f, 1.f }, "Remaining chocolate: %.2f units", sEntityGameplayComp.componentResource.resourceReserve);
+				}
+			}
+
 			EndGroup();
 		}
 		else if (coordinator.selectedEntities.size() > 1)
@@ -124,9 +196,9 @@ void Gamespector::WindowDisplay()
 			float size = (int)GetContentRegionAvail().y * 0.75f;
 			int iconsPerLines = GetContentRegionAvail().x / (size + 8);
 
-			while ((int)(((coordinator.selectedEntities.size() - 1) / iconsPerLines) + 1) * (size + 4) > GetContentRegionAvail().y)
+			while ((int)((coordinator.selectedEntities.size() / iconsPerLines) + 1) * (size + 4) > GetContentRegionAvail().y)
 			{
-				size /= 1.5f;
+				size /= 2.f;
 				iconsPerLines = GetContentRegionAvail().x / (size + 8);
 			}
 
@@ -141,7 +213,6 @@ void Gamespector::WindowDisplay()
 
 				(placedTemp % iconsPerLines) ? SameLine() : NewLine();
 			}
-
 		}
 	}
 

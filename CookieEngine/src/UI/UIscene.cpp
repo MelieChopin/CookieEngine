@@ -1,44 +1,46 @@
+#include "Game.hpp"
 #include "UIscene.hpp"
 
 #include "UIgame_AllIn.hpp"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 using namespace ImGui;
 using namespace Cookie::UI;
 using namespace Cookie::UIwidget;
 
 
-UIscene::UIscene(const std::vector<GameWindowInfo>& _gameWindows)
+UIscene::UIscene(const std::vector<GameWindowInfo>& _gameWindows, Cookie::Game& _game)
 {
 	if (!_gameWindows.empty())
-		LoadLayout(_gameWindows);
+		LoadLayout(_gameWindows, _game);
 }
 
 UIscene::~UIscene()
 { CleanLayout(); }
 
 
-void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows)
+void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows, Cookie::Game& game)
 {
 	for (const GameWindowInfo& info : GameWindows)
 	{ 
-		GameWindowBase* convertedWidget = nullptr;
-
 		switch (info.ID)
 		{
-		case GameWidgetID::TestBoiID: convertedWidget = new TestBoi; break;
+		case GameWidgetID::GamespectorID:	sceneWidgets.push_back(std::make_unique<Gamespector>(game.coordinator, game.resources));
+		case GameWidgetID::ActionPanelID:	sceneWidgets.push_back(std::make_unique<ActionPanel>(game.coordinator, game.resources));
 
 		default: break;
 		}
+
+		GameWindowBase* const & convertedWidget = sceneWidgets.back().get();
 
 		convertedWidget->xPos = info.xPos;
 		convertedWidget->yPos = info.yPos;
 		convertedWidget->width = info.width;
 		convertedWidget->height = info.height;
 
-
-		sceneWidgets.push_back(std::move(convertedWidget));
+		signature |= info.ID;
 	}
 }
 
@@ -46,7 +48,7 @@ const std::vector<UIscene::GameWindowInfo> UIscene::SaveLayout(bool clean)
 {
 	std::vector<GameWindowInfo> infos;
 	
-	for (GameWindowBase*& widget : sceneWidgets)
+	for (std::unique_ptr<GameWindowBase>& widget : sceneWidgets)
 	{
 		GameWindowInfo widgetInfo;
 
@@ -70,14 +72,24 @@ const std::vector<UIscene::GameWindowInfo> UIscene::SaveLayout(bool clean)
 
 void UIscene::CleanLayout()
 {
-	for (GameWindowBase*& widget : sceneWidgets)
-	{ delete widget; }
+	for (std::unique_ptr<GameWindowBase>& widget : sceneWidgets)
+	{ widget.reset(); }
 
-	std::vector<GameWindowBase*>().swap(sceneWidgets);
+	std::vector<std::unique_ptr<GameWindowBase>>().swap(sceneWidgets);
 }
+
 
 void UIscene::RenderLayout()
 {
-	for (UIwidget::GameWindowBase*& gw : sceneWidgets)
+	isHovered = false;
+	const ImVec2 mPos = GetIO().MousePos;
+
+	for (std::unique_ptr<GameWindowBase>& gw : sceneWidgets)
+	{
 		gw->WindowDisplay();
+
+		const ImRect lastRect = FindWindowByName(gw->GetName())->Rect();
+
+		isHovered |= (mPos.x > lastRect.Min.x) && (mPos.x < lastRect.Max.x) && (mPos.y > lastRect.Min.y) && (mPos.y < lastRect.Max.y);
+	}
 }

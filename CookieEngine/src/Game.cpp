@@ -142,10 +142,10 @@ void Game::HandleGameplayInputs()
     }
     else
     {
-        if (ImGui::GetIO().MouseClicked[0])
+        if (ImGui::GetIO().MouseClicked[0] && !scene->uiScene.IsHovered())
             InputStartSelectionQuad();
 
-        if (ImGui::GetIO().MouseReleased[0])
+        if (ImGui::GetIO().MouseReleased[0] && !scene->uiScene.IsHovered())
             InputEndSelectionQuad();
 
         if (!ImGui::GetIO().MouseDownDuration[1])
@@ -377,9 +377,8 @@ void Game::DisplayLife()
 
 /*================== SETTER/GETTER ==================*/
 
-void Game::SetScene(const std::shared_ptr<Resources::Scene>& _scene)
+void Game::SetScene()
 {
-    scene = _scene;
     scene->InitCoordinator(coordinator);
 
     scene->camera->SetProj(scene->camera.get()->fov, renderer.window.width, renderer.window.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
@@ -414,8 +413,8 @@ void Game::SetCamClampFromMap()
     if (depth > scene->map.trs.scale.z)
         depth = scene->map.trs.scale.z;
 
-    scene->camera->mapClampX = {{ -scene->map.trs.scale.x * 0.5f ,scene->map.trs.scale.x * 0.5f } };
-    scene->camera->mapClampZ = {{ -scene->map.trs.scale.z * 0.5f , scene->map.trs.scale.z * 0.5f} };
+    scene->camera->mapClampX = { { -scene->map.trs.scale.x * 0.5f ,scene->map.trs.scale.x * 0.5f } };
+    scene->camera->mapClampZ = { { -scene->map.trs.scale.z * 0.5f , scene->map.trs.scale.z * 0.5f} };
 }
 
 void Game::TryResizeWindow()

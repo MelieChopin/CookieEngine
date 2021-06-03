@@ -1,5 +1,4 @@
 #include "Core/Time.hpp"
-#include "Physics/PhysicsHandle.hpp"
 #include "Physics/PhysicsSimulator.hpp"
 
 using namespace Cookie::Physics;
@@ -8,8 +7,8 @@ constexpr float initTimeStep = 1.0f / 60.0f;
 
 /*================ CONSTRUCTORS/DESTRUCTORS ================*/
 
-PhysicsSimulator::PhysicsSimulator()
-	:worldSim{ Physics::PhysicsHandle::physSim}, timeStep{initTimeStep}
+PhysicsSimulator::PhysicsSimulator():
+	timeStep{initTimeStep}
 {
 }
 

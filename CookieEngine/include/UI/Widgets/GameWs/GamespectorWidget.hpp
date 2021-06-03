@@ -20,6 +20,8 @@ namespace Cookie::UIwidget
 
 	private:
 		void SafeIcon(const Cookie::Resources::Texture* const & texture, const float size);
+
+		void LifeBar(const float currentLife, const float maxLife, const float barWidth, const float barHeight);
 		
 	public:
 		inline Gamespector(const Cookie::ECS::Coordinator& _coordinator, Cookie::Resources::ResourcesManager& _resources)

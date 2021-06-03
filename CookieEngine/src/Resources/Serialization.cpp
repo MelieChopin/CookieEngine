@@ -263,7 +263,7 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 
 	//UI Scene
 	{
-		Cookie::UI::UIscene ui = actScene.uiScene;
+		Cookie::UI::UIscene& ui = actScene.uiScene;
 
 		std::vector<Cookie::UI::UIscene::GameWindowInfo> info = ui.SaveLayout();
 		for (int i = 0; i < info.size(); i++)
@@ -907,15 +907,15 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 	 }
  }
 
-std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Game& game)
+void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Game& game)
  {
-	 std::shared_ptr<Resources::Scene> newScene = std::make_shared<Resources::Scene>();
+	 std::unique_ptr<Resources::Scene> newScene = std::make_unique<Resources::Scene>();
 	 std::ifstream file(filepath);
 
 	 if (!file.is_open())
 	 {
 		 std::cout << "DON'T FIND THE FILE\n";
-		 return nullptr;
+		 return;
 	 }
 
 	 json js;
@@ -1017,7 +1017,7 @@ std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const c
 				info.height = ui["height"].get<int>();
 				list.push_back(info);
 			}
-			newScene.get()->uiScene.LoadLayout(list);
+			newScene->uiScene.LoadLayout(list, game);
 		 }
 	 }
 
@@ -1050,7 +1050,7 @@ std::shared_ptr<Scene> Cookie::Resources::Serialization::Load::LoadScene(const c
 
 	 newScene->filepath = filepath;
 
-	 return newScene;
+	 game.scene = std::move(newScene);
  }
 
 void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager)
@@ -1258,8 +1258,6 @@ void Cookie::Resources::Serialization::Load::LoadPhysic(json& physic, Cookie::EC
 	::reactphysics3d::Vector3 vecTemp(pTRS[0].get<float>(), pTRS[1].get<float>(), pTRS[1].get<float>());
 	::reactphysics3d::Quaternion quatTemp(qTRS[1].get<float>(), qTRS[2].get<float>(), qTRS[3].get<float>(), qTRS[0].get<float>());
 	physicsComp.physTransform = ::reactphysics3d::Transform({ vecTemp, quatTemp });
-
-	physicsComp.physBody = Cookie::Physics::PhysicsHandle::physSim->createRigidBody(physicsComp.physTransform);
 
 	//Rigidbody
 	{

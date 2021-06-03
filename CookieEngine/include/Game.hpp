@@ -37,7 +37,7 @@ namespace Cookie
 			Render::FrameBuffer								miniMapBuffer;
 			Resources::Particles::ParticlesHandler			particlesHandler;
 
-			std::shared_ptr<Resources::Scene>				scene{nullptr};
+			std::unique_ptr<Resources::Scene>				scene{nullptr};
 
 		public:
 			 Game();
@@ -64,7 +64,7 @@ namespace Cookie
 			void ECSCalls(Render::DebugRenderer& dbg);
 			void DisplayLife();
 
-			void SetScene(const std::shared_ptr<Resources::Scene>& _scene);
+			void SetScene();
 			void SetCamClampFromMap();
 			void TryResizeWindow();
 	};
