@@ -1139,8 +1139,6 @@ void Cookie::Resources::Serialization::Load::LoadPhysic(json& physic, Cookie::EC
 	::reactphysics3d::Quaternion quatTemp(qTRS[1].get<float>(), qTRS[2].get<float>(), qTRS[3].get<float>(), qTRS[0].get<float>());
 	physicsComp.physTransform = ::reactphysics3d::Transform({ vecTemp, quatTemp });
 
-	physicsComp.physBody = Cookie::Physics::PhysicsHandle::physSim->createRigidBody(physicsComp.physTransform);
-
 	//Rigidbody
 	{
 		json rigid = physic["Rigidbody"];

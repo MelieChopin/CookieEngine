@@ -219,7 +219,7 @@ void DebugRenderer::Draw(const Mat4& viewProj)
 
         /* ask rp3d to compute the primitives for us */
         physDbgRenderer.reset();
-        physDbgRenderer.computeDebugRenderingPrimitives(*Physics::PhysicsHandle::physSim);
+        physDbgRenderer.computeDebugRenderingPrimitives(*Physics::PhysicsHandle::physSim.worldSim);
 
         /* draw triangles first */
         if (physDbgRenderer.getNbTriangles() > 0)
