@@ -36,22 +36,15 @@ void ParticlesSystem::Update()
 
 void ParticlesSystem::Draw(const Render::Camera& cam, Render::Frustrum& frustrum)
 {
-	bool cull = false;
 	for (int j = 0; j < data.size(); j++)
 	{
 		std::vector<Cookie::Render::InstancedData> newData;
 		for (int i = 0; i < data[j].countAlive; i++)
 		{
 			Cookie::Core::Math::Vec4 pos = Cookie::Core::Math::Vec4(data[j].data[i].pos, 1);
-			for (int j = 0; j < frustrum.planes.size(); j++)
-				if ((frustrum.planes[j].Dot(pos) + frustrum.planes[j].w) < -Cookie::Core::Math::PI)
-					cull = true;
 
-			if (cull)
-			{
-				cull = false;
+			if (ParticlesHandler::TestFrustrum(frustrum, pos))
 				continue;
-			}
 
 			Cookie::Render::InstancedData temp;
 			temp.World = Cookie::Core::Math::Mat4::TRS(data[j].data[i].pos, data[j].data[i].rot, data[j].data[i].scale);

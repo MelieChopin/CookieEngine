@@ -4,6 +4,8 @@
 #include "Game.hpp"
 #include "ECS/ComponentGameplay.hpp"
 
+#include "SoundManager.hpp"
+
 #include "UIcore.hpp"
 
 using namespace Cookie;
@@ -60,6 +62,8 @@ void Game::Update()
     particlesHandler.Draw(*scene->camera.get());
 
     DisplayLife();
+    
+    Resources::SoundManager::UpdateFMODFor3DMusic(*scene->camera.get());
 
     renderer.SetBackBuffer();
 }
@@ -326,16 +330,33 @@ void Game::DisplayLife()
         if ((gameplay.signatureGameplay & CGP_SIGNATURE::LIVE) != CGP_SIGNATURE::LIVE)
             continue;
 
+        CGPLive live = gameplay.componentLive;
+        int lifeCurrent = gameplay.componentLive.lifeCurrent;
+        int lifeMax = gameplay.componentLive.lifeMax;
         Cookie::Render::InstancedData newData;
-        newData.World = (Cookie::Core::Math::Mat4::Translate(gameplay.trs->pos))
-                        * (Cookie::Core::Math::Mat4::Scale(Vec3(1, 1, 1)) * Cookie::Core::Math::Mat4::Translate(Vec3(0, 5, 0)));
-        newData.Color = Vec4(1, 1, 1, 1);
-        newData.isBillboard = true;
+
+        Cookie::Core::Math::Vec4 pos = Cookie::Core::Math::Vec4(0, 0, 0, 1);
+        if (ParticlesHandler::TestFrustrum(particlesHandler.frustrum, pos))
+            continue;
+
+        newData.World = Cookie::Core::Math::Mat4::TRS(Vec3(0, 3 * gameplay.trs->scale.y / 3, 0), Vec3(Cookie::Core::Math::ToRadians(180) - scene.get()->camera.get()->rot.x, 0, 0),
+            Vec3(2 * lifeMax / 10, 0.25, 2 * lifeMax / 10)) // stocker matrix trs
+            * Cookie::Core::Math::Mat4::Translate(gameplay.trs->pos);
+
+        newData.Color = Vec4(0, 0, 0, 1);
+        newData.isBillboard = false;
+        data.push_back(newData);
+
+        newData.World = Cookie::Core::Math::Mat4::TRS(Vec3(-(lifeMax - lifeCurrent) / 10, 3 * gameplay.trs->scale.y / 4, 0), Vec3(Cookie::Core::Math::ToRadians(180) - scene.get()->camera.get()->rot.x, 0, 0),
+            Vec3(2 * lifeCurrent / 10, 0.25, 2 * lifeCurrent / 10))
+            * Cookie::Core::Math::Mat4::Translate(gameplay.trs->pos);
+
+        newData.Color = Vec4((lifeMax - lifeCurrent) / lifeMax , lifeCurrent / lifeMax, 0, 1);
         data.push_back(newData);
     }
 
     if (data.size() > 0)
-        ::ParticlesHandler::shader.Draw(*scene.get()->camera.get(), resources.meshes["Assets/Rec.gltf - meshes[0]"].get(), resources.textures2D["Red"].get(), data);
+        ::ParticlesHandler::shader.Draw(*scene.get()->camera.get(), resources.meshes["Quad"].get(), resources.textures2D["White"].get(), data);
 }
 
 

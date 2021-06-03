@@ -129,21 +129,16 @@ void Editor::Loop()
 
         //std::cout << game.particlesHandler.living << "\n";
 
-        //Update for 3D Music
-        FMOD_VECTOR temp = { cam.pos.x, cam.pos.y, cam.pos.z }; // Modify to have cam in scene
-        Cookie::Resources::SoundManager::system->set3DListenerAttributes(0, &temp, nullptr, nullptr, nullptr);
-        Cookie::Resources::SoundManager::system->update();
-
         //TEMP : TEST FOR 3D 
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
             Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(-5, 15, 5), game.resources.particles["Bomb"].get(), Vec3(10, 0, 25));
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P])
             Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(5, 5, 5), game.resources.particles["Attack"].get(), Vec3(15, 15, 5));
             
-        //if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
-           // Cookie::Resources::SoundManager::SetPaused("Music.mp3", true);
-       // if (glfwGetKey(game.renderer.window.window, GLFW_KEY_L) == GLFW_PRESS)
-           // Cookie::Resources::SoundManager::SetPaused("Music.mp3", false);
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P])
+            Cookie::Resources::SoundManager::PlayMusic(game.resources.sounds["Music.mp3"].get());
+        if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
+            Cookie::Resources::SoundManager::PlayMusic3D(game.resources.sounds["Magic.mp3"].get(), Vec3(0, 0, 0));
 
         // Present frame
         if (isPlaying)
@@ -181,6 +176,9 @@ void Editor::Loop()
             {
                 selectedEntity.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id).Set(selectedEntity.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id));
             }
+
+            //Update for 3D Music
+            Cookie::Resources::SoundManager::UpdateFMODFor3DMusic(cam);
         }
 
            
