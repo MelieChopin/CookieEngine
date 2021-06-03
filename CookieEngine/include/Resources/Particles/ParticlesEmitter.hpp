@@ -16,8 +16,8 @@ namespace Cookie
 			class ParticlesEmitter
 			{
 			public:
-				std::vector<ParticlesGenerator*> generators;
-				std::vector<ParticlesUpdate*>  updates;
+				std::vector<std::shared_ptr<ParticlesGenerator>> generators;
+				std::vector<std::shared_ptr<ParticlesUpdate>>  updates;
 
 				ParticlesEmitter() {}
 				~ParticlesEmitter() {}

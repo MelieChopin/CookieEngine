@@ -608,7 +608,7 @@ void Cookie::Resources::Serialization::Save::SaveParticles(Cookie::Resources::Pa
 	{
 		for (int i = 0; i < particles.particlesEmiter.size(); i++)
 		{
-			ParticlesEmitter particlesEmitter = particles.particlesEmiter[i];
+			ParticlesEmitter& particlesEmitter = particles.particlesEmiter[i];
 			json& emitter = js["Emitter"][i];
 			if (particlesEmitter.generators.size() == 0)
 				emitter["Generators"] = 0;
@@ -619,73 +619,73 @@ void Cookie::Resources::Serialization::Save::SaveParticles(Cookie::Resources::Pa
 				switch (particlesEmitter.generators[j]->type)
 				{
 				case (TYPEGEN::POINTPOSITIONGEN): {
-					PointPositionGenerate& point = dynamic_cast<PointPositionGenerate&>(*particlesEmitter.generators[j]);
+					PointPositionGenerate& point = dynamic_cast<PointPositionGenerate&>(*particlesEmitter.generators[j].get());
 					generator["pos"] = point.pos.e;
 					break;
 				}
 				case (TYPEGEN::BOXPOSITIONGEN): {
-					BoxPositionGenerate& box = dynamic_cast<BoxPositionGenerate&>(*particlesEmitter.generators[j]);
+					BoxPositionGenerate& box = dynamic_cast<BoxPositionGenerate&>(*particlesEmitter.generators[j].get());
 					generator["pos"] = box.pos.e;
 					generator["sizeBox"] = box.sizeBox.e;
 					break;
 				}
 				case (TYPEGEN::CIRCLEPOSITIONGEN): {
-					SpherePositionGenerate& sphere = dynamic_cast<SpherePositionGenerate&>(*particlesEmitter.generators[j]);
+					SpherePositionGenerate& sphere = dynamic_cast<SpherePositionGenerate&>(*particlesEmitter.generators[j].get());
 					generator["pos"] = sphere.pos.e;
 					generator["radius"] = sphere.radius;
 					break;
 				}
 				case (TYPEGEN::SCALECONSTGEN): {
-					ScaleConstGenerate& scaleC = dynamic_cast<ScaleConstGenerate&>(*particlesEmitter.generators[j]);
+					ScaleConstGenerate& scaleC = dynamic_cast<ScaleConstGenerate&>(*particlesEmitter.generators[j].get());
 					generator["scale"] = scaleC.scale.e;
 					break;
 				}
 				case (TYPEGEN::SCALERANDGEN): {
-					ScaleRandGenerate& scaleR = dynamic_cast<ScaleRandGenerate&>(*particlesEmitter.generators[j]);
+					ScaleRandGenerate& scaleR = dynamic_cast<ScaleRandGenerate&>(*particlesEmitter.generators[j].get());
 					generator["scaleMin"] = scaleR.scaleMin.e;
 					generator["scaleMax"] = scaleR.scaleMax.e;
 					break;
 				}
 				case (TYPEGEN::ROTATERANDGEN): {
-					RotateRandGenerate& rot = dynamic_cast<RotateRandGenerate&>(*particlesEmitter.generators[j]);
+					RotateRandGenerate& rot = dynamic_cast<RotateRandGenerate&>(*particlesEmitter.generators[j].get());
 					generator["rotMin"] = rot.rotMin.e;
 					generator["rotMax"] = rot.rotMax.e;
 					break;
 				}
 				case (TYPEGEN::VELCONSTGEN): {
-					VelocityConstGenerate& velC = dynamic_cast<VelocityConstGenerate&>(*particlesEmitter.generators[j]);
+					VelocityConstGenerate& velC = dynamic_cast<VelocityConstGenerate&>(*particlesEmitter.generators[j].get());
 					generator["vel"] = velC.vel.e;
 					break;
 				}
 				case (TYPEGEN::VELRANDGEN): {
-					VelocityRandGenerate& velR = dynamic_cast<VelocityRandGenerate&>(*particlesEmitter.generators[j]);
+					VelocityRandGenerate& velR = dynamic_cast<VelocityRandGenerate&>(*particlesEmitter.generators[j].get());
 					generator["velMin"] = velR.velMin.e;
 					generator["velMax"] = velR.velMax.e;
 					break;
 				}
 				case (TYPEGEN::MASSCONSTGEN): {
-					MassConstGenerate& mass = dynamic_cast<MassConstGenerate&>(*particlesEmitter.generators[j]);
+					MassConstGenerate& mass = dynamic_cast<MassConstGenerate&>(*particlesEmitter.generators[j].get());
 					generator["mass"] = mass.mass;
 					break;
 				}
 				case (TYPEGEN::TIMECONSTGEN): {
-					TimeConstGenerate& timeC = dynamic_cast<TimeConstGenerate&>(*particlesEmitter.generators[j]);
+					TimeConstGenerate& timeC = dynamic_cast<TimeConstGenerate&>(*particlesEmitter.generators[j].get());
 					generator["time"] = timeC.time;
 					break;
 				}
 				case (TYPEGEN::TIMERANDGEN): {
-					TimeRandGenerate& timeR = dynamic_cast<TimeRandGenerate&>(*particlesEmitter.generators[j]);
+					TimeRandGenerate& timeR = dynamic_cast<TimeRandGenerate&>(*particlesEmitter.generators[j].get());
 					generator["timeMin"] = timeR.timeMin;
 					generator["timeMax"] = timeR.timeMax;
 					break;
 				}
 				case (TYPEGEN::COLORCONSTGEN): {
-					ColorConstGenerate& colorC = dynamic_cast<ColorConstGenerate&>(*particlesEmitter.generators[j]);
+					ColorConstGenerate& colorC = dynamic_cast<ColorConstGenerate&>(*particlesEmitter.generators[j].get());
 					generator["color"] = colorC.col.e;
 					break;
 				}
 				case (TYPEGEN::COLORRANDGEN):{
-					ColorRandGenerate& colorR = dynamic_cast<ColorRandGenerate&>(*particlesEmitter.generators[j]);
+					ColorRandGenerate& colorR = dynamic_cast<ColorRandGenerate&>(*particlesEmitter.generators[j].get());
 					generator["colorMin"] = colorR.minCol.e;
 					generator["colorMax"] = colorR.maxCol.e;
 					break;
@@ -1515,68 +1515,68 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							break;
 						}
 						case (TYPEGEN::SCALECONSTGEN): {
-							ScaleConstGenerate* scaleC = new ScaleConstGenerate();
-							gen[j]["scale"].get_to(scaleC->scale.e);
-							emitter.generators.push_back(scaleC);
+							std::shared_ptr<ScaleConstGenerate> scaleC = std::make_unique<ScaleConstGenerate>();
+							gen[j]["scale"].get_to(scaleC.get()->scale.e);
+							emitter.generators.push_back(std::move(scaleC));
 							break;
 						}
 						case (TYPEGEN::SCALERANDGEN): {
-							ScaleRandGenerate* scaleR = new ScaleRandGenerate();
-							gen[j]["scaleMin"].get_to(scaleR->scaleMin.e);
-							gen[j]["scaleMax"].get_to(scaleR->scaleMax.e);
-							emitter.generators.push_back(scaleR);
+							std::shared_ptr<ScaleRandGenerate> scaleR = std::make_unique<ScaleRandGenerate>();
+							gen[j]["scaleMin"].get_to(scaleR.get()->scaleMin.e);
+							gen[j]["scaleMax"].get_to(scaleR.get()->scaleMax.e);
+							emitter.generators.push_back(std::move(scaleR));
 							break;
 						}
 						case (TYPEGEN::ROTATERANDGEN): {
-							RotateRandGenerate* rot = new RotateRandGenerate();
-							gen[j]["rotMin"].get_to(rot->rotMin.e);
-							gen[j]["rotMax"].get_to(rot->rotMax.e);
-							emitter.generators.push_back(rot);
+							std::shared_ptr<RotateRandGenerate> rot = std::make_unique<RotateRandGenerate>();
+							gen[j]["rotMin"].get_to(rot.get()->rotMin.e);
+							gen[j]["rotMax"].get_to(rot.get()->rotMax.e);
+							emitter.generators.push_back(std::move(rot));
 							break;
 						}
 						case (TYPEGEN::VELCONSTGEN): {
-							VelocityConstGenerate* velC = new VelocityConstGenerate();
-							gen[j]["vel"].get_to(velC->vel.e);
-							emitter.generators.push_back(velC);
+							std::shared_ptr<VelocityConstGenerate> velC = std::make_unique<VelocityConstGenerate>();
+							gen[j]["vel"].get_to(velC.get()->vel.e);
+							emitter.generators.push_back(std::move(velC));
 							break;
 						}
 						case (TYPEGEN::VELRANDGEN): {
-							VelocityRandGenerate* velR = new VelocityRandGenerate();
-							gen[j]["velMin"].get_to(velR->velMin.e);
-							gen[j]["velMax"].get_to(velR->velMax.e);
-							emitter.generators.push_back(velR);
+							std::shared_ptr<VelocityRandGenerate> velR = std::make_unique<VelocityRandGenerate>();
+							gen[j]["velMin"].get_to(velR.get()->velMin.e);
+							gen[j]["velMax"].get_to(velR.get()->velMax.e);
+							emitter.generators.push_back(std::move(velR));
 							break;
 						}
 						case (TYPEGEN::MASSCONSTGEN): {
-							MassConstGenerate* mass = new MassConstGenerate();
-							mass->mass = gen[j]["mass"].get<float>();
-							emitter.generators.push_back(mass);
+							std::shared_ptr<MassConstGenerate> mass = std::make_unique<MassConstGenerate>();
+							mass.get()->mass = gen[j]["mass"].get<float>();
+							emitter.generators.push_back(std::move(mass));
 							break;
 						}
 						case (TYPEGEN::TIMECONSTGEN): {
-							TimeConstGenerate* timeC = new TimeConstGenerate();
-							timeC->time = gen[j]["time"].get<float>();
-							emitter.generators.push_back(timeC);
+							std::shared_ptr<TimeConstGenerate> timeC = std::make_unique<TimeConstGenerate>();
+							timeC.get()->time = gen[j]["time"].get<float>();
+							emitter.generators.push_back(std::move(timeC));
 							break;
 						}
 						case (TYPEGEN::TIMERANDGEN): {
-							TimeRandGenerate* timeR = new TimeRandGenerate();
-							timeR->timeMin = gen[j]["timeMin"].get<float>();
-							timeR->timeMax = gen[j]["timeMax"].get<float>();
-							emitter.generators.push_back(timeR);
+							std::shared_ptr<TimeRandGenerate> timeR = std::make_unique<TimeRandGenerate>();
+							timeR.get()->timeMin = gen[j]["timeMin"].get<float>();
+							timeR.get()->timeMax = gen[j]["timeMax"].get<float>();
+							emitter.generators.push_back(std::move(timeR));
 							break;
 						}
 						case (TYPEGEN::COLORCONSTGEN): {
-							ColorConstGenerate* colorC = new ColorConstGenerate();
-							gen[j]["color"].get_to(colorC->col.e);
-							emitter.generators.push_back(colorC);
+							std::shared_ptr<ColorConstGenerate> colorC = std::make_unique<ColorConstGenerate>();
+							gen[j]["color"].get_to(colorC.get()->col.e);
+							emitter.generators.push_back(std::move(colorC));
 							break;
 						}
 						case (TYPEGEN::COLORRANDGEN): {
-							ColorRandGenerate* colorR = new ColorRandGenerate();
-							gen[j]["colorMin"].get_to(colorR->minCol.e);
-							gen[j]["colorMax"].get_to(colorR->maxCol.e);
-							emitter.generators.push_back(colorR);
+							std::shared_ptr<ColorRandGenerate> colorR = std::make_unique<ColorRandGenerate>();
+							gen[j]["colorMin"].get_to(colorR.get()->minCol.e);
+							gen[j]["colorMax"].get_to(colorR.get()->maxCol.e);
+							emitter.generators.push_back(std::move(colorR));
 							break;
 						}
 						case (TYPEGEN::INITVELWITHPOINT): {
@@ -1599,37 +1599,37 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 						switch (typeUp)
 						{
 						case (TYPEUP::UPDATEVEL): {
-							UpdateVelocity* vel = new UpdateVelocity();
-							emitter.updates.push_back(vel);
+							std::shared_ptr<UpdateVelocity> vel = std::make_unique<UpdateVelocity>();
+							emitter.updates.push_back(std::move(vel));
 							break;
 						}
 						case (TYPEUP::UPDATESCALE): {
-							UpdateScale* upScale = new UpdateScale();
-							up[j]["scaleEnd"].get_to(upScale->scaleEnd.e);
-							emitter.updates.push_back(upScale);
+							std::shared_ptr<UpdateScale> upScale = std::make_unique<UpdateScale>();
+							up[j]["scaleEnd"].get_to(upScale.get()->scaleEnd.e);
+							emitter.updates.push_back(std::move(upScale));
 							break;
 						}
 						case (TYPEUP::UPDATEALPHA): {
-							UpdateAlpha* upAlpha = new UpdateAlpha();
-							upAlpha->alphaEnd = up[j]["alphaEnd"].get<float>();
-							emitter.updates.push_back(upAlpha);
+							std::shared_ptr<UpdateAlpha> upAlpha = std::make_unique<UpdateAlpha>();
+							upAlpha.get()->alphaEnd = up[j]["alphaEnd"].get<float>();
+							emitter.updates.push_back(std::move(upAlpha));
 							break;
 						}
 						case (TYPEUP::COLOROVERLIFE): {
-							ColorOverLife* upColor = new ColorOverLife();
-							up[j]["colorEnd"].get_to(upColor->colorEnd.e);
-							emitter.updates.push_back(upColor);
+							std::shared_ptr<ColorOverLife> upColor = std::make_unique<ColorOverLife>();
+							up[j]["colorEnd"].get_to(upColor.get()->colorEnd.e);
+							emitter.updates.push_back(std::move(upColor));
 							break;
 						}
 						case (TYPEUP::ENABLEGRAVITY): {
-							EnabledGravity* upGravity = new EnabledGravity();
-							upGravity->gravity = up[j]["gravity"].get<float>();
-							emitter.updates.push_back(upGravity);
+							std::shared_ptr<EnabledGravity> upGravity = std::make_unique<EnabledGravity>();
+							upGravity.get()->gravity = up[j]["gravity"].get<float>();
+							emitter.updates.push_back(std::move(upGravity));
 							break;
 						}
 						case (TYPEUP::UPDATETIME): {
-							UpdateTime* time = new UpdateTime();
-							emitter.updates.push_back(time);
+							std::shared_ptr<UpdateTime> time = std::make_unique<UpdateTime>();
+							emitter.updates.push_back(std::move(time));
 							break;
 						}
 						case (TYPEUP::LOOP): {
@@ -1639,11 +1639,11 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							break;
 						}
 						case (TYPEUP::COLLISIONWITHPLANE): {
-							CollisionWithPlane* plane = new CollisionWithPlane();
-							plane->dis = up[j]["distance"].get<float>();
-							up[j]["normal"].get_to(plane->n.e);
-							plane->namePrefab = up[j]["namePrefab"].get<std::string>();
-							emitter.updates.push_back(plane);
+							std::shared_ptr<CollisionWithPlane> plane = std::make_unique<CollisionWithPlane>();
+							plane.get()->dis = up[j]["distance"].get<float>();
+							up[j]["normal"].get_to(plane.get()->n.e);
+							plane.get()->namePrefab = up[j]["namePrefab"].get<std::string>();
+							emitter.updates.push_back(std::move(plane));
 							break;
 						}
 						case (TYPEUP::CREATEPARTICLES): {
@@ -1677,6 +1677,6 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 			}
 		}
 
-		resourcesManager.particles[pref.name] = std::make_unique<ParticlesPrefab>(pref);
+		resourcesManager.particles[pref.name] = std::move(std::make_unique<ParticlesPrefab>(pref));
 	}
 }

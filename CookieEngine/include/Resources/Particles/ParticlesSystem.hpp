@@ -58,19 +58,9 @@ namespace Cookie
 				ParticlesSystem() 
 				{}
 
-				ParticlesSystem(const ParticlesSystem& other): data(other.data), particlesEmiter(other.particlesEmiter), 
-					trs(other.trs), needToBeRemoved(other.needToBeRemoved), name(other.name)
-				{}
-
 				ParticlesSystem(Cookie::Render::ParticlesPass* shader)
 				{}
 
-				ParticlesSystem(int size, int sizeFrame)
-				{
-					data.push_back(ParticlesData());
-					particlesEmiter.push_back(ParticlesEmitter());
-					data[0].generate(size, sizeFrame);
-				}
 				~ParticlesSystem() 
 				{
 					data.clear();

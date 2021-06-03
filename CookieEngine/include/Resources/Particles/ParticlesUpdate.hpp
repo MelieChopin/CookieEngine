@@ -104,9 +104,10 @@ namespace Cookie
 			class Loop : public ParticlesUpdate
 			{
 			public:
-				Loop(std::vector<ParticlesGenerator*>& _particlesGen) : particlesGen(&_particlesGen) { type = TYPEUP::LOOP; }
+				Loop() { type = TYPEUP::LOOP; }
+				Loop(std::vector<std::shared_ptr<ParticlesGenerator>>& _particlesGen) : particlesGen(&_particlesGen) { type = TYPEUP::LOOP; }
 				~Loop() {}
-				std::vector<ParticlesGenerator*>* particlesGen;
+				std::vector<std::shared_ptr<ParticlesGenerator>>* particlesGen;
 
 				virtual void Update(ParticlesData* p) override;
 			};
@@ -137,6 +138,7 @@ namespace Cookie
 
 				virtual void Update(ParticlesData* p) override;
 
+				CreateParticlesFollowing() { type = TYPEUP::CREATEPARTICLES; }
 				CreateParticlesFollowing(ParticlesData& data, float time = 0.35f, float coeff = 1, float coeffPos = 3)
 					: data(&data), coeffScale(coeff), coeffPos(coeffPos), time(time) { type = TYPEUP::CREATEPARTICLES; }
 			};
@@ -149,9 +151,10 @@ namespace Cookie
 
 				virtual void Update(ParticlesData* p) override;
 
+				Shadow() { type = TYPEUP::SHADOW; }
 				Shadow(ParticlesData& data, float time = 0.35f)
 					: data(&data), time(time) {
-					type = TYPEUP::CREATEPARTICLES;
+					type = TYPEUP::SHADOW;
 				}
 			};
 
