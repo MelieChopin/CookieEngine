@@ -82,22 +82,43 @@ void Editor::InitEditComp()
 {
     for (int i = 0; i < MAX_ENTITIES; i++)
     {
-        editingComponent[i].InitComponent(game.coordinator.componentHandler->GetComponentTransform(i));
+        int j = game.coordinator.entityHandler->entities[i].id;
+        editingComponent[j].InitComponent(game.coordinator.componentHandler->GetComponentTransform(j));
     }
 }
 
 void Editor::ModifyEditComp()
 {
-    for (int i = 0; i < MAX_ENTITIES; i++)
+    int max = livingEntitiesNb > game.coordinator.entityHandler->livingEntities ? livingEntitiesNb : game.coordinator.entityHandler->livingEntities;
+    for (int i = 0; i < max; i++)
     {
-        editingComponent[i].editTrs = &game.coordinator.componentHandler->GetComponentTransform(i);
-        if ((game.coordinator.entityHandler->entities[i].signature & C_SIGNATURE::MODEL) && game.coordinator.componentHandler->GetComponentModel(i).mesh != nullptr)
+        int j = game.coordinator.entityHandler->entities[i].id;
+        ComponentEditor& jComponent = editingComponent[j];
+        jComponent.editTrs = &game.coordinator.componentHandler->GetComponentTransform(j);
+        bool hasMesh = (game.coordinator.entityHandler->entities[i].signature & C_SIGNATURE::MODEL) && game.coordinator.componentHandler->GetComponentModel(j).mesh != nullptr;
+
+        /* if it has mesh and alive, change collider */
+        if (hasMesh)
         {
-            editingComponent[i].AABBMin = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBMin;
-            editingComponent[i].AABBMax = game.coordinator.componentHandler->GetComponentModel(i).mesh->AABBMax;
-            editingComponent[i].MakeCollider();
+            jComponent.AABBMin = game.coordinator.componentHandler->GetComponentModel(j).mesh->AABBMin;
+            jComponent.AABBMax = game.coordinator.componentHandler->GetComponentModel(j).mesh->AABBMax;
+            jComponent.MakeCollider();
         }
-        editingComponent[i].Update();
+        
+        /* if entity deleted, remove collider */
+        if (!hasMesh && jComponent.collider)
+        {
+            if (jComponent.body)
+            {
+                if (jComponent.collider)
+                {
+                    jComponent.body->removeCollider(editingComponent[j].collider);
+                    jComponent.collider = nullptr;
+                }
+            }
+        }
+
+        jComponent.Update();
     }
 }
 
@@ -157,20 +178,21 @@ void Editor::Loop()
             game.coordinator.ApplyComputeTrs();
 
             cam.Update();
+           
+            if (currentScene != game.scene.get() || game.coordinator.entityHandler->livingEntities != livingEntitiesNb)
+            {
+                selectedEntity = {};
+                selectedEntity.componentHandler = game.coordinator.componentHandler;
+                ModifyEditComp();
+                currentScene = game.scene.get();
+                livingEntitiesNb = game.coordinator.entityHandler->livingEntities;
+            }
 
             if (!ImGui::GetIO().MouseDownDuration[0])
             {
                 Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDirClamp() * cam.camFar;
                 rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, { fwdRay.x,fwdRay.y,fwdRay.z });
                 physHandle.editWorld->raycast(ray, this);
-            }
-
-            if (currentScene != game.scene.get())
-            {
-                selectedEntity = {};
-                selectedEntity.componentHandler = game.coordinator.componentHandler;
-                ModifyEditComp();
-                currentScene = game.scene.get();
             }
 
             if (selectedEntity.toChangeEntityIndex >= 0)

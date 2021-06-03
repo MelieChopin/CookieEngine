@@ -45,9 +45,13 @@ void ComponentEditor::Update()
 
 void ComponentEditor::MakeCollider()
 {
-	if (collider && body)
+	if (body)
 	{
-		body->removeCollider(collider);
+		if (collider)
+		{
+			body->removeCollider(collider);
+			collider = nullptr;
+		}
 
 		Core::Math::Vec3 center = (AABBMin + AABBMax) * 0.5f;
 		Core::Math::Vec3 AABBhalf = { AABBMax.x - center.x,AABBMax.y - center.y,AABBMax.z - center.z };

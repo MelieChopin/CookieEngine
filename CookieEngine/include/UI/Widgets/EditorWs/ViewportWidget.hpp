@@ -16,7 +16,7 @@ namespace Cookie::UIwidget
 
 	class Viewport final : public WindowBase
 	{
-		std::shared_ptr<Toolbar> toolbar;
+		Toolbar* toolbar;
 
 		
 		struct { float posx, posy, width, height; } viewportDrawspace;
@@ -37,7 +37,7 @@ namespace Cookie::UIwidget
 		void GizmoManipulator();
 
 	public:
-		inline Viewport(const std::shared_ptr<Toolbar>&		_toolbar, 
+		inline Viewport(Toolbar*							_toolbar, 
 						GLFWwindow*							_window, 
 						const Cookie::Render::FrameBuffer&	_frameBuffer, 
 						Cookie::Render::Camera*				_camera, 
