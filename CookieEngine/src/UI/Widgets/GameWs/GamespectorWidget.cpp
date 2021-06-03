@@ -185,7 +185,7 @@ void Gamespector::WindowDisplay()
 				}
 				else
 				{
-					TextColored({ 0.235f, 0.16f, 0.16f, 255.f }, "Remaining chocolate: %.2f units", sEntityGameplayComp.componentResource.resourceReserve);
+					TextColored({ 123.f, 63.f, 0.f, 1.f }, "Remaining chocolate: %.2f units", sEntityGameplayComp.componentResource.resourceReserve);
 				}
 			}
 

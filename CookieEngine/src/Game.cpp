@@ -123,10 +123,10 @@ void Game::HandleGameplayInputs()
     }
     else
     {
-        if (ImGui::GetIO().MouseClicked[0] && !scene->uiScene.isHovered)
+        if (ImGui::GetIO().MouseClicked[0] && !scene->uiScene.IsHovered())
             InputStartSelectionQuad();
 
-        if (ImGui::GetIO().MouseReleased[0] && !scene->uiScene.isHovered)
+        if (ImGui::GetIO().MouseReleased[0] && !scene->uiScene.IsHovered())
             InputEndSelectionQuad();
 
         if (!ImGui::GetIO().MouseDownDuration[1])
@@ -316,9 +316,8 @@ void Game::ECSCalls(Render::DebugRenderer& dbg)
 
 /*================== SETTER/GETTER ==================*/
 
-void Game::SetScene(const std::shared_ptr<Resources::Scene>& _scene)
+void Game::SetScene()
 {
-    scene = _scene;
     scene->InitCoordinator(coordinator);
 
     scene->camera->SetProj(scene->camera.get()->fov, renderer.window.width, renderer.window.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);

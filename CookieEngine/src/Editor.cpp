@@ -41,8 +41,8 @@ Editor::Editor()
     game.particlesHandler.particlesPrefab = &game.resources.particles;
 
     //Load default Scene
-    std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", game);
-    game.SetScene(_scene);
+    Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", game);
+    game.SetScene();
 
     editorUI.AddItem(new UIwidget::SaveButton(game.scene, game.resources), 0);
     editorUI.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);

@@ -129,7 +129,6 @@ set (SRC_FILES
     "${SRC_DIR}/UI/Widgets/EditorWs/ViewportWidget.cpp"
     "${SRC_DIR}/UI/Widgets/EditorWs/WorldSettingsWidget.cpp"
     "${SRC_DIR}/UI/Widgets/GameWs/ActionPanelWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/GameWs/TestWidget.cpp"
     "${SRC_DIR}/UI/Widgets/GameWs/GamespectorWidget.cpp"
 
     

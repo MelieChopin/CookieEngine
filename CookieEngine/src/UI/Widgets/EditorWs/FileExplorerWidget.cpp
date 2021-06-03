@@ -49,7 +49,8 @@ void FileExplorer::ExploreFiles(const fs::path& path, const char* researchQuery)
                     {
                         if (Custom::FileButton(filename.filename().string().c_str(), saveIcon->GetResourceView()))
                         {
-                            game.SetScene(Cookie::Resources::Serialization::Load::LoadScene(filename.string().c_str(), game));
+                            Cookie::Resources::Serialization::Load::LoadScene(filename.string().c_str(), game);
+                            game.SetScene();
                         }
                     }
                     else
