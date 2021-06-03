@@ -22,6 +22,7 @@ using namespace Cookie::Core::Math;
 using namespace Cookie::ECS;
 
 
+
 //Entity
 Entity& Coordinator::AddEntity(const int signature, std::string name)
 {

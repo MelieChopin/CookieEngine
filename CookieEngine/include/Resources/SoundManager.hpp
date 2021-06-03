@@ -7,6 +7,11 @@
 
 namespace Cookie
 {
+	namespace Render
+	{
+		class Camera;
+	}
+
 	namespace Resources
 	{
 		class ResourcesManager;
@@ -22,6 +27,8 @@ namespace Cookie
 
 			static void PlayMusic(Sound* const& sound);
 			static void PlayMusic3D(Sound* const& sound, const Cookie::Core::Math::Vec3& pos);
+
+			static void UpdateFMODFor3DMusic(const Cookie::Render::Camera& cam);
 
 			static inline void SetVolume(Sound* const& sound, float vol)
 			{ sound->vol = vol; }

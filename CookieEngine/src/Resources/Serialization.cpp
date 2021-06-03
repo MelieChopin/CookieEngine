@@ -13,6 +13,7 @@
 #include "Resources/Prefab.hpp"
 #include "Light.hpp"
 #include "Particles/ParticlesSystem.hpp"
+#include "ComponentGameplay.hpp"
 #include "Camera.hpp"
 #include <reactphysics3d/reactphysics3d.h>
 #include <iostream>
@@ -61,28 +62,43 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 			json& modelJ = js["ComponentHandler"]["Model"];
 			if (entity.entities[i].namePrefab != "NONE")
 			{
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name != model.mesh->name)
-					modelJ[modelJ.size()]["model"] = model.mesh->name;
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh)
+				{
+					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name != model.mesh->name)
+						modelJ[modelJ.size()]["model"] = model.mesh->name;
+				}
 				else
 					modelJ[modelJ.size()]["model"] = 0;
 
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name != model.albedo->name)
-					modelJ[modelJ.size() - 1]["texture"]["albedo"] = model.albedo->name;
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo)
+				{
+					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name != model.albedo->name)
+						modelJ[modelJ.size() - 1]["texture"]["albedo"] = model.albedo->name;
+				}
 				else
 					modelJ[modelJ.size() - 1]["texture"]["albedo"] = 0;
 
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name != model.normal->name)
-					modelJ[modelJ.size() - 1]["texture"]["normal"] = model.normal->name;
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal)
+				{
+					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name != model.normal->name)
+						modelJ[modelJ.size() - 1]["texture"]["normal"] = model.normal->name;
+				}
 				else
 					modelJ[modelJ.size() - 1]["texture"]["normal"] = 0;
 
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name != model.metallicRoughness->name)
-					modelJ[modelJ.size() - 1]["texture"]["metallic"] = model.metallicRoughness->name;
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness)
+				{
+					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name != model.metallicRoughness->name)
+						modelJ[modelJ.size() - 1]["texture"]["metallic"] = model.metallicRoughness->name;
+				}
 				else
 					modelJ[modelJ.size() - 1]["texture"]["metallic"] = 0;
 
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name != model.icon->name)
-					modelJ[modelJ.size() - 1]["texture"]["icon"] = model.icon->name;
+				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon)
+				{
+					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name != model.icon->name)
+						modelJ[modelJ.size() - 1]["texture"]["icon"] = model.icon->name;
+				}
 				else
 					modelJ[modelJ.size() - 1]["texture"]["icon"] = 0;
 			}
@@ -156,6 +172,26 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 				game["CGPResource"] = json{ { "resourcesReserve", gameplay.componentResource.resourceReserve },
 											{ "isPrimary", gameplay.componentResource.isPrimary } };
 			}	
+		}
+		if (entity.entities[i].signature & C_SIGNATURE::FX)
+		{
+			int index = js["FX"].size();
+			json& fx = js["FX"][index];
+			ComponentGameplay gameplay = component.GetComponentGameplay(entity.entities[i].id);
+			if (gameplay.signatureGameplay & CGP_SIGNATURE::ATTACK)
+			{
+				fx["CGPAttack"]["sfxAttack"] = gameplay.componentAttack.sfxAttack ? gameplay.componentAttack.sfxAttack->name : "NONE";
+				fx["CGPAttack"]["vfxAttack"] = gameplay.componentAttack.vfxAttack ? gameplay.componentAttack.vfxAttack->name : "NONE";
+
+			}
+			if (gameplay.signatureGameplay & CGP_SIGNATURE::LIVE)
+			{
+				fx["CGPLive"]["sfxDeath"] = gameplay.componentLive.sfxDeath ? gameplay.componentLive.sfxDeath->name : "NONE";
+				fx["CGPLive"]["vfxDeath"] = gameplay.componentLive.vfxDeath ? gameplay.componentLive.vfxDeath->name : "NONE";
+
+				fx["CGPLive"]["sfxHit"] = gameplay.componentLive.sfxHit ? gameplay.componentLive.sfxHit->name : "NONE";
+				fx["CGPLive"]["vfxHit"] = gameplay.componentLive.vfxHit ? gameplay.componentLive.vfxHit->name : "NONE";
+			}
 		}
 	}
 }
@@ -417,6 +453,27 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const Prefab* const & pr
 		 json& worker = js["Gameplay"]["CGPWorker"];
 		 for (int i = 0; i < gameplay.componentWorker.possibleBuildings.size(); i++)
 			 worker["name"] += gameplay.componentWorker.possibleBuildings[i]->name;
+	 }
+
+	 if (prefab->signature & C_SIGNATURE::FX)
+	 {
+		 int index = js["FX"].size();
+		 json& fx = js["FX"][index];
+		 ComponentGameplay gameplay = prefab->gameplay;
+		 if (gameplay.signatureGameplay & CGP_SIGNATURE::ATTACK)
+		 {
+			 fx["CGPAttack"]["sfxAttack"] = gameplay.componentAttack.sfxAttack ? gameplay.componentAttack.sfxAttack->name : "NONE";
+			 fx["CGPAttack"]["vfxAttack"] = gameplay.componentAttack.vfxAttack ? gameplay.componentAttack.vfxAttack->name : "NONE";
+
+		 }
+		 if (gameplay.signatureGameplay & CGP_SIGNATURE::LIVE)
+		 {
+			 fx["CGPLive"]["sfxDeath"] = gameplay.componentLive.sfxDeath ? gameplay.componentLive.sfxDeath->name : "NONE";
+			 fx["CGPLive"]["vfxDeath"] = gameplay.componentLive.vfxDeath ? gameplay.componentLive.vfxDeath->name : "NONE";
+
+			 fx["CGPLive"]["sfxHit"] = gameplay.componentLive.sfxHit ? gameplay.componentLive.sfxHit->name : "NONE";
+			 fx["CGPLive"]["vfxHit"] = gameplay.componentLive.vfxHit ? gameplay.componentLive.vfxHit->name : "NONE";
+		 }
 	 }
 
 	 file << std::setw(4) << js << std::endl;
@@ -730,6 +787,7 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
  {
 	 int indexOfPhysic = 0;
 	 int indexOfGameplay = 0;
+	 int indexOfFX = 0;
 	 for (int i = 0; i < entity.livingEntities; i++)
 	 {
 		 if (entity.entities[i].signature & C_SIGNATURE::TRANSFORM)
@@ -746,11 +804,7 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 if (TRS.contains("scale"))
 				TRS.at("scale").get_to(transform.scale.e);
 			 else if (entity.entities[i].namePrefab != "NONE")
-			 {
-				 
 				 transform.scale = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->transform.scale;
-				  transform.scale.Debug();
-			 }
 			 
 			 transform.trsHasChanged = true;
 			 component.GetComponentTransform(entity.entities[i].id) = transform;
@@ -816,6 +870,39 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 LoadGameplay(gameplay, component.GetComponentGameplay(entity.entities[i].id), resourcesManager);
 
 			 indexOfGameplay += 1;
+		 }
+		 if (entity.entities[i].signature & C_SIGNATURE::FX)
+		 {
+			 json& fx = js["FX"][indexOfFX];
+
+			 if (fx.contains("CGPAttack"))
+			 {
+				 Gameplay::CGPAttack& game = component.GetComponentGameplay(entity.entities[i].id).componentAttack;
+				 std::string name = fx["CGPAttack"]["sfxAttack"].get<std::string>();
+				 if (resourcesManager.sounds.find(name) != resourcesManager.sounds.end())
+					 game.sfxAttack = resourcesManager.sounds[name].get();
+				 name = fx["CGPAttack"]["vfxAttack"].get<std::string>();
+				 if (resourcesManager.particles.find(name) != resourcesManager.particles.end())
+					 game.vfxAttack = resourcesManager.particles[name].get();
+			 }
+
+			 if (fx.contains("CGPLive"))
+			 {
+				 Gameplay::CGPLive& game = component.GetComponentGameplay(entity.entities[i].id).componentLive;
+				 std::string name = fx["CGPLive"]["sfxDeath"].get<std::string>();
+				 if (resourcesManager.sounds.find(name) != resourcesManager.sounds.end())
+					 game.sfxDeath = resourcesManager.sounds[name].get();
+				 name = fx["CGPLive"]["vfxDeath"].get<std::string>();
+				 if (resourcesManager.particles.find(name) != resourcesManager.particles.end())
+					 game.vfxDeath = resourcesManager.particles[name].get();
+
+				 name = fx["CGPLive"]["sfxHit"].get<std::string>();
+				 if (resourcesManager.sounds.find(name) != resourcesManager.sounds.end())
+					 game.sfxHit = resourcesManager.sounds[name].get();
+				 name = fx["CGPLive"]["vfxHit"].get<std::string>();
+				 if (resourcesManager.particles.find(name) != resourcesManager.particles.end())
+					 game.vfxHit = resourcesManager.particles[name].get();
+			 }
 		 }
 	 }
  }
@@ -1081,6 +1168,39 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 			 json gameplay = js["Gameplay"];
 
 			 LoadGameplay(gameplay, newPrefab.gameplay, resourcesManager);
+		 }
+		 if (js.contains("FX"))
+		 {
+			 json& fx = js["FX"];
+
+			 if (fx.contains("CGPAttack"))
+			 {
+				 Gameplay::CGPAttack& game = newPrefab.gameplay.componentAttack;
+				 std::string name = fx["CGPAttack"]["sfxAttack"].get<std::string>();
+				 if (resourcesManager.sounds.find(name) != resourcesManager.sounds.end())
+					 game.sfxAttack = resourcesManager.sounds[name].get();
+				 name = fx["CGPAttack"]["vfxAttack"].get<std::string>();
+				 if (resourcesManager.particles.find(name) != resourcesManager.particles.end())
+					 game.vfxAttack = resourcesManager.particles[name].get();
+			 }
+
+			 if (fx.contains("CGPLive"))
+			 {
+				 Gameplay::CGPLive& game = newPrefab.gameplay.componentLive;
+				 std::string name = fx["CGPLive"]["sfxDeath"].get<std::string>();
+				 if (resourcesManager.sounds.find(name) != resourcesManager.sounds.end())
+					 game.sfxDeath = resourcesManager.sounds[name].get();
+				 name = fx["CGPLive"]["vfxDeath"].get<std::string>();
+				 if (resourcesManager.particles.find(name) != resourcesManager.particles.end())
+					 game.vfxDeath = resourcesManager.particles[name].get();
+
+				 name = fx["CGPLive"]["sfxHit"].get<std::string>();
+				 if (resourcesManager.sounds.find(name) != resourcesManager.sounds.end())
+					 game.sfxHit = resourcesManager.sounds[name].get();
+				 name = fx["CGPLive"]["vfxHit"].get<std::string>();
+				 if (resourcesManager.particles.find(name) != resourcesManager.particles.end())
+					 game.vfxHit = resourcesManager.particles[name].get();
+			 }
 		 }
 
 		 newPrefab.filepath = filesPath[i];

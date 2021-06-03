@@ -10,6 +10,18 @@ unsigned int ParticlesHandler::living;
 std::unordered_map<std::string, std::unique_ptr<ParticlesPrefab>>* ParticlesHandler::particlesPrefab;
 Cookie::Render::ParticlesPass ParticlesHandler::shader;
 
+constexpr float cullEpsilon = -3.0f;
+
+bool ParticlesHandler::TestFrustrum(Render::Frustrum& frustrum, Cookie::Core::Math::Vec4& pos)
+{
+	for (int j = 0; j < frustrum.planes.size(); j++)
+	{
+		if ((frustrum.planes[j].Dot(pos) + frustrum.planes[j].w) < cullEpsilon)
+			return true;
+	}
+	return false;
+}
+
 void ParticlesHandler::Update()
 {
 	for (std::list<ParticlesSystem>::iterator particles = particlesSystems.begin(); particles != particlesSystems.end(); particles++)
@@ -21,8 +33,7 @@ void ParticlesHandler::Update()
 			particlesSystems.push_back(ParticlesSystem());
 			living--;
 		}
-	}
-		
+	}	
 }
 
 void ParticlesHandler::Draw(const Render::Camera& cam)
@@ -34,12 +45,10 @@ void ParticlesHandler::Draw(const Render::Camera& cam)
 
 void ParticlesHandler::CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3& pos, const std::string& namePref, const Cookie::Core::Math::Vec3& posSpawnEnd)
 {
-	ParticlesPrefab* prefab = (*particlesPrefab)[namePref].get();
-	CreateParticlesWithPrefab(pos, prefab, posSpawnEnd);
+	CreateParticlesWithPrefab(pos, (*particlesPrefab)[namePref].get(), posSpawnEnd);
 }
 
-void ParticlesHandler::CreateParticlesWithPrefab
-(const Cookie::Core::Math::Vec3& pos, ParticlesPrefab* particlesPrefab, const Cookie::Core::Math::Vec3& posSpawnEnd)
+void ParticlesHandler::CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3& pos, ParticlesPrefab* particlesPrefab, const Cookie::Core::Math::Vec3& posSpawnEnd)
 {
 	if (living + 1 >= particlesSystems.size() || !particlesPrefab)
 		return;

@@ -1,6 +1,7 @@
 #include "ResourcesManager.hpp"
 #include "SoundManager.hpp"
 #include "Serialization.hpp"
+#include "Camera.hpp"
 #include <iostream>
 #include <filesystem>
 
@@ -88,6 +89,11 @@ void SoundManager::LoadAllMusic(ResourcesManager& resourcesManager)
 
 void SoundManager::PlayMusic(Sound* const & sound)
 {
+	bool isAlreadyPlay;
+	sound->chan->isPlaying(&isAlreadyPlay);
+	if (isAlreadyPlay)
+		return;
+		
 	if (sound->sound == nullptr)
 		system->createSound(sound->filepath.c_str(), sound->mode, nullptr, &sound->sound);
 
@@ -97,11 +103,7 @@ void SoundManager::PlayMusic(Sound* const & sound)
 
 void SoundManager::PlayMusic3D(Sound* const& sound, const Cookie::Core::Math::Vec3& pos)
 {
-	if (sound->sound == nullptr)
-		system->createSound(sound->filepath.c_str(), sound->mode, nullptr, &sound->sound);
-
-	system->playSound(sound->sound, nullptr, false, &sound->chan);
-	sound->chan->setVolume(sound->vol);
+	PlayMusic(sound);
 
 	if (sound->mode & FMOD_3D)
 	{
@@ -109,4 +111,11 @@ void SoundManager::PlayMusic3D(Sound* const& sound, const Cookie::Core::Math::Ve
 		FMOD_VECTOR pos = { posSound.x, posSound.y, posSound.z };
 		sound->chan->set3DAttributes(&pos, nullptr);
 	}
+}
+
+void SoundManager::UpdateFMODFor3DMusic(const Render::Camera& cam)
+{//Update for 3D Music
+	FMOD_VECTOR temp = { cam.pos.x, cam.pos.y, cam.pos.z };
+	Cookie::Resources::SoundManager::system->set3DListenerAttributes(0, &temp, nullptr, nullptr, nullptr);
+	Cookie::Resources::SoundManager::system->update();
 }
