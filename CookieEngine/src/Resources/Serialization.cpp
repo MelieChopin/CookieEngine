@@ -136,6 +136,7 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 				game["CGPLive"]["Life"] = gameplay.componentLive.lifeCurrent;
 				game["CGPLive"]["LifeMax"] = gameplay.componentLive.lifeMax;
 				game["CGPLive"]["Armor"] = gameplay.componentLive.armor;
+				game["CGPLive"]["PosLife"] = gameplay.componentLive.posLifeInRapportOfEntity.e;
 			}
 
 			if (gameplay.signatureGameplay & CGP_SIGNATURE::ATTACK)
@@ -432,6 +433,7 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const Prefab* const & pr
 		 live["Life"] = gameplay.componentLive.lifeCurrent;
 		 live["LifeMax"] = gameplay.componentLive.lifeMax;
 		 live["Armor"] = gameplay.componentLive.armor;
+		 live["PosLife"] = gameplay.componentLive.posLifeInRapportOfEntity.e;
 
 		 json& attack = js["Gameplay"]["CGPAttack"];
 		 attack["NeedToAttack"] = gameplay.componentAttack.needToAttack;
@@ -815,17 +817,24 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 if (model["model"].is_string())
 				component.GetComponentModel(entity.entities[i].id).mesh = resourcesManager.meshes[(model["model"].get<std::string>())].get();
 			 else if (entity.entities[i].namePrefab != "NONE")
-				 component.GetComponentModel(entity.entities[i].id).mesh =
-						resourcesManager.meshes[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name].get();
-
+			 {
+				 if (resourcesManager.meshes.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name) != resourcesManager.meshes.end())
+					component.GetComponentModel(entity.entities[i].id).mesh =
+					 resourcesManager.meshes[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name].get();
+			 }
+				 
 			 if (model["texture"]["albedo"].is_string())
 			 {
 				 if (model["texture"]["albedo"].get<std::string>() != "NO ALBEDO")
 					 component.GetComponentModel(entity.entities[i].id).albedo = resourcesManager.textures2D[(model["texture"]["albedo"].get<std::string>())].get();
 			 }
 			 else if (entity.entities[i].namePrefab != "NONE")
-				component.GetComponentModel(entity.entities[i].id).albedo =
-						 resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name].get();
+			 {
+				 if (resourcesManager.textures2D.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name) != resourcesManager.textures2D.end())
+					component.GetComponentModel(entity.entities[i].id).albedo =
+					 resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name].get();
+			 }
+				
 				 
 			 if (model["texture"]["normal"].is_string())
 			 {
@@ -833,26 +842,37 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 					 component.GetComponentModel(entity.entities[i].id).normal = resourcesManager.textures2D[(model["texture"]["normal"].get<std::string>())].get();
 			 }
 			 else if (entity.entities[i].namePrefab != "NONE")
-				 component.GetComponentModel(entity.entities[i].id).normal =
-				 resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name].get();
+			 {
+				 if (resourcesManager.textures2D.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name) != resourcesManager.textures2D.end())
+					 component.GetComponentModel(entity.entities[i].id).normal =
+						resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name].get();
 
+			 }
+				
 			 if (model["texture"]["metallic"].is_string())
 			 {
 				 if (model["texture"]["metallic"].get<std::string>() != "NO METALLIC")
 					 component.GetComponentModel(entity.entities[i].id).metallicRoughness = resourcesManager.textures2D[(model["texture"]["metallic"].get<std::string>())].get();
 			 }
 			 else if (entity.entities[i].namePrefab != "NONE")
-				component.GetComponentModel(entity.entities[i].id).metallicRoughness =
-				resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name].get();
-
+			 {
+				 if (resourcesManager.textures2D.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name) != resourcesManager.textures2D.end())
+					 component.GetComponentModel(entity.entities[i].id).metallicRoughness =
+					 resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name].get();
+			 }
+				
 			 if (model["texture"]["icon"].is_string())
 			 {
 				 if (model["texture"]["icon"].get<std::string>() != "NO ICON")
 					 component.GetComponentModel(entity.entities[i].id).icon = resourcesManager.icons[(model["texture"]["icon"].get<std::string>())].get();
 			 }
 			 else if (entity.entities[i].namePrefab != "NONE")
-				 component.GetComponentModel(entity.entities[i].id).icon =
-				 resourcesManager.icons[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name].get();
+			 {
+				 if (resourcesManager.icons.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name) != resourcesManager.icons.end())
+					component.GetComponentModel(entity.entities[i].id).icon =
+					 resourcesManager.icons[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name].get();
+			 }
+				 
 		 
 		 }
 		 if (entity.entities[i].signature & C_SIGNATURE::PHYSICS)
@@ -1336,6 +1356,7 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 		GPComponent.componentLive.lifeCurrent = temp["Life"].get<float>();
 		GPComponent.componentLive.lifeMax = temp["LifeMax"].get<float>();
 		GPComponent.componentLive.armor = temp["Armor"].get<float>();
+		temp["PosLife"].get_to(GPComponent.componentLive.posLifeInRapportOfEntity.e);
 	}
 
 	if (gameplay.contains("CGPAttack"))
@@ -1516,6 +1537,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							std::shared_ptr<ScaleConstGenerate> scaleC = std::make_unique<ScaleConstGenerate>();
 							gen[j]["scale"].get_to(scaleC.get()->scale.e);
 							emitter.generators.push_back(std::move(scaleC));
+							free(scaleC.get());
 							break;
 						}
 						case (TYPEGEN::SCALERANDGEN): {
@@ -1523,6 +1545,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["scaleMin"].get_to(scaleR.get()->scaleMin.e);
 							gen[j]["scaleMax"].get_to(scaleR.get()->scaleMax.e);
 							emitter.generators.push_back(std::move(scaleR));
+							free(scaleR.get());
 							break;
 						}
 						case (TYPEGEN::ROTATERANDGEN): {
@@ -1530,12 +1553,14 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["rotMin"].get_to(rot.get()->rotMin.e);
 							gen[j]["rotMax"].get_to(rot.get()->rotMax.e);
 							emitter.generators.push_back(std::move(rot));
+							free(rot.get());
 							break;
 						}
 						case (TYPEGEN::VELCONSTGEN): {
 							std::shared_ptr<VelocityConstGenerate> velC = std::make_unique<VelocityConstGenerate>();
 							gen[j]["vel"].get_to(velC.get()->vel.e);
 							emitter.generators.push_back(std::move(velC));
+							free(velC.get());
 							break;
 						}
 						case (TYPEGEN::VELRANDGEN): {
@@ -1543,18 +1568,21 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["velMin"].get_to(velR.get()->velMin.e);
 							gen[j]["velMax"].get_to(velR.get()->velMax.e);
 							emitter.generators.push_back(std::move(velR));
+							free(velR.get());
 							break;
 						}
 						case (TYPEGEN::MASSCONSTGEN): {
 							std::shared_ptr<MassConstGenerate> mass = std::make_unique<MassConstGenerate>();
 							mass.get()->mass = gen[j]["mass"].get<float>();
 							emitter.generators.push_back(std::move(mass));
+							free(mass.get());
 							break;
 						}
 						case (TYPEGEN::TIMECONSTGEN): {
 							std::shared_ptr<TimeConstGenerate> timeC = std::make_unique<TimeConstGenerate>();
 							timeC.get()->time = gen[j]["time"].get<float>();
 							emitter.generators.push_back(std::move(timeC));
+							free(timeC.get());
 							break;
 						}
 						case (TYPEGEN::TIMERANDGEN): {
@@ -1562,12 +1590,14 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							timeR.get()->timeMin = gen[j]["timeMin"].get<float>();
 							timeR.get()->timeMax = gen[j]["timeMax"].get<float>();
 							emitter.generators.push_back(std::move(timeR));
+							free(timeR.get());
 							break;
 						}
 						case (TYPEGEN::COLORCONSTGEN): {
 							std::shared_ptr<ColorConstGenerate> colorC = std::make_unique<ColorConstGenerate>();
 							gen[j]["color"].get_to(colorC.get()->col.e);
 							emitter.generators.push_back(std::move(colorC));
+							free(colorC.get());
 							break;
 						}
 						case (TYPEGEN::COLORRANDGEN): {
@@ -1575,6 +1605,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["colorMin"].get_to(colorR.get()->minCol.e);
 							gen[j]["colorMax"].get_to(colorR.get()->maxCol.e);
 							emitter.generators.push_back(std::move(colorR));
+							free(colorR.get());
 							break;
 						}
 						case (TYPEGEN::INITVELWITHPOINT): {
@@ -1599,35 +1630,41 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 						case (TYPEUP::UPDATEVEL): {
 							std::shared_ptr<UpdateVelocity> vel = std::make_unique<UpdateVelocity>();
 							emitter.updates.push_back(std::move(vel));
+							free(vel.get());
 							break;
 						}
 						case (TYPEUP::UPDATESCALE): {
 							std::shared_ptr<UpdateScale> upScale = std::make_unique<UpdateScale>();
 							up[j]["scaleEnd"].get_to(upScale.get()->scaleEnd.e);
 							emitter.updates.push_back(std::move(upScale));
+							free(upScale.get());
 							break;
 						}
 						case (TYPEUP::UPDATEALPHA): {
 							std::shared_ptr<UpdateAlpha> upAlpha = std::make_unique<UpdateAlpha>();
 							upAlpha.get()->alphaEnd = up[j]["alphaEnd"].get<float>();
 							emitter.updates.push_back(std::move(upAlpha));
+							free(upAlpha.get());
 							break;
 						}
 						case (TYPEUP::COLOROVERLIFE): {
 							std::shared_ptr<ColorOverLife> upColor = std::make_unique<ColorOverLife>();
 							up[j]["colorEnd"].get_to(upColor.get()->colorEnd.e);
 							emitter.updates.push_back(std::move(upColor));
+							free(upColor.get());
 							break;
 						}
 						case (TYPEUP::ENABLEGRAVITY): {
 							std::shared_ptr<EnabledGravity> upGravity = std::make_unique<EnabledGravity>();
 							upGravity.get()->gravity = up[j]["gravity"].get<float>();
 							emitter.updates.push_back(std::move(upGravity));
+							free(upGravity.get());
 							break;
 						}
 						case (TYPEUP::UPDATETIME): {
 							std::shared_ptr<UpdateTime> time = std::make_unique<UpdateTime>();
 							emitter.updates.push_back(std::move(time));
+							free(time.get());
 							break;
 						}
 						case (TYPEUP::LOOP): {
@@ -1642,6 +1679,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							up[j]["normal"].get_to(plane.get()->n.e);
 							plane.get()->namePrefab = up[j]["namePrefab"].get<std::string>();
 							emitter.updates.push_back(std::move(plane));
+							free(plane.get());
 							break;
 						}
 						case (TYPEUP::CREATEPARTICLES): {
@@ -1675,6 +1713,6 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 			}
 		}
 
-		resourcesManager.particles[pref.name] = std::move(std::make_unique<ParticlesPrefab>(pref));
+		resourcesManager.particles[pref.name] = std::make_unique<ParticlesPrefab>(pref);
 	}
 }

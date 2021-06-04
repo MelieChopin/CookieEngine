@@ -28,6 +28,11 @@ namespace Cookie
 					shader.InitShader();
 				}
 
+				~ParticlesHandler()
+				{
+
+				}
+
 				static bool TestFrustrum(Render::Frustrum& frustrum, Cookie::Core::Math::Vec4& pos);
 				void Update();
 				void Draw(const Render::Camera& cam);

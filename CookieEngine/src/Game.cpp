@@ -61,13 +61,13 @@ void Game::Update()
     renderer.ClearFrameBuffer(miniMapBuffer);
 
     scene->camera->Update();
+    particlesHandler.Update();
     coordinator.ApplyComputeTrs();
 
     renderer.Draw(scene->camera.get(), frameBuffer);
-    renderer.DrawMiniMap(miniMapBuffer);
     particlesHandler.Draw(*scene->camera.get());
-
     DisplayLife();
+    renderer.DrawMiniMap(miniMapBuffer);
     
     Resources::SoundManager::UpdateFMODFor3DMusic(*scene->camera.get());
 
@@ -336,6 +336,11 @@ void Game::ECSCalls(Render::DebugRenderer& dbg)
 void Game::DisplayLife()
 {
     std::vector<Cookie::Render::InstancedData> data;
+    float angle = Cookie::Core::Math::ToRadians(180) - scene.get()->camera.get()->rot.x;
+    float lifeCurrent;
+    float lifeMax;
+    Mat4 trs;
+    Vec3 posLife;
     for (int i = 0; i < coordinator.entityHandler->livingEntities; i++)
     {
         if (!coordinator.CheckSignature(coordinator.entityHandler->entities[i].signature, C_SIGNATURE::GAMEPLAY))
@@ -345,28 +350,21 @@ void Game::DisplayLife()
         if ((gameplay.signatureGameplay & CGP_SIGNATURE::LIVE) != CGP_SIGNATURE::LIVE)
             continue;
 
-        CGPLive live = gameplay.componentLive;
-        int lifeCurrent = gameplay.componentLive.lifeCurrent;
-        int lifeMax = gameplay.componentLive.lifeMax;
+        lifeCurrent = gameplay.componentLive.lifeCurrent;
+        lifeMax = gameplay.componentLive.lifeMax;
+        trs = Cookie::Core::Math::Mat4::Translate(gameplay.trs->pos);
+        posLife = gameplay.componentLive.posLifeInRapportOfEntity;
         Cookie::Render::InstancedData newData;
-
-        Cookie::Core::Math::Vec4 pos = Cookie::Core::Math::Vec4(0, 0, 0, 1);
-        if (ParticlesHandler::TestFrustrum(particlesHandler.frustrum, pos))
-            continue;
-
-        newData.World = Cookie::Core::Math::Mat4::TRS(Vec3(0, 3 * gameplay.trs->scale.y / 3, 0), Vec3(Cookie::Core::Math::ToRadians(180) - scene.get()->camera.get()->rot.x, 0, 0),
-            Vec3(2 * lifeMax / 10, 0.25, 2 * lifeMax / 10)) // stocker matrix trs
-            * Cookie::Core::Math::Mat4::Translate(gameplay.trs->pos);
-
+        newData.World = Cookie::Core::Math::Mat4::TRS(posLife, Vec3(angle, 0, 0),
+            Vec3(2 * lifeMax / 10, 0.25, 2 * lifeMax / 10)) * trs;
         newData.Color = Vec4(0, 0, 0, 1);
         newData.isBillboard = false;
         data.push_back(newData);
 
-        newData.World = Cookie::Core::Math::Mat4::TRS(Vec3(-(lifeMax - lifeCurrent) / 10, 3 * gameplay.trs->scale.y / 4, 0), Vec3(Cookie::Core::Math::ToRadians(180) - scene.get()->camera.get()->rot.x, 0, 0),
-            Vec3(2 * lifeCurrent / 10, 0.25, 2 * lifeCurrent / 10))
-            * Cookie::Core::Math::Mat4::Translate(gameplay.trs->pos);
+        newData.World = Cookie::Core::Math::Mat4::TRS(posLife - Vec3((lifeMax - lifeCurrent) / 10, 0, 0),
+            Vec3(angle, 0, 0), Vec3(2 * lifeCurrent / 10, 0.25, 2 * lifeCurrent / 10)) * trs;
 
-        newData.Color = Vec4((lifeMax - lifeCurrent) / lifeMax , lifeCurrent / lifeMax, 0, 1);
+        newData.Color = Vec4((lifeMax - lifeCurrent) / lifeMax, lifeCurrent / lifeMax, 0, 1);
         data.push_back(newData);
     }
 

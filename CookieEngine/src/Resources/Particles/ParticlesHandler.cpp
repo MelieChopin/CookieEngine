@@ -84,11 +84,13 @@ void ParticlesHandler::CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3&
 				point.get()->pos = prefab->emit[i][j].data[0];
 				point.get()->trs = &particles.trs;
 				particles.particlesEmiter[i].generators.push_back(std::move(point));
+				free(point.get());
 			}
 			else if (name == "Loop")
 			{
 				std::shared_ptr<Loop> loop = std::make_unique<Loop>(particles.particlesEmiter[i].generators);
 				particles.particlesEmiter[i].updates.push_back(std::move(loop));
+				free(loop.get());
 			}
 			else if (name == "BoxPositionGen")
 			{
@@ -97,6 +99,7 @@ void ParticlesHandler::CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3&
 				box.get()->sizeBox = prefab->emit[i][j].data[1];
 				box.get()->trs = &particles.trs;
 				particles.particlesEmiter[i].generators.push_back(std::move(box));
+				free(box.get());
 			}
 			else if (name == "CirclePositionGen")
 			{
@@ -105,6 +108,7 @@ void ParticlesHandler::CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3&
 				sphere.get()->radius = prefab->emit[i][j].data[1].x;
 				sphere.get()->trs = &particles.trs;
 				particles.particlesEmiter[i].generators.push_back(std::move(sphere));
+				free(sphere.get());
 			}
 			else if (name == "CreateParticles")
 			{
@@ -116,6 +120,7 @@ void ParticlesHandler::CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3&
 					create.get()->coeffPos = prefab->emit[i][j].data[1].y;
 					create.get()->time = prefab->emit[i][j].data[1].z;
 					particles.particlesEmiter[i].updates.push_back(std::move(create));
+					free(create.get());
 				}
 			}
 			else if (name == "Shadow")
@@ -126,6 +131,7 @@ void ParticlesHandler::CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3&
 					particles.data[prefab->emit[i][j].data[0].x].canRemoved = false;
 					shadow.get()->time = prefab->emit[i][j].data[0].y;
 					particles.particlesEmiter[i].updates.push_back(std::move(shadow));
+					free(shadow.get());
 				}
 			}
 			else if (name == "SpawnEnd")
@@ -134,12 +140,14 @@ void ParticlesHandler::CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3&
 				plane.get()->namePrefab = prefab->emit[i][j].nameData;
 				plane.get()->posSpawn = posSpawnEnd;
 				particles.particlesEmiter[i].updates.push_back(std::move(plane));
+				free(plane.get());
 			}
 			else if (name == "InitVelWithPoint")
 			{
 				std::shared_ptr<InitVelocityWithPoint> vel = std::make_unique<InitVelocityWithPoint>();
 				vel.get()->endPoint = posSpawnEnd;
 				particles.particlesEmiter[i].generators.push_back(std::move(vel));
+				free(vel.get());
 			}
 		}
 	}

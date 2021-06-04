@@ -128,8 +128,6 @@ void Editor::Loop()
     //Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
     Physics::PhysicsHandle physHandle;
 
-
-    bool isActive = false;
     {
        // game.scene->map.model.albedo = game.resources.textures2D["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
     }
@@ -147,21 +145,9 @@ void Editor::Loop()
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
         // Present frame
-
-        //std::cout << game.particlesHandler.living << "\n";
-
-        //TEMP : TEST FOR 3D 
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
             Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(-5, 15, 5), game.resources.particles["Bomb"].get(), Vec3(10, 0, 25));
-        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P])
-            Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(5, 5, 5), game.resources.particles["Attack"].get(), Vec3(15, 15, 5));
-            
-        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P])
-            Cookie::Resources::SoundManager::PlayMusic(game.resources.sounds["Music.mp3"].get());
-        if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
-            Cookie::Resources::SoundManager::PlayMusic3D(game.resources.sounds["Magic.mp3"].get(), Vec3(0, 0, 0));
-
-        // Present frame
+        
         if (isPlaying)
         {
             game.Update();
@@ -214,12 +200,6 @@ void Editor::Loop()
         //game.coordinator.armyHandler->Debug();
         //game.coordinator.entityHandler->Debug();
 
-		if (isActive)
-            game.particlesHandler.Update();
-        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
-            isActive = true;
-
-
         //Draw
         game.renderer.Clear();
         game.renderer.ClearFrameBuffer(editorFBO);
@@ -237,6 +217,8 @@ void Editor::Loop()
 
     if (game.scene)
         game.scene->skyBox = game.renderer.skyBox.texture;
+
+    Particles::ParticlesHandler::shader.Destroy();
 }
 
 void Editor::TryResizeWindow()
