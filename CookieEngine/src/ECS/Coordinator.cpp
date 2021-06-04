@@ -181,8 +181,8 @@ Entity* Coordinator::GetClosestSelectableEntity(Core::Math::Vec3& pos, int minim
 	{
 		ComponentTransform& trs = componentHandler->GetComponentTransform(entityToReturn->id);
 
-		if (pos.x < trs.pos.x - trs.scale.x || trs.pos.x + trs.scale.x < pos.x ||
-			pos.z < trs.pos.z - trs.scale.z || trs.pos.z + trs.scale.z < pos.z)
+		if (pos.x < trs.pos.x - trs.scale.x / 2 || trs.pos.x + trs.scale.x / 2 < pos.x ||
+			pos.z < trs.pos.z - trs.scale.z / 2 || trs.pos.z + trs.scale.z / 2 < pos.z)
 			entityToReturn = nullptr;
 	}
 
