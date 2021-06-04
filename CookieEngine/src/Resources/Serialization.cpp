@@ -62,45 +62,46 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 			json& modelJ = js["ComponentHandler"]["Model"];
 			if (entity.entities[i].namePrefab != "NONE")
 			{
+				int size = modelJ.size();
 				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh)
 				{
 					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name != model.mesh->name)
-						modelJ[modelJ.size()]["model"] = model.mesh->name;
+						modelJ[size]["model"] = model.mesh->name;
 				}
 				else
-					modelJ[modelJ.size()]["model"] = 0;
+					modelJ[size]["model"] = 0;
 
 				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo)
 				{
 					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name != model.albedo->name)
-						modelJ[modelJ.size() - 1]["texture"]["albedo"] = model.albedo->name;
+						modelJ[size]["texture"]["albedo"] = model.albedo->name;
 				}
 				else
-					modelJ[modelJ.size() - 1]["texture"]["albedo"] = 0;
+					modelJ[size]["texture"]["albedo"] = 0;
 
 				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal)
 				{
 					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name != model.normal->name)
-						modelJ[modelJ.size() - 1]["texture"]["normal"] = model.normal->name;
+						modelJ[size]["texture"]["normal"] = model.normal->name;
 				}
 				else
-					modelJ[modelJ.size() - 1]["texture"]["normal"] = 0;
+					modelJ[size]["texture"]["normal"] = 0;
 
 				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness)
 				{
 					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name != model.metallicRoughness->name)
-						modelJ[modelJ.size() - 1]["texture"]["metallic"] = model.metallicRoughness->name;
+						modelJ[size]["texture"]["metallic"] = model.metallicRoughness->name;
 				}
 				else
-					modelJ[modelJ.size() - 1]["texture"]["metallic"] = 0;
+					modelJ[size]["texture"]["metallic"] = 0;
 
 				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon)
 				{
 					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name != model.icon->name)
-						modelJ[modelJ.size() - 1]["texture"]["icon"] = model.icon->name;
+						modelJ[size]["texture"]["icon"] = model.icon->name;
 				}
 				else
-					modelJ[modelJ.size() - 1]["texture"]["icon"] = 0;
+					modelJ[size]["texture"]["icon"] = 0;
 			}
 			else
 			{
@@ -790,12 +791,14 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 	 int indexOfPhysic = 0;
 	 int indexOfGameplay = 0;
 	 int indexOfFX = 0;
+	 int indexOfTransform = 0;
+	 int indexOfModel = 0;
 	 for (int i = 0; i < entity.livingEntities; i++)
 	 {
 		 if (entity.entities[i].signature & C_SIGNATURE::TRANSFORM)
 		 {
 			 Cookie::ECS::ComponentTransform transform;
-			 json TRS = js["ComponentHandler"]["Transform"][i].at("localTRS");
+			 json TRS = js["ComponentHandler"]["Transform"][indexOfTransform].at("localTRS");
 			 TRS.at("translate").get_to(transform.pos.e);
 			 
 			 if (TRS.contains("rotation"))
@@ -810,17 +813,19 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 
 			 transform.trsHasChanged = true;
 			 component.GetComponentTransform(entity.entities[i].id) = transform;
+			 indexOfTransform++;
 		 }
 		 if (entity.entities[i].signature & C_SIGNATURE::MODEL)
 		 {
-			 json model = js["ComponentHandler"]["Model"][i];
+			 json model = js["ComponentHandler"]["Model"][indexOfModel];
 			 if (model["model"].is_string())
 				component.GetComponentModel(entity.entities[i].id).mesh = resourcesManager.meshes[(model["model"].get<std::string>())].get();
 			 else if (entity.entities[i].namePrefab != "NONE")
 			 {
-				 if (resourcesManager.meshes.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name) != resourcesManager.meshes.end())
-					component.GetComponentModel(entity.entities[i].id).mesh =
-					 resourcesManager.meshes[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name].get();
+				 if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh)
+					if (resourcesManager.meshes.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name) != resourcesManager.meshes.end())
+						component.GetComponentModel(entity.entities[i].id).mesh =
+						resourcesManager.meshes[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name].get();
 			 }
 				 
 			 if (model["texture"]["albedo"].is_string())
@@ -830,9 +835,10 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 }
 			 else if (entity.entities[i].namePrefab != "NONE")
 			 {
-				 if (resourcesManager.textures2D.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name) != resourcesManager.textures2D.end())
-					component.GetComponentModel(entity.entities[i].id).albedo =
-					 resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name].get();
+				 if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo)
+					if (resourcesManager.textures2D.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name) != resourcesManager.textures2D.end())
+						component.GetComponentModel(entity.entities[i].id).albedo =
+						resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name].get();
 			 }
 				
 				 
@@ -843,8 +849,9 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 }
 			 else if (entity.entities[i].namePrefab != "NONE")
 			 {
-				 if (resourcesManager.textures2D.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name) != resourcesManager.textures2D.end())
-					 component.GetComponentModel(entity.entities[i].id).normal =
+				 if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal)
+					if (resourcesManager.textures2D.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name) != resourcesManager.textures2D.end())
+						component.GetComponentModel(entity.entities[i].id).normal =
 						resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name].get();
 
 			 }
@@ -856,9 +863,10 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 }
 			 else if (entity.entities[i].namePrefab != "NONE")
 			 {
-				 if (resourcesManager.textures2D.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name) != resourcesManager.textures2D.end())
-					 component.GetComponentModel(entity.entities[i].id).metallicRoughness =
-					 resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name].get();
+				 if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness)
+					if (resourcesManager.textures2D.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name) != resourcesManager.textures2D.end())
+						component.GetComponentModel(entity.entities[i].id).metallicRoughness =
+						resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name].get();
 			 }
 				
 			 if (model["texture"]["icon"].is_string())
@@ -868,12 +876,13 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 }
 			 else if (entity.entities[i].namePrefab != "NONE")
 			 {
-				 if (resourcesManager.icons.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name) != resourcesManager.icons.end())
-					component.GetComponentModel(entity.entities[i].id).icon =
-					 resourcesManager.icons[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name].get();
+				 if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon)
+					if (resourcesManager.icons.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name) != resourcesManager.icons.end())
+						component.GetComponentModel(entity.entities[i].id).icon =
+						resourcesManager.icons[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name].get();
 			 }
 				 
-		 
+			 indexOfModel++;
 		 }
 		 if (entity.entities[i].signature & C_SIGNATURE::PHYSICS)
 		 {
