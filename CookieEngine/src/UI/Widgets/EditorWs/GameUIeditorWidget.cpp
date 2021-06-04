@@ -38,6 +38,17 @@ void GameUIeditor::WindowDisplay()
 				widgets.push_back(std::make_unique<ActionPanel>(game.coordinator, game.resources));
 				game.scene->uiScene.signature |= GameWidgetID::ActionPanelID;
 			}
+
+
+			if (game.scene->uiScene.signature & GameWidgetID::MinimapID)
+			{
+				TextDisabled("Minimap added");
+			}
+			else if (Selectable("Add a minimap"))
+			{
+				widgets.push_back(std::make_unique<Minimap>(game.miniMapBuffer, game.scene->camera.get(), game.scene->map));
+				game.scene->uiScene.signature |= GameWidgetID::MinimapID;
+			}
 		}
 		
 		EndChild();

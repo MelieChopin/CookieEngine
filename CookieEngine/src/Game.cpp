@@ -64,6 +64,10 @@ void Game::Update()
     particlesHandler.Update();
     coordinator.ApplyComputeTrs();
 
+    CalculateMousePosInWorld();
+    HandleGameplayInputs();
+    ECSCalls();
+
     renderer.Draw(scene->camera.get(), frameBuffer);
     particlesHandler.Draw(*scene->camera.get());
     DisplayLife();
@@ -154,7 +158,7 @@ void Game::HandleGameplayInputs()
         if (ImGui::GetIO().MouseClicked[0] && !scene->uiScene.IsHovered())
             InputStartSelectionQuad();
 
-        if (ImGui::GetIO().MouseReleased[0] && !scene->uiScene.IsHovered())
+        if (ImGui::GetIO().MouseReleased[0] && playerData.makingASelectionQuad)
             InputEndSelectionQuad();
 
         if (!ImGui::GetIO().MouseDownDuration[1])
@@ -330,14 +334,14 @@ void Game::InputAddUnit(int index)
     }
 }
 
-void Game::ECSCalls(Render::DebugRenderer& dbg)
+void Game::ECSCalls()
 {
     coordinator.armyHandler->UpdateArmyCoordinators(scene->map);
     resources.UpdateScriptsContent();
     coordinator.ApplyScriptUpdate();
     coordinator.UpdateCGPProducer(scene->map);
     coordinator.UpdateCGPWorker(scene->map);
-    coordinator.UpdateCGPMove(scene->map, dbg);
+    coordinator.UpdateCGPMove(scene->map);
     coordinator.UpdateCGPAttack();
     coordinator.ApplyRemoveUnnecessaryEntities();
 }

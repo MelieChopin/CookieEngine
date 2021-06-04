@@ -248,19 +248,6 @@ namespace Cookie
 
                 return m;
             }
-
-            inline Mat4 Mat4::Dir(const Vec3& dirVec)
-            {
-                Mat4 m;
-
-                float theta = atanf(sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y) / dirVec.z);
-                float phi = atan2f(dirVec.y,dirVec.x);
-
-                m = Mat4::RotateY(phi) * Mat4::RotateX(theta) * Mat4::RotateZ(PI);
-
-                return m;
-            }
-
             inline Mat4 Mat4::Inverse(const Mat4& _mat)
             {
                 float det = _mat.Det();
@@ -399,6 +386,27 @@ namespace Cookie
                     c[0].e[2], c[1].e[2], c[2].e[2], c[3].e[2],
                     c[0].e[3], c[1].e[3], c[2].e[3], c[3].e[3],
                 } };
+            }
+
+            inline Vec3 Mat4::GetEuler()const
+            {
+                Vec3 euler;
+                euler.x = -asinf(c[2].e[1]);//Pitch
+
+                if (cosf(euler.x) > 0.0001)                 // Not at poles
+                {
+                    euler.y = Core::Math::ToDegrees(atan2f(c[2].e[0], c[2].e[2]));     // Yaw
+                    euler.z = Core::Math::ToDegrees(atan2f(c[0].e[1], c[1].e[1]));     // Roll
+                }
+                else
+                {
+                    euler.y = 0.0f;                         // Yaw
+                    euler.z = Core::Math::ToDegrees(atan2f(-c[1].e[0], c[0].e[0]));    // Roll
+                }
+
+                euler.x = Core::Math::ToDegrees(euler.x);
+
+                return euler;
             }
 
             inline Vec3 Mat4::GetTranslate()const

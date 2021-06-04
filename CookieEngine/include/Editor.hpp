@@ -94,6 +94,7 @@ namespace Cookie
 			}
 
 			void Loop();
+			void ChooseDrawBuffer();
 
 	};
 }

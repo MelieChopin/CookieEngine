@@ -122,6 +122,41 @@ void Editor::ModifyEditComp()
     }
 }
 
+void Editor::ChooseDrawBuffer()
+{
+    static Render::FrameBuffer& fbo = editorFBO;
+
+    if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F1] >= 0.0f)
+    {
+        fbo = editorFBO;
+    }
+    if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F2] >= 0.0f)
+    {
+        fbo = game.renderer.geomPass.posFBO;
+    }
+    else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F3] >= 0.0f)
+    {
+        fbo = game.renderer.geomPass.normalFBO;
+    }
+    else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F4] >= 0.0f)
+    {
+        fbo = game.renderer.geomPass.albedoFBO;
+    }
+    else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F5] >= 0.0f)
+    {
+        fbo = game.renderer.lightPass.diffuseFBO;
+    }
+    else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F6] >= 0.0f)
+    {
+        fbo = game.renderer.lightPass.specularFBO;
+    }
+
+    if (fbo.shaderResource == editorFBO.shaderResource)
+        return;
+
+    Render::RendererRemote::context->OMSetRenderTargets(1, &editorFBO.renderTargetView, nullptr);
+    game.renderer.DrawFrameBuffer(fbo);
+}
 
 void Editor::Loop()
 {
@@ -147,6 +182,14 @@ void Editor::Loop()
         // Present frame
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
             Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(-5, 15, 5), game.resources.particles["Bomb"].get(), Vec3(10, 0, 25));
+        
+
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_ESCAPE])
+            isPlaying = false;
+
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P])
+            isPlaying = true;
+
         
         if (isPlaying)
         {
@@ -193,9 +236,7 @@ void Editor::Loop()
         //game.scene->physSim.Update();
         //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
         
-        game.CalculateMousePosInWorld();
-        game.HandleGameplayInputs();
-        game.ECSCalls(dbgRenderer);
+
 
         //game.coordinator.armyHandler->Debug();
         //game.coordinator.entityHandler->Debug();
@@ -204,6 +245,7 @@ void Editor::Loop()
         game.renderer.Clear();
         game.renderer.ClearFrameBuffer(editorFBO);
         game.renderer.Draw(&cam,editorFBO);
+        ChooseDrawBuffer();
 		game.particlesHandler.Draw(cam);
 
         dbgRenderer.Draw(cam.GetViewProj());
