@@ -49,15 +49,19 @@ namespace Cookie
 
 		struct DrawData
 		{
-			Resources::Mesh* mesh;
+			Resources::Mesh*	mesh;
 			Resources::Texture* albedo;
 			Resources::Texture* normalMap;
 			Resources::Texture* matMap;
 
-			/* the first is all of them, the second is the ones that are not culled by the frustrum culling of current cam */
+			/* all the matrices with this model in the world */
 			std::vector<Core::Math::Mat4>				matrices;
-			std::vector<Core::Math::Mat4>				visibleMatrices;
+			/* all the gameplay components with this model in the world */
 			std::vector<const ECS::ComponentGameplay*>	gameplays;
+
+			/* the matrices with this model in the world, that were not culled by frustrum culling */
+			std::vector<Core::Math::Mat4>				visibleMatrices;
+			/* the gameplay components with this model in the world, that were not culled by frustrum culling */
 			std::vector<const ECS::ComponentGameplay*>	visibleGameplays;
 
 			bool operator==(const ECS::ComponentModel& model);
@@ -66,28 +70,37 @@ namespace Cookie
 		class DrawDataHandler
 		{
 			public:
+				/* all the information about the game we need to draw */
 				const ECS::Coordinator*				coordinator	{nullptr};
 				Resources::Scene*					currentScene{ nullptr };
-
-				Frustrum							frustrum;
-
-				std::vector<DrawData>	staticDrawData;
-				std::vector<DrawData>	dynamicDrawData;
-				std::vector<DrawData>	selectedDrawData;
-				
-				std::array<Core::Math::Vec3, 2>		AABB;
-				
-				ID3D11DepthStencilView*				depthStencilView;
-				ID3D11Buffer*						CamCBuffer;
-
-				ModelDrawer							modelDrawer;
-				MapDrawer							mapDrawer;
-
 				const Camera*						currentCam;
 				const Gameplay::PlayerData*			player;
 				LightsArray*						lights;
 
+				/* the frustrum for occlusion culling */
+				Frustrum							frustrum;
+
+				/* draw data for entities that do not move */
+				std::vector<DrawData>	staticDrawData;
+				/* draw data for entities that do move */
+				std::vector<DrawData>	dynamicDrawData;
+				/* draw data of selected entities, for them there is a single draw data by entity */
+				std::vector<DrawData>	selectedDrawData;
+				
+				/* AABB of what is visible currently on screen */
+				std::array<Core::Math::Vec3, 2>		AABB;
+				
+				/* info to display the models and map*/
+				ID3D11DepthStencilView*				depthStencilView;
+				ID3D11Buffer*						CamCBuffer;
+
+				/* the drawers to draw the model ... */
+				ModelDrawer							modelDrawer;
+				/* ... and to draw the map */
+				MapDrawer							mapDrawer;
+
 			private:
+				/* */
 				void PushDrawData(std::vector<DrawData>& drawDatas, const ECS::ComponentModel& model, const Core::Math::Mat4& trs, const ECS::ComponentGameplay& gameplay, bool culled);
 				bool Cull(ECS::ComponentModel& model, Core::Math::Mat4& trs);
 

@@ -39,7 +39,7 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 	{
 		if (entity.entities[i].signature & C_SIGNATURE::TRANSFORM)
 		{
-			Cookie::ECS::ComponentTransform transform = component.GetComponentTransform(entity.entities[i].id);
+			Cookie::ECS::ComponentTransform& transform = component.GetComponentTransform(entity.entities[i].id);
 			json& trans = js["ComponentHandler"]["Transform"];
 			if (entity.entities[i].namePrefab != "NONE")
 			{
@@ -58,7 +58,7 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 		}
 		if (entity.entities[i].signature & C_SIGNATURE::MODEL)
 		{
-			Cookie::ECS::ComponentModel model = component.GetComponentModel(entity.entities[i].id);
+			Cookie::ECS::ComponentModel& model = component.GetComponentModel(entity.entities[i].id);
 			json& modelJ = js["ComponentHandler"]["Model"];
 			if (entity.entities[i].namePrefab != "NONE")
 			{
@@ -120,7 +120,7 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 		}
 		if (entity.entities[i].signature & C_SIGNATURE::GAMEPLAY)
 		{
-			ComponentGameplay gameplay = component.GetComponentGameplay(entity.entities[i].id);
+			ComponentGameplay& gameplay = component.GetComponentGameplay(entity.entities[i].id);
 
 			int index = js["Gameplay"].size();
 			json& game = js["Gameplay"][index];
@@ -179,7 +179,7 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 		{
 			int index = js["FX"].size();
 			json& fx = js["FX"][index];
-			ComponentGameplay gameplay = component.GetComponentGameplay(entity.entities[i].id);
+			ComponentGameplay& gameplay = component.GetComponentGameplay(entity.entities[i].id);
 			if (gameplay.signatureGameplay & CGP_SIGNATURE::ATTACK)
 			{
 				fx["CGPAttack"]["sfxAttack"] = gameplay.componentAttack.sfxAttack ? gameplay.componentAttack.sfxAttack->name : "NONE";
@@ -213,7 +213,7 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 	//Map
 	{
 		json& map = js["Map"];
-		Cookie::Resources::Map actMap = actScene.map;
+		Cookie::Resources::Map& actMap = actScene.map;
 		map["tilesNb"] = actMap.tilesNb.e;
 		map["tilesSize"] = actMap.tilesSize.e;
 
@@ -280,7 +280,7 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 
 	//Light
 	{
-		Render::LightsArray array = actScene.lights;
+		Render::LightsArray& array = actScene.lights;
 		json& light = js["LightsArray"];
 		
 		light["useDir"] = array.useDir;

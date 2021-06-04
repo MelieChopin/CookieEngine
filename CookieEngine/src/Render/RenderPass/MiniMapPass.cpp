@@ -46,6 +46,10 @@ MiniMapPass::~MiniMapPass()
 	{
 		rasterState->Release();
 	}
+    if (depthBuffer)
+    {
+        depthBuffer->Release();
+    }
 }
 
 /*=========================== INIT METHODS ===========================*/
