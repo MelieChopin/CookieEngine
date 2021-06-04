@@ -87,9 +87,15 @@ void UIscene::RenderLayout()
 	for (std::unique_ptr<GameWindowBase>& gw : sceneWidgets)
 	{
 		gw->WindowDisplay();
+		
 
-		const ImRect lastRect = FindWindowByName(gw->GetName())->Rect();
+		const ImGuiWindow* const & lastWin = FindWindowByName(gw->GetName());
 
-		isHovered |= (mPos.x > lastRect.Min.x) && (mPos.x < lastRect.Max.x) && (mPos.y > lastRect.Min.y) && (mPos.y < lastRect.Max.y);
+		if (lastWin)
+		{
+			const ImRect lastRect = lastWin->Rect();
+
+			isHovered |= (mPos.x > lastRect.Min.x) && (mPos.x < lastRect.Max.x) && (mPos.y > lastRect.Min.y) && (mPos.y < lastRect.Max.y);
+		}
 	}
 }
