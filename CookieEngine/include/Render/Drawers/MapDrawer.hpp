@@ -22,7 +22,7 @@ namespace Cookie
 	namespace Render
 	{
 
-
+		/* class that handles the drawing of the Map */
 		class MapDrawer
 		{
 			private:

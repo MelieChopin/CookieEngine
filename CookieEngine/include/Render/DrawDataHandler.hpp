@@ -65,6 +65,8 @@ namespace Cookie
 			bool operator==(const ECS::ComponentModel& model);
 		};
 		
+		/* Handler to sort and get the info to draw the game.
+		 * countains the drawer for model and the drawer for the map. */
 		class DrawDataHandler
 		{
 			public:

@@ -12,6 +12,9 @@ namespace Cookie
 		class DrawDataHandler;
 		struct DrawData;
 
+		/* class that handles the drawing of DrawData.
+		 * (meaning the drawing of instanced models)
+		 * */
 		class ModelDrawer
 		{
 		private:
