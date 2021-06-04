@@ -14,5 +14,5 @@ void ComponentHandler::InitComponentPhysic(Entity& entity)
 	if (entity.signature & C_SIGNATURE::TRANSFORM)
 		componentPhysics[entity.id].Set(componentTransforms[entity.id]);
 
-	componentPhysics[entity.id].physBody = Physics::PhysicsHandle::physSim->createRigidBody(componentPhysics[entity.id].physTransform);
+	componentPhysics[entity.id].physBody = Physics::PhysicsHandle::physSim.worldSim->createRigidBody(componentPhysics[entity.id].physTransform);
 }

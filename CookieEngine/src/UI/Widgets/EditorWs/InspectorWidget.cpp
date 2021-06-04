@@ -67,11 +67,7 @@ void Inspector::EntityInspection()
 
         if (selectedEntity.focusedEntity->signature & C_SIGNATURE::PHYSICS)    TextDisabled("Component Physics already added");
         else if (Selectable("Add component Physics"))
-        {
             coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::PHYSICS);
-            coordinator.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id).Activate();
-        }
-
 
         if (selectedEntity.focusedEntity->signature & C_SIGNATURE::SCRIPT)     TextDisabled("Component Script already added");
         else if (Selectable("Add component Script"))
@@ -516,6 +512,8 @@ void Inspector::GameplayInterface()
 
                 TreePop();
                 NewLine();
+
+                Text("Pos Life in game:"); NewLine(); DragFloat3("##POS", gameplayComp.componentLive.posLifeInRapportOfEntity.e);
             }
         }
         else if (Selectable("Add life/Armor properties"))

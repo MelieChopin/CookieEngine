@@ -14,13 +14,30 @@ void GameUIeditor::WindowDisplay()
 {
 	TryBeginWindow(ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBringToFrontOnFocus)
 	{
+		static std::vector<std::unique_ptr<GameWindowBase>>& widgets = game.scene->uiScene.GetLayout();
+		
 		if (BeginChild("Widget pannel", { 200.f, (float)game.renderer.window.height}, true))
 		{
-			if (Selectable("Add a test"))
-				game.scene->uiScene.GetLayout().push_back(new TestBoi());
+			if (game.scene->uiScene.signature & GameWidgetID::GamespectorID)
+			{
+				TextDisabled("Game inspector added");
+			}
+			else if (Selectable("Add a game inspector"))
+			{
+				widgets.push_back(std::make_unique<Gamespector>(game.coordinator, game.resources));
+				game.scene->uiScene.signature |= GameWidgetID::GamespectorID;
+			}
 
-			if (Selectable("Add a gamespector"))
-				game.scene->uiScene.GetLayout().push_back(new Gamespector(game.coordinator, game.resources));
+
+			if (game.scene->uiScene.signature & GameWidgetID::ActionPanelID)
+			{
+				TextDisabled("Action panel added");
+			}
+			else if (Selectable("Add an action panel"))
+			{
+				widgets.push_back(std::make_unique<ActionPanel>(game.coordinator, game.resources));
+				game.scene->uiScene.signature |= GameWidgetID::ActionPanelID;
+			}
 		}
 		
 		EndChild();
@@ -30,14 +47,15 @@ void GameUIeditor::WindowDisplay()
 
 		if (BeginChild("Widget space", { (float)game.renderer.window.width, (float)game.renderer.window.height }, true, ImGuiWindowFlags_NoBringToFrontOnFocus))
 		{
-			std::vector<GameWindowBase*>& widgets = game.scene->uiScene.GetLayout();
-
-			for (auto wit = widgets.begin(); wit != widgets.end();)
+			for (size_t i = 0; i < widgets.size();)
 			{
-				if ((*wit)->WindowEdit())
-					wit++;
+				if (widgets[i]->WindowEdit())
+					i++;
 				else
-					wit = widgets.erase(wit);
+				{ 
+					game.scene->uiScene.signature -= widgets[i]->GetID();
+					widgets.erase(widgets.begin() + i);
+				}
 			}
 		}
 		

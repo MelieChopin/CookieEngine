@@ -41,8 +41,8 @@ Editor::Editor()
     game.particlesHandler.particlesPrefab = &game.resources.particles;
 
     //Load default Scene
-    std::shared_ptr<Resources::Scene> _scene = Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", game);
-    game.SetScene(_scene);
+    Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", game);
+    game.SetScene();
 
     editorUI.AddItem(new UIwidget::SaveButton(game.scene, game.resources), 0);
     editorUI.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
@@ -128,8 +128,6 @@ void Editor::Loop()
     //Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
     Physics::PhysicsHandle physHandle;
 
-
-    bool isActive = false;
     {
        // game.scene->map.model.albedo = game.resources.textures2D["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
     }
@@ -147,26 +145,9 @@ void Editor::Loop()
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
         // Present frame
-
-        //std::cout << game.particlesHandler.living << "\n";
-
-        //Update for 3D Music
-        FMOD_VECTOR temp = { cam.pos.x, cam.pos.y, cam.pos.z }; // Modify to have cam in scene
-        Cookie::Resources::SoundManager::system->set3DListenerAttributes(0, &temp, nullptr, nullptr, nullptr);
-        Cookie::Resources::SoundManager::system->update();
-
-        //TEMP : TEST FOR 3D 
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
             Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(-5, 15, 5), game.resources.particles["Bomb"].get(), Vec3(10, 0, 25));
-        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P])
-            Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(5, 5, 5), game.resources.particles["Attack"].get(), Vec3(15, 15, 5));
-            
-        //if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
-           // Cookie::Resources::SoundManager::SetPaused("Music.mp3", true);
-       // if (glfwGetKey(game.renderer.window.window, GLFW_KEY_L) == GLFW_PRESS)
-           // Cookie::Resources::SoundManager::SetPaused("Music.mp3", false);
-
-        // Present frame
+        
         if (isPlaying)
         {
             game.Update();
@@ -203,6 +184,9 @@ void Editor::Loop()
             {
                 selectedEntity.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id).Set(selectedEntity.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id));
             }
+
+            //Update for 3D Music
+            Cookie::Resources::SoundManager::UpdateFMODFor3DMusic(cam);
         }
 
            
@@ -215,12 +199,6 @@ void Editor::Loop()
 
         //game.coordinator.armyHandler->Debug();
         //game.coordinator.entityHandler->Debug();
-
-		if (isActive)
-            game.particlesHandler.Update();
-        if (glfwGetKey(game.renderer.window.window, GLFW_KEY_P) == GLFW_PRESS)
-            isActive = true;
-
 
         //Draw
         game.renderer.Clear();
@@ -239,6 +217,8 @@ void Editor::Loop()
 
     if (game.scene)
         game.scene->skyBox = game.renderer.skyBox.texture;
+
+    Particles::ParticlesHandler::shader.Destroy();
 }
 
 void Editor::TryResizeWindow()

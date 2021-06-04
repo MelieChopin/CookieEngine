@@ -32,7 +32,6 @@ namespace Cookie
 			ECS::EntityHandler						entityHandler;
 			ECS::ComponentHandler					componentHandler;
 			Gameplay::ArmyHandler					armyHandler;
-			Physics::PhysicsSimulator				physSim;
 			Map										map;
 			UI::UIscene								uiScene;
 			Texture*								skyBox{nullptr};

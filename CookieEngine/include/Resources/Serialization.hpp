@@ -67,7 +67,7 @@ namespace Cookie
 				void FromJson(json& js, const Cookie::ECS::EntityHandler& entity, 
 					Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager);
 
-				std::shared_ptr<Scene> LoadScene(const char* filepath, Game& game);
+				void LoadScene(const char* filepath, Game& game);
 				void LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
 				void LoadAllTextures(Cookie::Resources::ResourcesManager& resourcesManager);
 				void LoadPhysic(json& physic, Cookie::ECS::ComponentPhysics& physics);

@@ -3,6 +3,5 @@
 
 #include "Widgets/GameWs/ActionPanelWidget.hpp"
 #include "Widgets/GameWs/GamespectorWidget.hpp"
-#include "Widgets/GameWs/TestWidget.hpp"
 
 #endif

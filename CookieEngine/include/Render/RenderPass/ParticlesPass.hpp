@@ -52,6 +52,7 @@ namespace Cookie
 			void InitShader();
 			void Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mesh, Resources::Texture* texture, std::vector<InstancedData> data);
 			void AllocateMoreSpace(int newSpace);
+			void Destroy();
 
 			void Clean();
 

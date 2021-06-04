@@ -1,7 +1,9 @@
 #include "UIwidgetBases.hpp"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
+#include <string>
 
 using namespace ImGui;
 using namespace Cookie::UIwidget;
@@ -26,11 +28,14 @@ bool GameWindowBase::BeginWindow(int windowFlags)
 {
 	if (!opened || invalid) return false;
 
-	SetNextWindowSize({ width				   , height					}, ImGuiCond_Appearing);
-	SetNextWindowPos ({ xPos + GetWindowPos().x, yPos + GetWindowPos().y}					  );
+	SetNextWindowSize({ width				   , height					 }, ImGuiCond_Appearing);
+	SetNextWindowPos ({ xPos + GetWindowPos().x, yPos + GetWindowPos().y }					   );
 
 	SetNextWindowViewport(GetWindowViewport()->ID);
-	contentVisible = Begin(windowName, nullptr, windowFlags | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings);
+	contentVisible = Begin((windowName + std::to_string(GetCurrentWindowRead()->IDStack.back())).c_str(), nullptr, windowFlags | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings);
+
+	if (IsWindowAppearing())
+		SetWindowPos({ xPos + GetWindowPos().x, yPos + GetWindowPos().y });
 
 	return true;
 }

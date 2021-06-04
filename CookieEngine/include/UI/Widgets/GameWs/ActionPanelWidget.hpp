@@ -3,6 +3,9 @@
 
 #include "UIwidgetBases.hpp"
 
+namespace Cookie::ECS		{ class Coordinator; }
+namespace Cookie::Resources { class ResourcesManager; class Texture; }
+
 
 namespace Cookie::UIwidget
 {
@@ -11,9 +14,18 @@ namespace Cookie::UIwidget
 
 	class ActionPanel final : public GameWindowBase
 	{
+		const Cookie::ECS::Coordinator& coordinator;
+
+		Cookie::Resources::ResourcesManager& resources;
+
+	private:
+		bool SafeIconButton(const Cookie::Resources::Texture* const & texture, const float size);
+
 	public:
-		inline ActionPanel()
-			: GameWindowBase("Action panel", true)
+		inline ActionPanel(const Cookie::ECS::Coordinator& _coordinator, Cookie::Resources::ResourcesManager& _resources)
+			: GameWindowBase("Action panel", true),
+			  coordinator	(_coordinator),
+			  resources		(_resources)
 		{}
 
 		void WindowDisplay() override;

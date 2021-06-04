@@ -63,20 +63,12 @@ namespace Cookie
 				{
 					RemoveCollider(physColliders[i]);
 				}
-				if (physBody)
-				{
-					Physics::PhysicsHandle::physSim->destroyRigidBody(physBody);
-				}
-
-				physBody = Physics::PhysicsHandle::physSim->createRigidBody(physTransform);
 
 				/* actually does not reset settings, just desactivate it */
 				physBody->setIsActive(false);
 
 				std::vector<reactphysics3d::Collider*>().swap(physColliders);
 			}
-
-			inline void Activate()const  { physBody->setIsActive(true); }
 		};
 
     }

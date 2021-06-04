@@ -39,7 +39,7 @@ namespace Cookie
 				TYPEUP type;
 
 				ParticlesUpdate() {}
-				~ParticlesUpdate() {}
+				virtual ~ParticlesUpdate() {}
 			};
 
 			class UpdateVelocity : public ParticlesUpdate
@@ -57,7 +57,7 @@ namespace Cookie
 			public:
 				Cookie::Core::Math::Vec3 scaleEnd;
 				UpdateScale(Cookie::Core::Math::Vec3 scale = Cookie::Core::Math::Vec3(0, 0, 0)) : scaleEnd(scale) { type = TYPEUP::UPDATESCALE; }
-				~UpdateScale() {}
+				~UpdateScale()override {}
 
 				virtual void Update(ParticlesData* p) override;
 			};
@@ -67,7 +67,7 @@ namespace Cookie
 			public:
 				float alphaEnd;
 				UpdateAlpha(float alpha = 0): alphaEnd(alpha) { type = TYPEUP::UPDATEALPHA; }
-				~UpdateAlpha() {}
+				~UpdateAlpha()override {}
 
 				virtual void Update(ParticlesData* p) override;
 			};
@@ -77,7 +77,7 @@ namespace Cookie
 			public:
 				Cookie::Core::Math::Vec4 colorEnd;
 				ColorOverLife(Cookie::Core::Math::Vec4 color = Cookie::Core::Math::Vec4(1, 1, 1, 1)) : colorEnd(color) { type = TYPEUP::COLOROVERLIFE; }
-				~ColorOverLife() {}
+				~ColorOverLife()override {}
 
 				virtual void Update(ParticlesData* p) override;
 			};
@@ -87,7 +87,7 @@ namespace Cookie
 			public:
 				float gravity = -9.81f;
 				EnabledGravity(float gravity = -9.81f) : gravity(gravity) { type = TYPEUP::ENABLEGRAVITY; }
-				~EnabledGravity() {}
+				~EnabledGravity()override {}
 
 				virtual void Update(ParticlesData* p) override;
 			};
@@ -96,7 +96,7 @@ namespace Cookie
 			{
 			public :
 				UpdateTime() { type = TYPEUP::UPDATETIME; }
-				~UpdateTime() {}
+				~UpdateTime()override {}
 
 				virtual void Update(ParticlesData* p) override;
 			};
@@ -104,9 +104,10 @@ namespace Cookie
 			class Loop : public ParticlesUpdate
 			{
 			public:
-				Loop(std::vector<ParticlesGenerator*>& _particlesGen) : particlesGen(&_particlesGen) { type = TYPEUP::LOOP; }
-				~Loop() {}
-				std::vector<ParticlesGenerator*>* particlesGen;
+				Loop() { type = TYPEUP::LOOP; }
+				Loop(std::vector<std::shared_ptr<ParticlesGenerator>>& _particlesGen) : particlesGen(&_particlesGen) { type = TYPEUP::LOOP; }
+				~Loop()override {}
+				std::vector<std::shared_ptr<ParticlesGenerator>>* particlesGen;
 
 				virtual void Update(ParticlesData* p) override;
 			};
@@ -114,10 +115,11 @@ namespace Cookie
 			class CollisionWithPlane : public ParticlesUpdate
 			{
 			public:
-				CollisionWithPlane(std::string namePrefab = "Explosion",
+				CollisionWithPlane() { type = TYPEUP::COLLISIONWITHPLANE; }
+				CollisionWithPlane(std::string namePrefab,
 					Cookie::Core::Math::Vec3 normal = {0, 1, 0}, float distance = -0.58f)
 					: dis(distance), n(normal) { type = TYPEUP::COLLISIONWITHPLANE; }
-				~CollisionWithPlane() {}
+				~CollisionWithPlane()override {}
 
 				float dis = -0.58f;
 				Cookie::Core::Math::Vec3 n = Cookie::Core::Math::Vec3(0, 1, 0);
@@ -137,8 +139,10 @@ namespace Cookie
 
 				virtual void Update(ParticlesData* p) override;
 
+				CreateParticlesFollowing() { type = TYPEUP::CREATEPARTICLES; }
 				CreateParticlesFollowing(ParticlesData& data, float time = 0.35f, float coeff = 1, float coeffPos = 3)
 					: data(&data), coeffScale(coeff), coeffPos(coeffPos), time(time) { type = TYPEUP::CREATEPARTICLES; }
+				~CreateParticlesFollowing()override {}
 			};
 
 			class Shadow : public ParticlesUpdate
@@ -149,10 +153,12 @@ namespace Cookie
 
 				virtual void Update(ParticlesData* p) override;
 
+				Shadow() { type = TYPEUP::SHADOW; }
 				Shadow(ParticlesData& data, float time = 0.35f)
 					: data(&data), time(time) {
-					type = TYPEUP::CREATEPARTICLES;
+					type = TYPEUP::SHADOW;
 				}
+				~Shadow()override {}
 			};
 
 			class SpawnEnd : public ParticlesUpdate
@@ -163,10 +169,8 @@ namespace Cookie
 
 				virtual void Update(ParticlesData* p) override;
 
-				SpawnEnd()
-				{
-					type = TYPEUP::SPAWNEND;
-				}
+				SpawnEnd() { type = TYPEUP::SPAWNEND; }
+				~SpawnEnd()override { type = TYPEUP::SPAWNEND; }
 			};
 		}
 	}

@@ -1,7 +1,7 @@
 #ifndef __PHYSICS_HANDLE_HPP__
 #define __PHYSICS_HANDLE_HPP__
 
-#include <reactphysics3d/reactphysics3d.h>
+#include "Physics/PhysicsSimulator.hpp"
 
 namespace Cookie
 {
@@ -11,24 +11,24 @@ namespace Cookie
 		{
 			public:
 				inline static std::unique_ptr<rp3d::PhysicsCommon>			physCom{nullptr};
-				inline static rp3d::PhysicsWorld*							physSim{nullptr};
+				inline static PhysicsSimulator								physSim;
 				inline static rp3d::PhysicsWorld*							editWorld{nullptr};
 
 				static void Init()
 				{
 					physCom = std::make_unique<rp3d::PhysicsCommon>();
-					physSim = PhysicsHandle::physCom->createPhysicsWorld();
+					physSim.worldSim = PhysicsHandle::physCom->createPhysicsWorld();
 				}
 
 				static void Terminate()
 				{
-					int max = physSim->getNbRigidBodies();
+					int max = physSim.worldSim->getNbRigidBodies();
 					for (int i = 0; i < max; i++)
 					{
-						physSim->destroyRigidBody(physSim->getRigidBody(0));
+						physSim.worldSim->destroyRigidBody(physSim.worldSim->getRigidBody(0));
 					}
 
-					PhysicsHandle::physCom->destroyPhysicsWorld(physSim);
+					PhysicsHandle::physCom->destroyPhysicsWorld(physSim.worldSim);
 
 					physSim.worldSim = nullptr;
 
