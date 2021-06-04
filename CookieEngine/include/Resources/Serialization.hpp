@@ -47,7 +47,9 @@ namespace Cookie
 		{
 			namespace Save
 			{
+				//Save entity
 				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity);
+				//Save components
 				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, 
 					Cookie::Resources::ResourcesManager& resourcesManager);
 
@@ -63,7 +65,9 @@ namespace Cookie
 
 			namespace Load
 			{
+				//Load entity
 				void FromJson(json& js, Cookie::ECS::EntityHandler& entity);
+				//Load all components
 				void FromJson(json& js, const Cookie::ECS::EntityHandler& entity, 
 					Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager);
 
