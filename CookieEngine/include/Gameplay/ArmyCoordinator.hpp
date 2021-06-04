@@ -51,12 +51,12 @@ namespace Cookie
 			{
 				behavior.steps.push_back(AIStep{});
 				behavior.steps[0].nbOfWorker = 6;
-				behavior.steps[0].nbOfUnits = 1;
+				behavior.steps[0].nbOfUnits = 2;
 				behavior.steps[0].listOfBuildings.push_back("02Producer");
 
 				behavior.steps.push_back(AIStep{});
 				behavior.steps[1].nbOfWorker = 0;
-				behavior.steps[1].nbOfUnits = 2;
+				behavior.steps[1].nbOfUnits = 3;
 				behavior.steps[1].listOfBuildings.push_back("02Producer");
 				behavior.steps[1].listOfBuildings.push_back("02Producer");
 			}
