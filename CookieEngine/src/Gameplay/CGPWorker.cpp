@@ -66,12 +66,12 @@ void CGPWorker::Update(Resources::Map& map, Coordinator& coordinator, int selfId
 	Core::Math::Vec3* destination = (needTostartBuilding) ? &posBuilding : (isCarryingResource) ? posBase : posResource;
 	if (!destination)
 		return;
-	Core::Math::Vec3 direction = (*destination - trs.pos).Normalize();
-	trs.pos += direction * (moveSpeed * Core::DeltaTime());
+	Core::Math::Vec3 direction = Vec3{destination->x - trs.pos.x, 0, destination->z - trs.pos.z};
+	trs.pos += direction.Normalize() * (moveSpeed * Core::DeltaTime());
 	trs.trsHasChanged = true;
 
 	//HasReachDestination
-	if ((*destination - trs.pos).Length() < 0.1)
+	if (direction.Length() < 0.1)
 	{
 		if (needTostartBuilding)
 		{

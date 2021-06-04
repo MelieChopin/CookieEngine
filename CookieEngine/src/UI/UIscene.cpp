@@ -27,8 +27,8 @@ void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows, Cookie:
 	{ 
 		switch (info.ID)
 		{
-		case GameWidgetID::GamespectorID:	sceneWidgets.push_back(std::make_unique<Gamespector>(game.coordinator, game.resources));
-		case GameWidgetID::ActionPanelID:	sceneWidgets.push_back(std::make_unique<ActionPanel>(game.coordinator, game.resources));
+		case GameWidgetID::GamespectorID:	sceneWidgets.push_back(std::make_unique<Gamespector>(game.coordinator, game.resources)); break;
+		case GameWidgetID::ActionPanelID:	sceneWidgets.push_back(std::make_unique<ActionPanel>(game.coordinator, game.resources)); break;
 
 		default: break;
 		}
