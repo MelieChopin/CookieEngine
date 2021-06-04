@@ -158,7 +158,7 @@ void Game::HandleGameplayInputs()
         if (ImGui::GetIO().MouseClicked[0] && !scene->uiScene.IsHovered())
             InputStartSelectionQuad();
 
-        if (ImGui::GetIO().MouseReleased[0] && !scene->uiScene.IsHovered())
+        if (ImGui::GetIO().MouseReleased[0] && playerData.makingASelectionQuad)
             InputEndSelectionQuad();
 
         if (!ImGui::GetIO().MouseDownDuration[1])
