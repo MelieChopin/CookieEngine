@@ -207,6 +207,20 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 		Cookie::Resources::Serialization::Save::ToJson(js, actScene.entityHandler, actScene.componentHandler, resourcesManager);
 	}
 
+	//ArmyHandler
+	{
+		json& ArmyHandler = js["ArmyHandler"];
+		for (int i = 0; i < actScene.armyHandler.livingArmies; i++)
+		{
+			Cookie::Gameplay::Army& army = actScene.armyHandler.armies[i];
+			ArmyHandler += json{ { "name", army.name },
+								{ "Income", { { "incomePrimary", army.income.primary }, 
+												{ "incomeSecondary", army.income.secondary },
+												{ "supplyCurrent", army.income.supplyCurrent },
+												{ "supplyMax", army.income.supplyMax } } } };
+		}
+	}
+
 	//UI Scene
 	{
 		Cookie::UI::UIscene& ui = actScene.uiScene;
@@ -927,7 +941,7 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 				info.height = ui["height"].get<int>();
 				list.push_back(info);
 			}
-			newScene->uiScene.LoadLayout(list, game);
+			newScene->uiScene.LoadLayout(list, game, *newScene);
 		 }
 	 }
 
@@ -960,7 +974,24 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 
 	 newScene->filepath = filepath;
 
-	 //
+	 ArmyHandler& handler = newScene.get()->armyHandler;
+	 //Army
+	 if (js.contains("ArmyHandler"))
+	 {
+		 json& armyHandler = js["ArmyHandler"];
+		 for (int i = 0; i < armyHandler.size(); i++)
+		 {
+			 Income& income = handler.armies[handler.livingArmies].income;
+			 handler.AddArmy((E_ARMY_NAME)(armyHandler[i]["name"].get<int>()));
+			 income.primary = armyHandler[i]["Income"]["incomePrimary"].get<float>();
+			 income.secondary = armyHandler[i]["Income"]["incomeSecondary"].get<float>();
+			 income.supplyCurrent = armyHandler[i]["Income"]["supplyCurrent"].get<float>();
+			 income.supplyMax = armyHandler[i]["Income"]["supplyMax"].get<float>();
+		 }
+	 }
+
+
+	 //Load With Prefab
 	 int indexGameplay = 0;
 	 Map& map = newScene.get()->map;
 	 for (int i = 0; i < newScene.get()->entityHandler.livingEntities; i++)
@@ -970,6 +1001,9 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 			 continue;
 
 		 ComponentGameplay& gameComp = newScene.get()->componentHandler.GetComponentGameplay(current.id);
+
+		 handler.AddElementToArmy(&gameComp);
+
 		 if (gameComp.signatureGameplay & CGP_SIGNATURE::PRODUCER)
 		 {
 			 json& temp = js["Gameplay"][indexGameplay]["CGPProducer"]["OccupiedTiles"];
@@ -983,6 +1017,7 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 
 		 indexGameplay++;
 	 }
+
 
 	 game.scene = std::move(newScene);
  }

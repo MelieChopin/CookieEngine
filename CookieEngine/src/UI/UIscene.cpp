@@ -3,6 +3,8 @@
 
 #include "UIgame_AllIn.hpp"
 
+#include "Scene.hpp"
+
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -14,14 +16,14 @@ using namespace Cookie::UIwidget;
 UIscene::UIscene(const std::vector<GameWindowInfo>& _gameWindows, Cookie::Game& _game)
 {
 	if (!_gameWindows.empty())
-		LoadLayout(_gameWindows, _game);
+		LoadLayout(_gameWindows, _game, *_game.scene.get());
 }
 
 UIscene::~UIscene()
 { CleanLayout(); }
 
 
-void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows, Cookie::Game& game)
+void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows, Cookie::Game& game, Cookie::Resources::Scene& scene)
 {
 	for (const GameWindowInfo& info : GameWindows)
 	{ 
@@ -29,6 +31,7 @@ void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows, Cookie:
 		{
 		case GameWidgetID::GamespectorID:	sceneWidgets.push_back(std::make_unique<Gamespector>(game.coordinator, game.resources)); break;
 		case GameWidgetID::ActionPanelID:	sceneWidgets.push_back(std::make_unique<ActionPanel>(game.coordinator, game.resources)); break;
+		case GameWidgetID::MinimapID:	    sceneWidgets.push_back(std::make_unique<Minimap>(game.miniMapBuffer, scene.camera.get(), scene.map)); break;
 
 		default: break;
 		}
