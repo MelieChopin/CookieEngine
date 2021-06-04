@@ -366,8 +366,12 @@ void Coordinator::ApplyGameplayResolveCollision(Map& map)
 		}
 
 	//Recursive Colision
-	while (!entitiesToCheck.empty())
+	//for now had a max because in some case it loop forever, will be resolved later on
+	int counter = 0;
+	while (!entitiesToCheck.empty() && counter < 30)
 	{
+		counter++;
+
 		for (int i = 0; i < allEntitiespossible.size(); ++i)
 		{
 			if (entitiesToCheck[0] == allEntitiespossible[i])
