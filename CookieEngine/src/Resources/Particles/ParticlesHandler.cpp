@@ -30,7 +30,7 @@ void ParticlesHandler::Update()
 		if ((*particles).needToBeRemoved)
 		{
 			particles = particlesSystems.erase(particles);
-			particlesSystems.push_back(ParticlesSystem());
+			//particlesSystems.push_back(ParticlesSystem());
 			living--;
 		}
 	}	
@@ -80,66 +80,74 @@ void ParticlesHandler::CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3&
 			name = prefab->emit[i][j].name;
 			if (name == "PointPositionGen")
 			{
-				PointPositionGenerate* point = new PointPositionGenerate();
-				point->pos = prefab->emit[i][j].data[0];
-				point->trs = &particles.trs;
-				particles.particlesEmiter[i].generators.push_back(point);
+				std::shared_ptr<PointPositionGenerate> point = std::make_unique<PointPositionGenerate>();
+				point.get()->pos = prefab->emit[i][j].data[0];
+				point.get()->trs = &particles.trs;
+				particles.particlesEmiter[i].generators.push_back(std::move(point));
+				free(point.get());
 			}
 			else if (name == "Loop")
 			{
-				Loop* loop = new Loop(particles.particlesEmiter[i].generators);
-				particles.particlesEmiter[i].updates.push_back(loop);
+				std::shared_ptr<Loop> loop = std::make_unique<Loop>(particles.particlesEmiter[i].generators);
+				particles.particlesEmiter[i].updates.push_back(std::move(loop));
+				free(loop.get());
 			}
 			else if (name == "BoxPositionGen")
 			{
-				BoxPositionGenerate* box = new BoxPositionGenerate();
-				box->pos = prefab->emit[i][j].data[0];
-				box->sizeBox = prefab->emit[i][j].data[1];
-				box->trs = &particles.trs;
-				particles.particlesEmiter[i].generators.push_back(box);
+				std::shared_ptr<BoxPositionGenerate> box = std::make_unique<BoxPositionGenerate>();
+				box.get()->pos = prefab->emit[i][j].data[0];
+				box.get()->sizeBox = prefab->emit[i][j].data[1];
+				box.get()->trs = &particles.trs;
+				particles.particlesEmiter[i].generators.push_back(std::move(box));
+				free(box.get());
 			}
 			else if (name == "CirclePositionGen")
 			{
-				SpherePositionGenerate* sphere = new SpherePositionGenerate();
-				sphere->pos = prefab->emit[i][j].data[0];
-				sphere->radius = prefab->emit[i][j].data[1].x;
-				sphere->trs = &particles.trs;
-				particles.particlesEmiter[i].generators.push_back(sphere);
+				std::shared_ptr<SpherePositionGenerate> sphere = std::make_unique<SpherePositionGenerate>();
+				sphere.get()->pos = prefab->emit[i][j].data[0];
+				sphere.get()->radius = prefab->emit[i][j].data[1].x;
+				sphere.get()->trs = &particles.trs;
+				particles.particlesEmiter[i].generators.push_back(std::move(sphere));
+				free(sphere.get());
 			}
 			else if (name == "CreateParticles")
 			{
 				if (particles.data.size() > prefab->emit[i][j].data[0].x)
 				{
-					CreateParticlesFollowing* create = new CreateParticlesFollowing(particles.data[prefab->emit[i][j].data[0].x]);
+					std::shared_ptr<CreateParticlesFollowing> create = std::make_unique<CreateParticlesFollowing>(particles.data[prefab->emit[i][j].data[0].x]);
 					particles.data[prefab->emit[i][j].data[0].x].canRemoved = false;
-					create->coeffScale = prefab->emit[i][j].data[1].x;
-					create->coeffPos = prefab->emit[i][j].data[1].y;
-					create->time = prefab->emit[i][j].data[1].z;
-					particles.particlesEmiter[i].updates.push_back(create);
+					create.get()->coeffScale = prefab->emit[i][j].data[1].x;
+					create.get()->coeffPos = prefab->emit[i][j].data[1].y;
+					create.get()->time = prefab->emit[i][j].data[1].z;
+					particles.particlesEmiter[i].updates.push_back(std::move(create));
+					free(create.get());
 				}
 			}
 			else if (name == "Shadow")
 			{
 				if (particles.data.size() > prefab->emit[i][j].data[0].x)
 				{
-					Shadow* shadow = new Shadow(particles.data[prefab->emit[i][j].data[0].x]);
+					std::shared_ptr<Shadow> shadow = std::make_unique<Shadow>(particles.data[prefab->emit[i][j].data[0].x]);
 					particles.data[prefab->emit[i][j].data[0].x].canRemoved = false;
-					shadow->time = prefab->emit[i][j].data[0].y;
-					particles.particlesEmiter[i].updates.push_back(shadow);
+					shadow.get()->time = prefab->emit[i][j].data[0].y;
+					particles.particlesEmiter[i].updates.push_back(std::move(shadow));
+					free(shadow.get());
 				}
 			}
 			else if (name == "SpawnEnd")
 			{
-				SpawnEnd* plane = new SpawnEnd();
-				plane->namePrefab = prefab->emit[i][j].nameData;
-				plane->posSpawn = posSpawnEnd;
-				particles.particlesEmiter[i].updates.push_back(plane);
+				std::shared_ptr<SpawnEnd> plane = std::make_unique<SpawnEnd>();
+				plane.get()->namePrefab = prefab->emit[i][j].nameData;
+				plane.get()->posSpawn = posSpawnEnd;
+				particles.particlesEmiter[i].updates.push_back(std::move(plane));
+				free(plane.get());
 			}
 			else if (name == "InitVelWithPoint")
 			{
-				InitVelocityWithPoint* vel = new InitVelocityWithPoint();
-				vel->endPoint = posSpawnEnd;
-				particles.particlesEmiter[i].generators.push_back(vel);
+				std::shared_ptr<InitVelocityWithPoint> vel = std::make_unique<InitVelocityWithPoint>();
+				vel.get()->endPoint = posSpawnEnd;
+				particles.particlesEmiter[i].generators.push_back(std::move(vel));
+				free(vel.get());
 			}
 		}
 	}

@@ -39,11 +39,11 @@ namespace Cookie
 			class ParticlesGenerator
 			{
 			public :
-				virtual void generate(ParticlesData* data, int start, int end) = 0;
+				virtual void generate(ParticlesData* data, int start, int end) {}
 				TYPEGEN type;
 
 				ParticlesGenerator() {}
-				~ParticlesGenerator() {}
+				virtual ~ParticlesGenerator() {}
 			};
 
 			class PointPositionGenerate : public ParticlesGenerator
@@ -56,6 +56,7 @@ namespace Cookie
 
 				PointPositionGenerate() { type = TYPEGEN::POINTPOSITIONGEN; }
 				PointPositionGenerate(Cookie::Core::Math::Vec3 _pos, Cookie::Core::Math::Mat4* mat) : pos(_pos), trs(mat) { type = TYPEGEN::POINTPOSITIONGEN; }
+				~PointPositionGenerate()override {}
 			};
 
 			class BoxPositionGenerate : public ParticlesGenerator
@@ -69,6 +70,7 @@ namespace Cookie
 
 				BoxPositionGenerate() { type = TYPEGEN::BOXPOSITIONGEN; }
 				BoxPositionGenerate(Cookie::Core::Math::Vec3 _pos, Cookie::Core::Math::Vec3 _sizeBox, Cookie::Core::Math::Mat4* mat) : pos(_pos), sizeBox(_sizeBox), trs(mat) { type = TYPEGEN::BOXPOSITIONGEN; }
+				~BoxPositionGenerate() override {}
 			};
 
 			class SpherePositionGenerate : public ParticlesGenerator
@@ -82,6 +84,7 @@ namespace Cookie
 
 				SpherePositionGenerate() { type = TYPEGEN::CIRCLEPOSITIONGEN; }
 				SpherePositionGenerate(Cookie::Core::Math::Vec3 _pos, float radius, Cookie::Core::Math::Mat4* mat) : pos(_pos), trs(mat), radius(radius) { type = TYPEGEN::CIRCLEPOSITIONGEN; }
+				~SpherePositionGenerate()override {}
 			};
 
 			class ScaleConstGenerate : public ParticlesGenerator
@@ -90,8 +93,9 @@ namespace Cookie
 				Cookie::Core::Math::Vec3 scale;
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
-				ScaleConstGenerate(Cookie::Core::Math::Vec3 scale = Cookie::Core::Math::Vec3(1, 1, 1)) : scale(scale) { type = TYPEGEN::SCALECONSTGEN; }
-				~ScaleConstGenerate() {}
+				ScaleConstGenerate() { type = TYPEGEN::SCALECONSTGEN; }
+				ScaleConstGenerate(Cookie::Core::Math::Vec3 scale) : scale(scale) { type = TYPEGEN::SCALECONSTGEN; }
+				~ScaleConstGenerate()override {}
 			};
 
 
@@ -105,7 +109,7 @@ namespace Cookie
 
 				ScaleRandGenerate() { type = TYPEGEN::SCALERANDGEN; }
 				ScaleRandGenerate(Cookie::Core::Math::Vec3 scaleMin, Cookie::Core::Math::Vec3 scaleMax) : scaleMin(scaleMin), scaleMax(scaleMax) { type = TYPEGEN::SCALERANDGEN; }
-				~ScaleRandGenerate() {}
+				~ScaleRandGenerate()override {}
 			};
 
 			class RotateRandGenerate : public ParticlesGenerator
@@ -118,7 +122,7 @@ namespace Cookie
 
 				RotateRandGenerate() { type = TYPEGEN::ROTATERANDGEN; }
 				RotateRandGenerate(Cookie::Core::Math::Vec3 rotateMin, Cookie::Core::Math::Vec3 rotateMax) : rotMin(rotateMin), rotMax(rotateMax) { type = TYPEGEN::ROTATERANDGEN; }
-				~RotateRandGenerate() {}
+				~RotateRandGenerate()override {}
 			};
 
 			class VelocityConstGenerate : public ParticlesGenerator
@@ -130,7 +134,7 @@ namespace Cookie
 
 				VelocityConstGenerate() { type = TYPEGEN::VELCONSTGEN; }
 				VelocityConstGenerate(Cookie::Core::Math::Vec3 vel) : vel(vel) { type = TYPEGEN::VELCONSTGEN; }
-				~VelocityConstGenerate() {}
+				~VelocityConstGenerate()override {}
 
 			};
 
@@ -144,7 +148,7 @@ namespace Cookie
 
 				VelocityRandGenerate() { type = TYPEGEN::VELRANDGEN; }
 				VelocityRandGenerate(Cookie::Core::Math::Vec3 velMin, Cookie::Core::Math::Vec3 velMax) : velMin(velMin), velMax(velMax) { type = TYPEGEN::VELRANDGEN; }
-				~VelocityRandGenerate() {}
+				~VelocityRandGenerate()override {}
 			};
 
 			class MassConstGenerate : public ParticlesGenerator
@@ -155,6 +159,7 @@ namespace Cookie
 
 				MassConstGenerate() { type = TYPEGEN::MASSCONSTGEN; }
 				MassConstGenerate(float mass) : mass(mass) { type = TYPEGEN::MASSCONSTGEN; }
+				~MassConstGenerate()override {}
 			};
 
 			class TimeConstGenerate : public ParticlesGenerator
@@ -165,6 +170,7 @@ namespace Cookie
 
 				TimeConstGenerate() { type = TYPEGEN::TIMECONSTGEN; }
 				TimeConstGenerate(float time) : time(time) { type = TYPEGEN::TIMECONSTGEN; }
+				~TimeConstGenerate()override {}
 			};
 
 			class TimeRandGenerate : public ParticlesGenerator
@@ -176,6 +182,7 @@ namespace Cookie
 
 				TimeRandGenerate() { type = TYPEGEN::TIMERANDGEN; }
 				TimeRandGenerate(float timeMin, float timeMax) : timeMin(timeMin), timeMax(timeMax) { type = TYPEGEN::TIMERANDGEN; }
+				~TimeRandGenerate()override {}
 			};
 
 			class ColorRandGenerate : public ParticlesGenerator
@@ -188,6 +195,7 @@ namespace Cookie
 
 				ColorRandGenerate() { type = TYPEGEN::COLORRANDGEN; }
 				ColorRandGenerate(Cookie::Core::Math::Vec4 colorMin, Cookie::Core::Math::Vec4 colorMax) : minCol(colorMin), maxCol(colorMax) { type = TYPEGEN::COLORRANDGEN; }
+				~ColorRandGenerate()override {}
 			};
 
 			class ColorConstGenerate : public ParticlesGenerator
@@ -199,6 +207,7 @@ namespace Cookie
 
 				ColorConstGenerate() { type = TYPEGEN::COLORCONSTGEN; }
 				ColorConstGenerate(Cookie::Core::Math::Vec4 color) : col(color) { type = TYPEGEN::COLORCONSTGEN; }
+				~ColorConstGenerate()override {}
 			};
 
 			class InitVelocityWithPoint : public ParticlesGenerator
@@ -210,7 +219,7 @@ namespace Cookie
 
 				InitVelocityWithPoint() { type = TYPEGEN::INITVELWITHPOINT; }
 				InitVelocityWithPoint(Cookie::Core::Math::Vec3 point) : endPoint(point) { type = TYPEGEN::INITVELWITHPOINT; }
-				~InitVelocityWithPoint() {}
+				~InitVelocityWithPoint()override {}
 
 			};
 		}

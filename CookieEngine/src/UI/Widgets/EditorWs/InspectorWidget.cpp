@@ -512,6 +512,8 @@ void Inspector::GameplayInterface()
 
                 TreePop();
                 NewLine();
+
+                Text("Pos Life in game:"); NewLine(); DragFloat3("##POS", gameplayComp.componentLive.posLifeInRapportOfEntity.e);
             }
         }
         else if (Selectable("Add life/Armor properties"))

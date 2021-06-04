@@ -19,7 +19,6 @@ struct VS_CONSTANT_BUFFER
 
 ParticlesPass::ParticlesPass()
 {
-   // InitShader();
 }
 
 ParticlesPass::ParticlesPass(const ParticlesPass& pass) : VShader(pass.VShader), PShader(pass.PShader), ILayout(pass.ILayout), CBuffer(pass.CBuffer),
@@ -38,6 +37,10 @@ ParticlesPass::ParticlesPass(const ParticlesPass& pass) : VShader(pass.VShader),
 }
 
 ParticlesPass::~ParticlesPass()
+{
+}
+
+void ParticlesPass::Destroy()
 {
     if (VShader != nullptr)
         VShader->Release();
@@ -118,16 +121,12 @@ void ParticlesPass::InitShader()
             temp = mul(float4(vin.PosL, 1.0), mul(rot, vin.World));
         }
 
-	    // Transform to world space space.
 	    vout.PosW    = temp.xyz;
 	    vout.NormalW = mul(vin.NormalL, (float3x3)vin.World);
         
         float4x4 mat = mul(gView, gProj);
 
-	    // Transform to homogeneous clip space.
 	    vout.PosH = mul(temp, mat);
-	    
-	    // Output vertex attributes for interpolation across triangle.
 	    vout.Tex   = vin.Tex;
 	    vout.Color = vin.Color;
 
@@ -153,8 +152,7 @@ void ParticlesPass::InitShader()
 
     float4 main(PixelInputType input) : SV_TARGET
     {
-        float4 finalColor = text.Sample(WrapSampler, input.Tex);
-        finalColor = finalColor.rgba * input.Color.rgba;
+        float4 finalColor = input.Color.rgba * text.Sample(WrapSampler, input.Tex);
         return finalColor; 
     }
 	)";
