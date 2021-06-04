@@ -29,7 +29,9 @@ namespace Cookie
 		class SkyBox
 		{
 			private:
+				/* Matrix Constant buffer */
 				ID3D11Buffer*		CBuffer{ nullptr };
+
 				ID3D11InputLayout*	ILayout{ nullptr };
 				ID3D11VertexShader* VShader{ nullptr };
 				ID3D11PixelShader*  PShader{ nullptr };
@@ -37,6 +39,7 @@ namespace Cookie
 
 
 			public:
+				/* model Info */
 				std::unique_ptr<Cookie::Resources::Mesh>	cube			{ nullptr };
 				Cookie::Resources::Texture*					texture			{ nullptr };
 

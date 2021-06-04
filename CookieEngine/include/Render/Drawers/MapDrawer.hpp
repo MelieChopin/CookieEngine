@@ -26,23 +26,21 @@ namespace Cookie
 		class MapDrawer
 		{
 			private:
+				/* the dx11 info to display the map */
 				ID3D11VertexShader* VShader	{ nullptr };
-				ID3D11PixelShader*	PShader	{ nullptr };
 				ID3D11Buffer*		VCBuffer{ nullptr };
-				ID3D11Buffer*		PCBuffer{ nullptr };
 				ID3D11InputLayout*	ILayout	{ nullptr };
 
 			public:
+				/* map model Info */
 				std::unique_ptr<Resources::Mesh>	mapMesh;
 				Resources::Texture*					albedoTex = nullptr;
 				Resources::Texture*					normalTex = nullptr;
 				Resources::Texture*					matTex = nullptr;
 
+				/* special info */
 				Core::Math::Mat4					model;
 				Core::Math::Vec2					tileNb;
-
-				Core::Math::Vec3					limitColor;
-				Core::Math::Vec2					tileLimits{ MAP_TILE_LIMITS };
 
 
 			private:

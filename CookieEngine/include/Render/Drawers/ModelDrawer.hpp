@@ -3,10 +3,7 @@
 
 #include <vector>
 
-struct ID3D11VertexShader;
-struct ID3D11PixelShader;
 struct ID3D11Buffer;
-struct ID3D11InputLayout;
 
 namespace Cookie
 {
@@ -18,6 +15,7 @@ namespace Cookie
 		class ModelDrawer
 		{
 		private:
+			/* the Instance Buffer and size for the models matrices */
 			ID3D11Buffer*		IBuffer{ nullptr };
 			unsigned int		IBufferSize = 0;
 
