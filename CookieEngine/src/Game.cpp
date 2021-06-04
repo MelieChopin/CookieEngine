@@ -140,7 +140,7 @@ void Game::HandleGameplayInputs()
         else
             scene->camera->pos = coordinator.componentHandler->GetComponentTransform(coordinator.selectedEntities[0]->id).pos;
 
-        scene->camera->pos += {0, 10, 15};
+        scene->camera->pos += {0, 20, 20};
         scene->camera->ForceUpdate();
     }
 
