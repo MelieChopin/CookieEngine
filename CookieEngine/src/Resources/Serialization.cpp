@@ -1431,6 +1431,8 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 	else
 		CDebug.Error("No SignatureGameplay defined");
 
+	GPComponent.type = gameplay["Type"];
+
 	json temp = gameplay;
 	if (gameplay.contains("Cost"))
 	{
