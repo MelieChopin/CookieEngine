@@ -77,7 +77,8 @@ Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab, E_ARMY_N
 		gameplay.componentAttack.trs = trsPtr;
 		gameplay.componentMove.trs   = trsPtr;
 
-		armyHandler->AddElementToArmy(&gameplay);
+		if(gameplay.teamName != E_ARMY_NAME::E_DEFAULT_NAME)
+			armyHandler->AddElementToArmy(&gameplay);
 	}
 
 
@@ -286,7 +287,7 @@ void Coordinator::ApplyGameplayUpdateWorker(Map& map)
 }
 
 //CGP_Move
-void Coordinator::UpdateCGPMove(Map& map, Render::DebugRenderer& debug)
+void Coordinator::UpdateCGPMove(Map& map)
 {
 	ApplyGameplayUpdatePushedCooldown(map);
 	ApplyGameplayUpdateReachGoalCooldown();
@@ -296,7 +297,7 @@ void Coordinator::UpdateCGPMove(Map& map, Render::DebugRenderer& debug)
 	ApplyGameplayPosPrediction();
 	ApplyGameplayResolveCollision(map);
 	
-	ApplyGameplayDrawPath(debug);
+	//ApplyGameplayDrawPath(debug);
 }
 void Coordinator::ApplyGameplayUpdatePushedCooldown(Map& map)
 {

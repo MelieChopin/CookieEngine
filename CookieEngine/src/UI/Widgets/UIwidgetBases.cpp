@@ -57,7 +57,7 @@ bool GameWindowBase::WindowEdit()
 	}
 
 	SetNextWindowViewport(GetWindowViewport()->ID);
-	ImGui::Begin(windowName, nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings);
+	ImGui::Begin(windowName, nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing);
 
 	SetWindowPos({ xPos + parentWindowPos.x, yPos + parentWindowPos.y }, IsWindowFocused() ? ImGuiCond_Appearing : ImGuiCond_Always);
 

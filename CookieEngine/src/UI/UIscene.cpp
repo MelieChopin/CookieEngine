@@ -27,8 +27,8 @@ void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows, Cookie:
 	{ 
 		switch (info.ID)
 		{
-		case GameWidgetID::GamespectorID:	sceneWidgets.push_back(std::make_unique<Gamespector>(game.coordinator, game.resources));
-		case GameWidgetID::ActionPanelID:	sceneWidgets.push_back(std::make_unique<ActionPanel>(game.coordinator, game.resources));
+		case GameWidgetID::GamespectorID:	sceneWidgets.push_back(std::make_unique<Gamespector>(game.coordinator, game.resources)); break;
+		case GameWidgetID::ActionPanelID:	sceneWidgets.push_back(std::make_unique<ActionPanel>(game.coordinator, game.resources)); break;
 
 		default: break;
 		}
@@ -87,9 +87,15 @@ void UIscene::RenderLayout()
 	for (std::unique_ptr<GameWindowBase>& gw : sceneWidgets)
 	{
 		gw->WindowDisplay();
+		
 
-		const ImRect lastRect = FindWindowByName(gw->GetName())->Rect();
+		const ImGuiWindow* const & lastWin = FindWindowByName(gw->GetName());
 
-		isHovered |= (mPos.x > lastRect.Min.x) && (mPos.x < lastRect.Max.x) && (mPos.y > lastRect.Min.y) && (mPos.y < lastRect.Max.y);
+		if (lastWin)
+		{
+			const ImRect lastRect = lastWin->Rect();
+
+			isHovered |= (mPos.x > lastRect.Min.x) && (mPos.x < lastRect.Max.x) && (mPos.y > lastRect.Min.y) && (mPos.y < lastRect.Max.y);
+		}
 	}
 }

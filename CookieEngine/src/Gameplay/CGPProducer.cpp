@@ -4,6 +4,7 @@
 #include "ECS/ComponentHandler.hpp"
 #include "Core/Time.hpp"
 #include "Resources/Prefab.hpp"
+#include "Resources/Mesh.hpp"
 
 using namespace Cookie::Gameplay;
 using namespace Cookie::Core::Math;
@@ -24,7 +25,10 @@ void CGPProducer::UpdateCountdown(Resources::Map& map, Coordinator& coordinator,
 
 		ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(selfId);
 		ComponentTransform& newEntityTrs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
+		ComponentModel& model = coordinator.componentHandler->GetComponentModel(selfId);
+		ComponentModel& newEntityModel = coordinator.componentHandler->GetComponentModel(newEntity.id);
 		newEntityTrs.pos = trs.pos;
+		newEntityTrs.pos.y -= trs.scale.y * std::abs(model.mesh->AABBMin.y) - newEntityTrs.scale.y * std::abs(newEntityModel.mesh->AABBMin.y);
 
 		//Need to set additionnal behavior if newEntity has a ComponentGameplay
 		if (newEntity.signature & C_SIGNATURE::GAMEPLAY)

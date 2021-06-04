@@ -1,6 +1,7 @@
 #include "Gameplay/ArmyHandler.hpp"
 
 
+using namespace Cookie::ECS;
 using namespace Cookie::Gameplay;
 
 
@@ -42,6 +43,29 @@ ArmyCoordinator* ArmyHandler::GetArmyCoordinator(E_ARMY_NAME armyName)
 	return nullptr;
 }
 
+void ArmyHandler::AddArmy(E_ARMY_NAME armyName)
+{
+	assert(livingArmies < MAX_ARMIES && "Too many armies in existence.");
+
+	armies[livingArmies].name = armyName;
+	livingArmies++;
+}
+void ArmyHandler::RemoveArmy(Army& army)
+{
+	assert(livingArmies > 0 && "No armies in existence.");
+
+	livingArmies--;
+	Army& lastArmy = armies[livingArmies];
+	ArmyCoordinator* lastArmyCoordinator = GetArmyCoordinator(lastArmy.name);
+
+	army = lastArmy;
+	lastArmy.Reset();
+
+	if (lastArmyCoordinator)
+		lastArmyCoordinator->army = &army;
+
+}
+
 void ArmyHandler::AddArmyCoordinator(E_ARMY_NAME armyName)
 {
 	for (int i = 0; i < livingArmies; ++i)
@@ -51,8 +75,17 @@ void ArmyHandler::AddArmyCoordinator(E_ARMY_NAME armyName)
 			return;
 		}
 }
+void ArmyHandler::RemoveArmyCoordinator(E_ARMY_NAME armyName)
+{
+	for (int i = 0; i < armiesCoordinator.size(); ++i)
+		if (armiesCoordinator[i].army->name == armyName)
+		{
+			armiesCoordinator.erase(armiesCoordinator.begin() + i);
+			return;
+		}
+}
 
-void ArmyHandler::AddElementToArmy(ECS::ComponentGameplay* element)
+void ArmyHandler::AddElementToArmy(ComponentGameplay* element)
 {
 	for (int i = 0; i < livingArmies; ++i)
 		if (armies[i].name == element->teamName)
@@ -61,14 +94,10 @@ void ArmyHandler::AddElementToArmy(ECS::ComponentGameplay* element)
 			return;
 		}
 
-	assert(livingArmies < MAX_ARMIES && "Too many armies in existence.");
-
-	Army& newArmy = armies[livingArmies];
-	newArmy.name = element->teamName;
-	AddElementToArmy(newArmy, element);
-	livingArmies++;
+	AddArmy(element->teamName);
+	AddElementToArmy(armies[livingArmies - 1], element);
 }
-void ArmyHandler::AddElementToArmy(Army& army, ECS::ComponentGameplay* element)
+void ArmyHandler::AddElementToArmy(Army& army, ComponentGameplay* element)
 {
 	ArmyCoordinator* armyCoordinator = GetArmyCoordinator(army.name);
 
@@ -100,7 +129,7 @@ void ArmyHandler::AddElementToArmy(Army& army, ECS::ComponentGameplay* element)
 	}
 }
 
-void ArmyHandler::RemoveElementFromArmy(ECS::ComponentGameplay* element, std::string entityName)
+void ArmyHandler::RemoveElementFromArmy(ComponentGameplay* element, std::string entityName)
 {
 	for (int i = 0; i < livingArmies; ++i)
 		if (armies[i].name == element->teamName)
@@ -109,7 +138,7 @@ void ArmyHandler::RemoveElementFromArmy(ECS::ComponentGameplay* element, std::st
 			return;
 		}
 }
-void ArmyHandler::RemoveElementFromArmy(Army& army, ECS::ComponentGameplay* element, std::string entityName)
+void ArmyHandler::RemoveElementFromArmy(Army& army, ComponentGameplay* element, std::string entityName)
 {
 	ArmyCoordinator* armyCoordinator = GetArmyCoordinator(army.name);
 
@@ -133,8 +162,10 @@ void ArmyHandler::RemoveElementFromArmy(Army& army, ECS::ComponentGameplay* elem
 	default:
 		break;
 	}
+
+	RemoveArmyIfEmpty(army);
 }
-void ArmyHandler::RemoveElementFromVector(std::vector<ECS::ComponentGameplay*>& vector, ECS::ComponentGameplay* element)
+void ArmyHandler::RemoveElementFromVector(std::vector<ComponentGameplay*>& vector, ComponentGameplay* element)
 {
 	for (int i = 0; i < vector.size(); ++i)
 		if (vector[i] == element)
@@ -142,4 +173,39 @@ void ArmyHandler::RemoveElementFromVector(std::vector<ECS::ComponentGameplay*>& 
 			vector.erase(vector.begin() + i);
 			return;
 		}
+}
+
+void ArmyHandler::RemoveArmyIfEmpty(Army& army)
+{
+	//if there is still an entity in this army
+	if (!army.workers.empty() ||
+		!army.units.empty()   ||
+		!army.buildings.empty()  )
+		return;
+
+
+	//RemoveArmyCoordinator if existing
+	RemoveArmyCoordinator(army.name);
+
+	//Remove Army
+	RemoveArmy(army);
+
+	//Check if player Win or Lose
+	if (livingArmies == 1)
+	{
+		if (armies[0].name == E_ARMY_NAME::E_PLAYER)
+			PlayerWin();
+		else
+			PlayerLose();
+	}
+
+
+}
+void ArmyHandler::PlayerWin()
+{
+	std::cout << "PLAYER WIN\n";
+}
+void ArmyHandler::PlayerLose()
+{
+	std::cout << "PLAYER LOSE\n";
 }
