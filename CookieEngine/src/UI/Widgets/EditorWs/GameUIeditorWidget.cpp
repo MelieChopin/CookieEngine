@@ -35,7 +35,7 @@ void GameUIeditor::WindowDisplay()
 			}
 			else if (Selectable("Add an action panel"))
 			{
-				widgets.push_back(std::make_unique<ActionPanel>(game.coordinator, game.resources));
+				widgets.push_back(std::make_unique<ActionPanel>(game.coordinator, game.playerData, game.resources));
 				game.scene->uiScene.signature |= GameWidgetID::ActionPanelID;
 			}
 
@@ -48,6 +48,27 @@ void GameUIeditor::WindowDisplay()
 			{
 				widgets.push_back(std::make_unique<Minimap>(game.miniMapBuffer, game.scene->camera.get(), game.scene->map));
 				game.scene->uiScene.signature |= GameWidgetID::MinimapID;
+			}
+
+			if (game.scene->uiScene.signature & GameWidgetID::WheatPanelID)
+			{
+				TextDisabled("Wheat panel added");
+			}
+			else if (Selectable("Add a wheat panel"))
+			{
+				widgets.push_back(std::make_unique<WheatPanel>(game.scene->armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));
+				game.scene->uiScene.signature |= GameWidgetID::WheatPanelID;
+			}
+
+
+			if (game.scene->uiScene.signature & GameWidgetID::ChocolatePanelID)
+			{
+				TextDisabled("Chocolate panel added");
+			}
+			else if (Selectable("Add a chocolate panel"))
+			{
+				widgets.push_back(std::make_unique<ChocolatePanel>(game.scene->armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));
+				game.scene->uiScene.signature |= GameWidgetID::ChocolatePanelID;
 			}
 		}
 		

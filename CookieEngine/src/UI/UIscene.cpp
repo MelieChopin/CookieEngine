@@ -29,9 +29,20 @@ void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows, Cookie:
 	{ 
 		switch (info.ID)
 		{
-		case GameWidgetID::GamespectorID:	sceneWidgets.push_back(std::make_unique<Gamespector>(game.coordinator, game.resources)); break;
-		case GameWidgetID::ActionPanelID:	sceneWidgets.push_back(std::make_unique<ActionPanel>(game.coordinator, game.resources)); break;
-		case GameWidgetID::MinimapID:	    sceneWidgets.push_back(std::make_unique<Minimap>(game.miniMapBuffer, scene.camera.get(), scene.map)); break;
+		case GameWidgetID::GamespectorID:
+			sceneWidgets.push_back(std::make_unique<Gamespector>	(game.coordinator, game.resources));											break;
+		
+		case GameWidgetID::ActionPanelID:
+			sceneWidgets.push_back(std::make_unique<ActionPanel>	(game.coordinator, game.playerData, game.resources));							break;
+		
+		case GameWidgetID::MinimapID:	    
+			sceneWidgets.push_back(std::make_unique<Minimap>		(game.miniMapBuffer, scene.camera.get(), scene.map));							break;
+		
+		case GameWidgetID::WheatPanelID:
+			sceneWidgets.push_back(std::make_unique<WheatPanel>		(scene.armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));	break;
+		
+		case GameWidgetID::ChocolatePanelID:
+			sceneWidgets.push_back(std::make_unique<ChocolatePanel>	(scene.armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));	break;
 
 		default: break;
 		}
