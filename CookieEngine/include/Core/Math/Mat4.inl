@@ -248,19 +248,6 @@ namespace Cookie
 
                 return m;
             }
-
-            inline Mat4 Mat4::Dir(const Vec3& dirVec)
-            {
-                Mat4 m;
-
-                float theta = atanf(sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y) / dirVec.z);
-                float phi = atan2f(dirVec.y,dirVec.x);
-
-                m = Mat4::RotateY(phi) * Mat4::RotateX(theta) * Mat4::RotateZ(PI);
-
-                return m;
-            }
-
             inline Mat4 Mat4::Inverse(const Mat4& _mat)
             {
                 float det = _mat.Det();
