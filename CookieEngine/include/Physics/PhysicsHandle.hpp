@@ -30,6 +30,8 @@ namespace Cookie
 
 					PhysicsHandle::physCom->destroyPhysicsWorld(physSim);
 
+					physSim.worldSim = nullptr;
+
 					if (editWorld)
 					{
 						int max = Physics::PhysicsHandle::editWorld->getNbRigidBodies();
