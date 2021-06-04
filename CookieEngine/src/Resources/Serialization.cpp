@@ -26,6 +26,7 @@ using namespace Cookie::Resources;
 using namespace Cookie::ECS;
 using namespace Cookie::Resources::Particles;
 using namespace Cookie::Resources::Serialization;
+using namespace Cookie::Gameplay;
 
 void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS::EntityHandler& entity)
 {
@@ -44,77 +45,20 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 		{
 			Cookie::ECS::ComponentTransform& transform = component.GetComponentTransform(entity.entities[i].id);
 			json& trans = js["ComponentHandler"]["Transform"];
-			if (entity.entities[i].namePrefab != "NONE")
-			{
-				trans += json{ { "localTRS", { { "translate", transform.pos.e } } } };
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->transform.rot != transform.rot)
-					trans.at(trans.size() - 1).at("localTRS")["rotation"] = transform.rot.e;
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->transform.scale != transform.scale)
-					trans.at(trans.size() - 1).at("localTRS")["scale"] = transform.scale.e;
-			}
-			else
-			{
-				trans += json{ { "localTRS", { { "translate", transform.pos.e },
+			trans += json{ { "localTRS", { { "translate", transform.pos.e },
 													{ "rotation", transform.rot.e },
 													{ "scale", transform.scale.e } } } };
-			}
 		}
 		if (entity.entities[i].signature & C_SIGNATURE::MODEL)
 		{
 			Cookie::ECS::ComponentModel& model = component.GetComponentModel(entity.entities[i].id);
 			json& modelJ = js["ComponentHandler"]["Model"];
-			if (entity.entities[i].namePrefab != "NONE")
-			{
-				int size = modelJ.size();
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh)
-				{
-					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name != model.mesh->name)
-						modelJ[size]["model"] = model.mesh->name;
-				}
-				else
-					modelJ[size]["model"] = 0;
-
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo)
-				{
-					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name != model.albedo->name)
-						modelJ[size]["texture"]["albedo"] = model.albedo->name;
-				}
-				else
-					modelJ[size]["texture"]["albedo"] = 0;
-
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal)
-				{
-					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name != model.normal->name)
-						modelJ[size]["texture"]["normal"] = model.normal->name;
-				}
-				else
-					modelJ[size]["texture"]["normal"] = 0;
-
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness)
-				{
-					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name != model.metallicRoughness->name)
-						modelJ[size]["texture"]["metallic"] = model.metallicRoughness->name;
-				}
-				else
-					modelJ[size]["texture"]["metallic"] = 0;
-
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon)
-				{
-					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name != model.icon->name)
-						modelJ[size]["texture"]["icon"] = model.icon->name;
-				}
-				else
-					modelJ[size]["texture"]["icon"] = 0;
-			}
-			else
-			{
-				modelJ += json{ { "model", model.mesh != nullptr ? model.mesh->name : "NO MESH" },
-								{ "texture", { { "albedo" , model.albedo != nullptr ? model.albedo->name : "NO ALBEDO"},
-											   { "normal" , model.normal != nullptr ? model.normal->name : "NO NORMAL"}, 
-											   { "metallic" , model.metallicRoughness != nullptr ? model.metallicRoughness->name : "NO METALLIC"},
-											   { "icon" , model.icon != nullptr ? model.icon->name : "NO ICON"}} } };
-				
-			}
+			modelJ += json{ { "model", model.mesh != nullptr ? model.mesh->name : "NO MESH" },
+							{ "texture", { { "albedo" , model.albedo != nullptr ? model.albedo->name : "NO ALBEDO"},
+										    { "normal" , model.normal != nullptr ? model.normal->name : "NO NORMAL"}, 
+											{ "metallic" , model.metallicRoughness != nullptr ? model.metallicRoughness->name : "NO METALLIC"},
+											{ "icon" , model.icon != nullptr ? model.icon->name : "NO ICON"}} } };
+			
 		}
 		if (entity.entities[i].signature & C_SIGNATURE::PHYSICS)
 		{
@@ -162,7 +106,7 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 					game["CGPProducer"]["name"] += gameplay.componentProducer.possibleUnits[i]->name;
 
 				for (int i = 0; i < gameplay.componentProducer.occupiedTiles.size(); i++)
-					js["Map"]["OccupiedTiles"] += gameplay.componentProducer.occupiedTiles[i]->id;
+					game["CGPProducer"]["OccupiedTiles"] += gameplay.componentProducer.occupiedTiles[i]->id;
 
 				game["CGPProducer"]["TileSize"] = gameplay.componentProducer.tileSize.e;
 			}
@@ -783,7 +727,7 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, Cookie::ECS::Ent
  }
 
 void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::ECS::EntityHandler& entity,
-	 Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager)
+		Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager)
  {
 	 int indexOfPhysic = 0;
 	 int indexOfGameplay = 0;
@@ -800,13 +744,9 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 
 			 if (TRS.contains("rotation"))
 				 TRS.at("rotation").get_to(transform.rot.e);
-			 else if (entity.entities[i].namePrefab != "NONE")
-				 transform.rot = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->transform.rot;
-			 
+
 			 if (TRS.contains("scale"))
 				TRS.at("scale").get_to(transform.scale.e);
-			 else if (entity.entities[i].namePrefab != "NONE")
-				 transform.scale = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->transform.scale;
 			 
 			 transform.trsHasChanged = true;
 			 component.GetComponentTransform(entity.entities[i].id) = transform;
@@ -816,67 +756,29 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 		 {
 			 json model = js["ComponentHandler"]["Model"][indexOfModel];
 			 if (model["model"].is_string())
-				component.GetComponentModel(entity.entities[i].id).mesh = resourcesManager.meshes[(model["model"].get<std::string>())].get();
-			 else if (entity.entities[i].namePrefab != "NONE")
 			 {
-				 if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh)
-					if (resourcesManager.meshes.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name) != resourcesManager.meshes.end())
-						component.GetComponentModel(entity.entities[i].id).mesh =
-						resourcesManager.meshes[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name].get();
+				 if (model["texture"]["albedo"].get<std::string>() != "NO MESH")
+					 component.GetComponentModel(entity.entities[i].id).mesh = resourcesManager.meshes[(model["model"].get<std::string>())].get();
 			 }
-				 
 			 if (model["texture"]["albedo"].is_string())
 			 {
 				 if (model["texture"]["albedo"].get<std::string>() != "NO ALBEDO")
 					 component.GetComponentModel(entity.entities[i].id).albedo = resourcesManager.textures2D[(model["texture"]["albedo"].get<std::string>())].get();
 			 }
-			 else if (entity.entities[i].namePrefab != "NONE")
-			 {
-				 if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo)
-					if (resourcesManager.textures2D.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name) != resourcesManager.textures2D.end())
-						component.GetComponentModel(entity.entities[i].id).albedo =
-						resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name].get();
-			 }
-				
-				 
 			 if (model["texture"]["normal"].is_string())
 			 {
 				 if (model["texture"]["normal"].get<std::string>() != "NO NORMAL")
 					 component.GetComponentModel(entity.entities[i].id).normal = resourcesManager.textures2D[(model["texture"]["normal"].get<std::string>())].get();
 			 }
-			 else if (entity.entities[i].namePrefab != "NONE")
-			 {
-				 if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal)
-					if (resourcesManager.textures2D.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name) != resourcesManager.textures2D.end())
-						component.GetComponentModel(entity.entities[i].id).normal =
-						resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name].get();
-
-			 }
-				
 			 if (model["texture"]["metallic"].is_string())
 			 {
 				 if (model["texture"]["metallic"].get<std::string>() != "NO METALLIC")
 					 component.GetComponentModel(entity.entities[i].id).metallicRoughness = resourcesManager.textures2D[(model["texture"]["metallic"].get<std::string>())].get();
 			 }
-			 else if (entity.entities[i].namePrefab != "NONE")
-			 {
-				 if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness)
-					if (resourcesManager.textures2D.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name) != resourcesManager.textures2D.end())
-						component.GetComponentModel(entity.entities[i].id).metallicRoughness =
-						resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name].get();
-			 }
-				
 			 if (model["texture"]["icon"].is_string())
 			 {
 				 if (model["texture"]["icon"].get<std::string>() != "NO ICON")
 					 component.GetComponentModel(entity.entities[i].id).icon = resourcesManager.icons[(model["texture"]["icon"].get<std::string>())].get();
-			 }
-			 else if (entity.entities[i].namePrefab != "NONE")
-			 {
-				 if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon)
-					if (resourcesManager.icons.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name) != resourcesManager.icons.end())
-						component.GetComponentModel(entity.entities[i].id).icon =
-						resourcesManager.icons[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name].get();
 			 }
 				 
 			 indexOfModel++;
@@ -893,7 +795,7 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 		 {
 			 json gameplay = js["Gameplay"][indexOfGameplay];
 
-			 LoadGameplay(gameplay, component.GetComponentGameplay(entity.entities[i].id), resourcesManager);
+			 LoadGameplay(gameplay, component.GetComponentGameplay(entity.entities[i].id), resourcesManager, true);
 
 			 indexOfGameplay += 1;
 		 }
@@ -991,33 +893,15 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 		 if (js["Map"]["model"]["texture"].contains("metallic"))
 			 scene->map.model.metallicRoughness = resources.textures2D[js["Map"]["model"]["texture"]["metallic"].get<std::string>()].get();
 
-		 if (js["Map"].contains("OccupiedTiles"))
-		 {
-			 for (int i = 0; i < js["Map"]["OccupiedTiles"].size(); i++)
-				 scene->map.tiles[js["Map"]["OccupiedTiles"][i].get<int>()].isObstacle = true;
-		 }
-
 		 LoadPhysic(js["Map"]["physic"], scene->map.physic);
 		 scene->map.InitTiles();
 	 }
 
 	 if (js.contains("EntityHandler"))
 	 {
-		 int newSizeEntities = js["EntityHandler"].size();
-		 for (int i = newSizeEntities; i < newSizeEntities + newScene->entityHandler.livingEntities - newSizeEntities; i++)
-		 {
-			 if (newScene->entityHandler.entities[i].signature & C_SIGNATURE::TRANSFORM)
-				 newScene->componentHandler.GetComponentTransform(newScene->entityHandler.entities[i].id).ToDefault();
-			 if (newScene->entityHandler.entities[i].signature & C_SIGNATURE::MODEL)
-				 newScene->componentHandler.GetComponentModel(newScene->entityHandler.entities[i].id).ToDefault();
-			 if (newScene->entityHandler.entities[i].signature & C_SIGNATURE::PHYSICS)
-				 newScene->componentHandler.GetComponentPhysics(newScene->entityHandler.entities[i].id).ToDefault();
-			 newScene->entityHandler.entities[i] = Cookie::ECS::Entity(i);
-		 }
-
 		 //entities
 		 {
-			 newScene->entityHandler.livingEntities = newSizeEntities;
+			 newScene->entityHandler.livingEntities = js["EntityHandler"].size();
 			 Cookie::Resources::Serialization::Load::FromJson(js, newScene->entityHandler);
 		 }
 
@@ -1075,6 +959,30 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 	 }
 
 	 newScene->filepath = filepath;
+
+	 //
+	 int indexGameplay = 0;
+	 Map& map = newScene.get()->map;
+	 for (int i = 0; i < newScene.get()->entityHandler.livingEntities; i++)
+	 {
+		 Entity& current = newScene.get()->entityHandler.entities[i];
+		 if (!(current.signature & C_SIGNATURE::GAMEPLAY))
+			 continue;
+
+		 ComponentGameplay& gameComp = newScene.get()->componentHandler.GetComponentGameplay(current.id);
+		 if (gameComp.signatureGameplay & CGP_SIGNATURE::PRODUCER)
+		 {
+			 json& temp = js["Gameplay"][indexGameplay]["CGPProducer"]["OccupiedTiles"];
+			 for (int j = 0; j < temp.size(); j++)
+			 {
+				 gameComp.componentProducer.occupiedTiles.push_back(&(map.tiles[temp[j].get<int>()]));
+				 gameComp.componentProducer.occupiedTiles[j]->isObstacle = true;
+			 }
+			 temp = js["Gameplay"][indexGameplay]["CGPProducer"];
+		 }
+
+		 indexGameplay++;
+	 }
 
 	 game.scene = std::move(newScene);
  }
@@ -1234,6 +1142,28 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 		 resourcesManager.prefabs[newPrefab.name] = std::make_unique<Prefab>(newPrefab);
 
 		 file.close();
+	 }
+
+	 for (std::unordered_map<std::string, std::unique_ptr<Prefab>>::iterator pref =
+		 resourcesManager.prefabs.begin(); pref != resourcesManager.prefabs.end(); ++pref)
+	 {
+		 Prefab* prefab = pref->second.get();
+		 if (prefab->gameplay.signatureGameplay & CGP_SIGNATURE::PRODUCER)
+		 {
+			 for (int i = 0; i < prefab->gameplay.componentProducer.possibleUnitsAtLoad.size(); i++)
+			 {
+				 std::string name = prefab->gameplay.componentProducer.possibleUnitsAtLoad[i];
+				 prefab->gameplay.componentProducer.possibleUnits.push_back(resourcesManager.prefabs[name].get());
+			 }
+		 }
+		 if (prefab->gameplay.signatureGameplay & CGP_SIGNATURE::WORKER)
+		 {
+			 for (int i = 0; i < prefab->gameplay.componentWorker.possibleBuildingsAtLoad.size(); i++)
+			 {
+				 std::string name = prefab->gameplay.componentWorker.possibleBuildingsAtLoad[i];
+				 prefab->gameplay.componentWorker.possibleBuildings.push_back(resourcesManager.prefabs[name].get());
+			 }
+		 }
 	 }
  }
 
@@ -1419,7 +1349,7 @@ void Cookie::Resources::Serialization::Load::LoadPhysic(json& physic, Cookie::EC
 }
 
 void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay, 
-				Cookie::ECS::ComponentGameplay& GPComponent, Cookie::Resources::ResourcesManager& resourcesManager)
+				Cookie::ECS::ComponentGameplay& GPComponent, Cookie::Resources::ResourcesManager& resourcesManager, bool allPrefabLoaded)
 {
 	if (gameplay.contains("TeamName"))
 		GPComponent.teamName = gameplay["TeamName"];
@@ -1478,8 +1408,10 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 			for (int i = 0; i < temp["name"].size(); i++)
 			{
 				std::string name = temp["name"][i].get<std::string>();
-				if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end())
+				if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end() && allPrefabLoaded)
 					GPComponent.componentProducer.possibleUnits.push_back(resourcesManager.prefabs[name].get());
+				else
+					GPComponent.componentProducer.possibleUnitsAtLoad.push_back(name);
 			}
 		}
 	}
@@ -1492,8 +1424,10 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 			for (int i = 0; i < temp.size(); i++)
 			{
 				std::string name = temp[i].get<std::string>();
-				if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end())
+				if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end() && allPrefabLoaded)
 					GPComponent.componentWorker.possibleBuildings.push_back(resourcesManager.prefabs[name].get());
+				else
+					GPComponent.componentWorker.possibleBuildingsAtLoad.push_back(name);
 			}
 		}
 	}

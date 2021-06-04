@@ -75,7 +75,7 @@ namespace Cookie
 				void LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
 				void LoadAllTextures(Cookie::Resources::ResourcesManager& resourcesManager);
 				void LoadPhysic(json& physic, Cookie::ECS::ComponentPhysics& physics);
-				void LoadGameplay(json& game, Cookie::ECS::ComponentGameplay& gameplay, Cookie::Resources::ResourcesManager& resourcesManager);
+				void LoadGameplay(json& game, Cookie::ECS::ComponentGameplay& gameplay, Cookie::Resources::ResourcesManager& resourcesManager, bool allPrefabLoaded = false);
 				void LoadVolumAndModeMusic(std::string path, Sound* const& sound);
 				void LoadAllParticles(Cookie::Resources::ResourcesManager& resourcesManager);
 			}

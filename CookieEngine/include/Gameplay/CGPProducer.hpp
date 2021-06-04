@@ -27,6 +27,7 @@ namespace Cookie
 			Income*							income {nullptr};
 			int								supplyGiven {0};
 			std::vector<Resources::Prefab*>	possibleUnits;
+			std::vector<std::string>		possibleUnitsAtLoad;
 			std::vector<Resources::Prefab*> queueOfUnits;
 			float                           currentCountdown {0};
 			Core::Math::Vec3				newUnitDestination {0, 0, 0};

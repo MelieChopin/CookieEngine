@@ -175,8 +175,11 @@ void Game::HandleGameplayInputs()
 
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_C])
             InputStartBuilding(0);
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_D])
+            InputStartBuilding(1);
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V])
             InputAddUnit(0);
+
     }
 }
 
