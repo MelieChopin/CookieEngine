@@ -2,6 +2,7 @@
 #include "Core/Primitives.hpp"
 #include "Core/Time.hpp"
 
+using namespace Cookie::Core::Math;
 using namespace Cookie::Resources;
 using namespace Cookie::Gameplay;
 
@@ -80,6 +81,7 @@ void CGPMove::MoveTowardWaypoint()
 
 
 	trs->pos += (waypoints[0] - trs->pos).Normalize() * (moveSpeed * Core::DeltaTime());
+	trs->rot = Mat4::LookAt(trs->pos, waypoints[0], Vec3{0, 1, 0}).GetEuler();
 	trs->trsHasChanged = true;
 }
 
