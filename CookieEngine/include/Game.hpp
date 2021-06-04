@@ -60,8 +60,8 @@ namespace Cookie
 			void InputSetResourceToWorkers();
 			void InputStartBuilding(int index);
 			void InputAddUnit(int index);
-			void DisplayNewEntityDestination(Render::DebugRenderer& dbg);
-			void ECSCalls(Render::DebugRenderer& dbg);
+			void DisplayNewEntityDestination();
+			void ECSCalls();
 			void DisplayLife();
 
 			void SetScene();

@@ -5,7 +5,6 @@
 
 using namespace Cookie::Core;
 
-
 constexpr int initWidth = 1280;
 constexpr int initHeight = 720;
 
@@ -45,6 +44,7 @@ Window::~Window()
 
 void Window::SetIcon()
 {
+    /* a bit rough, but working. makes it that you should always have a Assets file with CookieEngine_Icon.png in it */
     GLFWimage images[1];
     images[0].pixels = stbi_load("Assets/CookieEngine_Icon.png", &images[0].width, &images[0].height, 0, 4); //rgba channels 
     glfwSetWindowIcon(window, 1, images);

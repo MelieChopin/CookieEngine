@@ -7,17 +7,20 @@ namespace Cookie
 {
 	namespace Physics
 	{
+		/* static class to access the physics of reactphysics3D at anytime 
+		*(to allocate or add rigidbody withoutpassing in arguments) */
 		class PhysicsHandle
 		{
 			public:
+				/* the allocator of reactphysics3D*/
 				inline static std::unique_ptr<rp3d::PhysicsCommon>			physCom{nullptr};
 				inline static PhysicsSimulator								physSim;
 				inline static rp3d::PhysicsWorld*							editWorld{nullptr};
 
 				static void Init()
 				{
-					physCom = std::make_unique<rp3d::PhysicsCommon>();
-					physSim.worldSim = PhysicsHandle::physCom->createPhysicsWorld();
+					physCom				= std::make_unique<rp3d::PhysicsCommon>();
+					physSim.worldSim	= PhysicsHandle::physCom->createPhysicsWorld();
 				}
 
 				static void Terminate()
@@ -29,6 +32,8 @@ namespace Cookie
 					}
 
 					PhysicsHandle::physCom->destroyPhysicsWorld(physSim.worldSim);
+
+					physSim.worldSim = nullptr;
 
 					if (editWorld)
 					{

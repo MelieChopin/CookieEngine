@@ -287,7 +287,7 @@ void Coordinator::ApplyGameplayUpdateWorker(Map& map)
 }
 
 //CGP_Move
-void Coordinator::UpdateCGPMove(Map& map, Render::DebugRenderer& debug)
+void Coordinator::UpdateCGPMove(Map& map)
 {
 	ApplyGameplayUpdatePushedCooldown(map);
 	ApplyGameplayUpdateReachGoalCooldown();
@@ -297,7 +297,7 @@ void Coordinator::UpdateCGPMove(Map& map, Render::DebugRenderer& debug)
 	ApplyGameplayPosPrediction();
 	ApplyGameplayResolveCollision(map);
 	
-	ApplyGameplayDrawPath(debug);
+	//ApplyGameplayDrawPath(debug);
 }
 void Coordinator::ApplyGameplayUpdatePushedCooldown(Map& map)
 {
