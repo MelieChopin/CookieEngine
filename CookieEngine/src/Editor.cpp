@@ -122,6 +122,41 @@ void Editor::ModifyEditComp()
     }
 }
 
+void Editor::ChooseDrawBuffer()
+{
+    static Render::FrameBuffer& fbo = editorFBO;
+
+    if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F1] >= 0.0f)
+    {
+        fbo = editorFBO;
+    }
+    if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F2] >= 0.0f)
+    {
+        fbo = game.renderer.geomPass.posFBO;
+    }
+    else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F3] >= 0.0f)
+    {
+        fbo = game.renderer.geomPass.normalFBO;
+    }
+    else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F4] >= 0.0f)
+    {
+        fbo = game.renderer.geomPass.albedoFBO;
+    }
+    else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F5] >= 0.0f)
+    {
+        fbo = game.renderer.lightPass.diffuseFBO;
+    }
+    else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F6] >= 0.0f)
+    {
+        fbo = game.renderer.lightPass.specularFBO;
+    }
+
+    if (fbo.shaderResource == editorFBO.shaderResource)
+        return;
+
+    Render::RendererRemote::context->OMSetRenderTargets(1, &editorFBO.renderTargetView, nullptr);
+    game.renderer.DrawFrameBuffer(fbo);
+}
 
 void Editor::Loop()
 {
@@ -204,6 +239,7 @@ void Editor::Loop()
         game.renderer.Clear();
         game.renderer.ClearFrameBuffer(editorFBO);
         game.renderer.Draw(&cam,editorFBO);
+        ChooseDrawBuffer();
 		game.particlesHandler.Draw(cam);
 
         dbgRenderer.Draw(cam.GetViewProj());

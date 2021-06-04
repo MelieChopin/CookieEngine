@@ -29,5 +29,8 @@ void PhysicsSimulator::Update()
 		accumulator -= timeStep;
 	}
 
+	/* factor is usually over 1 as timeStep is between 0 and 1 usually.
+	 * but it is usually not over 1 when update is really done 
+	 * as accumulator will be lower than timeStep */
 	factor = accumulator / timeStep;
 }

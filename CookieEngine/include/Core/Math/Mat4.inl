@@ -401,6 +401,27 @@ namespace Cookie
                 } };
             }
 
+            inline Vec3 Mat4::GetEuler()const
+            {
+                Vec3 euler;
+                euler.x = -asinf(c[2].e[1]);//Pitch
+
+                if (cosf(euler.x) > 0.0001)                 // Not at poles
+                {
+                    euler.y = Core::Math::ToDegrees(atan2f(c[2].e[0], c[2].e[2]));     // Yaw
+                    euler.z = Core::Math::ToDegrees(atan2f(c[0].e[1], c[1].e[1]));     // Roll
+                }
+                else
+                {
+                    euler.y = 0.0f;                         // Yaw
+                    euler.z = Core::Math::ToDegrees(atan2f(-c[1].e[0], c[0].e[0]));    // Roll
+                }
+
+                euler.x = Core::Math::ToDegrees(euler.x);
+
+                return euler;
+            }
+
             inline Vec3 Mat4::GetTranslate()const
             {
                 return Vec3{c[0].e[3],
