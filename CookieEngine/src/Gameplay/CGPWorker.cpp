@@ -68,6 +68,7 @@ void CGPWorker::Update(Resources::Map& map, Coordinator& coordinator, int selfId
 		return;
 	Core::Math::Vec3 direction = Vec3{destination->x - trs.pos.x, 0, destination->z - trs.pos.z};
 	trs.pos += direction.Normalize() * (moveSpeed * Core::DeltaTime());
+	trs.rot = Mat4::LookAt(Vec3{ 0, 0, 0 }, direction, Vec3{ 0, 1, 0 }).GetEuler();
 	trs.trsHasChanged = true;
 
 	//HasReachDestination

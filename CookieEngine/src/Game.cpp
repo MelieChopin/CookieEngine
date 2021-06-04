@@ -140,7 +140,7 @@ void Game::HandleGameplayInputs()
         else
             scene->camera->pos = coordinator.componentHandler->GetComponentTransform(coordinator.selectedEntities[0]->id).pos;
 
-        scene->camera->pos += {0, 10, 15};
+        scene->camera->pos += {0, 20, 20};
         scene->camera->ForceUpdate();
     }
 
@@ -175,8 +175,11 @@ void Game::HandleGameplayInputs()
 
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_C])
             InputStartBuilding(0);
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_D])
+            InputStartBuilding(1);
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V])
             InputAddUnit(0);
+
     }
 }
 
@@ -360,7 +363,7 @@ void Game::DisplayLife()
             continue;
 
         ComponentGameplay gameplay = coordinator.componentHandler->GetComponentGameplay(coordinator.entityHandler->entities[i].id);
-        if ((gameplay.signatureGameplay & CGP_SIGNATURE::LIVE) != CGP_SIGNATURE::LIVE)
+        if (!coordinator.CheckSignature(gameplay.signatureGameplay, CGP_SIGNATURE::LIVE))
             continue;
 
         lifeCurrent = gameplay.componentLive.lifeCurrent;
@@ -368,15 +371,29 @@ void Game::DisplayLife()
         trs = Cookie::Core::Math::Mat4::Translate(gameplay.trs->pos);
         posLife = gameplay.componentLive.posLifeInRapportOfEntity;
         Cookie::Render::InstancedData newData;
-        newData.World = Cookie::Core::Math::Mat4::TRS(posLife, Vec3(angle, 0, 0),
-            Vec3(2 * lifeMax / 10, 0.25, 2 * lifeMax / 10)) * trs;
+        Vec3 scaleBlack = Vec3(2 * lifeMax / 10, 0.25, 1);
+        Vec3 scaleGreen = Vec3(2 * lifeCurrent / 10, 0.25, 1);
+        Vec3 posGreen = Vec3((lifeMax - lifeCurrent) / 10, 0, 0);
+        if (coordinator.CheckSignature(coordinator.entityHandler->entities[i].signature, C_SIGNATURE::MODEL) && 
+                coordinator.CheckSignature(coordinator.entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM))
+        {
+            ComponentTransform& transform = coordinator.componentHandler->GetComponentTransform(coordinator.entityHandler->entities[i].id);
+            ComponentModel& model = coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[i].id);
+            if (model.mesh)
+            {
+                Core::Math::Vec3 AABBMax = model.mesh->AABBMax;
+                scaleBlack.x = std::clamp(scaleBlack.x, 0.0f, AABBMax.x * transform.scale.x * 2);
+                scaleGreen.x = std::clamp(scaleGreen.x, 0.0f, AABBMax.x * transform.scale.x * 2);
+                posGreen.x = (scaleBlack.x - scaleGreen.x) / 2;
+            }
+        }
+        
+        newData.World = Cookie::Core::Math::Mat4::TRS(posLife, Vec3(angle, 0, 0), scaleBlack) * trs;
         newData.Color = Vec4(0, 0, 0, 1);
         newData.isBillboard = false;
         data.push_back(newData);
 
-        newData.World = Cookie::Core::Math::Mat4::TRS(posLife - Vec3((lifeMax - lifeCurrent) / 10, 0, 0),
-            Vec3(angle, 0, 0), Vec3(2 * lifeCurrent / 10, 0.25, 2 * lifeCurrent / 10)) * trs;
-
+        newData.World = Cookie::Core::Math::Mat4::TRS(posLife - posGreen, Vec3(angle, 0, 0), scaleGreen) * trs;
         newData.Color = Vec4((lifeMax - lifeCurrent) / lifeMax, lifeCurrent / lifeMax, 0, 1);
         data.push_back(newData);
     }

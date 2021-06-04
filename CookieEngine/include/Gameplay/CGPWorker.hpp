@@ -43,6 +43,7 @@ namespace Cookie
 
 			//Building
 			std::vector<Resources::Prefab*>	possibleBuildings;
+			std::vector<std::string>		possibleBuildingsAtLoad;
 			Resources::Prefab*				BuildingInConstruction {nullptr};
 			Core::Math::Vec3				posBuilding            {0,  0, 0}; // = mousePos when start construction
 			bool							needTostartBuilding    {false};

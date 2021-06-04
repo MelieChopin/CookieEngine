@@ -26,97 +26,43 @@ using namespace Cookie::Resources;
 using namespace Cookie::ECS;
 using namespace Cookie::Resources::Particles;
 using namespace Cookie::Resources::Serialization;
+using namespace Cookie::Gameplay;
 
 void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS::EntityHandler& entity)
 {
+	//Save data in entity
 	for (int i = 0; i < entity.livingEntities; i++)
-		js["EntityHandler"] += json{ { "entity", { { "id", entity.entities[i].id }, { "signature", entity.entities[i].signature }, { "name", entity.entities[i].name }, { "namePrefab", entity.entities[i].namePrefab } } } };
+		js["EntityHandler"] += json{ { "entity", { { "id", entity.entities[i].id }, { "signature", entity.entities[i].signature }, 
+								{ "name", entity.entities[i].name }, { "namePrefab", entity.entities[i].namePrefab } } } };
 }
 
 void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager)
 {
+	//Save all component for each entity
 	for (int i = 0; i < entity.livingEntities; i++)
 	{
 		if (entity.entities[i].signature & C_SIGNATURE::TRANSFORM)
 		{
 			Cookie::ECS::ComponentTransform& transform = component.GetComponentTransform(entity.entities[i].id);
 			json& trans = js["ComponentHandler"]["Transform"];
-			if (entity.entities[i].namePrefab != "NONE")
-			{
-				trans += json{ { "localTRS", { { "translate", transform.pos.e } } } };
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->transform.rot != transform.rot)
-					trans.at(trans.size() - 1).at("localTRS")["rotation"] = transform.rot.e;
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->transform.scale != transform.scale)
-					trans.at(trans.size() - 1).at("localTRS")["scale"] = transform.scale.e;
-			}
-			else
-			{
-				trans += json{ { "localTRS", { { "translate", transform.pos.e },
+			trans += json{ { "localTRS", { { "translate", transform.pos.e },
 													{ "rotation", transform.rot.e },
 													{ "scale", transform.scale.e } } } };
-			}
 		}
 		if (entity.entities[i].signature & C_SIGNATURE::MODEL)
 		{
 			Cookie::ECS::ComponentModel& model = component.GetComponentModel(entity.entities[i].id);
 			json& modelJ = js["ComponentHandler"]["Model"];
-			if (entity.entities[i].namePrefab != "NONE")
-			{
-				int size = modelJ.size();
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh)
-				{
-					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name != model.mesh->name)
-						modelJ[size]["model"] = model.mesh->name;
-				}
-				else
-					modelJ[size]["model"] = 0;
-
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo)
-				{
-					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name != model.albedo->name)
-						modelJ[size]["texture"]["albedo"] = model.albedo->name;
-				}
-				else
-					modelJ[size]["texture"]["albedo"] = 0;
-
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal)
-				{
-					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name != model.normal->name)
-						modelJ[size]["texture"]["normal"] = model.normal->name;
-				}
-				else
-					modelJ[size]["texture"]["normal"] = 0;
-
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness)
-				{
-					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name != model.metallicRoughness->name)
-						modelJ[size]["texture"]["metallic"] = model.metallicRoughness->name;
-				}
-				else
-					modelJ[size]["texture"]["metallic"] = 0;
-
-				if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon)
-				{
-					if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name != model.icon->name)
-						modelJ[size]["texture"]["icon"] = model.icon->name;
-				}
-				else
-					modelJ[size]["texture"]["icon"] = 0;
-			}
-			else
-			{
-				modelJ += json{ { "model", model.mesh != nullptr ? model.mesh->name : "NO MESH" },
-								{ "texture", { { "albedo" , model.albedo != nullptr ? model.albedo->name : "NO ALBEDO"},
-											   { "normal" , model.normal != nullptr ? model.normal->name : "NO NORMAL"}, 
-											   { "metallic" , model.metallicRoughness != nullptr ? model.metallicRoughness->name : "NO METALLIC"},
-											   { "icon" , model.icon != nullptr ? model.icon->name : "NO ICON"}} } };
-				
-			}
+			modelJ += json{ { "model", model.mesh != nullptr ? model.mesh->name : "NO MESH" },
+							{ "texture", { { "albedo" , model.albedo != nullptr ? model.albedo->name : "NO ALBEDO"},
+										    { "normal" , model.normal != nullptr ? model.normal->name : "NO NORMAL"}, 
+											{ "metallic" , model.metallicRoughness != nullptr ? model.metallicRoughness->name : "NO METALLIC"},
+											{ "icon" , model.icon != nullptr ? model.icon->name : "NO ICON"}} } };
+			
 		}
 		if (entity.entities[i].signature & C_SIGNATURE::PHYSICS)
 		{
-			int index = js["PhysicHandler"].size();
-			SavePhysic(js["PhysicHandler"][index], component.GetComponentPhysics(entity.entities[i].id));
+			SavePhysic(js["PhysicHandler"][js["PhysicHandler"].size()], component.GetComponentPhysics(entity.entities[i].id));
 		}
 		if (entity.entities[i].signature & C_SIGNATURE::GAMEPLAY)
 		{
@@ -160,7 +106,7 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 					game["CGPProducer"]["name"] += gameplay.componentProducer.possibleUnits[i]->name;
 
 				for (int i = 0; i < gameplay.componentProducer.occupiedTiles.size(); i++)
-					js["Map"]["OccupiedTiles"] += gameplay.componentProducer.occupiedTiles[i]->id;
+					game["CGPProducer"]["OccupiedTiles"] += gameplay.componentProducer.occupiedTiles[i]->id;
 
 				game["CGPProducer"]["TileSize"] = gameplay.componentProducer.tileSize.e;
 			}
@@ -233,33 +179,45 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 
 	//Skybox
 	{
-		js["SkyboxName"] = actScene.skyBox->name;
+		if (actScene.skyBox)
+			js["SkyboxName"] = actScene.skyBox->name;
 	}
 
 	//Camera
 	{
 		json& cam = js["Camera"];
 		Cookie::Render::Camera* camera = actScene.camera.get();
-
-		cam["camNear"] = camera->camNear;
-		cam["camFar"] = camera->camFar;
-		cam["fov"] = camera->fov;
-		cam["aspectRatio"] = camera->aspectRatio;
-		cam["windowOffset"] = camera->windowOffset.e;
-		cam["pos"] = camera->pos.e;
-		cam["rot"] = camera->rot.e;
+		if (camera)
+		{
+			cam["camNear"] = camera->camNear;
+			cam["camFar"] = camera->camFar;
+			cam["fov"] = camera->fov;
+			cam["aspectRatio"] = camera->aspectRatio;
+			cam["windowOffset"] = camera->windowOffset.e;
+			cam["pos"] = camera->pos.e;
+			cam["rot"] = camera->rot.e;
+		}
 	}
 
 	if (actScene.entityHandler.livingEntities > 0)
 	{
 		//Entities
-		{
-			Cookie::Resources::Serialization::Save::ToJson(js, actScene.entityHandler);
-		}
-
+		Cookie::Resources::Serialization::Save::ToJson(js, actScene.entityHandler);
 		//Components
+		Cookie::Resources::Serialization::Save::ToJson(js, actScene.entityHandler, actScene.componentHandler, resourcesManager);
+	}
+
+	//ArmyHandler
+	{
+		json& ArmyHandler = js["ArmyHandler"];
+		for (int i = 0; i < actScene.armyHandler.livingArmies; i++)
 		{
-			Cookie::Resources::Serialization::Save::ToJson(js, actScene.entityHandler, actScene.componentHandler, resourcesManager);
+			Cookie::Gameplay::Army& army = actScene.armyHandler.armies[i];
+			ArmyHandler += json{ { "name", army.name },
+								{ "Income", { { "incomePrimary", army.income.primary }, 
+												{ "incomeSecondary", army.income.secondary },
+												{ "supplyCurrent", army.income.supplyCurrent },
+												{ "supplyMax", army.income.supplyMax } } } };
 		}
 	}
 
@@ -418,7 +376,7 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const Prefab* const & pr
 
 	 if (prefab->signature & C_SIGNATURE::GAMEPLAY)
 	 {
-		 ComponentGameplay gameplay = prefab->gameplay;
+		 const ComponentGameplay& gameplay = prefab->gameplay;
 		 json& gp = js["Gameplay"];
 		 gp["TeamName"] = gameplay.teamName;
 		 gp["Type"] = gameplay.type;
@@ -462,12 +420,11 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const Prefab* const & pr
 	 {
 		 int index = js["FX"].size();
 		 json& fx = js["FX"][index];
-		 ComponentGameplay gameplay = prefab->gameplay;
+		 const ComponentGameplay& gameplay = prefab->gameplay;
 		 if (gameplay.signatureGameplay & CGP_SIGNATURE::ATTACK)
 		 {
 			 fx["CGPAttack"]["sfxAttack"] = gameplay.componentAttack.sfxAttack ? gameplay.componentAttack.sfxAttack->name : "NONE";
 			 fx["CGPAttack"]["vfxAttack"] = gameplay.componentAttack.vfxAttack ? gameplay.componentAttack.vfxAttack->name : "NONE";
-
 		 }
 		 if (gameplay.signatureGameplay & CGP_SIGNATURE::LIVE)
 		 {
@@ -502,7 +459,7 @@ void Cookie::Resources::Serialization::Save::SaveTexture(std::string& name, Cook
 
 void Cookie::Resources::Serialization::Save::SavePhysic(json& js, Cookie::ECS::ComponentPhysics& physics)
  {
-	 std::vector<::reactphysics3d::Collider*> colliders = physics.physColliders;
+	 std::vector<::reactphysics3d::Collider*>& colliders = physics.physColliders;
 	 for (int j = 0; j < colliders.size(); j++)
 	 {
 		 ::reactphysics3d::Collider* actCollider = colliders[j];
@@ -522,15 +479,15 @@ void Cookie::Resources::Serialization::Save::SavePhysic(json& js, Cookie::ECS::C
 		 }
 		 else if (actCollider->getCollisionShape()->getName() == ::reactphysics3d::CollisionShapeName::BOX)
 		 {
-			 ::reactphysics3d::Vector3 box = static_cast<::reactphysics3d::BoxShape*>(actCollider->getCollisionShape())->getHalfExtents();
+			 const ::reactphysics3d::Vector3& box = static_cast<::reactphysics3d::BoxShape*>(actCollider->getCollisionShape())->getHalfExtents();
 			 colliders["type"] = "Box";
 			 colliders["HalfExtents"] = { box.x, box.y, box.z };
 		 }
 
 		 ::reactphysics3d::Material& mat = actCollider->getMaterial();
 
-		 ::reactphysics3d::Vector3		vec = actCollider->getLocalToBodyTransform().getPosition();
-		 ::reactphysics3d::Quaternion	quat = actCollider->getLocalToBodyTransform().getOrientation();
+		 const ::reactphysics3d::Vector3& vec = actCollider->getLocalToBodyTransform().getPosition();
+		 const ::reactphysics3d::Quaternion& quat = actCollider->getLocalToBodyTransform().getOrientation();
 		 colliders["transform"]["pos"] = { vec.x, vec.y, vec.z };
 		 colliders["transform"]["quaternion"] = { quat.w, quat.x, quat.y, quat.z };
 		 colliders["bounciness"] = mat.getBounciness();
@@ -551,14 +508,13 @@ void Cookie::Resources::Serialization::Save::SavePhysic(json& js, Cookie::ECS::C
 	 rigidbody["sleeping"] = rigibody->isSleeping();
 	 rigidbody["gravityEnabled"] = rigibody->isGravityEnabled();
 
-	 ::reactphysics3d::Transform physTrans = physics.physTransform;
-	 ::reactphysics3d::Vector3 pos = physTrans.getPosition();
-	 ::reactphysics3d::Quaternion quat = physTrans.getOrientation();
+	 ::reactphysics3d::Transform& physTrans = physics.physTransform;
+	 const ::reactphysics3d::Vector3& pos = physTrans.getPosition();
+	 const ::reactphysics3d::Quaternion& quat = physTrans.getOrientation();
 
 	 js["physicTRS"]["position"] = { pos.x, pos.y, pos.z };
 	 js["physicTRS"]["quaternion"] = { quat.w, quat.x, quat.y, quat.z };
  }
-
 
 void Cookie::Resources::Serialization::Save::SaveVolumAndModeMusic(Sound* const & sound)
 {
@@ -575,7 +531,6 @@ void Cookie::Resources::Serialization::Save::SaveVolumAndModeMusic(Sound* const 
 
 	js["Volume"] = sound->vol;
 	js["Mode"] = sound->mode;
-	js["Pos"] = sound->pos.e;
 
 	file << std::setw(4) << js << std::endl;
 }
@@ -778,7 +733,7 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, Cookie::ECS::Ent
  {
 	 for (int i = 0; i < entity.livingEntities; i++)
 	 {
-		 json newEntity = js["EntityHandler"][i].at("entity");
+		 json& newEntity = js["EntityHandler"][i].at("entity");
 		 entity.entities[i] = (Cookie::ECS::Entity(newEntity.at("id").get<int>(), newEntity.at("signature").get<int>(), 
 								newEntity.at("name").get<std::string>(), newEntity.at("namePrefab").get<std::string>()));
 		 entity.entities[i].namePrefab = newEntity.at("namePrefab").get<std::string>();
@@ -786,7 +741,7 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, Cookie::ECS::Ent
  }
 
 void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::ECS::EntityHandler& entity,
-	 Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager)
+		Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager)
  {
 	 int indexOfPhysic = 0;
 	 int indexOfGameplay = 0;
@@ -803,13 +758,9 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 			 
 			 if (TRS.contains("rotation"))
 				 TRS.at("rotation").get_to(transform.rot.e);
-			 else if (entity.entities[i].namePrefab != "NONE")
-				 transform.rot = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->transform.rot;
-			 
+
 			 if (TRS.contains("scale"))
 				TRS.at("scale").get_to(transform.scale.e);
-			 else if (entity.entities[i].namePrefab != "NONE")
-				 transform.scale = resourcesManager.prefabs[entity.entities[i].namePrefab].get()->transform.scale;
 			 
 			 transform.trsHasChanged = true;
 			 component.GetComponentTransform(entity.entities[i].id) = transform;
@@ -819,67 +770,29 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 		 {
 			 json model = js["ComponentHandler"]["Model"][indexOfModel];
 			 if (model["model"].is_string())
-				component.GetComponentModel(entity.entities[i].id).mesh = resourcesManager.meshes[(model["model"].get<std::string>())].get();
-			 else if (entity.entities[i].namePrefab != "NONE")
 			 {
-				 if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh)
-					if (resourcesManager.meshes.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name) != resourcesManager.meshes.end())
-						component.GetComponentModel(entity.entities[i].id).mesh =
-						resourcesManager.meshes[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.mesh->name].get();
+				 if (model["texture"]["albedo"].get<std::string>() != "NO MESH")
+					 component.GetComponentModel(entity.entities[i].id).mesh = resourcesManager.meshes[(model["model"].get<std::string>())].get();
 			 }
-				 
 			 if (model["texture"]["albedo"].is_string())
 			 {
 				 if (model["texture"]["albedo"].get<std::string>() != "NO ALBEDO")
 					 component.GetComponentModel(entity.entities[i].id).albedo = resourcesManager.textures2D[(model["texture"]["albedo"].get<std::string>())].get();
 			 }
-			 else if (entity.entities[i].namePrefab != "NONE")
-			 {
-				 if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo)
-					if (resourcesManager.textures2D.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name) != resourcesManager.textures2D.end())
-						component.GetComponentModel(entity.entities[i].id).albedo =
-						resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.albedo->name].get();
-			 }
-				
-				 
 			 if (model["texture"]["normal"].is_string())
 			 {
 				 if (model["texture"]["normal"].get<std::string>() != "NO NORMAL")
 					 component.GetComponentModel(entity.entities[i].id).normal = resourcesManager.textures2D[(model["texture"]["normal"].get<std::string>())].get();
 			 }
-			 else if (entity.entities[i].namePrefab != "NONE")
-			 {
-				 if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal)
-					if (resourcesManager.textures2D.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name) != resourcesManager.textures2D.end())
-						component.GetComponentModel(entity.entities[i].id).normal =
-						resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.normal->name].get();
-
-			 }
-				
 			 if (model["texture"]["metallic"].is_string())
 			 {
 				 if (model["texture"]["metallic"].get<std::string>() != "NO METALLIC")
 					 component.GetComponentModel(entity.entities[i].id).metallicRoughness = resourcesManager.textures2D[(model["texture"]["metallic"].get<std::string>())].get();
 			 }
-			 else if (entity.entities[i].namePrefab != "NONE")
-			 {
-				 if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness)
-					if (resourcesManager.textures2D.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name) != resourcesManager.textures2D.end())
-						component.GetComponentModel(entity.entities[i].id).metallicRoughness =
-						resourcesManager.textures2D[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.metallicRoughness->name].get();
-			 }
-				
 			 if (model["texture"]["icon"].is_string())
 			 {
 				 if (model["texture"]["icon"].get<std::string>() != "NO ICON")
 					 component.GetComponentModel(entity.entities[i].id).icon = resourcesManager.icons[(model["texture"]["icon"].get<std::string>())].get();
-			 }
-			 else if (entity.entities[i].namePrefab != "NONE")
-			 {
-				 if (resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon)
-					if (resourcesManager.icons.find(resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name) != resourcesManager.icons.end())
-						component.GetComponentModel(entity.entities[i].id).icon =
-						resourcesManager.icons[resourcesManager.prefabs[entity.entities[i].namePrefab].get()->model.icon->name].get();
 			 }
 				 
 			 indexOfModel++;
@@ -896,7 +809,7 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, const Cookie::EC
 		 {
 			 json gameplay = js["Gameplay"][indexOfGameplay];
 
-			 LoadGameplay(gameplay, component.GetComponentGameplay(entity.entities[i].id), resourcesManager);
+			 LoadGameplay(gameplay, component.GetComponentGameplay(entity.entities[i].id), resourcesManager, true);
 
 			 indexOfGameplay += 1;
 		 }
@@ -974,32 +887,6 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 		 cam["rot"].get_to(camera->rot.e);
 	 }
 
-	 if (js.contains("EntityHandler"))
-	 {
-		 int newSizeEntities = js["EntityHandler"].size();
-		 for (int i = newSizeEntities; i < newSizeEntities + newScene->entityHandler.livingEntities - newSizeEntities; i++)
-		 {
-			 if (newScene->entityHandler.entities[i].signature & C_SIGNATURE::TRANSFORM)
-				 newScene->componentHandler.GetComponentTransform(newScene->entityHandler.entities[i].id).ToDefault();
-			 if (newScene->entityHandler.entities[i].signature & C_SIGNATURE::MODEL)
-				 newScene->componentHandler.GetComponentModel(newScene->entityHandler.entities[i].id).ToDefault();
-			 if (newScene->entityHandler.entities[i].signature & C_SIGNATURE::PHYSICS)
-				 newScene->componentHandler.GetComponentPhysics(newScene->entityHandler.entities[i].id).ToDefault();
-			 newScene->entityHandler.entities[i] = Cookie::ECS::Entity(i);
-		 }
-
-		 //entities
-		 {
-			 newScene->entityHandler.livingEntities = newSizeEntities;
-			 Cookie::Resources::Serialization::Load::FromJson(js, newScene->entityHandler);
-		 }
-
-		 //component
-		 {
-			 Cookie::Resources::Serialization::Load::FromJson(js, newScene->entityHandler, newScene->componentHandler, game.resources);
-		 }
-	 }
-		 
 	 if (js.contains("Map"))
 	 {
 		 Cookie::Resources::Scene* scene = newScene.get();
@@ -1020,33 +907,21 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 		 if (js["Map"]["model"]["texture"].contains("metallic"))
 			 scene->map.model.metallicRoughness = resources.textures2D[js["Map"]["model"]["texture"]["metallic"].get<std::string>()].get();
 
-		 if (js["Map"].contains("OccupiedTiles"))
-		 {
-			 for (int i = 0; i < js["Map"]["OccupiedTiles"].size(); i++)
-				 scene->map.tiles[js["Map"]["OccupiedTiles"][i].get<int>()].isObstacle = true;
-		 }
-
 		 LoadPhysic(js["Map"]["physic"], scene->map.physic);
 		 scene->map.InitTiles();
 	 }
 
-	 if (js.contains("UIScene"))
+	 if (js.contains("EntityHandler"))
 	 {
-		 if (js["UIScene"].size() != 0)
+		 //entities
 		 {
-			std::vector<Cookie::UI::UIscene::GameWindowInfo> list;
-			for (int i = 0; i < js["UIScene"].size(); i++)
-			{
-				Cookie::UI::UIscene::GameWindowInfo info;
-				json ui = js["UIScene"][i];
-				info.ID = ui["ID"].get<int>();
-				info.xPos = ui["xPos"].get<int>();
-				info.yPos = ui["yPos"].get<int>();
-				info.width = ui["width"].get<int>();
-				info.height = ui["height"].get<int>();
-				list.push_back(info);
-			}
-			newScene->uiScene.LoadLayout(list, game);
+			 newScene->entityHandler.livingEntities = js["EntityHandler"].size();
+			 Cookie::Resources::Serialization::Load::FromJson(js, newScene->entityHandler);
+		 }
+
+		 //component
+		 {
+			 Cookie::Resources::Serialization::Load::FromJson(js, newScene->entityHandler, newScene->componentHandler, game.resources);
 		 }
 	 }
 
@@ -1078,6 +953,72 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 	 }
 
 	 newScene->filepath = filepath;
+
+	 ArmyHandler& handler = newScene.get()->armyHandler;
+	 //Army
+	 if (js.contains("ArmyHandler"))
+	 {
+		 json& armyHandler = js["ArmyHandler"];
+		 for (int i = 0; i < armyHandler.size(); i++)
+		 {
+			 Income& income = handler.armies[handler.livingArmies].income;
+			 handler.AddArmy((E_ARMY_NAME)(armyHandler[i]["name"].get<int>()));
+			 income.primary = armyHandler[i]["Income"]["incomePrimary"].get<float>();
+			 income.secondary = armyHandler[i]["Income"]["incomeSecondary"].get<float>();
+			 income.supplyCurrent = armyHandler[i]["Income"]["supplyCurrent"].get<float>();
+			 income.supplyMax = armyHandler[i]["Income"]["supplyMax"].get<float>();
+		 }
+	 }
+
+
+	 //Load With Prefab
+	 int indexGameplay = 0;
+	 Map& map = newScene.get()->map;
+	 for (int i = 0; i < newScene.get()->entityHandler.livingEntities; i++)
+	 {
+		 Entity& current = newScene.get()->entityHandler.entities[i];
+		 if (!(current.signature & C_SIGNATURE::GAMEPLAY))
+			 continue;
+
+		 ComponentGameplay& gameComp = newScene.get()->componentHandler.GetComponentGameplay(current.id);
+
+		 handler.AddElementToArmy(&gameComp);
+
+		 if (gameComp.signatureGameplay & CGP_SIGNATURE::PRODUCER)
+		 {
+			 json& temp = js["Gameplay"][indexGameplay]["CGPProducer"]["OccupiedTiles"];
+			 for (int j = 0; j < temp.size(); j++)
+			 {
+				 gameComp.componentProducer.occupiedTiles.push_back(&(map.tiles[temp[j].get<int>()]));
+				 gameComp.componentProducer.occupiedTiles[j]->isObstacle = true;
+			 }
+			 temp = js["Gameplay"][indexGameplay]["CGPProducer"];
+		 }
+
+		 indexGameplay++;
+	 }
+
+
+	 if (js.contains("UIScene"))
+	 {
+		 if (js["UIScene"].size() != 0)
+		 {
+			std::vector<Cookie::UI::UIscene::GameWindowInfo> list;
+			for (int i = 0; i < js["UIScene"].size(); i++)
+			{
+				Cookie::UI::UIscene::GameWindowInfo info;
+				json ui = js["UIScene"][i];
+				info.ID = ui["ID"].get<int>();
+				info.xPos = ui["xPos"].get<int>();
+				info.yPos = ui["yPos"].get<int>();
+				info.width = ui["width"].get<int>();
+				info.height = ui["height"].get<int>();
+				list.push_back(info);
+			}
+			newScene->uiScene.LoadLayout(list, game, *newScene);
+		 }
+	 }
+
 
 	 game.scene = std::move(newScene);
  }
@@ -1238,6 +1179,28 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 
 		 file.close();
 	 }
+
+	 for (std::unordered_map<std::string, std::unique_ptr<Prefab>>::iterator pref =
+		 resourcesManager.prefabs.begin(); pref != resourcesManager.prefabs.end(); ++pref)
+	 {
+		 Prefab* prefab = pref->second.get();
+		 if (prefab->gameplay.signatureGameplay & CGP_SIGNATURE::PRODUCER)
+		 {
+			 for (int i = 0; i < prefab->gameplay.componentProducer.possibleUnitsAtLoad.size(); i++)
+			 {
+				 std::string name = prefab->gameplay.componentProducer.possibleUnitsAtLoad[i];
+				 prefab->gameplay.componentProducer.possibleUnits.push_back(resourcesManager.prefabs[name].get());
+			 }
+		 }
+		 if (prefab->gameplay.signatureGameplay & CGP_SIGNATURE::WORKER)
+		 {
+			 for (int i = 0; i < prefab->gameplay.componentWorker.possibleBuildingsAtLoad.size(); i++)
+			 {
+				 std::string name = prefab->gameplay.componentWorker.possibleBuildingsAtLoad[i];
+				 prefab->gameplay.componentWorker.possibleBuildings.push_back(resourcesManager.prefabs[name].get());
+			 }
+		 }
+	 }
  }
 
 void Cookie::Resources::Serialization::Load::LoadAllTextures(Cookie::Resources::ResourcesManager& resourcesManager)
@@ -1272,8 +1235,15 @@ void Cookie::Resources::Serialization::Load::LoadAllTextures(Cookie::Resources::
 
 		 Cookie::Core::Math::Vec4 color;
 		 std::string name;
-		 js["color"].get_to(color.e);
-		 js["name"].get_to(name);
+		 if (js.contains("color"))
+			 js["color"].get_to(color.e);
+		 else
+			 CDebug.Error("No color defined");
+
+		 if (js.contains("name"))
+			js["name"].get_to(name);
+		 else 
+			 CDebug.Error("No name defined");
 
 		 resourcesManager.textures2D[name] = std::make_unique<Texture>(name, color);
 	 }
@@ -1281,83 +1251,163 @@ void Cookie::Resources::Serialization::Load::LoadAllTextures(Cookie::Resources::
 
 void Cookie::Resources::Serialization::Load::LoadPhysic(json& physic, Cookie::ECS::ComponentPhysics& physicsComp)
 {
-	json pTRS = physic["physicTRS"].at("position");
-	json qTRS = physic["physicTRS"].at("quaternion");
-
-	::reactphysics3d::Vector3 vecTemp(pTRS[0].get<float>(), pTRS[1].get<float>(), pTRS[1].get<float>());
-	::reactphysics3d::Quaternion quatTemp(qTRS[1].get<float>(), qTRS[2].get<float>(), qTRS[3].get<float>(), qTRS[0].get<float>());
-	physicsComp.physTransform = ::reactphysics3d::Transform({ vecTemp, quatTemp });
-
-	//Rigidbody
+	if (physic.contains("physicTRS"))
 	{
-		json rigid = physic["Rigidbody"];
+		if (physic["physicTRS"].contains("position") && physic["physicTRS"].contains("quaternion"))
+		{
+			json& pTRS = physic["physicTRS"].at("position");
+			json& qTRS = physic["physicTRS"].at("quaternion");
+
+			::reactphysics3d::Vector3 vecTemp(pTRS[0].get<float>(), pTRS[1].get<float>(), pTRS[1].get<float>());
+			::reactphysics3d::Quaternion quatTemp(qTRS[1].get<float>(), qTRS[2].get<float>(), qTRS[3].get<float>(), qTRS[0].get<float>());
+			physicsComp.physTransform = ::reactphysics3d::Transform({ vecTemp, quatTemp });
+		}
+	}
+	else
+		CDebug.Error("No position and/or quaternion in physic");
+	
+	//Rigidbody
+	if (physic.contains("Rigidbody"))
+	{
+		json& rigid = physic["Rigidbody"];
 		::reactphysics3d::RigidBody* actRigidBody = physicsComp.physBody;
 
-		if (rigid["type"].get<int>() == 0)
-			actRigidBody->setType(::reactphysics3d::BodyType::STATIC);
-		else if (rigid["type"].get<int>() == 1)
-			actRigidBody->setType(::reactphysics3d::BodyType::KINEMATIC);
-		else if (rigid["type"].get<int>() == 2)
-			actRigidBody->setType(::reactphysics3d::BodyType::DYNAMIC);
+		if (rigid.contains("type"))
+		{
+			if (rigid["type"].get<int>() == 0)
+				actRigidBody->setType(::reactphysics3d::BodyType::STATIC);
+			else if (rigid["type"].get<int>() == 1)
+				actRigidBody->setType(::reactphysics3d::BodyType::KINEMATIC);
+			else if (rigid["type"].get<int>() == 2)
+				actRigidBody->setType(::reactphysics3d::BodyType::DYNAMIC);
+		}
+		else
+			CDebug.Error("No type define");
 
-		actRigidBody->setIsActive(rigid["active"].get<bool>());
-		actRigidBody->setIsAllowedToSleep(rigid["allowedToSleep"].get<bool>());
-		actRigidBody->setAngularDamping(rigid["angularDamping"].get<float>());
-		actRigidBody->enableGravity(rigid["gravityEnabled"].get<bool>());
-		actRigidBody->setLinearDamping(rigid["linearDamping"].get<float>());
-		actRigidBody->setMass(rigid["mass"].get<float>());
-		//check for sleeping 
+		if (rigid.contains("active"))
+			actRigidBody->setIsActive(rigid["active"].get<bool>());
+		else
+			CDebug.Error("No type defined");
+
+		if (rigid.contains("allowedToSleep"))
+			actRigidBody->setIsAllowedToSleep(rigid["allowedToSleep"].get<bool>());
+		else
+			CDebug.Error("Don't know if allowed to sleep");
+
+		if (rigid.contains("angularDamping"))
+			actRigidBody->setAngularDamping(rigid["angularDamping"].get<float>());
+		else
+			CDebug.Error("No angular damping defined");
+
+		if (rigid.contains("gravityEnabled"))
+			actRigidBody->enableGravity(rigid["gravityEnabled"].get<bool>());
+		else
+			CDebug.Error("Don't know if gravity is enabled");
+
+		if (rigid.contains("linearDamping"))
+			actRigidBody->setLinearDamping(rigid["linearDamping"].get<float>());
+		else
+			CDebug.Error("No linear damping defined");
+
+		if (rigid.contains("mass"))
+			actRigidBody->setMass(rigid["mass"].get<float>());
+		else
+			CDebug.Error("No mass defined");
 	}
+	else
+		CDebug.Error("No rigidbody");
 
-
-	for (int j = 0; j < physic["Colliders"].size(); j++)
+	if (physic.contains("Colliders"))
 	{
-		json colliders = physic["Colliders"][j];
-
-		Cookie::Core::Math::Vec3 pos;
-		Cookie::Core::Math::Vec4 quat;
-		colliders["transform"]["pos"].get_to(pos.e);
-		colliders["transform"]["quaternion"].get_to(quat.e);
-		Cookie::Core::Math::Vec3 rot = Cookie::Core::Math::Quat::ToEulerAngle({ quat.x, quat.y, quat.z, quat.w });
-
-		if (colliders["type"].get<std::string>() == "Sphere")
+		for (int j = 0; j < physic["Colliders"].size(); j++)
 		{
-			float radius = colliders["radius"].get<float>();
-			physicsComp.AddSphereCollider(radius, pos, rot);
-		}
-		else if (colliders["type"].get<std::string>() == "Capsule")
-		{
-			float radius = colliders["radius"].get<float>();
-			float height = colliders["height"].get<float>();
-			physicsComp.AddCapsuleCollider(Cookie::Core::Math::Vec2{ {radius, height } }, pos, rot);
-		}
-		else if (colliders["type"].get<std::string>() == "Box")
-		{
-			Cookie::Core::Math::Vec3 halfExtents;
-			colliders["HalfExtents"].get_to(halfExtents.e);
-			physicsComp.AddCubeCollider(halfExtents, pos, rot);
-		}
+			json colliders = physic["Colliders"][j];
 
-		::reactphysics3d::Material& mat = physicsComp.physColliders[j]->getMaterial();
-		mat.setBounciness(colliders["bounciness"].get<float>());
-		mat.setMassDensity(colliders["density"].get<float>());
-		mat.setFrictionCoefficient(colliders["frictionCoeff"].get<float>());
-		mat.setRollingResistance(colliders["rollingResistance"].get<float>());
+			Cookie::Core::Math::Vec3 pos(0, 0, 0);
+			Cookie::Core::Math::Vec3 rot(0, 0, 0);
+			if (colliders.contains("transform"))
+			{
+				if (colliders["transform"].contains("pos"))
+					colliders["transform"]["pos"].get_to(pos.e);
+				if (colliders["transform"].contains("quaternion"))
+				{
+					Cookie::Core::Math::Vec4 quat;
+					colliders["transform"]["quaternion"].get_to(quat.e);
+					rot = Cookie::Core::Math::Quat::ToEulerAngle({ quat.x, quat.y, quat.z, quat.w });
+				}
+			}
+			else
+				CDebug.Error("No transform defined");
+
+			if (colliders.contains("type"))
+			{
+				if (colliders["type"].get<std::string>() == "Sphere")
+				{
+					float radius = colliders["radius"].get<float>();
+					physicsComp.AddSphereCollider(radius, pos, rot);
+				}
+				else if (colliders["type"].get<std::string>() == "Capsule")
+				{
+					float radius = colliders["radius"].get<float>();
+					float height = colliders["height"].get<float>();
+					physicsComp.AddCapsuleCollider(Cookie::Core::Math::Vec2{ {radius, height } }, pos, rot);
+				}
+				else if (colliders["type"].get<std::string>() == "Box")
+				{
+					Cookie::Core::Math::Vec3 halfExtents;
+					colliders["HalfExtents"].get_to(halfExtents.e);
+					physicsComp.AddCubeCollider(halfExtents, pos, rot);
+				}
+			}
+
+			::reactphysics3d::Material& mat = physicsComp.physColliders[j]->getMaterial();
+			if (colliders.contains("bounciness"))
+				mat.setBounciness(colliders["bounciness"].get<float>());
+			else
+				CDebug.Error("No bounciness defined");
+
+			if (colliders.contains("density"))
+				mat.setMassDensity(colliders["density"].get<float>());
+			else
+				CDebug.Error("No density defined");
+
+			if (colliders.contains("frictionCoeff"))
+				mat.setFrictionCoefficient(colliders["frictionCoeff"].get<float>());
+			else 
+				CDebug.Error("No frictionCoeff defined");
+
+			if (colliders.contains("rollingResistance"))
+				mat.setRollingResistance(colliders["rollingResistance"].get<float>());
+			else 
+				CDebug.Error("No rollingResistance defined");
+		}
 	}
 }
 
 void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay, 
-				Cookie::ECS::ComponentGameplay& GPComponent, Cookie::Resources::ResourcesManager& resourcesManager)
+				Cookie::ECS::ComponentGameplay& GPComponent, Cookie::Resources::ResourcesManager& resourcesManager, bool allPrefabLoaded)
 {
-	GPComponent.teamName = gameplay["TeamName"];
-	GPComponent.signatureGameplay = gameplay["SignatureGameplay"];
+	if (gameplay.contains("TeamName"))
+		GPComponent.teamName = gameplay["TeamName"];
+	else
+		CDebug.Error("No team's defined");
+
+	if (gameplay.contains("SignatureGameplay"))
+		GPComponent.signatureGameplay = gameplay["SignatureGameplay"];
+	else
+		CDebug.Error("No SignatureGameplay defined");
+
 	GPComponent.type = gameplay["Type"];
 
-	json temp = gameplay["Cost"];
-	GPComponent.cost.costPrimary = temp["CostPrimary"].get<float>();
-	GPComponent.cost.costSecondary = temp["CostSecondary"].get<float>();
-	GPComponent.cost.costSupply = temp["CostSupply"].get<float>();
-	GPComponent.cost.timeToProduce = temp["TimeToProduce"].get<float>();
+	json temp = gameplay;
+	if (gameplay.contains("Cost"))
+	{
+		temp = gameplay["Cost"];
+		GPComponent.cost.costPrimary = temp["CostPrimary"].get<float>();
+		GPComponent.cost.costSecondary = temp["CostSecondary"].get<float>();
+		GPComponent.cost.costSupply = temp["CostSupply"].get<float>();
+		GPComponent.cost.timeToProduce = temp["TimeToProduce"].get<float>();
+	}
 
 	if (gameplay.contains("CGPLive"))
 	{
@@ -1394,8 +1444,10 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 			for (int i = 0; i < temp["name"].size(); i++)
 			{
 				std::string name = temp["name"][i].get<std::string>();
-				if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end())
+				if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end() && allPrefabLoaded)
 					GPComponent.componentProducer.possibleUnits.push_back(resourcesManager.prefabs[name].get());
+				else
+					GPComponent.componentProducer.possibleUnitsAtLoad.push_back(name);
 			}
 		}
 	}
@@ -1408,8 +1460,10 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 			for (int i = 0; i < temp.size(); i++)
 			{
 				std::string name = temp[i].get<std::string>();
-				if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end())
+				if (resourcesManager.prefabs.find(name) != resourcesManager.prefabs.end() && allPrefabLoaded)
 					GPComponent.componentWorker.possibleBuildings.push_back(resourcesManager.prefabs[name].get());
+				else
+					GPComponent.componentWorker.possibleBuildingsAtLoad.push_back(name);
 			}
 		}
 	}
@@ -1470,11 +1524,13 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 		json js;
 		file >> js;
 
-		ParticlesPrefab pref;
+		std::unique_ptr<ParticlesPrefab> prefParticles = std::make_unique<ParticlesPrefab>();
+		ParticlesPrefab& pref = *prefParticles.get();
 
 		pref.name = js["Name"].get<std::string>();
 
 		//Data
+		if (js.contains("Data"))
 		{
 			pref.data.resize(js["Data"].size());
 			for (int i = 0; i < js["Data"].size(); i++)
@@ -1504,6 +1560,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 		}
 
 		//Emitter
+		if (js.contains("Emitter"))
 		{
 			json emitter = js["Emitter"];
 			pref.emitter.resize(emitter.size());
@@ -1722,6 +1779,6 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 			}
 		}
 
-		resourcesManager.particles[pref.name] = std::make_unique<ParticlesPrefab>(pref);
+		resourcesManager.particles[pref.name] = std::move(prefParticles);
 	}
 }

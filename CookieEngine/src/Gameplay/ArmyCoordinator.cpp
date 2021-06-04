@@ -81,7 +81,7 @@ void ArmyCoordinator::ResourceAllocation(Map& map)
 
 void ArmyCoordinator::DevelopWorker()
 {
-	std::cout << "AI DevelopWorker\n";
+	//std::cout << "AI DevelopWorker\n";
 
 	for (int i = 0; i < army->buildings.size(); ++i)
 	{
@@ -101,7 +101,7 @@ void ArmyCoordinator::DevelopWorker()
 }
 void ArmyCoordinator::DevelopBase(Map& map)
 {
-	std::cout << "AI DevelopBase\n";
+	//std::cout << "AI DevelopBase\n";
 	//CLEAN later on 
 
 	for (int i = 0; i < army->workers.size(); ++i)
@@ -165,7 +165,7 @@ void ArmyCoordinator::DevelopBase(Map& map)
 }
 void ArmyCoordinator::DevelopArmy()
 {
-	std::cout << "AI DevelopArmy\n";
+	//std::cout << "AI DevelopArmy\n";
 
 	for (int i = 0; i < army->buildings.size(); ++i)
 	{
@@ -185,7 +185,7 @@ void ArmyCoordinator::DevelopArmy()
 }
 void ArmyCoordinator::Attack(Map& map)
 {
-	std::cout << "AI Attack\n";
+	//std::cout << "AI Attack\n";
 
 	for (int i = 0; i < army->units.size(); ++i)
 	{
@@ -200,7 +200,7 @@ void ArmyCoordinator::Attack(Map& map)
 }
 void ArmyCoordinator::Defense(Map& map)
 {
-	std::cout << "AI Defend\n";
+	//std::cout << "AI Defend\n";
 
 	for (int i = 0; i < army->units.size(); ++i)
 	{
@@ -215,5 +215,5 @@ void ArmyCoordinator::Defense(Map& map)
 }
 void ArmyCoordinator::Retreat()
 {
-	std::cout << "AI Retreat\n";
+	//std::cout << "AI Retreat\n";
 }

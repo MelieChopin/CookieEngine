@@ -7,9 +7,18 @@
 
 namespace Cookie { class Game; }
 
+namespace Cookie
+{
+	namespace Resources
+	{
+		class Scene;
+	}
+}
 
 namespace Cookie::UI
 {
+	
+
 	class UIscene
 	{
 		std::vector<std::unique_ptr<UIwidget::GameWindowBase>> sceneWidgets;
@@ -28,7 +37,6 @@ namespace Cookie::UI
 			int xPos,  yPos,
 				width, height;
 		};
-
 	
 		UIscene() = default;
 		UIscene(const std::vector<GameWindowInfo>& _gameWindows, Cookie::Game& _game);
@@ -37,7 +45,7 @@ namespace Cookie::UI
 
 		inline const bool IsHovered() { return isHovered; }
 
-		void								LoadLayout	(const std::vector<GameWindowInfo>& GameWindows, Cookie::Game& game);
+		void								LoadLayout	(const std::vector<GameWindowInfo>& GameWindows, Cookie::Game& game, Cookie::Resources::Scene& scene);
 		const std::vector<GameWindowInfo>	SaveLayout	(bool clean = false);
 
 		void CleanLayout();

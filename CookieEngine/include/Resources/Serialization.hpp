@@ -47,7 +47,9 @@ namespace Cookie
 		{
 			namespace Save
 			{
+				//Save entity
 				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity);
+				//Save components
 				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, 
 					Cookie::Resources::ResourcesManager& resourcesManager);
 
@@ -63,7 +65,9 @@ namespace Cookie
 
 			namespace Load
 			{
+				//Load entity
 				void FromJson(json& js, Cookie::ECS::EntityHandler& entity);
+				//Load all components
 				void FromJson(json& js, const Cookie::ECS::EntityHandler& entity, 
 					Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager);
 
@@ -71,7 +75,7 @@ namespace Cookie
 				void LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
 				void LoadAllTextures(Cookie::Resources::ResourcesManager& resourcesManager);
 				void LoadPhysic(json& physic, Cookie::ECS::ComponentPhysics& physics);
-				void LoadGameplay(json& game, Cookie::ECS::ComponentGameplay& gameplay, Cookie::Resources::ResourcesManager& resourcesManager);
+				void LoadGameplay(json& game, Cookie::ECS::ComponentGameplay& gameplay, Cookie::Resources::ResourcesManager& resourcesManager, bool allPrefabLoaded = false);
 				void LoadVolumAndModeMusic(std::string path, Sound* const& sound);
 				void LoadAllParticles(Cookie::Resources::ResourcesManager& resourcesManager);
 			}

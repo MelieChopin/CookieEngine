@@ -2,6 +2,7 @@
 #include "Core/Primitives.hpp"
 #include "Core/Time.hpp"
 
+using namespace Cookie::Core::Math;
 using namespace Cookie::Resources;
 using namespace Cookie::Gameplay;
 
@@ -80,6 +81,7 @@ void CGPMove::MoveTowardWaypoint()
 
 
 	trs->pos += (waypoints[0] - trs->pos).Normalize() * (moveSpeed * Core::DeltaTime());
+	trs->rot = Mat4::LookAt(trs->pos, waypoints[0], Vec3{0, 1, 0}).GetEuler();
 	trs->trsHasChanged = true;
 }
 
@@ -100,7 +102,6 @@ void CGPMove::ResolveColision(CGPMove& other, Map& map)
 		}
 		other.pushedCooldownBeforeReturn = CGPMOVE_CD_BEFORE_RETURN;
 
-		std::cout << "Colision Higher Priority\n";
 		Core::Math::Vec3 direction = (other.trs->pos - trs->pos).Normalize();
 		other.trs->pos = trs->pos + direction * (radius + other.radius);
 
@@ -119,13 +120,11 @@ void CGPMove::ResolveColision(CGPMove& other, Map& map)
 
 		if (directionSelfToOther.Dot(directionSelf) > 0.9) // if they face each other
 		{
-			std::cout << "Colision face each other\n";
 			trs->pos += Core::Math::Vec3{ directionSelf.z, directionSelf.y, -directionSelf.x } *(overlapLength / 2);
 			other.trs->pos += Core::Math::Vec3{ directionOther.z, directionOther.y, -directionOther.x } *(overlapLength / 2);
 		}
 		else // they colidde side by side
 		{
-			std::cout << "Colision Side by Side\n";
 			//fix strange behavior for now
 			//trs->pos += -directionSelfToOther * (overlapLength / 2);
 			//other.trs->pos += directionSelfToOther * (overlapLength / 2);

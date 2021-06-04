@@ -3,6 +3,8 @@
 
 #include "UIgame_AllIn.hpp"
 
+#include "Scene.hpp"
+
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -14,21 +16,33 @@ using namespace Cookie::UIwidget;
 UIscene::UIscene(const std::vector<GameWindowInfo>& _gameWindows, Cookie::Game& _game)
 {
 	if (!_gameWindows.empty())
-		LoadLayout(_gameWindows, _game);
+		LoadLayout(_gameWindows, _game, *_game.scene.get());
 }
 
 UIscene::~UIscene()
 { CleanLayout(); }
 
 
-void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows, Cookie::Game& game)
+void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows, Cookie::Game& game, Cookie::Resources::Scene& scene)
 {
 	for (const GameWindowInfo& info : GameWindows)
 	{ 
 		switch (info.ID)
 		{
-		case GameWidgetID::GamespectorID:	sceneWidgets.push_back(std::make_unique<Gamespector>(game.coordinator, game.resources)); break;
-		case GameWidgetID::ActionPanelID:	sceneWidgets.push_back(std::make_unique<ActionPanel>(game.coordinator, game.resources)); break;
+		case GameWidgetID::GamespectorID:
+			sceneWidgets.push_back(std::make_unique<Gamespector>	(game.coordinator, game.resources));											break;
+		
+		case GameWidgetID::ActionPanelID:
+			sceneWidgets.push_back(std::make_unique<ActionPanel>	(game.coordinator, game.playerData, game.resources));							break;
+		
+		case GameWidgetID::MinimapID:	    
+			sceneWidgets.push_back(std::make_unique<Minimap>		(game.miniMapBuffer, scene.camera.get(), scene.map));							break;
+		
+		case GameWidgetID::WheatPanelID:
+			sceneWidgets.push_back(std::make_unique<WheatPanel>		(scene.armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));	break;
+		
+		case GameWidgetID::ChocolatePanelID:
+			sceneWidgets.push_back(std::make_unique<ChocolatePanel>	(scene.armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));	break;
 
 		default: break;
 		}
