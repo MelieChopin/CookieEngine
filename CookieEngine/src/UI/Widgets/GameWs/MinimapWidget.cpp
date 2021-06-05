@@ -1,6 +1,7 @@
 #include "FrameBuffer.hpp"
 #include "Camera.hpp"
 #include "Map.hpp"
+#include "ResourcesManager.hpp"
 #include "MinimapWidget.hpp"
 
 #include <imgui.h>
@@ -11,10 +12,12 @@ using namespace Cookie::UIwidget;
 
 void Minimap::WindowDisplay()
 {
-	PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
-
 	TryBeginWindow()
 	{
+		ImGui::SetCursorPos({ 0, 0 });
+		Image(static_cast<ImTextureID>(resources.icons["Assets/UI/Cadre_Left.png"].get()->GetResourceView()), GetWindowSize());
+		ImGui::SetCursorPos(GetStyle().WindowPadding);
+
 		Image(static_cast<ImTextureID>(minimapBuffer.shaderResource), GetContentRegionAvail());
 
 		if (IsItemHovered() && GetIO().MouseDown[0])
@@ -27,6 +30,4 @@ void Minimap::WindowDisplay()
 	}
 
 	ImGui::End();
-
-	PopStyleVar();
 }

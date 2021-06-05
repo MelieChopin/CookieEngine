@@ -41,12 +41,14 @@ void Gamespector::WindowDisplay()
 {
 	TryBeginWindow()
 	{
+		ImGui::SetCursorPos({ 0, 0 });
+		Image(static_cast<ImTextureID>(resources.icons["Assets/UI/Cadre_Middle.png"].get()->GetResourceView()), GetWindowSize());
+		ImGui::SetCursorPos(GetStyle().WindowPadding);
+
 		if (coordinator.selectedEntities.size() == 1)
 		{
 			const Entity* const & selectedEntity = coordinator.selectedEntities[0];
 			const ComponentGameplay& sEntityGameplayComp = coordinator.componentHandler->GetComponentGameplay(selectedEntity->id);
-			
-			Dummy({GetContentRegionAvail().x / 5.f, GetContentRegionAvail().y});
 			
 			SameLine();
 			BeginGroup();
