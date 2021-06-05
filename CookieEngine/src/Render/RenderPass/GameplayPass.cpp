@@ -127,76 +127,60 @@ void GameplayPass::InitShader()
 
 void GameplayPass::InitState()
 {
-
-    // Initialize the description of the stencil state.
     D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 
-    // Set up the description of the stencil state.
-    depthStencilDesc.DepthEnable = true;
+    /* depth test enabled */
+    depthStencilDesc.DepthEnable    = true;
     depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-    depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+    depthStencilDesc.DepthFunc      = D3D11_COMPARISON_LESS;
 
+    /* depth test enabled, read, no write*/
     depthStencilDesc.StencilEnable = true;
     depthStencilDesc.StencilReadMask = 0xFF;
     depthStencilDesc.StencilWriteMask = 0;
 
-    // Stencil operations if pixel is front-facing.
-    depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
-
-    // Stencil operations if pixel is back-facing.
-    depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
+    /* cull what was in stencil before */
+    depthStencilDesc.FrontFace.StencilFailOp        = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.FrontFace.StencilDepthFailOp   = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.FrontFace.StencilPassOp        = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.FrontFace.StencilFunc          = D3D11_COMPARISON_NOT_EQUAL;
+    depthStencilDesc.BackFace.StencilFailOp         = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.BackFace.StencilDepthFailOp    = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.BackFace.StencilPassOp         = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.BackFace.StencilFunc           = D3D11_COMPARISON_NOT_EQUAL;
 
     RendererRemote::device->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
 
-    // Set up the description of the stencil state.
-    depthStencilDesc.DepthEnable = true;
-    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-    depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-
+    /* keeps the depth test, enable write on stencil */
     depthStencilDesc.StencilEnable = true;
     depthStencilDesc.StencilReadMask = 0xFF;
     depthStencilDesc.StencilWriteMask = 0xFF;
 
-    // Stencil operations if pixel is front-facing.
-    depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_REPLACE;
-    depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_REPLACE;
-    depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
-    depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-    // Stencil operations if pixel is back-facing.
-    depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_REPLACE;
-    depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_REPLACE;
-    depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
-    depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+    /* just write the entire thing that is being drawn in the stencil */
+    depthStencilDesc.FrontFace.StencilFailOp        = D3D11_STENCIL_OP_REPLACE;
+    depthStencilDesc.FrontFace.StencilDepthFailOp   = D3D11_STENCIL_OP_REPLACE;
+    depthStencilDesc.FrontFace.StencilPassOp        = D3D11_STENCIL_OP_REPLACE;
+    depthStencilDesc.FrontFace.StencilFunc          = D3D11_COMPARISON_ALWAYS;
+    depthStencilDesc.BackFace.StencilFailOp         = D3D11_STENCIL_OP_REPLACE;
+    depthStencilDesc.BackFace.StencilDepthFailOp    = D3D11_STENCIL_OP_REPLACE;
+    depthStencilDesc.BackFace.StencilPassOp         = D3D11_STENCIL_OP_REPLACE;
+    depthStencilDesc.BackFace.StencilFunc           = D3D11_COMPARISON_ALWAYS;
 
     RendererRemote::device->CreateDepthStencilState(&depthStencilDesc, &outLineState);
 
     D3D11_RASTERIZER_DESC rasterDesc = {};
 
-    // Setup the raster description which will determine how and what polygons will be drawn.
-    rasterDesc.AntialiasedLineEnable = false;
-    rasterDesc.CullMode = D3D11_CULL_NONE;
-    rasterDesc.DepthBias = 0;
-    rasterDesc.DepthBiasClamp = 0.0f;
-    rasterDesc.DepthClipEnable = true;
-    rasterDesc.FillMode = D3D11_FILL_SOLID;
-    rasterDesc.FrontCounterClockwise = true;
-    rasterDesc.MultisampleEnable = false;
-    rasterDesc.ScissorEnable = false;
-    rasterDesc.SlopeScaledDepthBias = 0.0f;
+    /* no culling cause it is easier that way (we display a lot of quad) */
+    rasterDesc.CullMode                 = D3D11_CULL_NONE;
+    rasterDesc.DepthClipEnable          = true;
+    rasterDesc.FillMode                 = D3D11_FILL_SOLID;
+    rasterDesc.FrontCounterClockwise    = true;
 
     RendererRemote::device->CreateRasterizerState(&rasterDesc, &rasterizerState);
 
     D3D11_BLEND_DESC blenDesc = {  };
 
-    blenDesc.AlphaToCoverageEnable                  = false;
-    blenDesc.IndependentBlendEnable                 = false;
+    /* turn on alpha blending */
     blenDesc.RenderTarget[0].BlendEnable            = true;
     blenDesc.RenderTarget[0].SrcBlend               = D3D11_BLEND_SRC_ALPHA;
     blenDesc.RenderTarget[0].DestBlend              = D3D11_BLEND_INV_SRC_ALPHA;
@@ -209,16 +193,14 @@ void GameplayPass::InitState()
     RendererRemote::device->CreateBlendState(&blenDesc, &blendState);
 
     D3D11_SAMPLER_DESC samDesc = {};
-    samDesc.Filter      = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-    samDesc.AddressU    = D3D11_TEXTURE_ADDRESS_WRAP;
-    samDesc.AddressV    = D3D11_TEXTURE_ADDRESS_WRAP;
-    samDesc.AddressW    = D3D11_TEXTURE_ADDRESS_WRAP;
-    samDesc.MipLODBias = 0.0f;
-    samDesc.MaxAnisotropy = 1;
-    samDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-    samDesc.BorderColor[0] = samDesc.BorderColor[1] = samDesc.BorderColor[2] = samDesc.BorderColor[3] = 0;
-    samDesc.MinLOD = 0;
-    samDesc.MaxLOD = 0;
+
+    /* sampler for textures */
+    samDesc.Filter          = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    samDesc.AddressU        = D3D11_TEXTURE_ADDRESS_WRAP;
+    samDesc.AddressV        = D3D11_TEXTURE_ADDRESS_WRAP;
+    samDesc.AddressW        = D3D11_TEXTURE_ADDRESS_WRAP;
+    samDesc.MaxAnisotropy   = 1;
+    samDesc.ComparisonFunc  = D3D11_COMPARISON_ALWAYS;
 
     Render::CreateSampler(&samDesc, &PSampler);
 }
@@ -237,6 +219,7 @@ void GameplayPass::Set()
 
     Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
 
+    /* set shader */
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &VCBuffer);
@@ -247,21 +230,23 @@ void GameplayPass::Draw(const DrawDataHandler& drawData)
 {
     ID3D11RenderTargetView* FBO = nullptr;
     Render::RendererRemote::context->OMGetRenderTargets(1, &FBO, nullptr);
+
     if (drawData.currentCam)
     {
-        if (drawData.player)
-        {
-            playerDrawer.Set(drawData);
-            playerDrawer.Draw(VCBuffer, PCBuffer);
-        }
+        /* draw the selection quad and the building in construction */
+        playerDrawer.Set(drawData);
+        playerDrawer.Draw(VCBuffer, PCBuffer);
 
+        /* set the shader */
         selectDrawer.Set(drawData);
 
+        /* fill the stencil with the selectionned models */
         Render::RendererRemote::context->PSSetShader(nullptr, nullptr, 0);
         Render::RendererRemote::context->OMSetDepthStencilState(outLineState, 1);
         Render::RendererRemote::context->OMSetRenderTargets(0, nullptr, drawData.depthStencilView);
         selectDrawer.FillStencil(VCBuffer);
 
+        /* draw outlines, and arrows */
         Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
         Render::RendererRemote::context->OMSetRenderTargets(1, &FBO, drawData.depthStencilView);
         Render::RendererRemote::context->OMSetDepthStencilState(depthStencilState, 1);

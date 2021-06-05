@@ -77,17 +77,14 @@ void ComposePass::InitShader()
 
     CompilePixel(source, &PShader);
 
+    /* sampler to sample the diffuse, specular and albedo */
     D3D11_SAMPLER_DESC samDesc = {};
-    samDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-    samDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-    samDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-    samDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-    samDesc.MipLODBias = 0.0f;
-    samDesc.MaxAnisotropy = 1;
-    samDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-    samDesc.BorderColor[0] = samDesc.BorderColor[1] = samDesc.BorderColor[2] = samDesc.BorderColor[3] = 0;
-    samDesc.MinLOD = 0;
-    samDesc.MaxLOD = 0;
+    samDesc.Filter          = D3D11_FILTER_MIN_MAG_MIP_POINT;
+    samDesc.AddressU        = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samDesc.AddressV        = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samDesc.AddressW        = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samDesc.MaxAnisotropy   = 1;
+    samDesc.ComparisonFunc  = D3D11_COMPARISON_ALWAYS;
 
     Render::CreateSampler(&samDesc, &PSampler);
 
@@ -96,59 +93,27 @@ void ComposePass::InitShader()
 
 void ComposePass::InitState()
 {
-    // Initialize the description of the stencil state.
     D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 
-    // Set up the description of the stencil state.
+    /* we are force to use it because skybox may rewrite it otherwise */
     depthStencilDesc.DepthEnable    = true;
-    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
     depthStencilDesc.DepthFunc      = D3D11_COMPARISON_LESS;
-
-    depthStencilDesc.StencilEnable      = false;
-    depthStencilDesc.StencilReadMask    = 0xFF;
-    depthStencilDesc.StencilWriteMask   = 0xFF;
-
-    // Stencil operations if pixel is front-facing.
-    depthStencilDesc.FrontFace.StencilFailOp        = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilDepthFailOp   = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilPassOp        = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilFunc          = D3D11_COMPARISON_ALWAYS;
-
-    // Stencil operations if pixel is back-facing.
-    depthStencilDesc.BackFace.StencilFailOp         = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilDepthFailOp    = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilPassOp         = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilFunc           = D3D11_COMPARISON_ALWAYS;
+    depthStencilDesc.StencilEnable  = false;
 
     RendererRemote::device->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
 
     D3D11_RASTERIZER_DESC rasterDesc = {};
 
-    // Setup the raster description which will determine how and what polygons will be drawn.
-    rasterDesc.AntialiasedLineEnable    = false;
-    rasterDesc.CullMode                 = D3D11_CULL_BACK;
-    rasterDesc.DepthBias                = 0;
-    rasterDesc.DepthBiasClamp           = 0.0f;
-    rasterDesc.DepthClipEnable          = false;
-    rasterDesc.FillMode                 = D3D11_FILL_SOLID;
-    rasterDesc.FrontCounterClockwise    = false;
-    rasterDesc.MultisampleEnable        = false;
-    rasterDesc.ScissorEnable            = false;
-    rasterDesc.SlopeScaledDepthBias     = 0.0f;
+    /* cull back because do not need front */
+    rasterDesc.CullMode = D3D11_CULL_BACK;
+    rasterDesc.FillMode = D3D11_FILL_SOLID;
 
     RendererRemote::device->CreateRasterizerState(&rasterDesc, &rasterizerState);
 
     D3D11_BLEND_DESC blenDesc = {  };
 
-    blenDesc.AlphaToCoverageEnable                  = false;
-    blenDesc.IndependentBlendEnable                 = false;
-    blenDesc.RenderTarget[0].BlendEnable            = false;
-    blenDesc.RenderTarget[0].SrcBlend               = D3D11_BLEND_ONE;
-    blenDesc.RenderTarget[0].DestBlend              = D3D11_BLEND_ZERO;
-    blenDesc.RenderTarget[0].BlendOp                = D3D11_BLEND_OP_ADD;
-    blenDesc.RenderTarget[0].SrcBlendAlpha          = D3D11_BLEND_ONE;
-    blenDesc.RenderTarget[0].DestBlendAlpha         = D3D11_BLEND_ZERO;
-    blenDesc.RenderTarget[0].BlendOpAlpha           = D3D11_BLEND_OP_ADD;
+    /* normal blending to remove additive blending of light pass  */
     blenDesc.RenderTarget[0].RenderTargetWriteMask  = D3D11_COLOR_WRITE_ENABLE_ALL;
 
     RendererRemote::device->CreateBlendState(&blenDesc, &blendState);
@@ -167,19 +132,23 @@ void ComposePass::Set(FrameBuffer& diffuse, FrameBuffer& specular, FrameBuffer& 
     const float blendFactor[4] = { 1.0f,1.0f,1.0f,0.0f };
     Render::RendererRemote::context->OMSetBlendState(blendState, blendFactor, 0xffffffff);
 
+    /* set shader */
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
-
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
 
+    /* exploit dx11 behavior*/
     Render::RendererRemote::context->IASetInputLayout(nullptr);
     Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
 
+    /* set texture */
     ID3D11ShaderResourceView* fbos[3] = {diffuse.shaderResource, specular.shaderResource, albedo.shaderResource };
-
     Render::RendererRemote::context->PSSetShaderResources(0, 3, fbos);
 }
 
 void ComposePass::Draw()
 {
+    /* we don't draw a quad but a triangle,
+     * we exploit the default behavior of
+     * having no vertex buffer of dx11 */
     Render::RendererRemote::context->Draw(3, 0);
 }

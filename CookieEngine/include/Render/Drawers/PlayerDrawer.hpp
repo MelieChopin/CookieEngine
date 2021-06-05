@@ -20,6 +20,7 @@ namespace Cookie
 	{
 		class DrawDataHandler;
 
+		/* class to help draws the selection quad and the building in construction */
 		class PlayerDrawer
 		{
 		private:

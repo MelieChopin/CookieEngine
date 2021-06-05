@@ -19,14 +19,16 @@ namespace Cookie
 
 	namespace Resources
 	{
+		/* the mesh are normalized during import to be all in a box between 
+		 * -0.5 and 0.5 on all axes */
 		class Mesh
 		{
-		public:
+			public:
 				ID3D11Buffer* VBuffer	= nullptr;
 				ID3D11Buffer* IBuffer	= nullptr;
 				unsigned int  INb		= 0;
 
-			public:
+				/* cannot exceed 0.5 or -0.5 but can be smaller */
 				Core::Math::Vec3 AABBMin;
 				Core::Math::Vec3 AABBMax;
 
@@ -47,7 +49,6 @@ namespace Cookie
 				Mesh(std::string meshName, std::vector<float>& vertices, std::vector<unsigned int>& indices, unsigned int INb);
 				~Mesh();
 
-				inline unsigned int GetIndicesNb()const noexcept{ return INb; }
 				void Set()const;
 				void Draw()const;
 		};

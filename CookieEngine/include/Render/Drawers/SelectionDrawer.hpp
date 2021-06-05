@@ -23,6 +23,7 @@ namespace Cookie
 		struct DrawData;
 		class DrawDataHandler;
 
+		/* class to help draws the outline of selected models and arrows of building */
 		class SelectionDrawer
 		{
 			private:

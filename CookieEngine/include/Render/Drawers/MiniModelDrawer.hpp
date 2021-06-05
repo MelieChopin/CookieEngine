@@ -18,14 +18,21 @@ namespace Cookie
 		class DrawDataHandler;
 		struct DrawData;
 
+		/* handle the drawing of models on the minimap.
+		 * almost the same as model drawer, but the model
+		 * are not drawn in their texture, but in the color of their army
+		 * (if they are in one) */
 		class MiniModelDrawer
 		{
 		private:
+			/* shader */
 			ID3D11InputLayout* ILayout{ nullptr };
 			ID3D11VertexShader* VShader{ nullptr };
 			ID3D11PixelShader* PShader{ nullptr };
 
+			/* instance buffer for matrices */
 			ID3D11Buffer* IMatricesBuffer{ nullptr };
+			/* and indices of the army (contained in enum) */
 			ID3D11Buffer* IArmyBuffer{ nullptr };
 			unsigned int  IBufferSize = 0;
 

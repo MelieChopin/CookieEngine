@@ -78,7 +78,6 @@ set (SRC_FILES
     "${SRC_DIR}/Render/DrawDataHandler.cpp"
 
     "${SRC_DIR}/Render/FrameBuffer.cpp"
-    "${SRC_DIR}/Render/Light.cpp"
     "${SRC_DIR}/Render/ShadowBuffer.cpp" 
 
     "${SRC_DIR}/Render/Drawers/ModelDrawer.cpp"
