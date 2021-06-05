@@ -1060,7 +1060,8 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 
 		 ComponentGameplay& gameComp = newScene.get()->componentHandler.GetComponentGameplay(current.id);
 
-		 handler.AddElementToArmy(&gameComp);
+		 if (gameComp.teamName != E_ARMY_NAME::E_DEFAULT_NAME)
+			handler.AddElementToArmy(&gameComp);
 
 		 if (gameComp.signatureGameplay & CGP_SIGNATURE::PRODUCER)
 		 {
