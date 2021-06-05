@@ -14,11 +14,11 @@ using namespace Cookie::ECS;
 void ArmyCoordinator::Analysis()
 {
 	//Economic
-	if(army->workers.size() + nbOfWorkerInProduction < behavior.stepGoals.nbOfWorker)
+	if(army->workers.size() + nbOfWorkerInProduction < stepGoals.nbOfWorker)
 		goals.push_back(E_GOALS::E_DEVELOP_WORKER);
-	if(behavior.stepGoals.listOfBuildings.size() > 0)
+	if(stepGoals.listOfBuildings.size() > 0)
 		goals.push_back(E_GOALS::E_DEVELOP_BASE);
-	if (army->units.size() + nbOfUnitInProduction < behavior.stepGoals.nbOfUnits)
+	if (army->units.size() + nbOfUnitInProduction < stepGoals.nbOfUnits)
 		goals.push_back(E_GOALS::E_DEVELOP_ARMY);
 
 	//Military
@@ -26,15 +26,15 @@ void ArmyCoordinator::Analysis()
 	//goals.push_back(E_GOALS::E_DEFEND);
 
 	//if Reach Goal
-	if (army->workers.size() >= behavior.stepGoals.nbOfWorker &&
-		behavior.stepGoals.listOfBuildings.empty() &&
-		army->units.size() >= behavior.stepGoals.nbOfUnits )
+	if (army->workers.size() >= stepGoals.nbOfWorker &&
+		stepGoals.listOfBuildings.empty() &&
+		army->units.size() >= stepGoals.nbOfUnits )
 	{
 		if (canAttack)
 		{
 			canAttack = false;
 			goals.push_back(E_GOALS::E_ATTACK);
-			behavior.AddNextStep();
+			AddNextStep();
 		}
 	}
 	else
@@ -113,8 +113,8 @@ void ArmyCoordinator::DevelopBase(Map& map)
 			{
 				std::string name = worker.possibleBuildings[j]->name;
 
-				for (int k = 0; k < behavior.stepGoals.listOfBuildings.size(); ++k)
-					if (name == behavior.stepGoals.listOfBuildings[k])
+				for (int k = 0; k < stepGoals.listOfBuildings.size(); ++k)
+					if (name == stepGoals.listOfBuildings[k])
 					{
 						//Calculate Pos
 						Vec3 pos {INFINITY, INFINITY, INFINITY};
@@ -154,7 +154,7 @@ void ArmyCoordinator::DevelopBase(Map& map)
 
 						if (worker.StartBuilding(map, pos, j))
 						{
-							behavior.stepGoals.listOfBuildings.erase(behavior.stepGoals.listOfBuildings.begin() + k);
+							stepGoals.listOfBuildings.erase(stepGoals.listOfBuildings.begin() + k);
 							nbOfBuildingInProduction++;
 						}
 						return;

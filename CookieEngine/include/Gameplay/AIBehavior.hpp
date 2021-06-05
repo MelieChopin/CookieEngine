@@ -13,25 +13,10 @@ namespace Cookie
 			std::string			name {"No Name"}; //for UI and Save
 			std::vector<AIStep> steps;
 
-			int					currentStepIndex {0};
-			AIStep				stepGoals; //total
-
-			void AddNextStep()
-			{
-
-				if (currentStepIndex < steps.size())
-				{
-					stepGoals += steps[currentStepIndex];
-					currentStepIndex++;
-				}
-				//else loop with last Step goals
-			}
 			void Clear()
 			{
 				name = "No Name";
 				steps.clear();
-				currentStepIndex = 0;
-				stepGoals.Clear();
 			}
 		};
 	}

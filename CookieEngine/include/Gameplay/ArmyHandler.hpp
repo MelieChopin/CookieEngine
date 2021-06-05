@@ -59,7 +59,7 @@ namespace Cookie
 
 			void AddArmy(Gameplay::E_ARMY_NAME armyName);
 			void RemoveArmy(Army& army);
-			void AddArmyCoordinator(Gameplay::E_ARMY_NAME armyName);
+			void AddArmyCoordinator(Gameplay::E_ARMY_NAME armyName, AIBehavior* aiBehavior);
 			void RemoveArmyCoordinator(Gameplay::E_ARMY_NAME armyName);
 
 			void AddElementToArmy(ECS::ComponentGameplay* element);

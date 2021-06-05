@@ -130,8 +130,6 @@ void Game::HandleGameplayInputs()
         Vec2 tileSize {{1, 1}};
         trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, tileSize) + Vec3{ 0, trs.scale.y * unscaledOffsetFromMap, 0 };
     }
-    if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
-        coordinator.armyHandler->AddArmyCoordinator(E_ARMY_NAME::E_AI1);
 
     if (ImGui::GetIO().KeysDown[GLFW_KEY_SPACE])
     {
@@ -382,8 +380,8 @@ void Game::DisplayLife()
             if (model.mesh)
             {
                 Core::Math::Vec3 AABBMax = model.mesh->AABBMax;
-                scaleBlack.x = std::clamp(scaleBlack.x, 0.0f, AABBMax.x * transform.scale.x * 2);
-                scaleGreen.x = std::clamp(scaleGreen.x, 0.0f, AABBMax.x * transform.scale.x * 2);
+                scaleBlack.x = lifeMax * (AABBMax.x * transform.scale.x * 2) / lifeMax;
+                scaleGreen.x = lifeCurrent * (AABBMax.x * transform.scale.x * 2) / lifeMax;
                 posGreen.x = (scaleBlack.x - scaleGreen.x) / 2;
             }
         }

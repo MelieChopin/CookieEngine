@@ -40,6 +40,8 @@ Editor::Editor()
     Serialization::Load::LoadAllParticles(game.resources);
     game.particlesHandler.particlesPrefab = &game.resources.particles;
 
+    Serialization::Load::LoadAllAIBehaviors(game.resources);
+
     //Load default Scene
     Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", game);
     game.SetScene();
@@ -51,6 +53,7 @@ Editor::Editor()
     editorUI.AddWItem(new UIwidget::AIBehaviorEditor(game.resources), 1);
     editorUI.AddWItem(new UIwidget::GameUIeditor(game), 1);
     editorUI.AddWItem(new UIwidget::SoundOrchestrator(game.resources), 1);
+    editorUI.AddWItem(new UIwidget::ParticleEditor(game.resources), 1);
     
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
     editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
@@ -185,12 +188,14 @@ void Editor::Loop()
             Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(-5, 15, 5), game.resources.particles["Bomb"].get(), Vec3(10, 0, 25));
         
 
-        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_ESCAPE])
+       /* if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_ESCAPE])
             isPlaying = false;
 
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P])
             isPlaying = true;
-
+            */
+        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
+            game.coordinator.armyHandler->AddArmyCoordinator(E_ARMY_NAME::E_AI1, game.resources.aiBehaviors["Test1"].get());
         
         if (isPlaying)
         {
