@@ -32,6 +32,13 @@ void Hierarchy::WindowDisplay()
                     coordinator.AddEntity(prefab);
             }
 
+            NewLine();
+            if (Selectable("Clean scene"))
+            {
+                while (coordinator.entityHandler->livingEntities)
+                    coordinator.RemoveEntity(coordinator.entityHandler->entities[0]);
+            }
+
             EndPopup();
         }
 

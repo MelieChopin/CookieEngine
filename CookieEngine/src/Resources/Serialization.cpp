@@ -925,26 +925,6 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 		 }
 	 }
 
-	 if (js.contains("UIScene"))
-	 {
-		 if (js["UIScene"].size() != 0)
-		 {
-			std::vector<Cookie::UI::UIscene::GameWindowInfo> list;
-			for (int i = 0; i < js["UIScene"].size(); i++)
-			{
-				Cookie::UI::UIscene::GameWindowInfo info;
-				json ui = js["UIScene"][i];
-				info.ID = ui["ID"].get<int>();
-				info.xPos = ui["xPos"].get<int>();
-				info.yPos = ui["yPos"].get<int>();
-				info.width = ui["width"].get<int>();
-				info.height = ui["height"].get<int>();
-				list.push_back(info);
-			}
-			newScene->uiScene.LoadLayout(list, game, *newScene);
-		 }
-	 }
-
 	 if (js.contains("LightsArray"))
 	 {
 		 json light = js["LightsArray"];
@@ -1016,6 +996,27 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 		 }
 
 		 indexGameplay++;
+	 }
+
+
+	 if (js.contains("UIScene"))
+	 {
+		 if (js["UIScene"].size() != 0)
+		 {
+			std::vector<Cookie::UI::UIscene::GameWindowInfo> list;
+			for (int i = 0; i < js["UIScene"].size(); i++)
+			{
+				Cookie::UI::UIscene::GameWindowInfo info;
+				json ui = js["UIScene"][i];
+				info.ID = ui["ID"].get<int>();
+				info.xPos = ui["xPos"].get<int>();
+				info.yPos = ui["yPos"].get<int>();
+				info.width = ui["width"].get<int>();
+				info.height = ui["height"].get<int>();
+				list.push_back(info);
+			}
+			newScene->uiScene.LoadLayout(list, game, *newScene);
+		 }
 	 }
 
 

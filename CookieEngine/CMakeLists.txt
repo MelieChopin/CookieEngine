@@ -135,6 +135,7 @@ set (SRC_FILES
     "${SRC_DIR}/UI/Widgets/GameWs/ActionPanelWidget.cpp"
     "${SRC_DIR}/UI/Widgets/GameWs/GamespectorWidget.cpp"
     "${SRC_DIR}/UI/Widgets/GameWs/MinimapWidget.cpp"
+    "${SRC_DIR}/UI/Widgets/GameWs/ResourcePanelWidgets.cpp"
 
     
     "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
