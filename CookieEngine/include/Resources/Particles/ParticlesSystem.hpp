@@ -25,20 +25,20 @@ namespace Cookie
 				std::string nameData;
 			};
 
+			struct data
+			{
+				Mesh* mesh;
+				Texture* texture;
+				int size;
+				int countFrame;
+				int countAlive;
+				bool isBillboard;
+			};
+
 			class ParticlesPrefab
 			{
 			public:
 				std::string name;
-				struct data
-				{
-					Mesh* mesh;
-					Texture* texture;
-					int size;
-					int countFrame;
-					int countAlive;
-					bool isBillboard;
-				};
-				
 				std::vector<data> data;
 				std::vector<ParticlesEmitter> emitter;
 				std::vector<std::vector<emit>> emit;

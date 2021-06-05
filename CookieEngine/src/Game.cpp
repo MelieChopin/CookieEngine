@@ -382,8 +382,8 @@ void Game::DisplayLife()
             if (model.mesh)
             {
                 Core::Math::Vec3 AABBMax = model.mesh->AABBMax;
-                scaleBlack.x = std::clamp(scaleBlack.x, 0.0f, AABBMax.x * transform.scale.x * 2);
-                scaleGreen.x = std::clamp(scaleGreen.x, 0.0f, AABBMax.x * transform.scale.x * 2);
+                scaleBlack.x = lifeMax * (AABBMax.x * transform.scale.x * 2) / lifeMax;
+                scaleGreen.x = lifeCurrent * (AABBMax.x * transform.scale.x * 2) / lifeMax;
                 posGreen.x = (scaleBlack.x - scaleGreen.x) / 2;
             }
         }

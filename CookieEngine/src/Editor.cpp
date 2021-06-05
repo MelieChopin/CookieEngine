@@ -51,6 +51,7 @@ Editor::Editor()
     editorUI.AddWItem(new UIwidget::AIBehaviorEditor(game.resources), 1);
     editorUI.AddWItem(new UIwidget::GameUIeditor(game), 1);
     editorUI.AddWItem(new UIwidget::SoundOrchestrator(game.resources), 1);
+    editorUI.AddWItem(new UIwidget::ParticleEditor(game.resources), 1);
     
     editorUI.AddWItem(new UIwidget::Inspector(selectedEntity, game.resources, game.coordinator), 2);
     editorUI.AddWItem(new UIwidget::Hierarchy(game.resources, game.scene, game.coordinator, selectedEntity), 2);
