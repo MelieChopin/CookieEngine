@@ -39,7 +39,7 @@ namespace Cookie
 			Army*                army {nullptr};
 			std::vector<E_GOALS> goals;
 
-			AIBehavior			 behavior; //use a Behavior* when it will be loaded in the RM
+			AIBehavior*			 behavior{nullptr};
 
 			int nbOfWorkerInProduction   {0};
 			int nbOfBuildingInProduction {0};
@@ -47,19 +47,10 @@ namespace Cookie
 			bool canAttack				 {true};
 			bool canDefend               {true};
 
-			ArmyCoordinator(Army* _army) : army{_army}
-			{
-				behavior.steps.push_back(AIStep{});
-				behavior.steps[0].nbOfWorker = 6;
-				behavior.steps[0].nbOfUnits = 2;
-				behavior.steps[0].listOfBuildings.push_back("02Producer");
+			int					currentStepIndex{0};
+			AIStep				stepGoals; //total
 
-				behavior.steps.push_back(AIStep{});
-				behavior.steps[1].nbOfWorker = 0;
-				behavior.steps[1].nbOfUnits = 3;
-				behavior.steps[1].listOfBuildings.push_back("02Producer");
-				behavior.steps[1].listOfBuildings.push_back("02Producer");
-			}
+			ArmyCoordinator(Army* _army, AIBehavior* _aiBehavior) : army{_army}, behavior{_aiBehavior} {}
 			~ArmyCoordinator() {}
 
 
@@ -75,6 +66,15 @@ namespace Cookie
 			void Defense(Resources::Map& map);
 			void Retreat();
 
+			void AddNextStep()
+			{
+				if (currentStepIndex < behavior->steps.size())
+				{
+					stepGoals += behavior->steps[currentStepIndex];
+					currentStepIndex++;
+				}
+				//else loop with last Step goals
+			}
 		};
 
 

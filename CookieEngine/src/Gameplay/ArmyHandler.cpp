@@ -66,12 +66,12 @@ void ArmyHandler::RemoveArmy(Army& army)
 
 }
 
-void ArmyHandler::AddArmyCoordinator(E_ARMY_NAME armyName)
+void ArmyHandler::AddArmyCoordinator(E_ARMY_NAME armyName, AIBehavior* aiBehavior)
 {
 	for (int i = 0; i < livingArmies; ++i)
 		if (armies[i].name == armyName)
 		{
-			armiesCoordinator.push_back(ArmyCoordinator{ &armies[i] });
+			armiesCoordinator.push_back(ArmyCoordinator{ &armies[i], aiBehavior });
 			return;
 		}
 }
@@ -155,7 +155,7 @@ void ArmyHandler::RemoveElementFromArmy(Army& army, ComponentGameplay* element, 
 	case E_ARMY_TYPE::E_BUILDING:
 		army.income.supplyMax -= element->componentProducer.supplyGiven;
 		if (armyCoordinator)
-			armyCoordinator->behavior.stepGoals.listOfBuildings.push_back(entityName);
+			armyCoordinator->stepGoals.listOfBuildings.push_back(entityName);
 		RemoveElementFromVector(army.buildings, element);
 		break;
 

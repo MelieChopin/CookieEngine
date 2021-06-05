@@ -130,8 +130,6 @@ void Game::HandleGameplayInputs()
         Vec2 tileSize {{1, 1}};
         trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, tileSize) + Vec3{ 0, trs.scale.y * unscaledOffsetFromMap, 0 };
     }
-    if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
-        coordinator.armyHandler->AddArmyCoordinator(E_ARMY_NAME::E_AI1);
 
     if (ImGui::GetIO().KeysDown[GLFW_KEY_SPACE])
     {

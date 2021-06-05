@@ -5,6 +5,8 @@
 #include "Prefab.hpp"
 #include "ComponentHandler.hpp"
 
+#include "Serialization.hpp"
+
 #include <imgui.h>
 #include <imgui_stdlib.h>
 
@@ -136,6 +138,8 @@ void AIBehaviorEditor::WindowDisplay()
 				resources.aiBehaviors[behaviorToEdit.name] = (std::make_unique<AIBehavior>(behaviorToEdit));
 				
 				//Serialize
+				Cookie::Resources::Serialization::Save::SaveAIBehavior(behaviorToEdit);
+
 				behaviorToEdit.Clear();
 				selectedStep = nullptr;
 				isEditing = false;

@@ -1,4 +1,3 @@
-
 #include "Physics/PhysicsHandle.hpp"
 #include "Game.hpp"
 
@@ -15,6 +14,7 @@
 #include "Particles/ParticlesSystem.hpp"
 #include "ComponentGameplay.hpp"
 #include "Camera.hpp"
+#include "Gameplay/AIBehavior.hpp"
 #include <reactphysics3d/reactphysics3d.h>
 #include <iostream>
 #include <fstream>
@@ -218,6 +218,34 @@ void Cookie::Resources::Serialization::Save::SaveScene(Cookie::Resources::Scene&
 												{ "incomeSecondary", army.income.secondary },
 												{ "supplyCurrent", army.income.supplyCurrent },
 												{ "supplyMax", army.income.supplyMax } } } };
+		}
+
+	}
+
+	//ArmyCoordinator
+	{
+		for (int i = 0; i < actScene.armyHandler.armiesCoordinator.size(); i++)
+		{
+			json& armyCoordinator = js["ArmiesCoordinator"][i];
+			ArmyCoordinator& coordinator = actScene.armyHandler.armiesCoordinator[i];
+			armyCoordinator["armyName"] = coordinator.army->name;
+			armyCoordinator["aiBehaviorName"] = coordinator.behavior->name;
+
+			armyCoordinator["nbOfWorkerInProduction"] = coordinator.nbOfWorkerInProduction;
+			armyCoordinator["nbOfBuildingInProduction"] = coordinator.nbOfBuildingInProduction;
+			armyCoordinator["nbOfUnitInProduction"] = coordinator.nbOfUnitInProduction;
+
+			armyCoordinator["canAttack"] = coordinator.canAttack;
+			armyCoordinator["canDefend"] = coordinator.canDefend;
+
+			armyCoordinator["currentStepIndex"] = coordinator.currentStepIndex;
+			//StepGoals
+			{
+				armyCoordinator["nbOfWorker"] = coordinator.stepGoals.nbOfWorker;
+				armyCoordinator["nbOfUnits"] = coordinator.stepGoals.nbOfUnits;
+				for (int j = 0; j < coordinator.stepGoals.listOfBuildings.size(); j++)
+					armyCoordinator["ListOfBuilding"] += coordinator.stepGoals.listOfBuildings[j];
+			}
 		}
 	}
 
@@ -727,6 +755,27 @@ void Cookie::Resources::Serialization::Save::SaveParticles(Cookie::Resources::Pa
 	file << std::setw(4) << js << std::endl;
 }
 
+void Cookie::Resources::Serialization::Save::SaveAIBehavior(Cookie::Gameplay::AIBehavior& aiBehavior)
+{
+	std::ofstream file("Assets/AIBehaviors/" + aiBehavior.name + ".AIBAsset");
+
+	json js;
+
+	js["Name"] = aiBehavior.name;
+
+	for (int i = 0; i < aiBehavior.steps.size(); i++)
+	{
+		json& steps = js["Steps"][i];
+		AIStep& step = aiBehavior.steps[i];
+		steps["NumberOfWorkers"] = step.nbOfWorker;
+		steps["NumberOfUnits"] = step.nbOfUnits;
+		for (int j = 0; j < step.listOfBuildings.size(); j++)
+			steps["ListOfBuilding"] += step.listOfBuildings[j];
+	}	
+
+	file << std::setw(4) << js << std::endl;
+}
+
  //------------------------------------------------------------------------------------------------------------------
 
 void Cookie::Resources::Serialization::Load::FromJson(json& js, Cookie::ECS::EntityHandler& entity)
@@ -970,6 +1019,35 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 		 }
 	 }
 
+	 //ArmiesCoordinator
+	 if (js.contains("ArmiesCoordinator"))
+	 {
+		 for (int i = 0; i < js["ArmiesCoordinator"].size(); i++)
+		 {
+			 json& armyCoordinator = js["ArmiesCoordinator"][i];
+			 handler.AddArmyCoordinator((E_ARMY_NAME)(armyCoordinator["armyName"].get<int>()), 
+				 game.resources.aiBehaviors[armyCoordinator["aiBehaviorName"].get<std::string>()].get());
+
+			 ArmyCoordinator& coordinator = handler.armiesCoordinator[i];
+
+			 coordinator.nbOfWorkerInProduction = armyCoordinator["nbOfWorkerInProduction"].get<int>();
+			 coordinator.nbOfBuildingInProduction = armyCoordinator["nbOfBuildingInProduction"].get<int>();
+			 coordinator.nbOfUnitInProduction = armyCoordinator["nbOfUnitInProduction"].get<int>();
+
+			 coordinator.canAttack = armyCoordinator["canAttack"].get<bool>();
+			 coordinator.canDefend = armyCoordinator["canDefend"].get<bool>();
+
+			 coordinator.currentStepIndex = armyCoordinator["currentStepIndex"].get<int>();
+
+			 //StepGoals
+			 {
+				 coordinator.stepGoals.nbOfWorker = armyCoordinator["nbOfWorker"].get<int>();
+				 coordinator.stepGoals.nbOfUnits = armyCoordinator["nbOfUnits"].get<int>();
+				 for (int j = 0; j < armyCoordinator["ListOfBuilding"].size(); j++)
+					 coordinator.stepGoals.listOfBuildings.push_back(armyCoordinator["ListOfBuilding"][j].get<std::string>());
+			 }
+		 }
+	 }
 
 	 //Load With Prefab
 	 int indexGameplay = 0;
@@ -992,12 +1070,10 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 				 gameComp.componentProducer.occupiedTiles.push_back(&(map.tiles[temp[j].get<int>()]));
 				 gameComp.componentProducer.occupiedTiles[j]->isObstacle = true;
 			 }
-			 temp = js["Gameplay"][indexGameplay]["CGPProducer"];
 		 }
 
 		 indexGameplay++;
 	 }
-
 
 	 if (js.contains("UIScene"))
 	 {
@@ -1018,7 +1094,6 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 			newScene->uiScene.LoadLayout(list, game, *newScene);
 		 }
 	 }
-
 
 	 game.scene = std::move(newScene);
  }
@@ -1780,5 +1855,58 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 		}
 
 		resourcesManager.particles[pref.name] = std::move(prefParticles);
+	}
+}
+
+void Cookie::Resources::Serialization::Load::LoadAllAIBehaviors(Cookie::Resources::ResourcesManager& resourcesManager)
+{
+	std::vector<std::string> filesPath;
+	for (const fs::directory_entry& path : fs::directory_iterator("Assets/AIBehaviors"))
+	{
+		if (path.path().string().find(".AIBAsset") != std::string::npos)
+			filesPath.push_back(path.path().string());
+	}
+
+	for (unsigned int i = 0; i < filesPath.size(); i++)
+	{
+		std::string& iFile = filesPath.at(i);
+		std::replace(iFile.begin(), iFile.end(), '\\', '/');
+	}
+
+	for (int i = 0; i < filesPath.size(); i++)
+	{
+		std::cout << filesPath[i] << "\n";
+
+		std::ifstream file(filesPath[i]);
+
+		if (!file.is_open())
+		{
+			std::cout << "DON'T FIND THE FILE\n";
+			continue;
+		}
+
+		json js;
+		file >> js;
+
+		std::unique_ptr<AIBehavior> aiBehavior = std::make_unique<AIBehavior>();
+		AIBehavior* aiB = aiBehavior.get();
+		
+		aiB->name = js["Name"].get<std::string>();
+
+		if (js.contains("Steps"))
+		{
+			for (int i = 0; i < js["Steps"].size(); i++)
+			{
+				json& currentStep = js["Steps"][i];
+				aiBehavior->steps.push_back(AIStep());
+				AIStep& step = aiBehavior->steps[i];
+				step.nbOfWorker = currentStep["NumberOfWorkers"].get<int>();
+				step.nbOfUnits = currentStep["NumberOfUnits"].get<int>();
+				for (int j = 0; j < currentStep["ListOfBuilding"].size(); j++)
+					step.listOfBuildings.push_back(currentStep["ListOfBuilding"][j].get<std::string>());
+			}
+		}
+
+		resourcesManager.aiBehaviors[aiB->name] = std::move(aiBehavior);
 	}
 }

@@ -41,6 +41,11 @@ namespace Cookie
 		}
 	}
 
+	namespace Gameplay
+	{
+		struct AIBehavior;
+	}
+
 	namespace Resources
 	{
 		namespace Serialization
@@ -61,6 +66,7 @@ namespace Cookie
 				void SaveTexture(std::string& name, Cookie::Core::Math::Vec4& color);
 				void SaveVolumAndModeMusic(Sound* const & sound);
 				void SaveParticles(Cookie::Resources::Particles::ParticlesSystem& particles);
+				void SaveAIBehavior(Cookie::Gameplay::AIBehavior& aiBehavior);
 			}
 
 			namespace Load
@@ -78,6 +84,7 @@ namespace Cookie
 				void LoadGameplay(json& game, Cookie::ECS::ComponentGameplay& gameplay, Cookie::Resources::ResourcesManager& resourcesManager, bool allPrefabLoaded = false);
 				void LoadVolumAndModeMusic(std::string path, Sound* const& sound);
 				void LoadAllParticles(Cookie::Resources::ResourcesManager& resourcesManager);
+				void LoadAllAIBehaviors(Cookie::Resources::ResourcesManager& resourcesManager);
 			}
 		}
 	}
