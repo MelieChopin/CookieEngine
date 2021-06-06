@@ -92,9 +92,17 @@ void Game::CalculateMousePosInWorld()
 }
 void Game::HandleGameplayInputs()
 {
+
+
+    if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_A])
+    {
+        coordinator.componentHandler->GetComponentGameplay(coordinator.selectedEntities[0]->id).componentLive.TakeHit(0);
+    }
+
+
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
     {
-        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["04Base"].get(), E_ARMY_NAME::E_PLAYER);
+        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["Base"].get(), E_ARMY_NAME::E_PLAYER);
 
         ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
         ComponentModel& model = coordinator.componentHandler->GetComponentModel(newEntity.id);
@@ -108,7 +116,7 @@ void Game::HandleGameplayInputs()
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B])
     {
-        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["04Base"].get(), E_ARMY_NAME::E_AI1);
+        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["Base"].get(), E_ARMY_NAME::E_AI1);
 
         ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
         ComponentModel& model = coordinator.componentHandler->GetComponentModel(newEntity.id);
@@ -122,7 +130,7 @@ void Game::HandleGameplayInputs()
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_X])
     {
-        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["Resource"].get(), E_ARMY_NAME::E_DEFAULT_NAME);
+        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["ResourcePrimary"].get(), E_ARMY_NAME::E_DEFAULT_NAME);
 
         ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
         ComponentModel& model = coordinator.componentHandler->GetComponentModel(newEntity.id);

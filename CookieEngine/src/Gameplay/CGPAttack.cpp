@@ -20,7 +20,7 @@ void CGPAttack::Attack()
 		if (vfxAttack)
 			ParticlesHandler::CreateParticlesWithPrefab(trs->pos, vfxAttack, target->trs->pos);
 
-		attackCooldown = 1.f / attackSpeed;
+		attackCooldown = attackSpeed;
 		target->TakeHit(attackDamage);
 	}
 }
