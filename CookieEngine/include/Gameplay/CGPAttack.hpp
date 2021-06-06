@@ -33,7 +33,7 @@ namespace Cookie
 
 			float powerLevel     {0}; //used for AI analysis
 			float attackDamage   {1};
-			float attackSpeed    {5}; //attack per sec, so maxCooldown = 1 / attackSpeed
+			float attackSpeed    {1}; 
 			float attackCooldown {0};
 			float attackRange    {10};
 
