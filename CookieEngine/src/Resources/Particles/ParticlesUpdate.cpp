@@ -106,7 +106,7 @@ void CollisionWithPlane::Update(ParticlesData* p)
 		Cookie::Core::Math::Vec3 pos(p->data[i].pos.x, p->data[i].pos.y, p->data[i].pos.z);
 		float distance = (pos.Dot(n) + dis) / n.Length();
 
-		if (distance <= Cookie::Core::Math::EPSILON && p->data[i].isBillboard == true)
+		if (distance <= Cookie::Core::Math::EPSILON)
 		{
 			p->countAlive--;
 			ParticlesHandler::CreateParticlesWithPrefab(p->data[i].pos, namePrefab);
