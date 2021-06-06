@@ -42,10 +42,13 @@ namespace Cookie
 
 			std::unique_ptr<Resources::Scene>				scene{nullptr};
 
+			bool isPaused = false;
+
 		public:
 			 Game();
 			~Game();
 
+			void Start();
 			void Update();
 			void Loop();
 

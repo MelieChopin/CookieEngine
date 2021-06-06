@@ -28,11 +28,19 @@ Game::Game():
     Core::UIcore::FinishInit(renderer);
     renderer.drawData.Init(*this);
     renderer.miniMapPass.CreateDepth(miniMapResolution, miniMapResolution);
+
+    uiMenu.GiveQuitFunction([&game=*this]{glfwSetWindowShouldClose(game.renderer.window.window, true);});
 }
 
 Game::~Game()
 {
     Physics::PhysicsHandle::Terminate();
+}
+
+
+void Game::Start()
+{
+    uiMenu.SetMenuOpened();
 }
 
 /*================== LOOP ==================*/
@@ -57,22 +65,28 @@ void Game::Update()
     //physSim.Update();
     //coordinator.ApplySystemPhysics(physSim.factor);
 
-    renderer.Clear();
-    renderer.ClearFrameBuffer(frameBuffer);
-    renderer.ClearFrameBuffer(miniMapBuffer);
+    if (!uiMenu.menuState)
+    {
+        renderer.Clear();
+        renderer.ClearFrameBuffer(frameBuffer);
+        renderer.ClearFrameBuffer(miniMapBuffer);
 
-    scene->camera->Update();
-    particlesHandler.Update();
-    coordinator.ApplyComputeTrs();
+        if (!isPaused)
+        {
+            scene->camera->Update();
+            particlesHandler.Update();
+            coordinator.ApplyComputeTrs();
 
-    CalculateMousePosInWorld();
-    HandleGameplayInputs();
-    ECSCalls();
+            CalculateMousePosInWorld();
+            HandleGameplayInputs();
+            ECSCalls();
+        }
 
-    renderer.Draw(scene->camera.get(), frameBuffer);
-    particlesHandler.Draw(*scene->camera.get());
-    DisplayLife();
-    renderer.DrawMiniMap(miniMapBuffer);
+        renderer.Draw(scene->camera.get(), frameBuffer);
+        particlesHandler.Draw(*scene->camera.get());
+        DisplayLife();
+        renderer.DrawMiniMap(miniMapBuffer);
+    }
     
     Resources::SoundManager::UpdateFMODFor3DMusic(*scene->camera.get());
 

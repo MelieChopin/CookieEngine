@@ -93,6 +93,8 @@ namespace Cookie
 				return 0.0f;
 			}
 
+			void HandleEditorInput();
+
 			void Loop();
 			void ChooseDrawBuffer();
 
