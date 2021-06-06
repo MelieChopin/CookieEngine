@@ -51,7 +51,7 @@ namespace Cookie
 			class PointPositionGenerate : public ParticlesGenerator
 			{
 			public:
-				Cookie::Core::Math::Vec3 pos;
+				Cookie::Core::Math::Vec3 pos = Cookie::Core::Math::Vec3(0, 0, 0);
 				Cookie::Core::Math::Mat4* trs;
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
@@ -64,8 +64,8 @@ namespace Cookie
 			class BoxPositionGenerate : public ParticlesGenerator
 			{
 			public :
-				Cookie::Core::Math::Vec3 pos;
-				Cookie::Core::Math::Vec3 sizeBox;
+				Cookie::Core::Math::Vec3 pos = Cookie::Core::Math::Vec3(0, 0, 0);
+				Cookie::Core::Math::Vec3 sizeBox = Cookie::Core::Math::Vec3(1, 1, 1);
 				Cookie::Core::Math::Mat4* trs;
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
@@ -78,7 +78,7 @@ namespace Cookie
 			class SpherePositionGenerate : public ParticlesGenerator
 			{
 			public:
-				Cookie::Core::Math::Vec3 pos; 
+				Cookie::Core::Math::Vec3 pos = Cookie::Core::Math::Vec3(0, 0, 0);
 				Cookie::Core::Math::Mat4* trs;
 				float radius = 2;
 
@@ -92,7 +92,7 @@ namespace Cookie
 			class ScaleConstGenerate : public ParticlesGenerator
 			{
 			public:
-				Cookie::Core::Math::Vec3 scale;
+				Cookie::Core::Math::Vec3 scale = Cookie::Core::Math::Vec3(1, 1, 1);
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
 				ScaleConstGenerate() { type = TYPEGEN::SCALECONSTGEN; }
@@ -104,8 +104,8 @@ namespace Cookie
 			class ScaleRandGenerate : public ParticlesGenerator
 			{
 			public:
-				Cookie::Core::Math::Vec3 scaleMin;
-				Cookie::Core::Math::Vec3 scaleMax;
+				Cookie::Core::Math::Vec3 scaleMin = Cookie::Core::Math::Vec3(1, 1, 1);
+				Cookie::Core::Math::Vec3 scaleMax = Cookie::Core::Math::Vec3(2, 2, 2);
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
@@ -117,8 +117,8 @@ namespace Cookie
 			class RotateRandGenerate : public ParticlesGenerator
 			{
 			public:
-				Cookie::Core::Math::Vec3 rotMin;
-				Cookie::Core::Math::Vec3 rotMax;
+				Cookie::Core::Math::Vec3 rotMin = Cookie::Core::Math::Vec3(0, 0, 0);
+				Cookie::Core::Math::Vec3 rotMax = Cookie::Core::Math::Vec3(1, 1, 1);
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
@@ -130,7 +130,7 @@ namespace Cookie
 			class VelocityConstGenerate : public ParticlesGenerator
 			{
 			public :
-				Cookie::Core::Math::Vec3 vel;
+				Cookie::Core::Math::Vec3 vel = Cookie::Core::Math::Vec3(0, 0, 0);
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
@@ -143,8 +143,8 @@ namespace Cookie
 			class VelocityRandGenerate : public ParticlesGenerator
 			{
 			public:
-				Cookie::Core::Math::Vec3 velMin;
-				Cookie::Core::Math::Vec3 velMax;
+				Cookie::Core::Math::Vec3 velMin = Cookie::Core::Math::Vec3(0, 0, 0);
+				Cookie::Core::Math::Vec3 velMax = Cookie::Core::Math::Vec3(1, 1, 1);
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
@@ -190,8 +190,8 @@ namespace Cookie
 			class ColorRandGenerate : public ParticlesGenerator
 			{
 			public:
-				Cookie::Core::Math::Vec4 minCol;
-				Cookie::Core::Math::Vec4 maxCol;
+				Cookie::Core::Math::Vec4 minCol = Cookie::Core::Math::Vec4(0, 0, 0, 0);
+				Cookie::Core::Math::Vec4 maxCol = Cookie::Core::Math::Vec4(1, 1, 1, 1);
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
@@ -203,7 +203,7 @@ namespace Cookie
 			class ColorConstGenerate : public ParticlesGenerator
 			{
 			public:
-				Cookie::Core::Math::Vec4 col;
+				Cookie::Core::Math::Vec4 col = Cookie::Core::Math::Vec4(1, 1, 1, 1);
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
 
@@ -215,7 +215,7 @@ namespace Cookie
 			class InitVelocityWithPoint : public ParticlesGenerator
 			{
 			public:
-				Cookie::Core::Math::Vec3 endPoint;
+				Cookie::Core::Math::Vec3 endPoint = Cookie::Core::Math::Vec3(0, 0, 0);
 
 				virtual void generate(ParticlesData* data, int start, int end) override;
 

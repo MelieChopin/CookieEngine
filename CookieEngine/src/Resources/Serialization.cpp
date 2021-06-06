@@ -448,8 +448,7 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const Prefab* const & pr
 
 	 if (prefab->signature & C_SIGNATURE::FX)
 	 {
-		 int index = js["FX"].size();
-		 json& fx = js["FX"][index];
+		 json& fx = js["FX"];
 		 const ComponentGameplay& gameplay = prefab->gameplay;
 		 if (gameplay.signatureGameplay & CGP_SIGNATURE::ATTACK)
 		 {
@@ -1266,6 +1265,7 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 				 if (resourcesManager.sounds.find(name) != resourcesManager.sounds.end())
 					 game.sfxAttack = resourcesManager.sounds[name].get();
 				 name = fx["CGPAttack"]["vfxAttack"].get<std::string>();
+				 std::cout << name << "\n";
 				 if (resourcesManager.particles.find(name) != resourcesManager.particles.end())
 					 game.vfxAttack = resourcesManager.particles[name].get();
 			 }
@@ -1679,14 +1679,14 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 		//Emitter
 		if (js.contains("Emitter"))
 		{
-			json emitter = js["Emitter"];
-			pref.emitter.resize(emitter.size());
-			pref.emit.resize(emitter.size());
-			for (int i = 0; i < emitter.size(); i++)
+			json emitterJson = js["Emitter"];
+			pref.emitter.resize(emitterJson.size());
+			pref.emit.resize(emitterJson.size());
+			for (int i = 0; i < emitterJson.size(); i++)
 			{
-				if (emitter[i]["Generators"].is_array())
+				if (emitterJson[i]["Generators"].is_array())
 				{
-					json gen = emitter[i]["Generators"];
+					json gen = emitterJson[i]["Generators"];
 					for (int j = 0; j < gen.size(); j++)
 					{
 						TYPEGEN typeGen = (TYPEGEN)gen[j]["Type"].get<int>();
@@ -1698,6 +1698,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							emit.name = "PointPositionGen";
 							gen[j]["pos"].get_to(emit.data[0].e);
 							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::PPGEN;
 							break;
 						}
 						case (TYPEGEN::BOXPOSITIONGEN): {
@@ -1706,6 +1707,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["pos"].get_to(emit.data[0].e);
 							gen[j]["sizeBox"].get_to(emit.data[1].e);
 							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::BPGEN;
 							break;
 						}
 						case (TYPEGEN::CIRCLEPOSITIONGEN): {
@@ -1714,12 +1716,14 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["pos"].get_to(emit.data[0].e);
 							emit.data[1].x = gen[j]["radius"].get<float>();
 							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::CPGEN;
 							break;
 						}
 						case (TYPEGEN::SCALECONSTGEN): {
 							std::shared_ptr<ScaleConstGenerate> scaleC = std::make_unique<ScaleConstGenerate>();
 							gen[j]["scale"].get_to(scaleC.get()->scale.e);
 							emitter.generators.push_back(std::move(scaleC));
+							emitter.componentAdd += COMPONENTADD::SCGEN;
 							break;
 						}
 						case (TYPEGEN::SCALERANDGEN): {
@@ -1727,6 +1731,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["scaleMin"].get_to(scaleR.get()->scaleMin.e);
 							gen[j]["scaleMax"].get_to(scaleR.get()->scaleMax.e);
 							emitter.generators.push_back(std::move(scaleR));
+							emitter.componentAdd += COMPONENTADD::SRGEN;
 							break;
 						}
 						case (TYPEGEN::ROTATERANDGEN): {
@@ -1734,12 +1739,14 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["rotMin"].get_to(rot.get()->rotMin.e);
 							gen[j]["rotMax"].get_to(rot.get()->rotMax.e);
 							emitter.generators.push_back(std::move(rot));
+							emitter.componentAdd += COMPONENTADD::RRGEN;
 							break;
 						}
 						case (TYPEGEN::VELCONSTGEN): {
 							std::shared_ptr<VelocityConstGenerate> velC = std::make_unique<VelocityConstGenerate>();
 							gen[j]["vel"].get_to(velC.get()->vel.e);
 							emitter.generators.push_back(std::move(velC));
+							emitter.componentAdd += COMPONENTADD::VCGEN;
 							break;
 						}
 						case (TYPEGEN::VELRANDGEN): {
@@ -1747,18 +1754,21 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["velMin"].get_to(velR.get()->velMin.e);
 							gen[j]["velMax"].get_to(velR.get()->velMax.e);
 							emitter.generators.push_back(std::move(velR));
+							emitter.componentAdd += COMPONENTADD::VRGEN;
 							break;
 						}
 						case (TYPEGEN::MASSCONSTGEN): {
 							std::shared_ptr<MassConstGenerate> mass = std::make_unique<MassConstGenerate>();
 							mass.get()->mass = gen[j]["mass"].get<float>();
 							emitter.generators.push_back(std::move(mass));
+							emitter.componentAdd += COMPONENTADD::MCGEN;
 							break;
 						}
 						case (TYPEGEN::TIMECONSTGEN): {
 							std::shared_ptr<TimeConstGenerate> timeC = std::make_unique<TimeConstGenerate>();
 							timeC.get()->time = gen[j]["time"].get<float>();
 							emitter.generators.push_back(std::move(timeC));
+							emitter.componentAdd += COMPONENTADD::TCGEN;
 							break;
 						}
 						case (TYPEGEN::TIMERANDGEN): {
@@ -1766,12 +1776,14 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							timeR.get()->timeMin = gen[j]["timeMin"].get<float>();
 							timeR.get()->timeMax = gen[j]["timeMax"].get<float>();
 							emitter.generators.push_back(std::move(timeR));
+							emitter.componentAdd += COMPONENTADD::TRGEN;
 							break;
 						}
 						case (TYPEGEN::COLORCONSTGEN): {
 							std::shared_ptr<ColorConstGenerate> colorC = std::make_unique<ColorConstGenerate>();
 							gen[j]["color"].get_to(colorC.get()->col.e);
 							emitter.generators.push_back(std::move(colorC));
+							emitter.componentAdd += COMPONENTADD::CCGEN;
 							break;
 						}
 						case (TYPEGEN::COLORRANDGEN): {
@@ -1779,21 +1791,23 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["colorMin"].get_to(colorR.get()->minCol.e);
 							gen[j]["colorMax"].get_to(colorR.get()->maxCol.e);
 							emitter.generators.push_back(std::move(colorR));
+							emitter.componentAdd += COMPONENTADD::CRGEN;
 							break;
 						}
 						case (TYPEGEN::INITVELWITHPOINT): {
 							Particles::emit emit;
 							emit.name = "InitVelWithPoint";
 							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::IVWP;
 							break;
 						}
 						}
 					}
 				}
 
-				if (emitter[i]["Updates"].is_array())
+				if (emitterJson[i]["Updates"].is_array())
 				{
-					json up = emitter[i]["Updates"];
+					json up = emitterJson[i]["Updates"];
 					for (int j = 0; j < up.size(); j++)
 					{
 						TYPEUP typeUp = (TYPEUP)up[j]["Type"].get<int>();
@@ -1803,41 +1817,48 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 						case (TYPEUP::UPDATEVEL): {
 							std::shared_ptr<UpdateVelocity> vel = std::make_unique<UpdateVelocity>();
 							emitter.updates.push_back(std::move(vel));
+							emitter.componentAdd += COMPONENTADD::UPVEL;
 							break;
 						}
 						case (TYPEUP::UPDATESCALE): {
 							std::shared_ptr<UpdateScale> upScale = std::make_unique<UpdateScale>();
 							up[j]["scaleEnd"].get_to(upScale.get()->scaleEnd.e);
 							emitter.updates.push_back(std::move(upScale));
+							emitter.componentAdd += COMPONENTADD::UPSCALE;
 							break;
 						}
 						case (TYPEUP::UPDATEALPHA): {
 							std::shared_ptr<UpdateAlpha> upAlpha = std::make_unique<UpdateAlpha>();
 							upAlpha.get()->alphaEnd = up[j]["alphaEnd"].get<float>();
 							emitter.updates.push_back(std::move(upAlpha));
+							emitter.componentAdd += COMPONENTADD::UPALPHA;
 							break;
 						}
 						case (TYPEUP::COLOROVERLIFE): {
 							std::shared_ptr<ColorOverLife> upColor = std::make_unique<ColorOverLife>();
 							up[j]["colorEnd"].get_to(upColor.get()->colorEnd.e);
 							emitter.updates.push_back(std::move(upColor));
+							emitter.componentAdd += COMPONENTADD::COL;
 							break;
 						}
 						case (TYPEUP::ENABLEGRAVITY): {
 							std::shared_ptr<EnabledGravity> upGravity = std::make_unique<EnabledGravity>();
 							upGravity.get()->gravity = up[j]["gravity"].get<float>();
 							emitter.updates.push_back(std::move(upGravity));
+							emitter.componentAdd += COMPONENTADD::EG;
 							break;
 						}
 						case (TYPEUP::UPDATETIME): {
 							std::shared_ptr<UpdateTime> time = std::make_unique<UpdateTime>();
 							emitter.updates.push_back(std::move(time));
+							emitter.componentAdd += COMPONENTADD::UPT;
 							break;
 						}
 						case (TYPEUP::LOOP): {
 							Particles::emit emit;
 							emit.name = "Loop";
 							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::LP;
 							break;
 						}
 						case (TYPEUP::COLLISIONWITHPLANE): {
@@ -1846,6 +1867,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							up[j]["normal"].get_to(plane.get()->n.e);
 							plane.get()->namePrefab = up[j]["namePrefab"].get<std::string>();
 							emitter.updates.push_back(std::move(plane));
+							emitter.componentAdd += COMPONENTADD::CWP;
 							break;
 						}
 						case (TYPEUP::CREATEPARTICLES): {
@@ -1856,6 +1878,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							emit.data[1].y = up[j]["coeffPos"].get<float>();
 							emit.data[1].z = up[j]["time"].get<float>();
 							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::CP;
 							break;
 						}
 						case (TYPEUP::SHADOW): {
@@ -1864,6 +1887,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							emit.data[0].x = up[j]["index"].get<int>();
 							emit.data[0].y = up[j]["time"].get<float>();
 							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::SH;
 							break;
 						}
 						case (TYPEUP::SPAWNEND):{
@@ -1871,7 +1895,9 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							emit.name = "SpawnEnd";
 							emit.nameData = up[j]["namePrefab"].get<std::string>();
 							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::SP;
 						}
+
 						}
 					}
 				}
