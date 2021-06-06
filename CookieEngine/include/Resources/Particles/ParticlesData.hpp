@@ -21,68 +21,79 @@ namespace Cookie
 
 		namespace Particles
 		{  
+			struct Data
+			{
+				Cookie::Core::Math::Vec4 col = Cookie::Core::Math::Vec4(1, 1, 1, 1);
+				Cookie::Core::Math::Vec4 colBegin = Cookie::Core::Math::Vec4(1, 1, 1, 1);
+				Cookie::Core::Math::Vec3 pos = Cookie::Core::Math::Vec3(0, 0, 0);
+				Cookie::Core::Math::Vec3 scale = Cookie::Core::Math::Vec3(1, 1, 1);
+				Cookie::Core::Math::Vec3 scaleBegin = Cookie::Core::Math::Vec3(1, 1, 1);
+				Cookie::Core::Math::Vec3 vel = Cookie::Core::Math::Vec3(0, 0, 0);
+				Cookie::Core::Math::Vec3 rot = Cookie::Core::Math::Vec3(0, 0, 0);
+				float					 time = 1;
+				float					 timeMax = 1;
+				float					 mass = 1.0f;
+				bool					 isBillboard = true;
+				bool					 alive = false;
+			};
 
 			class ParticlesData
 			{
 			public:
-				std::vector<Cookie::Core::Math::Mat4>	trs;
-				std::vector<Cookie::Core::Math::Vec3>	vel;
-				std::vector<Cookie::Core::Math::Vec4>	col;
-				std::vector<Cookie::Core::Math::Vec4>	acc;
-				std::vector<float>						time;
-				std::vector<float>						mass;
-				std::vector<bool>						alive;
+				std::vector<Data> data;
 
-				int										count = 0;
+				Cookie::Resources::Mesh*				mesh = nullptr;
+				Cookie::Resources::Texture*				texture = nullptr;
 				int										countFrame = 0;
 				int										countAlive = 0;
+				bool									canRemoved = true;
 
 				ParticlesData() {}
 				~ParticlesData() {}
 
 				void generate(int size, int sizeFrame) 
 				{
-					count = size;
 					countFrame = sizeFrame;
 					countAlive = 0;
+					data.resize(size);
+				}
 
-					trs.resize(size);
-					for (int i = 0; i < trs.size(); i++)
-						trs[i] = Cookie::Core::Math::Mat4::Identity();
-					vel.resize(size);
-					col.resize(size);
-					acc.resize(size);
-					time.resize(size);
-					alive.resize(size);
-					mass.resize(size);
+				void SetIsBIllboard(bool value)
+				{
+					for (int i = 0; i < data.size(); i++)
+						data[i].isBillboard = value;
 				}
 
 				void kill(int index) 
 				{
-					alive[index] = false;
+					data[index].alive = false;
 					swapData(index, countAlive - 1);
 					countAlive -= 1;
 				}
 
 				void wake(int indexBegin, int indexEnd)
 				{
-					for (int i = indexBegin; i <= indexEnd; i++)
+					for (int i = indexBegin; i < indexEnd; i++)
 					{
-						alive[i] = true;
+						data[i].alive = true;
 						countAlive += 1;
-						trs[i] = Cookie::Core::Math::Mat4::Identity();
+						data[i].pos = Cookie::Core::Math::Vec3(0, 0, 0);
+						data[i].scale = Cookie::Core::Math::Vec3(1, 1, 1);
+						data[i].rot = Cookie::Core::Math::Vec3(0, 0, 0);
+						data[i].time = 10;
+						data[i].timeMax = 10;
 					}
 				}
 
 				void swapData(int indexA, int indexB) 
 				{
-					std::iter_swap(trs.begin() + indexA, trs.begin() + indexB);
-					std::iter_swap(vel.begin() + indexA, vel.begin() + indexB);
-					std::iter_swap(col.begin() + indexA, col.begin() + indexB);
-					std::iter_swap(acc.begin() + indexA, acc.begin() + indexB);
-					std::iter_swap(time.begin() + indexA, time.begin() + indexB);
-					std::iter_swap(alive.begin() + indexA, alive.begin() + indexB);
-					std::iter_swap(mass.begin() + indexA, mass.begin() + indexB);
+					std::iter_swap(data.begin() + indexA, data.begin() + indexB);
+				}
+
+				bool operator==(const ParticlesData& data) const
+				{
+					return data.countAlive == countAlive && data.countFrame == countFrame
+						&& data.mesh == mesh && data.texture == texture;
 				}
 			};
 			

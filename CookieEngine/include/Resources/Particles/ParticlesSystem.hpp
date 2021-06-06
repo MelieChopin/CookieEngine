@@ -1,13 +1,16 @@
 #ifndef __PARTICLESSYSTEM_HPP__
 #define __PARTICLESSYSTEM_HPP__
 
+
 #include "ParticlesEmitter.hpp"
 #include "ParticlesData.hpp"
 #include "ComponentTransform.hpp"
-#include "ParticlesPass.hpp"
+#include "RenderPass/ParticlesPass.hpp"
 #include "Resources/Mesh.hpp"
+#include "Resources/Texture.hpp"
 #include "Camera.hpp"
-#include "ResourcesManager.hpp"
+#include "DrawDataHandler.hpp"
+#include "Resources/ResourcesManager.hpp"
 
 namespace Cookie
 {
@@ -15,55 +18,58 @@ namespace Cookie
 	{
 		namespace Particles
 		{
+			struct emit
+			{
+				std::string name;
+				Cookie::Core::Math::Vec3 data[2];
+				std::string nameData;
+			};
+
+			struct data
+			{
+				Mesh* mesh;
+				Texture* texture;
+				int size;
+				int countFrame;
+				int countAlive;
+				bool isBillboard;
+			};
+
+			class ParticlesPrefab
+			{
+			public:
+				std::string name;
+				std::vector<data> data;
+				std::vector<ParticlesEmitter> emitter;
+				std::vector<std::vector<emit>> emit;
+			};
+
 			class ParticlesSystem
 			{
 			public :
 				std::vector<ParticlesData> data;
 				std::vector<ParticlesEmitter> particlesEmiter;
 
-				ECS::ComponentTransform trs;
+				Core::Math::Mat4 trs = Core::Math::Mat4::Identity();
+				bool needToBeRemoved = false;
 
-				Cookie::Render::ParticlesPass shader;
+				std::string name;
 
-				ParticlesSystem() {}
+				ParticlesSystem() 
+				{}
 
-				ParticlesSystem(const ParticlesSystem& other) : data(other.data), particlesEmiter(other.particlesEmiter)
+				ParticlesSystem(Cookie::Render::ParticlesPass* shader)
+				{}
+
+				~ParticlesSystem() 
 				{
-					shader.InitShader();
+					data.clear();
+					particlesEmiter.clear();
 				}
 
-				ParticlesSystem(int size, int sizeFrame)
-				{
-					shader.InitShader();
-					data.push_back(ParticlesData());
-					particlesEmiter.push_back(ParticlesEmitter());
-					data[0].generate(size, sizeFrame);
-				}
-				~ParticlesSystem() {}
-
-				void Update()
-				{
-					for (int j = 0; j < data.size(); j++)
-						for (int k = 0; k < particlesEmiter[j].updates.size(); k++)
-							particlesEmiter[j].updates[k]->Update(&data[j]);
-				}
-
-				void Draw(const Render::Camera& cam, Cookie::Resources::ResourcesManager& resources)
-				{
-					for (int j = 0; j < data.size(); j++)
-					{
-						std::vector<Cookie::Render::InstancedData> newData;
-						for (int i = 0; i < data[j].countAlive; i++)
-						{
-							Cookie::Render::InstancedData temp;
-							temp.World = (trs.TRS * data[j].trs[i]);
-							temp.Color = Cookie::Core::Math::Vec4(data[j].col[i].ToVec3(), 0.25f);
-							newData.push_back(temp);
-						}
-
-						shader.Draw(cam, resources.meshes["Quad"].get(), newData);
-					}
-				}
+				void generate();
+				void Update();
+				void Draw(const Render::Camera& cam, Render::Frustrum& frustrum);
 			};
 		}
 	}

@@ -26,12 +26,12 @@ void Viewport::WindowDisplay()
 			viewportDrawspace.width  = GetContentRegionAvail().x;
 			viewportDrawspace.height = GetContentRegionAvail().y;
 
-			camera->SetProj(60.f, viewportDrawspace.width, viewportDrawspace.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
+			camera->SetProj(camera->fov, viewportDrawspace.width, viewportDrawspace.height, camera->camNear, camera->camFar);
 		}
 
 		ImGui::Image(static_cast<ImTextureID>(frameBuffer.shaderResource), GetContentRegionAvail());
-		camera->windowOffset = { {viewportDrawspace.posx, viewportDrawspace.posy } };
-
+		camera->windowOffset = { {viewportDrawspace.posx, viewportDrawspace.posy} };
+		
 
 		ImGuiIO& io = GetIO();
 
@@ -65,6 +65,7 @@ void Viewport::GizmoManipulator()
 	ComponentTransform& trsf = coordinator.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id);
 	Mat4 trsfTMat = trsf.TRS.Transpose();
 
+	ImGuizmo::SetDrawlist();
 	ImGuizmo::SetRect(viewportDrawspace.posx, viewportDrawspace.posy, viewportDrawspace.width, viewportDrawspace.height);
 
 	static ImGuizmo::OPERATION transformTool;
@@ -77,7 +78,7 @@ void Viewport::GizmoManipulator()
 	}
 
 
-	if (ImGuizmo::Manipulate(camera->GetView().Transpose().e, camera->GetProj().Transpose().e, transformTool, ImGuizmo::MODE::WORLD, trsfTMat.e))
+	if (ImGuizmo::Manipulate(camera->GetView().Transpose().e, camera->GetProj().Transpose().e, transformTool, ImGuizmo::MODE::LOCAL, trsfTMat.e))
 	{
 		trsfTMat.Transpose();
 		ImGuizmo::DecomposeMatrixToComponents(trsfTMat.e, trsf.pos.e, trsf.rot.e, trsf.scale.e);

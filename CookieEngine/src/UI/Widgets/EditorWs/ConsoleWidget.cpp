@@ -1,6 +1,6 @@
 #include "Debug.hpp"
 #include "Resources/Texture.hpp"
-#include "Renderer.hpp"
+#include "ResourcesManager.hpp"
 #include "ConsoleWidget.hpp"
 
 #include <imgui.h>
@@ -10,14 +10,14 @@ using namespace Cookie::UIwidget;
 using namespace Cookie::Core;
 
 
-Console::Console(DebugMessageHandler& _debugManager, Cookie::Render::Renderer& _renderer)
+Console::Console(DebugMessageHandler& _debugManager, Cookie::Resources::ResourcesManager& _resources)
 	: WItemBase		("Console", false),
-	  debugManager	(_debugManager)
-{
-	icons[0] = std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/Log.ico");
-	icons[1] = std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/Warning.ico");
-	icons[2] = std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/Error.ico");
-}
+	  debugManager	(_debugManager),
+
+	  icons			{_resources.icons["Assets/EditorUIcons/Log.ico"].get(),
+					 _resources.icons["Assets/EditorUIcons/Warning.ico"].get(),
+					 _resources.icons["Assets/EditorUIcons/Error.ico"].get()}
+{}
 
 
 bool Console::BeginWindow(int windowFlags)
@@ -97,7 +97,7 @@ void Console::GroupedDisplay()
 
 		for (size_t fo = 0; fo < firstOccurences.size(); fo++)
 		{
-			if ((strcmp(it->text, firstOccurences[fo]->text) == 0) && (it->messageType == firstOccurences[fo]->messageType))
+			if ((it->text == firstOccurences[fo]->text) && (it->messageType == firstOccurences[fo]->messageType))
 			{
 				isNew = false;
 				repetitions[fo]++;
@@ -136,17 +136,17 @@ void Console::DisplayMessage(DebugMessage& message)
 	switch (message.messageType)
 	{
 	case (DebugMessage::Log):
-		TextColored({ (255.f - message.colorVariant) / 255.f, 1, 1, 1 }, "%s", message.text);
+		TextColored({ (255.f - message.colorVariant) / 255.f, 1, 1, 1 }, "%s", message.text.c_str());
 		MessageColorBounce(1, message.colorVariant, message.bouncing, message.colorBounces);
 		break;
 
 	case (DebugMessage::Warning):
-		TextColored({ 1, 1, (255.f - message.colorVariant) / 255.f, 1 }, "%s", message.text);
+		TextColored({ 1, 1, (255.f - message.colorVariant) / 255.f, 1 }, "%s", message.text.c_str());
 		MessageColorBounce(3, message.colorVariant, message.bouncing, message.colorBounces);
 		break;
 
 	case (DebugMessage::Error):
-		TextColored({ 1, (255.f - message.colorVariant) / 255.f, (255.f - message.colorVariant) / 255.f, 1 }, "%s", message.text);
+		TextColored({ 1, (255.f - message.colorVariant) / 255.f, (255.f - message.colorVariant) / 255.f, 1 }, "%s", message.text.c_str());
 		MessageColorBounce(5, message.colorVariant, message.bouncing, message.colorBounces);
 		break;
 	}

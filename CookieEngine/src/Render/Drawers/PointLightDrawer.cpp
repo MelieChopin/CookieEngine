@@ -3,9 +3,8 @@
 #include "Mat4.hpp"
 #include "Light.hpp"
 #include "Mesh.hpp"
-#include "ShadowBuffer.hpp"
 #include "DrawDataHandler.hpp"
-#include "RenderPass/PointLightPass.hpp"
+#include "Drawers/PointLightDrawer.hpp"
 
 using namespace Cookie::Core::Math;
 using namespace Cookie::Render;
@@ -19,13 +18,13 @@ struct INSTANCE_POINT_LIGHT
 
 /*======================= CONSTRUCTORS/DESTRUCTORS =======================*/
 
-PointLightPass::PointLightPass()
+PointLightDrawer::PointLightDrawer()
 {
     sphereMesh = Core::Primitives::CreateIcoSphere();
     InitShader();
 }
 
-PointLightPass::~PointLightPass()
+PointLightDrawer::~PointLightDrawer()
 {
     if (VShader)
         VShader->Release();
@@ -39,7 +38,7 @@ PointLightPass::~PointLightPass()
 
 /*======================= INIT METHODS =======================*/
 
-void PointLightPass::InitShader()
+void PointLightDrawer::InitShader()
 {
     ID3DBlob* blob = nullptr;
 
@@ -74,11 +73,11 @@ void PointLightPass::InitShader()
         VOut output;
     
         float4x4 model = 0;
-        model[0][0] = input.radius;
+        model[0][0] = input.radius * 2.0;
         model[0][3] = input.lightPos.x;
-        model[1][1] = input.radius;
+        model[1][1] = input.radius * 2.0;
         model[1][3] = input.lightPos.y;
-        model[2][2] = input.radius;
+        model[2][2] = input.radius * 2.0;
         model[2][3] = input.lightPos.z;
         model[3][3] = 1.0;
 
@@ -137,15 +136,13 @@ void PointLightPass::InitShader()
 
         float3  fragPos     = positionTex.Sample(ClampSampler,uv).xyz;
         float3  normal      = normalize(normalTex.Sample(ClampSampler,uv).xyz);
-        float3  albedo      = pow(albedoTex.Sample(ClampSampler,uv).xyz,2.2);
         float   metallic    = positionTex.Sample(ClampSampler,uv).w;
         float   roughness   = normalTex.Sample(ClampSampler,uv).w;
-        float   ao          = albedoTex.Sample(ClampSampler,uv).w;
         float3  lightDir    = (vertexOutput.lightPos - fragPos);
         float   dist        = length(lightDir);
 
-        output          = compute_lighting(normal,fragPos,normalize(lightDir),vertexOutput.color,albedo,metallic,roughness);
-        output.diffuse  = output.diffuse * Falloff(dist,vertexOutput.radius) + (0.03 * ao) *  float4(albedo,1.0);
+        output          = compute_lighting(normal,fragPos,normalize(lightDir),vertexOutput.color,metallic,roughness);
+        output.diffuse  = output.diffuse * Falloff(dist,vertexOutput.radius);
         output.diffuse  = pow(output.diffuse,0.45454545);
         output.specular = pow(output.specular * Falloff(dist,vertexOutput.radius),0.45454545);//
 
@@ -156,17 +153,20 @@ void PointLightPass::InitShader()
 
     D3D11_INPUT_ELEMENT_DESC ied[] =
     {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        /* mesh info */
+        { "POSITION",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,   D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "UV",         0, DXGI_FORMAT_R32G32_FLOAT,    0, 12,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "NORMAL",     0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
 
-        { "LIGHTPOS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0,  D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-        { "LIGHTRADIUS", 0, DXGI_FORMAT_R32_FLOAT, 1, offsetof(INSTANCE_POINT_LIGHT,radius),  D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-        { "LIGHTCOLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, offsetof(INSTANCE_POINT_LIGHT,color),  D3D11_INPUT_PER_INSTANCE_DATA, 1 }
+        /* point light instance info */
+        { "LIGHTPOS",       0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0,                                       D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+        { "LIGHTRADIUS",    0, DXGI_FORMAT_R32_FLOAT,       1, offsetof(INSTANCE_POINT_LIGHT,radius),   D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+        { "LIGHTCOLOR",     0, DXGI_FORMAT_R32G32B32_FLOAT, 1, offsetof(INSTANCE_POINT_LIGHT,color),    D3D11_INPUT_PER_INSTANCE_DATA, 1 }
     };
 
     Render::CreateLayout(&blob, ied, 6, &ILayout);
 
+    /* create the instance buffer to fill the point light info */
     D3D11_BUFFER_DESC instanceBufferDesc;
     instanceBufferDesc.Usage                = D3D11_USAGE_DYNAMIC;
     instanceBufferDesc.ByteWidth            = sizeof(INSTANCE_POINT_LIGHT) * POINT_LIGHT_MAX_NB;
@@ -177,30 +177,40 @@ void PointLightPass::InitShader()
 
     Render::RendererRemote::device->CreateBuffer(&instanceBufferDesc, 0, &IBuffer);
 
+    blob->Release();
 }
 
 /*======================= REALTIME METHODS =======================*/
 
-void PointLightPass::Set(ID3D11Buffer** lightCBuffer, const LightsArray& lights, const DrawDataHandler& drawData)
+void PointLightDrawer::Set(const LightsArray& lights, const DrawDataHandler& drawData)
 {
+    /* set the vertex shader and constant buffers */
     RendererRemote::context->VSSetShader(VShader, nullptr, 0);
-    RendererRemote::context->PSSetShader(PShader, nullptr, 0);
-    Render::RendererRemote::context->PSSetConstantBuffers(0, 1, lightCBuffer);
     RendererRemote::context->IASetInputLayout(ILayout);
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &drawData.CamCBuffer);
 
+    /* write the instance buffer with the point lights info */
+    WriteBuffer(lights.pointLights.data(), sizeof(INSTANCE_POINT_LIGHT) * lights.usedPoints, 0, &IBuffer);
 
-    WriteCBuffer(lights.pointLights.data(), sizeof(INSTANCE_POINT_LIGHT) * lights.usedPoints, 0, &IBuffer);
-
-    UINT stride[2] = { ((2 * sizeof(Core::Math::Vec3)) + sizeof(Core::Math::Vec2)), sizeof(INSTANCE_POINT_LIGHT) };
-    UINT offset[2] = { 0 , 0 };
-    ID3D11Buffer* VBuffers[2] = { sphereMesh->VBuffer, IBuffer };
-
+    /* set the vertex, index and instance buffer */
+    UINT stride[2]              = { ((2 * sizeof(Core::Math::Vec3)) + sizeof(Core::Math::Vec2)), sizeof(INSTANCE_POINT_LIGHT) };
+    UINT offset[2]              = { 0 , 0 };
+    ID3D11Buffer* VBuffers[2]   = { sphereMesh->VBuffer, IBuffer };
     RendererRemote::context->IASetIndexBuffer(sphereMesh->IBuffer, DXGI_FORMAT_R32_UINT, 0);
     RendererRemote::context->IASetVertexBuffers(0, 2, VBuffers, stride, offset);
 }
 
-void PointLightPass::Draw(const unsigned int instanceNb)
+void PointLightDrawer::FillStencil(const unsigned int instanceNb)
 {
+    /* to fill stencil, no need  of pxiel buffer */
+    RendererRemote::context->PSSetShader(nullptr, nullptr, 0);
+    RendererRemote::context->DrawIndexedInstanced(sphereMesh->INb, instanceNb, 0, 0, 0);
+}
+
+void PointLightDrawer::Draw(ID3D11Buffer** lightCBuffer, const unsigned int instanceNb)
+{
+    /* set all things we need in pixel */
+    RendererRemote::context->PSSetShader(PShader, nullptr, 0);
+    Render::RendererRemote::context->PSSetConstantBuffers(0, 1, lightCBuffer);
     RendererRemote::context->DrawIndexedInstanced(sphereMesh->INb, instanceNb, 0, 0, 0);
 }

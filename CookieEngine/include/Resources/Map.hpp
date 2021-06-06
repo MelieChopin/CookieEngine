@@ -24,6 +24,7 @@ namespace Cookie
 
 		struct Tile
 		{
+			int id = 0;
 			bool isObstacle = false;
 			bool isVisited = false;
 
@@ -65,14 +66,18 @@ namespace Cookie
 			Tile& GetTile(Core::Math::Vec2& mousePos);
 			Tile& GetTile(Core::Math::Vec3& pos);
 
+			void ClampPosInMap(Core::Math::Vec2& posToClamp, Core::Math::Vec2& buildingNbOfTiles);
+			void ClampPosInMap(Core::Math::Vec3& posToClamp);
+			void ClampPosInMapWithScale(ECS::ComponentTransform& trsToClamp);
+			void ClampPosOutsideObstacleTile(ECS::ComponentTransform& trsToClamp);
+
 			Core::Math::Vec2 GetCenterOfBuilding(Core::Math::Vec2& mousePos, Core::Math::Vec2& buildingNbOfTiles);
+			Core::Math::Vec3 GetCenterOfBuilding(Core::Math::Vec3& mousePos, Core::Math::Vec2& buildingNbOfTiles);
+
 			bool isBuildingValid(int indexTopLeft, Core::Math::Vec2& tileSize);
-			void GiveTilesToBuilding(int indexTopLeft, Gameplay::CGPProducer& building);
+			void FillOccupiedTiles(int indexTopLeft, Core::Math::Vec2& tileSize, std::vector<Tile*>& vectorOfOccupiedTiles);
 
 			bool ApplyPathfinding(Tile& tileStart, Tile& tileEnd);
-
-			void Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view, ID3D11Buffer** CBuffer);
-
 
 		};
 

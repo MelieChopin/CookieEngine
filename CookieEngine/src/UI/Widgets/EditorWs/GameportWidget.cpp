@@ -1,5 +1,8 @@
 #include "Game.hpp"
 #include "GameportWidget.hpp"
+#include "Scene.hpp"
+
+#include "Scene.hpp"
 
 #include <imgui.h>
 
@@ -9,38 +12,35 @@ using namespace Cookie::UIwidget;
 
 bool GamePort::BeginWindow(int windowFlags)
 {
-	if (!opened)
-	{
-		if (!isPlaying)	return false;
-		else			Flip();
-	}
-
 	if (isPlaying)
-	{
-		windowFlags |= ImGuiWindowFlags_NoDocking;
-		windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
-		windowFlags |= ImGuiWindowFlags_NoDecoration;
+	{	
+		contentVisible = ImGui::Begin(windowName, (isPlaying ? nullptr : &opened), windowFlags);
+
+		return true;
 	}
-	
-	contentVisible = ImGui::Begin(windowName, (isPlaying ? nullptr : &opened), windowFlags);
-
-	if (!opened) visible = true;
-
-	return true;
+	else return false;
 }
 
 
 void GamePort::WindowDisplay()
 {
-	TryBeginWindow()
+	TryBeginWindow(ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus)
 	{
-		if (!isPlaying)
-		{ Text("[Game not running]"); }
+		BeginChild("UnmovingContainer", {(float)game.renderer.window.width, (float)game.renderer.window.height}, false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove);
 
-		else
-		{
-			ImGui::Image(static_cast<ImTextureID>(game.frameBuffer.shaderResource), {(float)game.renderer.window.width, (float)game.renderer.window.height});
-		}
+		ImVec2 gameportPos;
+
+		gameportPos.x = GetWindowPos().x + GetCursorPosX();
+		gameportPos.y = GetWindowPos().y + GetCursorPosY();
+
+		game.scene->camera->windowOffset = { {gameportPos.x, gameportPos.y} };
+		game.scene->camera->Activate();
+
+		ImGui::Image(static_cast<ImTextureID>(game.frameBuffer.shaderResource), { (float)game.renderer.window.width, (float)game.renderer.window.height });
+			
+		game.scene->uiScene.RenderLayout();
+
+		EndChild();
 	}
 
 	ImGui::End();

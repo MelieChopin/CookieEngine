@@ -8,13 +8,12 @@ using namespace Cookie::Resources;
 Mesh::Mesh(std::string _name, aiMesh* mesh):
     name{_name}
 {
+    AABBMin = { mesh->mAABB.mMin.x, mesh->mAABB.mMin.y, mesh->mAABB.mMin.z };
+    AABBMax = { mesh->mAABB.mMax.x, mesh->mAABB.mMax.y, mesh->mAABB.mMax.z };
+
     INb     = mesh->mNumFaces * 3;//a face is a triangle as triangulate flag is enabled
     InitVBuffer(mesh);
     InitIBuffer(mesh);
-
-
-    AABBMin = { mesh->mAABB.mMin.x, mesh->mAABB.mMin.y, mesh->mAABB.mMin.z };
-    AABBMax = { mesh->mAABB.mMax.x, mesh->mAABB.mMax.y, mesh->mAABB.mMax.z };
 }
 
 #undef min
@@ -26,9 +25,10 @@ Mesh::Mesh(std::string meshName, std::vector<float>& vertices, std::vector<unsig
     name{ meshName }
 {
     INb = inb;
+    ComputeAABB(vertices);
+
     InitVBuffer(vertices);
     InitIBuffer(indices);
-    ComputeAABB(vertices);
 }
 
 Mesh::~Mesh()
@@ -81,11 +81,22 @@ void Mesh::InitVBuffer(aiMesh* mesh)
 
     std::vector<float> vertices;
 
+    /* find the max vertex size */
+    float xLength = AABBMax.x - AABBMin.x;
+    float yLength = AABBMax.y - AABBMin.y;
+    float zLength = AABBMax.z - AABBMin.z;
+
+    float max = std::max(xLength, std::max(yLength, zLength));
+
+    AABBMax /= max;
+    AABBMin /= max;
+
+    /* push vertices and normalize them in a box between -0.5 and 0.5 */
     for (int i = 0; i < mesh->mNumVertices; i++)
     {
-        vertices.push_back(mesh->mVertices[i].x);
-        vertices.push_back(mesh->mVertices[i].y);
-        vertices.push_back(mesh->mVertices[i].z);
+        vertices.push_back(mesh->mVertices[i].x/max);
+        vertices.push_back(mesh->mVertices[i].y/max);
+        vertices.push_back(mesh->mVertices[i].z/max);
         vertices.push_back(mesh->mTextureCoords[0][i].x);
         vertices.push_back(mesh->mTextureCoords[0][i].y);
         vertices.push_back(mesh->mNormals[i].x);
@@ -149,11 +160,28 @@ void Mesh::InitVBuffer(std::vector<float>& vertices)
     D3D11_BUFFER_DESC bDesc = {};
 
     bDesc.ByteWidth = vertices.size() * sizeof(float);
-    bDesc.Usage = D3D11_USAGE_DEFAULT;
+    bDesc.Usage     = D3D11_USAGE_DEFAULT;
     bDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     bDesc.CPUAccessFlags = 0;
     bDesc.MiscFlags = 0;
     bDesc.StructureByteStride = 0;
+
+
+    /* find the max vertex size */
+    float xLength = AABBMax.x - AABBMin.x;
+    float yLength = AABBMax.y - AABBMin.y;
+    float zLength = AABBMax.z - AABBMin.z;
+
+    float max = std::max(xLength, std::max(yLength, zLength));
+
+    AABBMax /= max;
+    AABBMin /= max;
+
+    /* push vertices and normalize them in a box between -0.5 and 0.5 */
+    for (int i = 0; i < vertices.size(); i++)
+    {
+        vertices[i] = vertices[i] / max;
+    }
 
     D3D11_SUBRESOURCE_DATA InitData;
     InitData.pSysMem = vertices.data();
@@ -194,7 +222,6 @@ void Mesh::Set()const
     UINT offset = 0;
     Render::RendererRemote::context->IASetVertexBuffers(0,1,&VBuffer,&stride,&offset);
     Render::RendererRemote::context->IASetIndexBuffer(IBuffer, DXGI_FORMAT_R32_UINT,0);
-    Render::RendererRemote::context->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void Mesh::Draw()const

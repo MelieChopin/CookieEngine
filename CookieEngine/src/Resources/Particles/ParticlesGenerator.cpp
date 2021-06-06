@@ -1,14 +1,7 @@
 #include "ParticlesGenerator.hpp"
 #include "ParticlesData.hpp"
 #include "Mat4.hpp"
-
-Cookie::Core::Math::Vec4 Cookie::Core::Math::Random(Cookie::Core::Math::Vec3& min, Cookie::Core::Math::Vec3& max)
-{
-	return Cookie::Core::Math::Vec4(float(rand()) / float((RAND_MAX)) * (max.x - min.x) + min.x,
-									float(rand()) / float((RAND_MAX)) * (max.y - min.y) + min.y,
-									float(rand()) / float((RAND_MAX)) * (max.z - min.z) + min.z,
-									1.0f);
-}
+#include "Calc.hpp"
 
 float Random(float min, float max)
 {
@@ -16,6 +9,12 @@ float Random(float min, float max)
 }
 
 using namespace Cookie::Resources::Particles;
+
+void PointPositionGenerate::generate(ParticlesData* data, int start, int end)
+{
+	for (int i = start; i < end; i++)
+		data->data[i].pos = (*trs) * pos;
+}
 
 void BoxPositionGenerate::generate(ParticlesData* data, int start, int end)
 {
@@ -29,55 +28,110 @@ void BoxPositionGenerate::generate(ParticlesData* data, int start, int end)
 
 	for (int i = start; i < end; i++)
 	{
-		Cookie::Core::Math::Vec3 temp = Cookie::Core::Math::Random(posMin, posMax).ToVec3();
-		data->trs[i].c[0].w = temp.x;
-		data->trs[i].c[1].w = temp.y;
-		data->trs[i].c[2].w = temp.z;
+		Cookie::Core::Math::Vec3 temp = Cookie::Core::Math::Random(posMin, posMax);
+		data->data[i].pos.x = temp.x;
+		data->data[i].pos.y = temp.y;
+		data->data[i].pos.z = temp.z;
+		data->data[i].pos = (*trs) * data->data[i].pos;
 	}
 }
 
-void CirclePositionGenerate::generate(ParticlesData* data, int start, int end)
+void SpherePositionGenerate::generate(ParticlesData* data, int start, int end)
 {
 	for (int i = start; i < end; i++)
 	{
 		float angle = Random(0.f, 360.f);
-		data->trs[i].c[0].w = radius * cos(angle);
-		data->trs[i].c[2].w = radius * sin(angle);
+		data->data[i].pos.x =  radius * (Random(0, 10) <= 5 ? -1 : 1) * cos(angle);
+		data->data[i].pos.y = radius * (Random(0, 10) <= 5 ? -1 : 1) * cos(angle);
+		data->data[i].pos.z = radius * (Random(0, 10) <= 5 ? -1 : 1) *  sin(angle);
+		data->data[i].pos = (*trs) * data->data[i].pos;
 	}
 }
+
+void ScaleConstGenerate::generate(ParticlesData* data, int start, int end)
+{
+	for (int i = start; i < end; i++)
+	{
+		data->data[i].scale = scale;
+		data->data[i].scaleBegin = scale;
+	}
+}
+
+void ScaleRandGenerate::generate(ParticlesData* data, int start, int end)
+{
+	for (int i = start; i < end; i++)
+	{
+		data->data[i].scale = Cookie::Core::Math::Random(scaleMin, scaleMax);
+		data->data[i].scaleBegin = data->data[i].scale;
+	}
+}
+
+void RotateRandGenerate::generate(ParticlesData* data, int start, int end)
+{
+	for (int i = start; i < end; i++)
+		data->data[i].rot = Cookie::Core::Math::Random(rotMin, rotMax);	
+}
+
 
 void VelocityConstGenerate::generate(ParticlesData* data, int start, int end)
 {
 	for (int i = start; i < end; i++)
-		data->vel[i] = vel;
+		data->data[i].vel = vel;
 }
 
 void VelocityRandGenerate::generate(ParticlesData* data, int start, int end)
 {
 	for (int i = start; i < end; i++)
-		data->vel[i] = Cookie::Core::Math::Random(velMin, velMax).ToVec3();
+		data->data[i].vel = Cookie::Core::Math::Random(velMin, velMax);
 }
 
 void MassConstGenerate::generate(ParticlesData* data, int start, int end)
 {
 	for (int i = start; i < end; i++)
-		data->mass[i] = mass;
+		data->data[i].mass = mass;
 }
 
 void TimeConstGenerate::generate(ParticlesData* data, int start, int end)
 {
 	for (int i = start; i < end; i++)
-		data->time[i] = time;
+	{
+		data->data[i].time = time;
+		data->data[i].timeMax = time;
+	}
 }
 
 void TimeRandGenerate::generate(ParticlesData* data, int start, int end)
 {
 	for (int i = start; i < end; i++)
-		data->time[i] = Random(timeMin, timeMax);
+	{
+		data->data[i].time = Random(timeMin, timeMax);
+		data->data[i].timeMax = data->data[i].time;
+	}
 }
 
 void ColorRandGenerate::generate(ParticlesData* data, int start, int end)
 {
 	for (int i = start; i < end; i++)
-		data->col[i] = Cookie::Core::Math::Random(minCol, maxCol);
+	{
+		data->data[i].col = Cookie::Core::Math::Random(minCol, maxCol);
+		data->data[i].colBegin = data->data[i].col;
+	}
+}
+
+void ColorConstGenerate::generate(ParticlesData* data, int start, int end)
+{
+	for (int i = start; i < end; i++)
+	{
+		data->data[i].col = col;
+		data->data[i].colBegin = data->data[i].col;
+	}
+}
+
+void InitVelocityWithPoint::generate(ParticlesData* data, int start, int end)
+{
+	for (int i = start; i < end; i++)
+	{
+		data->data[i].vel = (endPoint - data->data[i].pos);
+		data->data[i].vel.y = 0;
+	}
 }

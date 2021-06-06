@@ -3,22 +3,19 @@
 
 #include "UIwidgetBases.hpp"
 
-namespace Cookie::Core		{ class Window; }
-namespace Cookie::Resources { class Scene; }
+namespace Cookie { class Game; }
 
 
 namespace Cookie::UIwidget
 {
 	class GameUIeditor final : public WItemBase
 	{
-		const Cookie::Core::Window& window;
-		std::shared_ptr<Cookie::Resources::Scene>& scene;
+		Cookie::Game& game;
 
 	public:
-		inline GameUIeditor(const Cookie::Core::Window& _window, std::shared_ptr<Cookie::Resources::Scene>& _scene)
+		inline GameUIeditor(Cookie::Game& _game)
 			: WItemBase	("UI editor"),
-			  window	(_window),
-			  scene		(_scene)
+			  game		(_game)
 		{}
 
 		void WindowDisplay() override;

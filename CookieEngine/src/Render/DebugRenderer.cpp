@@ -27,14 +27,6 @@ DebugRenderer::DebugRenderer():
 
 DebugRenderer::~DebugRenderer()
 {
-    int max = Physics::PhysicsHandle::editWorld->getNbRigidBodies();
-    for (int i = 0; i < max; i++)
-    {
-        Physics::PhysicsHandle::editWorld->destroyRigidBody(Physics::PhysicsHandle::editWorld->getRigidBody(0));
-    }
-
-    Physics::PhysicsHandle::physCom->destroyPhysicsWorld(Physics::PhysicsHandle::editWorld);
-
     if (VBuffer)
         VBuffer->Release();
     if (rasterState)
@@ -138,7 +130,7 @@ void DebugRenderer::InitShader()
     D3D11_INPUT_ELEMENT_DESC ied[] =
     {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(rp3d::DebugRenderer::DebugTriangle,point1), D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"COLOR", 0, DXGI_FORMAT_R32_FLOAT, 0,  offsetof(rp3d::DebugRenderer::DebugTriangle,color1), D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"COLOR", 0, DXGI_FORMAT_R32_UINT, 0,  offsetof(rp3d::DebugRenderer::DebugTriangle,color1), D3D11_INPUT_PER_VERTEX_DATA, 0},
     };
 
     Render::CreateLayout(&blob,ied,2,&ILayout);
@@ -215,7 +207,7 @@ void DebugRenderer::Draw(const Mat4& viewProj)
         Render::RendererRemote::context->IASetInputLayout(ILayout);
         Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
 
-        Render::WriteCBuffer(viewProj.e,sizeof(viewProj),0,&CBuffer);
+        Render::WriteBuffer(viewProj.e,sizeof(viewProj),0,&CBuffer);
 
         /* save previous State to put it back at the end*/
         D3D11_PRIMITIVE_TOPOLOGY topo = D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
@@ -227,7 +219,7 @@ void DebugRenderer::Draw(const Mat4& viewProj)
 
         /* ask rp3d to compute the primitives for us */
         physDbgRenderer.reset();
-        physDbgRenderer.computeDebugRenderingPrimitives(*Physics::PhysicsHandle::physSim);
+        physDbgRenderer.computeDebugRenderingPrimitives(*Physics::PhysicsHandle::physSim.worldSim);
 
         /* draw triangles first */
         if (physDbgRenderer.getNbTriangles() > 0)
@@ -291,5 +283,7 @@ void DebugRenderer::Draw(const Mat4& viewProj)
         /* put back previous context */
         Render::RendererRemote::context->IASetPrimitiveTopology(topo);
         Render::RendererRemote::context->RSSetState(previousState);
+
+        previousState->Release();
     }
 }

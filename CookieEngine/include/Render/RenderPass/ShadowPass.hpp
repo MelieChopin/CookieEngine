@@ -35,19 +35,25 @@ namespace Cookie
 		class DrawDataHandler;
 		class Camera;
 
+		/* class representing a render pass where we fill a shadowmap */
 		class ShadowPass
 		{
 
 		private:
+			/* shader */
 			ID3D11VertexShader*			VShader{ nullptr };
 			ID3D11Buffer*				CBuffer{ nullptr };
 
+			/* dx11 state */
 			ID3D11DepthStencilState*	depthStencilState	= nullptr;
 			ID3D11RasterizerState*		rasterizerState		= nullptr;
-			ID3D11BlendState*			blendState			= nullptr;
+
+			/* viewport */
 			D3D11_VIEWPORT				shadowViewport;
+			Core::Math::Mat4			proj;
 			
 		public:
+			/* the shadowmap (depthStencilView and ShaderResourcesView)*/
 			ShadowBuffer				shadowMap;
 
 		private:
@@ -59,7 +65,7 @@ namespace Cookie
 			~ShadowPass();
 
 			void Set();
-			void Draw(DrawDataHandler& drawData, LightsArray& lights);
+			void Draw(DrawDataHandler& drawData);
 			void Clear();
 		};
 	}

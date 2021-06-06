@@ -1,5 +1,5 @@
 #include "Resources/Texture.hpp"
-#include "Renderer.hpp"
+#include "ResourcesManager.hpp"
 #include "ToolbarWidget.hpp"
 
 #include <imgui.h>
@@ -8,26 +8,19 @@ using namespace ImGui;
 using namespace Cookie::UIwidget;
 
 
-Toolbar::Toolbar(Cookie::Render::Renderer& _renderer, bool& _isPlaying)
+Toolbar::Toolbar(Cookie::Resources::ResourcesManager& _resources, bool& _isPlaying)
 	: WindowBase	("##TOOLBAR"),
-	  isPlaying		(_isPlaying)
-{
-	icons[(int)ToolbarIcons::Translator]	= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/translate.ico");
-	icons[(int)ToolbarIcons::Rotator]		= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/rotate.ico");
-	icons[(int)ToolbarIcons::Scaler]		= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/zoom.ico");
-	icons[(int)ToolbarIcons::Play]			= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/play.ico");
-	icons[(int)ToolbarIcons::Stop]			= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/stop.ico");
-	icons[(int)ToolbarIcons::Pause]			= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/pause.ico");
-	icons[(int)ToolbarIcons::Frame]			= std::make_unique<Cookie::Resources::Texture>("Assets/EditorUIcons/frame.ico");
-}
+	  isPlaying		(_isPlaying),
 
-Toolbar::~Toolbar()
-{
-	for (int i = 0; i < (int)ToolbarIcons::ICOS_NUM; i++)
-	{
-		icons[i].reset();
-	}
-}
+	  icons			{_resources.icons["Assets/EditorUIcons/translate.ico"].get(),
+					 _resources.icons["Assets/EditorUIcons/rotate.ico"].get(),
+			         _resources.icons["Assets/EditorUIcons/zoom.ico"].get(),
+			         _resources.icons["Assets/EditorUIcons/play.ico"].get(),
+			         _resources.icons["Assets/EditorUIcons/Stop.ico"].get(),
+			         _resources.icons["Assets/EditorUIcons/pause.ico"].get(),
+			         _resources.icons["Assets/EditorUIcons/frame.ico"].get()}
+{}
+
 
 bool Toolbar::BeginWindow(int windowFlags)
 {

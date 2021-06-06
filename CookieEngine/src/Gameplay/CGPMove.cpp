@@ -2,33 +2,46 @@
 #include "Core/Primitives.hpp"
 #include "Core/Time.hpp"
 
+using namespace Cookie::Core::Math;
+using namespace Cookie::Resources;
 using namespace Cookie::Gameplay;
 
-void CGPMove::UpdatePushedCooldown(Resources::Map& map, ECS::ComponentTransform& trs)
+void CGPMove::UpdatePushedCooldown(Resources::Map& map)
 {
 	if (state != CGPMOVE_STATE::E_PUSHED)
 		return;
 
 	pushedCooldownBeforeReturn -= Core::DeltaTime();
 
-	if (pushedCooldownBeforeReturn < 0 && map.ApplyPathfinding(map.GetTile(trs.pos), map.GetTile(posBeforePushed)))
+	if (pushedCooldownBeforeReturn < 0 && map.ApplyPathfinding(map.GetTile(trs->pos), map.GetTile(posBeforePushed)))
 	{
-		pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
-		SetPath(map.GetTile(posBeforePushed), trs);
+		pushedCooldownBeforeReturn = CGPMOVE_CD_BEFORE_RETURN;
+		SetPath(map.GetTile(posBeforePushed));
 	}
 }
+void CGPMove::UpdateReachGoalCooldown()
+{
+	if (state != CGPMOVE_STATE::E_REACH_GOAL)
+		return;
 
-void CGPMove::SetPath(Resources::Tile& lastWaypoint, ECS::ComponentTransform& trs)
+	reachGoalCountdown -= Core::DeltaTime();
+
+	if (reachGoalCountdown <= 0)
+	{
+		reachGoalCountdown = CGPMOVE_CD_BEFORE_STATIC;
+		state = CGPMOVE_STATE::E_STATIC;
+	}
+
+}
+
+void CGPMove::SetPath(Resources::Tile& lastWaypoint)
 {
 	waypoints.clear();
 	state = CGPMOVE_STATE::E_MOVING;
-	commanderPos = nullptr;
-	commanderCGPMove = nullptr;
-	lastTile = &lastWaypoint;
 	Resources::Tile* currentTile = &lastWaypoint;
 
 	//Whatever happen always had the lastWaypoint
-	waypoints.emplace(waypoints.begin(), Core::Math::Vec3{ currentTile->pos.x, 1, currentTile->pos.y });
+	waypoints.emplace(waypoints.begin(), Core::Math::Vec3{ currentTile->pos.x, trs->pos.y, currentTile->pos.y });
 
 	//if Entity is Flying go as a straight line
 	//or if the lastWaypoint has no parent it mean we go to the Tile we are already on so we don't need to continue
@@ -39,8 +52,8 @@ void CGPMove::SetPath(Resources::Tile& lastWaypoint, ECS::ComponentTransform& tr
 	//if the Tile has no parent it mean it is the start Tile of the path so we don't add it 
 	while (currentTile->parent != nullptr)
 	{
-		Core::Math::Vec3 currentWaypoint = { currentTile->pos.x, 1, currentTile->pos.y };
-		Core::Math::Vec3 parentWaypoint = { currentTile->parent->pos.x, 1, currentTile->parent->pos.y };
+		Core::Math::Vec3 currentWaypoint = { currentTile->pos.x, trs->pos.y, currentTile->pos.y };
+		Core::Math::Vec3 parentWaypoint = { currentTile->parent->pos.x, trs->pos.y, currentTile->parent->pos.y };
 
 		//if the direction from currentWaypoint to next Waypoint is the same as the direction from parentWaypoint
 		//to currentWaypoin then it's a straigth line so we don't add the waypoint
@@ -51,139 +64,91 @@ void CGPMove::SetPath(Resources::Tile& lastWaypoint, ECS::ComponentTransform& tr
 	}
 
 }
-void CGPMove::SetCommander(CGPMove& _commanderCGPMove, ECS::ComponentTransform& commanderTrs, ECS::ComponentTransform& selfTrs)
-{
-	waypoints.clear();
-	state = CGPMOVE_STATE::E_MOVING;
-	commanderPos = &(commanderTrs.pos);
-	commanderCGPMove = &(_commanderCGPMove);
-	offsetFromCommander = selfTrs.pos - commanderTrs.pos;
-}
 
-void CGPMove::MoveTowardWaypoint(ECS::ComponentTransform& trs)
+void CGPMove::MoveTowardWaypoint()
 {
-	while (waypoints.size() != 0 && (waypoints[0] - trs.pos).Length() < 0.1)
+	while (waypoints.size() != 0 && (waypoints[0] - trs->pos).Length() < 0.1)
 	{
 		waypoints.erase(waypoints.begin());
 
 		//check if reach goal here to avoid to set the state each frame
 		if (waypoints.size() == 0)
-			state = CGPMOVE_STATE::E_STATIC;
+			state = CGPMOVE_STATE::E_REACH_GOAL;
 	}
 
 	if (waypoints.size() == 0 || state == CGPMOVE_STATE::E_WAITING)
 		return;
 
 
-	Core::Math::Vec3 direction = (waypoints[0] - trs.pos).Normalize();
-	trs.pos += direction * (moveSpeed * Core::DeltaTime());
-	trs.trsHasChanged = true;
-}
-void CGPMove::MoveWithCommander(ECS::ComponentTransform& trs)
-{
-	if (commanderPos == nullptr || state == CGPMOVE_STATE::E_WAITING)
-		return;
-
-
-	Core::Math::Vec3 previousPos = trs.pos;
-	trs.pos = *commanderPos + offsetFromCommander;
-	trs.trsHasChanged = true;
-
-	//check if commander is Static
-	if (commanderCGPMove->state != CGPMOVE_STATE::E_WAITING && previousPos == trs.pos)
-	{
-		commanderPos = nullptr;
-		commanderCGPMove = nullptr;
-		state = CGPMOVE_STATE::E_STATIC;
-	}
-
-
+	trs->pos += (waypoints[0] - trs->pos).Normalize() * (moveSpeed * Core::DeltaTime());
+	trs->rot = Mat4::LookAt(trs->pos, waypoints[0], Vec3{0, 1, 0}).GetEuler();
+	trs->trsHasChanged = true;
 }
 
 void CGPMove::PositionPrediction()
 {
 
 }
-void CGPMove::ResolveColision(ECS::ComponentTransform& trsSelf, CGPMove& other, ECS::ComponentTransform& trsOther)
+void CGPMove::ResolveColision(CGPMove& other, Map& map)
 {
 	//Priority High
-	if ((state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_PUSHED) ||
-		(state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_STATIC) ||
-		(state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_REACH_GOAL) ||
-		(state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_STATIC) ||
-		(state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_REACH_GOAL))
+	if (state > other.state ||
+		(state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_PUSHED))
 	{
 		if (other.state == CGPMOVE_STATE::E_STATIC)
 		{
 			other.state = CGPMOVE_STATE::E_PUSHED;
-			other.posBeforePushed = trsOther.pos;
+			other.posBeforePushed = other.trs->pos;
 		}
-		other.pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
+		other.pushedCooldownBeforeReturn = CGPMOVE_CD_BEFORE_RETURN;
 
-		Core::Math::Vec3 direction = (trsOther.pos - trsSelf.pos).Normalize();
-		trsOther.pos = trsSelf.pos + direction * (radius + other.radius);
-		trsOther.trsHasChanged = true;
+		Core::Math::Vec3 direction = (other.trs->pos - trs->pos).Normalize();
+		other.trs->pos = trs->pos + direction * (radius + other.radius);
+
+		map.ClampPosInMapWithScale(*other.trs);
+		map.ClampPosOutsideObstacleTile(*other.trs);
+		other.trs->trsHasChanged = true;
 	}
 	//Priority Medium need some fixes
 	else if (state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_MOVING)
 	{
-		float overlapLength = (radius + other.radius) - (trsSelf.pos - trsOther.pos).Length();
+		float overlapLength = (radius + other.radius) - (trs->pos - other.trs->pos).Length();
 
-		Core::Math::Vec3 directionSelfToOther = (trsOther.pos - trsSelf.pos).Normalize();
-		Core::Math::Vec3 directionSelf = (commanderCGPMove ? commanderCGPMove->waypoints[0] - *commanderPos : waypoints[0] - trsSelf.pos).Normalize();
-		Core::Math::Vec3 directionOther = (other.commanderCGPMove ? other.commanderCGPMove->waypoints[0] - *other.commanderPos : other.waypoints[0] - trsOther.pos).Normalize();
+		Core::Math::Vec3 directionSelfToOther = (other.trs->pos - trs->pos).Normalize();
+		Core::Math::Vec3 directionSelf = (waypoints[0] - trs->pos).Normalize();
+		Core::Math::Vec3 directionOther = (other.waypoints[0] - other.trs->pos).Normalize();
 
 		if (directionSelfToOther.Dot(directionSelf) > 0.9) // if they face each other
 		{
-			trsSelf.pos += Core::Math::Vec3{ directionSelf.z, directionSelf.y, -directionSelf.x } *(overlapLength / 2);
-			trsOther.pos += Core::Math::Vec3{ directionOther.z, directionOther.y, -directionOther.x } *(overlapLength / 2);
-
+			trs->pos += Core::Math::Vec3{ directionSelf.z, directionSelf.y, -directionSelf.x } *(overlapLength / 2);
+			other.trs->pos += Core::Math::Vec3{ directionOther.z, directionOther.y, -directionOther.x } *(overlapLength / 2);
 		}
 		else // they colidde side by side
 		{
-			trsSelf.pos += -directionSelfToOther * (overlapLength / 2);
-			trsOther.pos += directionSelfToOther * (overlapLength / 2);
+			//fix strange behavior for now
+			//trs->pos += -directionSelfToOther * (overlapLength / 2);
+			//other.trs->pos += directionSelfToOther * (overlapLength / 2);
+			other.trs->pos += directionSelfToOther * (overlapLength);
 		}
 
-		if (commanderCGPMove)
-			offsetFromCommander = trsSelf.pos - *commanderPos;
-		if (other.commanderCGPMove)
-			other.offsetFromCommander = trsOther.pos - *other.commanderPos;
-
-		trsSelf.trsHasChanged = true;
-		trsOther.trsHasChanged = true;
+		map.ClampPosInMapWithScale(*trs);
+		map.ClampPosOutsideObstacleTile(*trs);
+		trs->trsHasChanged = true;
+		map.ClampPosInMapWithScale(*other.trs);
+		map.ClampPosOutsideObstacleTile(*other.trs);
+		other.trs->trsHasChanged = true;
 
 	}
-	//Priority Low
-	else if ((state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_MOVING) ||
-		(state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_MOVING) ||
-		(state == CGPMOVE_STATE::E_STATIC && other.state == CGPMOVE_STATE::E_PUSHED) ||
-		(state == CGPMOVE_STATE::E_REACH_GOAL && other.state == CGPMOVE_STATE::E_MOVING) ||
-		(state == CGPMOVE_STATE::E_REACH_GOAL && other.state == CGPMOVE_STATE::E_PUSHED))
-	{
-		if (state == CGPMOVE_STATE::E_STATIC)
-		{
-			state = CGPMOVE_STATE::E_PUSHED;
-			posBeforePushed = trsSelf.pos;
-		}
-		pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
-
-		Core::Math::Vec3 direction = (trsSelf.pos - trsOther.pos).Normalize();
-		trsSelf.pos = trsOther.pos + direction * (radius + other.radius);
-		trsSelf.trsHasChanged = true;
-	}
-
 
 }
 
-void CGPMove::DrawPath(Render::DebugRenderer& debug, ECS::ComponentTransform& trs)
+void CGPMove::DrawPath(Render::DebugRenderer& debug)
 {
-	if (waypoints.size() != 0)
-		debug.AddDebugElement(Core::Primitives::CreateLine({ trs.pos.x, 1, trs.pos.z }, { waypoints[0].x, 1, waypoints[0].z }, 0x00FFFF, 0x00FFFF));
+	if (waypoints.size() == 0)
+		return;
 
-	for (int i = 1; i < waypoints.size(); ++i)
-	{
-		//use 1 for Y so the debug will not be mix up with the map
-		debug.AddDebugElement(Core::Primitives::CreateLine({ waypoints[i - 1].x, 1, waypoints[i - 1].z }, { waypoints[i].x, 1, waypoints[i].z }, 0x00FFFF, 0xFF0000));
-	}
+	debug.AddDebugElement(Core::Primitives::CreateLine({ trs->pos.x, 1, trs->pos.z }, { waypoints[0].x, 1, waypoints[0].z }, 0x00FFFF, 0x00FFFF));
+
+	for (int i = 0; i < waypoints.size() - 1; ++i)
+		debug.AddDebugElement(Core::Primitives::CreateLine(waypoints[i], waypoints[i + 1], 0x00FFFF, 0x00FFFF));
 }

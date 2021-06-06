@@ -2,6 +2,8 @@
 #include <reactphysics3d.h>
 #include "InspectorWidget.hpp"
 
+#include "Prefab.hpp"
+
 #include "MapExplorerHelper.hpp"
 
 #include <imgui.h>
@@ -14,6 +16,7 @@ using namespace ImGui;
 using namespace Cookie::UIwidget;
 using namespace Cookie::ECS;
 using namespace Cookie::Resources;
+using namespace Cookie::Gameplay;
 
 
 void Inspector::WindowDisplay()
@@ -45,6 +48,7 @@ void Inspector::EntityInspection()
     if (selectedEntity.focusedEntity->signature & C_SIGNATURE::PHYSICS)      PhysicsInterface();
     if (selectedEntity.focusedEntity->signature & C_SIGNATURE::SCRIPT)       ScriptInterface();
     if (selectedEntity.focusedEntity->signature & C_SIGNATURE::GAMEPLAY)     GameplayInterface();
+    if (selectedEntity.focusedEntity->signature & C_SIGNATURE::FX)           FXInterface();
 
 
     if (Button("Add component...")) OpenPopup("Add component popup");
@@ -63,11 +67,7 @@ void Inspector::EntityInspection()
 
         if (selectedEntity.focusedEntity->signature & C_SIGNATURE::PHYSICS)    TextDisabled("Component Physics already added");
         else if (Selectable("Add component Physics"))
-        {
             coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::PHYSICS);
-            coordinator.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id).Activate();
-        }
-
 
         if (selectedEntity.focusedEntity->signature & C_SIGNATURE::SCRIPT)     TextDisabled("Component Script already added");
         else if (Selectable("Add component Script"))
@@ -77,6 +77,10 @@ void Inspector::EntityInspection()
         if (selectedEntity.focusedEntity->signature & C_SIGNATURE::GAMEPLAY)   TextDisabled("Component Gameplay already added");
         else if (Selectable("Add component Gameplay"))
             coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::GAMEPLAY);
+
+        if (selectedEntity.focusedEntity->signature & C_SIGNATURE::FX)   TextDisabled("Component FX already added");
+        else if (Selectable("Add component FX"))
+            coordinator.componentHandler->AddComponent(*selectedEntity.focusedEntity, C_SIGNATURE::FX);
 
         EndPopup();
     }
@@ -127,17 +131,22 @@ void Inspector::ModelInterface()
         
         Text("Albedo:"); SameLine(100);
 
-        ResourceMapExplorer<Texture>("texture", "##ALDEBOSELECT", resources.textures, modelComp.albedo);
+        ResourceMapExplorer<Texture>("texture", "##ALDEBOSELECT", resources.textures2D, modelComp.albedo);
 
 
         Text("Normal:"); SameLine(100);
 
-        ResourceMapExplorer<Texture>("normal texture", "##NORMSELECT", resources.textures, modelComp.normal);
+        ResourceMapExplorer<Texture>("normal texture", "##NORMSELECT", resources.textures2D, modelComp.normal);
 
 
         ImGui::Custom::TextSnip("metallic-Roughness", 9); SameLine(); Text(":"); SameLine(100);
 
-        ResourceMapExplorer<Texture>("metallic-rough texture", "##MRSELECT", resources.textures, modelComp.metallicRoughness);
+        ResourceMapExplorer<Texture>("metallic-rough texture", "##MRSELECT", resources.textures2D, modelComp.metallicRoughness);
+
+
+        ImGui::Custom::TextSnip("In-Game icon", 9); SameLine(); Text(":"); SameLine(100);
+
+        ResourceMapExplorer<Texture>("In-Game icon", "##IGICSELECTOR", resources.icons, modelComp.icon);
 
 //====================//
 
@@ -423,7 +432,7 @@ void Inspector::ScriptInterface()
         
         if (BeginPopup("Script selector popup"))
         {
-            for (std::unordered_map<std::string, std::shared_ptr<Script>>::iterator scrIt = resources.scripts.begin(); scrIt != resources.scripts.end(); scrIt++)
+            for (std::unordered_map<std::string, std::unique_ptr<Script>>::iterator scrIt = resources.scripts.begin(); scrIt != resources.scripts.end(); scrIt++)
             {
                 if (Button(scrIt->second->filename.c_str()))
                 {
@@ -454,11 +463,19 @@ void Inspector::GameplayInterface()
     {
         ComponentGameplay& gameplayComp = coordinator.componentHandler->GetComponentGameplay(selectedEntity.focusedEntity->id);
 
-        InputText("##TEAMNAME", &gameplayComp.teamName);
+        static const char* armyNames[] = { "Default", "Player", "AI1"};
+        if (BeginCombo("##ARMY_NAME", armyNames[gameplayComp.teamName]))
+        {
+            if (Selectable(armyNames[0], gameplayComp.type == 0)) gameplayComp.teamName = Gameplay::E_ARMY_NAME::E_DEFAULT_NAME;
+            if (Selectable(armyNames[1], gameplayComp.type == 1)) gameplayComp.teamName = Gameplay::E_ARMY_NAME::E_PLAYER;
+            if (Selectable(armyNames[2], gameplayComp.type == 2)) gameplayComp.teamName = Gameplay::E_ARMY_NAME::E_AI1;
+
+            EndCombo();
+        }
 
         NewLine();
-        DragFloat("##FIRSTCOST",  &gameplayComp.cost.costPrimary,   1.f, NULL, NULL, "Initial cost: %.0f");
-        DragFloat("##SECONDCOST", &gameplayComp.cost.costSecondary, 1.f, NULL, NULL, "Upgrade cost: %.0f");
+        DragFloat("##FIRSTCOST",  &gameplayComp.cost.costPrimary,   1.f, NULL, NULL, "Primary cost: %.0f");
+        DragFloat("##SECONDCOST", &gameplayComp.cost.costSecondary, 1.f, NULL, NULL, "Secondary cost: %.0f");
         DragFloat("##SUPPLYCOST", &gameplayComp.cost.costSupply,    1.f, NULL, NULL, "Supply cost: %.0f" );
 
         DragFloat("##PRODUCTIONTIME", &gameplayComp.cost.timeToProduce, 0.25f, NULL, NULL, "Production time: %.2f");
@@ -468,7 +485,7 @@ void Inspector::GameplayInterface()
         static const char* _typesName[] = { "Default", "Worker", "Unit", "Building" };
         if (BeginCombo("##ENTITYTYPE", _typesName[gameplayComp.type]))
         {
-            if (Selectable(_typesName[0], gameplayComp.type == 0)) gameplayComp.type = Gameplay::E_ARMY_TYPE::E_DEFAULT;
+            if (Selectable(_typesName[0], gameplayComp.type == 0)) gameplayComp.type = Gameplay::E_ARMY_TYPE::E_DEFAULT_TYPE;
             if (Selectable(_typesName[1], gameplayComp.type == 1)) gameplayComp.type = Gameplay::E_ARMY_TYPE::E_WORKER;
             if (Selectable(_typesName[2], gameplayComp.type == 2)) gameplayComp.type = Gameplay::E_ARMY_TYPE::E_UNIT;
             if (Selectable(_typesName[3], gameplayComp.type == 3)) gameplayComp.type = Gameplay::E_ARMY_TYPE::E_BUILDING;
@@ -483,15 +500,20 @@ void Inspector::GameplayInterface()
         {
             if (TreeNode("Life/Armor properties"))
             {
-                DragFloat("##LIFE",  &gameplayComp.componentLive.life,  1.f, NULL, NULL, "Life: %.0f" );
-                DragFloat("##ARMOR", &gameplayComp.componentLive.armor, 1.f, NULL, NULL, "Armor: %.0f");
-
-
-                NewLine();
-                if (Selectable("Remove the property##LIVE"))
+                SameLine();
+                if (SmallButton("Remove##LIVE"))
                     gameplayComp.RemoveComponent(CGP_SIGNATURE::LIVE);
 
+
+                DragFloat("##LIFEMAX",  &gameplayComp.componentLive.lifeMax,     1.f, NULL, NULL,                               "Max life: %.0f");
+                DragFloat("##LIFE",     &gameplayComp.componentLive.lifeCurrent, 1.f,    0, gameplayComp.componentLive.lifeMax, "Life: %.0f" );
+                
+                DragFloat("##ARMOR",    &gameplayComp.componentLive.armor,       1.f, NULL, NULL, "Armor: %.0f");
+
                 TreePop();
+                NewLine();
+
+                Text("Pos Life in game:"); NewLine(); DragFloat3("##POS", gameplayComp.componentLive.posLifeInRapportOfEntity.e);
             }
         }
         else if (Selectable("Add life/Armor properties"))
@@ -502,17 +524,18 @@ void Inspector::GameplayInterface()
         {
             if (TreeNode("Movement capacities"))
             {
+                SameLine();
+                if (SmallButton("Remove##MOVE"))
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::MOVE);
+
+
                 DragFloat("##SPEED", &gameplayComp.componentMove.moveSpeed, 0.25f, NULL, NULL, "Speed: %.2f");
                 Text("Flying:"); SameLine(); Checkbox("##CANFLY", &gameplayComp.componentMove.isFlying);
 
                 DragFloat("##RADIUS", &gameplayComp.componentMove.radius, 0.25f, NULL, NULL, "Radius: %.2f");
 
-
-                NewLine();
-                if (Selectable("Remove the property##MOVE"))
-                    gameplayComp.RemoveComponent(CGP_SIGNATURE::MOVE);
-
                 TreePop();
+                NewLine();
             }
         }
         else if (Selectable("Add movement capacities"))
@@ -523,17 +546,18 @@ void Inspector::GameplayInterface()
         {
             if (TreeNode("Attack abilities"))
             {
+                SameLine();
+                if (SmallButton("Remove##ATTACK"))
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::ATTACK);
+
+                
                 DragFloat("##POWER",  &gameplayComp.componentAttack.powerLevel,   1.00f, NULL, NULL, "Power Lv: %.2f");
                 DragFloat("##DAMAGE", &gameplayComp.componentAttack.attackDamage, 0.25f, NULL, NULL, "Damage: %.2f"  );
                 DragFloat("##RANGE",  &gameplayComp.componentAttack.attackRange,  0.25f, NULL, NULL, "Range: %.2f"   );
                 DragFloat("##SPEED",  &gameplayComp.componentAttack.attackSpeed,  0.25f, NULL, NULL, "Speed: %.2f"   );
 
-
-                NewLine();
-                if (Selectable("Remove the property##ATTACK"))
-                    gameplayComp.RemoveComponent(CGP_SIGNATURE::ATTACK);
-
                 TreePop();
+                NewLine();
             }
         }
         else if (Selectable("Add attack abilities"))
@@ -544,18 +568,107 @@ void Inspector::GameplayInterface()
         {
             if (TreeNode("Production property"))
             {
+                SameLine();
+                if (SmallButton("Remove##PRODUCER"))
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::PRODUCER);
+
+
                 DragFloat2("Tile size (in x and z)", gameplayComp.componentProducer.tileSize.e, 0.5f, 0.5f, 100.f, "%.1f");
                 
-
                 NewLine();
-                if (Selectable("Remove the property##PRODUCER"))
-                    gameplayComp.RemoveComponent(CGP_SIGNATURE::ATTACK);
+                Text("Can produce the following units:");
+
+                int i = 0;
+                for (auto it = gameplayComp.componentProducer.possibleUnits.begin(); it != gameplayComp.componentProducer.possibleUnits.end();)
+                {
+                    i++;
+
+                    Text("%s", (*it)->name.c_str());
+                    
+                    SameLine();
+
+                    std::string tinyDeleterTag = "X##" + std::to_string(i);
+                    if (SmallButton(tinyDeleterTag.c_str()))
+                    {
+                        it = gameplayComp.componentProducer.possibleUnits.erase(it);
+                    }
+                    else it++;
+                }
+                {
+                    Prefab* newProductable = ResourceMapSelector<Prefab>("prefab", "##PRDUNIT_SELECTOR", resources.prefabs);
+
+                    if (newProductable != nullptr)
+                        gameplayComp.componentProducer.possibleUnits.push_back(newProductable);
+                }
 
                 TreePop();
+                NewLine();
             }
         }
         else if (Selectable("Make this entity a producer"))
             gameplayComp.AddComponent(CGP_SIGNATURE::PRODUCER);
+
+
+        if (gameplayComp.signatureGameplay & CGP_SIGNATURE::WORKER)
+        {
+            if (TreeNode("Worker property"))
+            {
+                SameLine();
+                if (SmallButton("Remove##WORKER"))
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::WORKER);
+
+
+                Text("Can produce the following buildings:");
+
+                int i = 0;
+                for (auto it = gameplayComp.componentWorker.possibleBuildings.begin(); it != gameplayComp.componentWorker.possibleBuildings.end();)
+                {
+                    i++;
+
+                    Text("%s", (*it)->name.c_str());
+
+                    SameLine();
+
+                    std::string tinyDeleterTag = "X##" + std::to_string(i);
+                    if (SmallButton(tinyDeleterTag.c_str()))
+                    {
+                        it = gameplayComp.componentProducer.possibleUnits.erase(it);
+                    }
+                    else it++;
+                }
+                {
+                    Prefab* newProductable = ResourceMapSelector<Prefab>("prefab", "##PRDUNIT_SELECTOR", resources.prefabs);
+
+                    if (newProductable != nullptr)
+                        gameplayComp.componentWorker.possibleBuildings.push_back(newProductable);
+                }
+
+                TreePop();
+                NewLine();
+            }
+        }
+        else if (Selectable("Make this entity a worker"))
+            gameplayComp.AddComponent(CGP_SIGNATURE::WORKER);
+
+
+        if (gameplayComp.signatureGameplay & CGP_SIGNATURE::RESOURCE)
+        {
+            if (TreeNode("Resource property"))
+            {
+                SameLine();
+                if (SmallButton("Remove##RESOURCE"))
+                    gameplayComp.RemoveComponent(CGP_SIGNATURE::RESOURCE);
+
+
+                DragFloat("##RESERVE", &gameplayComp.componentResource.resourceReserve, 1.f, NULL, NULL, "Reserve: %.0f");
+                Text("Is a primary resource:"); SameLine(); Checkbox("##ISPRIMARY", &gameplayComp.componentResource.isPrimary);
+
+                TreePop();
+            }
+        }
+        else if (Selectable("Transform this entity into game resources"))
+            gameplayComp.AddComponent(CGP_SIGNATURE::RESOURCE);
+
 
 
         NewLine();
@@ -570,3 +683,99 @@ void Inspector::GameplayInterface()
     ImGui::Separator();
 }
 
+void Inspector::FXInterface()
+{
+    if (TreeNode("FX"))
+    {
+        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(selectedEntity.focusedEntity->id);
+
+        //Life
+        if (gameplay.signatureGameplay & CGP_SIGNATURE::LIVE)
+        {
+            CGPLive& life = gameplay.componentLive;
+
+            //Death
+            {
+                Text("On Death :");
+                if (BeginCombo("##DEATH_SFX", (life.sfxDeath) ? life.sfxDeath->filepath.c_str() : "SFX missing"))
+                {
+                    for (std::unordered_map<std::string, std::unique_ptr<Sound>>::iterator soundPtr = resources.sounds.begin(); soundPtr != resources.sounds.end(); ++soundPtr)
+                        if (Selectable(soundPtr->first.c_str()))
+                            life.sfxDeath = soundPtr->second.get();
+
+                    EndCombo();
+                }
+                if (BeginCombo("##DEATH_VFX", (life.vfxDeath) ? life.vfxDeath->name.c_str() : "VFX missing"))
+                {
+                    for (std::unordered_map<std::string, std::unique_ptr<Particles::ParticlesPrefab>>::iterator particlePtr = resources.particles.begin(); particlePtr != resources.particles.end(); ++particlePtr)
+                        if (Selectable(particlePtr->first.c_str()))
+                            life.vfxDeath = particlePtr->second.get();
+
+                    EndCombo();
+                }
+            }
+
+            //Hit
+            {
+                Text("On Hit :");
+                if (BeginCombo("##HIT_SFX", (life.sfxHit) ? life.sfxHit->filepath.c_str() : "SFX missing"))
+                {
+                    for (std::unordered_map<std::string, std::unique_ptr<Sound>>::iterator soundPtr = resources.sounds.begin(); soundPtr != resources.sounds.end(); ++soundPtr)
+                        if (Selectable(soundPtr->first.c_str()))
+                            life.sfxHit = soundPtr->second.get();
+
+                    EndCombo();
+                }
+                if (BeginCombo("##HIT_VFX", (life.vfxHit) ? life.vfxHit->name.c_str() : "VFX missing"))
+                {
+                    for (std::unordered_map<std::string, std::unique_ptr<Particles::ParticlesPrefab>>::iterator particlePtr = resources.particles.begin(); particlePtr != resources.particles.end(); ++particlePtr)
+                        if (Selectable(particlePtr->first.c_str()))
+                            life.vfxHit = particlePtr->second.get();
+
+                    EndCombo();
+                }
+            }
+        }
+        else
+            TextDisabled("Component Gameplay Life missing");
+        NewLine();
+
+        //Attack
+        if (gameplay.signatureGameplay & CGP_SIGNATURE::ATTACK)
+        {
+            CGPAttack& attack = gameplay.componentAttack;
+
+            //Attack
+            {
+                Text("On Attack :");
+                if (BeginCombo("##ATTACK_SFX", (attack.sfxAttack) ? attack.sfxAttack->filepath.c_str() : "SFX missing"))
+                {
+                    for (std::unordered_map<std::string, std::unique_ptr<Sound>>::iterator soundPtr = resources.sounds.begin(); soundPtr != resources.sounds.end(); ++soundPtr)
+                        if (Selectable(soundPtr->first.c_str()))
+                            attack.sfxAttack = soundPtr->second.get();
+
+                    EndCombo();
+                }
+                if (BeginCombo("##ATTACK_VFX", (attack.vfxAttack) ? attack.vfxAttack->name.c_str() : "VFX missing"))
+                {
+                    for (std::unordered_map<std::string, std::unique_ptr<Particles::ParticlesPrefab>>::iterator particlePtr = resources.particles.begin(); particlePtr != resources.particles.end(); ++particlePtr)
+                        if (Selectable(particlePtr->first.c_str()))
+                            attack.vfxAttack = particlePtr->second.get();
+
+                    EndCombo();
+                }
+            }
+        }
+        else
+            TextDisabled("Component Gameplay Attack missing");
+        NewLine();
+
+
+        if (Selectable("Remove component##FX"))
+            coordinator.componentHandler->RemoveComponent(*selectedEntity.focusedEntity, C_SIGNATURE::FX);
+
+        TreePop();
+    }
+
+    ImGui::Separator();
+}

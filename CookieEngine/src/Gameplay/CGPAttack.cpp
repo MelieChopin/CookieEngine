@@ -1,7 +1,11 @@
 #include "Gameplay/CGPAttack.hpp"
+#include "SoundManager.hpp"
+#include "ParticlesHandler.hpp"
 #include "Core/Time.hpp"
 
 using namespace Cookie::Gameplay;
+using namespace Cookie::Resources;
+using namespace Cookie::Resources::Particles;
 
 void CGPAttack::Attack()
 {
@@ -11,6 +15,11 @@ void CGPAttack::Attack()
 
 	if (target && attackCooldown <= 0)
 	{
+		if (sfxAttack)
+			SoundManager::PlayMusic3D(sfxAttack, trs->pos);
+		if (vfxAttack)
+			ParticlesHandler::CreateParticlesWithPrefab(trs->pos, vfxAttack, target->trs->pos);
+
 		attackCooldown = 1.f / attackSpeed;
 		target->TakeHit(attackDamage);
 	}

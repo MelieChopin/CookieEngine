@@ -11,11 +11,18 @@ namespace Cookie
 	{
 		inline bool CompileVertex(std::string VSSource, ID3DBlob** VS, ID3D11VertexShader** VShader)
 		{
-            ID3DBlob* VSErr;
+            ID3DBlob* VSErr = nullptr;
 
-            if (FAILED(D3DCompile(VSSource.c_str(), VSSource.length(), nullptr, nullptr, nullptr, "main", "vs_5_0", 0, 0, VS, &VSErr)))
+            if (FAILED(D3DCompile(VSSource.c_str(), VSSource.length(), nullptr, nullptr, nullptr, "main", "vs_5_0", 
+#if 0
+                D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
+#else
+                0,
+#endif
+                0, VS, &VSErr)))
             {
                 printf("Failed To Compile Vertex Shader %s\n", (const char*)(VSErr->GetBufferPointer()));
+                VSErr->Release();
                 return false;
             }
 
@@ -25,6 +32,7 @@ namespace Cookie
             if (FAILED(result))
             {
                 printf("Failed Creating Vertex Shader: %s\n", std::system_category().message(result).c_str());
+                VSErr->Release();
                 return false;
             }
 
@@ -33,12 +41,19 @@ namespace Cookie
 
         inline bool CompilePixel(std::string PSSource, ID3D11PixelShader** PShader)
         {
-            ID3DBlob* PS;
-            ID3DBlob* PSErr;
+            ID3DBlob* PS = nullptr;
+            ID3DBlob* PSErr = nullptr;
 
-            if (FAILED(D3DCompile(PSSource.c_str(), PSSource.length(), nullptr, nullptr, nullptr, "main", "ps_5_0", 0, 0, &PS, &PSErr)))
+            if (FAILED(D3DCompile(PSSource.c_str(), PSSource.length(), nullptr, nullptr, nullptr, "main", "ps_5_0", 
+#if 0
+                D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 
+#else
+                0,
+#endif
+                0, &PS, &PSErr)))
             {
                 printf("Failed To Compile Pixel Shader: %s\n", (const char*)(PSErr->GetBufferPointer()));
+                PSErr->Release();
                 return false;
             }
 
@@ -46,8 +61,11 @@ namespace Cookie
             if (FAILED(result))
             {
                 printf("Failed Creating Pixel Shader: %s\n", std::system_category().message(result).c_str());
+                PSErr->Release();
                 return false;
             }
+
+            PS->Release();
 
             return true;
         }
@@ -106,7 +124,7 @@ namespace Cookie
             return true;
         }
 
-        inline bool WriteCBuffer(const void* data, size_t bufferSize, UINT CBufferIndex, ID3D11Buffer** CBuffer)
+        inline bool WriteBuffer(const void* data, size_t bufferSize, UINT CBufferIndex, ID3D11Buffer** CBuffer)
         {
             D3D11_MAPPED_SUBRESOURCE ms;
 

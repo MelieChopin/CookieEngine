@@ -2,6 +2,7 @@
 #define __COORDINATOR_HPP__
 
 #include "Core/Math/Mat4.hpp"
+#include "ComponentGameplay.hpp" //for E_ARMY_NAME
 #include <vector>
 
 namespace Cookie
@@ -37,45 +38,45 @@ namespace Cookie
 			Gameplay::ArmyHandler* armyHandler      {nullptr};
 			std::vector<Entity*>   selectedEntities;
 
-			Coordinator() {};
-			~Coordinator() {};
+			Coordinator() {}
+			~Coordinator() {}
 
 			//Entity
 			Entity& AddEntity(const int signature, std::string name = std::string("No Name"));
-			Entity& AddEntity(std::shared_ptr<Resources::Prefab> prefab);
+			Entity& AddEntity(const Resources::Prefab* const & prefab, Gameplay::E_ARMY_NAME teamName = Gameplay::E_ARMY_NAME::E_DEFAULT_NAME);
 			void RemoveEntity(Entity& entity);
 			bool CheckSignature(const int entitySignature, const int signature);
 			
 			//Selection
-			void SelectEntities(Core::Math::Vec2& selectionQuadStart, Core::Math::Vec2& selectionQuadEnd);
-			Entity* GetSelectedEntitiesCommander();
-			void SetSelectedEntitiesCommander(Entity* commander);
-
-
+			void SelectEntities(Core::Math::Vec3& selectionQuadStart, Core::Math::Vec3& selectionQuadEnd);
+			Entity* GetClosestFreeResourceEntity(Core::Math::Vec3& pos);
+			Entity* GetClosestEntity(Core::Math::Vec3& pos, int minimumGameplaySignatureWanted = 0);
+			Entity* GetClosestSelectableEntity(Core::Math::Vec3& pos, int minimumGameplaySignatureWanted = 0);
 
 			//Primary Component
-			void ApplySystemPhysics(float factor);
+			//void ApplySystemPhysics(float factor);
 			//void ApplyDraw(const Core::Math::Mat4& viewProj);
+			void ApplyScriptStart();
 			void ApplyScriptUpdate();
 			void ApplyRemoveUnnecessaryEntities();
 			void ApplyComputeTrs();
 
 
 			//CGP_Producer
-			void UpdateCGPProducer();
-			void ApplyGameplayUpdateCountdownProducer();
+			void UpdateCGPProducer(Resources::Map& map);
+			void ApplyGameplayUpdateCountdownProducer(Resources::Map& map);
 
 			//CGP_Worker
-			void UpdateCGPWorker();
-			void ApplyGameplayUpdateWorker();
+			void UpdateCGPWorker(Resources::Map& map);
+			void ApplyGameplayUpdateWorker(Resources::Map& map);
 
 			//CGP_Move
-			void UpdateCGPMove(Resources::Map& map, Render::DebugRenderer& debug);
+			void UpdateCGPMove(Resources::Map& map);
 			void ApplyGameplayUpdatePushedCooldown(Resources::Map& map);
+			void ApplyGameplayUpdateReachGoalCooldown();
 			void ApplyGameplayMoveTowardWaypoint();
-			void ApplyGameplayMoveWithCommander();
 			void ApplyGameplayPosPrediction();
-			void ApplyGameplayResolveCollision();
+			void ApplyGameplayResolveCollision(Resources::Map& map);
 			void ApplyGameplayDrawPath(Render::DebugRenderer& debug);
 
 			//CGP_Attack

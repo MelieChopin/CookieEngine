@@ -1,5 +1,4 @@
 #include "Core/Time.hpp"
-#include "Physics/PhysicsHandle.hpp"
 #include "Physics/PhysicsSimulator.hpp"
 
 using namespace Cookie::Physics;
@@ -8,8 +7,8 @@ constexpr float initTimeStep = 1.0f / 60.0f;
 
 /*================ CONSTRUCTORS/DESTRUCTORS ================*/
 
-PhysicsSimulator::PhysicsSimulator()
-	:worldSim{ Physics::PhysicsHandle::physSim}, timeStep{initTimeStep}
+PhysicsSimulator::PhysicsSimulator():
+	timeStep{initTimeStep}
 {
 }
 
@@ -30,5 +29,8 @@ void PhysicsSimulator::Update()
 		accumulator -= timeStep;
 	}
 
+	/* factor is usually over 1 as timeStep is between 0 and 1 usually.
+	 * but it is usually not over 1 when update is really done 
+	 * as accumulator will be lower than timeStep */
 	factor = accumulator / timeStep;
 }

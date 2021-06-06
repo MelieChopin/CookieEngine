@@ -6,7 +6,7 @@
 // Namespace for custom-made ImGui widegets.
 namespace ImGui::Custom
 {
-	// Displays up to the given number of chars, is exceeded, the rest can be peeked in a tooltip by hovering the text.
+	// Displays up to the given number of chars, if exceeded, the rest can be peeked in a tooltip by hovering the text.
 	inline void TextSnip(const char* text, short maxChars)
     {
         if (strlen(text) > maxChars)

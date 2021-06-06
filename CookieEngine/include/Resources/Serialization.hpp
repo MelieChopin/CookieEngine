@@ -34,9 +34,17 @@ namespace Cookie
 		class Scene;
 		class Prefab;
 		class Texture;
+		class Sound;
+		namespace Particles
+		{
+			class ParticlesSystem;
+		}
 	}
 
-
+	namespace Gameplay
+	{
+		struct AIBehavior;
+	}
 
 	namespace Resources
 	{
@@ -44,31 +52,39 @@ namespace Cookie
 		{
 			namespace Save
 			{
+				//Save entity
 				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity);
+				//Save components
 				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, 
 					Cookie::Resources::ResourcesManager& resourcesManager);
 
 				void SaveScene(Cookie::Resources::Scene& actScene, Cookie::Resources::ResourcesManager& resourcesManager);
-				void SavePrefab(const std::shared_ptr<Prefab>& prefab);
+				void SavePrefab(const Prefab* const & prefab);
 				void SavePhysic(json& js, Cookie::ECS::ComponentPhysics& physics);
 
 				void SaveAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
 				void SaveTexture(std::string& name, Cookie::Core::Math::Vec4& color);
-				void SaveVolumAndModeMusic(std::string key);
+				void SaveVolumAndModeMusic(Sound* const & sound);
+				void SaveParticles(Cookie::Resources::Particles::ParticlesSystem& particles);
+				void SaveAIBehavior(Cookie::Gameplay::AIBehavior& aiBehavior);
 			}
 
 			namespace Load
 			{
+				//Load entity
 				void FromJson(json& js, Cookie::ECS::EntityHandler& entity);
+				//Load all components
 				void FromJson(json& js, const Cookie::ECS::EntityHandler& entity, 
 					Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager);
 
-				std::shared_ptr<Scene> LoadScene(const char* filepath, Game& game);
+				void LoadScene(const char* filepath, Game& game);
 				void LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
 				void LoadAllTextures(Cookie::Resources::ResourcesManager& resourcesManager);
 				void LoadPhysic(json& physic, Cookie::ECS::ComponentPhysics& physics);
-				void LoadGameplay(json& game, Cookie::ECS::ComponentGameplay& gameplay, Cookie::Resources::ResourcesManager& resourcesManager);
-				void LoadVolumAndModeMusic(std::string path, std::string key);
+				void LoadGameplay(json& game, Cookie::ECS::ComponentGameplay& gameplay, Cookie::Resources::ResourcesManager& resourcesManager, bool allPrefabLoaded = false);
+				void LoadVolumAndModeMusic(std::string path, Sound* const& sound);
+				void LoadAllParticles(Cookie::Resources::ResourcesManager& resourcesManager);
+				void LoadAllAIBehaviors(Cookie::Resources::ResourcesManager& resourcesManager);
 			}
 		}
 	}

@@ -23,10 +23,6 @@ namespace Cookie::UIwidget
 
 		
 		virtual void WindowDisplay() = 0;
-
-
-		//inline		 bool& GetOpenSwitch()			{ return opened; }
-		//inline const bool  GetOpenSwitch() const	{ return opened; }
 	};
 	
 	
@@ -37,14 +33,16 @@ namespace Cookie::UIwidget
 		bool invalid = false;
 
 	public:
-		float	xPos	= 10, 
-				yPos	= 10, 
+		float	xPos	= 0, 
+				yPos	= 0, 
 				width	= 100,
 				height	= 100;
-	
+
 	protected:
 		// Note: The flags to prevent docking and collapsing are always given.
 		virtual bool BeginWindow(int windowFlags = 0) override;
+
+		virtual void WindowPreview() {};
 
 	public:
 		inline GameWindowBase(const char* _nameTag, bool _opened)
@@ -53,6 +51,7 @@ namespace Cookie::UIwidget
 
 		bool WindowEdit();
 
+		inline const char* GetName() { return windowName; }
 
 		virtual inline int GetID() = 0;
 	};

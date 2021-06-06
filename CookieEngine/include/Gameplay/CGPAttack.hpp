@@ -5,11 +5,30 @@
 
 namespace Cookie
 {
+	namespace Resources
+	{
+		class Sound;
+
+		namespace Particles
+		{
+			class ParticlesPrefab;
+		}
+	}
+
+	namespace ECS
+	{
+		class ComponentTransform;
+	}
+
 	namespace Gameplay
 	{
 		class CGPAttack 
 		{
 		public:
+			ECS::ComponentTransform*			   trs       {nullptr};
+			Resources::Sound*					   sfxAttack {nullptr};
+			Resources::Particles::ParticlesPrefab* vfxAttack {nullptr};
+
 			bool needToAttack    {false};
 
 			float powerLevel     {0}; //used for AI analysis
@@ -26,6 +45,9 @@ namespace Cookie
 
 			inline void ToDefault() noexcept
 			{
+				sfxAttack = nullptr;
+				vfxAttack = nullptr;
+
 				needToAttack = false;
 				attackDamage = 0;
 				attackSpeed = 0;

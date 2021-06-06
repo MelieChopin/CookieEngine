@@ -15,14 +15,14 @@ constexpr float cullEpsilon = -3.0f;
 
 struct VS_CONSTANT_BUFFER
 {
-	Mat4 model = Cookie::Core::Math::Mat4::Identity();
+	Mat4 proj = Mat4::Identity();
+	Mat4 view = Mat4::Identity();
 };
 
 /*======================= CONSTRUCTORS/DESTRUCTORS =======================*/
 
 DrawDataHandler::DrawDataHandler()
 {
-	InitCBuffer();
 }
 
 DrawDataHandler::~DrawDataHandler()
@@ -31,183 +31,281 @@ DrawDataHandler::~DrawDataHandler()
 
 /*========================= INIT METHODS =========================*/
 
-void DrawDataHandler::InitCBuffer()
+void DrawDataHandler::Init(const Game& game)
 {
-	VS_CONSTANT_BUFFER buffer = {};
-
-	Render::CreateBuffer(&buffer, sizeof(VS_CONSTANT_BUFFER), &CBuffer);
+	coordinator			= &game.coordinator;
+	player				= &game.playerData;
 }
 
-/*========================= REALTIME METHODS =========================*/
+void DrawDataHandler::SetScene(Resources::Scene* _scene)
+{
+	currentScene = _scene;
+}
 
-void DrawDataHandler::MakeFrustrum(const Camera& cam)
+/*========================= DRAW DATA METHODS =========================*/
+
+bool DrawData::operator==(const ECS::ComponentModel& model)
+{
+	return (model.mesh == mesh 
+			&& model.albedo == albedo 
+			&& model.normal == normalMap 
+			&& model.metallicRoughness == matMap);
+}
+
+/*========================= FRUSTRUM METHODS =========================*/
+
+void Frustrum::MakeFrustrum(const Camera& cam)
 {
 	Mat4 viewProj = cam.GetViewProj();
 
 	//left plane
-	frustrum.planes[0].x = viewProj.c[3].e[0] + viewProj.c[0].e[0];
-	frustrum.planes[0].y = viewProj.c[3].e[1] + viewProj.c[0].e[1];
-	frustrum.planes[0].z = viewProj.c[3].e[2] + viewProj.c[0].e[2];
-	frustrum.planes[0].w = viewProj.c[3].e[3] + viewProj.c[0].e[3];
+	planes[0].x = viewProj.c[3].e[0] + viewProj.c[0].e[0];
+	planes[0].y = viewProj.c[3].e[1] + viewProj.c[0].e[1];
+	planes[0].z = viewProj.c[3].e[2] + viewProj.c[0].e[2];
+	planes[0].w = viewProj.c[3].e[3] + viewProj.c[0].e[3];
 
 	//right plane
-	frustrum.planes[1].x = viewProj.c[3].e[0] - viewProj.c[0].e[0];
-	frustrum.planes[1].y = viewProj.c[3].e[1] - viewProj.c[0].e[1];
-	frustrum.planes[1].z = viewProj.c[3].e[2] - viewProj.c[0].e[2];
-	frustrum.planes[1].w = viewProj.c[3].e[3] - viewProj.c[0].e[3];
+	planes[1].x = viewProj.c[3].e[0] - viewProj.c[0].e[0];
+	planes[1].y = viewProj.c[3].e[1] - viewProj.c[0].e[1];
+	planes[1].z = viewProj.c[3].e[2] - viewProj.c[0].e[2];
+	planes[1].w = viewProj.c[3].e[3] - viewProj.c[0].e[3];
 
 	//top plane
-	frustrum.planes[2].x = viewProj.c[3].e[0] - viewProj.c[1].e[0];
-	frustrum.planes[2].y = viewProj.c[3].e[1] - viewProj.c[1].e[1];
-	frustrum.planes[2].z = viewProj.c[3].e[2] - viewProj.c[1].e[2];
-	frustrum.planes[2].w = viewProj.c[3].e[3] - viewProj.c[1].e[3];
+	planes[2].x = viewProj.c[3].e[0] - viewProj.c[1].e[0];
+	planes[2].y = viewProj.c[3].e[1] - viewProj.c[1].e[1];
+	planes[2].z = viewProj.c[3].e[2] - viewProj.c[1].e[2];
+	planes[2].w = viewProj.c[3].e[3] - viewProj.c[1].e[3];
 
 	//bottom plane
-	frustrum.planes[3].x = viewProj.c[3].e[0] + viewProj.c[1].e[0];
-	frustrum.planes[3].y = viewProj.c[3].e[1] + viewProj.c[1].e[1];
-	frustrum.planes[3].z = viewProj.c[3].e[2] + viewProj.c[1].e[2];
-	frustrum.planes[3].w = viewProj.c[3].e[3] + viewProj.c[1].e[3];
+	planes[3].x = viewProj.c[3].e[0] + viewProj.c[1].e[0];
+	planes[3].y = viewProj.c[3].e[1] + viewProj.c[1].e[1];
+	planes[3].z = viewProj.c[3].e[2] + viewProj.c[1].e[2];
+	planes[3].w = viewProj.c[3].e[3] + viewProj.c[1].e[3];
 
 	//near plane
-	frustrum.planes[4].x = viewProj.c[2].e[0];
-	frustrum.planes[4].y = viewProj.c[2].e[1];
-	frustrum.planes[4].z = viewProj.c[2].e[2];
-	frustrum.planes[4].w = viewProj.c[2].e[3];
+	planes[4].x = viewProj.c[2].e[0];
+	planes[4].y = viewProj.c[2].e[1];
+	planes[4].z = viewProj.c[2].e[2];
+	planes[4].w = viewProj.c[2].e[3];
 
 	//far plane
-	frustrum.planes[5].x = viewProj.c[3].e[0] - viewProj.c[2].e[0];
-	frustrum.planes[5].y = viewProj.c[3].e[1] - viewProj.c[2].e[1];
-	frustrum.planes[5].z = viewProj.c[3].e[2] - viewProj.c[2].e[2];
-	frustrum.planes[5].w = viewProj.c[3].e[3] - viewProj.c[2].e[3];
+	planes[5].x = viewProj.c[3].e[0] - viewProj.c[2].e[0];
+	planes[5].y = viewProj.c[3].e[1] - viewProj.c[2].e[1];
+	planes[5].z = viewProj.c[3].e[2] - viewProj.c[2].e[2];
+	planes[5].w = viewProj.c[3].e[3] - viewProj.c[2].e[3];
 
-	for (int i = 0; i < frustrum.planes.size(); i++)
+	for (int i = 0; i < planes.size(); i++)
 	{
-		frustrum.planes[i] = frustrum.planes[i].Normalize();
+		planes[i] = planes[i].Normalize();
 	}
-
-	//the vectors of the referential of cam
-	Core::Math::Vec3 camFwd		= { viewProj.c[2].x,viewProj.c[2].y,viewProj.c[2].z };
-	Core::Math::Vec3 camRight	= { viewProj.c[0].x,viewProj.c[0].y,viewProj.c[0].z };
-	Core::Math::Vec3 camUp		= { viewProj.c[1].x,viewProj.c[1].y,viewProj.c[1].z };
-	camFwd		= camFwd.Normalize();
-	camRight	= camRight.Normalize();
-	camUp		= camUp.Normalize();
-
-	//height and width of far plane
-	float heightFar = 2.0f * tanf(cam.fov / 2.0f)*cam.camFar;
-	float widthFar = heightFar * cam.aspectRatio;
-
-	//height and width of near plane
-	float heightNear = 2.0f * tanf(cam.fov / 2.0f) * cam.camNear;
-	float widthNear = heightNear * cam.aspectRatio;
-
-	//Center of each plane
-	Core::Math::Vec3 nearCenter = cam.pos + camFwd * cam.camNear;
-	Core::Math::Vec3 farCenter	= cam.pos + camFwd * cam.camFar;
-	frustrum.centroid = cam.pos + camFwd * ((cam.camNear + cam.camFar) / 2.0f);
-
-	//the near bottom left corner and top far right corner of the frustrum
-	frustrum.AABB[0] = nearCenter - (camUp * (heightNear / 2.0f)) - (camRight * (widthNear / 2.0f));
-	frustrum.AABB[1] = farCenter + (camUp * (heightFar / 2.0f)) + (camRight * (widthFar / 2.0f));
-
 }
 
-void DrawDataHandler::SetDrawData(const Camera* cam, const Game& game)
+/*========================= REALTIME METHODS =========================*/
+
+void DrawDataHandler::SetDrawData(const Camera* cam)
 {
-	currentCam = cam;
-	MakeFrustrum(*cam);
-	depthStencilView	= game.renderer.gPass.depthBuffer;
-	CamCBuffer			= game.renderer.gPass.CBuffer;
+	/* setup component for future renderpass and occlusion culling*/
+	currentCam			= cam;
+	frustrum.MakeFrustrum(*cam);
 
-	const ECS::EntityHandler& entityHandler = *game.coordinator.entityHandler;
-	ECS::ComponentHandler& components = *game.coordinator.componentHandler;
+	/* set if the scene changed */
+	if (currentScene)
+	{
+		mapDrawer.Set(currentScene->map);
+		lights = &currentScene->lights;
+	}
+
+	/* get the different array of ECS */
+	const Coordinator&			coord			= *coordinator;
+	const ECS::EntityHandler&	entityHandler	= *coord.entityHandler;
+	ECS::ComponentHandler&		components		= *coord.componentHandler;
+
+	/* used to know if a model is culled or not */
 	bool cull = false;
-
-	models.push_back(game.scene->map.model);
-	matrices.push_back(game.scene->map.trs.TRS);
 
 	for (int i = 0; i < entityHandler.livingEntities; ++i)
 	{
-		if ((entityHandler.entities[i].signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL)) == (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
+		const Entity& iEntity = entityHandler.entities[i];
+
+		/* we look up if the entity is displayable */
+		if ((iEntity.signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL)) == (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
 		{
-			ECS::ComponentModel& model = components.GetComponentModel(entityHandler.entities[i].id);
+			/* seeing the signature it should be displayable but ... */
+			ECS::ComponentModel& model = components.GetComponentModel(iEntity.id);
+
+			/* we at least need a mesh to display the entity */
+			if (model.mesh == nullptr)
+			{
+				continue;
+			}
+
+			/* occlusion culling process */
+			Core::Math::Mat4& trs = components.GetComponentTransform(iEntity.id).TRS;
+			cull = Cull(model, trs);
+
+			/* at this point, we know if we should display it or not, we just separate it into two arrays:
+			 * static and dynamic for a simpler drawing process, 
+			 * only workers and those who have a move component should be able to move */
+			ECS::ComponentGameplay& iGameplay = components.GetComponentGameplay(iEntity.id);
+			if (iGameplay.signatureGameplay & (CGP_SIGNATURE::MOVE | CGP_SIGNATURE::WORKER))
+			{
+				PushDrawData(dynamicDrawData, model, trs, iGameplay, cull);
+			}
+			else
+			{
+				PushDrawData(staticDrawData, model, trs, iGameplay, cull);
+			}
+		}
+	}
+
+	for (int i = 0; i < coord.selectedEntities.size(); ++i)
+	{
+		Entity& iEntity = *coord.selectedEntities[i];
+		if ((iEntity.signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL)) == (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
+		{
+			ECS::ComponentModel& model = components.GetComponentModel(iEntity.id);
 
 			if (model.mesh == nullptr)
 			{
 				continue;
 			}
 
-			Core::Math::Mat4& trs = components.GetComponentTransform(entityHandler.entities[i].id).TRS;
+			/* there is not culling enabled for selected entity neither bactching */
+			selectedDrawData.push_back({ model.mesh,model.albedo,model.normal,model.metallicRoughness });
+			DrawData& draw = selectedDrawData[selectedDrawData.size() - 1];
 
-			Vec4 modelMin = trs * Core::Math::Vec4(model.mesh->AABBMin, 1.0f);
-			Vec4 modelMax = trs * Core::Math::Vec4(model.mesh->AABBMax, 1.0f);
-
-			for (int j = 0; j < frustrum.planes.size(); j++)
-			{
-
-				if ((frustrum.planes[j].Dot(modelMin) + frustrum.planes[j].w) < cullEpsilon && (frustrum.planes[j].Dot(modelMax) + frustrum.planes[j].w) < cullEpsilon)
-				{
-					cull = true;
-					break;
-				}
-
-			}
-
-			if (cull)
-			{
-				cull = false;
-				continue;
-			}
-
-			AABB[0].x = std::min(modelMin.x, AABB[0].x);
-			AABB[0].y = std::min(modelMin.y, AABB[0].y);
-			AABB[0].z = std::min(modelMin.z, AABB[0].z);
-
-			AABB[1].x = std::max(modelMax.x, AABB[1].x);
-			AABB[1].y = std::max(modelMax.y, AABB[1].y);
-			AABB[1].z = std::max(modelMax.z, AABB[1].z);
-
-			models.push_back(model);
-			matrices.push_back(trs);
+			draw.matrices.push_back(components.GetComponentTransform(iEntity.id).TRS);
+			draw.gameplays.push_back(&components.GetComponentGameplay(iEntity.id));
 		}
 	}
 }
 
-void DrawDataHandler::Draw(int _i)
+void DrawDataHandler::SetStaticDrawData(const Camera* cam)
 {
-	ID3D11ShaderResourceView* fbos[3] = { nullptr, nullptr, nullptr };
+	/* setup component for future renderpass and occlusion culling*/
+	currentCam = cam;
+	frustrum.MakeFrustrum(*cam);
 
-	VS_CONSTANT_BUFFER buffer;
+	/* get the different array of ECS */
+	const Coordinator& coord = *coordinator;
+	const ECS::EntityHandler& entityHandler = *coord.entityHandler;
+	ECS::ComponentHandler& components = *coord.componentHandler;
 
-	size_t bufferSize = sizeof(buffer);
+	/* used to know if a model is culled or not */
+	bool cull = false;
 
-	for (int i = _i; i < models.size(); i++)
+	for (int i = 0; i < entityHandler.livingEntities; ++i)
 	{
-		buffer.model = matrices[i];
-		Render::WriteCBuffer(&buffer, bufferSize, 0, &CBuffer);
+		const Entity& iEntity = entityHandler.entities[i];
 
-		const ECS::ComponentModel& iModel = models[i];
-
-		if (iModel.albedo)
-			iModel.albedo->Set(0);
-		if (iModel.normal)
-			iModel.normal->Set(1);
-		if (iModel.metallicRoughness)
-			iModel.metallicRoughness->Set(2);
-		if (iModel.mesh)
+		/* we look up if the entity is displayable */
+		if ((iEntity.signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL)) == (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
 		{
-			iModel.mesh->Set();
-			iModel.mesh->Draw();
+			/* seeing the signature it should be displayable but ... */
+			ECS::ComponentModel& model = components.GetComponentModel(iEntity.id);
+
+			/* we at least need a mesh to display the entity */
+			if (model.mesh == nullptr)
+			{
+				continue;
+			}
+
+			/* occlusion culling process */
+			Core::Math::Mat4& trs = components.GetComponentTransform(iEntity.id).TRS;
+			cull = Cull(model, trs);
+
+			/* pushing if the entity is a static entity */
+			ECS::ComponentGameplay& iGameplay = components.GetComponentGameplay(iEntity.id);
+			if (!(iGameplay.signatureGameplay & (CGP_SIGNATURE::MOVE | CGP_SIGNATURE::WORKER)))
+			{
+				PushDrawData(staticDrawData, model, trs, iGameplay, cull);
+			}
+		}
+	}
+}
+
+bool DrawDataHandler::Cull(ECS::ComponentModel& model, Core::Math::Mat4& trs)
+{
+	bool cull = false;
+
+	/* change AABB to OBB */
+	Vec4 modelMin = trs * Core::Math::Vec4(model.mesh->AABBMin, 1.0f);
+	Vec4 modelMax = trs * Core::Math::Vec4(model.mesh->AABBMax, 1.0f);
+
+	/* Check with each planes */
+	for (int j = 0; j < frustrum.planes.size(); j++)
+	{
+
+		if ((frustrum.planes[j].Dot(modelMin) + frustrum.planes[j].w) < cullEpsilon && (frustrum.planes[j].Dot(modelMax) + frustrum.planes[j].w) < cullEpsilon)
+		{
+			cull = true;
+			break;
 		}
 
-		Render::RendererRemote::context->PSSetShaderResources(0, 3, fbos);
 	}
+
+	/* add to overall AABB if not culled */
+	if (!cull)
+	{
+		AABB[0].x = std::min(modelMin.x, AABB[0].x);
+		AABB[0].y = std::min(modelMin.y, AABB[0].y);
+		AABB[0].z = std::min(modelMin.z, AABB[0].z);
+
+		AABB[1].x = std::max(modelMax.x, AABB[1].x);
+		AABB[1].y = std::max(modelMax.y, AABB[1].y);
+		AABB[1].z = std::max(modelMax.z, AABB[1].z);
+	}
+
+	return cull;
+}
+
+void DrawDataHandler::PushDrawData(std::vector<DrawData>& drawDatas, const ECS::ComponentModel& model, const Core::Math::Mat4& trs, const ECS::ComponentGameplay& gameplay, bool culled)
+{
+	/* check in our drawDatas if ther is already a mesh like it */
+	for (int i = 0; i < drawDatas.size(); i++)
+	{
+		DrawData& draw = drawDatas[i];
+		if (draw == model)
+		{
+			draw.matrices.push_back(trs);
+			draw.gameplays.push_back(&gameplay);
+
+			if (!culled)
+			{
+				draw.visibleMatrices.push_back(trs);
+				draw.visibleGameplays.push_back(&gameplay);
+			}
+
+			return;
+		}
+	}
+
+	/* create another one otherwise */
+	drawDatas.push_back({ model.mesh,model.albedo,model.normal,model.metallicRoughness });
+
+	DrawData& draw = drawDatas[drawDatas.size() - 1];
+
+	draw.matrices.push_back(trs);
+	draw.gameplays.push_back(&gameplay);
+
+	if (!culled)
+	{
+		draw.visibleMatrices.push_back(trs);
+		draw.visibleGameplays.push_back(&gameplay);
+	}
+}
+
+void DrawDataHandler::Draw(bool drawOccluded)
+{
+	modelDrawer.Draw(staticDrawData,drawOccluded);
+	modelDrawer.Draw(dynamicDrawData,drawOccluded);
 }
 
 void DrawDataHandler::Clear()
 {
-	models.clear();
-	matrices.clear();
+	staticDrawData.clear();
+	dynamicDrawData.clear();
+	selectedDrawData.clear();
 	AABB[0] = { std::numeric_limits<float>().max(),std::numeric_limits<float>().max() ,std::numeric_limits<float>().max() };
 	AABB[1] = { -std::numeric_limits<float>().max(), -std::numeric_limits<float>().max() , -std::numeric_limits<float>().max() };
 }

@@ -15,7 +15,16 @@ namespace Cookie
 
 		inline void Camera::Update()
 		{
-			viewMat = Core::Math::Mat4::Inverse(Core::Math::Mat4::Translate(pos) * Core::Math::Mat4::RotateY(-rot.y)  * Core::Math::Mat4::RotateX(-rot.x));
+			rotMat = Core::Math::Mat4::RotateY(rot.y) * Core::Math::Mat4::RotateX(rot.x);
+			posMat = Core::Math::Mat4::Translate(-pos);
+			viewMat =  posMat * rotMat;
+		}
+
+		inline void Camera::ForceUpdate()
+		{
+			rotMat = Core::Math::Mat4::RotateY(rot.y) * Core::Math::Mat4::RotateX(rot.x);
+			posMat = Core::Math::Mat4::Translate(-pos);
+			viewMat = posMat * rotMat;
 		}
 
 		inline void Camera::ResetPreviousMousePos()
@@ -24,13 +33,34 @@ namespace Cookie
 			previousMouseY = ImGui::GetIO().MousePos.y;
 		}					 
 
-		inline Core::Math::Vec3 Camera::MouseToWorldDir()
+		inline Core::Math::Vec3 Camera::MouseToWorldDir()const
 		{
 			Core::Math::Vec2 mousePos = { { ImGui::GetIO().MousePos.x - windowOffset.x,ImGui::GetIO().MousePos.y - windowOffset.y} };
 
 			Core::Math::Vec2 ratio = { { (mousePos.x / (width * 0.5f)) - 1.0f,  (-mousePos.y / (height * 0.5f)) + 1.0f} };
 
-			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(projMat * viewMat) * Core::Math::Vec4(ratio.x,ratio.y, 1.0f,1.0f);
+			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(rotMat * projMat) * Core::Math::Vec4(ratio.x, ratio.y, 1.0f, 1.0f);
+
+			return Core::Math::Vec3({ r.x / r.a,r.y / r.a,r.z / r.a }).Normalize();
+		}
+
+		inline Core::Math::Vec3 Camera::MouseToWorldDirClamp()const
+		{
+			Core::Math::Vec2 mousePos = { { ImGui::GetIO().MousePos.x - windowOffset.x,ImGui::GetIO().MousePos.y - windowOffset.y} };
+
+			Core::Math::Vec2 ratio = { { (mousePos.x / (width * 0.5f)) - 1.0f,  (-mousePos.y / (height * 0.5f)) + 1.0f} };
+
+			if (ratio.x > 1.0f || ratio.x < -1.0f || ratio.y > 1.0f || ratio.y < -1.0f)
+				return Core::Math::Vec3();
+
+			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(rotMat * projMat) * Core::Math::Vec4(ratio.x, ratio.y, 1.0f, 1.0f);
+
+			return Core::Math::Vec3({ r.x / r.a,r.y / r.a,r.z / r.a }).Normalize();
+		}
+
+		inline Core::Math::Vec3 Camera::ScreenPointToWorldDir(const Core::Math::Vec2& point)const
+		{
+			Core::Math::Vec4 r = Core::Math::Mat4::Inverse(rotMat * projMat) * Core::Math::Vec4(point.x, point.y, 10.0f, 1.0f);
 
 			return Core::Math::Vec3({ r.x / r.a,r.y / r.a,r.z / r.a }).Normalize();
 		}
@@ -95,23 +125,28 @@ namespace Cookie
 		}
 
 
-		/* Game Camera*/
+		/* Game Camera */
 
 		inline void GameCam::UpdateGamePos()
 		{
 			//Calculate DeltaMousePos, later on will put in inputs
-			float tempMouseX = ImGui::GetIO().MousePos.x;
-			float tempMouseY = ImGui::GetIO().MousePos.y;
+			float tempMouseX = ImGui::GetIO().MousePos.x - windowOffset.x;
+			float tempMouseY = ImGui::GetIO().MousePos.y - windowOffset.y;
 			
-			float deltaMouseX = (tempMouseX - previousMouseX) * CAM_MOUSE_SENSITIVITY_X;
-			float deltaMouseY = (tempMouseY - previousMouseY) * CAM_MOUSE_SENSITIVITY_Y;
-			
+			Core::Math::Vec2 ratio = { { (tempMouseX / (width * 0.5f)) - 1.0f,  (-tempMouseY / (height * 0.5f)) + 1.0f} };
+
 			previousMouseX = tempMouseX;
 			previousMouseY = tempMouseY;
 			
-			float speed = (Core::DeltaTime() * CAM_MOUSE_SPEED * CAM_MOUSE_SPEED_UP_SCALE);
+			float speed = (Core::DeltaTime() * CAM_MOUSE_SPEED);
 			
-			pos += Core::Math::Vec3(deltaMouseX, 0.0f, deltaMouseY) * speed;
+			if (ratio.x >= GAME_CAM_HIGHER_EPSILON || ratio.x <= GAME_CAM_LOWER_EPSILON)
+				pos.x += ratio.x * speed;
+			if (ratio.y >= GAME_CAM_HIGHER_EPSILON || ratio.y <= GAME_CAM_LOWER_EPSILON)
+				pos.z -= ratio.y * speed;
+
+			pos.x = std::clamp(pos.x, mapClampX.x, mapClampX.y);
+			pos.z = std::clamp(pos.z, mapClampZ.x, mapClampZ.y);
 		}
 
 		inline void GameCam::UpdateZoom()

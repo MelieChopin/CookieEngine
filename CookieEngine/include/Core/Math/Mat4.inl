@@ -171,7 +171,7 @@ namespace Cookie
             }
             inline Mat4 Mat4::TRS(const Vec3& t, const Vec3& r, const Vec3& s)
             {
-                return Mat4::Translate(t) * Mat4::RotateY(r.y) * Mat4::RotateX(r.x) * Mat4::RotateZ(r.z) * Mat4::Scale(s);
+                return Mat4::Scale(s) * Mat4::RotateZ(r.z) * Mat4::RotateX(r.x) * Mat4::RotateY(r.y) * Mat4::Translate(t);
             }
             inline Mat4 Mat4::Perspective(float yFov, float aspect, float n, float f)
             {
@@ -222,12 +222,12 @@ namespace Cookie
                 m.c[2].e[2] = -(2.0f/f_min_n);
                 m.c[2].e[3] = 0.0f;
 
-                m.c[3].e[0] = ((right + left) / (r_min_l))*-1.0f;
-                m.c[3].e[1] = ((top + bottom) / (t_min_b))*-1.0f;
-                m.c[3].e[2] = ((f + n) / f_min_n)*-1.0f;
+                m.c[3].e[0] = -(right + left) / (r_min_l);
+                m.c[3].e[1] = -(top + bottom) / (t_min_b);
+                m.c[3].e[2] = -(f + n) / (f_min_n);
                 m.c[3].e[3] = 1.0f;
 
-                return m;
+                return m.Transpose();
             }
             inline Mat4 Mat4::LookAt(const Vec3& eye, const Vec3& center, const Vec3& up)
             {
@@ -240,27 +240,14 @@ namespace Cookie
                 y = x.Cross(z);
                 y = y.Normalize();
 
-                m.c[0] = { x, eye.x };
-                m.c[1] = { y, eye.y };
-                m.c[2] = { -z, eye.z };
+                m.c[0] = { x, x.Dot(eye) };
+                m.c[1] = { y, y.Dot(eye) };
+                m.c[2] = { -z, z.Dot(eye) };
                 
                 m.c[3] = { 0.0f,0.0f,0.0f,1.0f };
 
                 return m;
             }
-
-            inline Mat4 Mat4::Dir(const Vec3& dirVec)
-            {
-                Mat4 m;
-
-                float theta = atanf(sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y) / dirVec.z);
-                float phi = atan2f(dirVec.y,dirVec.x);
-
-                m = Mat4::RotateY(phi) * Mat4::RotateX(theta) * Mat4::RotateZ(PI);
-
-                return m;
-            }
-
             inline Mat4 Mat4::Inverse(const Mat4& _mat)
             {
                 float det = _mat.Det();
@@ -401,6 +388,27 @@ namespace Cookie
                 } };
             }
 
+            inline Vec3 Mat4::GetEuler()const
+            {
+                Vec3 euler;
+                euler.x = -asinf(c[2].e[1]);//Pitch
+
+                if (cosf(euler.x) > 0.0001)                 // Not at poles
+                {
+                    euler.y = Core::Math::ToDegrees(atan2f(c[2].e[0], c[2].e[2]));     // Yaw
+                    euler.z = Core::Math::ToDegrees(atan2f(c[0].e[1], c[1].e[1]));     // Roll
+                }
+                else
+                {
+                    euler.y = 0.0f;                         // Yaw
+                    euler.z = Core::Math::ToDegrees(atan2f(-c[1].e[0], c[0].e[0]));    // Roll
+                }
+
+                euler.x = Core::Math::ToDegrees(euler.x);
+
+                return euler;
+            }
+
             inline Vec3 Mat4::GetTranslate()const
             {
                 return Vec3{c[0].e[3],
@@ -430,7 +438,7 @@ namespace Cookie
                 for (int c = 0; c < 4; ++c)
                     for (int r = 0; r < 4; ++r)
                         for (int k = 0; k < 4; ++k)
-                            res.c[c].e[r] += this->c[c].e[k] * other.c[k].e[r];
+                            res.c[c].e[r] += this->c[k].e[r] * other.c[c].e[k];
                 return res;
             }
             inline Vec4 Mat4::operator*(const Vec4& other) const

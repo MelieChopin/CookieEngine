@@ -2,12 +2,17 @@
 #define __GAME_HPP__
 
 #include "Render/Renderer.hpp" 
+
 #include "Resources/Mesh.hpp"
 #include "Resources/Texture.hpp"
+#include "Resources/Prefab.hpp"
+#include "Resources/Sound.hpp"
+
 #include "Resources/ResourcesManager.hpp"
-#include "Render/Skybox.hpp"
+
 #include "ECS/Coordinator.hpp"
 #include "Resources/Particles/ParticlesHandler.hpp"
+#include "PlayerData.hpp"
 
 #include <memory>
 
@@ -18,18 +23,21 @@ namespace Cookie
 		class Scene;
 	}
 
+	#define MINIMUM_SELECTION_QUAD_LENGTH 1
+
 	class Game
 	{
 		private:
 		public:
+			Gameplay::PlayerData                            playerData;
 			Render::Renderer								renderer;
 			Resources::ResourcesManager						resources;
-			Render::SkyBox									skyBox;
 			ECS::Coordinator								coordinator;
 			Render::FrameBuffer								frameBuffer;
+			Render::FrameBuffer								miniMapBuffer;
 			Resources::Particles::ParticlesHandler			particlesHandler;
 
-			std::shared_ptr<Resources::Scene>				scene{nullptr};
+			std::unique_ptr<Resources::Scene>				scene{nullptr};
 
 		public:
 			 Game();
@@ -38,7 +46,26 @@ namespace Cookie
 			void Update();
 			void Loop();
 
-			void SetScene(const std::shared_ptr<Resources::Scene>& _scene);
+			//In Loop
+			//Remove the debugRenderer later on
+			void CalculateMousePosInWorld();
+			void HandleGameplayInputs();
+			void CheckIfBuildingValid();
+			void InputCancelBuilding();
+			void InputValidateBuilding();
+			void InputStartSelectionQuad();
+			void InputEndSelectionQuad();
+			void InputMoveSelected();
+			void InputSetNewEntityDestination();
+			void InputSetResourceToWorkers();
+			void InputStartBuilding(int index);
+			void InputAddUnit(int index);
+			void DisplayNewEntityDestination();
+			void ECSCalls();
+			void DisplayLife();
+
+			void SetScene();
+			void SetCamClampFromMap();
 			void TryResizeWindow();
 	};
 }

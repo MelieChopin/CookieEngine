@@ -11,17 +11,17 @@ namespace Cookie
 	{
 		enum CGPMOVE_STATE
 		{
-			E_MOVING,
-			E_PUSHED,
-			E_STATIC,
 			E_REACH_GOAL,
-
-			E_WAITING
+			E_STATIC,
+			E_WAITING,
+			E_PUSHED,
+			E_MOVING
 		};
 
 		//use constexpr, for now it bug
-		#define CPGMOVE_CD_BEFORE_RETURN 0.5f
-
+		#define CGPMOVE_CD_BEFORE_RETURN 0.5f
+		#define CGPMOVE_CD_BEFORE_STATIC 2.f
+		#define OFFSET_MAX_FROM_CENTROID 5
 
 		class CGPMove
 		{
@@ -29,22 +29,16 @@ namespace Cookie
 			CGPMOVE_STATE state = CGPMOVE_STATE::E_STATIC;
 			float moveSpeed = 5;
 			bool  isFlying = false;
+			ECS::ComponentTransform* trs {nullptr};
 
 			//use it for collision Detection making a circle with trs.pos
-			// sqrt(0.5^2 + 0.5^2)
+			// sqrt(scale.x^2 + scale.z^2)
 			float radius = 0.7;
 
-			//temporary
-			Resources::Tile* lastTile = nullptr;
-
-			//maybe use a vector of Tile*
 			std::vector<Core::Math::Vec3> waypoints;
 
-			Core::Math::Vec3* commanderPos = nullptr;
-			CGPMove*		  commanderCGPMove = nullptr;
-			Core::Math::Vec3  offsetFromCommander;
-
-			float pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
+			float reachGoalCountdown = CGPMOVE_CD_BEFORE_STATIC;
+			float pushedCooldownBeforeReturn = CGPMOVE_CD_BEFORE_RETURN;
 			Core::Math::Vec3 posBeforePushed;
 
 			CGPMove() {}
@@ -56,26 +50,22 @@ namespace Cookie
 				moveSpeed = 0;
 				isFlying = false;
 				radius = 0;
-				lastTile = nullptr;
 				waypoints.clear();
-				commanderPos = nullptr;
-				commanderCGPMove = nullptr;
-				offsetFromCommander = { 0, 0, 0 };
-				pushedCooldownBeforeReturn = CPGMOVE_CD_BEFORE_RETURN;
+				pushedCooldownBeforeReturn = CGPMOVE_CD_BEFORE_RETURN;
+				reachGoalCountdown = CGPMOVE_CD_BEFORE_STATIC;
 			}
 
-			void UpdatePushedCooldown(Resources::Map& map, ECS::ComponentTransform& trs);
+			void UpdatePushedCooldown(Resources::Map& map);
+			void UpdateReachGoalCooldown();
 
-			void SetPath(Resources::Tile& lastWaypoint, ECS::ComponentTransform& trs);
-			void SetCommander(CGPMove& _commanderCGPMove, ECS::ComponentTransform& commanderTrs, ECS::ComponentTransform& selfTrs);
+			void SetPath(Resources::Tile& lastWaypoint);
 			
-			void MoveTowardWaypoint(ECS::ComponentTransform& trs);
-			void MoveWithCommander(ECS::ComponentTransform& trs);
+			void MoveTowardWaypoint();
 			
 			void PositionPrediction();
-			void ResolveColision(ECS::ComponentTransform& trsSelf, CGPMove& other, ECS::ComponentTransform& trsOther);
+			void ResolveColision(CGPMove& other, Resources::Map& map);
 			
-			void DrawPath(Render::DebugRenderer& debug, ECS::ComponentTransform& trs);
+			void DrawPath(Render::DebugRenderer& debug);
 		};
 
 

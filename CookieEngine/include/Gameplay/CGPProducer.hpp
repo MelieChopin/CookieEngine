@@ -24,13 +24,16 @@ namespace Cookie
 		class CGPProducer
 		{
 		public:
-			Income*                                         income {nullptr};
-			std::vector<std::shared_ptr<Resources::Prefab>> possibleUnits;
-			std::vector<std::shared_ptr<Resources::Prefab>> queueOfUnits;
-			float                                           currentCountdown {0};
+			Income*							income {nullptr};
+			int								supplyGiven {0};
+			std::vector<Resources::Prefab*>	possibleUnits;
+			std::vector<std::string>		possibleUnitsAtLoad;
+			std::vector<Resources::Prefab*> queueOfUnits;
+			float                           currentCountdown {0};
+			Core::Math::Vec3				newUnitDestination {0, 0, 0};
 
-			Core::Math::Vec2                                tileSize {{0, 0}};
-			std::vector<Resources::Tile*>                   occupiedTiles;
+			Core::Math::Vec2                tileSize {{0, 0}};
+			std::vector<Resources::Tile*>   occupiedTiles;
 
 			CGPProducer() {}
 			~CGPProducer() {}
@@ -50,10 +53,11 @@ namespace Cookie
 				
 			}
 		
-			void UpdateCountdown(ECS::Coordinator& coordinator);
+			void UpdateCountdown(Resources::Map& map, ECS::Coordinator& coordinator, int selfId);
 
 			bool AddUnitToQueue(int indexInPossible);
 			void RemoveUnitFromQueue(int indexInQueue);
+
 		};
 	}
 }

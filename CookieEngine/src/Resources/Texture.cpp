@@ -29,20 +29,13 @@ Texture::Texture(const std::string& texPath) :
 	}
 	else
 	{
-		HRESULT result = DirectX::CreateWICTextureFromFile(Render::RendererRemote::device, wString.c_str(), &texture, &shaderResourceView);/*CreateWICTextureFromFileEx(Render::RendererRemote::device, Render::RendererRemote::context,
-			wString.c_str(),
-			0,
-			D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0,
-			0x1,
-			&texture, &shaderResourceView);*/
+		HRESULT result = DirectX::CreateWICTextureFromFile(Render::RendererRemote::device, wString.c_str(), &texture, &shaderResourceView);
 		if (FAILED(result))
 		{
 			printf("Failing Loading Texture %s: %s\n", name.c_str(), std::system_category().message(result).c_str());
 			return;
 		}
 		shaderResourceView->GetDesc(&desc);
-
-
 	}
 		
 }
@@ -52,7 +45,7 @@ Texture::Texture(const std::string& texName, const Core::Math::Vec4& color):
 {
 	if (CreateTextureFromColor(color))
 	{
-		CreateShaderResource();
+		CreateShaderResource(DXGI_FORMAT_R32G32B32A32_FLOAT);
 	}
 }
 
@@ -100,9 +93,9 @@ bool Texture::CreateTextureFromColor(const Core::Math::Vec4& color)
 	return true;
 }
 
-bool Texture::CreateShaderResource()
+bool Texture::CreateShaderResource(DXGI_FORMAT format)
 {
-	desc.Format						= DXGI_FORMAT_R32G32B32A32_FLOAT;
+	desc.Format						= format;
 	desc.ViewDimension				= D3D11_SRV_DIMENSION_TEXTURE2D;
 	desc.Texture2D.MipLevels		= 1;
 	desc.Texture2D.MostDetailedMip	= 0;

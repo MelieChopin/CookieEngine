@@ -2,6 +2,8 @@
 #define _CGP_WORKER_HPP__
 
 #include "ComponentTransform.hpp"
+#include "Map.hpp"
+#include "Gameplay/CGPResource.hpp"
 #include "Gameplay/Income.hpp"
 #include <vector>
 
@@ -15,6 +17,7 @@ namespace Cookie
 	namespace Resources
 	{
 		class Prefab;
+		class Map;
 	}
 
 	namespace Gameplay
@@ -30,17 +33,22 @@ namespace Cookie
 			//will be replace by the CPGMove with flying later on
 			float moveSpeed                  {5};
 
-			Core::Math::Vec3 posBase         {0,  1, 0};
-			Core::Math::Vec3 posResource     {25, 1, 0};
+			//Harvest
 			Income* income                   {nullptr};
-
+			Core::Math::Vec3* posBase        {nullptr};
+			Core::Math::Vec3* posResource    {nullptr};
+			CGPResource*      resource       {nullptr};
 			float harvestCountdown           {0};
 			bool isCarryingResource          {false};
-			bool isResourcePrimary           {true};
 
-			std::vector<std::shared_ptr<Resources::Prefab>> possibleBuildings;
-			std::shared_ptr<Resources::Prefab>              BuildingInConstruction {nullptr};
-			float                                           constructionCountdown  {0};
+			//Building
+			std::vector<Resources::Prefab*>	possibleBuildings;
+			std::vector<std::string>		possibleBuildingsAtLoad;
+			Resources::Prefab*				BuildingInConstruction {nullptr};
+			Core::Math::Vec3				posBuilding            {0,  0, 0}; // = mousePos when start construction
+			bool							needTostartBuilding    {false};
+			float                           constructionCountdown  {0};
+			std::vector<Resources::Tile*>   occupiedTiles; //get at start of building, then set in building
 
 			CGPWorker() {}
 			~CGPWorker() {}
@@ -48,18 +56,22 @@ namespace Cookie
 			inline void ToDefault() noexcept
 			{
 				income						= nullptr;
-				posBase                     = {0, 0, 0};
-				posResource                 = {0, 0, 0};
+				posBase                     = nullptr;
+				posResource                 = nullptr;
+				resource					= nullptr;
 				harvestCountdown            = 0;
 				isCarryingResource          = false;
-				isResourcePrimary           = false;
 				BuildingInConstruction       = nullptr;
 				constructionCountdown       = 0;
+				for (int i = 0; i < occupiedTiles.size(); ++i)
+					occupiedTiles[i]->isObstacle = false;
+				occupiedTiles.clear();
 			}
 
-			void Update(ECS::ComponentTransform& trs, ECS::Coordinator& coordinator);
+			void Update(Resources::Map& map, ECS::Coordinator& coordinator, int selfId);
 
-
+			void SetResource(Core::Math::Vec3& resourcePos, CGPResource& resourceCGP);
+			bool StartBuilding(Resources::Map& map, Core::Math::Vec3& _posBuilding, int indexInPossibleBuildings);
 		};
 
 	}

@@ -1,13 +1,9 @@
-#include <vector>
-#include "Resources/Scene.hpp"
-#include "Coordinator.hpp"
-#include "InspectorWidget.hpp"
-#include "HierarchyWidget.hpp"
-#include "Resources/Mesh.hpp"
-#include "Resources/Texture.hpp"
-#include "Resources/ResourcesManager.hpp"
 #include "Editor.hpp"
-#include "Renderer.hpp"
+#include "InspectorWidget.hpp"
+#include "Scene.hpp"
+#include "HierarchyWidget.hpp"
+
+#include "MapExplorerHelper.hpp"
 
 #include <imgui.h>
 
@@ -16,6 +12,7 @@
 using namespace ImGui;
 using namespace Cookie::UIwidget;
 using namespace Cookie::ECS;
+using namespace Cookie::Resources;
 
 
 void Hierarchy::WindowDisplay()
@@ -25,10 +22,23 @@ void Hierarchy::WindowDisplay()
         if (BeginPopupContextWindow("Out-object hierarchy menu"))
         {
             if (Selectable("Create empty"))
-            { 
+            {
                 coordinator.AddEntity(C_SIGNATURE::EMPTY_C);
             }
-        
+
+            {
+                Prefab* prefab = ResourceMapSelector<Prefab>("prefab", "##PREFABEDSELECTOR", resources.prefabs);
+                if(prefab)
+                    coordinator.AddEntity(prefab);
+            }
+
+            NewLine();
+            if (Selectable("Clean scene"))
+            {
+                while (coordinator.entityHandler->livingEntities)
+                    coordinator.RemoveEntity(coordinator.entityHandler->entities[0]);
+            }
+
             EndPopup();
         }
 
@@ -45,7 +55,8 @@ void Hierarchy::WindowDisplay()
 
             if (Selectable(entityNameTag.c_str()))
             {
-                selectedEntity.toChangeEntityId = entityHandler.entities[i].id;
+                selectedEntity.toChangeEntityIndex = i;
+                //populate
             }
 
             if (BeginPopupContextItem(entityNameTag.c_str()))
@@ -56,13 +67,17 @@ void Hierarchy::WindowDisplay()
                 if (Selectable("Save as prefab"))
                 {
                     resources.CreateNewPrefabs(entityHandler.entities[i], *coordinator.componentHandler);
-                    Cookie::Resources::Serialization::Save::SavePrefab(resources.prefabs[entityHandler.entities[i].namePrefab]);
+                    Cookie::Resources::Serialization::Save::SavePrefab(resources.prefabs[entityHandler.entities[i].namePrefab].get());
                 }
                 
             
                 EndPopup();
             }
         }
+
+        NewLine();
+        NewLine();
+        NewLine();
     }
 
     ImGui::End();

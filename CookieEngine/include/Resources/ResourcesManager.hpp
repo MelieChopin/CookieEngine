@@ -6,6 +6,7 @@
 #include <memory>
 #include <filesystem>
 #include <d3d11.h>
+#include "Particles/ParticlesSystem.hpp"
 
 namespace fs = std::filesystem;
 
@@ -15,6 +16,11 @@ namespace Cookie
 	{
 		class ComponentHandler;
 		class Entity;
+	}
+
+	namespace Gameplay
+	{
+		struct AIBehavior;
 	}
 
 	namespace Render
@@ -32,14 +38,23 @@ namespace Cookie
 		class Prefab;
 		class Sound;
 
+		namespace Particles
+		{
+			class ParticlesPrefab;
+		}
+
 		class ResourcesManager
 		{
 			public:
-				std::unordered_map<std::string, std::unique_ptr<Mesh>>						meshes;
-				std::unordered_map<std::string, std::unique_ptr<Texture>>					textures;
-				std::unordered_map<std::string, std::shared_ptr<Script>>					scripts;
-				std::unordered_map<std::string, std::shared_ptr<Prefab>>					prefabs;
-				std::unordered_map<std::string, std::shared_ptr<Cookie::Resources::Sound>>  sounds;
+				std::unordered_map<std::string, std::unique_ptr<Mesh>>					meshes;
+				std::unordered_map<std::string, std::unique_ptr<Texture>>				textures2D;
+				std::unordered_map<std::string, std::unique_ptr<Texture>>				skyboxes;
+				std::unordered_map<std::string, std::unique_ptr<Texture>>				icons;
+				std::unordered_map<std::string, std::unique_ptr<Script>>				scripts;
+				std::unordered_map<std::string, std::unique_ptr<Sound>>					sounds;
+				std::unordered_map<std::string, std::unique_ptr<Particles::ParticlesPrefab>> particles;
+				std::unordered_map<std::string, std::unique_ptr<Gameplay::AIBehavior>>	aiBehaviors;
+				std::unordered_map<std::string, std::unique_ptr<Prefab>>				prefabs;
 				
 			private:
 				void SearchForAssets(const fs::path& path, std::vector<std::string>& gltfFiles);

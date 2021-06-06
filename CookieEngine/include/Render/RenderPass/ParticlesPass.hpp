@@ -22,6 +22,7 @@ namespace Cookie
 	namespace Resources
 	{
 		class Mesh;
+		class Texture;
 	}
 
 	namespace Render
@@ -30,6 +31,7 @@ namespace Cookie
 		{
 			Cookie::Core::Math::Mat4 World;
 			Cookie::Core::Math::Vec4 Color;
+			UINT isBillboard;
 		};
 
 		class ParticlesPass
@@ -41,15 +43,21 @@ namespace Cookie
 			ID3D11Buffer* CBuffer{ nullptr };
 			ID3D11Buffer* InstanceBuffer{ nullptr };
 			ID3D11BlendState* blendState{ nullptr };
+			ID3D11SamplerState* PSampler{ nullptr };
+			ID3D11RasterizerState* rasterizerState{ nullptr };
+			ID3D11DepthStencilState* depthStencilState{ nullptr };
 
 			std::vector<InstancedData> mInstancedData;
 
 			void InitShader();
-			void Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mesh, std::vector<InstancedData> data);
+			void Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mesh, Resources::Texture* texture, std::vector<InstancedData> data);
 			void AllocateMoreSpace(int newSpace);
+			void Destroy();
 
+			void Clean();
 
 			ParticlesPass();
+			ParticlesPass(const ParticlesPass& pass);
 			~ParticlesPass();
 		};
 	}
