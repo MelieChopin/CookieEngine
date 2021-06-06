@@ -124,29 +124,29 @@ void Inspector::ModelInterface()
 
         Text("Mesh:"); SameLine(100);
 
-        ResourceMapExplorer<Mesh>("mesh", "##MESHSELECT", resources.meshes, modelComp.mesh);
+        ResourceMapExplorer<Mesh>("mesh", std::move("##MESHSELECT"), resources.meshes, modelComp.mesh);
 
 
 //===== TEXTURES =====//
         
         Text("Albedo:"); SameLine(100);
 
-        ResourceMapExplorer<Texture>("texture", "##ALDEBOSELECT", resources.textures2D, modelComp.albedo);
+        ResourceMapExplorer<Texture>("texture", std::move("##ALDEBOSELECT"), resources.textures2D, modelComp.albedo);
 
 
         Text("Normal:"); SameLine(100);
 
-        ResourceMapExplorer<Texture>("normal texture", "##NORMSELECT", resources.textures2D, modelComp.normal);
+        ResourceMapExplorer<Texture>("normal texture", std::move("##NORMSELECT"), resources.textures2D, modelComp.normal);
 
 
         ImGui::Custom::TextSnip("metallic-Roughness", 9); SameLine(); Text(":"); SameLine(100);
 
-        ResourceMapExplorer<Texture>("metallic-rough texture", "##MRSELECT", resources.textures2D, modelComp.metallicRoughness);
+        ResourceMapExplorer<Texture>("metallic-rough texture", std::move("##MRSELECT"), resources.textures2D, modelComp.metallicRoughness);
 
 
         ImGui::Custom::TextSnip("In-Game icon", 9); SameLine(); Text(":"); SameLine(100);
 
-        ResourceMapExplorer<Texture>("In-Game icon", "##IGICSELECTOR", resources.icons, modelComp.icon);
+        ResourceMapExplorer<Texture>("In-Game icon", std::move("##IGICSELECTOR"), resources.icons, modelComp.icon);
 
 //====================//
 

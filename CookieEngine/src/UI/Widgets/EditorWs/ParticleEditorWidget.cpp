@@ -15,7 +15,7 @@ void ParticleEditor::WindowDisplay()
 	{
 		static ParticlesPrefab* selectedParticles = nullptr;
 
-		ResourceMapExplorer<ParticlesPrefab>("Particles System", "##PARTICLESSYSTEMSELECTOR", manager.particles, selectedParticles);
+		ResourceMapExplorer<ParticlesPrefab>("Particles System", std::move("##PARTICLESSYSTEMSELECTOR"), manager.particles, selectedParticles);
 
 		if (!selectedParticles)
 		{
@@ -33,11 +33,11 @@ void ParticleEditor::WindowDisplay()
 
 				Text("Mesh :");
 				SameLine(100);
-				ResourceMapExplorer<Mesh>("Mesh", "##MESHSELECT", manager.meshes, dataPrefab.mesh);
+				ResourceMapExplorer<Mesh>("Mesh", std::move("##MESHSELECT"), manager.meshes, dataPrefab.mesh);
 
 				Text("Texture :"); 
 				SameLine(100);
-				ResourceMapExplorer<Texture>("Texture", "##TEXTURESELECT", manager.textures2D, dataPrefab.texture);
+				ResourceMapExplorer<Texture>("Texture", std::move("##TEXTURESELECT"), manager.textures2D, dataPrefab.texture);
 
 				Text("Is billboarded ?"); 
 				SameLine(200);

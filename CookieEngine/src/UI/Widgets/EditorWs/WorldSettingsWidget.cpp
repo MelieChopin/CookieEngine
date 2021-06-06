@@ -76,17 +76,17 @@ void WorldSettingsWidget::WindowDisplay()
 			{
 				Text("Map albedo:"); SameLine(110);
 
-				ResourceMapExplorer<Texture>("texture", "##MAPTEXTSELECT", resources.textures2D, scene->map.model.albedo);
+				ResourceMapExplorer<Texture>("texture", std::move("##MAPTEXTSELECT"), resources.textures2D, scene->map.model.albedo);
 
 
 				Text("Map normal:"); SameLine(110);
 
-				ResourceMapExplorer<Texture>("normal texture", "##MAPNORMSELECT", resources.textures2D, scene->map.model.normal);
+				ResourceMapExplorer<Texture>("normal texture", std::move("##MAPNORMSELECT"), resources.textures2D, scene->map.model.normal);
 
 
 				ImGui::Custom::TextSnip("Map metallic-Roughness", 9); SameLine(); Text(":"); SameLine(110);
 
-				ResourceMapExplorer<Texture>("metallic-rough texture", "##MAPMRSELECT", resources.textures2D, scene->map.model.metallicRoughness);
+				ResourceMapExplorer<Texture>("metallic-rough texture", std::move("##MAPMRSELECT"), resources.textures2D, scene->map.model.metallicRoughness);
 			}
 
 			
@@ -143,7 +143,7 @@ void WorldSettingsWidget::WindowDisplay()
 		if (TreeNode("Skybox settings"))
 		{
 			Text("Skybox texture:");
-			ResourceMapExplorer<Texture>("cubic texture", "##SKYBOXSELECT", resources.skyboxes, skybox.texture);
+			ResourceMapExplorer<Texture>("cubic texture", std::move("##SKYBOXSELECT"), resources.skyboxes, skybox.texture);
 
 			TreePop();
 		}
@@ -168,7 +168,7 @@ void WorldSettingsWidget::WindowDisplay()
 						if (SmallButton("Remove##REMOVE_COORDINATOR")) 
 							scene->armyHandler.RemoveArmyCoordinator(currentArmyName);
 
-						ResourceMapExplorer<AIBehavior>("AIBehavior", "##AIBEHAVIOR", resources.aiBehaviors, currentArmyCoordinator->behavior);
+						ResourceMapExplorer<AIBehavior>("AIBehavior", std::move("##AIBEHAVIOR"), resources.aiBehaviors, currentArmyCoordinator->behavior);
 
 					}
 					else
