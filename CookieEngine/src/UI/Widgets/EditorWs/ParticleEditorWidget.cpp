@@ -346,11 +346,8 @@ void ParticleEditor::WindowDisplay()
 								CollisionWithPlane& collision = dynamic_cast<CollisionWithPlane&>(*emitter.updates[i].get());
 								Text("Which particles system ?");
 								SameLine();
-								Text("Current : %s", collision.namePrefab.c_str());
-								ParticlesPrefab* temp = nullptr;
-								ResourceMapExplorer<ParticlesPrefab>("Particles System", "##PARTICLESSYSTEMSELECTOR", manager.particles, temp);
-								if (temp)
-									collision.namePrefab = temp->name;
+								InputText("Particles name", &collision.namePrefab);
+									
 								if (Button("Remove"))
 								{
 									emitter.updates.erase(emitter.updates.begin() + i);

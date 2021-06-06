@@ -125,7 +125,7 @@ namespace Cookie
 
 				float dis = -0.70f;
 				Cookie::Core::Math::Vec3 n = Cookie::Core::Math::Vec3(0, 1, 0);
-				std::string namePrefab = "Explosion";
+				std::string namePrefab = "Death_All";
 
 				virtual void Update(ParticlesData* p) override;
 			};
