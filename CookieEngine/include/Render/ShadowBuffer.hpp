@@ -11,6 +11,8 @@ namespace Cookie
 {
 	namespace Render
 	{
+		/* class that is like the framebuffer class but for shadow. 
+		 * it creates a shadowMap with SHADOW_MAP_RESOLUTION */
 		class ShadowBuffer
 		{
 		public:

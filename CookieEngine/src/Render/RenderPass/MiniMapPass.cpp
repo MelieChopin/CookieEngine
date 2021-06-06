@@ -56,10 +56,9 @@ MiniMapPass::~MiniMapPass()
 
 void MiniMapPass::InitState()
 {
-    // Initialize the description of the stencil state.
     D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 
-    // Set up the description of the stencil state.
+    /* enable depth test */
     depthStencilDesc.DepthEnable	= true;
     depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
     depthStencilDesc.DepthFunc		= D3D11_COMPARISON_LESS;
@@ -69,17 +68,11 @@ void MiniMapPass::InitState()
 
     D3D11_RASTERIZER_DESC rasterDesc = {};
 
-    // Setup the raster description which will determine how and what polygons will be drawn.
-    rasterDesc.AntialiasedLineEnable = false;
-    rasterDesc.CullMode = D3D11_CULL_NONE;
-    rasterDesc.DepthBias = 0;
-    rasterDesc.DepthBiasClamp = 0.0f;
-    rasterDesc.DepthClipEnable = true;
-    rasterDesc.FillMode = D3D11_FILL_SOLID;
-    rasterDesc.FrontCounterClockwise = true;
-    rasterDesc.MultisampleEnable = false;
-    rasterDesc.ScissorEnable = false;
-    rasterDesc.SlopeScaledDepthBias = 0.0f;
+    /* enable cull back */
+    rasterDesc.CullMode                 = D3D11_CULL_BACK;
+    rasterDesc.DepthClipEnable          = true;
+    rasterDesc.FillMode                 = D3D11_FILL_SOLID;
+    rasterDesc.FrontCounterClockwise    = true;
 
     RendererRemote::device->CreateRasterizerState(&rasterDesc, &rasterState);
 }
@@ -92,17 +85,15 @@ void MiniMapPass::CreateDepth(int width, int height)
     D3D11_TEXTURE2D_DESC depthBufferDesc = {};
 
     // Set up the description of the depth buffer.
-    depthBufferDesc.Width = width;
-    depthBufferDesc.Height = height;
-    depthBufferDesc.MipLevels = 1;
-    depthBufferDesc.ArraySize = 1;
-    depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    depthBufferDesc.SampleDesc.Count = 1;
-    depthBufferDesc.SampleDesc.Quality = 0;
-    depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-    depthBufferDesc.CPUAccessFlags = 0;
-    depthBufferDesc.MiscFlags = 0;
+    depthBufferDesc.Width               = width;
+    depthBufferDesc.Height              = height;
+    depthBufferDesc.MipLevels           = 1;
+    depthBufferDesc.ArraySize           = 1;
+    depthBufferDesc.Format              = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthBufferDesc.SampleDesc.Count    = 1;
+    depthBufferDesc.SampleDesc.Quality  = 0;
+    depthBufferDesc.Usage               = D3D11_USAGE_DEFAULT;
+    depthBufferDesc.BindFlags           = D3D11_BIND_DEPTH_STENCIL;
 
     HRESULT result = RendererRemote::device->CreateTexture2D(&depthBufferDesc, NULL, &depthTexture);
     if (FAILED(result))
@@ -111,12 +102,11 @@ void MiniMapPass::CreateDepth(int width, int height)
         return;
     }
 
-    // Initialize the depth stencil view.
     D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
 
     // Set up the depth stencil view description.
-    depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    depthStencilViewDesc.Format             = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthStencilViewDesc.ViewDimension      = D3D11_DSV_DIMENSION_TEXTURE2D;
     depthStencilViewDesc.Texture2D.MipSlice = 0;
 
     result = RendererRemote::device->CreateDepthStencilView(depthTexture, &depthStencilViewDesc, &depthBuffer);
@@ -138,23 +128,25 @@ void MiniMapPass::Draw(DrawDataHandler& drawData, const FrameBuffer& framebuffer
 	const Camera& cam			= *drawData.currentCam;
 	const Resources::Map& map	= drawData.currentScene->map;
 
-	float width = map.trs.scale.x;
-	float height = map.trs.scale.z;
-
+    /* create an orthographic projection */
+	float width     = map.trs.scale.x;
+	float height    = map.trs.scale.z;
 	ortho = Mat4::Ortho(-width * 0.5f, width * 0.5f, -height * 0.5f, height * 0.5f, -zEpsilon, zEpsilon);
 
-	viewport.Width = framebuffer.width;
+    /* set viewport */
+	viewport.Width  = framebuffer.width;
 	viewport.Height = framebuffer.height;
-
 	Render::RendererRemote::context->RSSetViewports(1, &viewport);
 
+    /* set constant buffers */
 	ID3D11Buffer* CBuffers[2] = { miniModelDrawer.CBuffer, miniModelDrawer.CamCBuffer };
 	Render::RendererRemote::context->VSSetConstantBuffers(0, 2, CBuffers);
 
+    /* set cam constants */
 	CAM_CONSTANT_BUFFER buffer = { ortho, miniMapView };
-
 	Render::WriteBuffer(&buffer, sizeof(buffer), 0, &miniModelDrawer.CamCBuffer);
 
+    /* draw the models */
 	miniModelDrawer.Set();
 	miniModelDrawer.Draw(drawData.staticDrawData);
 	miniModelDrawer.Draw(drawData.dynamicDrawData);
@@ -164,6 +156,7 @@ void MiniMapPass::Draw(DrawDataHandler& drawData, const FrameBuffer& framebuffer
 	// Set the depth stencil state.
 	Render::RendererRemote::context->OMSetDepthStencilState(depthStencilState, 1);
 
+    /* draw the map */
 	miniMapDrawer.Set(cam,map);
 	miniMapDrawer.Draw();
 }

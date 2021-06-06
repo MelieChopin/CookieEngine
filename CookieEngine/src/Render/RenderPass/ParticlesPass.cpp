@@ -348,5 +348,5 @@ void ParticlesPass::Draw(const Cookie::Render::Camera& cam, Resources::Mesh* mes
     memcpy(ms.pData, mInstancedData.data(), sizeof(Render::InstancedData) * mInstancedData.size());
     Render::RendererRemote::context->Unmap(InstanceBuffer, 0);
 
-    Render::RendererRemote::context->DrawIndexedInstanced(mesh->GetIndicesNb(), mInstancedData.size(), 0, 0, 0);
+    Render::RendererRemote::context->DrawIndexedInstanced(mesh->INb, mInstancedData.size(), 0, 0, 0);
 }

@@ -127,38 +127,39 @@ void Editor::ModifyEditComp()
 
 void Editor::ChooseDrawBuffer()
 {
-    static Render::FrameBuffer& fbo = editorFBO;
+    static Render::FrameBuffer* fbo = &editorFBO;
 
     if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F1] >= 0.0f)
     {
-        fbo = editorFBO;
+        fbo = &editorFBO;
     }
     if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F2] >= 0.0f)
     {
-        fbo = game.renderer.geomPass.posFBO;
+        fbo = &game.renderer.geomPass.posFBO;
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F3] >= 0.0f)
     {
-        fbo = game.renderer.geomPass.normalFBO;
+        fbo = &game.renderer.geomPass.normalFBO;
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F4] >= 0.0f)
     {
-        fbo = game.renderer.geomPass.albedoFBO;
+        fbo = &game.renderer.geomPass.albedoFBO;
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F5] >= 0.0f)
     {
-        fbo = game.renderer.lightPass.diffuseFBO;
+        fbo = &game.renderer.lightPass.diffuseFBO;
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F6] >= 0.0f)
     {
-        fbo = game.renderer.lightPass.specularFBO;
+        fbo = &game.renderer.lightPass.specularFBO;
     }
 
-    if (fbo.shaderResource == editorFBO.shaderResource)
+    if (fbo == &editorFBO)
         return;
 
+    game.renderer.shadPass.Set();
     Render::RendererRemote::context->OMSetRenderTargets(1, &editorFBO.renderTargetView, nullptr);
-    game.renderer.DrawFrameBuffer(fbo);
+    game.renderer.DrawFrameBuffer(*fbo);
 }
 
 void Editor::Loop()

@@ -11,9 +11,12 @@ namespace Cookie
 	{
 		class FrameBuffer;
 
+		/* class to help drawing a framebuffer.
+		* just draws in a full screen quad the framebuffer*/
 		class FBODrawer
 		{
 			private:
+				/* shader */
 				ID3D11VertexShader* VShader{ nullptr };
 				ID3D11PixelShader*	PShader{ nullptr };
 				ID3D11SamplerState* PSampler{ nullptr };

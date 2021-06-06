@@ -52,6 +52,7 @@ void PlayerDrawer::Set(const DrawDataHandler& drawData)
 
     viewProj = drawData.currentCam->GetViewProj();
 
+    /* get the quad info and save it the way we need it */
     isMakingQuad = player.makingASelectionQuad;
     if (isMakingQuad)
     {
@@ -59,6 +60,7 @@ void PlayerDrawer::Set(const DrawDataHandler& drawData)
         quadTrs = Mat4::Scale({(quadCenter.x - player.selectionQuadStart.x)*2.0f,1.0f,(quadCenter.z - player.selectionQuadStart.z)*2.0f }) * Mat4::Translate(quadCenter);
     }
 
+    /* get the info of the building we need */
     isValid = player.isBuildingValid;
     if (player.workerWhoBuild)
     {
@@ -69,7 +71,7 @@ void PlayerDrawer::Set(const DrawDataHandler& drawData)
             buildingTRS          = player.workerWhoBuild->possibleBuildings[player.indexOfBuildingInWorker]->transform.TRS * Mat4::Translate(player.buildingPos);
         }
     }
-    else
+    else /* if not displayable for the moment disable it by making mesh null */
     {
         buildingMesh = nullptr;
     }
@@ -80,15 +82,17 @@ void PlayerDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
     ID3D11ShaderResourceView* tex[1] = {nullptr};
     Render::RendererRemote::context->PSSetShaderResources(0, 1, tex);
 
-    VS_CONSTANT_BUFFER buffer = {};
-    size_t bufferSize = sizeof(VS_CONSTANT_BUFFER);
+    /* setup the cam first */
+    VS_CONSTANT_BUFFER buffer   = {};
+    size_t bufferSize           = sizeof(VS_CONSTANT_BUFFER);
+    buffer.viewProj             = viewProj;
 
-    buffer.viewProj = viewProj;
-
-    Vec4 color = validColor;
-    size_t colorSize = sizeof(Vec4);
+    /* setup the default color */
+    Vec4 color          = validColor;
+    size_t colorSize    = sizeof(Vec4);
     Render::WriteBuffer(&color, colorSize, 0, &PCBuffer);
 
+    /* draw quad */
     if (isMakingQuad)
     {
         buffer.model = quadTrs;
@@ -98,6 +102,7 @@ void PlayerDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
         quadMesh->Draw();
     }
 
+    /* draw building */
     if (buildingMesh)
     {
         buffer.model = buildingTRS;
@@ -105,12 +110,14 @@ void PlayerDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
 
         if (!isValid)
         {
+            /* write the invalid color */
             color = invalidColor;
             Render::WriteBuffer(&color, colorSize, 0, &PCBuffer);
         }
 
         if (buildingAlbedoTex)
         {
+            /* setting texturr */
             tex[0] = buildingAlbedoTex->GetResourceView();
             Render::RendererRemote::context->PSSetShaderResources(0, 1, tex);
         }
