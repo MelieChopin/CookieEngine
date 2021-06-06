@@ -63,6 +63,7 @@ void DirLightDrawer::InitShader()
 
     CompileVertex(source, &blob, &VShader);
 
+    /* the idea is of an include, PBR is in Light.hpp */
     source = std::string(PBR) + std::string((const char*)R"(
 
     Texture2D	positionTex : register(t0);
@@ -126,7 +127,7 @@ void DirLightDrawer::InitShader()
         float   shadow      = lerp(1.0,compute_shadow(fragPos,dot(normal, normalize(-lightDir))),castShadow);
 
         output          = compute_lighting(normal,fragPos,normalize(-lightDir),lightColor,metallic,roughness);
-        output.diffuse  = output.diffuse * shadow + (0.03 * ao + 0.01);
+        output.diffuse  = output.diffuse * shadow + (0.03 * ao);
         output.diffuse  = pow(output.diffuse,0.45454545);
         output.specular = pow(output.specular * shadow,0.45454545);
 
@@ -135,21 +136,20 @@ void DirLightDrawer::InitShader()
 
     CompilePixel(source, &PShader);
 
+    /* create the buffer for the dir Lights */
     PS_DIRLIGHT_BUFFER buffer = {};
-
     CreateBuffer(&buffer, sizeof(PS_DIRLIGHT_BUFFER), &CBuffer);
 
+    /* create the comparison sampler for sampling the shadow map */
     D3D11_SAMPLER_DESC samDesc = {};
-    samDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
-    samDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
-    samDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
-    samDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-    samDesc.MipLODBias = 0.0f;
-    samDesc.MaxAnisotropy = 0.0f;
-    samDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
-    samDesc.BorderColor[0] = samDesc.BorderColor[1] = samDesc.BorderColor[2] = samDesc.BorderColor[3] = 1.0f;
-    samDesc.MinLOD = 0;
-    samDesc.MaxLOD = D3D11_FLOAT32_MAX;
+    samDesc.Filter          = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+    samDesc.AddressU        = D3D11_TEXTURE_ADDRESS_BORDER;
+    samDesc.AddressV        = D3D11_TEXTURE_ADDRESS_BORDER;
+    samDesc.AddressW        = D3D11_TEXTURE_ADDRESS_BORDER;
+    samDesc.ComparisonFunc  = D3D11_COMPARISON_LESS_EQUAL;
+    samDesc.BorderColor[0]  = samDesc.BorderColor[1] = samDesc.BorderColor[2] = samDesc.BorderColor[3] = 1.0f;
+    samDesc.MinLOD          = 0;
+    samDesc.MaxLOD          = D3D11_FLOAT32_MAX;
 
     Render::CreateSampler(&samDesc, &CSampler);
 
@@ -160,27 +160,27 @@ void DirLightDrawer::InitShader()
 
 void DirLightDrawer::Set(const DirLight& dirLight, const ShadowBuffer& shadowMap, ID3D11Buffer** lightCBuffer)
 {
-
+    /* set shaders */
     RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     RendererRemote::context->PSSetShader(PShader, nullptr, 0);
 
+    /* set the input layout to null to exploit the default behavior of dx11 */
     RendererRemote::context->IASetInputLayout(nullptr);
 
+    /* set sampler and constant buffer */
     ID3D11Buffer* buffer[] = { *lightCBuffer , CBuffer };
-
     Render::RendererRemote::context->PSSetConstantBuffers(0, 2, buffer);
-
     Render::RendererRemote::context->PSSetSamplers(1, 1, &CSampler);
 
+    /*set the shadow map */
     ID3D11ShaderResourceView* shaderResources[1] = { nullptr };
-
     if (dirLight.castShadow)
     {
         shaderResources[0] = shadowMap.shaderResource;
     }
-
     Render::RendererRemote::context->PSSetShaderResources(3, 1, shaderResources);
 
+    /* write info in constant buffer */
     PS_DIRLIGHT_BUFFER dirLightBuffer = { dirLight.dir,static_cast<float>(dirLight.castShadow), dirLight.color,0.0f, dirLight.lightViewProj };
     Render::WriteBuffer(&dirLightBuffer, sizeof(PS_DIRLIGHT_BUFFER), 0, &CBuffer);
 }

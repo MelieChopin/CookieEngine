@@ -13,7 +13,13 @@ namespace Cookie
 		{
             ID3DBlob* VSErr = nullptr;
 
-            if (FAILED(D3DCompile(VSSource.c_str(), VSSource.length(), nullptr, nullptr, nullptr, "main", "vs_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, VS, &VSErr)))
+            if (FAILED(D3DCompile(VSSource.c_str(), VSSource.length(), nullptr, nullptr, nullptr, "main", "vs_5_0", 
+#if 0
+                D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
+#else
+                0,
+#endif
+                0, VS, &VSErr)))
             {
                 printf("Failed To Compile Vertex Shader %s\n", (const char*)(VSErr->GetBufferPointer()));
                 VSErr->Release();
@@ -38,7 +44,13 @@ namespace Cookie
             ID3DBlob* PS = nullptr;
             ID3DBlob* PSErr = nullptr;
 
-            if (FAILED(D3DCompile(PSSource.c_str(), PSSource.length(), nullptr, nullptr, nullptr, "main", "ps_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, &PS, &PSErr)))
+            if (FAILED(D3DCompile(PSSource.c_str(), PSSource.length(), nullptr, nullptr, nullptr, "main", "ps_5_0", 
+#if 0
+                D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 
+#else
+                0,
+#endif
+                0, &PS, &PSErr)))
             {
                 printf("Failed To Compile Pixel Shader: %s\n", (const char*)(PSErr->GetBufferPointer()));
                 PSErr->Release();

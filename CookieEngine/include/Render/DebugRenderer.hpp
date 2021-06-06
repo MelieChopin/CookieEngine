@@ -21,9 +21,11 @@ namespace Cookie
 
 	namespace Render
 	{
+		/* class that draws the primitives given by reactphysics3D and can draw line */
 		class DebugRenderer
 		{
 			private:
+				/* shader */
 				ID3D11Buffer*		VBuffer	{ nullptr };
 				ID3D11VertexShader*	VShader	{ nullptr };
 				ID3D11PixelShader*	PShader	{ nullptr };
@@ -33,7 +35,6 @@ namespace Cookie
 
 				D3D11_BUFFER_DESC			bDesc		{};
 				ID3D11RasterizerState*		rasterState	{ nullptr };
-
 
 				rp3d::DebugRenderer&								physDbgRenderer;
 				std::vector<Core::Primitives::DebugVertex>			debugElement;
@@ -48,6 +49,8 @@ namespace Cookie
 				bool showDebug = true;
 
 				void Draw(const Core::Math::Mat4& viewProj);
+
+				/* adds lines in debug element */
 				void AddDebugElement(const std::vector<Core::Primitives::DebugVertex>& dbgElement);
 				void AddLine(Core::Math::Vec3 a, Core::Math::Vec3 b, uint32_t color);
 				void AddQuad(Core::Math::Vec3 start, Core::Math::Vec3 end, uint32_t color);

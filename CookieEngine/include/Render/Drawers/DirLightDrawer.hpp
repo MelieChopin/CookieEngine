@@ -14,13 +14,18 @@ namespace Cookie
 		struct DirLight;
 		class ShadowBuffer;
 
+		/* draws a full screen quad that represent 
+		 * the directionnal light with the shadow info */
 		class DirLightDrawer
 		{
 		private:
+			/* shader info */
 			ID3D11VertexShader*	VShader{ nullptr };
 			ID3D11PixelShader*	PShader{ nullptr };
 
+			/* constant buffer containing the info of the dir light */
 			ID3D11Buffer*		CBuffer{ nullptr };
+			/* comparison sampler for shadows */
 			ID3D11SamplerState*	CSampler{nullptr};
 
 		private:

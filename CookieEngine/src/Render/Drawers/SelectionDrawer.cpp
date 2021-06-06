@@ -11,7 +11,7 @@
 using namespace Cookie::Core::Math;
 using namespace Cookie::Render;
 
-constexpr float upEpsilon = 0.5f;
+constexpr float upEpsilon = 1.0f;
 
 struct VS_CONSTANT_BUFFER
 {
@@ -50,9 +50,9 @@ SelectionDrawer::~SelectionDrawer()
 
 void SelectionDrawer::Set(const DrawDataHandler& drawData)
 {
-    viewProj = drawData.currentCam->GetViewProj();
-    stencilBuffer = drawData.depthStencilView;
-    selectedDrawData = &drawData.selectedDrawData;
+    viewProj            = drawData.currentCam->GetViewProj();
+    stencilBuffer       = drawData.depthStencilView;
+    selectedDrawData    = &drawData.selectedDrawData;
 
     for (int i = 0; i < drawData.selectedDrawData.size(); i++)
     {
@@ -60,11 +60,13 @@ void SelectionDrawer::Set(const DrawDataHandler& drawData)
        
         if (iGameplay.signatureGameplay & ECS::CGP_SIGNATURE::PRODUCER)
         {
+            /* get the infos for the selected models */
             Mat4 mat = drawData.selectedDrawData[i].matrices.at(0);
             Vec3 pos = Vec3(mat.e[3], mat.e[7], mat.e[11]);
-            Vec3 tan = (iGameplay.componentProducer.newUnitDestination - pos);
+            pos.y = 0.0f;
+            Vec3 tan = (Vec3(iGameplay.componentProducer.newUnitDestination.x,0.0f,iGameplay.componentProducer.newUnitDestination.z) - pos);
 
-           
+            /* get the infos for the arrows*/
             Mat4 arrMat = Mat4::Scale({ 5.0f ,1.0f, tan.Length()});
             arrMat = arrMat * Mat4::LookAt({ 0.0f,0.0f,0.0f }, Vec3(tan.x,0.0f,-tan.z).Normalize(), {0.0f,1.0f,0.0f});
             arrMat = arrMat * Mat4::Translate(pos + (tan * 0.5f));
@@ -82,6 +84,7 @@ void SelectionDrawer::FillStencil(ID3D11Buffer* VCBuffer)
 
     const std::vector<DrawData>& selectedDrawData_ = *selectedDrawData;
 
+    /* fill the stencil buffer with the models */
     for (int i = 0; i < selectedDrawData_.size(); i++)
     {
         const DrawData& drawData = selectedDrawData_[i];
@@ -110,7 +113,7 @@ void SelectionDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
 
     size_t bufferSize = sizeof(VS_CONSTANT_BUFFER);
 
-    // drawing outLines
+    /* drawing outLines*/
     const std::vector<DrawData>& selectedDrawData_ = *selectedDrawData;
 
     for (int i = 0; i < selectedDrawData_.size(); i++)
@@ -119,6 +122,7 @@ void SelectionDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
 
         if (drawData.mesh)
         {
+            /* scale up the models */
             buffer.model = outLineSize * drawData.matrices.at(0);
             Render::WriteBuffer(&buffer, bufferSize, 0, &VCBuffer);
 
@@ -130,7 +134,7 @@ void SelectionDrawer::Draw(ID3D11Buffer* VCBuffer, ID3D11Buffer* PCBuffer)
     /* clear stencil */
     Render::RendererRemote::context->ClearDepthStencilView(stencilBuffer, D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    //drawing arrows
+    /* drawing arrows */
     color = ARROW_COLOR;
     WriteBuffer(&color, sizeof(Vec4), 0, &PCBuffer);
 

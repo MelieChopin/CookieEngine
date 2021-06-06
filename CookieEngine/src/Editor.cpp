@@ -46,6 +46,8 @@ Editor::Editor()
     Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", game);
     game.SetScene();
 
+    game.uiMenu.GiveQuitFunction([&editor=*this]{editor.isPlaying = false;});
+
     editorUI.AddItem(new UIwidget::SaveButton(game.scene, game.resources), 0);
     editorUI.AddWItem(new UIwidget::ExitPannel(game.renderer.window.window), 0);
     
@@ -64,7 +66,7 @@ Editor::Editor()
     editorUI.AddWItem(new UIwidget::DemoWindow, 3);
 
 
-    UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.resources, isPlaying);
+    UIwidget::Toolbar* toolbar = new UIwidget::Toolbar(game.resources, isPlaying, game.isPaused);
     editorUI.AddWindow(new UIwidget::Viewport(toolbar, game.renderer.window.window, editorFBO, &cam, game.coordinator, selectedEntity));
     editorUI.AddWindow(new UIwidget::GamePort(isPlaying, game));
 
@@ -127,125 +129,109 @@ void Editor::ModifyEditComp()
 
 void Editor::ChooseDrawBuffer()
 {
-    static Render::FrameBuffer& fbo = editorFBO;
+    static Render::FrameBuffer* fbo = &editorFBO;
 
     if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F1] >= 0.0f)
     {
-        fbo = editorFBO;
+        fbo = &editorFBO;
     }
     if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F2] >= 0.0f)
     {
-        fbo = game.renderer.geomPass.posFBO;
+        fbo = &game.renderer.geomPass.posFBO;
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F3] >= 0.0f)
     {
-        fbo = game.renderer.geomPass.normalFBO;
+        fbo = &game.renderer.geomPass.normalFBO;
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F4] >= 0.0f)
     {
-        fbo = game.renderer.geomPass.albedoFBO;
+        fbo = &game.renderer.geomPass.albedoFBO;
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F5] >= 0.0f)
     {
-        fbo = game.renderer.lightPass.diffuseFBO;
+        fbo = &game.renderer.lightPass.diffuseFBO;
     }
     else if (ImGui::GetIO().KeysDownDuration[GLFW_KEY_F6] >= 0.0f)
     {
-        fbo = game.renderer.lightPass.specularFBO;
+        fbo = &game.renderer.lightPass.specularFBO;
     }
 
-    if (fbo.shaderResource == editorFBO.shaderResource)
+    if (fbo == &editorFBO)
         return;
 
+    game.renderer.shadPass.Set();
     Render::RendererRemote::context->OMSetRenderTargets(1, &editorFBO.renderTargetView, nullptr);
-    game.renderer.DrawFrameBuffer(fbo);
+    game.renderer.DrawFrameBuffer(*fbo);
+}
+
+void Editor::HandleEditorInput()
+{
+    game.coordinator.ApplyComputeTrs();
+
+    cam.Update();
+
+    if (currentScene != game.scene.get() || game.coordinator.entityHandler->livingEntities != livingEntitiesNb)
+    {
+        selectedEntity = {};
+        selectedEntity.componentHandler = game.coordinator.componentHandler;
+        ModifyEditComp();
+        currentScene = game.scene.get();
+        livingEntitiesNb = game.coordinator.entityHandler->livingEntities;
+    }
+
+    if (!ImGui::GetIO().MouseDownDuration[0])
+    {
+        Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDirClamp() * cam.camFar;
+        rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, { fwdRay.x,fwdRay.y,fwdRay.z });
+        Physics::PhysicsHandle::editWorld->raycast(ray, this);
+    }
+
+    if (selectedEntity.toChangeEntityIndex >= 0)
+    {
+        PopulateFocusedEntity();
+    }
+    if (selectedEntity.focusedEntity && (selectedEntity.focusedEntity->signature & C_SIGNATURE::PHYSICS))
+    {
+        selectedEntity.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id).Set(selectedEntity.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id));
+    }
 }
 
 void Editor::Loop()
-{
-    //Cookie::Resources::SoundManager::PlayMusic("Music.mp3");
-    Physics::PhysicsHandle physHandle;
-
-    {
-       // game.scene->map.model.albedo = game.resources.textures2D["Assets/Floor_DefaultMaterial_BaseColor.png"].get();
-    }
-
-    //for (int i = 0; i < MAX_ENTITIES; i++)
-    //{
-    //    game.coordinator.AddEntity(MODEL | TRANSFORM, std::to_string(i));
-    //    game.coordinator.componentHandler->GetComponentModel(game.coordinator.entityHandler->entities[i].id).mesh = game.resources.meshes["Sphere"].get();
-    //    game.coordinator.componentHandler->GetComponentModel(game.coordinator.entityHandler->entities[i].id).albedo = game.resources.textures["Green"].get();
-    //    game.coordinator.componentHandler->GetComponentModel(game.coordinator.entityHandler->entities[i].id).metallicRoughness = game.resources.textures["Blue"].get();
-    //    game.coordinator.componentHandler->GetComponentTransform(game.coordinator.entityHandler->entities[i].id).pos = { -50.0f + ((float)std::rand() / (float)RAND_MAX) * 100.0f, (float)std::rand() / (float)RAND_MAX * 10.0f + 1.0f, -50.0f + ((float)std::rand() / (float)RAND_MAX) * 100.0f };
-    //    game.coordinator.componentHandler->GetComponentTransform(game.coordinator.entityHandler->entities[i].id).trsHasChanged = true;
-    //}
+{    
+    bool previewIsPlaying = isPlaying;
 
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
         // Present frame
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
             Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(-5, 15, 5), game.resources.particles["Bomb"].get(), Vec3(10, 0, 25));
-        
-        //if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_A])
 
-       /* if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_ESCAPE])
-            isPlaying = false;
-
-        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P])
-            isPlaying = true;
-            */
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
             game.coordinator.armyHandler->AddArmyCoordinator(E_ARMY_NAME::E_AI1, game.resources.aiBehaviors["Test1"].get());
         
-        if (isPlaying)
+        if (isPlaying && previewIsPlaying)
         {
             game.Update();
+        }
+        else if (isPlaying && !previewIsPlaying)
+        {
+            previewIsPlaying = isPlaying;
+            game.Start();
+        }
+        else if (!isPlaying && previewIsPlaying)
+        {
+            previewIsPlaying = isPlaying;
         }
         else
         {
             glfwPollEvents();
             TryResizeWindow();
-            game.coordinator.ApplyComputeTrs();
-
-            cam.Update();
-           
-            if (currentScene != game.scene.get() || game.coordinator.entityHandler->livingEntities != livingEntitiesNb)
-            {
-                selectedEntity = {};
-                selectedEntity.componentHandler = game.coordinator.componentHandler;
-                ModifyEditComp();
-                currentScene = game.scene.get();
-                livingEntitiesNb = game.coordinator.entityHandler->livingEntities;
-            }
-
-            if (!ImGui::GetIO().MouseDownDuration[0])
-            {
-                Core::Math::Vec3 fwdRay = cam.pos + cam.MouseToWorldDirClamp() * cam.camFar;
-                rp3d::Ray ray({ cam.pos.x,cam.pos.y,cam.pos.z }, { fwdRay.x,fwdRay.y,fwdRay.z });
-                physHandle.editWorld->raycast(ray, this);
-            }
-
-            if (selectedEntity.toChangeEntityIndex >= 0)
-            {
-                PopulateFocusedEntity();
-            }
-            if (selectedEntity.focusedEntity && (selectedEntity.focusedEntity->signature & C_SIGNATURE::PHYSICS))
-            {
-                selectedEntity.componentHandler->GetComponentPhysics(selectedEntity.focusedEntity->id).Set(selectedEntity.componentHandler->GetComponentTransform(selectedEntity.focusedEntity->id));
-            }
-
-            //Update for 3D Music
-            Cookie::Resources::SoundManager::UpdateFMODFor3DMusic(cam);
         }
 
-           
-        //game.scene->physSim.Update();
-        //game.coordinator.ApplySystemPhysics(game.scene->physSim.factor);
-        
+        HandleEditorInput();
 
-
-        //game.coordinator.armyHandler->Debug();
-        //game.coordinator.entityHandler->Debug();
+        //Update for 3D Music
+        Cookie::Resources::SoundManager::UpdateFMODFor3DMusic(cam);
 
         //Draw
         game.renderer.Clear();

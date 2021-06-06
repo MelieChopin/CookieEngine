@@ -78,7 +78,6 @@ set (SRC_FILES
     "${SRC_DIR}/Render/DrawDataHandler.cpp"
 
     "${SRC_DIR}/Render/FrameBuffer.cpp"
-    "${SRC_DIR}/Render/Light.cpp"
     "${SRC_DIR}/Render/ShadowBuffer.cpp" 
 
     "${SRC_DIR}/Render/Drawers/ModelDrawer.cpp"
@@ -109,12 +108,14 @@ set (SRC_FILES
     "${SRC_DIR}/Resources/Serialization.cpp" 
     "${SRC_DIR}/Resources/SoundManager.cpp" 
 
-    "${SRC_DIR}/UI/UIcore.cpp"
     "${SRC_DIR}/Resources/Particles/ParticlesGenerator.cpp"
     "${SRC_DIR}/Resources/Particles/ParticlesUpdate.cpp"
     "${SRC_DIR}/Resources/Particles/ParticlesHandler.cpp"
     "${SRC_DIR}/Resources/Particles/ParticlesSystem.cpp"
+    
+    "${SRC_DIR}/UI/UIcore.cpp"
     "${SRC_DIR}/UI/UIeditor.cpp"
+    "${SRC_DIR}/UI/UImenu.cpp"
     "${SRC_DIR}/UI/UIscene.cpp"
     "${SRC_DIR}/UI/CustomImWidget.cpp"
     "${SRC_DIR}/UI/Widgets/UIwidgetBases.cpp"

@@ -83,17 +83,13 @@ void FBODrawer::InitShader()
 
 void FBODrawer::Set()
 {
+    /* set shader */
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
 
     Render::RendererRemote::context->IASetInputLayout(nullptr);
 
-    ID3D11Buffer* null = nullptr;
-
-    Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &null);
     Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
-
-    Render::RendererRemote::context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void FBODrawer::Draw(FrameBuffer& fbo)

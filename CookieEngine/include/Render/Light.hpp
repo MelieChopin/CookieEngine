@@ -9,6 +9,8 @@ namespace Cookie
 {
 	namespace Render
 	{
+		/*================== SHADER INCLUDE ==================*/
+
 		constexpr const char* blinnPhong = R"(
 		static const float PI = 3.14159265359;
 
@@ -141,6 +143,8 @@ namespace Cookie
 
 		)";
 
+		/*================== END SHADER INCLUDE ==================*/
+
 		struct DirLight
 		{
 				Core::Math::Vec3 dir;
@@ -159,19 +163,6 @@ namespace Cookie
 
 		};
 
-		#define SPOT_LIGHT_MAX_NB 10
-
-		struct SpotLight
-		{
-				Core::Math::Vec3 pos	= {0.0f,0.0f,0.0f};
-				Core::Math::Vec3 dir	= {0.0f,0.0f,0.0f};
-				Core::Math::Vec3 color  = {1.0f,1.0f,1.0f};
-
-				float radius	= 0.0f;
-				float angle		= 0.0f;
-		};
-
-
 		struct LightsArray
 		{
 			public:
@@ -179,11 +170,6 @@ namespace Cookie
 				bool useDir = true;
 				std::array<PointLight,POINT_LIGHT_MAX_NB> pointLights;
 				unsigned int usedPoints = 0;
-				//std::vector<SpotLight>					spotLights;
-
-
-			public:
-				LightsArray();
 		};
 	}
 }

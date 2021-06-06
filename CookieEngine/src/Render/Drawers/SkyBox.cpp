@@ -133,17 +133,10 @@ void SkyBox::InitRasterizer()
 {
     D3D11_RASTERIZER_DESC rasterDesc = {};
 
-    // Setup the raster description which will determine how and what polygons will be drawn.
-    rasterDesc.AntialiasedLineEnable = false;
-    rasterDesc.CullMode = D3D11_CULL_BACK;
-    rasterDesc.DepthBias = 0;
-    rasterDesc.DepthBiasClamp = 0.0f;
-    rasterDesc.DepthClipEnable = false;
+    /* we want to draw the back face of cube */
+    rasterDesc.CullMode = D3D11_CULL_FRONT;
     rasterDesc.FillMode = D3D11_FILL_SOLID;
-    rasterDesc.FrontCounterClockwise = false;
-    rasterDesc.MultisampleEnable = false;
-    rasterDesc.ScissorEnable = false;
-    rasterDesc.SlopeScaledDepthBias = 0.0f;
+    rasterDesc.FrontCounterClockwise = true;
 
     HRESULT result = RendererRemote::device->CreateRasterizerState(&rasterDesc, &rasterizerState);
 
@@ -163,6 +156,7 @@ void SkyBox::Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view)
     Render::RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     Render::RendererRemote::context->PSSetShader(PShader, nullptr, 0);
 
+    /* set texture sampler, constant buffer, and input layout */
     Render::RendererRemote::context->IASetInputLayout(ILayout);
     Render::RendererRemote::context->PSSetSamplers(0, 1, &PSampler);
     Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
@@ -171,6 +165,7 @@ void SkyBox::Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view)
 
     Render::WriteBuffer(&buffer, sizeof(buffer), 0, &CBuffer);
 
+    /* set texture */
 	if (texture)
 		texture->Set();
     else
@@ -180,6 +175,7 @@ void SkyBox::Draw(const Core::Math::Mat4& proj, const Core::Math::Mat4& view)
     }
 	if (cube)
 	{
+        /* draw the cube! */
 		cube->Set();
 		cube->Draw();
 	}

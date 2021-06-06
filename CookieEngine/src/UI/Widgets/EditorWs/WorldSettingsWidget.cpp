@@ -1,6 +1,7 @@
 #include "Scene.hpp"
 #include "ResourcesManager.hpp"
 #include "Light.hpp"
+#include "AIBehavior.hpp"
 #include "Drawers/Skybox.hpp"
 #include "WorldSettingsWidget.hpp"
 
@@ -12,6 +13,7 @@
 using namespace ImGui;
 using namespace Cookie::UIwidget;
 using namespace Cookie::Resources;
+using namespace Cookie::Gameplay;
 
 
 void WorldSettingsWidget::WindowDisplay()
@@ -142,6 +144,49 @@ void WorldSettingsWidget::WindowDisplay()
 		{
 			Text("Skybox texture:");
 			ResourceMapExplorer<Texture>("cubic texture", "##SKYBOXSELECT", resources.skyboxes, skybox.texture);
+
+			TreePop();
+		}
+
+		if (TreeNode("AI settings"))
+		{
+			static const char* armyNames[] = { "Default", "Player", "AI1" };
+
+			for (int i = 0; i < scene->armyHandler.livingArmies; ++i)
+			{
+				Gameplay::E_ARMY_NAME currentArmyName = scene->armyHandler.armies[i].name;
+				Text("%s", armyNames[currentArmyName]);
+
+				//if an AI army
+				if (currentArmyName > Gameplay::E_ARMY_NAME::E_PLAYER)
+				{
+					//if there is already a coordinator
+					ArmyCoordinator* currentArmyCoordinator = scene->armyHandler.GetArmyCoordinator(currentArmyName);
+					if (currentArmyCoordinator)
+					{
+						SameLine();
+						if (SmallButton("Remove##REMOVE_COORDINATOR")) 
+							scene->armyHandler.RemoveArmyCoordinator(currentArmyName);
+
+						ResourceMapExplorer<AIBehavior>("AIBehavior", "##AIBEHAVIOR", resources.aiBehaviors, currentArmyCoordinator->behavior);
+
+					}
+					else
+					{
+						SameLine();
+						if (SmallButton("Add##ADD_COORDINATOR")) 
+							scene->armyHandler.AddArmyCoordinator(currentArmyName, nullptr);
+					}
+				}
+				else
+				{
+					SameLine();
+					Text(" Can't add an AI");
+				}
+
+				NewLine();
+			}
+
 
 			TreePop();
 		}

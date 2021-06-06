@@ -17,10 +17,8 @@ namespace Cookie::UIwidget
 		TransformTool currentTrsfTool = TransformTool::Translate;
 
 		bool& isPlaying;
-
-		bool playing	= false;
-		bool paused		= false;
-		bool frame		= false;
+		bool& isPaused;
+		bool  reqframe = false;
 
 	
 		enum class ToolbarIcons
@@ -39,7 +37,7 @@ namespace Cookie::UIwidget
 		bool BeginWindow(int windowFlags = 0) override;
 
 	public:
-		Toolbar(Cookie::Resources::ResourcesManager& _resources, bool& _isPlaying);
+		Toolbar(Cookie::Resources::ResourcesManager& _resources, bool& _isPlaying, bool& _isPaused);
 
 		void WindowDisplay() override;
 

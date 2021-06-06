@@ -142,36 +142,40 @@ void MiniMapDrawer::Set(const Camera& cam, const Resources::Map& map)
     mapTrs = map.trs.TRS;
     tileNb = map.tilesNb;
 
-    Vec3 middle = cam.ScreenPointToWorldDir({ { 0.0f,0.0f } });
-    Vec3 UpperRight = cam.ScreenPointToWorldDir({ { 1.0f,1.0f } });
-    Vec3 DownLeft = cam.ScreenPointToWorldDir({ { -1.0f,-1.0f } });
-
+    Vec3 middle     = cam.ScreenPointToWorldDir({ { 0.0f,0.0f } });
+    //Vec3 UpperRight = cam.ScreenPointToWorldDir({ { 1.0f,1.0f } });
+    //Vec3 DownLeft   = cam.ScreenPointToWorldDir({ { -1.0f,-1.0f } });
+    //
     float t = (-cam.pos.y) / middle.y;
     middle = cam.pos + middle * t;
-    t = (-cam.pos.y) / UpperRight.y;
-    UpperRight = cam.pos + UpperRight * t;
-    t = (-cam.pos.y) / DownLeft.y;
-    DownLeft = cam.pos + DownLeft * t;
+    //t = (-cam.pos.y) / UpperRight.y;
+    //UpperRight = cam.pos + UpperRight * t;
+    //t = (-cam.pos.y) / DownLeft.y;
+    //DownLeft = cam.pos + DownLeft * t;
 
     quadTrs = Mat4::Scale({ 10.0f,1.0f,10.0f }) * Mat4::Translate(middle);
 }
 
 void MiniMapDrawer::Draw()
 {
+    /* set shader */
     RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     RendererRemote::context->PSSetShader(PShader, nullptr, 0);
     RendererRemote::context->IASetInputLayout(ILayout);
 
+    /* filling constant buffer with map info  */
     VS_CONSTANT_BUFFER vbuffer = {};
     vbuffer.model   = mapTrs;
     vbuffer.tileNb  = { tileNb.x,tileNb.y,0.0f,0.0f };
-
     RendererRemote::context->VSSetConstantBuffers(0, 1, &VCBuffer);
     WriteBuffer(&vbuffer, sizeof(vbuffer), 0, &VCBuffer);;
 
+
+    /* map texture */
     if (mapAlbedo)
         mapAlbedo->Set(0);
 
+    /* then draw the map */
     mapMesh->Set();
     mapMesh->Draw();
 
@@ -183,13 +187,17 @@ void MiniMapDrawer::Draw()
     Render::RendererRemote::context->OMGetRenderTargets(1, &rtv, nullptr);
     Render::RendererRemote::context->OMSetRenderTargets(1, &rtv, nullptr);
 
+    /* we can use the same shader as it is pretty close put matrix in vbuffer */
     vbuffer.model = quadTrs;
     WriteBuffer(&vbuffer, sizeof(vbuffer), 0, &VCBuffer);
-    vbuffer.tileNb = { 1.0f,1.0f,0.0f,0.0f };
+
+    /* set a white texture and draw */
     quadColor->Set();
     quad->Set();
     quad->Draw();
 
+    /* when you use Getter in dx11 it adds a ref in the object, 
+     * so we release it*/
     rtv->Release();
     RendererRemote::context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

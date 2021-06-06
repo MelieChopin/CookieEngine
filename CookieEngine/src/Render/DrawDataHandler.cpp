@@ -98,37 +98,6 @@ void Frustrum::MakeFrustrum(const Camera& cam)
 	{
 		planes[i] = planes[i].Normalize();
 	}
-
-	//the vectors of the referential of cam
-	Core::Math::Vec3 camFwd		= { viewProj.c[2].x,viewProj.c[2].y,viewProj.c[2].z };
-	Core::Math::Vec3 camRight	= { viewProj.c[0].x,viewProj.c[0].y,viewProj.c[0].z };
-	Core::Math::Vec3 camUp		= { viewProj.c[1].x,viewProj.c[1].y,viewProj.c[1].z };
-	camFwd		= camFwd.Normalize();
-	camRight	= camRight.Normalize();
-	camUp		= camUp.Normalize();
-
-	//height and width of far plane
-	float heightFar = 2.0f * tanf(Core::Math::ToRadians(cam.fov) / 2.0f)*cam.camFar;
-	float widthFar = heightFar * cam.aspectRatio;
-
-	//height and width of near plane
-	float heightNear = 2.0f * tanf(Core::Math::ToRadians(cam.fov) / 2.0f) * cam.camNear;
-	float widthNear = heightNear * cam.aspectRatio;
-
-	//Center of each plane
-	Core::Math::Vec3 nearCenter = cam.pos + camFwd * cam.camNear;
-	Core::Math::Vec3 farCenter	= cam.pos + camFwd * cam.camFar;
-	centroid = cam.pos + camFwd * ((cam.camNear + cam.camFar) / 2.0f);
-
-	//the corners of the frustrum
-	corners[0] = nearCenter - (camUp * (heightNear / 2.0f)) - (camRight * (widthNear / 2.0f));
-	corners[1] = nearCenter - (camUp * (heightNear / 2.0f)) + (camRight * (widthNear / 2.0f));
-	corners[2] = nearCenter + (camUp * (heightNear / 2.0f)) - (camRight * (widthNear / 2.0f));
-	corners[3] = nearCenter + (camUp * (heightNear / 2.0f)) + (camRight * (widthNear / 2.0f));
-	corners[4] = farCenter - (camUp * (heightFar / 2.0f)) - (camRight * (widthFar / 2.0f));
-	corners[5] = farCenter - (camUp * (heightFar / 2.0f)) + (camRight * (widthFar / 2.0f));
-	corners[6] = farCenter + (camUp * (heightFar / 2.0f)) - (camRight * (widthFar / 2.0f));
-	corners[7] = farCenter + (camUp * (heightFar / 2.0f)) + (camRight * (widthFar / 2.0f));
 }
 
 /*========================= REALTIME METHODS =========================*/
@@ -201,50 +170,12 @@ void DrawDataHandler::SetDrawData(const Camera* cam)
 				continue;
 			}
 
+			/* there is not culling enabled for selected entity neither bactching */
 			selectedDrawData.push_back({ model.mesh,model.albedo,model.normal,model.metallicRoughness });
 			DrawData& draw = selectedDrawData[selectedDrawData.size() - 1];
 
 			draw.matrices.push_back(components.GetComponentTransform(iEntity.id).TRS);
 			draw.gameplays.push_back(&components.GetComponentGameplay(iEntity.id));
-		}
-	}
-}
-
-void DrawDataHandler::SetStaticDrawData()
-{
-	/* get the different array of ECS */
-	const Coordinator& coord = *coordinator;
-	const ECS::EntityHandler& entityHandler = *coord.entityHandler;
-	ECS::ComponentHandler& components = *coord.componentHandler;
-
-	/* used to know if a model is culled or not */
-	bool cull = false;
-
-	for (int i = 0; i < entityHandler.livingEntities; ++i)
-	{
-		const Entity& iEntity = entityHandler.entities[i];
-
-		/* we look up if the entity is displayable */
-		if ((iEntity.signature & (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL)) == (C_SIGNATURE::TRANSFORM + C_SIGNATURE::MODEL))
-		{
-			/* seeing the signature it should be displayable but ... */
-			ECS::ComponentModel& model = components.GetComponentModel(iEntity.id);
-
-			/* we at least need a mesh to display the entity */
-			if (model.mesh == nullptr)
-			{
-				continue;
-			}
-
-			/* occlusion culling process */
-			Core::Math::Mat4& trs = components.GetComponentTransform(iEntity.id).TRS;
-
-			/* pushing if the entity is a static entity */
-			ECS::ComponentGameplay& iGameplay = components.GetComponentGameplay(iEntity.id);
-			if (!(iGameplay.signatureGameplay & (CGP_SIGNATURE::MOVE | CGP_SIGNATURE::WORKER)))
-			{
-				PushDrawData(staticDrawData, model, trs, iGameplay, cull);
-			}
 		}
 	}
 }
@@ -297,9 +228,11 @@ bool DrawDataHandler::Cull(ECS::ComponentModel& model, Core::Math::Mat4& trs)
 {
 	bool cull = false;
 
+	/* change AABB to OBB */
 	Vec4 modelMin = trs * Core::Math::Vec4(model.mesh->AABBMin, 1.0f);
 	Vec4 modelMax = trs * Core::Math::Vec4(model.mesh->AABBMax, 1.0f);
 
+	/* Check with each planes */
 	for (int j = 0; j < frustrum.planes.size(); j++)
 	{
 
@@ -311,6 +244,7 @@ bool DrawDataHandler::Cull(ECS::ComponentModel& model, Core::Math::Mat4& trs)
 
 	}
 
+	/* add to overall AABB if not culled */
 	if (!cull)
 	{
 		AABB[0].x = std::min(modelMin.x, AABB[0].x);
@@ -327,6 +261,7 @@ bool DrawDataHandler::Cull(ECS::ComponentModel& model, Core::Math::Mat4& trs)
 
 void DrawDataHandler::PushDrawData(std::vector<DrawData>& drawDatas, const ECS::ComponentModel& model, const Core::Math::Mat4& trs, const ECS::ComponentGameplay& gameplay, bool culled)
 {
+	/* check in our drawDatas if ther is already a mesh like it */
 	for (int i = 0; i < drawDatas.size(); i++)
 	{
 		DrawData& draw = drawDatas[i];
@@ -345,6 +280,7 @@ void DrawDataHandler::PushDrawData(std::vector<DrawData>& drawDatas, const ECS::
 		}
 	}
 
+	/* create another one otherwise */
 	drawDatas.push_back({ model.mesh,model.albedo,model.normal,model.metallicRoughness });
 
 	DrawData& draw = drawDatas[drawDatas.size() - 1];

@@ -8,9 +8,10 @@ using namespace ImGui;
 using namespace Cookie::UIwidget;
 
 
-Toolbar::Toolbar(Cookie::Resources::ResourcesManager& _resources, bool& _isPlaying)
+Toolbar::Toolbar(Cookie::Resources::ResourcesManager& _resources, bool& _isPlaying, bool& _isPaused)
 	: WindowBase	("##TOOLBAR"),
 	  isPlaying		(_isPlaying),
+	  isPaused		(_isPaused),
 
 	  icons			{_resources.icons["Assets/EditorUIcons/translate.ico"].get(),
 					 _resources.icons["Assets/EditorUIcons/rotate.ico"].get(),
@@ -63,29 +64,28 @@ void Toolbar::ButtonsDisplay()
 
 	SameLine(GetWindowWidth() / 2);
 
-	if		(!playing && ImageButton(icons[(int)ToolbarIcons::Play]->GetResourceView(), { 25, 25 }, { 0, 0 }, { 1, 1 }, 5))
+	if		(!isPlaying && ImageButton(icons[(int)ToolbarIcons::Play]->GetResourceView(), { 25, 25 }, { 0, 0 }, { 1, 1 }, 5))
 	{
-		playing = true;
+		isPlaying = true;
 	}
-	else if ( playing && ImageButton(icons[(int)ToolbarIcons::Stop]->GetResourceView(), { 25, 25 }, { 0, 0 }, { 1, 1 }, 5))
+	else if ( isPlaying && ImageButton(icons[(int)ToolbarIcons::Stop]->GetResourceView(), { 25, 25 }, { 0, 0 }, { 1, 1 }, 5))
 	{
-		playing = false;
+		isPlaying = false;
 	}
 	SameLine(GetWindowWidth() / 2 + (35 * 1));
 
 
 	if (ImageButton(icons[(int)ToolbarIcons::Pause]->GetResourceView(), { 25, 25 }, { 0, 0 }, { 1, 1 }, 5))
 	{
-		paused ^= 1;
+		isPaused ^= true;
 	}
 	SameLine(GetWindowWidth() / 2 + (35 * 2));
 
 
 	if (ImageButton(icons[(int)ToolbarIcons::Frame]->GetResourceView(), { 25, 25 }, { 0, 0 }, { 1, 1 }, 5))
 	{
-		if (!paused) paused = true;
-
-		frame = true;
+		isPaused = false;
+		reqframe = true;
 	}
 
 
@@ -94,34 +94,18 @@ void Toolbar::ButtonsDisplay()
 }
 
 
-bool Toolbar::ProcessPlayFlow()
-{
-	if (playing)
-	{
-		if (paused)
-		{
-			if (frame)
-			{
-				frame = false;
-				return true;
-			}
-			else return false;
-		}
-		else return true;
-	}
-	else return false;
-}
-
-
 void Toolbar::WindowDisplay()
 {
+	if (reqframe)
+	{
+		reqframe = false;
+		isPaused = true;
+	}
+
 	TryBeginWindow(ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar)
 	{
 		ButtonsDisplay();
 	}
 
 	ImGui::EndChild();
-
-	
-	isPlaying = ProcessPlayFlow();
 }

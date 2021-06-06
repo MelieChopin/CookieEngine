@@ -25,6 +25,8 @@ ShadowPass::ShadowPass():
 {
     InitShader();
     InitState();
+
+    /* create a projection Matrix where we know model will be inside */
     proj = Mat4::Ortho(-shadowProjEpsilon, shadowProjEpsilon, -shadowProjEpsilon, shadowProjEpsilon, -shadowProjEpsilon, shadowProjEpsilon);
 }
 
@@ -34,8 +36,6 @@ ShadowPass::~ShadowPass()
         VShader->Release();
     if (CBuffer)
         CBuffer->Release();
-    if (blendState)
-        blendState->Release();
     if (depthStencilState)
         depthStencilState->Release();
     if (rasterizerState)
@@ -79,62 +79,24 @@ void ShadowPass::InitShader()
 
 void ShadowPass::InitState()
 {
-    // Initialize the description of the stencil state.
     D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 
-    // Set up the description of the stencil state.
+    /* depth test enabled, stencil disabled */
     depthStencilDesc.DepthEnable    = true;
     depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
     depthStencilDesc.DepthFunc      = D3D11_COMPARISON_LESS;
-
-    depthStencilDesc.StencilEnable      = false;
-    depthStencilDesc.StencilReadMask    = 0xFF;
-    depthStencilDesc.StencilWriteMask   = 0xFF;
-
-    // Stencil operations if pixel is front-facing.
-    depthStencilDesc.FrontFace.StencilFailOp        = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilDepthFailOp   = D3D11_STENCIL_OP_INCR;
-    depthStencilDesc.FrontFace.StencilPassOp        = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.FrontFace.StencilFunc          = D3D11_COMPARISON_ALWAYS;
-
-    // Stencil operations if pixel is back-facing.
-    depthStencilDesc.BackFace.StencilFailOp         = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilDepthFailOp    = D3D11_STENCIL_OP_DECR;
-    depthStencilDesc.BackFace.StencilPassOp         = D3D11_STENCIL_OP_KEEP;
-    depthStencilDesc.BackFace.StencilFunc           = D3D11_COMPARISON_ALWAYS;
+    depthStencilDesc.StencilEnable  = false;
 
     RendererRemote::device->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
 
     D3D11_RASTERIZER_DESC rasterDesc = {};
 
-    // Setup the raster description which will determine how and what polygons will be drawn.
-    rasterDesc.AntialiasedLineEnable = false;
-    rasterDesc.CullMode = D3D11_CULL_NONE;
-    rasterDesc.DepthBias = 0;
-    rasterDesc.DepthBiasClamp = 0.0f;
-    rasterDesc.DepthClipEnable = true;
-    rasterDesc.FillMode = D3D11_FILL_SOLID;
-    rasterDesc.FrontCounterClockwise = false;
-    rasterDesc.MultisampleEnable = false;
-    rasterDesc.ScissorEnable = false;
-    rasterDesc.SlopeScaledDepthBias = 0.0f;
+    /* cull is disabled because it looks better that way */
+    rasterDesc.CullMode         = D3D11_CULL_NONE;
+    rasterDesc.DepthClipEnable  = true;
+    rasterDesc.FillMode         = D3D11_FILL_SOLID;
 
     RendererRemote::device->CreateRasterizerState(&rasterDesc, &rasterizerState);
-
-    D3D11_BLEND_DESC blenDesc = {  };
-
-    blenDesc.AlphaToCoverageEnable = false;
-    blenDesc.IndependentBlendEnable = false;
-    blenDesc.RenderTarget[0].BlendEnable = false;
-    blenDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-    blenDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
-    blenDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-    blenDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-    blenDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-    blenDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-    blenDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-    RendererRemote::device->CreateBlendState(&blenDesc, &blendState);
 }
 
 /*======================= REALTIME METHODS =======================*/
@@ -145,52 +107,51 @@ void ShadowPass::Set()
     Render::RendererRemote::context->RSSetState(rasterizerState);
     // Set the depth stencil state.
     Render::RendererRemote::context->OMSetDepthStencilState(depthStencilState, 0);
-    // Set the Blend State.
-    const float blendFactor[4] = { 1.0f,1.0f,1.0f,0.0f };
-    Render::RendererRemote::context->OMSetBlendState(blendState, blendFactor, 0xffffffff);
 
+    /* we only need the depth buffer */
     ID3D11RenderTargetView* rtvs[4] = { nullptr,nullptr ,nullptr ,nullptr };
-
     Render::RendererRemote::context->OMSetRenderTargets(4, rtvs, nullptr);
 
+    /* clear up to disable the Pixel Shader */
     ID3D11ShaderResourceView* fbos[4] = { nullptr,nullptr,nullptr, nullptr};
-
     Render::RendererRemote::context->PSSetShaderResources(0, 4, fbos);
 
+    /* set the shader */
     RendererRemote::context->VSSetShader(VShader, nullptr, 0);
     RendererRemote::context->PSSetShader(nullptr, nullptr, 0);
-
-    
 }
 
 void ShadowPass::Draw(DrawDataHandler& drawData)
 {
-    Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
-
-    VS_CONSTANT_BUFFER buffer = {};
-
-    size_t bufferSize = sizeof(buffer);
-
-    Render::RendererRemote::context->RSSetViewports(1, &shadowViewport);
+   
 
     if (drawData.lights->useDir && drawData.lights->dirLight.castShadow)
     {
-        DirLight& dirLight = drawData.lights->dirLight;
+        /* set constant and viewport */
+        Render::RendererRemote::context->RSSetViewports(1, &shadowViewport);
+        Render::RendererRemote::context->VSSetConstantBuffers(0, 1, &CBuffer);
 
+        /* set the shadow map */
         Render::RendererRemote::context->OMSetRenderTargets(0, nullptr, shadowMap.depthStencilView);
 
+        DirLight& dirLight = drawData.lights->dirLight;
+
+        /* set the proj */
         Vec3 jDir   = dirLight.dir.Normalize();
+        /* we put the center of the camera at the center of the overall AABB of the visibles models */
         Vec3 pos    = (drawData.AABB[0] + drawData.AABB[1]) * 0.5f;
         Mat4 view   = Mat4::LookAt({ 0.0f,0.0f,0.0f }, jDir, { 0.0f,1.0f,0.0f });
-
+        /* the camera is inverse of transform so not SRT but (T)^-1 * (R)^-1 */
         view = Mat4::Translate(-(pos - jDir * shadowProjEpsilon * 0.5f)) * view;
 
-        dirLight.lightViewProj  = view * proj;
-        buffer.lightViewProj    = dirLight.lightViewProj;
-        Render::WriteBuffer(&buffer, bufferSize, 0, &CBuffer);
+        /* set the camera */
+        VS_CONSTANT_BUFFER buffer   = {};
+        dirLight.lightViewProj      = view * proj;
+        buffer.lightViewProj        = dirLight.lightViewProj;
+        Render::WriteBuffer(&buffer, sizeof(buffer), 0, &CBuffer);
 
+        /* draw all models, without frustrum culling */
         drawData.Draw(true);
-        
     }
 }
 

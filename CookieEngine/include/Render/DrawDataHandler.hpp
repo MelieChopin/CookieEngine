@@ -41,8 +41,6 @@ namespace Cookie
 		struct Frustrum
 		{
 			std::array<Core::Math::Vec4, 6> planes;
-			Core::Math::Vec3				centroid;
-			std::array<Core::Math::Vec3, 8> corners;
 
 			void MakeFrustrum(const Camera& cam);
 		};
@@ -67,6 +65,8 @@ namespace Cookie
 			bool operator==(const ECS::ComponentModel& model);
 		};
 		
+		/* Handler to sort and get the info to draw the game.
+		 * countains the drawer for model and the drawer for the map. */
 		class DrawDataHandler
 		{
 			public:
@@ -100,8 +100,10 @@ namespace Cookie
 				MapDrawer							mapDrawer;
 
 			private:
-				/* */
+				/* Helper to push on a evctor of draw Data */
 				void PushDrawData(std::vector<DrawData>& drawDatas, const ECS::ComponentModel& model, const Core::Math::Mat4& trs, const ECS::ComponentGameplay& gameplay, bool culled);
+
+				/* cull a single model */
 				bool Cull(ECS::ComponentModel& model, Core::Math::Mat4& trs);
 
 
@@ -109,11 +111,15 @@ namespace Cookie
 				DrawDataHandler();
 				~DrawDataHandler();
 
+				/* to recover the info needed to display (coordinator/playerData) */
 				void Init(const Game& game);
+
+				/* to recover the info needed to display in scene (map)*/
 				void SetScene(Resources::Scene* scene);
+
+				/* "sort" the draw datas and fill the drawDatas vector */
 				void SetDrawData(const Camera* cam);
 				void SetStaticDrawData(const Camera* cam);
-				void SetStaticDrawData();
 				void Draw(bool drawOccluded = false);
 				void Clear();
 		};

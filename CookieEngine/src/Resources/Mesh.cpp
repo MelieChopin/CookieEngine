@@ -81,6 +81,7 @@ void Mesh::InitVBuffer(aiMesh* mesh)
 
     std::vector<float> vertices;
 
+    /* find the max vertex size */
     float xLength = AABBMax.x - AABBMin.x;
     float yLength = AABBMax.y - AABBMin.y;
     float zLength = AABBMax.z - AABBMin.z;
@@ -90,6 +91,7 @@ void Mesh::InitVBuffer(aiMesh* mesh)
     AABBMax /= max;
     AABBMin /= max;
 
+    /* push vertices and normalize them in a box between -0.5 and 0.5 */
     for (int i = 0; i < mesh->mNumVertices; i++)
     {
         vertices.push_back(mesh->mVertices[i].x/max);
@@ -164,6 +166,8 @@ void Mesh::InitVBuffer(std::vector<float>& vertices)
     bDesc.MiscFlags = 0;
     bDesc.StructureByteStride = 0;
 
+
+    /* find the max vertex size */
     float xLength = AABBMax.x - AABBMin.x;
     float yLength = AABBMax.y - AABBMin.y;
     float zLength = AABBMax.z - AABBMin.z;
@@ -173,6 +177,7 @@ void Mesh::InitVBuffer(std::vector<float>& vertices)
     AABBMax /= max;
     AABBMin /= max;
 
+    /* push vertices and normalize them in a box between -0.5 and 0.5 */
     for (int i = 0; i < vertices.size(); i++)
     {
         vertices[i] = vertices[i] / max;
