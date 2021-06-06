@@ -35,7 +35,7 @@ namespace Cookie
 			Map										map;
 			UI::UIscene								uiScene;
 			Texture*								skyBox{nullptr};
-			std::shared_ptr<Cookie::Render::Camera> camera{nullptr};
+			std::unique_ptr<Cookie::Render::Camera> camera{nullptr};
 			Cookie::Render::LightsArray				lights;
 
 		public:

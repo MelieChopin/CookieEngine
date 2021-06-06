@@ -923,7 +923,7 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 	 if (js.contains("Camera"))
 	 {
 		 json& cam = js["Camera"];
-		 newScene.get()->camera = std::make_shared<Render::GameCam>();
+		 newScene.get()->camera = std::make_unique<Render::GameCam>();
 		 Cookie::Render::Camera* camera = newScene.get()->camera.get();
 
 		 camera->camNear = cam["camNear"].get<float>();
