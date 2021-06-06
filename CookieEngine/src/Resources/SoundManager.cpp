@@ -61,8 +61,6 @@ void SoundManager::LoadAllMusic(ResourcesManager& resourcesManager)
 
 	for (int i = 0; i < filesPath.size(); i++)
 	{
-		std::cout << filesPath[i] << "\n";
-
 		std::size_t pos = filesPath[i].find("c/");
 		std::string name = filesPath[i].substr(pos + 2);
 
