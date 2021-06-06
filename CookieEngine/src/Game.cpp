@@ -21,7 +21,8 @@ constexpr int miniMapResolution = 512;
 
 Game::Game():
     frameBuffer{renderer.window.width,renderer.window.height },
-    miniMapBuffer{miniMapResolution, miniMapResolution}
+    miniMapBuffer{miniMapResolution, miniMapResolution},
+    uiMenu{renderer.window, resources}
 {
     Physics::PhysicsHandle::Init();
     Core::UIcore::FinishInit(renderer);

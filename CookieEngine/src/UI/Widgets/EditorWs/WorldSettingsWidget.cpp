@@ -150,12 +150,12 @@ void WorldSettingsWidget::WindowDisplay()
 
 		if (TreeNode("AI settings"))
 		{
-
 			static const char* armyNames[] = { "Default", "Player", "AI1" };
+
 			for (int i = 0; i < scene->armyHandler.livingArmies; ++i)
 			{
 				Gameplay::E_ARMY_NAME currentArmyName = scene->armyHandler.armies[i].name;
-				Text(armyNames[currentArmyName]);
+				Text("%s", armyNames[currentArmyName]);
 
 				//if an AI army
 				if (currentArmyName > Gameplay::E_ARMY_NAME::E_PLAYER)

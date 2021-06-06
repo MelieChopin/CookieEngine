@@ -188,12 +188,9 @@ void Editor::Loop()
             Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(-5, 15, 5), game.resources.particles["Bomb"].get(), Vec3(10, 0, 25));
         
 
-       /* if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_ESCAPE])
-            isPlaying = false;
+       if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_Y])
+            game.uiMenu.SetMenuOpened(UI::UImenu::MenusID::MainMenu);
 
-        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_P])
-            isPlaying = true;
-            */
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
             game.coordinator.armyHandler->AddArmyCoordinator(E_ARMY_NAME::E_AI1, game.resources.aiBehaviors["Test1"].get());
         

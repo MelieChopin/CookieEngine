@@ -36,7 +36,7 @@ void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows, Cookie:
 			sceneWidgets.push_back(std::make_unique<ActionPanel>	(game.coordinator, game.playerData, game.resources));							break;
 		
 		case GameWidgetID::MinimapID:	    
-			sceneWidgets.push_back(std::make_unique<Minimap>		(game.miniMapBuffer, scene.camera.get(), scene.map));							break;
+			sceneWidgets.push_back(std::make_unique<Minimap>		(game.miniMapBuffer, scene.camera.get(), scene.map, game.resources));			break;
 		
 		case GameWidgetID::WheatPanelID:
 			sceneWidgets.push_back(std::make_unique<WheatPanel>		(scene.armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));	break;
@@ -98,6 +98,9 @@ void UIscene::RenderLayout()
 	isHovered = false;
 	const ImVec2 mPos = GetIO().MousePos;
 
+
+	PushStyleVar(ImGuiStyleVar_WindowPadding, {15, 15});
+
 	for (std::unique_ptr<GameWindowBase>& gw : sceneWidgets)
 	{
 		gw->WindowDisplay();
@@ -112,4 +115,6 @@ void UIscene::RenderLayout()
 			isHovered |= (mPos.x > lastRect.Min.x) && (mPos.x < lastRect.Max.x) && (mPos.y > lastRect.Min.y) && (mPos.y < lastRect.Max.y);
 		}
 	}
+
+	PopStyleVar();
 }
