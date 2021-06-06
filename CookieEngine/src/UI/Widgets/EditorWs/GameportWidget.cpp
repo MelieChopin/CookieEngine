@@ -1,6 +1,5 @@
 #include "Game.hpp"
 #include "GameportWidget.hpp"
-#include "Scene.hpp"
 
 #include "Scene.hpp"
 
@@ -39,6 +38,8 @@ void GamePort::WindowDisplay()
 		ImGui::Image(static_cast<ImTextureID>(game.frameBuffer.shaderResource), { (float)game.renderer.window.width, (float)game.renderer.window.height });
 			
 		game.scene->uiScene.RenderLayout();
+
+		game.uiMenu.DisplayMenus();
 
 		EndChild();
 	}

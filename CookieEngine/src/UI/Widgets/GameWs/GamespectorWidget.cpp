@@ -50,8 +50,9 @@ void Gamespector::WindowDisplay()
 			const Entity* const & selectedEntity = coordinator.selectedEntities[0];
 			const ComponentGameplay& sEntityGameplayComp = coordinator.componentHandler->GetComponentGameplay(selectedEntity->id);
 			
-			SameLine();
 			BeginGroup();
+
+			
 
 			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::LIVE)
 			{
@@ -68,6 +69,12 @@ void Gamespector::WindowDisplay()
 			SameLine();
 
 			BeginGroup();
+
+			SetWindowFontScale(2.f);
+			TextColored({0.25f, 0.25f, 1.f, 1}, "%s", selectedEntity->name.c_str());
+			SetWindowFontScale(1.f);
+			
+			Separator();
 
 			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::PRODUCER)
 			{
@@ -112,7 +119,7 @@ void Gamespector::WindowDisplay()
 					Dummy({ 0.f, 31.f });
 
 					PushStyleColor(ImGuiCol_PlotHistogram, { 0.5, 0.5, 0.5, 1 });
-					ProgressBar(1.f, { GetContentRegionAvail().x / 3.f, 15.f }, "No production");
+					ProgressBar(1.f, { 160.f, 15.f }, "No production");
 					PopStyleColor();
 
 					EndGroup();
@@ -121,6 +128,18 @@ void Gamespector::WindowDisplay()
 				}
 
 				Separator();
+			}
+
+			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::WORKER)
+			{
+				if (sEntityGameplayComp.componentWorker.BuildingInConstruction)
+				{
+					Text(sEntityGameplayComp.componentWorker.needTostartBuilding ? "Moving out to start building!" :  "Construction underway..!");
+
+					PushStyleColor(ImGuiCol_PlotHistogram, { 1, 0, 1, 1 });
+					ProgressBar(sEntityGameplayComp.componentWorker.constructionCountdown / sEntityGameplayComp.componentWorker.BuildingInConstruction->gameplay.cost.timeToProduce, { 350.f, 15.f }, std::to_string((int)sEntityGameplayComp.componentWorker.constructionCountdown).c_str());
+					PopStyleColor();
+				}
 			}
 
 			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::MOVE)

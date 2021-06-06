@@ -14,6 +14,8 @@
 #include "Resources/Particles/ParticlesHandler.hpp"
 #include "PlayerData.hpp"
 
+#include "UImenu.hpp"
+
 #include <memory>
 
 namespace Cookie
@@ -36,6 +38,7 @@ namespace Cookie
 			Render::FrameBuffer								frameBuffer;
 			Render::FrameBuffer								miniMapBuffer;
 			Resources::Particles::ParticlesHandler			particlesHandler;
+			UI::UImenu										uiMenu;
 
 			std::unique_ptr<Resources::Scene>				scene{nullptr};
 
