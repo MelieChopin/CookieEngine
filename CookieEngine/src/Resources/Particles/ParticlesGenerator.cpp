@@ -8,7 +8,43 @@ float Random(float min, float max)
 	return float(rand()) / float((RAND_MAX)) * (max - min + 1) + min;
 }
 
+
 using namespace Cookie::Resources::Particles;
+
+std::string Cookie::Resources::Particles::GetName(const TYPEGEN& type)
+{
+	switch (type)
+	{
+	case (POINTPOSITIONGEN): 
+		return "PointPositionGenerate";
+	case (BOXPOSITIONGEN):
+		return "BoxPositionGenerate";
+	case (CIRCLEPOSITIONGEN):
+		return "SpherePositionGenerate";
+	case (SCALECONSTGEN):
+		return "ScaleConstGenerate";
+	case (SCALERANDGEN):
+		return "ScaleRandGenerate";
+	case (ROTATERANDGEN):
+		return "RotateRandGenerate";
+	case (VELCONSTGEN):
+		return "VelocityConstGenerate";
+	case (VELRANDGEN):
+		return "VelocityRandGenerate";
+	case (MASSCONSTGEN):
+		return "MassConstGenerate";
+	case (TIMECONSTGEN):
+		return "TimeConstGenerate";
+	case (TIMERANDGEN):
+		return "TimeRandGenerate";
+	case (COLORCONSTGEN):
+		return "ColorConstGenerate";
+	case (COLORRANDGEN):
+		return "ColorRandGenerate";
+	case (INITVELWITHPOINT):
+		return "InitVelocityWithHowUnitWillAttack";
+	}
+}
 
 void PointPositionGenerate::generate(ParticlesData* data, int start, int end)
 {

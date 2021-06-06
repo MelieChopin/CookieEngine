@@ -32,6 +32,8 @@ namespace Cookie
 				SPAWNEND
 			};
 
+			std::string GetName(const TYPEUP& type);
+
 			class ParticlesUpdate
 			{
 			public :
@@ -55,7 +57,7 @@ namespace Cookie
 			class UpdateScale : public ParticlesUpdate
 			{
 			public:
-				Cookie::Core::Math::Vec3 scaleEnd;
+				Cookie::Core::Math::Vec3 scaleEnd = Cookie::Core::Math::Vec3(0, 0, 0);
 				UpdateScale(Cookie::Core::Math::Vec3 scale = Cookie::Core::Math::Vec3(0, 0, 0)) : scaleEnd(scale) { type = TYPEUP::UPDATESCALE; }
 				~UpdateScale()override {}
 
@@ -65,7 +67,7 @@ namespace Cookie
 			class UpdateAlpha : public ParticlesUpdate
 			{
 			public:
-				float alphaEnd;
+				float alphaEnd = 0;
 				UpdateAlpha(float alpha = 0): alphaEnd(alpha) { type = TYPEUP::UPDATEALPHA; }
 				~UpdateAlpha()override {}
 
@@ -75,7 +77,7 @@ namespace Cookie
 			class ColorOverLife : public ParticlesUpdate
 			{
 			public:
-				Cookie::Core::Math::Vec4 colorEnd;
+				Cookie::Core::Math::Vec4 colorEnd = Cookie::Core::Math::Vec4(0, 0, 0, 0);
 				ColorOverLife(Cookie::Core::Math::Vec4 color = Cookie::Core::Math::Vec4(1, 1, 1, 1)) : colorEnd(color) { type = TYPEUP::COLOROVERLIFE; }
 				~ColorOverLife()override {}
 
@@ -117,11 +119,11 @@ namespace Cookie
 			public:
 				CollisionWithPlane() { type = TYPEUP::COLLISIONWITHPLANE; }
 				CollisionWithPlane(std::string namePrefab,
-					Cookie::Core::Math::Vec3 normal = {0, 1, 0}, float distance = -0.58f)
+					Cookie::Core::Math::Vec3 normal = {0, 1, 0}, float distance = -0.70f)
 					: dis(distance), n(normal) { type = TYPEUP::COLLISIONWITHPLANE; }
 				~CollisionWithPlane()override {}
 
-				float dis = -0.58f;
+				float dis = -0.70f;
 				Cookie::Core::Math::Vec3 n = Cookie::Core::Math::Vec3(0, 1, 0);
 				std::string namePrefab = "Explosion";
 

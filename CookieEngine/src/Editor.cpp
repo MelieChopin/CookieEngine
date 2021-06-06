@@ -32,12 +32,13 @@ Editor::Editor()
     //Load all Textures we have create in texture editor
     Resources::Serialization::Load::LoadAllTextures(game.resources);
 
+    Serialization::Load::LoadAllParticles(game.resources);
+
     //Load all prefabs in folder Prefabs
     Resources::Serialization::Load::LoadAllPrefabs(game.resources);
 
     Resources::SoundManager::InitSystem();
     Resources::SoundManager::LoadAllMusic(game.resources);
-    Serialization::Load::LoadAllParticles(game.resources);
     game.particlesHandler.particlesPrefab = &game.resources.particles;
 
     Serialization::Load::LoadAllAIBehaviors(game.resources);
@@ -204,7 +205,7 @@ void Editor::Loop()
     {
         // Present frame
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
-            Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(-5, 15, 5), game.resources.particles["Bomb"].get(), Vec3(10, 0, 25));
+            Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(-5, 15, 5), game.resources.particles["Death"].get(), Vec3(10, 0, 25));
 
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
             game.coordinator.armyHandler->AddArmyCoordinator(E_ARMY_NAME::E_AI1, game.resources.aiBehaviors["Test1"].get());

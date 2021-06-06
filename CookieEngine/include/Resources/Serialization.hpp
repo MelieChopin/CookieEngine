@@ -38,6 +38,7 @@ namespace Cookie
 		namespace Particles
 		{
 			class ParticlesSystem;
+			class ParticlesPrefab;
 		}
 	}
 
@@ -65,7 +66,7 @@ namespace Cookie
 				void SaveAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
 				void SaveTexture(std::string& name, Cookie::Core::Math::Vec4& color);
 				void SaveVolumAndModeMusic(Sound* const & sound);
-				void SaveParticles(Cookie::Resources::Particles::ParticlesSystem& particles);
+				void SaveParticles(Cookie::Resources::Particles::ParticlesPrefab& particles);
 				void SaveAIBehavior(Cookie::Gameplay::AIBehavior& aiBehavior);
 			}
 
