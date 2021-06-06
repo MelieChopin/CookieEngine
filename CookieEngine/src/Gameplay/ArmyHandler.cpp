@@ -68,12 +68,14 @@ void ArmyHandler::RemoveArmy(Army& army)
 
 void ArmyHandler::AddArmyCoordinator(E_ARMY_NAME armyName, AIBehavior* aiBehavior)
 {
-	for (int i = 0; i < livingArmies; ++i)
-		if (armies[i].name == armyName)
-		{
-			armiesCoordinator.push_back(ArmyCoordinator{ &armies[i], aiBehavior });
-			return;
-		}
+	//quit if there is already an ArmyCoordinator
+	if (GetArmyCoordinator(armyName))
+		return;
+
+	Army* army = GetArmy(armyName);
+
+	if(army)
+		armiesCoordinator.push_back(ArmyCoordinator{army, aiBehavior });
 }
 void ArmyHandler::RemoveArmyCoordinator(E_ARMY_NAME armyName)
 {
@@ -87,15 +89,17 @@ void ArmyHandler::RemoveArmyCoordinator(E_ARMY_NAME armyName)
 
 void ArmyHandler::AddElementToArmy(ComponentGameplay* element)
 {
-	for (int i = 0; i < livingArmies; ++i)
-		if (armies[i].name == element->teamName)
-		{
-			AddElementToArmy(armies[i], element);
-			return;
-		}
+	Army* army = GetArmy(element->teamName);
 
-	AddArmy(element->teamName);
-	AddElementToArmy(armies[livingArmies - 1], element);
+	if(army)
+		AddElementToArmy(*army, element);
+	else
+	{
+		AddArmy(element->teamName);
+		AddElementToArmy(armies[livingArmies - 1], element);
+	}
+
+
 }
 void ArmyHandler::AddElementToArmy(Army& army, ComponentGameplay* element)
 {
@@ -131,12 +135,10 @@ void ArmyHandler::AddElementToArmy(Army& army, ComponentGameplay* element)
 
 void ArmyHandler::RemoveElementFromArmy(ComponentGameplay* element, std::string entityName)
 {
-	for (int i = 0; i < livingArmies; ++i)
-		if (armies[i].name == element->teamName)
-		{
-			RemoveElementFromArmy(armies[i], element, entityName);
-			return;
-		}
+	Army* army = GetArmy(element->teamName);
+	
+	if(army)
+		RemoveElementFromArmy(*army, element, entityName);
 }
 void ArmyHandler::RemoveElementFromArmy(Army& army, ComponentGameplay* element, std::string entityName)
 {

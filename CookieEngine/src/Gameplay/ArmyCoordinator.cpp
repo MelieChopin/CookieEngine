@@ -13,6 +13,13 @@ using namespace Cookie::ECS;
 
 void ArmyCoordinator::Analysis()
 {
+	if (!behavior)
+	{
+		CDebug.Warning("try to run an AI without giving a Behavior (Check World Settings)");
+		return;
+	}
+
+
 	//Economic
 	if(army->workers.size() + nbOfWorkerInProduction < stepGoals.nbOfWorker)
 		goals.push_back(E_GOALS::E_DEVELOP_WORKER);
