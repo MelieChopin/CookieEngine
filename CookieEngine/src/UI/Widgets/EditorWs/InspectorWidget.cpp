@@ -510,10 +510,10 @@ void Inspector::GameplayInterface()
                 
                 DragFloat("##ARMOR",    &gameplayComp.componentLive.armor,       1.f, NULL, NULL, "Armor: %.0f");
 
+                DragFloat("##POS", &gameplayComp.componentLive.posLifeInRapportOfEntity.y, 0.5f, -10, 10, "LifeBar Offset :  %.0f");
+
                 TreePop();
                 NewLine();
-
-                Text("Pos Life in game:"); NewLine(); DragFloat3("##POS", gameplayComp.componentLive.posLifeInRapportOfEntity.e);
             }
         }
         else if (Selectable("Add life/Armor properties"))
@@ -574,7 +574,9 @@ void Inspector::GameplayInterface()
 
 
                 DragFloat2("Tile size (in x and z)", gameplayComp.componentProducer.tileSize.e, 0.5f, 0.5f, 100.f, "%.1f");
-                
+                DragInt("##SupplyGiven", &gameplayComp.componentProducer.supplyGiven, 1, 0, 10, "Supply given : %d");
+
+
                 NewLine();
                 Text("Can produce the following units:");
 
@@ -632,7 +634,7 @@ void Inspector::GameplayInterface()
                     std::string tinyDeleterTag = "X##" + std::to_string(i);
                     if (SmallButton(tinyDeleterTag.c_str()))
                     {
-                        it = gameplayComp.componentProducer.possibleUnits.erase(it);
+                        it = gameplayComp.componentWorker.possibleBuildings.erase(it);
                     }
                     else it++;
                 }

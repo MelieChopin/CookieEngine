@@ -10,27 +10,21 @@ using namespace Cookie::Resources;
 
 void UImenu::DisplayMenus() const
 {
-	const ImVec2 viewPortSize = GetWindowViewport()->Size;
+	const ImVec2 windowSize = GetWindowSize();
 	
-	if (openMenuFlags[(size_t)UImenu::MenusID::MainMenu])
+	if (openMenuFlag)
 	{
 		OpenPopup("Main menu##GAMEMAINMENU");
-		openMenuFlags[(size_t)UImenu::MenusID::MainMenu] = false;
-	}
-
-	if (openMenuFlags[(size_t)UImenu::MenusID::EndMenu])
-	{
-		OpenPopup("End menu##GAMEENDMENU");
-		openMenuFlags[(size_t)UImenu::MenusID::EndMenu] = false;
+		openMenuFlag = false;
 	}
 
 
-	SetNextWindowSize(viewPortSize);
+	SetNextWindowSize(windowSize);
 	SetNextWindowViewport(GetWindowViewport()->ID);
 
 	if (BeginPopupModal("Main menu##GAMEMAINMENU", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove))
 	{
-		menuState[(size_t)UImenu::MenusID::MainMenu] = true;
+		menuState = true;
 
 		Image(static_cast<ImTextureID>(resources.icons["Assets/UI/WallpaperStartGame.tif"]->GetResourceView()), GetContentRegionAvail());
 
@@ -56,10 +50,11 @@ void UImenu::DisplayMenus() const
 		SetWindowFontScale(1.f);
 
 		SetCursorPosX(15.f);
-		if (Button("Options", { 100.f, 40.f }));
-
-		SetCursorPosX(15.f);
-		if (Button("Quit", { 100.f, 40.f }));
+		if (Button("Quit", { 100.f, 40.f }))
+		{
+			quitFunc();
+			CloseCurrentPopup();
+		}
 
 
 		PopStyleColor(3);
@@ -67,5 +62,5 @@ void UImenu::DisplayMenus() const
 
 		EndPopup();
 	}
-	else menuState[(size_t)UImenu::MenusID::MainMenu] = false;
+	else menuState = false;
 }

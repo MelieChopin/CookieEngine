@@ -32,7 +32,7 @@ bool GameWindowBase::BeginWindow(int windowFlags)
 	SetNextWindowPos ({ xPos + GetWindowPos().x, yPos + GetWindowPos().y }					   );
 
 	SetNextWindowViewport(GetWindowViewport()->ID);
-	contentVisible = Begin(windowName, nullptr, windowFlags | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground);
+	contentVisible = Begin(windowName, nullptr, windowFlags | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings);
 
 	if (IsWindowAppearing())
 		SetWindowPos({ xPos + GetWindowPos().x, yPos + GetWindowPos().y });

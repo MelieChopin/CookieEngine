@@ -39,7 +39,7 @@ void Gamespector::LifeBar(const float currentLife, const float maxLife, const fl
 
 void Gamespector::WindowDisplay()
 {
-	TryBeginWindow()
+	TryBeginWindow(ImGuiWindowFlags_NoBackground)
 	{
 		ImGui::SetCursorPos({ 0, 0 });
 		Image(static_cast<ImTextureID>(resources.icons["Assets/UI/Cadre_Middle.png"].get()->GetResourceView()), GetWindowSize());
@@ -206,7 +206,7 @@ void Gamespector::WindowDisplay()
 				}
 				else
 				{
-					TextColored({ 123.f, 63.f, 0.f, 1.f }, "Remaining chocolate: %.2f units", sEntityGameplayComp.componentResource.resourceReserve);
+					TextColored({ 0.482f, 0.247f, 0.f, 1.f }, "Remaining chocolate: %.2f units", sEntityGameplayComp.componentResource.resourceReserve);
 				}
 			}
 

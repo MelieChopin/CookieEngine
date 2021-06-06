@@ -10,7 +10,7 @@ namespace Cookie::UIwidget
 {
 	class GamePort final : public WindowBase
 	{
-		bool& isPlaying;
+		const bool& isPlaying;
 		const Cookie::Game& game;
 
 	protected:

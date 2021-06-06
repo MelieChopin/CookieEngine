@@ -50,25 +50,14 @@ void GameUIeditor::WindowDisplay()
 				game.scene->uiScene.signature |= GameWidgetID::MinimapID;
 			}
 
-			if (game.scene->uiScene.signature & GameWidgetID::WheatPanelID)
+			if (game.scene->uiScene.signature & GameWidgetID::IncomePanelID)
 			{
-				TextDisabled("Wheat panel added");
+				TextDisabled("Resource/info panel added");
 			}
-			else if (Selectable("Add a wheat panel"))
+			else if (Selectable("Add a resource/info panel"))
 			{
-				widgets.push_back(std::make_unique<WheatPanel>(game.scene->armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));
-				game.scene->uiScene.signature |= GameWidgetID::WheatPanelID;
-			}
-
-
-			if (game.scene->uiScene.signature & GameWidgetID::ChocolatePanelID)
-			{
-				TextDisabled("Chocolate panel added");
-			}
-			else if (Selectable("Add a chocolate panel"))
-			{
-				widgets.push_back(std::make_unique<ChocolatePanel>(game.scene->armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));
-				game.scene->uiScene.signature |= GameWidgetID::ChocolatePanelID;
+				widgets.push_back(std::make_unique<IncomePanel>(game.scene->armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));
+				game.scene->uiScene.signature |= GameWidgetID::IncomePanelID;
 			}
 		}
 		

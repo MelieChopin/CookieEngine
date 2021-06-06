@@ -49,7 +49,7 @@ void ActionPanel::ToolTipCost(const Prefab* const & prefab, const Cookie::Gamepl
 
 void ActionPanel::WindowDisplay()
 {
-	TryBeginWindow()
+	TryBeginWindow(ImGuiWindowFlags_NoBackground)
 	{
 		ImGui::SetCursorPos({0, 0});
 		Image(static_cast<ImTextureID>(resources.icons["Assets/UI/Cadre_Right.png"].get()->GetResourceView()), GetWindowSize());

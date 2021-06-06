@@ -109,6 +109,7 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 					game["CGPProducer"]["OccupiedTiles"] += gameplay.componentProducer.occupiedTiles[i]->id;
 
 				game["CGPProducer"]["TileSize"] = gameplay.componentProducer.tileSize.e;
+				game["CGPProducer"]["SupplyGiven"] = gameplay.componentProducer.supplyGiven;
 			}
 
 			if (gameplay.signatureGameplay & CGP_SIGNATURE::WORKER)
@@ -438,6 +439,7 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const Prefab* const & pr
 			 produ["name"] += gameplay.componentProducer.possibleUnits[i]->name;
 
 		 produ["TileSize"] = gameplay.componentProducer.tileSize.e;
+		 produ["SupplyGiven"] = gameplay.componentProducer.supplyGiven;
 
 		 json& worker = js["Gameplay"]["CGPWorker"];
 		 for (int i = 0; i < gameplay.componentWorker.possibleBuildings.size(); i++)
@@ -1101,6 +1103,7 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 
 void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager)
  {
+
 	 std::vector<std::string> filesPath;
 	 for (const fs::directory_entry& path : fs::directory_iterator("Assets/Prefabs"))
 	 {
@@ -1514,6 +1517,7 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 	{
 		temp = gameplay["CGPProducer"];
 		temp["TileSize"].get_to(GPComponent.componentProducer.tileSize.e);
+		GPComponent.componentProducer.supplyGiven = temp["SupplyGiven"].get<int>();
 
 		if (temp.contains("name"))
 		{

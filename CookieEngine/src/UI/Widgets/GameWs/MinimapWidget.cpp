@@ -12,7 +12,7 @@ using namespace Cookie::UIwidget;
 
 void Minimap::WindowDisplay()
 {
-	TryBeginWindow()
+	TryBeginWindow(ImGuiWindowFlags_NoBackground)
 	{
 		ImGui::SetCursorPos({ 0, 0 });
 		Image(static_cast<ImTextureID>(resources.icons["Assets/UI/Cadre_Left.png"].get()->GetResourceView()), GetWindowSize());
