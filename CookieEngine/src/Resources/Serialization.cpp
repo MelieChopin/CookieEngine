@@ -1155,8 +1155,6 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 
 	 for (int i = 0; i < filesPath.size(); i++)
 	 {
-		 std::cout << filesPath[i] << "\n";
-
 		 std::ifstream file(filesPath[i]);
 
 		 if (!file.is_open() || file.peek() == std::ifstream::traits_type::eof())
@@ -1265,7 +1263,6 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 				 if (resourcesManager.sounds.find(name) != resourcesManager.sounds.end())
 					 game.sfxAttack = resourcesManager.sounds[name].get();
 				 name = fx["CGPAttack"]["vfxAttack"].get<std::string>();
-				 std::cout << name << "\n";
 				 if (resourcesManager.particles.find(name) != resourcesManager.particles.end())
 					 game.vfxAttack = resourcesManager.particles[name].get();
 			 }
@@ -1336,8 +1333,6 @@ void Cookie::Resources::Serialization::Load::LoadAllTextures(Cookie::Resources::
 
 	 for (int i = 0; i < filesPath.size(); i++)
 	 {
-		 std::cout << filesPath[i] << "\n";
-
 		 std::ifstream file(filesPath[i]);
 
 		 if (!file.is_open() || file.peek() == std::ifstream::traits_type::eof())
@@ -1628,8 +1623,6 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 
 	for (int i = 0; i < filesPath.size(); i++)
 	{
-		std::cout << filesPath[i] << "\n";
-
 		std::ifstream file(filesPath[i]);
 
 		if (!file.is_open() || file.peek() == std::ifstream::traits_type::eof())
@@ -1926,8 +1919,6 @@ void Cookie::Resources::Serialization::Load::LoadAllAIBehaviors(Cookie::Resource
 
 	for (int i = 0; i < filesPath.size(); i++)
 	{
-		std::cout << filesPath[i] << "\n";
-
 		std::ifstream file(filesPath[i]);
 
 		if (!file.is_open() || file.peek() == std::ifstream::traits_type::eof())
