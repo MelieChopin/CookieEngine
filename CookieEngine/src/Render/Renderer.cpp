@@ -175,9 +175,12 @@ void Renderer::ResizeBuffer(int width, int height)
      * on the size of the window and the resolution*/
     remote.context->Flush();
 
-    /* change the viewport t be at the siz eof the window */
+    /* change the viewport be at the size of the window */
     viewport.Width  = width;
     viewport.Height = height;
+
+    remote.context->RSSetViewports(1, &viewport);
+    remote.context->IASetPrimitiveTopology(topo);
 }
 
 /*========================= RENDER METHODS =========================*/

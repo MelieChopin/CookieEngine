@@ -115,24 +115,31 @@ void WorldSettingsWidget::WindowDisplay()
 
 			if (TreeNode("Other lights"))
 			{
+				SliderInt("##POINTLIGHTNB", (int*)&lights.usedPoints, 0, POINT_LIGHT_MAX_NB, "Nb of Light: %d", ImGuiSliderFlags_AlwaysClamp);
+
 				static int lightIndex = 1;
 				static Render::PointLight* selectedPtLight = &lights.pointLights[0];
 
-				if (SliderInt("##POINTLIGHTSELECT", &lightIndex, 1, POINT_LIGHT_MAX_NB, "Editing light N%d", ImGuiSliderFlags_AlwaysClamp))
-				{ selectedPtLight = &lights.pointLights[lightIndex-1]; }
+				if (lights.usedPoints > 0)
+				{
 
-				NewLine();
-				Text("Position:");
-				DragFloat3("##POINTPOS", selectedPtLight->pos.e, 0.25f, NULL, NULL, "%.2f");
-				
-				NewLine();
-				Text("Light radius:");
-				DragFloat("##POINTRADIUS", &selectedPtLight->radius, 0.5f, NULL, NULL, "%.1f");
-				
-				NewLine();
-				Text("Coloration:");
-				ColorEdit3("##POINTCOLOR", selectedPtLight->color.e, ImGuiColorEditFlags_Float | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_PickerHueWheel);
+					if (SliderInt("##POINTLIGHTSELECT", &lightIndex, 1, lights.usedPoints, "Editing light N%d", ImGuiSliderFlags_AlwaysClamp))
+					{
+						selectedPtLight = &lights.pointLights[lightIndex - 1];
+					}
 
+					NewLine();
+					Text("Position:");
+					DragFloat3("##POINTPOS", selectedPtLight->pos.e, 0.25f, NULL, NULL, "%.2f");
+
+					NewLine();
+					Text("Light radius:");
+					DragFloat("##POINTRADIUS", &selectedPtLight->radius, 0.5f, NULL, NULL, "%.1f");
+
+					NewLine();
+					Text("Coloration:");
+					ColorEdit3("##POINTCOLOR", selectedPtLight->color.e, ImGuiColorEditFlags_Float | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_PickerHueWheel);
+				}
 				TreePop();
 			}
 
