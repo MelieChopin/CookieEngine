@@ -186,6 +186,7 @@ void Editor::Loop()
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
             Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(-5, 15, 5), game.resources.particles["Bomb"].get(), Vec3(10, 0, 25));
         
+        //if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_A])
 
        /* if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_ESCAPE])
             isPlaying = false;

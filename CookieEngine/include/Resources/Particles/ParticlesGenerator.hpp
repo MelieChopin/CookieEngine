@@ -36,6 +36,8 @@ namespace Cookie
 				INITVELWITHPOINT
 			};
 
+			std::string GetName(const TYPEGEN& type);
+
 			class ParticlesGenerator
 			{
 			public :

@@ -30,7 +30,7 @@ void ParticlesHandler::Update()
 		if ((*particles).needToBeRemoved)
 		{
 			particles = particlesSystems.erase(particles);
-			//particlesSystems.push_back(ParticlesSystem());
+			particlesSystems.push_back(ParticlesSystem());
 			living--;
 		}
 	}	
@@ -112,7 +112,7 @@ void ParticlesHandler::CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3&
 			}
 			else if (name == "CreateParticles")
 			{
-				if (particles.data.size() > prefab->emit[i][j].data[0].x)
+				if (particles.data.size() > prefab->emit[i][j].data[0].x && prefab->emit[i][j].data[0].x >= 0)
 				{
 					std::shared_ptr<CreateParticlesFollowing> create = std::make_unique<CreateParticlesFollowing>(particles.data[prefab->emit[i][j].data[0].x]);
 					particles.data[prefab->emit[i][j].data[0].x].canRemoved = false;
@@ -125,7 +125,7 @@ void ParticlesHandler::CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3&
 			}
 			else if (name == "Shadow")
 			{
-				if (particles.data.size() > prefab->emit[i][j].data[0].x)
+				if (particles.data.size() > prefab->emit[i][j].data[0].x && prefab->emit[i][j].data[0].x >= 0)
 				{
 					std::shared_ptr<Shadow> shadow = std::make_unique<Shadow>(particles.data[prefab->emit[i][j].data[0].x]);
 					particles.data[prefab->emit[i][j].data[0].x].canRemoved = false;

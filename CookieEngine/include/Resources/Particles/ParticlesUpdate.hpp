@@ -32,6 +32,8 @@ namespace Cookie
 				SPAWNEND
 			};
 
+			std::string GetName(const TYPEUP& type);
+
 			class ParticlesUpdate
 			{
 			public :
@@ -117,11 +119,11 @@ namespace Cookie
 			public:
 				CollisionWithPlane() { type = TYPEUP::COLLISIONWITHPLANE; }
 				CollisionWithPlane(std::string namePrefab,
-					Cookie::Core::Math::Vec3 normal = {0, 1, 0}, float distance = -0.58f)
+					Cookie::Core::Math::Vec3 normal = {0, 1, 0}, float distance = -0.70f)
 					: dis(distance), n(normal) { type = TYPEUP::COLLISIONWITHPLANE; }
 				~CollisionWithPlane()override {}
 
-				float dis = -0.58f;
+				float dis = -0.70f;
 				Cookie::Core::Math::Vec3 n = Cookie::Core::Math::Vec3(0, 1, 0);
 				std::string namePrefab = "Explosion";
 

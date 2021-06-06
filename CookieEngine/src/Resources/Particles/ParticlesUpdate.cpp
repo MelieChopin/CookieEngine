@@ -7,6 +7,35 @@
 
 using namespace Cookie::Resources::Particles;
 
+std::string Cookie::Resources::Particles::GetName(const TYPEUP& type)
+{
+	switch (type)
+	{
+	case (UPDATEVEL):
+		return "UpdateVelocity";
+	case (UPDATESCALE):
+		return "UpdateScale";
+	case (UPDATEALPHA):
+		return "UpdateAlpha";
+	case (COLOROVERLIFE):
+		return "ColorOverLife";
+	case (ENABLEGRAVITY):
+		return "EnableGravity";
+	case (UPDATETIME):
+		return "UpdateTime";
+	case (LOOP):
+		return "Loop";
+	case (COLLISIONWITHPLANE):
+		return "CollisionWithPlane";
+	case (CREATEPARTICLES):
+		return "CreateParticles";
+	case (SHADOW):
+		return "Shadow";
+	case (SPAWNEND):
+		return "SpawnEnd";
+	}
+}
+
 void UpdateVelocity::Update(ParticlesData* p)
 {
 	for (int i = 0; i < p->countAlive; i++)
@@ -111,7 +140,7 @@ void Shadow::Update(ParticlesData* p)
 		{
 			data->data[i].alive = true;
 			data->data[i].pos = p->data[i].pos;
-			data->data[i].pos.y = 0.55f;
+			data->data[i].pos.y = 0.90f;
 			data->data[i].rot = Cookie::Core::Math::Vec3(Core::Math::PI / 2, 0, 0);
 			data->data[i].time = time;
 			data->data[i].timeMax = time;
