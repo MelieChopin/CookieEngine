@@ -38,12 +38,9 @@ void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows, Cookie:
 		case GameWidgetID::MinimapID:	    
 			sceneWidgets.push_back(std::make_unique<Minimap>		(game.miniMapBuffer, scene.camera.get(), scene.map, game.resources));			break;
 		
-		case GameWidgetID::WheatPanelID:
-			sceneWidgets.push_back(std::make_unique<WheatPanel>		(scene.armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));	break;
+		case GameWidgetID::IncomePanelID:
+			sceneWidgets.push_back(std::make_unique<IncomePanel>	(scene.armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));	break;
 		
-		case GameWidgetID::ChocolatePanelID:
-			sceneWidgets.push_back(std::make_unique<ChocolatePanel>	(scene.armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));	break;
-
 		default: break;
 		}
 
