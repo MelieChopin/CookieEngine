@@ -168,11 +168,11 @@ Entity* Coordinator::GetClosestEntity(Vec3& pos, E_ARMY_NAME teamName, int minim
 
 	return entityToReturn;
 }
-Entity* Coordinator::GetClosestSelectableEntity(Core::Math::Vec3& pos, int minimumGameplaySignatureWanted)
+Entity* Coordinator::GetClosestSelectableEntity(Core::Math::Vec3& pos, E_ARMY_NAME teamName, int minimumGameplaySignatureWanted)
 {
 	//Used when the selection Quad is too small, we check if the user click on a unit
 
-	Entity* entityToReturn = GetClosestEntity(pos, E_ARMY_NAME::E_PLAYER, minimumGameplaySignatureWanted);
+	Entity* entityToReturn = GetClosestEntity(pos, teamName, minimumGameplaySignatureWanted);
 
 	//Check if pos exceed scales
 	if (entityToReturn)
