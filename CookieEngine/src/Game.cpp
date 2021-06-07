@@ -116,13 +116,12 @@ void Game::HandleGameplayInputs()
 
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
     {
-        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["Base"].get(), E_ARMY_NAME::E_PLAYER);
+        ECS::Entity* newEntity = coordinator.AddEntity(resources.prefabs["Base"].get(), E_ARMY_NAME::E_PLAYER);
 
-        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
-        ComponentModel& model = coordinator.componentHandler->GetComponentModel(newEntity.id);
-        CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer;
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity->id);
+        CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity->id).componentProducer;
 
-        float unscaledOffsetFromMap = std::abs(coordinator.componentHandler->GetComponentModel(newEntity.id).mesh->AABBMin.y);
+        float unscaledOffsetFromMap = std::abs(coordinator.componentHandler->GetComponentModel(newEntity->id).mesh->AABBMin.y);
         trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, producer.tileSize) + Vec3{ 0, trs.scale.y * unscaledOffsetFromMap, 0 };	
         
         Vec3 posTopLeft = trs.pos - trs.scale / 2;
@@ -130,13 +129,12 @@ void Game::HandleGameplayInputs()
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B])
     {
-        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["Base"].get(), E_ARMY_NAME::E_AI1);
+        ECS::Entity* newEntity = coordinator.AddEntity(resources.prefabs["Base"].get(), E_ARMY_NAME::E_AI1);
 
-        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
-        ComponentModel& model = coordinator.componentHandler->GetComponentModel(newEntity.id);
-        CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer;
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity->id);
+        CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity->id).componentProducer;
 
-        float unscaledOffsetFromMap = std::abs(coordinator.componentHandler->GetComponentModel(newEntity.id).mesh->AABBMin.y);
+        float unscaledOffsetFromMap = std::abs(coordinator.componentHandler->GetComponentModel(newEntity->id).mesh->AABBMin.y);
         trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, producer.tileSize) + Vec3{ 0, trs.scale.y * unscaledOffsetFromMap, 0 };
 
         Vec3 posTopLeft = trs.pos - trs.scale / 2;
@@ -144,12 +142,11 @@ void Game::HandleGameplayInputs()
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_X])
     {
-        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["ResourcePrimary"].get(), E_ARMY_NAME::E_DEFAULT_NAME);
+        ECS::Entity* newEntity = coordinator.AddEntity(resources.prefabs["ResourcePrimary"].get(), E_ARMY_NAME::E_DEFAULT_NAME);
 
-        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
-        ComponentModel& model = coordinator.componentHandler->GetComponentModel(newEntity.id);
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity->id);
 
-        float unscaledOffsetFromMap = std::abs(coordinator.componentHandler->GetComponentModel(newEntity.id).mesh->AABBMin.y);
+        float unscaledOffsetFromMap = std::abs(coordinator.componentHandler->GetComponentModel(newEntity->id).mesh->AABBMin.y);
         Vec2 tileSize {{1, 1}};
         trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, tileSize) + Vec3{ 0, trs.scale.y * unscaledOffsetFromMap, 0 };
     }
@@ -209,8 +206,8 @@ void Game::CheckIfBuildingValid()
     playerData.buildingPos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, playerData.buildingToBuild->tileSize);
     playerData.buildingPos.y += playerData.workerWhoBuild->possibleBuildings[playerData.indexOfBuildingInWorker]->transform.scale.y * std::abs(playerData.workerWhoBuild->possibleBuildings[playerData.indexOfBuildingInWorker]->model.mesh->AABBMin.y);
 
-    Vec2 posTopLeft =  {playerData.buildingPos.x - playerData.buildingToBuild->tileSize.x * scene->map.tilesSize.x / 2,
-                        playerData.buildingPos.z - playerData.buildingToBuild->tileSize.y * scene->map.tilesSize.y / 2};
+    Vec2 posTopLeft = {{playerData.buildingPos.x - playerData.buildingToBuild->tileSize.x * scene->map.tilesSize.x / 2,
+                        playerData.buildingPos.z - playerData.buildingToBuild->tileSize.y * scene->map.tilesSize.y / 2}};
 
     playerData.isBuildingValid = scene->map.isBuildingValid(scene->map.GetTileIndex(posTopLeft), playerData.buildingToBuild->tileSize);
 }
@@ -363,10 +360,7 @@ void Game::ECSCalls()
     coordinator.armyHandler->UpdateArmyCoordinators(scene->map);
     resources.UpdateScriptsContent();
     coordinator.ApplyScriptUpdate();
-    coordinator.UpdateCGPProducer(scene->map);
-    coordinator.UpdateCGPWorker(scene->map);
-    coordinator.UpdateCGPMove(scene->map);
-    coordinator.UpdateCGPAttack();
+    coordinator.ApplyGameplay(scene->map);
     coordinator.ApplyRemoveUnnecessaryEntities();
 }
 
@@ -390,7 +384,7 @@ void Game::DisplayLife()
         lifeCurrent = gameplay.componentLive.lifeCurrent;
         lifeMax = gameplay.componentLive.lifeMax;
         trs = Cookie::Core::Math::Mat4::Translate(gameplay.trs->pos);
-        posLife = gameplay.componentLive.posLifeInRapportOfEntity;
+        posLife = gameplay.componentLive.lifeBarOffset;
         Cookie::Render::InstancedData newData;
         Vec3 scaleBlack = Vec3(2 * lifeMax / 10, 0.25, 1);
         Vec3 scaleGreen = Vec3(2 * lifeCurrent / 10, 0.25, 1);

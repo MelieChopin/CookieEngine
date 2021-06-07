@@ -2,6 +2,10 @@
 
 using namespace Cookie::ECS;
 
+void ComponentScript::ToDefault()
+{
+	scripts.clear();
+}
 
 void ComponentScript::Start()
 {

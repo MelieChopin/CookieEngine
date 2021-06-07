@@ -83,7 +83,7 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 				game["CGPLive"]["Life"] = gameplay.componentLive.lifeCurrent;
 				game["CGPLive"]["LifeMax"] = gameplay.componentLive.lifeMax;
 				game["CGPLive"]["Armor"] = gameplay.componentLive.armor;
-				game["CGPLive"]["PosLife"] = gameplay.componentLive.posLifeInRapportOfEntity.e;
+				game["CGPLive"]["PosLife"] = gameplay.componentLive.lifeBarOffset.e;
 			}
 
 			if (gameplay.signatureGameplay & CGP_SIGNATURE::ATTACK)
@@ -421,7 +421,7 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const Prefab* const & pr
 		 live["Life"] = gameplay.componentLive.lifeCurrent;
 		 live["LifeMax"] = gameplay.componentLive.lifeMax;
 		 live["Armor"] = gameplay.componentLive.armor;
-		 live["PosLife"] = gameplay.componentLive.posLifeInRapportOfEntity.e;
+		 live["PosLife"] = gameplay.componentLive.lifeBarOffset.e;
 
 		 json& attack = js["Gameplay"]["CGPAttack"];
 		 attack["NeedToAttack"] = gameplay.componentAttack.needToAttack;
@@ -787,7 +787,6 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, Cookie::ECS::Ent
 		 json& newEntity = js["EntityHandler"][i].at("entity");
 		 entity.entities[i] = (Cookie::ECS::Entity(newEntity.at("id").get<int>(), newEntity.at("signature").get<int>(), 
 								newEntity.at("name").get<std::string>(), newEntity.at("namePrefab").get<std::string>()));
-		 entity.entities[i].namePrefab = newEntity.at("namePrefab").get<std::string>();
 	 }
  }
 
@@ -1494,7 +1493,7 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 		GPComponent.componentLive.lifeCurrent = temp["Life"].get<float>();
 		GPComponent.componentLive.lifeMax = temp["LifeMax"].get<float>();
 		GPComponent.componentLive.armor = temp["Armor"].get<float>();
-		temp["PosLife"].get_to(GPComponent.componentLive.posLifeInRapportOfEntity.e);
+		temp["PosLife"].get_to(GPComponent.componentLive.lifeBarOffset.e);
 	}
 
 	if (gameplay.contains("CGPAttack"))

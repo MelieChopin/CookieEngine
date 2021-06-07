@@ -5,6 +5,7 @@
 #include "ECS/ComponentTransform.hpp"
 #include "ECS/ComponentModel.hpp"
 #include "ECS/ComponentPhysics.hpp"
+#include "ECS/ComponentScript.hpp"
 #include "ECS/ComponentGameplay.hpp"
 
 namespace reactphysics3d
@@ -34,6 +35,7 @@ namespace Cookie
 			Cookie::ECS::ComponentTransform				transform;
 			Cookie::ECS::ComponentModel					model;
 			Cookie::ECS::ComponentPhysics				physics;
+			Cookie::ECS::ComponentScript				script;
 			Cookie::ECS::ComponentGameplay				gameplay;
 
 			std::string									filepath	= "Null";

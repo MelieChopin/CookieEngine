@@ -16,10 +16,7 @@ namespace Cookie
 		public:
 			std::vector<Resources::ScriptObject> scripts;
 
-			void ToDefault()
-			{
-				scripts.clear();
-			}
+			void ToDefault();
 
 			void Start();
 			void Update();

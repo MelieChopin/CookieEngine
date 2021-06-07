@@ -18,7 +18,6 @@ namespace Cookie
 			E_MOVING
 		};
 
-		//use constexpr, for now it bug
 		#define CGPMOVE_CD_BEFORE_RETURN 0.5f
 		#define CGPMOVE_CD_BEFORE_STATIC 2.f
 		#define OFFSET_MAX_FROM_CENTROID 5
@@ -26,11 +25,10 @@ namespace Cookie
 		class CGPMove
 		{
 		public:
-			CGPMOVE_STATE state = CGPMOVE_STATE::E_STATIC;
-			float moveSpeed = 5;
-			bool  isFlying = false;
 			ECS::ComponentTransform* trs {nullptr};
-
+			CGPMOVE_STATE state          {CGPMOVE_STATE::E_STATIC};
+			float moveSpeed              {5};
+			bool  isFlying               {false};
 			//use it for collision Detection making a circle with trs.pos
 			// sqrt(scale.x^2 + scale.z^2)
 			float radius = 0.7;
@@ -46,13 +44,16 @@ namespace Cookie
 
 			inline void ToDefault() noexcept
 			{
-				state = CGPMOVE_STATE::E_STATIC;
+				state     = CGPMOVE_STATE::E_STATIC;
 				moveSpeed = 0;
-				isFlying = false;
-				radius = 0;
+				isFlying  = false;
+				radius    = 0;
+
 				waypoints.clear();
+
 				pushedCooldownBeforeReturn = CGPMOVE_CD_BEFORE_RETURN;
-				reachGoalCountdown = CGPMOVE_CD_BEFORE_STATIC;
+				reachGoalCountdown         = CGPMOVE_CD_BEFORE_STATIC;
+				posBeforePushed            = {0, 0, 0};
 			}
 
 			void UpdatePushedCooldown(Resources::Map& map);

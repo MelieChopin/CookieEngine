@@ -14,10 +14,7 @@ void CGPMove::UpdatePushedCooldown(Resources::Map& map)
 	pushedCooldownBeforeReturn -= Core::DeltaTime();
 
 	if (pushedCooldownBeforeReturn < 0 && map.ApplyPathfinding(map.GetTile(trs->pos), map.GetTile(posBeforePushed)))
-	{
-		pushedCooldownBeforeReturn = CGPMOVE_CD_BEFORE_RETURN;
 		SetPath(map.GetTile(posBeforePushed));
-	}
 }
 void CGPMove::UpdateReachGoalCooldown()
 {
@@ -27,42 +24,41 @@ void CGPMove::UpdateReachGoalCooldown()
 	reachGoalCountdown -= Core::DeltaTime();
 
 	if (reachGoalCountdown <= 0)
-	{
-		reachGoalCountdown = CGPMOVE_CD_BEFORE_STATIC;
 		state = CGPMOVE_STATE::E_STATIC;
-	}
 
 }
 
 void CGPMove::SetPath(Resources::Tile& lastWaypoint)
 {
 	waypoints.clear();
-	state = CGPMOVE_STATE::E_MOVING;
 	Resources::Tile* currentTile = &lastWaypoint;
 
-	//Whatever happen always had the lastWaypoint
-	waypoints.emplace(waypoints.begin(), Core::Math::Vec3{ currentTile->pos.x, trs->pos.y, currentTile->pos.y });
-
 	//if Entity is Flying go as a straight line
-	//or if the lastWaypoint has no parent it mean we go to the Tile we are already on so we don't need to continue
-	if (isFlying || !currentTile->parent)
+	if (isFlying)
+	{
+		waypoints.emplace(waypoints.begin(), Core::Math::Vec3{ currentTile->pos.x, trs->pos.y, currentTile->pos.y });
+		state = CGPMOVE_STATE::E_MOVING;
 		return;
+	}
 
-	currentTile = currentTile->parent;
 	//if the Tile has no parent it mean it is the start Tile of the path so we don't add it 
 	while (currentTile->parent != nullptr)
 	{
 		Core::Math::Vec3 currentWaypoint = { currentTile->pos.x, trs->pos.y, currentTile->pos.y };
-		Core::Math::Vec3 parentWaypoint = { currentTile->parent->pos.x, trs->pos.y, currentTile->parent->pos.y };
+		Core::Math::Vec3 parentWaypoint  = { currentTile->parent->pos.x, trs->pos.y, currentTile->parent->pos.y };
 
+		if(waypoints.empty())
+			waypoints.emplace(waypoints.begin(), currentWaypoint);
 		//if the direction from currentWaypoint to next Waypoint is the same as the direction from parentWaypoint
-		//to currentWaypoin then it's a straigth line so we don't add the waypoint
-		if ((waypoints[0] - currentWaypoint).Normalize() != (currentWaypoint - parentWaypoint).Normalize())
+		//to currentWaypoin then it's a straigth line so we don't add the currentWaypoint
+		else if ((waypoints[0] - currentWaypoint).Normalize() != (currentWaypoint - parentWaypoint).Normalize())
 			waypoints.emplace(waypoints.begin(), currentWaypoint);
 
 		currentTile = currentTile->parent;
 	}
 
+	if (!waypoints.empty())
+		state = CGPMOVE_STATE::E_MOVING;
 }
 
 void CGPMove::MoveTowardWaypoint()
@@ -73,7 +69,10 @@ void CGPMove::MoveTowardWaypoint()
 
 		//check if reach goal here to avoid to set the state each frame
 		if (waypoints.size() == 0)
+		{
+			reachGoalCountdown = CGPMOVE_CD_BEFORE_STATIC;
 			state = CGPMOVE_STATE::E_REACH_GOAL;
+		}
 	}
 
 	if (waypoints.size() == 0 || state == CGPMOVE_STATE::E_WAITING)
@@ -87,13 +86,12 @@ void CGPMove::MoveTowardWaypoint()
 
 void CGPMove::PositionPrediction()
 {
-
+	//Empty for now but will help avoid colision ahead
 }
 void CGPMove::ResolveColision(CGPMove& other, Map& map)
 {
 	//Priority High
-	if (state > other.state ||
-		(state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_PUSHED))
+	if (state > other.state || (state == CGPMOVE_STATE::E_PUSHED && other.state == CGPMOVE_STATE::E_PUSHED))
 	{
 		if (other.state == CGPMOVE_STATE::E_STATIC)
 		{
@@ -104,10 +102,10 @@ void CGPMove::ResolveColision(CGPMove& other, Map& map)
 
 		Core::Math::Vec3 direction = (other.trs->pos - trs->pos).Normalize();
 		other.trs->pos = trs->pos + direction * (radius + other.radius);
+		other.trs->trsHasChanged = true;
 
 		map.ClampPosInMapWithScale(*other.trs);
 		map.ClampPosOutsideObstacleTile(*other.trs);
-		other.trs->trsHasChanged = true;
 	}
 	//Priority Medium need some fixes
 	else if (state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_MOVING)
@@ -123,7 +121,7 @@ void CGPMove::ResolveColision(CGPMove& other, Map& map)
 			trs->pos += Core::Math::Vec3{ directionSelf.z, directionSelf.y, -directionSelf.x } *(overlapLength / 2);
 			other.trs->pos += Core::Math::Vec3{ directionOther.z, directionOther.y, -directionOther.x } *(overlapLength / 2);
 		}
-		else // they colidde side by side
+		else // they collide side by side
 		{
 			//fix strange behavior for now
 			//trs->pos += -directionSelfToOther * (overlapLength / 2);
@@ -131,12 +129,12 @@ void CGPMove::ResolveColision(CGPMove& other, Map& map)
 			other.trs->pos += directionSelfToOther * (overlapLength);
 		}
 
+		trs->trsHasChanged = true;
 		map.ClampPosInMapWithScale(*trs);
 		map.ClampPosOutsideObstacleTile(*trs);
-		trs->trsHasChanged = true;
+		other.trs->trsHasChanged = true;
 		map.ClampPosInMapWithScale(*other.trs);
 		map.ClampPosOutsideObstacleTile(*other.trs);
-		other.trs->trsHasChanged = true;
 
 	}
 

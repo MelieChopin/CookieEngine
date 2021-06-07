@@ -7,6 +7,18 @@ namespace Cookie
 {
 	namespace ECS
 	{
+		inline ComponentHandler::ComponentHandler()
+		{
+			for (int i = 0; i < MAX_ENTITIES; ++i)
+			{
+				ComponentTransform* trsPtr = &componentTransforms[i];
+				componentGameplays[i].trs = trsPtr;
+				componentGameplays[i].componentLive.trs = trsPtr;
+				componentGameplays[i].componentAttack.trs = trsPtr;
+				componentGameplays[i].componentMove.trs = trsPtr;
+
+			}
+		}
 
 		inline void ComponentHandler::AddComponent(Entity& entity, int signature) noexcept
 		{
@@ -44,26 +56,11 @@ namespace Cookie
 		}
 
 
-		inline ComponentTransform& ComponentHandler::GetComponentTransform(const unsigned int id) noexcept 
-		{
-			return componentTransforms[id];
-		}
-		inline ComponentModel& ComponentHandler::GetComponentModel(const unsigned int id) noexcept 
-		{ 
-			return componentModels[id];
-		}
-		inline ComponentPhysics& ComponentHandler::GetComponentPhysics(const unsigned int id) noexcept
-		{
-			return componentPhysics[id];
-		}
-		inline ComponentScript& ComponentHandler::GetComponentScript(const unsigned int id) noexcept
-		{
-			return componentScripts[id]; 
-		}
-		inline ComponentGameplay& ComponentHandler::GetComponentGameplay(const unsigned int id) noexcept
-		{
-			return componentGameplays[id];
-		}
+		inline ComponentTransform& ComponentHandler::GetComponentTransform(const unsigned int id) noexcept { return componentTransforms[id]; }
+		inline ComponentModel& ComponentHandler::GetComponentModel(const unsigned int id) noexcept         { return componentModels[id]; }
+		inline ComponentPhysics& ComponentHandler::GetComponentPhysics(const unsigned int id) noexcept     { return componentPhysics[id]; }
+		inline ComponentScript& ComponentHandler::GetComponentScript(const unsigned int id) noexcept       { return componentScripts[id]; }
+		inline ComponentGameplay& ComponentHandler::GetComponentGameplay(const unsigned int id) noexcept   { return componentGameplays[id]; }
 	}
 }
 

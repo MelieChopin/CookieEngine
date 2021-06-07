@@ -9,11 +9,14 @@ void ArmyHandler::Debug()
 {
 	for (int i = 0; i < livingArmies; ++i)
 	{
-		std::cout << " name : "            << armies[i].name             << "\n"
-			      << " income primary : "  << armies[i].income.primary   << "\n"
-			      << " nb of workers : "   << armies[i].workers.size()   << "\n"
-			      << " nb of units : "     << armies[i].units.size()     << "\n"
-			      << " nb of buildings : " << armies[i].buildings.size() << "\n\n";
+		std::cout << " name : "                 << armies[i].name                 << "\n"
+			      << " income primary : "       << armies[i].income.primary       << "\n"
+				  << " income secondary : "     << armies[i].income.secondary     << "\n"
+				  << " income supplyCurrent : " << armies[i].income.supplyCurrent << "\n"
+				  << " income supplyMax : "     << armies[i].income.supplyMax     << "\n"
+			      << " nb of workers : "        << armies[i].workers.size()       << "\n"
+			      << " nb of units : "          << armies[i].units.size()         << "\n"
+			      << " nb of buildings : "      << armies[i].buildings.size()     << "\n\n";
 	}
 }
 
@@ -45,14 +48,22 @@ ArmyCoordinator* ArmyHandler::GetArmyCoordinator(E_ARMY_NAME armyName)
 
 void ArmyHandler::AddArmy(E_ARMY_NAME armyName)
 {
-	assert(livingArmies < MAX_ARMIES && "Too many armies in existence.");
+	if (livingArmies >= MAX_ARMIES)
+	{
+		CDebug.Warning("Too many armies existing.");
+		return;
+	}
 
 	armies[livingArmies].name = armyName;
 	livingArmies++;
 }
 void ArmyHandler::RemoveArmy(Army& army)
 {
-	assert(livingArmies > 0 && "No armies in existence.");
+	if (livingArmies <= 0)
+	{
+		CDebug.Warning("No armies to remove.");
+		return;
+	}
 
 	livingArmies--;
 	Army& lastArmy = armies[livingArmies];

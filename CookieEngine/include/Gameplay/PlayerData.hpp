@@ -17,11 +17,11 @@ namespace Cookie
 			bool makingASelectionQuad {false};
 			Core::Math::Vec3 selectionQuadStart{ 0, 0, 0 };
 			
-			CGPProducer* buildingToBuild          {nullptr};
-			CGPWorker*   workerWhoBuild           {nullptr};
-			Core::Math::Vec3 buildingPos          {0, 0, 0};
-			int          indexOfBuildingInWorker  {0};
-			bool		 isBuildingValid          {false};
+			CGPProducer*     buildingToBuild          {nullptr};
+			CGPWorker*       workerWhoBuild           {nullptr};
+			Core::Math::Vec3 buildingPos              {0, 0, 0};
+			int              indexOfBuildingInWorker  {0};
+			bool		     isBuildingValid          {false};
 		};
 	}
 }
