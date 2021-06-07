@@ -135,7 +135,7 @@ void Game::HandleGameplayInputs()
 
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_A])
     {
-        coordinator.componentHandler->GetComponentGameplay(coordinator.selectedEntities[0]->id).componentLive.TakeHit(0);
+      //  coordinator.componentHandler->GetComponentGameplay(coordinator.selectedEntities[0]->id).componentLive.TakeHit(0);
     }
 
 

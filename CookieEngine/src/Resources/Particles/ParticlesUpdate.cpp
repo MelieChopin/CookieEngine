@@ -33,6 +33,8 @@ std::string Cookie::Resources::Particles::GetName(const TYPEUP& type)
 		return "Shadow";
 	case (SPAWNEND):
 		return "SpawnEnd";
+	case (STOPAT):
+		return "StopAt";
 	}
 }
 
@@ -160,5 +162,16 @@ void SpawnEnd::Update(ParticlesData* p)
 			p->countAlive--;
 			ParticlesHandler::CreateParticlesWithPrefab(posSpawn, namePrefab);
 		}
+	}
+}
+
+void StopAt::Update(ParticlesData* p)
+{
+	for (int i = 0; i < p->countAlive; i++)
+	{
+		Cookie::Core::Math::Vec3 pos(p->data[i].pos.x, p->data[i].pos.y, p->data[i].pos.z);
+		float distance = (posEnd - pos).Length();
+		if (abs(distance) <= 0.5f)
+			p->countAlive--;
 	}
 }

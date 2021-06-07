@@ -149,6 +149,13 @@ void ParticlesHandler::CreateParticlesWithPrefab(const Cookie::Core::Math::Vec3&
 				particles.particlesEmiter[i].generators.push_back(std::move(vel));
 				free(vel.get());
 			}
+			else if (name == "StopAt")
+			{
+				std::shared_ptr<StopAt> stop = std::make_unique<StopAt>();
+				stop.get()->posEnd = posSpawnEnd;
+				particles.particlesEmiter[i].updates.push_back(std::move(stop));
+				free(stop.get());
+			}
 		}
 	}
 

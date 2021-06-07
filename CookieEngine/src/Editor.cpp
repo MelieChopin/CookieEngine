@@ -191,7 +191,7 @@ void Editor::Loop()
         TryResizeWindow();
 
         // Present frame
-        
+
         if (isPlaying && previewIsPlaying)
         {
             game.Update();

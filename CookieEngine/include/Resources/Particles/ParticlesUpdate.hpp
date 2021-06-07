@@ -29,7 +29,8 @@ namespace Cookie
 				COLLISIONWITHPLANE,
 				CREATEPARTICLES,
 				SHADOW,
-				SPAWNEND
+				SPAWNEND,
+				STOPAT
 			};
 
 			std::string GetName(const TYPEUP& type);
@@ -173,6 +174,17 @@ namespace Cookie
 
 				SpawnEnd() { type = TYPEUP::SPAWNEND; }
 				~SpawnEnd()override { type = TYPEUP::SPAWNEND; }
+			};
+
+			class StopAt : public ParticlesUpdate
+			{
+			public:
+				Cookie::Core::Math::Vec3 posEnd;
+
+				virtual void Update(ParticlesData* p) override;
+
+				StopAt() { type = TYPEUP::STOPAT; }
+				~StopAt()override { type = TYPEUP::STOPAT; }
 			};
 		}
 	}
