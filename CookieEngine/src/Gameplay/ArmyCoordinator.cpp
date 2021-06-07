@@ -129,6 +129,7 @@ void ArmyCoordinator::DevelopBase(Map& map)
 
 							//Check Right pos
 							Vec3 posToCheck = army->buildings[l]->trs->pos + Vec3{(NB_TILES_BETWEEN_BUILDINGS + newBuildingTileNb.x) * map.tilesSize.x + ((int)newBuildingTileNb.x % 2) * map.tilesSize.x / 2, 0, 0};
+							posToCheck.y -= army->buildings[l]->trs->scale.y * std::abs(army->buildings[l]->trs->modelptr->mesh->AABBMin.y) - worker.possibleBuildings[j]->transform.scale.y * std::abs(worker.possibleBuildings[j]->model.mesh->AABBMin.y);
 							if (!map.GetTile(posToCheck).isObstacle)
 							{
 								pos = posToCheck;
@@ -138,6 +139,7 @@ void ArmyCoordinator::DevelopBase(Map& map)
 
 							//Check Bottom pos
 							posToCheck = army->buildings[l]->trs->pos + Vec3{0, 0, (NB_TILES_BETWEEN_BUILDINGS + newBuildingTileNb.y) * map.tilesSize.y + ((int)newBuildingTileNb.y % 2) * map.tilesSize.y / 2 };
+							posToCheck.y -= army->buildings[l]->trs->scale.y * std::abs(army->buildings[l]->trs->modelptr->mesh->AABBMin.y) - worker.possibleBuildings[j]->transform.scale.y * std::abs(worker.possibleBuildings[j]->model.mesh->AABBMin.y);
 							if (!map.GetTile(posToCheck).isObstacle)
 							{
 								pos = posToCheck;
@@ -146,6 +148,7 @@ void ArmyCoordinator::DevelopBase(Map& map)
 
 							//Check Right-Bottom pos
 							posToCheck = army->buildings[l]->trs->pos + Vec3{ (NB_TILES_BETWEEN_BUILDINGS + newBuildingTileNb.x) * map.tilesSize.x + ((int)newBuildingTileNb.x % 2) * map.tilesSize.x / 2, 0, (NB_TILES_BETWEEN_BUILDINGS + newBuildingTileNb.y) * map.tilesSize.y + ((int)newBuildingTileNb.y % 2) * map.tilesSize.y / 2 };
+							posToCheck.y -= army->buildings[l]->trs->scale.y * std::abs(army->buildings[l]->trs->modelptr->mesh->AABBMin.y) - worker.possibleBuildings[j]->transform.scale.y * std::abs(worker.possibleBuildings[j]->model.mesh->AABBMin.y);
 							if (!map.GetTile(posToCheck).isObstacle)
 							{
 								pos = posToCheck;
