@@ -5,26 +5,21 @@
 
 #include <vector>
 
-namespace Cookie { class Game; }
+namespace Cookie			{ class Game; }
+namespace Cookie::Resources { class Scene; }
 
-namespace Cookie
-{
-	namespace Resources
-	{
-		class Scene;
-	}
-}
 
 namespace Cookie::UI
 {
-	
-
 	class UIscene
 	{
 		std::vector<std::unique_ptr<UIwidget::GameWindowBase>> sceneWidgets;
+		
+		// Prevents widgets from insta-appearing on first frame to not mess up the z-order
+		bool firstRoundDone = false;
 
 		bool isHovered = false;
-	
+		
 	public:
 		int signature = 0;
 	

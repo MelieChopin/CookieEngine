@@ -234,7 +234,7 @@ ___
 ![ui_editor](screenshots/ui_editor.gif)
 
 Allows you to place the widget of the ui in game where you want them to be.
-The modifications is save and you find them when you relaunch Cookie Engine.
+The modifications are saved and you will find them the same way when you relaunch Cookie Engine.
 ___
 
 ## __Sound Orchestrator__

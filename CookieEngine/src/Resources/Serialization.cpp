@@ -724,6 +724,8 @@ void Cookie::Resources::Serialization::Save::SaveParticles(Cookie::Resources::Pa
 					update["namePrefab"] = upCollision.namePrefab;
 					break;
 				}
+				case (TYPEUP::STOPAT):
+					break;
 				}
 			}
 		}
@@ -1895,7 +1897,12 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							pref.emit[i].push_back(emit);
 							emitter.componentAdd += COMPONENTADD::SP;
 						}
-
+						case (TYPEUP::STOPAT):{
+							Particles::emit emit;
+							emit.name = "StopAt";
+							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::SA;
+						}
 						}
 					}
 				}
