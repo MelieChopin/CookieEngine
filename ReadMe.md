@@ -108,6 +108,19 @@ you can also move the gizmos through it or select an object by clicking on it:
 
 ![gizmos_example](screenshots/gizmos_example.gif)
 
+## __Gameport__
+
+![gameport](screenshots/gameport.PNG)
+
+Allows you to see to play the game
+
+- mouse to a border to move the camera (or click on the minimap)
+- Left click + drag to make a selection quad
+- Right click : move the selected unit toward the position of the click or set a resource to a worker
+- Click on the Action Panel : to produce units or building (if a building is selected, left click to validate and right click to cancel)
+
+
+___
 ___
 
 ## __Inspector__
@@ -188,7 +201,9 @@ Allows to change the texture of the skybox.
 /!\ ___The texture of the skybox must be a cubemap, format does not matter as long as it can be imported by the WIC Texture loader, otherwise it should be a dds___ /!\
 
 - ### _AI Settings_
-  
+![AI_settings](screenshots/ai_settings.PNG)
+
+  Allows to change the Behavior of the selected Army which is not the player
 ___
 
 ## __Hierachy__

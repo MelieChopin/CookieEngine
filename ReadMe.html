@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ReadMe.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="cookie-engine"><em><strong>Cookie Engine</strong></em></h1>
+<p>Cookie Engine is a scholar project which aims to create a Game Engine specialized for the creation of RTS Games,
+In addition we provide a simple standalone game to illustrate a possible usage and capabilities of our Engine.</p>
+<h2 id="authors"><strong>Authors</strong></h2>
+<ul>
+<li>Mélie Chopin</li>
+<li>Anatole Todorov</li>
+<li>Hugo Chemouny</li>
+<li>Quentin Bleuse</li>
+</ul>
+<hr>
+<h2 id="table-of-contents"><strong>Table of Contents</strong></h2>
+<ul>
+<li>Techs</li>
+<li>To Build</li>
+<li>To Run</li>
+<li>User Manual</li>
+</ul>
+<hr>
+<h2 id="techs"><strong>Techs</strong></h2>
+<ul>
+<li>C++ for the Code Base</li>
+<li>DirectX3D 11 For Graphic API</li>
+<li>ImGui For The UI Framework</li>
+<li>glfw For Window Manager</li>
+<li>Assimp to load models</li>
+<li>WIC and the DDSTextureLoader of DirectXTex for texture loading</li>
+<li>FMod for music playing and loading</li>
+<li>CMake to compile</li>
+<li>Sol3 and lua for scripting</li>
+<li>reactphysics3D for the physics engine</li>
+</ul>
+<hr>
+<h2 id="to-build"><strong>To Build</strong></h2>
+<p>The project has been compiled using the support of Visual Studio for CMake mainly with Ninja, and clang-cl on windows,
+we guarantee at least that it will compile using this method.</p>
+<p>The CMakeSettings.json is available to compile,
+you can change the compiler and the generator if you do not want to use clang and Ninja, nor msvc and Ninja.</p>
+<p>Assets for the Project are available in the Following Google Drive: https://drive.google.com/drive/folders/1MkweOgCSBc_fAu7KRT-KTbGxjArFwXry?usp=sharing
+... the folder need to be put on the same folder of the executable.</p>
+<hr>
+<h2 id="to-run"><strong>To Run</strong></h2>
+<p>After the compile succeeded the executable can be found in the build/ folder generated by CMake,
+the path can be changed in the CMakeSettings.json .</p>
+<hr>
+<h2 id="user-manual"><strong>User Manual</strong></h2>
+<p>This part is the user manual of our engine, it will present to you the feature available and how to use our Engine to make your own game.</p>
+<p>Once you run the editor, it should look like this:</p>
+<p><img src="screenshots/editor_screen.PNG" alt="editor_screen"></p>
+<p>it might look like that when you open it for the first time:</p>
+<p><img src="screenshots/bad_init_editor_screen.PNG" alt="bad_init_editor_screen"></p>
+<p>it is because the imgui.ini was not copied properly during compilation or that it is not near the executable but, do not worry, you can just expand them and put them such as shown below.</p>
+<p><img src="screenshots/imgui_viewport_example.gif" alt="imgui_viewport_example"></p>
+<p>this is the example for the viewport but all widget can be expanded and placed to your desire.
+if you do not have the widget opened you can find them as shown below, in the Edit or Window options above.</p>
+<p><img src="screenshots/option_bar_example.gif" alt="option_bar_example"></p>
+<p>we will now see the different widget at your disposal:</p>
+<hr>
+<h2 id="toolbar"><strong>ToolBar</strong></h2>
+<p><img src="screenshots/toolbar.PNG" alt="toolbar"></p>
+<p>The buttons on the left allows you to change the things to change with the gizmos: starting from the right, translation, rotation, scale.</p>
+<p>The buttons in the middle allows you to play the game, to pause it and to run it frame by frame.</p>
+<hr>
+<h2 id="viewport"><strong>Viewport</strong></h2>
+<p><img src="screenshots/viewport.PNG" alt="viewport"></p>
+<p>Allows you to see the scene through a free fly camera, you can control the camera throught these inputs:</p>
+<ul>
+<li>mouse to move the camera</li>
+<li>wasd to move the camera (zqsd for azerty keyboard).</li>
+<li>space bar to go up</li>
+<li>left ctrl key to go down</li>
+</ul>
+<p>you can also move the gizmos through it or select an object by clicking on it:</p>
+<p><img src="screenshots/gizmos_example.gif" alt="gizmos_example"></p>
+<h2 id="gameport"><strong>Gameport</strong></h2>
+<p><img src="screenshots/gameport.PNG" alt="gameport"></p>
+<p>Allows you to see to play the game</p>
+<ul>
+<li>mouse to a border to move the camera (or click on the minimap)</li>
+<li>Left click + drag to make a selection quad</li>
+<li>Right click : move the selected unit toward the position of the click or set a resource to a worker</li>
+<li>Click on the Action Panel : to produce units or building (if a building is selected, left click to validate and right click to cancel)</li>
+</ul>
+<hr>
+<hr>
+<h2 id="inspector"><strong>Inspector</strong></h2>
+<p>Allows you to change the components of the entity selected, here are the components you can change</p>
+<ul>
+<li>
+<h3 id="transfom"><em>Transfom</em></h3>
+</li>
+</ul>
+<p><img src="screenshots/transform.PNG" alt="transform"></p>
+<p>Allows you to change the translation, rotation and scale of an entity</p>
+<ul>
+<li>
+<h3 id="model"><em>Model</em></h3>
+</li>
+</ul>
+<p><img src="screenshots/model.PNG" alt="model"></p>
+<p>Allows to change the mesh, albedo texture, normal texture, material texture, and icon of the entity</p>
+<p>/!\ <em><strong>when the mesh are imported they all have the same size of a cube between -0.5 and 0.5</strong></em> /!\</p>
+<p>/!\ <em><strong>the material map is the map containing the PBR information of the mesh.
+red is considered ambient occlusion, green roughness and blue metalness.</strong></em> /!\</p>
+<p>/!\ <em><strong>icon represents the texture that will be shown in the ui of the game to represent the entity</strong></em> /!\</p>
+<ul>
+<li>
+<h3 id="gameplay-properties"><em>Gameplay Properties</em></h3>
+</li>
+</ul>
+<p><img src="screenshots/gameplay_properties.PNG" alt="gameplay_properties"></p>
+<ul>
+<li>
+<h3 id="physics"><em>Physics</em></h3>
+</li>
+</ul>
+<p><img src="screenshots/physic_component.PNG" alt="physic_component"></p>
+<p>Allows you to add or remove colliders and change physics property of entity.</p>
+<p>/!\ <em><strong>do mind, physics is not being used in the engine so changing it does not have any meaning</strong></em> /!\</p>
+<ul>
+<li>
+<h3 id="script"><em>Script</em></h3>
+</li>
+</ul>
+<p><img src="screenshots/script.PNG" alt="script"></p>
+<ul>
+<li>
+<h3 id="fx"><em>FX</em></h3>
+</li>
+</ul>
+<p><img src="screenshots/FX_component.PNG" alt="fx_component"></p>
+<hr>
+<h2 id="world-settings"><strong>World Settings</strong></h2>
+<p><img src="screenshots/world_settings.PNG" alt="world_settings"></p>
+<p>Allows you to change scene property, that are not of entities.</p>
+<p>Here is a list of the property you can change:</p>
+<ul>
+<li>
+<h3 id="map-settings"><em>Map Settings</em></h3>
+</li>
+</ul>
+<p><img src="screenshots/map_settings.PNG" alt="map_settings"></p>
+<p>Allows you to change the textures, the size of the map and the number of tiles.</p>
+<p>/!\ <em><strong>The map is a cube centered on 0,0,0 that cannot move</strong></em> /!<br>
+/!\ <em><strong>The textures that you apply is the textures of the tiles, they will repeat</strong></em> /!\</p>
+<ul>
+<li>
+<h3 id="lights-settings"><em>Lights Settings</em></h3>
+</li>
+</ul>
+<p><img src="screenshots/light_settings.PNG" alt="light_settings"></p>
+<p>Allows you to change the property of the directional light, the number of point light, and the property of the point lights.</p>
+<p>/!\ <em><strong>the  number of point light can vary from 0 to 64</strong></em> /!\</p>
+<ul>
+<li>
+<h3 id="skybox-settings"><em>Skybox Settings</em></h3>
+</li>
+</ul>
+<p><img src="screenshots/skybox_settings.PNG" alt="skybox_settings"></p>
+<p>Allows to change the texture of the skybox.</p>
+<p>/!\ <em><strong>The texture of the skybox must be a cubemap, format does not matter as long as it can be imported by the WIC Texture loader, otherwise it should be a dds</strong></em> /!\</p>
+<ul>
+<li>
+<h3 id="ai-settings"><em>AI Settings</em></h3>
+</li>
+</ul>
+<p><img src="screenshots/ai_settings.PNG" alt="AI_settings"></p>
+<p>Allows to change the Behavior of the selected Army which is not the player</p>
+<hr>
+<h2 id="hierachy"><strong>Hierachy</strong></h2>
+<p>Allows you to see the entity in the scene, focus on the entity by clicking on it, and create or delete entities:</p>
+<p><img src="screenshots/hierarchy_example.gif" alt="hierarchy_example"></p>
+<p>you may also create prefabs and save entities as prefabs</p>
+<p>/!\ <em><strong>Prefabs are available in the Assets/Prefabs/ folder, be careful that this folder exists before saving prefabs as it might crash if you do not have it</strong></em> /!\</p>
+<hr>
+<h2 id="file-explorer"><strong>File Explorer</strong></h2>
+<p><img src="screenshots/file_explorer.PNG" alt="file_explorer"></p>
+<p>Allows you to see the content of your Assets folder, and to load save from file that have the .CAssets extension.</p>
+<p>/!\ <em><strong>Be careful that your save are not corrupted, it may crash otherwise</strong></em> /!\</p>
+<hr>
+<h2 id="texture-editor"><strong>Texture Editor</strong></h2>
+<p><img src="screenshots/texture_editor.PNG" alt="texture_editor"></p>
+<p>Allows you to create a texture from a color</p>
+<hr>
+<h2 id="aibehavior-editor"><strong>AiBehavior Editor</strong></h2>
+<p><img src="screenshots/AiBehavior_editor.PNG" alt="ai_editor"></p>
+<p>Allows you to edit the behavior of the enemy ai</p>
+<hr>
+<h2 id="ui-editor"><strong>UI Editor</strong></h2>
+<p><img src="screenshots/ui_editor.gif" alt="ui_editor"></p>
+<p>Allows you to place the widget of the ui in game where you want them to be.
+The modifications are saved and you will find them the same way when you relaunch Cookie Engine.</p>
+<hr>
+<h2 id="sound-orchestrator"><strong>Sound Orchestrator</strong></h2>
+<p><img src="screenshots/sound_orchestrator.PNG" alt="sound_orchestrator"></p>
+<p>Allows you to manage the sound you have imported.
+You can choose between to have a 2DSound and a 3DSound and modify the volume of this sound.</p>
+<hr>
+<h2 id="particle-editor"><strong>Particle Editor</strong></h2>
+<p><img src="screenshots/particle_editor.PNG" alt="particle_editor"></p>
+<p>Allows you to create particle and save particles.
+You can add updators and generators and remove it to improve your particles system.
+A particles system can have several particles which may have different behaviors.</p>
+<p>/!\ <em><strong>Particles are available in the Assets/VFX/ folder, be careful that this folder exists before saving particles as it might crash if you do not have it</strong></em> /!\</p>
+<hr>
+<p>This will be it for the widget that you have at your disposal.</p>
+<p>Now some information for the game:</p>
+<hr>
+<h2 id="architecture">Architecture</h2>
+<p>Here is a link to the UML: https://drive.google.com/file/d/1AnRNGyOqXX3bZTfirHu1Dimqlu5DOhBt/view?usp=sharing</p>
+<hr>
+<h2 id="known-bugs">Known Bugs</h2>
+<hr>
+<h2 id="additionnal-notes">Additionnal Notes</h2>
+<p>We only support mesh import via gltf of mesh in one piece.</p>
+<p>We do not have parent-child transform system a it is irrelevant for an RTS game.</p>
+<p>In the viewport, you can change the buffer that will be printed in it with F1 to F6 keys.
+here are the keys:</p>
+<ul>
+<li>F1 -- default buffer</li>
+<li>F2 -- position information</li>
+<li>F3 -- normal information</li>
+<li>F4 -- albedo information</li>
+<li>F5 -- diffuse information</li>
+<li>F6 -- specular information</li>
+</ul>
+
+</body>
+</html>
