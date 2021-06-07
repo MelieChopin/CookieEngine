@@ -231,7 +231,7 @@ void Gamespector::WindowDisplay()
 				if (IsItemHovered())
 				{
 					BeginTooltip();
-					Text("%s", e->name);
+					Text("%s", e->name.c_str());
 					EndTooltip();
 				}
 
