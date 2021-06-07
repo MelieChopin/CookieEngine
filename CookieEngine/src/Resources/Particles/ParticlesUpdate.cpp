@@ -171,7 +171,7 @@ void StopAt::Update(ParticlesData* p)
 	{
 		Cookie::Core::Math::Vec3 pos(p->data[i].pos.x, p->data[i].pos.y, p->data[i].pos.z);
 		float distance = (posEnd - pos).Length();
-		if (abs(distance) <= 0.5f)
+		if (abs(distance) <= 0.9f)
 			p->countAlive--;
 	}
 }
