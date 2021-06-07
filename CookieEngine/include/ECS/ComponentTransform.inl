@@ -20,10 +20,9 @@ namespace Cookie
 			TRS = Core::Math::Mat4::Identity();
 		}
 		inline void ComponentTransform::ComputeRadius()
-		{		
-			//pythagoras theorem
+		{
 			if (modelptr && modelptr->mesh)
-				radius = std::sqrt(std::pow(scale.x * std::abs(modelptr->mesh->AABBMin.x), 2) + std::pow(scale.z * std::abs(modelptr->mesh->AABBMin.z), 2));
+				radius = Core::Math::Vec2{ { scale.x * std::abs(modelptr->mesh->AABBMin.x), scale.z * std::abs(modelptr->mesh->AABBMin.z) } }.Length();
 		}
 		inline void ComponentTransform::ComputeTRS()
 		{

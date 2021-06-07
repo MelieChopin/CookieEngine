@@ -158,7 +158,7 @@ void Game::HandleGameplayInputs()
         Vec3 posTopLeft = trs.pos - trs.scale / 2;
         scene->map.FillOccupiedTiles(scene->map.GetTileIndex(posTopLeft), producer.tileSize, producer.occupiedTiles);
     }
-    if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_X])
+    if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V])
     {
         ECS::Entity* newEntity = coordinator.AddEntity(resources.prefabs["ResourcePrimary"].get(), E_ARMY_NAME::E_DEFAULT_NAME);
 
@@ -166,6 +166,16 @@ void Game::HandleGameplayInputs()
 
         float unscaledOffsetFromMap = std::abs(coordinator.componentHandler->GetComponentModel(newEntity->id).mesh->AABBMin.y);
         Vec2 tileSize {{1, 1}};
+        trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, tileSize) + Vec3{ 0, trs.scale.y * unscaledOffsetFromMap, 0 };
+    }
+    if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_C])
+    {
+        ECS::Entity* newEntity = coordinator.AddEntity(resources.prefabs["ResourceSecondary"].get(), E_ARMY_NAME::E_DEFAULT_NAME);
+
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity->id);
+
+        float unscaledOffsetFromMap = std::abs(coordinator.componentHandler->GetComponentModel(newEntity->id).mesh->AABBMin.y);
+        Vec2 tileSize{ {2, 2} };
         trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, tileSize) + Vec3{ 0, trs.scale.y * unscaledOffsetFromMap, 0 };
     }
 
@@ -201,12 +211,6 @@ void Game::HandleGameplayInputs()
             InputSetResourceToWorkers();
         }
 
-        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_C])
-            InputStartBuilding(0);
-        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_D])
-            InputStartBuilding(1);
-        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_V])
-            InputAddUnit(0);
 
     }
 }
@@ -259,7 +263,7 @@ void Game::InputEndSelectionQuad()
     if ((playerData.selectionQuadStart - playerData.mousePosInWorld).Length() < MINIMUM_SELECTION_QUAD_LENGTH)
     {
         coordinator.selectedEntities.clear();
-        ECS::Entity* possibleSelectedEntity = coordinator.GetClosestSelectableEntity(playerData.selectionQuadStart);
+        ECS::Entity* possibleSelectedEntity = coordinator.GetClosestSelectableEntity(playerData.selectionQuadStart, E_ARMY_NAME::E_PLAYER);
 
         if (possibleSelectedEntity)
             coordinator.selectedEntities.push_back(possibleSelectedEntity);
@@ -324,7 +328,7 @@ void Game::InputSetNewEntityDestination()
 }
 void Game::InputSetResourceToWorkers()
 {
-    ECS::Entity* resource = coordinator.GetClosestSelectableEntity(playerData.mousePosInWorld, CGP_SIGNATURE::RESOURCE);
+    ECS::Entity* resource = coordinator.GetClosestSelectableEntity(playerData.mousePosInWorld, E_ARMY_NAME::E_DEFAULT_NAME, CGP_SIGNATURE::RESOURCE);
 
     //if we don't select an entity with CGPResource in the first place, quit
     if (!resource)
@@ -332,7 +336,7 @@ void Game::InputSetResourceToWorkers()
 
     for (int i = 0; i < coordinator.selectedEntities.size(); ++i)
     {
-        if (coordinator.componentHandler->GetComponentGameplay(resource->id).componentResource.nbOfWorkerOnIt == MAX_WORKER_PER_RESOURCE)
+        if (coordinator.componentHandler->GetComponentGameplay(resource->id).componentResource.nbOfWorkerOnIt >= MAX_WORKER_PER_RESOURCE)
         {
             resource = coordinator.GetClosestFreeResourceEntity(playerData.mousePosInWorld);
             //if there is no more free resources available
@@ -340,8 +344,7 @@ void Game::InputSetResourceToWorkers()
                 return;
         }
 
-        float selectedEntityId = coordinator.selectedEntities[i]->id;
-        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(selectedEntityId);
+        ComponentGameplay& gameplay = coordinator.componentHandler->GetComponentGameplay(coordinator.selectedEntities[i]->id);
 
         if (gameplay.signatureGameplay & CGP_SIGNATURE::WORKER)
             gameplay.componentWorker.SetResource(coordinator.componentHandler->GetComponentTransform(resource->id).pos, coordinator.componentHandler->GetComponentGameplay(resource->id).componentResource);
@@ -449,8 +452,9 @@ void Game::SetScene()
 
     scene->camera->SetProj(scene->camera.get()->fov, renderer.window.width, renderer.window.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     scene->camera->ResetPreviousMousePos();
-    scene->camera->ForceUpdate();
+    //scene->camera->ForceUpdate();
     SetCamClampFromMap();
+    scene->camera->ZoomClamp = { {2.0f,10.0f} };
     scene->camera->Deactivate();
 
     renderer.drawData.SetScene(scene.get());

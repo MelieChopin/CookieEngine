@@ -33,9 +33,12 @@ void CGPProducer::UpdateCountdown(Resources::Map& map, Coordinator& coordinator,
 		{
 			ComponentGameplay& newEntityGameplay = coordinator.componentHandler->GetComponentGameplay(newEntity->id);
 
-			//Give PathFind to "newUnitDestination"
+			//Give PathFind to "newUnitDestination" (High impact on perfs, need to be clean)
 			if (newEntityGameplay.signatureGameplay & CGP_SIGNATURE::MOVE)
 			{
+				if (newEntityGameplay.componentMove.isFlying)
+					newEntityTrs.pos.y = FLYING_Y_LEVEL;
+
 				for (int i = 0; i < occupiedTiles.size(); ++i)
 					occupiedTiles[i]->isObstacle = false;
 
