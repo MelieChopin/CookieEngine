@@ -449,8 +449,9 @@ void Game::SetScene()
 
     scene->camera->SetProj(scene->camera.get()->fov, renderer.window.width, renderer.window.height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     scene->camera->ResetPreviousMousePos();
-    scene->camera->ForceUpdate();
+    //scene->camera->ForceUpdate();
     SetCamClampFromMap();
+    scene->camera->ZoomClamp = { {2.0f,10.0f} };
     scene->camera->Deactivate();
 
     renderer.drawData.SetScene(scene.get());

@@ -97,8 +97,6 @@ namespace Cookie
 
 		class GameCam : public Camera
 		{
-		private:
-			float zoom = 0.0f;
 
 		public:
 

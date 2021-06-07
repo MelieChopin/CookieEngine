@@ -138,9 +138,11 @@ namespace Cookie
 			
 			float speed = (Core::DeltaTime() * CAM_MOUSE_SPEED);
 			
-			if (ratio.x >= GAME_CAM_HIGHER_EPSILON || ratio.x <= GAME_CAM_LOWER_EPSILON)
+			if ((ratio.x >= GAME_CAM_HIGHER_EPSILON || ratio.x <= GAME_CAM_LOWER_EPSILON) 
+				&& (ratio.x < 1.0f || ratio.x > 1.0f))
 				pos.x += ratio.x * speed;
-			if (ratio.y >= GAME_CAM_HIGHER_EPSILON || ratio.y <= GAME_CAM_LOWER_EPSILON)
+			if ((ratio.y >= GAME_CAM_HIGHER_EPSILON || ratio.y <= GAME_CAM_LOWER_EPSILON)
+				&& (ratio.y < 1.0f || ratio.y > 1.0f))
 				pos.z -= ratio.y * speed;
 
 			pos.x = std::clamp(pos.x, mapClampX.x, mapClampX.y);
@@ -150,15 +152,10 @@ namespace Cookie
 		inline void GameCam::UpdateZoom()
 		{
 			Core::Math::Vec3 dir = { viewMat.c[2].x, viewMat.c[2].y, viewMat.c[2].z };
-			zoom = dir.Dot(pos);
 
-			pos += dir * zoom;
+			pos -= dir * ImGui::GetIO().MouseWheel * (CAM_MOUSE_SPEED * Core::DeltaTime());
 
-			zoom -= ImGui::GetIO().MouseWheel * (CAM_MOUSE_SPEED * Core::DeltaTime());
-
-			zoom = std::clamp(zoom, ZoomClamp.x, ZoomClamp.y);
-
-			pos -= dir * zoom;
+			pos.y = std::clamp(pos.y, ZoomClamp.x, ZoomClamp.y);
 		}
 
 
