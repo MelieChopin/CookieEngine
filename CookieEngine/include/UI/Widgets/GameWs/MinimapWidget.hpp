@@ -12,6 +12,11 @@ namespace Cookie::UIwidget
 	namespace GameWidgetID
 	{ constexpr int MinimapID = 1 << 2; }
 
+	/*
+		A rather large display that shows not only the state of the map, space token with buildings and such, but also has markers for teams.
+		The current view is outlined on said map with a white square.
+		Clicking on the minimap moves the camera/view where it is requested.
+	*/
 	class Minimap final : public GameWindowBase
 	{
 		const Cookie::Resources::Texture* const minimapBg;

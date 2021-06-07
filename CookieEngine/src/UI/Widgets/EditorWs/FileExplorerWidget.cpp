@@ -37,7 +37,7 @@ void FileExplorer::ExploreFiles(const fs::path& path, const char* researchQuery)
             }
         }
 
-
+        bool prevWasSave = false;
         for (const fs::directory_entry& entry : fs::directory_iterator(path))
         {
             const fs::path& filename = entry.path().c_str();
@@ -47,15 +47,24 @@ void FileExplorer::ExploreFiles(const fs::path& path, const char* researchQuery)
                 {
                     if (filename.extension().string() == ".CAsset")
                     {
+                        if (prevWasSave)
+                        {
+                            (GetContentRegionAvail().x < 70.f) ? NewLine() : SameLine();
+                        }
+
                         if (Custom::FileButton(filename.filename().string().c_str(), saveIcon->GetResourceView()))
                         {
                             Cookie::Resources::Serialization::Load::LoadScene(filename.string().c_str(), game);
                             game.SetScene();
                         }
+
+                        prevWasSave = true;
                     }
                     else
                     {
                         Text("%s", filename.filename().string().c_str());
+
+                        prevWasSave = false;
                     }
                 }
             }

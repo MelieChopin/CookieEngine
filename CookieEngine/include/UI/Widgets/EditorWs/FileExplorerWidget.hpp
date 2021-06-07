@@ -11,6 +11,12 @@ namespace Cookie			{ class Game; }
 
 namespace Cookie::UIwidget
 {
+	/*
+		The file explorer displays all assets, with folder access as well.
+		The save files can be double-clicked on to load them.
+
+		It, of course, has a research bar.
+	*/
 	class FileExplorer final : public WItemBase
 	{
 		Cookie::Game& game;

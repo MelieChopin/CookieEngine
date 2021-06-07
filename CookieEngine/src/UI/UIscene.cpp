@@ -87,6 +87,8 @@ void UIscene::CleanLayout()
 	{ widget.reset(); }
 
 	std::vector<std::unique_ptr<GameWindowBase>>().swap(sceneWidgets);
+
+	signature = NULL;
 }
 
 

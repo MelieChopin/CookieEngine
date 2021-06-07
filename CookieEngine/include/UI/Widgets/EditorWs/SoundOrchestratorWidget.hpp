@@ -6,6 +6,7 @@
 
 namespace Cookie::UIwidget
 {
+	// Gives an interface to modify sound files and how they sound in game/editor.
 	class SoundOrchestrator final : public WItemBase
 	{
 	public:

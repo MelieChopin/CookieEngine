@@ -9,6 +9,10 @@ namespace Cookie::Resources { class ResourcesManager; class Texture; }
 
 namespace Cookie::UIwidget
 {
+	/*
+		The console uses the debug singleton to display all logs, warnings and errors.
+		This also where there is the feature to clean all sent messages, or to group them.
+	*/
 	class Console final : public WItemBase
 	{
 		Cookie::Core::DebugMessageHandler& debugManager;
@@ -20,10 +24,15 @@ namespace Cookie::UIwidget
 		const Cookie::Resources::Texture* const icons[3];
 
 	private:
+		// The ungrouped display (default) displays all messages from latest to oldest, each with the date they've been sent.
 		void UngroupedDisplay();
+
+		// The grouped display puts all identical messages as one block with the number of repetitions and the date of the latest.
 		void GroupedDisplay();
 
 		void DisplayMessage(Cookie::Core::DebugMessage& message);
+
+		// Animates the color depending on what message type it is.
 		void MessageColorBounce(unsigned short intensity, uint8_t& colorVariant, bool& bouncing, unsigned short& colorBounces);
 
 	protected:

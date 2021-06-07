@@ -17,6 +17,7 @@ namespace Cookie
 				componentGameplays[i].componentLive.trs = trsPtr;
 				componentGameplays[i].componentAttack.trs = trsPtr;
 				componentGameplays[i].componentMove.trs = trsPtr;
+				componentGameplays[i].componentProducer.trs = trsPtr;
 
 			}
 		}

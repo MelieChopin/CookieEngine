@@ -11,7 +11,10 @@ namespace Cookie::UIwidget
 	enum class TransformTool
 	{ Translate, Rotate, Scale };
 
-
+	/*
+		Allows to switch between the editor tools (translate, rotate, scale),
+		And to play/stop/pause the game, or request a single frame to pass.
+	*/
 	class Toolbar final : public WindowBase
 	{		
 		TransformTool currentTrsfTool = TransformTool::Translate;

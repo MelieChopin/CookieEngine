@@ -25,6 +25,7 @@ namespace Cookie
 		class CGPProducer
 		{
 		public:
+			ECS::ComponentTransform* 			trs {nullptr};
 			Income*							income {nullptr};
 			int								supplyGiven {0};
 

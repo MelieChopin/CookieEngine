@@ -1112,6 +1112,7 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 			 gameComp.componentLive.trs = trsPtr;
 			 gameComp.componentAttack.trs = trsPtr;
 			 gameComp.componentMove.trs = trsPtr;
+			 gameComp.componentProducer.trs = trsPtr;
 
 			 if (gameComp.teamName != E_ARMY_NAME::E_DEFAULT_NAME)
 				handler.AddElementToArmy(&gameComp);

@@ -9,6 +9,7 @@
 
 namespace Cookie::UI
 {
+	// UI "moderator" for the entirety of the editor.
 	class UIeditor
 	{
 		const std::vector<const char*> menus = {"File", "Edit", "Windows", "Help"};
