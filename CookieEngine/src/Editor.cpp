@@ -204,9 +204,6 @@ void Editor::Loop()
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
         // Present frame
-        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_L])
-            Cookie::Resources::Particles::ParticlesHandler::CreateParticlesWithPrefab(Vec3(-5, 15, 5), game.resources.particles["Death"].get(), Vec3(10, 0, 25));
-
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
             game.coordinator.armyHandler->AddArmyCoordinator(E_ARMY_NAME::E_AI1, game.resources.aiBehaviors["Test1"].get());
         
