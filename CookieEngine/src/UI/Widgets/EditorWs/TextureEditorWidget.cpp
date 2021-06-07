@@ -19,7 +19,7 @@ void TextureEditor::WindowDisplay()
 {
 	TryBeginWindow()
 	{
-		Text("Currently loaded and available textures:");
+		//Text("Currently loaded and available textures:");
 		
 		
 		/*BeginGroup();

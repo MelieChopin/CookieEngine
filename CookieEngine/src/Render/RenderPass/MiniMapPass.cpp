@@ -29,7 +29,8 @@ struct VS_CONSTANT_BUFFER
 
 /*=========================== CONSTRUCTORS/DESTRUCTORS ===========================*/
 
-MiniMapPass::MiniMapPass()
+MiniMapPass::MiniMapPass():
+    viewport{0.0f,0.0f,0.0f,0.0f,0.0f,1.0f}
 {
 	miniMapView = Mat4::Translate({0.0f,-zEpsilon,0.0f}) * Mat4::RotateX(ToRadians(90.0f));
 

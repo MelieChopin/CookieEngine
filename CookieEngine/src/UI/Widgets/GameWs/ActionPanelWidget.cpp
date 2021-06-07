@@ -72,25 +72,30 @@ void ActionPanel::WindowDisplay()
 
 					ToolTipCost(pU, sEntityGameplayComp.componentProducer.income);
 
-					(i % 4) ? SameLine() : NewLine();
+					i++;
+
+					(i % 3) ? SameLine() : NewLine();
 				}
 
 			}
 
 			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::WORKER)
 			{
-				for (size_t i = 0; i < sEntityGameplayComp.componentWorker.possibleBuildings.size(); i++)
+				unsigned short i = 0;
+				for (Prefab* const& pB : sEntityGameplayComp.componentWorker.possibleBuildings)
 				{
-					if (SafeIconButton(sEntityGameplayComp.componentWorker.possibleBuildings[i]->model.icon, iconSize))
+					if (SafeIconButton(pB->model.icon, iconSize))
 					{
-						plData.buildingToBuild			= &sEntityGameplayComp.componentWorker.possibleBuildings[i]->gameplay.componentProducer;
+						plData.buildingToBuild			= &pB->gameplay.componentProducer;
 						plData.workerWhoBuild			= &sEntityGameplayComp.componentWorker;
 						plData.indexOfBuildingInWorker	= i;
 					}
 
-					ToolTipCost(sEntityGameplayComp.componentWorker.possibleBuildings[i], sEntityGameplayComp.componentWorker.income);
+					ToolTipCost(pB, sEntityGameplayComp.componentWorker.income);
 
-					(i % 4) ? SameLine() : NewLine();
+					i++;
+
+					(i % 3) ? SameLine() : NewLine();
 				}
 
 			}

@@ -33,7 +33,7 @@ namespace Cookie
 		class MiniMapPass
 		{
 		private:
-			D3D11_VIEWPORT viewport;
+			D3D11_VIEWPORT viewport = {};
 			
 		public:
 			/* camera matrices of the mini Map*/

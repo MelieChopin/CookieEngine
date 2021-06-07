@@ -76,17 +76,17 @@ void WorldSettingsWidget::WindowDisplay()
 			{
 				Text("Map albedo:"); SameLine(110);
 
-				ResourceMapExplorer<Texture>("texture", "##MAPTEXTSELECT", resources.textures2D, scene->map.model.albedo);
+				ResourceMapExplorer<Texture>("texture", std::move("##MAPTEXTSELECT"), resources.textures2D, scene->map.model.albedo);
 
 
 				Text("Map normal:"); SameLine(110);
 
-				ResourceMapExplorer<Texture>("normal texture", "##MAPNORMSELECT", resources.textures2D, scene->map.model.normal);
+				ResourceMapExplorer<Texture>("normal texture", std::move("##MAPNORMSELECT"), resources.textures2D, scene->map.model.normal);
 
 
 				ImGui::Custom::TextSnip("Map metallic-Roughness", 9); SameLine(); Text(":"); SameLine(110);
 
-				ResourceMapExplorer<Texture>("metallic-rough texture", "##MAPMRSELECT", resources.textures2D, scene->map.model.metallicRoughness);
+				ResourceMapExplorer<Texture>("metallic-rough texture", std::move("##MAPMRSELECT"), resources.textures2D, scene->map.model.metallicRoughness);
 			}
 
 			
@@ -115,24 +115,31 @@ void WorldSettingsWidget::WindowDisplay()
 
 			if (TreeNode("Other lights"))
 			{
+				SliderInt("##POINTLIGHTNB", (int*)&lights.usedPoints, 0, POINT_LIGHT_MAX_NB, "Nb of Light: %d", ImGuiSliderFlags_AlwaysClamp);
+
 				static int lightIndex = 1;
 				static Render::PointLight* selectedPtLight = &lights.pointLights[0];
 
-				if (SliderInt("##POINTLIGHTSELECT", &lightIndex, 1, POINT_LIGHT_MAX_NB, "Editing light N%d", ImGuiSliderFlags_AlwaysClamp))
-				{ selectedPtLight = &lights.pointLights[lightIndex-1]; }
+				if (lights.usedPoints > 0)
+				{
 
-				NewLine();
-				Text("Position:");
-				DragFloat3("##POINTPOS", selectedPtLight->pos.e, 0.25f, NULL, NULL, "%.2f");
-				
-				NewLine();
-				Text("Light radius:");
-				DragFloat("##POINTRADIUS", &selectedPtLight->radius, 0.5f, NULL, NULL, "%.1f");
-				
-				NewLine();
-				Text("Coloration:");
-				ColorEdit3("##POINTCOLOR", selectedPtLight->color.e, ImGuiColorEditFlags_Float | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_PickerHueWheel);
+					if (SliderInt("##POINTLIGHTSELECT", &lightIndex, 1, lights.usedPoints, "Editing light N%d", ImGuiSliderFlags_AlwaysClamp))
+					{
+						selectedPtLight = &lights.pointLights[lightIndex - 1];
+					}
 
+					NewLine();
+					Text("Position:");
+					DragFloat3("##POINTPOS", selectedPtLight->pos.e, 0.25f, NULL, NULL, "%.2f");
+
+					NewLine();
+					Text("Light radius:");
+					DragFloat("##POINTRADIUS", &selectedPtLight->radius, 0.5f, NULL, NULL, "%.1f");
+
+					NewLine();
+					Text("Coloration:");
+					ColorEdit3("##POINTCOLOR", selectedPtLight->color.e, ImGuiColorEditFlags_Float | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_PickerHueWheel);
+				}
 				TreePop();
 			}
 
@@ -143,7 +150,7 @@ void WorldSettingsWidget::WindowDisplay()
 		if (TreeNode("Skybox settings"))
 		{
 			Text("Skybox texture:");
-			ResourceMapExplorer<Texture>("cubic texture", "##SKYBOXSELECT", resources.skyboxes, skybox.texture);
+			ResourceMapExplorer<Texture>("cubic texture", std::move("##SKYBOXSELECT"), resources.skyboxes, skybox.texture);
 
 			TreePop();
 		}
@@ -168,7 +175,7 @@ void WorldSettingsWidget::WindowDisplay()
 						if (SmallButton("Remove##REMOVE_COORDINATOR")) 
 							scene->armyHandler.RemoveArmyCoordinator(currentArmyName);
 
-						ResourceMapExplorer<AIBehavior>("AIBehavior", "##AIBEHAVIOR", resources.aiBehaviors, currentArmyCoordinator->behavior);
+						ResourceMapExplorer<AIBehavior>("AIBehavior", std::move("##AIBEHAVIOR"), resources.aiBehaviors, currentArmyCoordinator->behavior);
 
 					}
 					else

@@ -14,7 +14,7 @@ namespace Cookie::UIwidget
 
 	class Gamespector final : public GameWindowBase
 	{
-		const Cookie::ECS::Coordinator& coordinator;
+		Cookie::ECS::Coordinator& coordinator;
 
 		Cookie::Resources::ResourcesManager& resources;
 
@@ -24,7 +24,7 @@ namespace Cookie::UIwidget
 		void LifeBar(const float currentLife, const float maxLife, const float barWidth, const float barHeight);
 		
 	public:
-		inline Gamespector(const Cookie::ECS::Coordinator& _coordinator, Cookie::Resources::ResourcesManager& _resources)
+		inline Gamespector(Cookie::ECS::Coordinator& _coordinator, Cookie::Resources::ResourcesManager& _resources)
 			: GameWindowBase	("Gamespector", true),
 			  coordinator		(_coordinator),
 			  resources			(_resources)

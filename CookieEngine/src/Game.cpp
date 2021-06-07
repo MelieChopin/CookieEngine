@@ -368,12 +368,13 @@ void Game::DisplayLife()
 {
     std::vector<Cookie::Render::InstancedData> data;
     float angle = Cookie::Core::Math::ToRadians(180) - scene.get()->camera.get()->rot.x;
-    float lifeCurrent;
-    float lifeMax;
-    Mat4 trs;
-    Vec3 posLife;
+    static float lifeCurrent;
+    static float lifeMax;
+    static Mat4 trs;
+    static Vec3 posLife;
     for (int i = 0; i < coordinator.entityHandler->livingEntities; i++)
     {
+        //Check first if the entity has a life
         if (!coordinator.CheckSignature(coordinator.entityHandler->entities[i].signature, C_SIGNATURE::GAMEPLAY))
             continue;
 
@@ -392,6 +393,7 @@ void Game::DisplayLife()
         if (coordinator.CheckSignature(coordinator.entityHandler->entities[i].signature, C_SIGNATURE::MODEL) && 
                 coordinator.CheckSignature(coordinator.entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM))
         {
+            //Calcul the scale and the pos to clamp with the model
             ComponentTransform& transform = coordinator.componentHandler->GetComponentTransform(coordinator.entityHandler->entities[i].id);
             ComponentModel& model = coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[i].id);
             if (model.mesh)
@@ -413,6 +415,7 @@ void Game::DisplayLife()
         data.push_back(newData);
     }
 
+    //Use the particles shader withe the instancing
     if (data.size() > 0)
         ::ParticlesHandler::shader.Draw(*scene.get()->camera.get(), resources.meshes["Quad"].get(), resources.textures2D["White"].get(), data);
 }

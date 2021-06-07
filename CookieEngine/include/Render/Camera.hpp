@@ -52,7 +52,7 @@ namespace Cookie
 				
 			public:
 				Camera() {}
-				~Camera() {}
+				virtual ~Camera() {}
 
 				inline const Core::Math::Mat4& GetView() const	{ return viewMat;			}
 				inline const Core::Math::Mat4& GetProj() const	{ return projMat;			}

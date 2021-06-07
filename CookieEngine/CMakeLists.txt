@@ -7,6 +7,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(RESOURCE_DIR "Assets/")
+set(UI_SETUP "${CMAKE_SOURCE_DIR}/imgui.ini")
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(DEPS_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/src")
@@ -207,11 +208,18 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES Release)
 
 # TODO: Ajoutez des tests et installez des cibles si nécessaire.
 
+#copies the Assets file
 add_custom_command(TARGET CookieEngine POST_BUILD COMMAND 
     ${CMAKE_COMMAND} -E copy_directory 
         ${CMAKE_SOURCE_DIR}/${RESOURCE_DIR} 
         ${CMAKE_CURRENT_BINARY_DIR}/${RESOURCE_DIR})
 
+#copies the imgui.ini
+add_custom_command(TARGET CookieEngine POST_BUILD COMMAND 
+    ${CMAKE_COMMAND} -E copy
+        ${UI_SETUP} $<TARGET_FILE_DIR:CookieEngine>)
+
+#copies the dlls
 add_custom_command(TARGET CookieEngine POST_BUILD COMMAND 
     ${CMAKE_COMMAND} -E copy
         ${DLL} $<TARGET_FILE_DIR:CookieEngine>)

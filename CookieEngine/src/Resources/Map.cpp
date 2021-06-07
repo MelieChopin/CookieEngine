@@ -72,10 +72,12 @@ void Map::ScaleHasChanged()
 
 	TileNbHasChanged();
 	
-	physic.physBody->removeCollider(physic.physColliders[0]);
-	physic.physColliders.clear();
-	physic.AddCubeCollider(trs.scale / 2.f, trs.pos, trs.rot);
-
+	if (physic.physColliders.size() > 0)
+	{
+		physic.physBody->removeCollider(physic.physColliders[0]);
+		physic.physColliders.clear();
+		physic.AddCubeCollider(trs.scale / 2.f, trs.pos, trs.rot);
+	}
 }
 void Map::TileNbHasChanged()
 {

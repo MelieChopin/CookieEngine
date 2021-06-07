@@ -14,6 +14,7 @@ namespace Cookie
 			class ParticlesHandler
 			{
 			public:
+				//We have decide to create particles no watter where
 				static std::list<ParticlesSystem> particlesSystems;
 				static unsigned int living;
 				static std::unordered_map<std::string, std::unique_ptr<Particles::ParticlesPrefab>>* particlesPrefab;

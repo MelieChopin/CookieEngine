@@ -40,6 +40,7 @@ namespace Cookie
 			class ParticlesData
 			{
 			public:
+				//Data we modify with generators and updators
 				std::vector<Data> data;
 
 				Cookie::Resources::Mesh*				mesh = nullptr;
@@ -88,12 +89,6 @@ namespace Cookie
 				void swapData(int indexA, int indexB) 
 				{
 					std::iter_swap(data.begin() + indexA, data.begin() + indexB);
-				}
-
-				bool operator==(const ParticlesData& data) const
-				{
-					return data.countAlive == countAlive && data.countFrame == countFrame
-						&& data.mesh == mesh && data.texture == texture;
 				}
 			};
 			

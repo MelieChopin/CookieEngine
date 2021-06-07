@@ -31,6 +31,23 @@ ___
 
 ### Hugo
 
+J'ai continue d'avantage sur l'UI (encore et toujours)
+Les nouveaux widgets et features sont:
+    - Les selectors de mesh, textures et toutes unordered_map ont été largement améliorée avec l'utilisation des Combos d'ImGui et les Selectables, ainsi qu'un système de recherche, le tout regroupe dans une fonction template avec une specialisation pour l'exploration des textures.
+    - Le GamePort est désormais fonctionnel.
+    - UIcore a été crée pour aider avec l'initialisation d'ImGui et permettant de faire des initialisations différentes selon les fichiers compiles.
+    - UIscene a été crée pour l'UI a l’intérieur du jeu. Elle est dotée de fonctions load/save pour faciliter la sérialisation.
+    - Le GameUIeditor a été conçu pour la manipulation des widgets de l'UIscene, permettant d'en ajouter ou en retirer et de les déplacer sur la surface correspondent a la fenêtre de jeu. (pas encore pleinement fonctionnel)
+    - Les GameWindowBase s ont été crée, ce sont les widgets utilisée uniquement dans le jeu.
+    - L'inspector peut interagir avec le Gameplay component et ses sous-components.
+    - Le WorldSettingsWidget a été implémente pour éditer tout ce qui concerne le monde lui-même.
+    - Beaucoup de boutons on été converti en Selectables.
+    - La Toolbar est maintenant en capacité de gérer le PlayFlow entièrement.
+    
+En terme de ressenti, je pense avoir garder un rythme plutôt constant, mais tout de même récemment ralenti, notamment a cause du contrôle de Mathématique et des projets de programmations en Anglais et mathématiques.
+Mais maintenant qu'ils ont tous été termine, je vais pouvoir me refocaliser sur le projet moteur et progresser d'avantage.
+Je trouve aussi que la cohésion au sein du groupe a augmente: contrairement a la milestone précédente, on a pas eu de mauvaises/soudaines surprises par manque de communication, et le groupe a même fais quelques efforts supplémentaires pour m'aider a implémenter des nouvelles features plus efficacement.
+
 ___
 
 ### Anatole

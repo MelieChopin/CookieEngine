@@ -448,8 +448,7 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const Prefab* const & pr
 
 	 if (prefab->signature & C_SIGNATURE::FX)
 	 {
-		 int index = js["FX"].size();
-		 json& fx = js["FX"][index];
+		 json& fx = js["FX"];
 		 const ComponentGameplay& gameplay = prefab->gameplay;
 		 if (gameplay.signatureGameplay & CGP_SIGNATURE::ATTACK)
 		 {
@@ -565,7 +564,7 @@ void Cookie::Resources::Serialization::Save::SaveVolumAndModeMusic(Sound* const 
 	file << std::setw(4) << js << std::endl;
 }
 
-void Cookie::Resources::Serialization::Save::SaveParticles(Cookie::Resources::Particles::ParticlesSystem& particles)
+void Cookie::Resources::Serialization::Save::SaveParticles(Cookie::Resources::Particles::ParticlesPrefab& particles)
 {
 	std::string filePath("Assets/VFX/" + particles.name + ".PSAsset");
 	std::ofstream file(filePath);
@@ -579,24 +578,21 @@ void Cookie::Resources::Serialization::Save::SaveParticles(Cookie::Resources::Pa
 		for (int i = 0; i < particles.data.size(); i++)
 		{
 			json& data = js["Data"][i];
-			Cookie::Resources::Particles::ParticlesData particlesData = particles.data[i];
+			Cookie::Resources::Particles::data particlesData = particles.data[i];
 			data["Mesh"] = particlesData.mesh != nullptr ? particlesData.mesh->name : "NO MESH";
 			data["Texture"] = particlesData.texture != nullptr ? particlesData.texture->name : "NO TEXTURE";
-			data["Size"] = particlesData.data.size();
+			data["Size"] = particlesData.size;
 			data["CountFrame"] = particlesData.countFrame;
 			data["CountAlive"] = particlesData.countAlive;
-			if (particlesData.data.size() != 0)
-				data["IsBillBoard"] = particlesData.data[0].isBillboard;
-			else
-				data["IsBillBoard"] = true;
+			data["IsBillBoard"] = particlesData.isBillboard;
 		}
 	}
 
 	//Emitter
 	{
-		for (int i = 0; i < particles.particlesEmiter.size(); i++)
+		for (int i = 0; i < particles.emitter.size(); i++)
 		{
-			ParticlesEmitter& particlesEmitter = particles.particlesEmiter[i];
+			ParticlesEmitter& particlesEmitter = particles.emitter[i];
 			json& emitter = js["Emitter"][i];
 			if (particlesEmitter.generators.size() == 0)
 				emitter["Generators"] = 0;
@@ -607,20 +603,12 @@ void Cookie::Resources::Serialization::Save::SaveParticles(Cookie::Resources::Pa
 				switch (particlesEmitter.generators[j]->type)
 				{
 				case (TYPEGEN::POINTPOSITIONGEN): {
-					PointPositionGenerate& point = dynamic_cast<PointPositionGenerate&>(*particlesEmitter.generators[j].get());
-					generator["pos"] = point.pos.e;
 					break;
 				}
 				case (TYPEGEN::BOXPOSITIONGEN): {
-					BoxPositionGenerate& box = dynamic_cast<BoxPositionGenerate&>(*particlesEmitter.generators[j].get());
-					generator["pos"] = box.pos.e;
-					generator["sizeBox"] = box.sizeBox.e;
 					break;
 				}
 				case (TYPEGEN::CIRCLEPOSITIONGEN): {
-					SpherePositionGenerate& sphere = dynamic_cast<SpherePositionGenerate&>(*particlesEmitter.generators[j].get());
-					generator["pos"] = sphere.pos.e;
-					generator["radius"] = sphere.radius;
 					break;
 				}
 				case (TYPEGEN::SCALECONSTGEN): {
@@ -672,7 +660,7 @@ void Cookie::Resources::Serialization::Save::SaveParticles(Cookie::Resources::Pa
 					generator["color"] = colorC.col.e;
 					break;
 				}
-				case (TYPEGEN::COLORRANDGEN):{
+				case (TYPEGEN::COLORRANDGEN): {
 					ColorRandGenerate& colorR = dynamic_cast<ColorRandGenerate&>(*particlesEmitter.generators[j].get());
 					generator["colorMin"] = colorR.minCol.e;
 					generator["colorMax"] = colorR.maxCol.e;
@@ -691,9 +679,9 @@ void Cookie::Resources::Serialization::Save::SaveParticles(Cookie::Resources::Pa
 				update["Type"] = particlesEmitter.updates[k]->type;
 				switch (particlesEmitter.updates[k]->type)
 				{
-				case (TYPEUP::UPDATEVEL): 
+				case (TYPEUP::UPDATEVEL):
 					break;
-				case (TYPEUP::UPDATESCALE):{
+				case (TYPEUP::UPDATESCALE): {
 					UpdateScale& upScale = dynamic_cast<UpdateScale&>(*particlesEmitter.updates[k]);
 					update["scaleEnd"] = upScale.scaleEnd.e;
 					break;
@@ -724,24 +712,10 @@ void Cookie::Resources::Serialization::Save::SaveParticles(Cookie::Resources::Pa
 					update["namePrefab"] = upCollision.namePrefab;
 					break;
 				}
-				case (TYPEUP::CREATEPARTICLES):{
-					CreateParticlesFollowing& upCreate = dynamic_cast<CreateParticlesFollowing&>(*particlesEmitter.updates[k]);
-					ParticlesData constData = *upCreate.data;
-					std::vector<ParticlesData>::iterator result = std::find(particles.data.begin(), particles.data.end(), constData);
-					if (result != particles.data.end())
-						update["index"] = std::distance(particles.data.begin(), result);
-					update["coeffScale"] = upCreate.coeffScale;
-					update["coeffPos"] = upCreate.coeffPos;
-					update["time"] = upCreate.time;
+				case (TYPEUP::CREATEPARTICLES): {
 					break;
 				}
 				case (TYPEUP::SHADOW): {
-					Shadow& upCreate = dynamic_cast<Shadow&>(*particlesEmitter.updates[k]);
-					ParticlesData constData = *upCreate.data;
-					std::vector<ParticlesData>::iterator result = std::find(particles.data.begin(), particles.data.end(), constData);
-					if (result != particles.data.end())
-						update["index"] = std::distance(particles.data.begin(), result);
-					update["time"] = upCreate.time;
 					break;
 				}
 				case (TYPEUP::SPAWNEND): {
@@ -749,6 +723,68 @@ void Cookie::Resources::Serialization::Save::SaveParticles(Cookie::Resources::Pa
 					update["namePrefab"] = upCollision.namePrefab;
 					break;
 				}
+				}
+			}
+		}
+	}
+
+	//Emit
+	{
+		for (int i = 0; i < particles.emit.size(); i++)
+		{
+			for (int j = 0; j < particles.emit[i].size(); j++)
+			{
+				std::string name = particles.emit[i][j].name;
+				json& generator = js["Emitter"][i]["Generators"];
+				json& update = js["Emitter"][i]["Updates"];
+				int sizeGenerator = generator.size();
+				int sizeUpdate = update.size();
+				if (name == "PointPositionGen")
+				{
+					generator[sizeGenerator]["Type"] = 0;
+					generator[sizeGenerator]["pos"] = particles.emit[i][j].data[0].e;
+				}
+				else if (name == "Loop")
+				{
+					update[sizeUpdate]["Type"] = 6;
+				}
+				else if (name == "BoxPositionGen")
+				{
+					generator[sizeGenerator]["Type"] = 1;
+					generator[sizeGenerator]["pos"] = particles.emit[i][j].data[0].e;
+					generator[sizeGenerator]["sizeBox"] = particles.emit[i][j].data[0].e;
+				}
+				else if (name == "CirclePositionGen")
+				{
+					generator[sizeGenerator]["Type"] = 2;
+					generator[sizeGenerator]["pos"] = particles.emit[i][j].data[0].e;
+					generator[sizeGenerator]["radius"] = particles.emit[i][j].data[1].x;
+				}
+				else if (name == "CreateParticles")
+				{
+					update[sizeUpdate]["Type"] = 8;
+					update[sizeUpdate]["index"] = particles.emit[i][j].data[0].x;
+
+					update[sizeUpdate]["coeffScale"] = particles.emit[i][j].data[1].x;
+					update[sizeUpdate]["coeffPos"] = particles.emit[i][j].data[1].y;
+					update[sizeUpdate]["time"] = particles.emit[i][j].data[1].z;
+				}
+				else if (name == "Shadow")
+				{
+					update[sizeUpdate]["Type"] = 9;
+
+					update[sizeUpdate]["index"] = particles.emit[i][j].data[0].x;
+					update[sizeUpdate]["time"] = particles.emit[i][j].data[0].y;
+				}
+				else if (name == "SpawnEnd")
+				{
+					update[sizeUpdate]["Type"] = 10;
+
+					update[sizeUpdate]["namePrefab"] = particles.emit[i][j].nameData;
+				}
+				else if (name == "InitVelWithPoint")
+				{
+					generator[sizeGenerator]["Type"] = 13;
 				}
 			}
 		}
@@ -904,9 +940,13 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 	 std::unique_ptr<Resources::Scene> newScene = std::make_unique<Resources::Scene>();
 	 std::ifstream file(filepath);
 
-	 if (!file.is_open())
+	 if (!file.is_open() || file.peek() == std::ifstream::traits_type::eof())
 	 {
 		 std::cout << "DON'T FIND THE FILE\n";
+		 newScene.get()->camera = std::make_unique<Render::GameCam>();
+		 newScene.get()->map.trs.ComputeTRS();
+		 newScene.get()->map.InitTiles();
+		 game.scene = std::move(newScene);
 		 return;
 	 }
 
@@ -924,7 +964,7 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 	 if (js.contains("Camera"))
 	 {
 		 json& cam = js["Camera"];
-		 newScene.get()->camera = std::make_shared<Render::GameCam>();
+		 newScene.get()->camera = std::make_unique<Render::GameCam>();
 		 Cookie::Render::Camera* camera = newScene.get()->camera.get();
 
 		 camera->camNear = cam["camNear"].get<float>();
@@ -947,7 +987,7 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 
 		 js["Map"]["trs"]["pos"].get_to(scene->map.trs.pos.e);
 		 js["Map"]["trs"]["rot"].get_to(scene->map.trs.rot.e);
-		 //js["Map"]["trs"]["scale"].get_to(scene->map.trs.scale.e);
+		 js["Map"]["trs"]["scale"].get_to(scene->map.trs.scale.e);
 		 scene->map.trs.ComputeTRS();
 
 		 if (js["Map"]["model"]["texture"].contains("albedo"))
@@ -1102,7 +1142,6 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 
 void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager)
  {
-
 	 std::vector<std::string> filesPath;
 	 for (const fs::directory_entry& path : fs::directory_iterator("Assets/Prefabs"))
 	 {
@@ -1118,11 +1157,9 @@ void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::R
 
 	 for (int i = 0; i < filesPath.size(); i++)
 	 {
-		 std::cout << filesPath[i] << "\n";
-
 		 std::ifstream file(filesPath[i]);
 
-		 if (!file.is_open())
+		 if (!file.is_open() || file.peek() == std::ifstream::traits_type::eof())
 		 {
 			 std::cout << "DON'T FIND THE FILE\n";
 			 continue;
@@ -1298,11 +1335,9 @@ void Cookie::Resources::Serialization::Load::LoadAllTextures(Cookie::Resources::
 
 	 for (int i = 0; i < filesPath.size(); i++)
 	 {
-		 std::cout << filesPath[i] << "\n";
-
 		 std::ifstream file(filesPath[i]);
 
-		 if (!file.is_open())
+		 if (!file.is_open() || file.peek() == std::ifstream::traits_type::eof())
 		 {
 			 std::cout << "DON'T FIND THE FILE\n";
 			 continue;
@@ -1465,16 +1500,8 @@ void Cookie::Resources::Serialization::Load::LoadPhysic(json& physic, Cookie::EC
 void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay, 
 				Cookie::ECS::ComponentGameplay& GPComponent, Cookie::Resources::ResourcesManager& resourcesManager, bool allPrefabLoaded)
 {
-	if (gameplay.contains("TeamName"))
-		GPComponent.teamName = gameplay["TeamName"];
-	else
-		CDebug.Error("No team's defined");
-
-	if (gameplay.contains("SignatureGameplay"))
-		GPComponent.signatureGameplay = gameplay["SignatureGameplay"];
-	else
-		CDebug.Error("No SignatureGameplay defined");
-
+	GPComponent.teamName = gameplay["TeamName"];
+	GPComponent.signatureGameplay = gameplay["SignatureGameplay"];
 	GPComponent.type = gameplay["Type"];
 
 	json temp = gameplay;
@@ -1559,7 +1586,7 @@ void Cookie::Resources::Serialization::Load::LoadVolumAndModeMusic(std::string p
 {
 	std::ifstream file(path);
 
-	if (!file.is_open())
+	if (!file.is_open() || file.peek() == std::ifstream::traits_type::eof())
 	{
 		std::cout << "DON'T FIND THE FILE\n";
 		return;
@@ -1590,11 +1617,9 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 
 	for (int i = 0; i < filesPath.size(); i++)
 	{
-		std::cout << filesPath[i] << "\n";
-
 		std::ifstream file(filesPath[i]);
 
-		if (!file.is_open())
+		if (!file.is_open() || file.peek() == std::ifstream::traits_type::eof())
 		{
 			std::cout << "DON'T FIND THE FILE\n";
 			continue;
@@ -1641,14 +1666,14 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 		//Emitter
 		if (js.contains("Emitter"))
 		{
-			json emitter = js["Emitter"];
-			pref.emitter.resize(emitter.size());
-			pref.emit.resize(emitter.size());
-			for (int i = 0; i < emitter.size(); i++)
+			json emitterJson = js["Emitter"];
+			pref.emitter.resize(emitterJson.size());
+			pref.emit.resize(emitterJson.size());
+			for (int i = 0; i < emitterJson.size(); i++)
 			{
-				if (emitter[i]["Generators"].is_array())
+				if (emitterJson[i]["Generators"].is_array())
 				{
-					json gen = emitter[i]["Generators"];
+					json gen = emitterJson[i]["Generators"];
 					for (int j = 0; j < gen.size(); j++)
 					{
 						TYPEGEN typeGen = (TYPEGEN)gen[j]["Type"].get<int>();
@@ -1660,6 +1685,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							emit.name = "PointPositionGen";
 							gen[j]["pos"].get_to(emit.data[0].e);
 							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::PPGEN;
 							break;
 						}
 						case (TYPEGEN::BOXPOSITIONGEN): {
@@ -1668,6 +1694,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["pos"].get_to(emit.data[0].e);
 							gen[j]["sizeBox"].get_to(emit.data[1].e);
 							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::BPGEN;
 							break;
 						}
 						case (TYPEGEN::CIRCLEPOSITIONGEN): {
@@ -1676,13 +1703,14 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["pos"].get_to(emit.data[0].e);
 							emit.data[1].x = gen[j]["radius"].get<float>();
 							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::CPGEN;
 							break;
 						}
 						case (TYPEGEN::SCALECONSTGEN): {
 							std::shared_ptr<ScaleConstGenerate> scaleC = std::make_unique<ScaleConstGenerate>();
 							gen[j]["scale"].get_to(scaleC.get()->scale.e);
 							emitter.generators.push_back(std::move(scaleC));
-							free(scaleC.get());
+							emitter.componentAdd += COMPONENTADD::SCGEN;
 							break;
 						}
 						case (TYPEGEN::SCALERANDGEN): {
@@ -1690,7 +1718,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["scaleMin"].get_to(scaleR.get()->scaleMin.e);
 							gen[j]["scaleMax"].get_to(scaleR.get()->scaleMax.e);
 							emitter.generators.push_back(std::move(scaleR));
-							free(scaleR.get());
+							emitter.componentAdd += COMPONENTADD::SRGEN;
 							break;
 						}
 						case (TYPEGEN::ROTATERANDGEN): {
@@ -1698,14 +1726,14 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["rotMin"].get_to(rot.get()->rotMin.e);
 							gen[j]["rotMax"].get_to(rot.get()->rotMax.e);
 							emitter.generators.push_back(std::move(rot));
-							free(rot.get());
+							emitter.componentAdd += COMPONENTADD::RRGEN;
 							break;
 						}
 						case (TYPEGEN::VELCONSTGEN): {
 							std::shared_ptr<VelocityConstGenerate> velC = std::make_unique<VelocityConstGenerate>();
 							gen[j]["vel"].get_to(velC.get()->vel.e);
 							emitter.generators.push_back(std::move(velC));
-							free(velC.get());
+							emitter.componentAdd += COMPONENTADD::VCGEN;
 							break;
 						}
 						case (TYPEGEN::VELRANDGEN): {
@@ -1713,21 +1741,21 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["velMin"].get_to(velR.get()->velMin.e);
 							gen[j]["velMax"].get_to(velR.get()->velMax.e);
 							emitter.generators.push_back(std::move(velR));
-							free(velR.get());
+							emitter.componentAdd += COMPONENTADD::VRGEN;
 							break;
 						}
 						case (TYPEGEN::MASSCONSTGEN): {
 							std::shared_ptr<MassConstGenerate> mass = std::make_unique<MassConstGenerate>();
 							mass.get()->mass = gen[j]["mass"].get<float>();
 							emitter.generators.push_back(std::move(mass));
-							free(mass.get());
+							emitter.componentAdd += COMPONENTADD::MCGEN;
 							break;
 						}
 						case (TYPEGEN::TIMECONSTGEN): {
 							std::shared_ptr<TimeConstGenerate> timeC = std::make_unique<TimeConstGenerate>();
 							timeC.get()->time = gen[j]["time"].get<float>();
 							emitter.generators.push_back(std::move(timeC));
-							free(timeC.get());
+							emitter.componentAdd += COMPONENTADD::TCGEN;
 							break;
 						}
 						case (TYPEGEN::TIMERANDGEN): {
@@ -1735,14 +1763,14 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							timeR.get()->timeMin = gen[j]["timeMin"].get<float>();
 							timeR.get()->timeMax = gen[j]["timeMax"].get<float>();
 							emitter.generators.push_back(std::move(timeR));
-							free(timeR.get());
+							emitter.componentAdd += COMPONENTADD::TRGEN;
 							break;
 						}
 						case (TYPEGEN::COLORCONSTGEN): {
 							std::shared_ptr<ColorConstGenerate> colorC = std::make_unique<ColorConstGenerate>();
 							gen[j]["color"].get_to(colorC.get()->col.e);
 							emitter.generators.push_back(std::move(colorC));
-							free(colorC.get());
+							emitter.componentAdd += COMPONENTADD::CCGEN;
 							break;
 						}
 						case (TYPEGEN::COLORRANDGEN): {
@@ -1750,22 +1778,23 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							gen[j]["colorMin"].get_to(colorR.get()->minCol.e);
 							gen[j]["colorMax"].get_to(colorR.get()->maxCol.e);
 							emitter.generators.push_back(std::move(colorR));
-							free(colorR.get());
+							emitter.componentAdd += COMPONENTADD::CRGEN;
 							break;
 						}
 						case (TYPEGEN::INITVELWITHPOINT): {
 							Particles::emit emit;
 							emit.name = "InitVelWithPoint";
 							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::IVWP;
 							break;
 						}
 						}
 					}
 				}
 
-				if (emitter[i]["Updates"].is_array())
+				if (emitterJson[i]["Updates"].is_array())
 				{
-					json up = emitter[i]["Updates"];
+					json up = emitterJson[i]["Updates"];
 					for (int j = 0; j < up.size(); j++)
 					{
 						TYPEUP typeUp = (TYPEUP)up[j]["Type"].get<int>();
@@ -1775,47 +1804,48 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 						case (TYPEUP::UPDATEVEL): {
 							std::shared_ptr<UpdateVelocity> vel = std::make_unique<UpdateVelocity>();
 							emitter.updates.push_back(std::move(vel));
-							free(vel.get());
+							emitter.componentAdd += COMPONENTADD::UPVEL;
 							break;
 						}
 						case (TYPEUP::UPDATESCALE): {
 							std::shared_ptr<UpdateScale> upScale = std::make_unique<UpdateScale>();
 							up[j]["scaleEnd"].get_to(upScale.get()->scaleEnd.e);
 							emitter.updates.push_back(std::move(upScale));
-							free(upScale.get());
+							emitter.componentAdd += COMPONENTADD::UPSCALE;
 							break;
 						}
 						case (TYPEUP::UPDATEALPHA): {
 							std::shared_ptr<UpdateAlpha> upAlpha = std::make_unique<UpdateAlpha>();
 							upAlpha.get()->alphaEnd = up[j]["alphaEnd"].get<float>();
 							emitter.updates.push_back(std::move(upAlpha));
-							free(upAlpha.get());
+							emitter.componentAdd += COMPONENTADD::UPALPHA;
 							break;
 						}
 						case (TYPEUP::COLOROVERLIFE): {
 							std::shared_ptr<ColorOverLife> upColor = std::make_unique<ColorOverLife>();
 							up[j]["colorEnd"].get_to(upColor.get()->colorEnd.e);
 							emitter.updates.push_back(std::move(upColor));
-							free(upColor.get());
+							emitter.componentAdd += COMPONENTADD::COL;
 							break;
 						}
 						case (TYPEUP::ENABLEGRAVITY): {
 							std::shared_ptr<EnabledGravity> upGravity = std::make_unique<EnabledGravity>();
 							upGravity.get()->gravity = up[j]["gravity"].get<float>();
 							emitter.updates.push_back(std::move(upGravity));
-							free(upGravity.get());
+							emitter.componentAdd += COMPONENTADD::EG;
 							break;
 						}
 						case (TYPEUP::UPDATETIME): {
 							std::shared_ptr<UpdateTime> time = std::make_unique<UpdateTime>();
 							emitter.updates.push_back(std::move(time));
-							free(time.get());
+							emitter.componentAdd += COMPONENTADD::UPT;
 							break;
 						}
 						case (TYPEUP::LOOP): {
 							Particles::emit emit;
 							emit.name = "Loop";
 							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::LP;
 							break;
 						}
 						case (TYPEUP::COLLISIONWITHPLANE): {
@@ -1824,7 +1854,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							up[j]["normal"].get_to(plane.get()->n.e);
 							plane.get()->namePrefab = up[j]["namePrefab"].get<std::string>();
 							emitter.updates.push_back(std::move(plane));
-							free(plane.get());
+							emitter.componentAdd += COMPONENTADD::CWP;
 							break;
 						}
 						case (TYPEUP::CREATEPARTICLES): {
@@ -1835,6 +1865,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							emit.data[1].y = up[j]["coeffPos"].get<float>();
 							emit.data[1].z = up[j]["time"].get<float>();
 							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::CP;
 							break;
 						}
 						case (TYPEUP::SHADOW): {
@@ -1843,6 +1874,7 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							emit.data[0].x = up[j]["index"].get<int>();
 							emit.data[0].y = up[j]["time"].get<float>();
 							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::SH;
 							break;
 						}
 						case (TYPEUP::SPAWNEND):{
@@ -1850,7 +1882,9 @@ void Cookie::Resources::Serialization::Load::LoadAllParticles(Cookie::Resources:
 							emit.name = "SpawnEnd";
 							emit.nameData = up[j]["namePrefab"].get<std::string>();
 							pref.emit[i].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::SP;
 						}
+
 						}
 					}
 				}
@@ -1879,11 +1913,9 @@ void Cookie::Resources::Serialization::Load::LoadAllAIBehaviors(Cookie::Resource
 
 	for (int i = 0; i < filesPath.size(); i++)
 	{
-		std::cout << filesPath[i] << "\n";
-
 		std::ifstream file(filesPath[i]);
 
-		if (!file.is_open())
+		if (!file.is_open() || file.peek() == std::ifstream::traits_type::eof())
 		{
 			std::cout << "DON'T FIND THE FILE\n";
 			continue;

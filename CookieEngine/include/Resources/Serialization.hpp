@@ -38,6 +38,7 @@ namespace Cookie
 		namespace Particles
 		{
 			class ParticlesSystem;
+			class ParticlesPrefab;
 		}
 	}
 
@@ -58,6 +59,7 @@ namespace Cookie
 				void ToJson(json& js, const Cookie::ECS::EntityHandler& entity, Cookie::ECS::ComponentHandler& component, 
 					Cookie::Resources::ResourcesManager& resourcesManager);
 
+				//For each functions we save the elements that we need 
 				void SaveScene(Cookie::Resources::Scene& actScene, Cookie::Resources::ResourcesManager& resourcesManager);
 				void SavePrefab(const Prefab* const & prefab);
 				void SavePhysic(json& js, Cookie::ECS::ComponentPhysics& physics);
@@ -65,7 +67,7 @@ namespace Cookie
 				void SaveAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
 				void SaveTexture(std::string& name, Cookie::Core::Math::Vec4& color);
 				void SaveVolumAndModeMusic(Sound* const & sound);
-				void SaveParticles(Cookie::Resources::Particles::ParticlesSystem& particles);
+				void SaveParticles(Cookie::Resources::Particles::ParticlesPrefab& particles);
 				void SaveAIBehavior(Cookie::Gameplay::AIBehavior& aiBehavior);
 			}
 
@@ -77,6 +79,7 @@ namespace Cookie
 				void FromJson(json& js, const Cookie::ECS::EntityHandler& entity, 
 					Cookie::ECS::ComponentHandler& component, Cookie::Resources::ResourcesManager& resourcesManager);
 
+				//For each functions we load all elements in the files
 				void LoadScene(const char* filepath, Game& game);
 				void LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager);
 				void LoadAllTextures(Cookie::Resources::ResourcesManager& resourcesManager);
