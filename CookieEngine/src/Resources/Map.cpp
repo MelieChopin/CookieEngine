@@ -114,8 +114,8 @@ void Map::ClampPosInMap(Vec2& posToClamp, Vec2& buildingNbOfTiles)
 	float minZ = -trs.scale.z / 2 + buildingNbOfTiles.y * tilesSize.y / 2;
 	float maxZ =  trs.scale.z / 2 - buildingNbOfTiles.y * tilesSize.y / 2;
 
-	posToClamp = { std::min(std::max(minX, posToClamp.x), maxX),
-				   std::min(std::max(minZ, posToClamp.y), maxZ) };
+	posToClamp = { {std::min(std::max(minX, posToClamp.x), maxX),
+				   std::min(std::max(minZ, posToClamp.y), maxZ) } };
 }
 void Map::ClampPosInMap(Vec3& posToClamp)
 {
@@ -166,8 +166,8 @@ Vec2 Map::GetCenterOfBuilding(Vec2& mousePos, Vec2& buildingNbOfTiles)
 	float leftZ = -trs.scale.z / 2 + buildingNbOfTiles.y * tilesSize.y / 2;
 	float rightZ = trs.scale.z / 2 - buildingNbOfTiles.y * tilesSize.y / 2;
 
-	return  {std::clamp(tilePos.x, (leftX <= rightX) ? leftX : rightX, (leftX <= rightX) ? rightX : leftX),
-			 std::clamp(tilePos.y, (leftZ <= rightZ) ? leftZ : rightZ, (leftZ <= rightZ) ? rightZ : leftZ)};
+	return  { {std::clamp(tilePos.x, (leftX <= rightX) ? leftX : rightX, (leftX <= rightX) ? rightX : leftX),
+			 std::clamp(tilePos.y, (leftZ <= rightZ) ? leftZ : rightZ, (leftZ <= rightZ) ? rightZ : leftZ)} };
 
 }
 Vec3 Map::GetCenterOfBuilding(Vec3& mousePos, Vec2& buildingNbOfTiles)

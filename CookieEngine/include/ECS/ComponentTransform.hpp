@@ -2,14 +2,21 @@
 #define __COMPONENT_TRANSFORM_HPP__
 
 #include "Mat4.hpp"
+#include "ComponentModel.hpp"
+#include "Mesh.hpp"
 
 namespace Cookie
 {
 	namespace ECS
 	{
+		class ComponentModel;
+
 		class ComponentTransform
 		{
 		public:
+			ComponentModel* modelptr {nullptr}; //necessary for radius 
+			float radius             {0}; //necessary for CGPMove and CGPAttack
+
 			Core::Math::Mat4 TRS = Core::Math::Mat4::Identity();
 
 			Core::Math::Vec3 pos{ 0,0,0 };
@@ -23,6 +30,7 @@ namespace Cookie
 			inline ~ComponentTransform() {}
 
 			inline void ToDefault() noexcept;
+			inline void ComputeRadius();
 			inline void ComputeTRS();
 
 		};

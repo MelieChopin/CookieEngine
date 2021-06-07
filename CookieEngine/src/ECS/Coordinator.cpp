@@ -67,8 +67,13 @@ Entity* Coordinator::AddEntity(const Resources::Prefab* const & prefab, E_ARMY_N
 	newEntity.namePrefab = prefab->name;
 	newEntity.signature = prefab->signature;
 
+
 	if (CheckSignature(newEntity.signature, C_SIGNATURE::TRANSFORM))
-		componentHandler->GetComponentTransform(newEntity.id) = prefab->transform;
+	{
+		ComponentTransform& trs = componentHandler->GetComponentTransform(newEntity.id);
+		trs = prefab->transform;
+		trs.modelptr = &componentHandler->GetComponentModel(newEntity.id);
+	}
 	if (CheckSignature(newEntity.signature, C_SIGNATURE::MODEL))
 		componentHandler->GetComponentModel(newEntity.id) = prefab->model;
 	if (CheckSignature(newEntity.signature, C_SIGNATURE::PHYSICS))
@@ -395,7 +400,7 @@ void Coordinator::ApplyGameplayResolveCollision(Map& map)
 			Vec3 otherInitialPos = allEntitiespossible[i]->trs->pos;
 
 			//if the two circles collide
-			if ((entitiesToCheck[0]->trs->pos - allEntitiespossible[i]->trs->pos).Length() < entitiesToCheck[0]->radius + allEntitiespossible[i]->radius)
+			if ((entitiesToCheck[0]->trs->pos - allEntitiespossible[i]->trs->pos).Length() < entitiesToCheck[0]->trs->radius + allEntitiespossible[i]->trs->radius)
 				entitiesToCheck[0]->ResolveColision(*allEntitiespossible[i], map);
 
 			//if the other unit was pushed add it back to the entities to check
