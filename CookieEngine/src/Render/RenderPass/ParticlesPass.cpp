@@ -21,7 +21,7 @@ ParticlesPass::ParticlesPass()
 {
 }
 
-ParticlesPass::ParticlesPass(const ParticlesPass& pass) : VShader(pass.VShader), PShader(pass.PShader), ILayout(pass.ILayout), CBuffer(pass.CBuffer),
+ParticlesPass::ParticlesPass(const ParticlesPass& pass) : ILayout(pass.ILayout), VShader(pass.VShader), PShader(pass.PShader), CBuffer(pass.CBuffer),
                 InstanceBuffer(pass.InstanceBuffer), blendState(pass.blendState), PSampler(pass.PSampler), rasterizerState(pass.rasterizerState), 
                 depthStencilState(pass.depthStencilState), mInstancedData(pass.mInstancedData)
 {

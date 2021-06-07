@@ -20,7 +20,6 @@ using namespace rp3d;
 Editor::Editor()
     : editorFBO{game.renderer.window.width,game.renderer.window.height}
 {
-    game.resources.Load(game.renderer);
     cam.SetProj(60.f, game.renderer.viewport.Width, game.renderer.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
     cam.rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
@@ -28,22 +27,7 @@ Editor::Editor()
     cam.Update();
     cam.Deactivate();
     game.scene->InitCoordinator(game.coordinator);
-
-    //Load all Textures we have create in texture editor
-    Resources::Serialization::Load::LoadAllTextures(game.resources);
-
-    Serialization::Load::LoadAllParticles(game.resources);
-
-    //Load all prefabs in folder Prefabs
-    Resources::Serialization::Load::LoadAllPrefabs(game.resources);
-    game.particlesHandler.particlesPrefab = &game.resources.particles;
-
-    Resources::SoundManager::InitSystem();
-    //Load settings of musics
-    Resources::SoundManager::LoadAllMusic(game.resources);
-
-    Serialization::Load::LoadAllAIBehaviors(game.resources);
-
+    
     //Load default Scene
     Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", game);
     game.SetScene();
@@ -204,6 +188,8 @@ void Editor::Loop()
 
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
+        TryResizeWindow();
+
         // Present frame
         
         if (isPlaying && previewIsPlaying)
@@ -214,15 +200,19 @@ void Editor::Loop()
         {
             previewIsPlaying = isPlaying;
             game.Start();
+            Resources::Serialization::Save::SaveScene(*game.scene.get(), game.resources);
         }
         else if (!isPlaying && previewIsPlaying)
         {
             previewIsPlaying = isPlaying;
+            Resources::Serialization::Load::LoadScene(game.scene.get()->filepath.c_str(), game);
+            game.SetScene();
+            game.coordinator.selectedEntities.clear();
+            game.particlesHandler.Clear();
         }
         else
         {
             glfwPollEvents();
-            TryResizeWindow();
         }
 
         HandleEditorInput();

@@ -14,9 +14,9 @@ using namespace Cookie::Core::Math;
 
 /*========================= CONSTRUCTORS/DESTRUCTORS ===========================*/
 
-Renderer::Renderer():
+Renderer::Renderer(bool windowed):
     /* It is where dx11 is enabled for the first time */
-    remote {InitDevice(window)},
+    remote {InitDevice(windowed)},
     /* The viewport is not 1 in z to be sure the skybox is not clipped by depth buffer when drawn */
     viewport {0.0f,0.0f,static_cast<float>(window.width),static_cast<float>(window.height),0.0f,0.9999999f},
     /* The pass that have framebuffers inside them need dimension when created */
@@ -60,7 +60,7 @@ Renderer::~Renderer()
 
 /*========================= INIT METHODS =========================*/
 
-RendererRemote Renderer::InitDevice(Core::Window& window)
+RendererRemote Renderer::InitDevice(bool windowed)
 {
     RendererRemote _remote;
 
@@ -68,9 +68,8 @@ RendererRemote Renderer::InitDevice(Core::Window& window)
 
     /* fill the swap chain description struct */
 
-    /* two back buffer (we do that because the swapeffect
-     * with only one back buffer is considered depreciated but supported)*/
-    scd.BufferCount         = 2;                 
+    /* one back buffer */
+    scd.BufferCount         = 1;                 
     /* use 32-bit color */
     scd.BufferDesc.Format   = DXGI_FORMAT_R8G8B8A8_UNORM;   
     /* how swap chain is to be used (we want to render in different framebuffer) */
@@ -82,13 +81,13 @@ RendererRemote Renderer::InitDevice(Core::Window& window)
     /* same for this one */
     scd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
     /* how many multisamples (so here we don not have one, also because we are in deffered renderer) */
-    scd.SampleDesc.Count = 1;
+    scd.SampleDesc.Count    = 1;
     /* ... so we don't use this one */
-    scd.SampleDesc.Quality = 0;
-    /* we are on window mode for now */
-    scd.Windowed           = TRUE;                                    
-    /* besacally, when we swap the precedent front buffer is cleared */
-    scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    scd.SampleDesc.Quality  = 0;
+    /* depends on init */
+    scd.Windowed            = windowed;                                    
+    /* basically, when we swap the precedent front buffer is cleared */
+    scd.SwapEffect          = DXGI_SWAP_EFFECT_DISCARD;
 
     /* create a device, device context and swap chain using the information in the scd struct*/
     HRESULT result = D3D11CreateDeviceAndSwapChain(
@@ -114,6 +113,14 @@ RendererRemote Renderer::InitDevice(Core::Window& window)
     {
         printf("Failed Creating Device: %s\n", std::system_category().message(result).c_str());
         return _remote;
+    }
+
+    if (!windowed)
+    {
+        const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+        window.width    = mode->width;
+        window.height   = mode->height;
     }
 
     return _remote;
@@ -146,6 +153,22 @@ void Renderer::ResizeBuffer(int width, int height)
     /* realease all buffer taht needs to be realeased before */
     geomPass.depthBuffer->Release();
     backbuffer->Release();
+
+
+    /* checking if we are going inyo full screen are not */
+    if (glfwGetWindowMonitor(window.window) != nullptr)
+    {
+        /* get resolution of monitor*/
+        const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+        /* switch to full screen*/
+        glfwSetWindowMonitor(window.window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, 0);
+
+        window.width    = mode->width;
+        window.height   = mode->height;
+        width   = mode->width;
+        height  = mode->height;
+    }
 
     /* leaving 0 will let the driver do the work of finding the size for us 
      * (without having to specify resolution and other stuff) */

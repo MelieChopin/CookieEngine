@@ -45,7 +45,7 @@ namespace Cookie
 			bool isPaused = false;
 
 		public:
-			 Game();
+			 Game(bool windowed = true);
 			~Game();
 
 			void Start();

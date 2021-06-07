@@ -46,7 +46,7 @@ void GameUIeditor::WindowDisplay()
 			}
 			else if (Selectable("Add a minimap"))
 			{
-				widgets.push_back(std::make_unique<Minimap>(game.miniMapBuffer, game.scene->camera.get(), game.scene->map, game.resources));
+				widgets.push_back(std::make_unique<Minimap>(game.resources, game.miniMapBuffer, game.scene->camera.get(), game.scene->map));
 				game.scene->uiScene.signature |= GameWidgetID::MinimapID;
 			}
 
@@ -56,7 +56,7 @@ void GameUIeditor::WindowDisplay()
 			}
 			else if (Selectable("Add a resource/info panel"))
 			{
-				widgets.push_back(std::make_unique<IncomePanel>(game.scene->armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));
+				widgets.push_back(std::make_unique<IncomePanel>(game.resources, game.scene->armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));
 				game.scene->uiScene.signature |= GameWidgetID::IncomePanelID;
 			}
 		}

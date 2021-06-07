@@ -1,4 +1,4 @@
-﻿#include "Editor.hpp"
+#include "Game.hpp"
 #include "UIcore.hpp"
 
 #pragma comment(lib, "dxguid.lib")
@@ -18,24 +18,12 @@ int main()
 {
 	{
 		Core::UIcore::PreInitContext();
-		Editor editor;
+		Game game;
 
-		editor.Loop();
+		game.Loop();
 
 		Core::UIcore::Terminate();
 	}
-	//{
-	//	if (Render::RendererRemote::device)
-	//	{
-	//		ID3D11Debug* debug = nullptr;
-	//		Render::RendererRemote::device->QueryInterface(IID_PPV_ARGS(&debug));
-	//		if (debug)
-	//		{
-	//			debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
-	//			debug->Release();
-	//		}
-	//	}
-	//}
 
 	return 0;
 }

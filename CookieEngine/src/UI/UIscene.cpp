@@ -30,16 +30,16 @@ void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows, Cookie:
 		switch (info.ID)
 		{
 		case GameWidgetID::GamespectorID:
-			sceneWidgets.push_back(std::make_unique<Gamespector>	(game.coordinator, game.resources));											break;
+			sceneWidgets.push_back(std::make_unique<Gamespector>	(game.coordinator, game.resources));															break;
 		
 		case GameWidgetID::ActionPanelID:
-			sceneWidgets.push_back(std::make_unique<ActionPanel>	(game.coordinator, game.playerData, game.resources));							break;
+			sceneWidgets.push_back(std::make_unique<ActionPanel>	(game.coordinator, game.playerData, game.resources));											break;
 		
 		case GameWidgetID::MinimapID:	    
-			sceneWidgets.push_back(std::make_unique<Minimap>		(game.miniMapBuffer, scene.camera.get(), scene.map, game.resources));			break;
+			sceneWidgets.push_back(std::make_unique<Minimap>		(game.resources, game.miniMapBuffer, scene.camera.get(), scene.map));							break;
 		
 		case GameWidgetID::IncomePanelID:
-			sceneWidgets.push_back(std::make_unique<IncomePanel>	(scene.armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));	break;
+			sceneWidgets.push_back(std::make_unique<IncomePanel>	(game.resources, scene.armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));	break;
 		
 		default: break;
 		}

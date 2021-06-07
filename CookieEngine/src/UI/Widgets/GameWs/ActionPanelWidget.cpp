@@ -37,7 +37,7 @@ void ActionPanel::ToolTipCost(const Prefab* const & prefab, const Cookie::Gamepl
 
 		if (prefab->gameplay.cost.costSecondary)
 		{
-			TextColored({ 123.f, 63.f, 0.f, 1.f }, "%.1f units of chocolate", prefab->gameplay.cost.costSecondary);
+			TextColored({ 0.482f, 0.247f, 0.f, 1.f }, "%.1f units of chocolate", prefab->gameplay.cost.costSecondary);
 			SameLine();
 			TextColored(income->secondary >= prefab->gameplay.cost.costSecondary ? ImVec4{ 0, 1, 0, 1 } : ImVec4{ 1, 0, 0, 1 }, " / %.1f", income->secondary);
 		}
