@@ -437,19 +437,22 @@ void Coordinator::ApplyGameplayCheckEnemyInRange()
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::ATTACK))
 		{
-			CGPAttack& cgpAttack = componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentAttack;
+			ComponentGameplay& gameplay = componentHandler->GetComponentGameplay(entityHandler->entities[i].id);
+			CGPAttack& cgpAttack = gameplay.componentAttack;
+			ComponentTransform& trs = componentHandler->GetComponentTransform(entityHandler->entities[i].id);
 			cgpAttack.target = nullptr;
 			float smallestDist = cgpAttack.attackRange;
 
 			for (int j = 0; j < entityHandler->livingEntities; ++j)
 				if (i != j &&
 					CheckSignature(entityHandler->entities[j].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
-					componentHandler->GetComponentGameplay(entityHandler->entities[i].id).teamName != componentHandler->GetComponentGameplay(entityHandler->entities[j].id).teamName &&
+					gameplay.teamName != componentHandler->GetComponentGameplay(entityHandler->entities[j].id).teamName &&
 					CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[j].id).signatureGameplay, CGP_SIGNATURE::LIVE))
 				{
-					float possibleNewDist = (componentHandler->GetComponentTransform(entityHandler->entities[i].id).pos - componentHandler->GetComponentTransform(entityHandler->entities[j].id).pos).Length();
+					ComponentTransform& otherTrs = componentHandler->GetComponentTransform(entityHandler->entities[j].id);
+					float possibleNewDist = Vec2{ {trs.pos.x - otherTrs.pos.x , trs.pos.z - otherTrs.pos.z } }.Length() - trs.radius - otherTrs.radius;
 
-					if (possibleNewDist < smallestDist)
+					if (possibleNewDist < smallestDist )
 					{
 						smallestDist = possibleNewDist;
 						cgpAttack.target = &componentHandler->GetComponentGameplay(entityHandler->entities[j].id).componentLive;

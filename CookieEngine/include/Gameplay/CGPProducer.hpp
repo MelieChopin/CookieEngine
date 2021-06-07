@@ -18,7 +18,8 @@ namespace Cookie
 
 	namespace Gameplay
 	{
-		
+
+		#define FLYING_Y_LEVEL 6
 		#define CGP_PRODUCER_MAX_IN_QUEUE 5
 
 		class CGPProducer
