@@ -53,9 +53,9 @@ namespace Cookie
 			void Loop();
 
 			//In Loop
-			//Remove the debugRenderer later on
 			void CalculateMousePosInWorld();
 			void HandleGameplayInputs();
+			void InputFocusCam();
 			void CheckIfBuildingValid();
 			void InputCancelBuilding();
 			void InputValidateBuilding();
