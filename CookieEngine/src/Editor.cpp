@@ -204,6 +204,8 @@ void Editor::Loop()
         else if (!isPlaying && previewIsPlaying)
         {
             previewIsPlaying = isPlaying;
+            
+            game.playerData.makingASelectionQuad = false;
         }
         else
         {

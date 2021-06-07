@@ -95,23 +95,26 @@ void UIscene::RenderLayout()
 	isHovered = false;
 	const ImVec2 mPos = GetIO().MousePos;
 
-
-	PushStyleVar(ImGuiStyleVar_WindowPadding, {15, 15});
-
-	for (std::unique_ptr<GameWindowBase>& gw : sceneWidgets)
+	if (firstRoundDone)
 	{
-		gw->WindowDisplay();
+		PushStyleVar(ImGuiStyleVar_WindowPadding, {15, 15});
+
+		for (std::unique_ptr<GameWindowBase>& gw : sceneWidgets)
+		{
+			gw->WindowDisplay();
 		
 
-		const ImGuiWindow* const & lastWin = FindWindowByName(gw->GetName());
+			const ImGuiWindow* const & lastWin = FindWindowByName(gw->GetName());
 
-		if (lastWin)
-		{
-			const ImRect lastRect = lastWin->Rect();
+			if (lastWin)
+			{
+				const ImRect lastRect = lastWin->Rect();
 
-			isHovered |= (mPos.x > lastRect.Min.x) && (mPos.x < lastRect.Max.x) && (mPos.y > lastRect.Min.y) && (mPos.y < lastRect.Max.y);
+				isHovered |= (mPos.x > lastRect.Min.x) && (mPos.x < lastRect.Max.x) && (mPos.y > lastRect.Min.y) && (mPos.y < lastRect.Max.y);
+			}
 		}
-	}
 
-	PopStyleVar();
+		PopStyleVar();
+	}
+	else firstRoundDone = true;
 }

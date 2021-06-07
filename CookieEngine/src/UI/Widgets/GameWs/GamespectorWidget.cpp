@@ -99,14 +99,23 @@ void Gamespector::WindowDisplay()
 					{
 						for (size_t i = 1; i < unitsQueue.size(); i++)
 						{
+							BeginGroup();
 							SafeIcon(unitsQueue[i]->model.icon, 40.f);
+
+							if (Button(("X##" + std::to_string(i)).c_str(), { 40.f, 20.f }))
+							{
+								coordinator.componentHandler->GetComponentGameplay(selectedEntity->id).componentProducer.RemoveUnitFromQueue(i);
+								i--;
+							}
+
+							EndGroup();
 
 							SameLine();
 						}
 
 						NewLine();
 					}
-					else Dummy({0, 40.f});
+					else Dummy({0, 64.f });
 				}
 				else
 				{
@@ -123,7 +132,7 @@ void Gamespector::WindowDisplay()
 
 					EndGroup();
 
-					Dummy({ 0, 40.f });
+					Dummy({ 0, 64.f });
 				}
 
 				Separator();
