@@ -127,7 +127,7 @@ void Game::CalculateMousePosInWorld()
 
     //if raycast hit
     if (scene->map.physic.physBody->raycast(ray, raycastInfo))
-        playerData.mousePosInWorld = {raycastInfo.worldPoint.x, raycastInfo.worldPoint.y, raycastInfo.worldPoint.z};
+        playerData.mousePosInWorld = {raycastInfo.worldPoint.x, raycastInfo.worldPoint.y + 0.1f, raycastInfo.worldPoint.z};
 }
 void Game::HandleGameplayInputs()
 {
@@ -201,6 +201,8 @@ void Game::HandleGameplayInputs()
 
         if (!ImGui::GetIO().MouseDownDuration[1])
         {
+            ParticlesHandler::CreateParticlesWithPrefab(playerData.mousePosInWorld, resources.particles["Target_Mouse_Green"].get());
+
             //CGPMove
             InputMoveSelected();
             
@@ -454,7 +456,7 @@ void Game::SetScene()
     scene->camera->ResetPreviousMousePos();
     //scene->camera->ForceUpdate();
     SetCamClampFromMap();
-    scene->camera->ZoomClamp = { {2.0f,10.0f} };
+    scene->camera->ZoomClamp = { {2.0f, 20.0f} };
     scene->camera->Deactivate();
 
     renderer.drawData.SetScene(scene.get());
