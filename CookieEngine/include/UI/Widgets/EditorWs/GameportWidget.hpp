@@ -8,6 +8,12 @@ namespace Cookie { class Game; }
 
 namespace Cookie::UIwidget
 {
+	/*
+		The Gameport is the window into the game loop.
+
+		It appears automatically as soon as the game is started and vanishes when the game stops running.
+		The Gameport actually simply puts the render of the scene under the game's ui. Input-mouse detection allows movement of camera as well in a RTS manner.
+	*/
 	class GamePort final : public WindowBase
 	{
 		const bool& isPlaying;

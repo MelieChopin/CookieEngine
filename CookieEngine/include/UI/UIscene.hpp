@@ -18,9 +18,11 @@ namespace Cookie::UI
 		// Prevents widgets from insta-appearing on first frame to not mess up the z-order
 		bool firstRoundDone = false;
 
+		// A flag that is true if any of the windows displayed by UIscene is currently hovered by the mouse.
 		bool isHovered = false;
 		
 	public:
+		// Keeps track of what widgets have already been added.
 		int signature = 0;
 	
 	public:
@@ -43,8 +45,10 @@ namespace Cookie::UI
 		void								LoadLayout	(const std::vector<GameWindowInfo>& GameWindows, Cookie::Game& game, Cookie::Resources::Scene& scene);
 		const std::vector<GameWindowInfo>	SaveLayout	(bool clean = false);
 
+		// Safely clean the entire UI of the scene and free all used memory.
 		void CleanLayout();
 		
+		// Render the current UI of the scene, keeping isHovered updated.
 		void RenderLayout();
 
 		inline std::vector<std::unique_ptr<UIwidget::GameWindowBase>>& GetLayout()

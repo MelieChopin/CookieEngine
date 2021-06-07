@@ -12,6 +12,7 @@ namespace Cookie::Core::Math { union Vec4; }
 
 namespace Cookie::UIwidget
 {
+	// Allows to create uni-colored textures.
 	class TextureEditor final : public WItemBase
 	{
 		Cookie::Resources::ResourcesManager& resources;

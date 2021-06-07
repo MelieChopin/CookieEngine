@@ -13,7 +13,10 @@ namespace Cookie::UIwidget
 {
 	class Inspector;
 
-
+	/*
+		Displays all entities inside the scene.
+		Also provides options to completely clear and delete every entity, or to place empty/prefab'ed entities.
+	*/
 	class Hierarchy final : public WItemBase
 	{
 		Cookie::Resources::ResourcesManager&		resources;

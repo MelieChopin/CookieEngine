@@ -12,6 +12,10 @@ namespace Cookie::UIwidget
 	namespace GameWidgetID
 	{ constexpr int IncomePanelID = 1 << 3; }
 
+	/*
+		The income panel display multiple player-related infos,
+		The resources currently stored, and the population.
+	*/
 	class IncomePanel final : public GameWindowBase
 	{
 		const Cookie::Resources::Texture* const panelBg;

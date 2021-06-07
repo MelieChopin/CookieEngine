@@ -9,6 +9,7 @@ namespace Cookie::Resources { class ResourcesManager; }
 
 namespace Cookie::UI
 {
+	// Displays the menu/tittle screen of the game, along with quit/start buttons.
 	class UImenu
 	{
 		Cookie::Resources::ResourcesManager& resources;
@@ -25,6 +26,7 @@ namespace Cookie::UI
 	public:
 		UImenu(Cookie::Resources::ResourcesManager& _resources);
 		
+		// Takes in a function that should depend on the compilation game-only or editor included. (Closing the window entirely or just stopping the gameplay.)
 		inline void GiveQuitFunction(const std::function<void()>& _quitFunc)
 		{ quitFunc = _quitFunc; }
 

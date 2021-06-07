@@ -25,6 +25,7 @@ namespace Cookie::UIwidget
 		Cookie::Resources::ResourcesManager& resources;
 
 	private:
+		// A safe button system that uses an emergency safe image if no valid ones are passed
 		bool SafeIconButton(const Cookie::Resources::Texture* const & texture, const float size);
 
 		void ToolTipCost(const Cookie::Resources::Prefab* const & prefab, const Cookie::Gameplay::Income* const & income);

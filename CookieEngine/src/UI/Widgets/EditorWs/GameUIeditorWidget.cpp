@@ -59,6 +59,15 @@ void GameUIeditor::WindowDisplay()
 				widgets.push_back(std::make_unique<IncomePanel>(game.resources, game.scene->armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));
 				game.scene->uiScene.signature |= GameWidgetID::IncomePanelID;
 			}
+
+
+			NewLine(); NewLine();
+			if (game.scene->uiScene.signature)
+			{
+				if (Selectable("Clean/Reset the UI layout"))
+					game.scene->uiScene.CleanLayout();
+			}
+			else TextDisabled("Clean/Reset the UI layout");
 		}
 		
 		EndChild();

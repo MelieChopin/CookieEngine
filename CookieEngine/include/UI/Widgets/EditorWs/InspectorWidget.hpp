@@ -12,9 +12,9 @@ namespace reactphysics3d	 { class Collider; }
 
 namespace Cookie::UIwidget
 {
+	// The inspector gives an immense multitude of options to edit any selected entity to your liking.
 	class Inspector final : public WItemBase
 	{
-
 		FocusEntity&			selectedEntity;
 		Cookie::ECS::Entity*	recordedEntity = nullptr;
 	
@@ -51,13 +51,8 @@ namespace Cookie::UIwidget
 		// Allows to interface with three inner components corresponding to the entity's health and armor, movement capacities and attack abilities.
 		void GameplayInterface();
 
+		// Gives plenty of options to edit the live sounds inside the game, on entities.
 		void FXInterface();
-
-		// Allows editing of different parameters used exclusively by map entities.
-		void MapInterface();
-
-
-		void SceneInspection();
 
 	public:
 		inline Inspector(FocusEntity& _selectedEntity, Cookie::Resources::ResourcesManager& _resources, Cookie::ECS::Coordinator& _coordinator)
