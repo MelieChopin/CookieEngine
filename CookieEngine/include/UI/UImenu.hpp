@@ -11,7 +11,6 @@ namespace Cookie::UI
 {
 	class UImenu
 	{
-		const Cookie::Core::Window& window;
 		Cookie::Resources::ResourcesManager& resources;
 
 		ImFont* tittleFont = nullptr;
@@ -24,7 +23,7 @@ namespace Cookie::UI
 		mutable bool menuState = false;
 
 	public:
-		UImenu(const Cookie::Core::Window& _window, Cookie::Resources::ResourcesManager& _resources);
+		UImenu(Cookie::Resources::ResourcesManager& _resources);
 		
 		inline void GiveQuitFunction(const std::function<void()>& _quitFunc)
 		{ quitFunc = _quitFunc; }

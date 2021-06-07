@@ -41,22 +41,22 @@ namespace Cookie::Resources
 	}
 
 	// Textures have a special preview feature, with a zoom-in by hovering on the preview.
-	template <>
-	void SelectableResourceDisplay<Texture>(const std::unordered_map<std::string, std::unique_ptr<Texture>>::iterator& textIt, const std::string& researchString, Texture*& currentR, const bool is_selected)
-	{
-		if (StringHelper::findCaseInsensitive(textIt->second->name, researchString) != std::string::npos)
-		{
-			if (textIt->second->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
-			{
-				ImGui::Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
-
-				ImGui::SameLine();
-			}
-
-			if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
-				currentR = textIt->second.get();
-		}
-	}
+	//template <>
+	//void SelectableResourceDisplay<Texture>(const std::unordered_map<std::string, std::unique_ptr<Texture>>::iterator& textIt, const std::string& researchString, Texture*& currentR, const bool is_selected)
+	//{
+	//	if (StringHelper::findCaseInsensitive(textIt->second->name, researchString) != std::string::npos)
+	//	{
+	//		if (textIt->second->desc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURE2D)
+	//		{
+	//			ImGui::Custom::Zoomimage(static_cast<ImTextureID>(textIt->second->GetResourceView()), 25, 25, 5);
+	//
+	//			ImGui::SameLine();
+	//		}
+	//
+	//		if (ImGui::Selectable(textIt->second->name.c_str(), is_selected))
+	//			currentR = textIt->second.get();
+	//	}
+	//}
 
 
 	// Template function used when it is required to go through an entire map of the resource manager to modify a particular component/member.

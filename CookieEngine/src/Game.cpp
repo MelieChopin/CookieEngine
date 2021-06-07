@@ -24,7 +24,7 @@ Game::Game(bool windowed):
     renderer{windowed},
     frameBuffer{renderer.window.width,renderer.window.height },
     miniMapBuffer{miniMapResolution, miniMapResolution},
-    uiMenu{renderer.window, resources}
+    uiMenu{resources}
 {
     Physics::PhysicsHandle::Init();
     Core::UIcore::FinishInit(renderer);

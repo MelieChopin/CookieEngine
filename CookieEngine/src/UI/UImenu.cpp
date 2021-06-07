@@ -8,11 +8,11 @@ using namespace Cookie::UI;
 using namespace Cookie::Resources;
 
 
-UImenu::UImenu(const Cookie::Core::Window& _window, Cookie::Resources::ResourcesManager& _resources)
-	  : window		(_window),
+UImenu::UImenu(Cookie::Resources::ResourcesManager& _resources):
 	    resources	(_resources),
 		tittleFont	(GetIO().Fonts->AddFontFromFileTTF("Assets/UI/Roboto-Medium.ttf", 90))
-{}
+{
+}
 
 void UImenu::DisplayMenus() const
 {
