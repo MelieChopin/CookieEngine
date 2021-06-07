@@ -141,13 +141,12 @@ void Game::HandleGameplayInputs()
 
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
     {
-        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["Base"].get(), E_ARMY_NAME::E_PLAYER);
+        ECS::Entity* newEntity = coordinator.AddEntity(resources.prefabs["Base"].get(), E_ARMY_NAME::E_PLAYER);
 
-        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
-        ComponentModel& model = coordinator.componentHandler->GetComponentModel(newEntity.id);
-        CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer;
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity->id);
+        CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity->id).componentProducer;
 
-        float unscaledOffsetFromMap = std::abs(coordinator.componentHandler->GetComponentModel(newEntity.id).mesh->AABBMin.y);
+        float unscaledOffsetFromMap = std::abs(coordinator.componentHandler->GetComponentModel(newEntity->id).mesh->AABBMin.y);
         trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, producer.tileSize) + Vec3{ 0, trs.scale.y * unscaledOffsetFromMap, 0 };	
         
         Vec3 posTopLeft = trs.pos - trs.scale / 2;
@@ -155,13 +154,12 @@ void Game::HandleGameplayInputs()
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_B])
     {
-        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["Base"].get(), E_ARMY_NAME::E_AI1);
+        ECS::Entity* newEntity = coordinator.AddEntity(resources.prefabs["Base"].get(), E_ARMY_NAME::E_AI1);
 
-        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
-        ComponentModel& model = coordinator.componentHandler->GetComponentModel(newEntity.id);
-        CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer;
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity->id);
+        CGPProducer& producer = coordinator.componentHandler->GetComponentGameplay(newEntity->id).componentProducer;
 
-        float unscaledOffsetFromMap = std::abs(coordinator.componentHandler->GetComponentModel(newEntity.id).mesh->AABBMin.y);
+        float unscaledOffsetFromMap = std::abs(coordinator.componentHandler->GetComponentModel(newEntity->id).mesh->AABBMin.y);
         trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, producer.tileSize) + Vec3{ 0, trs.scale.y * unscaledOffsetFromMap, 0 };
 
         Vec3 posTopLeft = trs.pos - trs.scale / 2;
@@ -169,12 +167,11 @@ void Game::HandleGameplayInputs()
     }
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_X])
     {
-        ECS::Entity& newEntity = coordinator.AddEntity(resources.prefabs["ResourcePrimary"].get(), E_ARMY_NAME::E_DEFAULT_NAME);
+        ECS::Entity* newEntity = coordinator.AddEntity(resources.prefabs["ResourcePrimary"].get(), E_ARMY_NAME::E_DEFAULT_NAME);
 
-        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
-        ComponentModel& model = coordinator.componentHandler->GetComponentModel(newEntity.id);
+        ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(newEntity->id);
 
-        float unscaledOffsetFromMap = std::abs(coordinator.componentHandler->GetComponentModel(newEntity.id).mesh->AABBMin.y);
+        float unscaledOffsetFromMap = std::abs(coordinator.componentHandler->GetComponentModel(newEntity->id).mesh->AABBMin.y);
         Vec2 tileSize {{1, 1}};
         trs.pos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, tileSize) + Vec3{ 0, trs.scale.y * unscaledOffsetFromMap, 0 };
     }
@@ -234,8 +231,8 @@ void Game::CheckIfBuildingValid()
     playerData.buildingPos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, playerData.buildingToBuild->tileSize);
     playerData.buildingPos.y += playerData.workerWhoBuild->possibleBuildings[playerData.indexOfBuildingInWorker]->transform.scale.y * std::abs(playerData.workerWhoBuild->possibleBuildings[playerData.indexOfBuildingInWorker]->model.mesh->AABBMin.y);
 
-    Vec2 posTopLeft =  {playerData.buildingPos.x - playerData.buildingToBuild->tileSize.x * scene->map.tilesSize.x / 2,
-                        playerData.buildingPos.z - playerData.buildingToBuild->tileSize.y * scene->map.tilesSize.y / 2};
+    Vec2 posTopLeft = {{playerData.buildingPos.x - playerData.buildingToBuild->tileSize.x * scene->map.tilesSize.x / 2,
+                        playerData.buildingPos.z - playerData.buildingToBuild->tileSize.y * scene->map.tilesSize.y / 2}};
 
     playerData.isBuildingValid = scene->map.isBuildingValid(scene->map.GetTileIndex(posTopLeft), playerData.buildingToBuild->tileSize);
 }
@@ -388,10 +385,7 @@ void Game::ECSCalls()
     coordinator.armyHandler->UpdateArmyCoordinators(scene->map);
     resources.UpdateScriptsContent();
     coordinator.ApplyScriptUpdate();
-    coordinator.UpdateCGPProducer(scene->map);
-    coordinator.UpdateCGPWorker(scene->map);
-    coordinator.UpdateCGPMove(scene->map);
-    coordinator.UpdateCGPAttack();
+    coordinator.ApplyGameplay(scene->map);
     coordinator.ApplyRemoveUnnecessaryEntities();
 }
 
@@ -399,12 +393,13 @@ void Game::DisplayLife()
 {
     std::vector<Cookie::Render::InstancedData> data;
     float angle = Cookie::Core::Math::ToRadians(180) - scene.get()->camera.get()->rot.x;
-    float lifeCurrent;
-    float lifeMax;
-    Mat4 trs;
-    Vec3 posLife;
+    static float lifeCurrent;
+    static float lifeMax;
+    static Mat4 trs;
+    static Vec3 posLife;
     for (int i = 0; i < coordinator.entityHandler->livingEntities; i++)
     {
+        //Check first if the entity has a life
         if (!coordinator.CheckSignature(coordinator.entityHandler->entities[i].signature, C_SIGNATURE::GAMEPLAY))
             continue;
 
@@ -415,7 +410,7 @@ void Game::DisplayLife()
         lifeCurrent = gameplay.componentLive.lifeCurrent;
         lifeMax = gameplay.componentLive.lifeMax;
         trs = Cookie::Core::Math::Mat4::Translate(gameplay.trs->pos);
-        posLife = gameplay.componentLive.posLifeInRapportOfEntity;
+        posLife = gameplay.componentLive.lifeBarOffset;
         Cookie::Render::InstancedData newData;
         Vec3 scaleBlack = Vec3(2 * lifeMax / 10, 0.25, 1);
         Vec3 scaleGreen = Vec3(2 * lifeCurrent / 10, 0.25, 1);
@@ -423,6 +418,7 @@ void Game::DisplayLife()
         if (coordinator.CheckSignature(coordinator.entityHandler->entities[i].signature, C_SIGNATURE::MODEL) && 
                 coordinator.CheckSignature(coordinator.entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM))
         {
+            //Calcul the scale and the pos to clamp with the model
             ComponentTransform& transform = coordinator.componentHandler->GetComponentTransform(coordinator.entityHandler->entities[i].id);
             ComponentModel& model = coordinator.componentHandler->GetComponentModel(coordinator.entityHandler->entities[i].id);
             if (model.mesh)
@@ -444,6 +440,7 @@ void Game::DisplayLife()
         data.push_back(newData);
     }
 
+    //Use the particles shader withe the instancing
     if (data.size() > 0)
         ::ParticlesHandler::shader.Draw(*scene.get()->camera.get(), resources.meshes["Quad"].get(), resources.textures2D["White"].get(), data);
 }

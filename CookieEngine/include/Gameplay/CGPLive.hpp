@@ -37,7 +37,7 @@ namespace Cookie
 			float lifeMax = 10;
 			float lifeCurrent = 10;
 			float armor = 0;
-			Cookie::Core::Math::Vec3 posLifeInRapportOfEntity = Cookie::Core::Math::Vec3(0, 0, 0);
+			Cookie::Core::Math::Vec3 lifeBarOffset = Cookie::Core::Math::Vec3(0, 0, 0);
 
 			CGPLive() {}
 			~CGPLive() {}
@@ -53,7 +53,7 @@ namespace Cookie
 				lifeMax = 10;
 				lifeCurrent = 10;
 				armor = 0;
-				posLifeInRapportOfEntity = Cookie::Core::Math::Vec3(0, 0, 0);
+				lifeBarOffset = Cookie::Core::Math::Vec3(0, 0, 0);
 			}
 
 			void TakeHit(const float damage);

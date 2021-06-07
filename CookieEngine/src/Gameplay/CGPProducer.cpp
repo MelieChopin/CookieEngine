@@ -12,29 +12,30 @@ using namespace Cookie::ECS;
 
 void CGPProducer::UpdateCountdown(Resources::Map& map, Coordinator& coordinator, int selfId)
 {
-
 	if (queueOfUnits.size() == 0)
 		return;
 
-	//std::cout << "producer updating " << currentCountdown << "\n";
 	currentCountdown -= Core::DeltaTime();
 
 	if (currentCountdown <= 0)
 	{
-		Entity& newEntity = coordinator.AddEntity(queueOfUnits[0], coordinator.componentHandler->GetComponentGameplay(selfId).teamName);
+		Entity* newEntity = coordinator.AddEntity(queueOfUnits[0], coordinator.componentHandler->GetComponentGameplay(selfId).teamName);
 
-		ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(selfId);
-		ComponentTransform& newEntityTrs = coordinator.componentHandler->GetComponentTransform(newEntity.id);
-		ComponentModel& model = coordinator.componentHandler->GetComponentModel(selfId);
-		ComponentModel& newEntityModel = coordinator.componentHandler->GetComponentModel(newEntity.id);
+		ComponentTransform& trs          = coordinator.componentHandler->GetComponentTransform(selfId);
+		ComponentTransform& newEntityTrs = coordinator.componentHandler->GetComponentTransform(newEntity->id);
+		ComponentModel& model            = coordinator.componentHandler->GetComponentModel(selfId);
+		ComponentModel& newEntityModel   = coordinator.componentHandler->GetComponentModel(newEntity->id);
+
+		//set new unit trs to self and then remove half height of the building and add half height of the unit so it will be placed on the map
 		newEntityTrs.pos = trs.pos;
 		newEntityTrs.pos.y -= trs.scale.y * std::abs(model.mesh->AABBMin.y) - newEntityTrs.scale.y * std::abs(newEntityModel.mesh->AABBMin.y);
 
 		//Need to set additionnal behavior if newEntity has a ComponentGameplay
-		if (newEntity.signature & C_SIGNATURE::GAMEPLAY)
+		if (newEntity->signature & C_SIGNATURE::GAMEPLAY)
 		{
-			ComponentGameplay& newEntityGameplay = coordinator.componentHandler->GetComponentGameplay(newEntity.id);
+			ComponentGameplay& newEntityGameplay = coordinator.componentHandler->GetComponentGameplay(newEntity->id);
 
+			//Give PathFind to "newUnitDestination"
 			if (newEntityGameplay.signatureGameplay & CGP_SIGNATURE::MOVE)
 			{
 				for (int i = 0; i < occupiedTiles.size(); ++i)
@@ -47,6 +48,7 @@ void CGPProducer::UpdateCountdown(Resources::Map& map, Coordinator& coordinator,
 					occupiedTiles[i]->isObstacle = true;
 			}
 
+			//set posBase and posResource
 			if (newEntityGameplay.signatureGameplay & CGP_SIGNATURE::WORKER)
 			{
 				newEntityGameplay.componentWorker.posBase = &trs.pos;
@@ -60,7 +62,7 @@ void CGPProducer::UpdateCountdown(Resources::Map& map, Coordinator& coordinator,
 
 		queueOfUnits.erase(queueOfUnits.begin());
 
-		//set to next cooldown if ther is still units
+		//set to next cooldown if there is still units
 		if (!queueOfUnits.empty())
 			currentCountdown = queueOfUnits[0]->gameplay.cost.timeToProduce;
 	}
@@ -69,10 +71,10 @@ void CGPProducer::UpdateCountdown(Resources::Map& map, Coordinator& coordinator,
 
 bool CGPProducer::AddUnitToQueue(int indexInPossible)
 {
-	//should be impossible when UI implemented
-	assert(indexInPossible < possibleUnits.size());
+	if (indexInPossible >= possibleUnits.size())
+		return false;
 
-	Resources::Prefab* const & unitToAdd = possibleUnits[indexInPossible];
+	Resources::Prefab* unitToAdd = possibleUnits[indexInPossible];
 
 	//later on add Debug.Log depending on what is blocking the process to give player Feedback
 	if (queueOfUnits.size() == CGP_PRODUCER_MAX_IN_QUEUE ||
@@ -84,12 +86,10 @@ bool CGPProducer::AddUnitToQueue(int indexInPossible)
 		return false;
 	}
 
-	std::cout << "Add to queue of Producer\n";
-
-
-	income->primary -= unitToAdd->gameplay.cost.costPrimary;
-	income->secondary -= unitToAdd->gameplay.cost.costSecondary;
+	income->primary       -= unitToAdd->gameplay.cost.costPrimary;
+	income->secondary     -= unitToAdd->gameplay.cost.costSecondary;
 	income->supplyCurrent += unitToAdd->gameplay.cost.costSupply;
+	//set CountDown if it's the first unit
 	if (queueOfUnits.size() == 0)
 		currentCountdown = unitToAdd->gameplay.cost.timeToProduce;
 	queueOfUnits.push_back(unitToAdd);
@@ -98,18 +98,16 @@ bool CGPProducer::AddUnitToQueue(int indexInPossible)
 }
 void CGPProducer::RemoveUnitFromQueue(int indexInQueue)
 {
-	//should be impossible when UI implemented
-	assert(indexInQueue < queueOfUnits.size());
-
-	std::cout << "remove from queue of Producer\n";
+	if (indexInQueue >= queueOfUnits.size())
+		return;
 
 
-	income->primary   += queueOfUnits[indexInQueue]->gameplay.cost.costPrimary;
-	income->secondary += queueOfUnits[indexInQueue]->gameplay.cost.costSecondary;
+	income->primary       += queueOfUnits[indexInQueue]->gameplay.cost.costPrimary;
+	income->secondary     += queueOfUnits[indexInQueue]->gameplay.cost.costSecondary;
 	income->supplyCurrent -= queueOfUnits[indexInQueue]->gameplay.cost.costSupply;
 	queueOfUnits.erase(queueOfUnits.begin() + indexInQueue);
 
-	//if we removed the first and there is still a queue, start new cooldown
+	//if we removed the first and there is still a queue, start new CountDown
 	if (indexInQueue == 0 && !queueOfUnits.empty())
 		currentCountdown = queueOfUnits[0]->gameplay.cost.timeToProduce;
 }

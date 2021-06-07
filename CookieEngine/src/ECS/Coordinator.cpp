@@ -5,6 +5,7 @@
 #include "ParticlesHandler.hpp"
 #include "Core/Primitives.hpp"
 #include "Render/DebugRenderer.hpp"
+#include "Debug.hpp"
 
 #include "ECS/EntityHandler.hpp"
 #include "ECS/ComponentHandler.hpp"
@@ -24,9 +25,13 @@ using namespace Cookie::ECS;
 
 
 //Entity
-Entity& Coordinator::AddEntity(const int signature, std::string name)
+Entity* Coordinator::AddEntity(const int signature, std::string name)
 {
-	assert(entityHandler->livingEntities < MAX_ENTITIES && "Too many entities in existence.");
+	if (entityHandler->livingEntities >= MAX_ENTITIES)
+	{
+		CDebug.Warning("Too many entities existing.");
+		return nullptr;
+	}
 
 	Entity& newEntity = entityHandler->entities[entityHandler->livingEntities];
 	entityHandler->livingEntities++;
@@ -43,13 +48,18 @@ Entity& Coordinator::AddEntity(const int signature, std::string name)
 		componentHandler->AddComponent(newEntity, C_SIGNATURE::SCRIPT);
 	if (CheckSignature(signature, C_SIGNATURE::GAMEPLAY))
 		componentHandler->AddComponent(newEntity, C_SIGNATURE::GAMEPLAY);
+	if (CheckSignature(signature, C_SIGNATURE::FX))
+		componentHandler->AddComponent(newEntity, C_SIGNATURE::FX);
 
-	return newEntity;
+	return &newEntity;
 }
-Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab, E_ARMY_NAME teamName)
+Entity* Coordinator::AddEntity(const Resources::Prefab* const & prefab, E_ARMY_NAME teamName)
 {
-	assert(entityHandler->livingEntities < MAX_ENTITIES && "Too many entities in existence." && prefab != nullptr);
-
+	if (entityHandler->livingEntities >= MAX_ENTITIES || !prefab)
+	{
+		CDebug.Warning("Too many entities existing or prefab null");
+		return nullptr;
+	}
 
 	Entity& newEntity = entityHandler->entities[entityHandler->livingEntities];
 	entityHandler->livingEntities++;
@@ -63,8 +73,8 @@ Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab, E_ARMY_N
 		componentHandler->GetComponentModel(newEntity.id) = prefab->model;
 	if (CheckSignature(newEntity.signature, C_SIGNATURE::PHYSICS))
 		componentHandler->GetComponentPhysics(newEntity.id) = prefab->physics;
-	//if (CheckSignature(newEntity.signature, C_SIGNATURE::SCRIPT))
-		//componentHandler->GetComponentScript(newEntity.id) = prefab->script;
+	if (CheckSignature(newEntity.signature, C_SIGNATURE::SCRIPT))
+		componentHandler->GetComponentScript(newEntity.id) = prefab->script;
 	if (CheckSignature(newEntity.signature, C_SIGNATURE::GAMEPLAY))
 	{
 		ComponentGameplay& gameplay = componentHandler->GetComponentGameplay(newEntity.id);
@@ -81,14 +91,17 @@ Entity& Coordinator::AddEntity(const Resources::Prefab* const & prefab, E_ARMY_N
 			armyHandler->AddElementToArmy(&gameplay);
 	}
 
-
-
-	return newEntity;
+	return &newEntity;
 }
 void Coordinator::RemoveEntity(Entity& entity)
 {
-	assert(entityHandler->livingEntities > 0 && "No Entity to remove");
+	if (entityHandler->livingEntities <= 0)
+	{
+		CDebug.Warning("No Entity to remove");
+		return;
+	}
 
+	//Remove from army
 	if (entity.signature & C_SIGNATURE::GAMEPLAY)
 		armyHandler->RemoveElementFromArmy(&componentHandler->GetComponentGameplay(entity.id), entity.name);
 
@@ -103,6 +116,7 @@ void Coordinator::RemoveEntity(Entity& entity)
 }
 bool Coordinator::CheckSignature(const int entitySignature, const int signature)
 {
+	//true if entitySignature has all the component of the given signature
 	return (entitySignature & signature) == signature;
 }
 
@@ -110,11 +124,12 @@ bool Coordinator::CheckSignature(const int entitySignature, const int signature)
 void Coordinator::SelectEntities(Vec3& selectionQuadStart, Vec3& selectionQuadEnd)
 {
 	selectedEntities.clear();
-	float minX = (selectionQuadStart.x < selectionQuadEnd.x) ? selectionQuadStart.x : selectionQuadEnd.x;
-	float maxX = (selectionQuadStart.x < selectionQuadEnd.x) ? selectionQuadEnd.x : selectionQuadStart.x;
-	float minZ = (selectionQuadStart.z < selectionQuadEnd.z) ? selectionQuadStart.z : selectionQuadEnd.z;
-	float maxZ = (selectionQuadStart.z < selectionQuadEnd.z) ? selectionQuadEnd.z : selectionQuadStart.z;
+	float minX = std::min(selectionQuadStart.x, selectionQuadEnd.x);
+	float maxX = std::max(selectionQuadStart.x, selectionQuadEnd.x);
+	float minZ = std::min(selectionQuadStart.z, selectionQuadEnd.z);
+	float maxZ = std::max(selectionQuadStart.z, selectionQuadEnd.z);
 
+	//push back all entities with corresponding signature and inside the selection quad
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY))
 		{
@@ -123,32 +138,6 @@ void Coordinator::SelectEntities(Vec3& selectionQuadStart, Vec3& selectionQuadEn
 				minZ <= entityPos.z && entityPos.z <= maxZ)
 				selectedEntities.push_back(&entityHandler->entities[i]);
 		}
-}
-Entity* Coordinator::GetClosestFreeResourceEntity(Core::Math::Vec3& pos)
-{
-	float   minimumDistance{ INFINITY };
-	Entity* entityToReturn{ nullptr };
-
-	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
-			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::RESOURCE) &&
-			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentResource.nbOfWorkerOnIt < MAX_WORKER_PER_RESOURCE && 
-			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentResource.resourceReserve > 0)
-		{
-			ComponentTransform& trs = componentHandler->GetComponentTransform(entityHandler->entities[i].id);
-			float possibleNewDistance = (trs.pos - pos).Length();
-
-			if (possibleNewDistance < minimumDistance)
-			{
-				minimumDistance = possibleNewDistance;
-				entityToReturn = &entityHandler->entities[i];
-			}
-		}
-
-	if (minimumDistance > MAX_RESOURCE_DISTANCE_FROM_BASE)
-		return nullptr;
-
-	return entityToReturn;
 }
 Entity* Coordinator::GetClosestEntity(Vec3& pos, int minimumGameplaySignatureWanted)
 {
@@ -174,6 +163,8 @@ Entity* Coordinator::GetClosestEntity(Vec3& pos, int minimumGameplaySignatureWan
 }
 Entity* Coordinator::GetClosestSelectableEntity(Core::Math::Vec3& pos, int minimumGameplaySignatureWanted)
 {
+	//Used when the selection Quad is too small, we check if the user click on a unit
+
 	Entity* entityToReturn = GetClosestEntity(pos, minimumGameplaySignatureWanted);
 
 	//Check if pos exceed scales
@@ -188,6 +179,41 @@ Entity* Coordinator::GetClosestSelectableEntity(Core::Math::Vec3& pos, int minim
 
 	return entityToReturn;
 }
+Entity* Coordinator::GetClosestFreeResourceEntity(Core::Math::Vec3& pos)
+{
+	//Same logic as "GetClosestEntity" but with additionnal specific conditions
+
+	float   minimumDistance{ INFINITY };
+	Entity* entityToReturn{ nullptr };
+
+	//Check if the entity meet all conditions and return the closest
+	for (int i = 0; i < entityHandler->livingEntities; ++i)
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY))
+		{
+			ComponentGameplay& gameplay = componentHandler->GetComponentGameplay(entityHandler->entities[i].id);
+
+			if (CheckSignature(gameplay.signatureGameplay, CGP_SIGNATURE::RESOURCE) &&
+				gameplay.componentResource.nbOfWorkerOnIt < MAX_WORKER_PER_RESOURCE &&
+				gameplay.componentResource.resourceReserve > 0)
+			{
+				ComponentTransform& trs = componentHandler->GetComponentTransform(entityHandler->entities[i].id);
+				float possibleNewDistance = (trs.pos - pos).Length();
+
+				if (possibleNewDistance < minimumDistance)
+				{
+					minimumDistance = possibleNewDistance;
+					entityToReturn = &entityHandler->entities[i];
+				}
+			}
+		}
+
+	//Avoid having workers going too far (or even in an enemy base)
+	if (minimumDistance > MAX_RESOURCE_DISTANCE_FROM_BASE)
+		return nullptr;
+
+	return entityToReturn;
+}
+
 
 //Primary Component
 /*
@@ -215,6 +241,13 @@ void Coordinator::ApplyScriptUpdate()
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::SCRIPT))
 			componentHandler->GetComponentScript(entityHandler->entities[i].id).Update();
+}
+void Coordinator::ApplyGameplay(Map& map)
+{
+	UpdateCGPProducer(map);
+	UpdateCGPWorker(map);
+	UpdateCGPMove(map);
+	UpdateCGPAttack();
 }
 void Coordinator::ApplyRemoveUnnecessaryEntities()
 {
@@ -246,6 +279,8 @@ void Coordinator::ApplyRemoveUnnecessaryEntities()
 }
 void Coordinator::ApplyComputeTrs()
 {
+	//Used to compute the matrix TRS of each entities at max once per frame
+
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM))
 		{
@@ -328,34 +363,11 @@ void Coordinator::ApplyGameplayPosPrediction()
 			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove.PositionPrediction();
 }
 void Coordinator::ApplyGameplayResolveCollision(Map& map)
-{/*
-	std::vector<Entity*> entitiesToCheck;
-
-	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
-			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
-		{
-
-			CGPMove& cgpMoveSelf = componentHandler->GetComponentGameplay(entityHandler->entities[i].id).componentMove;
-			ComponentTransform& trsSelf = componentHandler->GetComponentTransform(entityHandler->entities[i].id);
-
-			for (int j = 0; j < entitiesToCheck.size(); ++j)
-			{
-				CGPMove& cgpMoveOther = componentHandler->GetComponentGameplay(entitiesToCheck[j]->id).componentMove;
-				ComponentTransform& trsOther = componentHandler->GetComponentTransform(entitiesToCheck[j]->id);
-
-				//if the two circles collide
-				if ((trsSelf.pos - trsOther.pos).Length() < cgpMoveSelf.radius + cgpMoveOther.radius)
-					cgpMoveSelf.ResolveColision(cgpMoveOther, map);
-			}
-
-			entitiesToCheck.push_back(&entityHandler->entities[i]);
-		}*/
-
+{
 	std::vector<CGPMove*> allEntitiespossible;
 	std::vector<CGPMove*> entitiesToCheck;
 
-	//Fill Vectors
+	//Fill Vectors for easier use later
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, CGP_SIGNATURE::MOVE))
@@ -368,12 +380,13 @@ void Coordinator::ApplyGameplayResolveCollision(Map& map)
 	//Recursive Colision
 	//for now had a max because in some case it loop forever, will be resolved later on
 	int counter = 0;
-	while (!entitiesToCheck.empty() && counter < 30)
+	while (!entitiesToCheck.empty() && counter < allEntitiespossible.size() * 3)
 	{
 		counter++;
 
 		for (int i = 0; i < allEntitiespossible.size(); ++i)
 		{
+			//avoid check with self
 			if (entitiesToCheck[0] == allEntitiespossible[i])
 				continue;
 
@@ -388,6 +401,7 @@ void Coordinator::ApplyGameplayResolveCollision(Map& map)
 				entitiesToCheck.emplace(entitiesToCheck.begin() + 1, allEntitiespossible[i]);
 		}
 
+		//Remove the checked entity to test next
 		entitiesToCheck.erase(entitiesToCheck.begin());
 	}
 

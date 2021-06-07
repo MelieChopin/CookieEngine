@@ -42,22 +42,23 @@ namespace Cookie
 			~Coordinator() {}
 
 			//Entity
-			Entity& AddEntity(const int signature, std::string name = std::string("No Name"));
-			Entity& AddEntity(const Resources::Prefab* const & prefab, Gameplay::E_ARMY_NAME teamName = Gameplay::E_ARMY_NAME::E_DEFAULT_NAME);
+			Entity* AddEntity(const int signature, std::string name = std::string("No Name"));
+			Entity* AddEntity(const Resources::Prefab* const & prefab, Gameplay::E_ARMY_NAME teamName = Gameplay::E_ARMY_NAME::E_DEFAULT_NAME);
 			void RemoveEntity(Entity& entity);
 			bool CheckSignature(const int entitySignature, const int signature);
 			
 			//Selection
 			void SelectEntities(Core::Math::Vec3& selectionQuadStart, Core::Math::Vec3& selectionQuadEnd);
-			Entity* GetClosestFreeResourceEntity(Core::Math::Vec3& pos);
 			Entity* GetClosestEntity(Core::Math::Vec3& pos, int minimumGameplaySignatureWanted = 0);
 			Entity* GetClosestSelectableEntity(Core::Math::Vec3& pos, int minimumGameplaySignatureWanted = 0);
+			Entity* GetClosestFreeResourceEntity(Core::Math::Vec3& pos);
 
 			//Primary Component
 			//void ApplySystemPhysics(float factor);
 			//void ApplyDraw(const Core::Math::Mat4& viewProj);
 			void ApplyScriptStart();
 			void ApplyScriptUpdate();
+			void ApplyGameplay(Resources::Map& map);
 			void ApplyRemoveUnnecessaryEntities();
 			void ApplyComputeTrs();
 

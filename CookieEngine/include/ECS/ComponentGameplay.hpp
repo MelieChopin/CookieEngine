@@ -46,10 +46,10 @@ namespace Cookie
 
 		struct Cost
 		{
-			float timeToProduce {0};
 			float costPrimary   {0};
 			float costSecondary {0};
 			float costSupply    {0};
+			float timeToProduce {0};
 		};
 
 		class ComponentGameplay
@@ -57,9 +57,9 @@ namespace Cookie
 
 		public:
 			Gameplay::E_ARMY_NAME  teamName {Gameplay::E_ARMY_NAME::E_DEFAULT_NAME};
-			int                    signatureGameplay{ 0 };
-			Cost                   cost;
 			Gameplay::E_ARMY_TYPE  type {Gameplay::E_ARMY_TYPE::E_DEFAULT_TYPE};
+			int                    signatureGameplay {0};
+			Cost                   cost;
 			ComponentTransform*    trs {nullptr}; //for armyCoordinator
 
 			Gameplay::CGPLive      componentLive;

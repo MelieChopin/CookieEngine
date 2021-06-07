@@ -23,8 +23,8 @@ namespace Cookie
 	namespace Gameplay
 	{
 		#define TIME_TO_HARVEST 2
-		#define PRIMARY_PER_RECOLT 5
-		#define SECONDARY_PER_RECOLT 4
+		#define PRIMARY_PER_HARVEST 5
+		#define SECONDARY_PER_HARVEST 4
 
 		class CGPWorker
 		{
@@ -61,7 +61,12 @@ namespace Cookie
 				resource					= nullptr;
 				harvestCountdown            = 0;
 				isCarryingResource          = false;
-				BuildingInConstruction       = nullptr;
+
+				possibleBuildings.clear();
+				possibleBuildingsAtLoad.clear();
+				BuildingInConstruction      = nullptr;
+				posBuilding                 = {0, 0, 0};
+				needTostartBuilding         = false;
 				constructionCountdown       = 0;
 				for (int i = 0; i < occupiedTiles.size(); ++i)
 					occupiedTiles[i]->isObstacle = false;

@@ -88,8 +88,6 @@ void ArmyCoordinator::ResourceAllocation(Map& map)
 
 void ArmyCoordinator::DevelopWorker()
 {
-	//std::cout << "AI DevelopWorker\n";
-
 	for (int i = 0; i < army->buildings.size(); ++i)
 	{
 		CGPProducer& producer = army->buildings[i]->componentProducer;
@@ -108,7 +106,6 @@ void ArmyCoordinator::DevelopWorker()
 }
 void ArmyCoordinator::DevelopBase(Map& map)
 {
-	//std::cout << "AI DevelopBase\n";
 	//CLEAN later on 
 
 	for (int i = 0; i < army->workers.size(); ++i)
@@ -172,8 +169,6 @@ void ArmyCoordinator::DevelopBase(Map& map)
 }
 void ArmyCoordinator::DevelopArmy()
 {
-	//std::cout << "AI DevelopArmy\n";
-
 	for (int i = 0; i < army->buildings.size(); ++i)
 	{
 		CGPProducer& producer = army->buildings[i]->componentProducer;
@@ -192,8 +187,6 @@ void ArmyCoordinator::DevelopArmy()
 }
 void ArmyCoordinator::Attack(Map& map)
 {
-	//std::cout << "AI Attack\n";
-
 	for (int i = 0; i < army->units.size(); ++i)
 	{
 		ComponentGameplay* gameplay = army->units[i];
@@ -207,8 +200,6 @@ void ArmyCoordinator::Attack(Map& map)
 }
 void ArmyCoordinator::Defense(Map& map)
 {
-	//std::cout << "AI Defend\n";
-
 	for (int i = 0; i < army->units.size(); ++i)
 	{
 		ComponentGameplay* gameplay = army->units[i];

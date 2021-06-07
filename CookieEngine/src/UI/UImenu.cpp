@@ -8,6 +8,12 @@ using namespace Cookie::UI;
 using namespace Cookie::Resources;
 
 
+UImenu::UImenu(const Cookie::Core::Window& _window, Cookie::Resources::ResourcesManager& _resources)
+	  : window		(_window),
+	    resources	(_resources),
+		tittleFont	(GetIO().Fonts->AddFontFromFileTTF("Assets/UI/Roboto-Medium.ttf", 90))
+{}
+
 void UImenu::DisplayMenus() const
 {
 	const ImVec2 windowSize = GetWindowSize();
@@ -38,9 +44,11 @@ void UImenu::DisplayMenus() const
 
 		SetCursorPos({15.f, 20.f});
 		
-		SetWindowFontScale(5.f);
+		PushFont(tittleFont);
 		TextColored({0, 0, 0, 1}, "Cookie Battle");
-		
+		PopFont();
+
+
 		SetWindowFontScale(1.5f);
 
 		SetCursorPosX(15.f);

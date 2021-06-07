@@ -83,7 +83,7 @@ void Cookie::Resources::Serialization::Save::ToJson(json& js, const Cookie::ECS:
 				game["CGPLive"]["Life"] = gameplay.componentLive.lifeCurrent;
 				game["CGPLive"]["LifeMax"] = gameplay.componentLive.lifeMax;
 				game["CGPLive"]["Armor"] = gameplay.componentLive.armor;
-				game["CGPLive"]["PosLife"] = gameplay.componentLive.posLifeInRapportOfEntity.e;
+				game["CGPLive"]["PosLife"] = gameplay.componentLive.lifeBarOffset.e;
 			}
 
 			if (gameplay.signatureGameplay & CGP_SIGNATURE::ATTACK)
@@ -421,7 +421,7 @@ void Cookie::Resources::Serialization::Save::SavePrefab(const Prefab* const & pr
 		 live["Life"] = gameplay.componentLive.lifeCurrent;
 		 live["LifeMax"] = gameplay.componentLive.lifeMax;
 		 live["Armor"] = gameplay.componentLive.armor;
-		 live["PosLife"] = gameplay.componentLive.posLifeInRapportOfEntity.e;
+		 live["PosLife"] = gameplay.componentLive.lifeBarOffset.e;
 
 		 json& attack = js["Gameplay"]["CGPAttack"];
 		 attack["NeedToAttack"] = gameplay.componentAttack.needToAttack;
@@ -823,7 +823,6 @@ void Cookie::Resources::Serialization::Load::FromJson(json& js, Cookie::ECS::Ent
 		 json& newEntity = js["EntityHandler"][i].at("entity");
 		 entity.entities[i] = (Cookie::ECS::Entity(newEntity.at("id").get<int>(), newEntity.at("signature").get<int>(), 
 								newEntity.at("name").get<std::string>(), newEntity.at("namePrefab").get<std::string>()));
-		 entity.entities[i].namePrefab = newEntity.at("namePrefab").get<std::string>();
 	 }
  }
 
@@ -944,6 +943,10 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 	 if (!file.is_open() || file.peek() == std::ifstream::traits_type::eof())
 	 {
 		 std::cout << "DON'T FIND THE FILE\n";
+		 newScene.get()->camera = std::make_unique<Render::GameCam>();
+		 newScene.get()->map.trs.ComputeTRS();
+		 newScene.get()->map.InitTiles();
+		 game.scene = std::move(newScene);
 		 return;
 	 }
 
@@ -984,7 +987,7 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 
 		 js["Map"]["trs"]["pos"].get_to(scene->map.trs.pos.e);
 		 js["Map"]["trs"]["rot"].get_to(scene->map.trs.rot.e);
-		 //js["Map"]["trs"]["scale"].get_to(scene->map.trs.scale.e);
+		 js["Map"]["trs"]["scale"].get_to(scene->map.trs.scale.e);
 		 scene->map.trs.ComputeTRS();
 
 		 if (js["Map"]["model"]["texture"].contains("albedo"))
@@ -1139,7 +1142,6 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 
 void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager)
  {
-
 	 std::vector<std::string> filesPath;
 	 for (const fs::directory_entry& path : fs::directory_iterator("Assets/Prefabs"))
 	 {
@@ -1498,16 +1500,8 @@ void Cookie::Resources::Serialization::Load::LoadPhysic(json& physic, Cookie::EC
 void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay, 
 				Cookie::ECS::ComponentGameplay& GPComponent, Cookie::Resources::ResourcesManager& resourcesManager, bool allPrefabLoaded)
 {
-	if (gameplay.contains("TeamName"))
-		GPComponent.teamName = gameplay["TeamName"];
-	else
-		CDebug.Error("No team's defined");
-
-	if (gameplay.contains("SignatureGameplay"))
-		GPComponent.signatureGameplay = gameplay["SignatureGameplay"];
-	else
-		CDebug.Error("No SignatureGameplay defined");
-
+	GPComponent.teamName = gameplay["TeamName"];
+	GPComponent.signatureGameplay = gameplay["SignatureGameplay"];
 	GPComponent.type = gameplay["Type"];
 
 	json temp = gameplay;
@@ -1526,7 +1520,7 @@ void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay,
 		GPComponent.componentLive.lifeCurrent = temp["Life"].get<float>();
 		GPComponent.componentLive.lifeMax = temp["LifeMax"].get<float>();
 		GPComponent.componentLive.armor = temp["Armor"].get<float>();
-		temp["PosLife"].get_to(GPComponent.componentLive.posLifeInRapportOfEntity.e);
+		temp["PosLife"].get_to(GPComponent.componentLive.lifeBarOffset.e);
 	}
 
 	if (gameplay.contains("CGPAttack"))

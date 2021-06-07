@@ -234,14 +234,16 @@ ___
 ![ui_editor](screenshots/ui_editor.gif)
 
 Allows you to place the widget of the ui in game where you want them to be.
-
+The modifications is save and you find them when you relaunch Cookie Engine.
 ___
 
 ## __Sound Orchestrator__
 
 ![sound_orchestrator](screenshots/sound_orchestrator.PNG)
 
-Allows you to manage the sound you have imported
+Allows you to manage the sound you have imported.
+You can choose between to have a 2DSound and a 3DSound and modify the volume of this sound.
+
 
 ___
 
@@ -249,7 +251,9 @@ ___
 
 ![particle_editor](screenshots/particle_editor.PNG)
 
-Allows you to create particle and save particles
+Allows you to create particle and save particles.
+You can add updators and generators and remove it to improve your particles system.
+A particles system can have several particles which may have different behaviors.
 
 /!\ ___Particles are available in the Assets/VFX/ folder, be careful that this folder exists before saving particles as it might crash if you do not have it___ /!\
 ___

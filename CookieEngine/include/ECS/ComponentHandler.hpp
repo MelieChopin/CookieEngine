@@ -45,18 +45,7 @@ namespace Cookie
 
 
 		public:
-			ComponentHandler()
-			{
-				for (int i = 0; i < MAX_ENTITIES; ++i)
-				{
-					ComponentTransform* trsPtr				  = &componentTransforms[i];
-					componentGameplays[i].trs				  = trsPtr;
-					componentGameplays[i].componentLive.trs   = trsPtr;
-					componentGameplays[i].componentAttack.trs = trsPtr;
-					componentGameplays[i].componentMove.trs   = trsPtr;
-
-				}
-			}
+			ComponentHandler();
 			~ComponentHandler() {}
 
 			inline void AddComponent(Entity& entity, int signature) noexcept;
@@ -67,7 +56,6 @@ namespace Cookie
 			void InitComponentPhysic(Entity& entity);
 
 
-			//template later on
 			inline ComponentTransform& GetComponentTransform (const unsigned int id) noexcept;
 			inline ComponentModel&     GetComponentModel     (const unsigned int id) noexcept;
 			inline ComponentPhysics&   GetComponentPhysics   (const unsigned int id) noexcept;

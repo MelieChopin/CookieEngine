@@ -23,15 +23,15 @@ namespace Cookie
 
 			AIStep operator+(const AIStep& other)
 			{
-				AIStep toreturn = *this;
+				AIStep toReturn = *this;
 
-				toreturn.nbOfWorker += other.nbOfWorker;
-				toreturn.nbOfUnits  += other.nbOfUnits;
+				toReturn.nbOfWorker += other.nbOfWorker;
+				toReturn.nbOfUnits  += other.nbOfUnits;
 
 				for (int i = 0; i < other.listOfBuildings.size(); ++i)
-					toreturn.listOfBuildings.push_back(other.listOfBuildings[i]);
+					toReturn.listOfBuildings.push_back(other.listOfBuildings[i]);
 
-				return toreturn;
+				return toReturn;
 			}
 			AIStep& operator+=(const AIStep& other) { *this = *this + other; return *this; }
 		};

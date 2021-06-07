@@ -16,5 +16,6 @@ void CGPLive::TakeHit(const float damage)
 	if(vfxHit)
 		ParticlesHandler::CreateParticlesWithPrefab(trs->pos, vfxHit);
 
+	//avoid to gain life if armor exceed damage
 	lifeCurrent -= std::fmax(damage - armor, 0);
 }

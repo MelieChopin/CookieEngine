@@ -72,10 +72,12 @@ void Map::ScaleHasChanged()
 
 	TileNbHasChanged();
 	
-	physic.physBody->removeCollider(physic.physColliders[0]);
-	physic.physColliders.clear();
-	physic.AddCubeCollider(trs.scale / 2.f, trs.pos, trs.rot);
-
+	if (physic.physColliders.size() > 0)
+	{
+		physic.physBody->removeCollider(physic.physColliders[0]);
+		physic.physColliders.clear();
+		physic.AddCubeCollider(trs.scale / 2.f, trs.pos, trs.rot);
+	}
 }
 void Map::TileNbHasChanged()
 {
@@ -211,7 +213,10 @@ bool Map::ApplyPathfinding(Tile& tileStart, Tile& tileEnd)
 		return false;
 	//if we are already on the tile end return true without doing any calculation
 	if (&tileStart == &tileEnd)
+	{
+		tileEnd.parent = nullptr;
 		return true;
+	}
 
 	// Set all Tiles to default 
 	for (int x = 0; x < tilesNb.x; x++)

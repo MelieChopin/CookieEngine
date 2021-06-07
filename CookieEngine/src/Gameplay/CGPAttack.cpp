@@ -7,6 +7,8 @@ using namespace Cookie::Gameplay;
 using namespace Cookie::Resources;
 using namespace Cookie::Resources::Particles;
 
+
+
 void CGPAttack::Attack()
 {
 	//add Check so attackCooldown will not have high negative value if unit stand still long enough

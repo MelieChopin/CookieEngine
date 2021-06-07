@@ -26,8 +26,10 @@ namespace Cookie
 		public:
 			Income*							income {nullptr};
 			int								supplyGiven {0};
+
 			std::vector<Resources::Prefab*>	possibleUnits;
-			std::vector<std::string>		possibleUnitsAtLoad;
+			std::vector<std::string>		possibleUnitsAtLoad; //for serialization
+
 			std::vector<Resources::Prefab*> queueOfUnits;
 			float                           currentCountdown {0};
 			Core::Math::Vec3				newUnitDestination {0, 0, 0};
@@ -42,9 +44,14 @@ namespace Cookie
 			inline void ToDefault() noexcept
 			{
 				income = nullptr;
+				supplyGiven = 0;
+
 				possibleUnits.clear();
+				possibleUnitsAtLoad.clear();
+
 				queueOfUnits.clear();
 				currentCountdown = 0;
+				newUnitDestination = {0, 0, 0};
 				
 				tileSize = { {0, 0} };
 				for (int i = 0; i < occupiedTiles.size(); ++i)

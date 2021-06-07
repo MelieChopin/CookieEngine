@@ -17,16 +17,14 @@ namespace Cookie
 			unsigned int		id				  {0};
 			int                 signature		  {0}; 
 			std::string			name			  {"No Name"};
+			std::string			namePrefab		  {"No Name"};
 			std::string			tag				  {"No Tag"};
 			bool				needToBeRemoved	  {false};
-			std::string			namePrefab		  {"NONE"};
 
 			Entity(unsigned int _id);
 			Entity(unsigned int _id, int _signature, std::string _name, std::string _namePrefab);
-			Entity(const Entity& entity);
 			~Entity() {};
 
-			void operator= (const Entity& entity);
 			void Swap(Entity& entity);
 
 			void ToDefault();

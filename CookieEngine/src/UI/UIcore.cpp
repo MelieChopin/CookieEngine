@@ -21,6 +21,7 @@ void UIcore::PreInitContext()
 
 	StyleColorsDark();
 	GetStyle().Colors[ImGuiCol_DockingEmptyBg] = { 0, 0, 0, 0 };
+	GetIO().Fonts->AddFontDefault();
 }
 
 void UIcore::FinishInit(const Cookie::Render::Renderer& _renderer)

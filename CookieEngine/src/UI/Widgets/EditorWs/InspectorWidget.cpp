@@ -510,7 +510,7 @@ void Inspector::GameplayInterface()
                 
                 DragFloat("##ARMOR",    &gameplayComp.componentLive.armor,       1.f, NULL, NULL, "Armor: %.0f");
 
-                DragFloat("##POS", &gameplayComp.componentLive.posLifeInRapportOfEntity.y, 0.5f, -10, 10, "LifeBar Offset :  %.0f");
+                DragFloat("##POS", &gameplayComp.componentLive.lifeBarOffset.y, 0.5f, -10, 10, "LifeBar Offset :  %.0f");
 
                 TreePop();
                 NewLine();

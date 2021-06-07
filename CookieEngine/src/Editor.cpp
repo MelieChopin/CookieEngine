@@ -27,7 +27,7 @@ Editor::Editor()
     cam.Update();
     cam.Deactivate();
     game.scene->InitCoordinator(game.coordinator);
-
+    
     //Load default Scene
     Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", game);
     game.SetScene();
@@ -191,8 +191,6 @@ void Editor::Loop()
         TryResizeWindow();
 
         // Present frame
-        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
-            game.coordinator.armyHandler->AddArmyCoordinator(E_ARMY_NAME::E_AI1, game.resources.aiBehaviors["Test1"].get());
         
         if (isPlaying && previewIsPlaying)
         {

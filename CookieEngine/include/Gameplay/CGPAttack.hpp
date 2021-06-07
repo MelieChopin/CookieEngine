@@ -31,7 +31,7 @@ namespace Cookie
 
 			bool needToAttack    {false};
 
-			float powerLevel     {0}; //used for AI analysis
+			float powerLevel     {0}; //will be used for AI analysis
 			float attackDamage   {1};
 			float attackSpeed    {1}; 
 			float attackCooldown {0};

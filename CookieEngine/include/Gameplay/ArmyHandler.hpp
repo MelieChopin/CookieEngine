@@ -44,7 +44,7 @@ namespace Cookie
 		class ArmyHandler
 		{
 		public:
-			int               livingArmies {0};
+			int                          livingArmies {0};
 			std::array<Army, MAX_ARMIES> armies;
 			std::vector<ArmyCoordinator> armiesCoordinator;
 

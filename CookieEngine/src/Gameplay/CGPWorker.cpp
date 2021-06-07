@@ -19,20 +19,15 @@ void CGPWorker::Update(Resources::Map& map, Coordinator& coordinator, int selfId
 	//isBuilding
 	if (constructionCountdown > 0)
 	{
-		//std::cout << "Worker updating " << constructionCountdown << "\n";
 		constructionCountdown -= Core::DeltaTime();
-
 
 		if (constructionCountdown <= 0)
 		{
-			if (BuildingInConstruction)
-			{
-				Entity& newEntity = coordinator.AddEntity(BuildingInConstruction, coordinator.componentHandler->GetComponentGameplay(selfId).teamName);
+			Entity* newEntity = coordinator.AddEntity(BuildingInConstruction, coordinator.componentHandler->GetComponentGameplay(selfId).teamName);
 
-				coordinator.componentHandler->GetComponentTransform(newEntity.id).pos = posBuilding;
-				coordinator.componentHandler->GetComponentGameplay(newEntity.id).componentProducer.occupiedTiles = occupiedTiles;
-			}
-
+			coordinator.componentHandler->GetComponentTransform(newEntity->id).pos = posBuilding;
+			coordinator.componentHandler->GetComponentGameplay(newEntity->id).componentProducer.occupiedTiles = occupiedTiles;
+			occupiedTiles.clear();
 			BuildingInConstruction = nullptr;
 		}
 		else
@@ -46,7 +41,7 @@ void CGPWorker::Update(Resources::Map& map, Coordinator& coordinator, int selfId
 		if (harvestCountdown <= 0)
 		{
 			isCarryingResource = true;
-			resource->resourceReserve -= (resource->isPrimary ? PRIMARY_PER_RECOLT : SECONDARY_PER_RECOLT);
+			resource->resourceReserve -= (resource->isPrimary ? PRIMARY_PER_HARVEST : SECONDARY_PER_HARVEST);
 
 			if (resource->resourceReserve <= 0)
 			{
@@ -57,35 +52,38 @@ void CGPWorker::Update(Resources::Map& map, Coordinator& coordinator, int selfId
 			}
 				
 		}
-
-		return;
+		else
+			return;
 	}
 
 	//isMoving
-	ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(selfId);
-	Core::Math::Vec3* destination = (needTostartBuilding) ? &posBuilding : (isCarryingResource) ? posBase : posResource;
-	if (!destination)
-		return;
-	Core::Math::Vec3 direction = Vec3{destination->x - trs.pos.x, 0, destination->z - trs.pos.z};
-	trs.pos += direction.Normalize() * (moveSpeed * Core::DeltaTime());
-	trs.rot = Mat4::LookAt(Vec3{ 0, 0, 0 }, direction, Vec3{ 0, 1, 0 }).GetEuler();
-	trs.trsHasChanged = true;
-
-	//HasReachDestination
-	if (direction.Length() < 0.1)
 	{
-		if (needTostartBuilding)
+		ComponentTransform& trs = coordinator.componentHandler->GetComponentTransform(selfId);
+		Core::Math::Vec3* destination = (needTostartBuilding) ? &posBuilding : (isCarryingResource) ? posBase : posResource;
+		if (!destination)
+			return;
+		//avoid mvt on y axis
+		Core::Math::Vec3 direction = Vec3{ destination->x - trs.pos.x, 0, destination->z - trs.pos.z };
+		trs.pos += direction.Normalize() * (moveSpeed * Core::DeltaTime());
+		trs.rot = Mat4::LookAt(Vec3{ 0, 0, 0 }, direction, Vec3{ 0, 1, 0 }).GetEuler();
+		trs.trsHasChanged = true;
+
+		//HasReachDestination
+		if (direction.Length() < 0.1)
 		{
-			needTostartBuilding = false;
-			constructionCountdown = BuildingInConstruction->gameplay.cost.timeToProduce;
+			if (needTostartBuilding)
+			{
+				needTostartBuilding = false;
+				constructionCountdown = BuildingInConstruction->gameplay.cost.timeToProduce;
+			}
+			else if (isCarryingResource)
+			{
+				isCarryingResource = false;			
+				(resource->isPrimary ? income->primary : income->secondary) += (resource->isPrimary ? PRIMARY_PER_HARVEST : SECONDARY_PER_HARVEST);
+			}
+			else
+				harvestCountdown = TIME_TO_HARVEST;
 		}
-		else if (isCarryingResource)
-		{
-			isCarryingResource = false;			
-			(resource->isPrimary ? income->primary : income->secondary) += (resource->isPrimary ? PRIMARY_PER_RECOLT : SECONDARY_PER_RECOLT);
-		}
-		else
-			harvestCountdown = TIME_TO_HARVEST;
 	}
 
 	
@@ -103,8 +101,8 @@ void CGPWorker::SetResource(Core::Math::Vec3& resourcePos, CGPResource& resource
 
 bool CGPWorker::StartBuilding(Map& map, Vec3& _posBuilding, int indexInPossibleBuildings)
 {
-	//should be impossible when UI implemented
-	assert(indexInPossibleBuildings < possibleBuildings.size());
+	if (indexInPossibleBuildings >= possibleBuildings.size())
+		return false;
 
 	Resources::Prefab* const& buildingToAdd = possibleBuildings[indexInPossibleBuildings];
 
