@@ -87,10 +87,11 @@ Entity* Coordinator::AddEntity(const Resources::Prefab* const & prefab, E_ARMY_N
 		gameplay.teamName = teamName;
 
 		ComponentTransform* trsPtr = &componentHandler->GetComponentTransform(newEntity.id);
-		gameplay.trs				 = trsPtr;
-		gameplay.componentLive.trs   = trsPtr;
-		gameplay.componentAttack.trs = trsPtr;
-		gameplay.componentMove.trs   = trsPtr;
+		gameplay.trs				   = trsPtr;
+		gameplay.componentLive.trs     = trsPtr;
+		gameplay.componentAttack.trs   = trsPtr;
+		gameplay.componentMove.trs     = trsPtr;
+		gameplay.componentProducer.trs = trsPtr;
 
 		if(gameplay.teamName != E_ARMY_NAME::E_DEFAULT_NAME)
 			armyHandler->AddElementToArmy(&gameplay);
