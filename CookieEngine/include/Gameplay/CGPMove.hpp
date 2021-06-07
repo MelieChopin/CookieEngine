@@ -29,9 +29,6 @@ namespace Cookie
 			CGPMOVE_STATE state          {CGPMOVE_STATE::E_STATIC};
 			float moveSpeed              {5};
 			bool  isFlying               {false};
-			//use it for collision Detection making a circle with trs.pos
-			// sqrt(scale.x^2 + scale.z^2)
-			float radius = 0.7;
 
 			std::vector<Core::Math::Vec3> waypoints;
 
@@ -47,7 +44,6 @@ namespace Cookie
 				state     = CGPMOVE_STATE::E_STATIC;
 				moveSpeed = 0;
 				isFlying  = false;
-				radius    = 0;
 
 				waypoints.clear();
 

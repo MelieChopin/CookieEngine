@@ -101,7 +101,7 @@ void CGPWorker::SetResource(Core::Math::Vec3& resourcePos, CGPResource& resource
 
 bool CGPWorker::StartBuilding(Map& map, Vec3& _posBuilding, int indexInPossibleBuildings)
 {
-	if (indexInPossibleBuildings >= possibleBuildings.size())
+	if (indexInPossibleBuildings >= possibleBuildings.size() || needTostartBuilding || constructionCountdown)
 		return false;
 
 	Resources::Prefab* const& buildingToAdd = possibleBuildings[indexInPossibleBuildings];

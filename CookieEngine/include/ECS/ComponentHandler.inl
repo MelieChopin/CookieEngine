@@ -12,6 +12,7 @@ namespace Cookie
 			for (int i = 0; i < MAX_ENTITIES; ++i)
 			{
 				ComponentTransform* trsPtr = &componentTransforms[i];
+				trsPtr->modelptr = &componentModels[i];
 				componentGameplays[i].trs = trsPtr;
 				componentGameplays[i].componentLive.trs = trsPtr;
 				componentGameplays[i].componentAttack.trs = trsPtr;

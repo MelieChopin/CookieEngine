@@ -532,8 +532,6 @@ void Inspector::GameplayInterface()
                 DragFloat("##SPEED", &gameplayComp.componentMove.moveSpeed, 0.25f, NULL, NULL, "Speed: %.2f");
                 Text("Flying:"); SameLine(); Checkbox("##CANFLY", &gameplayComp.componentMove.isFlying);
 
-                DragFloat("##RADIUS", &gameplayComp.componentMove.radius, 0.25f, NULL, NULL, "Radius: %.2f");
-
                 TreePop();
                 NewLine();
             }
