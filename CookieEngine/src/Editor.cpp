@@ -36,10 +36,11 @@ Editor::Editor()
 
     //Load all prefabs in folder Prefabs
     Resources::Serialization::Load::LoadAllPrefabs(game.resources);
+    game.particlesHandler.particlesPrefab = &game.resources.particles;
 
     Resources::SoundManager::InitSystem();
+    //Load settings of musics
     Resources::SoundManager::LoadAllMusic(game.resources);
-    game.particlesHandler.particlesPrefab = &game.resources.particles;
 
     Serialization::Load::LoadAllAIBehaviors(game.resources);
 
@@ -204,8 +205,6 @@ void Editor::Loop()
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
         // Present frame
-        if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
-            game.coordinator.armyHandler->AddArmyCoordinator(E_ARMY_NAME::E_AI1, game.resources.aiBehaviors["Test1"].get());
         
         if (isPlaying && previewIsPlaying)
         {

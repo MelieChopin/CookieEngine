@@ -48,9 +48,11 @@ namespace Cookie
 			class ParticlesEmitter
 			{
 			public:
+				//ParticlesGenerator and ParticlesUpdate are virtuals
 				std::vector<std::shared_ptr<ParticlesGenerator>> generators;
 				std::vector<std::shared_ptr<ParticlesUpdate>>  updates;
 
+				//Use for the UI
 				int componentAdd = 0;
 
 				ParticlesEmitter() {}

@@ -944,6 +944,10 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 	 if (!file.is_open() || file.peek() == std::ifstream::traits_type::eof())
 	 {
 		 std::cout << "DON'T FIND THE FILE\n";
+		 newScene.get()->camera = std::make_unique<Render::GameCam>();
+		 newScene.get()->map.trs.ComputeTRS();
+		 newScene.get()->map.InitTiles();
+		 game.scene = std::move(newScene);
 		 return;
 	 }
 
@@ -984,7 +988,7 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 
 		 js["Map"]["trs"]["pos"].get_to(scene->map.trs.pos.e);
 		 js["Map"]["trs"]["rot"].get_to(scene->map.trs.rot.e);
-		 //js["Map"]["trs"]["scale"].get_to(scene->map.trs.scale.e);
+		 js["Map"]["trs"]["scale"].get_to(scene->map.trs.scale.e);
 		 scene->map.trs.ComputeTRS();
 
 		 if (js["Map"]["model"]["texture"].contains("albedo"))
@@ -1139,7 +1143,6 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 
 void Cookie::Resources::Serialization::Load::LoadAllPrefabs(Cookie::Resources::ResourcesManager& resourcesManager)
  {
-
 	 std::vector<std::string> filesPath;
 	 for (const fs::directory_entry& path : fs::directory_iterator("Assets/Prefabs"))
 	 {
@@ -1498,16 +1501,8 @@ void Cookie::Resources::Serialization::Load::LoadPhysic(json& physic, Cookie::EC
 void Cookie::Resources::Serialization::Load::LoadGameplay(json& gameplay, 
 				Cookie::ECS::ComponentGameplay& GPComponent, Cookie::Resources::ResourcesManager& resourcesManager, bool allPrefabLoaded)
 {
-	if (gameplay.contains("TeamName"))
-		GPComponent.teamName = gameplay["TeamName"];
-	else
-		CDebug.Error("No team's defined");
-
-	if (gameplay.contains("SignatureGameplay"))
-		GPComponent.signatureGameplay = gameplay["SignatureGameplay"];
-	else
-		CDebug.Error("No SignatureGameplay defined");
-
+	GPComponent.teamName = gameplay["TeamName"];
+	GPComponent.signatureGameplay = gameplay["SignatureGameplay"];
 	GPComponent.type = gameplay["Type"];
 
 	json temp = gameplay;

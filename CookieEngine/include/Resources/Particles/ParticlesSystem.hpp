@@ -47,6 +47,7 @@ namespace Cookie
 			class ParticlesSystem
 			{
 			public :
+				//each particles systems have data (data of each particles) and a emitter who have a list of generators and updates
 				std::vector<ParticlesData> data;
 				std::vector<ParticlesEmitter> particlesEmiter;
 
@@ -69,6 +70,7 @@ namespace Cookie
 
 				void generate();
 				void Update();
+				//For the draw we use the intancing and we don't draw if the camera don't see the particles
 				void Draw(const Render::Camera& cam, Render::Frustrum& frustrum);
 			};
 		}

@@ -23,7 +23,17 @@ void ParticleEditor::WindowDisplay()
 		//Create new particles
 		{
 			InputText("Particles name", &name);
-			if (Button("Create") && manager.particles.find(name) == manager.particles.end())
+			if (name.empty())
+			{
+				NewLine();
+				Text("Your Particles has no name!");
+			}
+			else if (manager.particles.find(name) != manager.particles.end())
+			{
+				NewLine();
+				Text("Your Particles' name is invalid. (already in use)");
+			}
+			else if (Button("Create") && manager.particles.find(name) == manager.particles.end())
 			{
 				std::unique_ptr<ParticlesPrefab> prefParticles = std::make_unique<ParticlesPrefab>();
 				ParticlesPrefab& pref = *prefParticles.get();
@@ -36,16 +46,6 @@ void ParticleEditor::WindowDisplay()
 				Cookie::Resources::Serialization::Save::SaveParticles(pref);
 				selectedParticles = manager.particles[pref.name].get();
 				name.clear();
-			}
-			else if (name.empty())
-			{
-				NewLine();
-				Text("Your Particles has no name!");
-			}
-			else if (manager.particles.find(name) != manager.particles.end())
-			{
-				NewLine();
-				Text("Your Particles' name is invalid. (already in use)");
 			}
 		}
 
@@ -727,16 +727,10 @@ void ParticleEditor::WindowDisplay()
 							emitter.componentAdd += COMPONENTADD::SP;
 						}
 					}
-
 				}
 				TreePop();
 			}
-
-
-
 		}
-
-
 
 		NewLine();
 
