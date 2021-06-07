@@ -131,7 +131,8 @@ void Coordinator::SelectEntities(Vec3& selectionQuadStart, Vec3& selectionQuadEn
 
 	//push back all entities with corresponding signature and inside the selection quad
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY))
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).teamName == E_ARMY_NAME::E_PLAYER)
 		{
 			Vec3& entityPos = componentHandler->GetComponentTransform(entityHandler->entities[i].id).pos;
 			if (minX <= entityPos.x && entityPos.x <= maxX &&
@@ -139,7 +140,7 @@ void Coordinator::SelectEntities(Vec3& selectionQuadStart, Vec3& selectionQuadEn
 				selectedEntities.push_back(&entityHandler->entities[i]);
 		}
 }
-Entity* Coordinator::GetClosestEntity(Vec3& pos, int minimumGameplaySignatureWanted)
+Entity* Coordinator::GetClosestEntity(Vec3& pos, E_ARMY_NAME teamName, int minimumGameplaySignatureWanted)
 {
 	float   minimumDistance {INFINITY};
 	Entity* entityToReturn  {nullptr};
@@ -147,6 +148,7 @@ Entity* Coordinator::GetClosestEntity(Vec3& pos, int minimumGameplaySignatureWan
 	//Get closest Entity with minimumGameplaySignatureWanted
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).teamName == teamName && 
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, minimumGameplaySignatureWanted))
 		{
 			ComponentTransform& trs = componentHandler->GetComponentTransform(entityHandler->entities[i].id);
@@ -165,7 +167,7 @@ Entity* Coordinator::GetClosestSelectableEntity(Core::Math::Vec3& pos, int minim
 {
 	//Used when the selection Quad is too small, we check if the user click on a unit
 
-	Entity* entityToReturn = GetClosestEntity(pos, minimumGameplaySignatureWanted);
+	Entity* entityToReturn = GetClosestEntity(pos, E_ARMY_NAME::E_PLAYER, minimumGameplaySignatureWanted);
 
 	//Check if pos exceed scales
 	if (entityToReturn)
