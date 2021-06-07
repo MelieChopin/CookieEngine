@@ -191,7 +191,7 @@ void Editor::Loop()
         TryResizeWindow();
 
         // Present frame
-        
+
         if (isPlaying && previewIsPlaying)
         {
             game.Update();
@@ -200,10 +200,18 @@ void Editor::Loop()
         {
             previewIsPlaying = isPlaying;
             game.Start();
+            Resources::Serialization::Save::SaveScene(*game.scene.get(), game.resources);
         }
         else if (!isPlaying && previewIsPlaying)
         {
             previewIsPlaying = isPlaying;
+            
+            game.playerData.makingASelectionQuad = false;
+            
+            Resources::Serialization::Load::LoadScene(game.scene.get()->filepath.c_str(), game);
+            game.SetScene();
+            game.coordinator.selectedEntities.clear();
+            game.particlesHandler.Clear();
         }
         else
         {

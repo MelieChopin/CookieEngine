@@ -30,16 +30,16 @@ void UIscene::LoadLayout(const std::vector<GameWindowInfo>& GameWindows, Cookie:
 		switch (info.ID)
 		{
 		case GameWidgetID::GamespectorID:
-			sceneWidgets.push_back(std::make_unique<Gamespector>	(game.coordinator, game.resources));											break;
+			sceneWidgets.push_back(std::make_unique<Gamespector>	(game.coordinator, game.resources));															break;
 		
 		case GameWidgetID::ActionPanelID:
-			sceneWidgets.push_back(std::make_unique<ActionPanel>	(game.coordinator, game.playerData, game.resources));							break;
+			sceneWidgets.push_back(std::make_unique<ActionPanel>	(game.coordinator, game.playerData, game.resources));											break;
 		
 		case GameWidgetID::MinimapID:	    
-			sceneWidgets.push_back(std::make_unique<Minimap>		(game.miniMapBuffer, scene.camera.get(), scene.map, game.resources));			break;
+			sceneWidgets.push_back(std::make_unique<Minimap>		(game.resources, game.miniMapBuffer, scene.camera.get(), scene.map));							break;
 		
 		case GameWidgetID::IncomePanelID:
-			sceneWidgets.push_back(std::make_unique<IncomePanel>	(scene.armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));	break;
+			sceneWidgets.push_back(std::make_unique<IncomePanel>	(game.resources, scene.armyHandler.GetArmy(Cookie::Gameplay::E_ARMY_NAME::E_PLAYER)->income));	break;
 		
 		default: break;
 		}
@@ -95,23 +95,26 @@ void UIscene::RenderLayout()
 	isHovered = false;
 	const ImVec2 mPos = GetIO().MousePos;
 
-
-	PushStyleVar(ImGuiStyleVar_WindowPadding, {15, 15});
-
-	for (std::unique_ptr<GameWindowBase>& gw : sceneWidgets)
+	if (firstRoundDone)
 	{
-		gw->WindowDisplay();
+		PushStyleVar(ImGuiStyleVar_WindowPadding, {15, 15});
+
+		for (std::unique_ptr<GameWindowBase>& gw : sceneWidgets)
+		{
+			gw->WindowDisplay();
 		
 
-		const ImGuiWindow* const & lastWin = FindWindowByName(gw->GetName());
+			const ImGuiWindow* const & lastWin = FindWindowByName(gw->GetName());
 
-		if (lastWin)
-		{
-			const ImRect lastRect = lastWin->Rect();
+			if (lastWin)
+			{
+				const ImRect lastRect = lastWin->Rect();
 
-			isHovered |= (mPos.x > lastRect.Min.x) && (mPos.x < lastRect.Max.x) && (mPos.y > lastRect.Min.y) && (mPos.y < lastRect.Max.y);
+				isHovered |= (mPos.x > lastRect.Min.x) && (mPos.x < lastRect.Max.x) && (mPos.y > lastRect.Min.y) && (mPos.y < lastRect.Max.y);
+			}
 		}
-	}
 
-	PopStyleVar();
+		PopStyleVar();
+	}
+	else firstRoundDone = true;
 }

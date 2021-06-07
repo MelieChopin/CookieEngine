@@ -365,6 +365,9 @@ void ParticleEditor::WindowDisplay()
 							case (TYPEUP::SPAWNEND): {
 								break;
 							}
+							case (TYPEUP::STOPAT): {
+								break;
+							}
 							}
 							TreePop();
 						}
@@ -490,6 +493,16 @@ void ParticleEditor::WindowDisplay()
 									selectedParticles->emit[j].erase(selectedParticles->emit[j].begin() + i);
 									i--;
 									emitter.componentAdd -= COMPONENTADD::IVWP;
+								}
+							}
+							else if (name == "StopAt")
+							{
+								Text("Stop At");
+								if (Button("Remove"))
+								{
+									selectedParticles->emit[j].erase(selectedParticles->emit[j].begin() + i);
+									i--;
+									emitter.componentAdd -= COMPONENTADD::SA;
 								}
 							}
 							TreePop();
@@ -725,6 +738,16 @@ void ParticleEditor::WindowDisplay()
 							emit.name = "SpawnEnd";
 							selectedParticles->emit[j].push_back(emit);
 							emitter.componentAdd += COMPONENTADD::SP;
+						}
+					}
+					if (!(emitter.componentAdd & COMPONENTADD::SA))
+					{
+						if (Button("Add StopAt"))
+						{
+							Particles::emit emit;
+							emit.name = "StopAt";
+							selectedParticles->emit[j].push_back(emit);
+							emitter.componentAdd += COMPONENTADD::SA;
 						}
 					}
 				}

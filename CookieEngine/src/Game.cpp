@@ -132,13 +132,6 @@ void Game::CalculateMousePosInWorld()
 void Game::HandleGameplayInputs()
 {
 
-
-    if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_A])
-    {
-        coordinator.componentHandler->GetComponentGameplay(coordinator.selectedEntities[0]->id).componentLive.TakeHit(0);
-    }
-
-
     if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_N])
     {
         ECS::Entity* newEntity = coordinator.AddEntity(resources.prefabs["Base"].get(), E_ARMY_NAME::E_PLAYER);
@@ -177,15 +170,7 @@ void Game::HandleGameplayInputs()
     }
 
     if (ImGui::GetIO().KeysDown[GLFW_KEY_SPACE])
-    {
-        if (coordinator.selectedEntities.empty())
-            scene->camera->pos = { 0, 0, 0 };
-        else
-            scene->camera->pos = coordinator.componentHandler->GetComponentTransform(coordinator.selectedEntities[0]->id).pos;
-
-        scene->camera->pos += {0, 20, 20};
-        scene->camera->ForceUpdate();
-    }
+        InputFocusCam();
 
     if (playerData.buildingToBuild)
     {
@@ -226,6 +211,16 @@ void Game::HandleGameplayInputs()
     }
 }
 
+void Game::InputFocusCam()
+{
+    if (coordinator.selectedEntities.empty())
+        scene->camera->pos = { 0, 0, 0 };
+    else
+        scene->camera->pos = coordinator.componentHandler->GetComponentTransform(coordinator.selectedEntities[0]->id).pos;
+
+    scene->camera->pos += {0, 20, 10};
+    scene->camera->ForceUpdate();
+}
 void Game::CheckIfBuildingValid()
 {
     playerData.buildingPos = scene->map.GetCenterOfBuilding(playerData.mousePosInWorld, playerData.buildingToBuild->tileSize);

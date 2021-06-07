@@ -8,7 +8,7 @@ namespace Cookie
 	namespace Gameplay
 	{
 		#define DEFAULT_INCOME_PRIMARY    1000
-		#define DEFAULT_INCOME_SECONDARY  0
+		#define DEFAULT_INCOME_SECONDARY  500
 		#define DEFAULT_INCOME_SUPPLY_MAX 200
 
 		struct Income

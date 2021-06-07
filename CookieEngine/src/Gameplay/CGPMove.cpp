@@ -100,8 +100,8 @@ void CGPMove::ResolveColision(CGPMove& other, Map& map)
 		}
 		other.pushedCooldownBeforeReturn = CGPMOVE_CD_BEFORE_RETURN;
 
-		Core::Math::Vec3 direction = (other.trs->pos - trs->pos).Normalize();
-		other.trs->pos = trs->pos + direction * (radius + other.radius);
+		Core::Math::Vec3 direction = Vec3{other.trs->pos.x - trs->pos.x, 0, other.trs->pos.z - trs->pos.z}.Normalize();
+		other.trs->pos = trs->pos + direction * (trs->radius + other.trs->radius);
 		other.trs->trsHasChanged = true;
 
 		map.ClampPosInMapWithScale(*other.trs);
@@ -110,16 +110,16 @@ void CGPMove::ResolveColision(CGPMove& other, Map& map)
 	//Priority Medium need some fixes
 	else if (state == CGPMOVE_STATE::E_MOVING && other.state == CGPMOVE_STATE::E_MOVING)
 	{
-		float overlapLength = (radius + other.radius) - (trs->pos - other.trs->pos).Length();
+		float overlapLength = (trs->radius + other.trs->radius) - (trs->pos - other.trs->pos).Length();
 
-		Core::Math::Vec3 directionSelfToOther = (other.trs->pos - trs->pos).Normalize();
-		Core::Math::Vec3 directionSelf = (waypoints[0] - trs->pos).Normalize();
-		Core::Math::Vec3 directionOther = (other.waypoints[0] - other.trs->pos).Normalize();
+		Core::Math::Vec3 directionSelfToOther = Vec3{other.trs->pos.x - trs->pos.x, 0, other.trs->pos.z - trs->pos.z}.Normalize();
+		Core::Math::Vec3 directionSelf = Vec3{waypoints[0].x - trs->pos.x, 0, waypoints[0].z - trs->pos.z}.Normalize();
+		Core::Math::Vec3 directionOther = Vec3{other.waypoints[0].x - other.trs->pos.x, 0, other.waypoints[0].z - other.trs->pos.z}.Normalize();
 
 		if (directionSelfToOther.Dot(directionSelf) > 0.9) // if they face each other
 		{
-			trs->pos += Core::Math::Vec3{ directionSelf.z, directionSelf.y, -directionSelf.x } *(overlapLength / 2);
-			other.trs->pos += Core::Math::Vec3{ directionOther.z, directionOther.y, -directionOther.x } *(overlapLength / 2);
+			trs->pos       += Core::Math::Vec3{ directionSelf.z,  directionSelf.y,  -directionSelf.x }  * (overlapLength / 2);
+			other.trs->pos += Core::Math::Vec3{ directionOther.z, directionOther.y, -directionOther.x } * (overlapLength / 2);
 		}
 		else // they collide side by side
 		{

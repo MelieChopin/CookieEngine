@@ -3,7 +3,8 @@
 
 #include "UIwidgetBases.hpp"
 
-namespace Cookie::Gameplay { struct Income; }
+namespace Cookie::Resources { class ResourcesManager; class Texture; }
+namespace Cookie::Gameplay	{ struct Income; }
 
 
 namespace Cookie::UIwidget
@@ -13,13 +14,12 @@ namespace Cookie::UIwidget
 
 	class IncomePanel final : public GameWindowBase
 	{
+		const Cookie::Resources::Texture* const panelBg;
+
 		const Cookie::Gameplay::Income& income;
 
 	public:
-		inline IncomePanel(const Cookie::Gameplay::Income& _income)
-			: GameWindowBase("Wheat panel", true),
-			  income		(_income)
-		{}
+		IncomePanel(Cookie::Resources::ResourcesManager& _resources, const Cookie::Gameplay::Income& _income);
 	
 		void WindowDisplay() override;
 

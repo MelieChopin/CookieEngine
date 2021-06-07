@@ -114,7 +114,7 @@ void Map::ClampPosInMap(Vec2& posToClamp, Vec2& buildingNbOfTiles)
 	float minZ = -trs.scale.z / 2 + buildingNbOfTiles.y * tilesSize.y / 2;
 	float maxZ =  trs.scale.z / 2 - buildingNbOfTiles.y * tilesSize.y / 2;
 
-	posToClamp = { { std::min(std::max(minX, posToClamp.x), maxX),
+	posToClamp = { {std::min(std::max(minX, posToClamp.x), maxX),
 				   std::min(std::max(minZ, posToClamp.y), maxZ) } };
 }
 void Map::ClampPosInMap(Vec3& posToClamp)
