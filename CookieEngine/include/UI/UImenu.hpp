@@ -5,7 +5,7 @@
 
 namespace Cookie::Core		{ class Window; }
 namespace Cookie::Resources { class ResourcesManager; }
-
+/* Inside ImGui.h */		  struct ImFont;
 
 namespace Cookie::UI
 {
@@ -13,6 +13,8 @@ namespace Cookie::UI
 	{
 		const Cookie::Core::Window& window;
 		Cookie::Resources::ResourcesManager& resources;
+
+		ImFont* tittleFont = nullptr;
 
 		mutable bool openMenuFlag = false;
 
@@ -22,17 +24,12 @@ namespace Cookie::UI
 		mutable bool menuState = false;
 
 	public:
-		inline UImenu(const Cookie::Core::Window& _window, Cookie::Resources::ResourcesManager& _resources)
-			: window	(_window),
-			  resources	(_resources)
-		{}
+		UImenu(const Cookie::Core::Window& _window, Cookie::Resources::ResourcesManager& _resources);
 		
-
 		inline void GiveQuitFunction(const std::function<void()>& _quitFunc)
 		{ quitFunc = _quitFunc; }
 
 		// This tells to open the associated menu. Once opened, the associated display function will make it appear, and only the user can close it.
-		// The returned bool reference turns to false when the menu is closed.
 		inline void SetMenuOpened()
 		{ openMenuFlag |= true; }
 
