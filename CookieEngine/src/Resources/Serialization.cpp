@@ -7,6 +7,7 @@
 
 #include "SoundManager.hpp"
 #include "Resources/ResourcesManager.hpp"
+#include "ECS/Coordinator.hpp"
 #include "ECS/ComponentHandler.hpp"
 #include "Resources/Serialization.hpp"
 #include "Resources/Prefab.hpp"
@@ -1096,25 +1097,35 @@ void Cookie::Resources::Serialization::Load::LoadScene(const char* filepath, Gam
 	 for (int i = 0; i < newScene.get()->entityHandler.livingEntities; i++)
 	 {
 		 Entity& current = newScene.get()->entityHandler.entities[i];
-		 if (!(current.signature & C_SIGNATURE::GAMEPLAY))
-			 continue;
 
-		 ComponentGameplay& gameComp = newScene.get()->componentHandler.GetComponentGameplay(current.id);
+		 if (current.signature & C_SIGNATURE::TRANSFORM)
+			 newScene.get()->componentHandler.GetComponentTransform(current.id).modelptr = &newScene.get()->componentHandler.GetComponentModel(current.id);
 
-		 if (gameComp.teamName != E_ARMY_NAME::E_DEFAULT_NAME)
-			handler.AddElementToArmy(&gameComp);
 
-		 if (gameComp.signatureGameplay & CGP_SIGNATURE::PRODUCER)
+		 if (current.signature & C_SIGNATURE::GAMEPLAY)
 		 {
-			 json& temp = js["Gameplay"][indexGameplay]["CGPProducer"]["OccupiedTiles"];
-			 for (int j = 0; j < temp.size(); j++)
-			 {
-				 gameComp.componentProducer.occupiedTiles.push_back(&(map.tiles[temp[j].get<int>()]));
-				 gameComp.componentProducer.occupiedTiles[j]->isObstacle = true;
-			 }
-		 }
+			 ComponentGameplay& gameComp = newScene.get()->componentHandler.GetComponentGameplay(current.id);
+			 ComponentTransform* trsPtr = &newScene.get()->componentHandler.GetComponentTransform(current.id);
+			 gameComp.trs = trsPtr;
+			 gameComp.componentLive.trs = trsPtr;
+			 gameComp.componentAttack.trs = trsPtr;
+			 gameComp.componentMove.trs = trsPtr;
 
-		 indexGameplay++;
+			 if (gameComp.teamName != E_ARMY_NAME::E_DEFAULT_NAME)
+				handler.AddElementToArmy(&gameComp);
+
+			 if (gameComp.signatureGameplay & CGP_SIGNATURE::PRODUCER)
+			 {
+				 json& temp = js["Gameplay"][indexGameplay]["CGPProducer"]["OccupiedTiles"];
+				 for (int j = 0; j < temp.size(); j++)
+				 {
+					 gameComp.componentProducer.occupiedTiles.push_back(&(map.tiles[temp[j].get<int>()]));
+					 gameComp.componentProducer.occupiedTiles[j]->isObstacle = true;
+				 }
+			 }
+
+			 indexGameplay++; 
+		 }
 	 }
 
 	 if (js.contains("UIScene"))

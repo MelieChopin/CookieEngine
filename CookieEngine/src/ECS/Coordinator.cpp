@@ -275,7 +275,11 @@ void Coordinator::ApplyRemoveUnnecessaryEntities()
 				if (life.sfxDeath)
 					SoundManager::PlayMusic3D(life.sfxDeath, life.trs->pos);
 				if (life.vfxDeath)
-					ParticlesHandler::CreateParticlesWithPrefab(Vec3(life.trs->pos.x, 0.7, life.trs->pos.z), life.vfxDeath);
+				{
+					Vec3 vfxPos = life.trs->pos;
+					vfxPos.y -= life.trs->scale.y * std::abs(life.trs->modelptr->mesh->AABBMin.y);
+					ParticlesHandler::CreateParticlesWithPrefab(vfxPos, life.vfxDeath);
+				}
 
 				RemoveEntity(entityHandler->entities[i]);
 				i = std::max(i - 1, 0);
