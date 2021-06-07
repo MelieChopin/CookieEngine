@@ -13,6 +13,7 @@ namespace Cookie::UIwidget
 	namespace GameWidgetID
 	{ constexpr int ActionPanelID = 1 << 1; }
 
+	// Displays button in a grid formation to build new units from a producer building or to build new buildings from a worker
 	class ActionPanel final : public GameWindowBase
 	{
 		const Cookie::ECS::Coordinator& coordinator;

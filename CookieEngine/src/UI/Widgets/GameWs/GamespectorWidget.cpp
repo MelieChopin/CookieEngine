@@ -50,9 +50,8 @@ void Gamespector::WindowDisplay()
 			const Entity* const & selectedEntity = coordinator.selectedEntities[0];
 			const ComponentGameplay& sEntityGameplayComp = coordinator.componentHandler->GetComponentGameplay(selectedEntity->id);
 			
-			BeginGroup();
 
-			
+			BeginGroup();
 
 			if (sEntityGameplayComp.signatureGameplay & CGP_SIGNATURE::LIVE)
 			{
@@ -66,8 +65,8 @@ void Gamespector::WindowDisplay()
 				SafeIcon(coordinator.componentHandler->GetComponentModel(selectedEntity->id).icon, GetContentRegionAvail().y);
 
 			EndGroup();
-			SameLine();
 
+			SameLine();
 			BeginGroup();
 
 			SetWindowFontScale(2.f);
@@ -223,12 +222,24 @@ void Gamespector::WindowDisplay()
 				iconsPerLines = GetContentRegionAvail().x / (size + 8);
 			}
 
-
 			int placedTemp = 0;
 
-			for (const Entity* const & e : coordinator.selectedEntities)
+			for (Entity* const & e : coordinator.selectedEntities)
 			{
 				SafeIcon(coordinator.componentHandler->GetComponentModel(e->id).icon, size);
+
+				if (IsItemHovered())
+				{
+					BeginTooltip();
+					Text("%s", e->name);
+					EndTooltip();
+				}
+
+				if (IsItemClicked(ImGuiMouseButton_Left))
+				{
+					std::vector<Entity*>({e}).swap(coordinator.selectedEntities);
+					break;
+				}
 
 				placedTemp++;
 
