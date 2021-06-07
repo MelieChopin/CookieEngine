@@ -67,8 +67,13 @@ Entity* Coordinator::AddEntity(const Resources::Prefab* const & prefab, E_ARMY_N
 	newEntity.namePrefab = prefab->name;
 	newEntity.signature = prefab->signature;
 
+
 	if (CheckSignature(newEntity.signature, C_SIGNATURE::TRANSFORM))
-		componentHandler->GetComponentTransform(newEntity.id) = prefab->transform;
+	{
+		ComponentTransform& trs = componentHandler->GetComponentTransform(newEntity.id);
+		trs = prefab->transform;
+		trs.modelptr = &componentHandler->GetComponentModel(newEntity.id);
+	}
 	if (CheckSignature(newEntity.signature, C_SIGNATURE::MODEL))
 		componentHandler->GetComponentModel(newEntity.id) = prefab->model;
 	if (CheckSignature(newEntity.signature, C_SIGNATURE::PHYSICS))
@@ -131,7 +136,8 @@ void Coordinator::SelectEntities(Vec3& selectionQuadStart, Vec3& selectionQuadEn
 
 	//push back all entities with corresponding signature and inside the selection quad
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
-		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY))
+		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).teamName == E_ARMY_NAME::E_PLAYER)
 		{
 			Vec3& entityPos = componentHandler->GetComponentTransform(entityHandler->entities[i].id).pos;
 			if (minX <= entityPos.x && entityPos.x <= maxX &&
@@ -139,7 +145,7 @@ void Coordinator::SelectEntities(Vec3& selectionQuadStart, Vec3& selectionQuadEn
 				selectedEntities.push_back(&entityHandler->entities[i]);
 		}
 }
-Entity* Coordinator::GetClosestEntity(Vec3& pos, int minimumGameplaySignatureWanted)
+Entity* Coordinator::GetClosestEntity(Vec3& pos, E_ARMY_NAME teamName, int minimumGameplaySignatureWanted)
 {
 	float   minimumDistance {INFINITY};
 	Entity* entityToReturn  {nullptr};
@@ -147,6 +153,7 @@ Entity* Coordinator::GetClosestEntity(Vec3& pos, int minimumGameplaySignatureWan
 	//Get closest Entity with minimumGameplaySignatureWanted
 	for (int i = 0; i < entityHandler->livingEntities; ++i)
 		if (CheckSignature(entityHandler->entities[i].signature, C_SIGNATURE::TRANSFORM + C_SIGNATURE::GAMEPLAY) &&
+			componentHandler->GetComponentGameplay(entityHandler->entities[i].id).teamName == teamName && 
 			CheckSignature(componentHandler->GetComponentGameplay(entityHandler->entities[i].id).signatureGameplay, minimumGameplaySignatureWanted))
 		{
 			ComponentTransform& trs = componentHandler->GetComponentTransform(entityHandler->entities[i].id);
@@ -165,7 +172,7 @@ Entity* Coordinator::GetClosestSelectableEntity(Core::Math::Vec3& pos, int minim
 {
 	//Used when the selection Quad is too small, we check if the user click on a unit
 
-	Entity* entityToReturn = GetClosestEntity(pos, minimumGameplaySignatureWanted);
+	Entity* entityToReturn = GetClosestEntity(pos, E_ARMY_NAME::E_PLAYER, minimumGameplaySignatureWanted);
 
 	//Check if pos exceed scales
 	if (entityToReturn)
@@ -268,7 +275,11 @@ void Coordinator::ApplyRemoveUnnecessaryEntities()
 				if (life.sfxDeath)
 					SoundManager::PlayMusic3D(life.sfxDeath, life.trs->pos);
 				if (life.vfxDeath)
-					ParticlesHandler::CreateParticlesWithPrefab(Vec3(life.trs->pos.x, 0.7, life.trs->pos.z), life.vfxDeath);
+				{
+					Vec3 vfxPos = life.trs->pos;
+					vfxPos.y -= life.trs->scale.y * std::abs(life.trs->modelptr->mesh->AABBMin.y);
+					ParticlesHandler::CreateParticlesWithPrefab(vfxPos, life.vfxDeath);
+				}
 
 				RemoveEntity(entityHandler->entities[i]);
 				i = std::max(i - 1, 0);
@@ -393,7 +404,7 @@ void Coordinator::ApplyGameplayResolveCollision(Map& map)
 			Vec3 otherInitialPos = allEntitiespossible[i]->trs->pos;
 
 			//if the two circles collide
-			if ((entitiesToCheck[0]->trs->pos - allEntitiespossible[i]->trs->pos).Length() < entitiesToCheck[0]->radius + allEntitiespossible[i]->radius)
+			if ((entitiesToCheck[0]->trs->pos - allEntitiespossible[i]->trs->pos).Length() < entitiesToCheck[0]->trs->radius + allEntitiespossible[i]->trs->radius)
 				entitiesToCheck[0]->ResolveColision(*allEntitiespossible[i], map);
 
 			//if the other unit was pushed add it back to the entities to check

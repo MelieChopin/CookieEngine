@@ -205,6 +205,9 @@ void Editor::Loop()
         else if (!isPlaying && previewIsPlaying)
         {
             previewIsPlaying = isPlaying;
+            
+            game.playerData.makingASelectionQuad = false;
+            
             Resources::Serialization::Load::LoadScene(game.scene.get()->filepath.c_str(), game);
             game.SetScene();
             game.coordinator.selectedEntities.clear();

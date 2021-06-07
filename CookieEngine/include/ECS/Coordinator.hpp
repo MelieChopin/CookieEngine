@@ -49,7 +49,7 @@ namespace Cookie
 			
 			//Selection
 			void SelectEntities(Core::Math::Vec3& selectionQuadStart, Core::Math::Vec3& selectionQuadEnd);
-			Entity* GetClosestEntity(Core::Math::Vec3& pos, int minimumGameplaySignatureWanted = 0);
+			Entity* GetClosestEntity(Core::Math::Vec3& pos, Gameplay::E_ARMY_NAME teamName, int minimumGameplaySignatureWanted = 0);
 			Entity* GetClosestSelectableEntity(Core::Math::Vec3& pos, int minimumGameplaySignatureWanted = 0);
 			Entity* GetClosestFreeResourceEntity(Core::Math::Vec3& pos);
 

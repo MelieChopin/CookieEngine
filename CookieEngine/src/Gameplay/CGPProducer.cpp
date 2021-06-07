@@ -23,12 +23,10 @@ void CGPProducer::UpdateCountdown(Resources::Map& map, Coordinator& coordinator,
 
 		ComponentTransform& trs          = coordinator.componentHandler->GetComponentTransform(selfId);
 		ComponentTransform& newEntityTrs = coordinator.componentHandler->GetComponentTransform(newEntity->id);
-		ComponentModel& model            = coordinator.componentHandler->GetComponentModel(selfId);
-		ComponentModel& newEntityModel   = coordinator.componentHandler->GetComponentModel(newEntity->id);
 
 		//set new unit trs to self and then remove half height of the building and add half height of the unit so it will be placed on the map
 		newEntityTrs.pos = trs.pos;
-		newEntityTrs.pos.y -= trs.scale.y * std::abs(model.mesh->AABBMin.y) - newEntityTrs.scale.y * std::abs(newEntityModel.mesh->AABBMin.y);
+		newEntityTrs.pos.y -= trs.scale.y * std::abs(trs.modelptr->mesh->AABBMin.y) - newEntityTrs.scale.y * std::abs(newEntityTrs.modelptr->mesh->AABBMin.y);
 
 		//Need to set additionnal behavior if newEntity has a ComponentGameplay
 		if (newEntity->signature & C_SIGNATURE::GAMEPLAY)
