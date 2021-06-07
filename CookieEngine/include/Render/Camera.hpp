@@ -22,7 +22,6 @@ namespace Cookie
 
 			protected:
 				Core::Math::Mat4 rotMat = Core::Math::Mat4::Identity();
-				Core::Math::Mat4 posMat = Core::Math::Mat4::Identity();
 				Core::Math::Mat4 viewMat = Core::Math::Mat4::Identity();
 
 				bool activated = true;
@@ -35,6 +34,7 @@ namespace Cookie
 				#undef max 
 				Core::Math::Vec2 mapClampX = {{ -std::numeric_limits<float>().max(),std::numeric_limits<float>().max() }};
 				Core::Math::Vec2 mapClampZ = {{ -std::numeric_limits<float>().max(),std::numeric_limits<float>().max() }};
+				Core::Math::Vec2 ZoomClamp = { { -std::numeric_limits<float>().max(),std::numeric_limits<float>().max() } };
 
 
 				float camNear	= 0.0f;
@@ -98,7 +98,7 @@ namespace Cookie
 		class GameCam : public Camera
 		{
 		private:
-
+			float zoom = 0.0f;
 
 		public:
 

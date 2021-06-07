@@ -16,15 +16,13 @@ namespace Cookie
 		inline void Camera::Update()
 		{
 			rotMat = Core::Math::Mat4::RotateY(rot.y) * Core::Math::Mat4::RotateX(rot.x);
-			posMat = Core::Math::Mat4::Translate(-pos);
-			viewMat =  posMat * rotMat;
+			viewMat = Core::Math::Mat4::Translate(-pos) * rotMat;
 		}
 
 		inline void Camera::ForceUpdate()
 		{
 			rotMat = Core::Math::Mat4::RotateY(rot.y) * Core::Math::Mat4::RotateX(rot.x);
-			posMat = Core::Math::Mat4::Translate(-pos);
-			viewMat = posMat * rotMat;
+			viewMat = Core::Math::Mat4::Translate(-pos) * rotMat;
 		}
 
 		inline void Camera::ResetPreviousMousePos()
@@ -151,7 +149,16 @@ namespace Cookie
 
 		inline void GameCam::UpdateZoom()
 		{
-			pos -= Core::Math::Vec3({viewMat.c[2].x, viewMat.c[2].y, viewMat.c[2].z}) * ImGui::GetIO().MouseWheel * (CAM_MOUSE_SPEED * Core::DeltaTime());
+			Core::Math::Vec3 dir = { viewMat.c[2].x, viewMat.c[2].y, viewMat.c[2].z };
+			zoom = dir.Dot(pos);
+
+			pos += dir * zoom;
+
+			zoom -= ImGui::GetIO().MouseWheel * (CAM_MOUSE_SPEED * Core::DeltaTime());
+
+			zoom = std::clamp(zoom, ZoomClamp.x, ZoomClamp.y);
+
+			pos -= dir * zoom;
 		}
 
 
