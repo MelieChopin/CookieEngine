@@ -72,14 +72,14 @@ namespace Cookie
 				Render::FBODrawer	fboDrawer;
 
 			private:
-				RendererRemote InitDevice(Core::Window& window);
+				RendererRemote InitDevice(bool windowed = true);
 
 				/* recreate the backbuffer of swapchain after window is being resized or created */
 				bool CreateDrawBuffer(int width, int height);
 
 			public:
 				/* CONSTRUCTORS/DESTRUCTORS */
-				Renderer();
+				Renderer(bool windowed  = true);
 				~Renderer();
 				
 				/* Draw the game from the cam's POV, in the fbo given in parameters */

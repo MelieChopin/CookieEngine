@@ -37,7 +37,7 @@ include_directories("${DEPS_INC_DIR}/Lua/")
 include_directories("${DEPS_INC_DIR}/Sol/")
 include_directories("${DEPS_INC_DIR}/FMOD/")
 
-# Record SUB_SYS configuration (WIN32 for release en Windows to remove console)
+# Record SUB_SYS configuration (WIN32 for release Windows to remove console)
 IF(CMAKE_BUILD_TYPE MATCHES Release)
     message(STATUS "Generate CMake cache for Release")
     IF(WIN32)
@@ -51,118 +51,23 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES Release)
 
 # List source files
 set (SRC_FILES
-    "${SRC_DIR}/main.cpp"
-    "${SRC_DIR}/Editor.cpp"
-    
-    "${DEPS_SRC_DIR}/DirectXTex/DDSTextureLoader11.cpp"
-    "${DEPS_SRC_DIR}/DirectXTex/WICTextureLoader11.cpp"
-    
-    "${DEPS_SRC_DIR}/ImGui/imgui.cpp"
-    "${DEPS_SRC_DIR}/ImGui/imgui_demo.cpp"
-    "${DEPS_SRC_DIR}/ImGui/imgui_draw.cpp"
-    "${DEPS_SRC_DIR}/ImGui/imgui_impl_dx11.cpp"
-    "${DEPS_SRC_DIR}/ImGui/imgui_impl_glfw.cpp"
-    "${DEPS_SRC_DIR}/ImGui/imgui_tables.cpp"
-    "${DEPS_SRC_DIR}/ImGui/imgui_widgets.cpp"
-    "${DEPS_SRC_DIR}/ImGui/imgui_stdlib.cpp"
-
-    "${DEPS_SRC_DIR}/ImGuizmo/ImCurveEdit.cpp"
-    "${DEPS_SRC_DIR}/ImGuizmo/ImGradient.cpp"
-    "${DEPS_SRC_DIR}/ImGuizmo/ImGuizmo.cpp"
-    "${DEPS_SRC_DIR}/ImGuizmo/ImSequencer.cpp"
 
     "${SRC_DIR}/Core/Window.cpp"
-    
-    "${SRC_DIR}/Render/Renderer.cpp"
-    "${SRC_DIR}/Render/DebugRenderer.cpp"
-    "${SRC_DIR}/Render/RendererRemote.cpp"
-    "${SRC_DIR}/Render/DrawDataHandler.cpp"
-
-    "${SRC_DIR}/Render/FrameBuffer.cpp"
-    "${SRC_DIR}/Render/ShadowBuffer.cpp" 
-
-    "${SRC_DIR}/Render/Drawers/ModelDrawer.cpp"
-    "${SRC_DIR}/Render/Drawers/DirLightDrawer.cpp"
-    "${SRC_DIR}/Render/Drawers/PointLightDrawer.cpp"
-    "${SRC_DIR}/Render/Drawers/FBODrawer.cpp"
-    "${SRC_DIR}/Render/Drawers/MapDrawer.cpp"
-    "${SRC_DIR}/Render/Drawers/SkyBox.cpp"
-    "${SRC_DIR}/Render/Drawers/PlayerDrawer.cpp"
-    "${SRC_DIR}/Render/Drawers/SelectionDrawer.cpp"
-    "${SRC_DIR}/Render/Drawers/MiniMapDrawer.cpp"
-    "${SRC_DIR}/Render/Drawers/MiniModelDrawer.cpp"
-
-    "${SRC_DIR}/Render/RenderPass/GeometryPass.cpp"
-    "${SRC_DIR}/Render/RenderPass/LightPass.cpp"
-    "${SRC_DIR}/Render/RenderPass/ShadowPass.cpp"
-    "${SRC_DIR}/Render/RenderPass/ComposePass.cpp"
-    "${SRC_DIR}/Render/RenderPass/GameplayPass.cpp"
-    "${SRC_DIR}/Render/RenderPass/MiniMapPass.cpp"
-    "${SRC_DIR}/Render/RenderPass/ParticlesPass.cpp"
-    
-    "${SRC_DIR}/Resources/Loader.cpp" 
-    "${SRC_DIR}/Resources/Map.cpp" 
-    "${SRC_DIR}/Resources/ResourcesManager.cpp"
-    "${SRC_DIR}/Resources/Mesh.cpp"
-    "${SRC_DIR}/Resources/Texture.cpp"
-    "${SRC_DIR}/Resources/Scene.cpp"
-    "${SRC_DIR}/Resources/Serialization.cpp" 
-    "${SRC_DIR}/Resources/SoundManager.cpp" 
-
-    "${SRC_DIR}/Resources/Particles/ParticlesGenerator.cpp"
-    "${SRC_DIR}/Resources/Particles/ParticlesUpdate.cpp"
-    "${SRC_DIR}/Resources/Particles/ParticlesHandler.cpp"
-    "${SRC_DIR}/Resources/Particles/ParticlesSystem.cpp"
-    
-    "${SRC_DIR}/UI/UIcore.cpp"
-    "${SRC_DIR}/UI/UIeditor.cpp"
-    "${SRC_DIR}/UI/UImenu.cpp"
-    "${SRC_DIR}/UI/UIscene.cpp"
-    "${SRC_DIR}/UI/CustomImWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/UIwidgetBases.cpp"
-    "${SRC_DIR}/UI/Widgets/UIwidgets.cpp" 
-    "${SRC_DIR}/UI/Widgets/EditorWs/AIBehaviorEditorWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/EditorWs/ConsoleWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/EditorWs/FileExplorerWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/EditorWs/GameportWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/EditorWs/GameUIeditorWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/EditorWs/HierarchyWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/EditorWs/InspectorWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/EditorWs/ParticleEditorWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/EditorWs/SoundOrchestratorWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/EditorWs/TextureEditorWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/EditorWs/ToolbarWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/EditorWs/ViewportWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/EditorWs/WorldSettingsWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/GameWs/ActionPanelWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/GameWs/GamespectorWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/GameWs/MinimapWidget.cpp"
-    "${SRC_DIR}/UI/Widgets/GameWs/ResourcePanelWidgets.cpp"
-
-    
     "${SRC_DIR}/Physics/PhysicsSimulator.cpp"
-    
-
-    "${SRC_DIR}/ECS/ComponentEditor.cpp"
-    "${SRC_DIR}/ECS/ComponentHandler.cpp"
-    "${SRC_DIR}/ECS/ComponentModel.cpp" 
-    "${SRC_DIR}/ECS/ComponentPhysics.cpp"
-    "${SRC_DIR}/ECS/ComponentScript.cpp"
-    "${SRC_DIR}/ECS/Coordinator.cpp"
-    "${SRC_DIR}/ECS/EntityHandler.cpp"
-
-    
-    "${SRC_DIR}/Gameplay/ArmyCoordinator.cpp"
-    "${SRC_DIR}/Gameplay/ArmyHandler.cpp"
-    "${SRC_DIR}/Gameplay/CGPAttack.cpp"
-    "${SRC_DIR}/Gameplay/CGPLive.cpp"
-    "${SRC_DIR}/Gameplay/CGPMove.cpp"
-    "${SRC_DIR}/Gameplay/CGPProducer.cpp"
-    "${SRC_DIR}/Gameplay/CGPWorker.cpp"
-    
-
-    "${SRC_DIR}/Editor.cpp" 
     "${SRC_DIR}/Game.cpp")
+
+#choose the right main
+if(GAME_ONLY)
+
+set (SRC_FILES ${SRC_FILES}
+    "${SRC_DIR}/gameMain.cpp")
+
+else()
+
+set (SRC_FILES ${SRC_FILES}
+    "${SRC_DIR}/Editor.cpp" 
+    "${SRC_DIR}/editorMain.cpp")
+endif(GAME_ONLY)
 
 set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
         "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/lua54.dll"
@@ -173,10 +78,20 @@ set(DLL "${CMAKE_CURRENT_SOURCE_DIR}/libs/dll/assimp-vc142-mt.dll"
 
 set(LIB_DIR "${CookieEngine_SOURCE_DIR}/CookieEngine/libs")
 
-#add_compile_options(-O2)
+IF(FAST)
+    add_compile_options(-O2)
+ENDIF(FAST)
 
 # Ajoutez une source à l'exécutable de ce projet.
 add_executable (CookieEngine ${SUB_SYS} ${SRC_FILES})
+
+#list all the source files
+add_subdirectory(${DEPS_SRC_DIR})
+add_subdirectory("${SRC_DIR}/ECS")
+add_subdirectory("${SRC_DIR}/Gameplay")
+add_subdirectory("${SRC_DIR}/UI")
+add_subdirectory("${SRC_DIR}/Render")
+add_subdirectory("${SRC_DIR}/Resources")
 
 set_target_properties(CookieEngine PROPERTIES CXX_STANDARD 17)
 

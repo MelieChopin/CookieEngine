@@ -20,7 +20,6 @@ using namespace rp3d;
 Editor::Editor()
     : editorFBO{game.renderer.window.width,game.renderer.window.height}
 {
-    game.resources.Load(game.renderer);
     cam.SetProj(60.f, game.renderer.viewport.Width, game.renderer.viewport.Height, CAMERA_INITIAL_NEAR, CAMERA_INITIAL_FAR);
     cam.pos = { 0.f , 20.0f,30.0f };
     cam.rot = { Core::Math::ToRadians(30.0f) ,0.0f,0.0f };
@@ -28,20 +27,6 @@ Editor::Editor()
     cam.Update();
     cam.Deactivate();
     game.scene->InitCoordinator(game.coordinator);
-
-    //Load all Textures we have create in texture editor
-    Resources::Serialization::Load::LoadAllTextures(game.resources);
-
-    Serialization::Load::LoadAllParticles(game.resources);
-
-    //Load all prefabs in folder Prefabs
-    Resources::Serialization::Load::LoadAllPrefabs(game.resources);
-
-    Resources::SoundManager::InitSystem();
-    Resources::SoundManager::LoadAllMusic(game.resources);
-    game.particlesHandler.particlesPrefab = &game.resources.particles;
-
-    Serialization::Load::LoadAllAIBehaviors(game.resources);
 
     //Load default Scene
     Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", game);
@@ -203,6 +188,8 @@ void Editor::Loop()
 
     while (!glfwWindowShouldClose(game.renderer.window.window))
     {
+        TryResizeWindow();
+
         // Present frame
         if (!ImGui::GetIO().KeysDownDuration[GLFW_KEY_I])
             game.coordinator.armyHandler->AddArmyCoordinator(E_ARMY_NAME::E_AI1, game.resources.aiBehaviors["Test1"].get());
@@ -223,7 +210,6 @@ void Editor::Loop()
         else
         {
             glfwPollEvents();
-            TryResizeWindow();
         }
 
         HandleEditorInput();

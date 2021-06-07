@@ -8,6 +8,7 @@ project ("CookieEngine")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(SOURCE_DIR "CookieEngine")
+set(GAME_ONLY CACHE BOOL "ON/OFF")
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 

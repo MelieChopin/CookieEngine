@@ -3,6 +3,7 @@
 #include "Resources/Scene.hpp"
 #include "Game.hpp"
 #include "ECS/ComponentGameplay.hpp"
+#include "Serialization.hpp"
 
 #include "SoundManager.hpp"
 
@@ -19,7 +20,8 @@ constexpr int miniMapResolution = 512;
 
 /*================== CONSTRUCTORS/DESTRUCTORS ==================*/
 
-Game::Game():
+Game::Game(bool windowed):
+    renderer{windowed},
     frameBuffer{renderer.window.width,renderer.window.height },
     miniMapBuffer{miniMapResolution, miniMapResolution},
     uiMenu{renderer.window, resources}
@@ -27,6 +29,24 @@ Game::Game():
     Physics::PhysicsHandle::Init();
     Core::UIcore::FinishInit(renderer);
     renderer.drawData.Init(*this);
+
+    resources.Load(renderer);
+
+    //Load all Textures we have create in texture editor
+    Resources::Serialization::Load::LoadAllTextures(resources);
+
+    Resources::Serialization::Load::LoadAllParticles(resources);
+
+    //Load all prefabs in folder Prefabs
+    Resources::Serialization::Load::LoadAllPrefabs(resources);
+
+    Resources::SoundManager::InitSystem();
+    Resources::SoundManager::LoadAllMusic(resources);
+    particlesHandler.particlesPrefab = &resources.particles;
+
+    Resources::Serialization::Load::LoadAllAIBehaviors(resources);
+
+
     renderer.miniMapPass.CreateDepth(miniMapResolution, miniMapResolution);
 
     uiMenu.GiveQuitFunction([&game=*this]{glfwSetWindowShouldClose(game.renderer.window.window, true);});
@@ -47,9 +67,15 @@ void Game::Start()
 
 void Game::Loop()
 {
+    Start();
+
+    Resources::Serialization::Load::LoadScene("Assets/Save/Default.CAsset", *this);
+    SetScene();
 
     while (!glfwWindowShouldClose(renderer.window.window))
     {
+        TryResizeWindow();
+
         Update();
 
         renderer.Render();
@@ -60,7 +86,6 @@ void Game::Update()
 {
     // Present frame
     glfwPollEvents();
-    TryResizeWindow();
 
     //physSim.Update();
     //coordinator.ApplySystemPhysics(physSim.factor);

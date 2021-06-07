@@ -1,7 +1,7 @@
 ﻿{
   "configurations": [
     {
-      "name": "x64-Clang-Debug",
+      "name": "x64-Clang-Debug-Editor",
       "generator": "Ninja",
       "configurationType": "Debug",
       "buildRoot": "${projectDir}\\build\\${name}",
@@ -13,7 +13,7 @@
       "variables": []
     },
     {
-      "name": "x64-Clang-Release",
+      "name": "x64-Clang-Release-Editor",
       "generator": "Ninja",
       "configurationType": "Release",
       "buildRoot": "${projectDir}\\build\\${name}",
@@ -25,7 +25,7 @@
       "variables": []
     },
     {
-      "name": "x64-MSVC-Debug",
+      "name": "x64-MSVC-Debug-Editor",
       "generator": "Ninja",
       "configurationType": "Debug",
       "buildRoot": "${projectDir}\\build\\${name}",
@@ -37,7 +37,7 @@
       "variables": []
     },
     {
-      "name": "x64-MSVC-Release",
+      "name": "x64-MSVC-Release-Editor",
       "generator": "Ninja",
       "configurationType": "Release",
       "buildRoot": "${projectDir}\\build\\${name}",
@@ -47,6 +47,42 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "variables": []
+    },
+    {
+      "name": "x64-Clang-Game",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "buildRoot": "${projectDir}\\build\\${name}",
+      "installRoot": "${projectDir}\\install\\${name}",
+      "cmakeCommandArgs": "-D ARCH:STRING=x64 ",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "clang_cl_x64_x64" ],
+      "variables": [
+        {
+          "name": "GAME_ONLY",
+          "value": "True",
+          "type": "BOOL"
+        }
+      ]
+    },
+    {
+      "name": "x64-MSVC-Game",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "buildRoot": "${projectDir}\\build\\${name}",
+      "installRoot": "${projectDir}\\install\\${name}",
+      "cmakeCommandArgs": "-D ARCH:STRING=x64",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "variables": [
+        {
+          "name": "GAME_ONLY",
+          "value": "True",
+          "type": "BOOL"
+        }
+      ]
     }
   ]
 }
