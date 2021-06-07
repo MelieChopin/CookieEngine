@@ -289,6 +289,11 @@ ___
 
 ## Known Bugs
 
+pathfinding cannot find a path to attack when AI army is ready
+
+if you don't have assets you may crash
+
+the ui game is hard coded (font and textures)
 
 ___
 
