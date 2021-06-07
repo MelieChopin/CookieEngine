@@ -3,8 +3,8 @@
 
 #include "UIwidgetBases.hpp"
 
+namespace Cookie::Resources { class Map; class Texture; class ResourcesManager; }
 namespace Cookie::Render	{ class FrameBuffer; class Camera; }
-namespace Cookie::Resources { class Map; class ResourcesManager; }
 
 
 namespace Cookie::UIwidget
@@ -14,21 +14,15 @@ namespace Cookie::UIwidget
 
 	class Minimap final : public GameWindowBase
 	{
+		const Cookie::Resources::Texture* const minimapBg;
+
 		const Cookie::Render::FrameBuffer& minimapBuffer;
 
 		Cookie::Render::Camera* const camera;
 		const Cookie::Resources::Map&	map;
 
-		Cookie::Resources::ResourcesManager& resources;
-
 	public:
-		inline Minimap(const Cookie::Render::FrameBuffer& _minimapBuffer, Cookie::Render::Camera* const _camera, const Cookie::Resources::Map& _map, Cookie::Resources::ResourcesManager& _resources)
-			: GameWindowBase("Minimap", true),
-			  minimapBuffer	(_minimapBuffer),
-			  camera		(_camera),
-			  map			(_map),
-			  resources		(_resources)
-		{}
+		Minimap(Cookie::Resources::ResourcesManager& _resources, const Cookie::Render::FrameBuffer& _minimapBuffer, Cookie::Render::Camera* const _camera, const Cookie::Resources::Map& _map);
 
 		void WindowDisplay() override;
 

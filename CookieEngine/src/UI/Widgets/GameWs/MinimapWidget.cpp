@@ -10,12 +10,20 @@ using namespace ImGui;
 using namespace Cookie::UIwidget;
 
 
+Minimap::Minimap(Cookie::Resources::ResourcesManager& _resources, const Cookie::Render::FrameBuffer& _minimapBuffer, Cookie::Render::Camera* const _camera, const Cookie::Resources::Map& _map)
+	: GameWindowBase("Minimap", true),
+	  minimapBg		(_resources.icons["Assets/UI/Cadre_Left.png"].get()),
+	  minimapBuffer	(_minimapBuffer),
+	  camera		(_camera),
+	  map			(_map)
+{}
+
 void Minimap::WindowDisplay()
 {
 	TryBeginWindow(ImGuiWindowFlags_NoBackground)
 	{
 		ImGui::SetCursorPos({ 0, 0 });
-		Image(static_cast<ImTextureID>(resources.icons["Assets/UI/Cadre_Left.png"].get()->GetResourceView()), GetWindowSize());
+		Image(static_cast<ImTextureID>(minimapBg->GetResourceView()), GetWindowSize());
 		ImGui::SetCursorPos(GetStyle().WindowPadding);
 
 		Image(static_cast<ImTextureID>(minimapBuffer.shaderResource), GetContentRegionAvail());
