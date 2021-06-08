@@ -32,6 +32,9 @@ Game::Game(bool windowed):
 
     resources.Load(renderer);
 
+    Resources::SoundManager::InitSystem();
+    Resources::SoundManager::LoadAllMusic(resources);
+
     //Load all Textures we have create in texture editor
     Resources::Serialization::Load::LoadAllTextures(resources);
 
@@ -40,8 +43,6 @@ Game::Game(bool windowed):
     //Load all prefabs in folder Prefabs
     Resources::Serialization::Load::LoadAllPrefabs(resources);
 
-    Resources::SoundManager::InitSystem();
-    Resources::SoundManager::LoadAllMusic(resources);
     particlesHandler.particlesPrefab = &resources.particles;
 
     Resources::Serialization::Load::LoadAllAIBehaviors(resources);

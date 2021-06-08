@@ -105,7 +105,7 @@ void SoundManager::PlayMusic3D(Sound* const& sound, const Cookie::Core::Math::Ve
 
 	if (sound->mode & FMOD_3D)
 	{
-		Cookie::Core::Math::Vec3 posSound = sound->pos;
+		Cookie::Core::Math::Vec3 posSound = pos;
 		FMOD_VECTOR pos = { posSound.x, posSound.y, posSound.z };
 		sound->chan->set3DAttributes(&pos, nullptr);
 	}

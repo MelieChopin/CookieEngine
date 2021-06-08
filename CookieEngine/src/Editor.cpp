@@ -220,9 +220,6 @@ void Editor::Loop()
 
         HandleEditorInput();
 
-        //Update for 3D Music
-        Cookie::Resources::SoundManager::UpdateFMODFor3DMusic(cam);
-
         //Draw
         game.renderer.Clear();
         game.renderer.ClearFrameBuffer(editorFBO);
